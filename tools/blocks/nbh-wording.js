@@ -24,6 +24,10 @@
         reachable, or not set up yet, the panel says so plainly, and that Check wording and Writing Tools still work.
      3. iPad Writing Tools: Apple's own, already in every text box on an iPad with Apple Intelligence; the
         panel only explains it.
+   (v25.68, research #12) A page that goes home (marked data-nbh-family by its form: the Home note's, Form HD-1's sheets,
+   SR-1's family version, a respondent page) has a Reading level button at its corner: a grade by a standard formula (aim:
+   grades 6 to 8), the sentences over 25 words, and the words of the trade with plain words for each, in English, Spanish
+   or (without a formula) Haitian Creole; a field on such a page shows the same under Check wording. It only suggests.
    "Use this text" writes the panel's text into the field (or over the part that was selected) and fires
    input and change, so the form records, counts and saves it as if it had been typed. Cancel leaves the
    field as it was; the panel's edits are kept in memory and offered again when it reopens on that field.
@@ -236,6 +240,286 @@ const CATS = [
   [/^blank/i, 'Blank to fill in']
 ];
 function catLabel(c){ for (let i = 0; i < CATS.length; i++) if (CATS[i][0].test(c)) return CATS[i][1]; c = str(c).replace(/[-_]+/g, ' ').trim(); return c ? c.charAt(0).toUpperCase() + c.slice(1) : 'Wording'; }
+
+/* ------------------------------------------------------------------ v25.68 the reading level of what goes home (research #12) */
+/* A page for the family (an element marked data-nbh-family, or a field inside one) is read for: a grade level by a standard
+   formula, aiming for grades 6 to 8; every sentence over 25 words; and the words of the trade a family may not know, each with
+   plain words to use instead. It suggests and never changes a word: the BCBA changes the words where they are written.
+   English: the Flesch-Kincaid grade level, 0.39 x (words per sentence) + 11.8 x (syllables per word) - 15.59 (Kincaid,
+   Fishburne, Rogers and Chissom, 1975, Naval Technical Training Command, Research Branch Report 8-75).
+   Spanish: the Fernandez Huerta reading ease, 206.84 - 0.60 x (syllables per 100 words) - 1.02 x (words per sentence)
+   (Fernandez Huerta, 1959, "Medidas sencillas de lecturabilidad", Consigna 214, 29-32; Flesch's reading ease adapted to
+   Spanish), read against Flesch's school levels (Flesch, 1948, Journal of Applied Psychology 32, 221-233): 80 to 90 is
+   about grade 6, 70 to 80 about grade 7, 60 to 70 about grades 8 and 9.
+   Haitian Creole: no standard formula exists, so only the long sentences are listed; the district translator judges it.
+   Syllables are counted by rule (vowel groups; Spanish diphthongs and hiatus), so a grade is a rough guide, as every
+   readability formula is. A line that does not end a sentence and has under four words (a heading, a column, a label) is
+   left out of the formula and of the counts. */
+const FAM_AIM = [6, 8], FAM_LONG = 25, FAM_MIN = 20;
+const FAM_LANG = {en:'English', es:'Español (Spanish)', ht:'Kreyòl ayisyen (Haitian Creole)'};
+/* a language code from a code or a language's name as people write it ("Spanish", "Haitian Creole", "Kreyòl") */
+function famLangOf(v){
+  const s = deaccent(v).trim().toLowerCase();
+  if (!s) return '';
+  if (/^(?:es|spa)(?:[-_]|$)/.test(s) || /span|espan/.test(s)) return 'es';
+  if (/^(?:ht|hat)(?:[-_]|$)/.test(s) || /creole|kreyol|haitian|ayisyen/.test(s)) return 'ht';
+  if (/^en(?:[-_]|$)|^eng|english|ingles/.test(s)) return 'en';
+  return '';
+}
+function sylEn(w){
+  w = w.toLowerCase().replace(/[^a-z]/g, '');
+  if (!w) return 0;
+  if (w.length <= 3) return 1;
+  w = w.replace(/(?:[^laeiouy]es|[^laeiouy]ed|[^laeiouy]e)$/, '').replace(/^y/, '');
+  const m = w.match(/[aeiouy]{1,2}/g);
+  return Math.max(1, m ? m.length : 1);
+}
+const ES_STRONG = 'aeáéoóíú', ES_V = ES_STRONG + 'iuü';
+function sylEs(w){
+  w = str(w).toLowerCase().replace(/[^a-záéíóúüñ]/g, '');
+  if (!w) return 0;
+  w = w.replace(/([qg])u(?=[eiéí])/g, '$1').replace(/y$/, 'i');
+  if (w === 'i') return 1;
+  let n = 0, prev = '';
+  for (let i = 0; i < w.length; i++) {
+    const c = w.charAt(i), v = ES_V.indexOf(c) >= 0;
+    if (!v) { prev = ''; continue; }
+    if (!prev) n++;
+    else if (ES_STRONG.indexOf(c) >= 0 && ES_STRONG.indexOf(prev) >= 0) n++;   /* two strong vowels: a hiatus */
+    prev = c;
+  }
+  return Math.max(1, n);
+}
+let WORDRE;
+try { WORDRE = new RegExp("[\\p{L}][\\p{L}\\p{M}'’]*(?:-[\\p{L}][\\p{L}\\p{M}'’]*)*", 'gu'); }
+catch (e) { WORDRE = /[A-Za-zÀ-ɏ][A-Za-zÀ-ɏ'’]*(?:-[A-Za-zÀ-ɏ][A-Za-zÀ-ɏ'’]*)*/g; }
+function wordsOf(s){ WORDRE.lastIndex = 0; return str(s).match(WORDRE) || []; }
+/* the sentences of a text, each with where it is: a line break ends one, and so does ., ! or ? before a space; an
+   abbreviation (e.g., Mr., a.m., S.S.) does not */
+const ABBR = /\b(?:e\.g|i\.e|etc|vs|approx|mr|mrs|ms|dr|sr|sra|srta|dra|st|a\.m|p\.m|u\.s)\./gi, INIT = /\b(?:[A-Z]\.){2,}/g;
+function sentencesOf(t){
+  t = str(t);
+  const dots = m => m.replace(/\./g, '\u2024');
+  /* the same length as the text, so a sentence's place in it holds: a dot inside a word, a number or an address is not an end */
+  const prot = t.replace(ABBR, dots).replace(INIT, dots).replace(/\.(?=[A-Za-z0-9])/g, '\u2024');
+  const out = [], re = /[^.!?\u2026\n]+(?:[.!?\u2026]+["'\u201D\u2019\u00BB)\]]*|(?=\n)|$)|[.!?\u2026]+/g;
+  let m;
+  while ((m = re.exec(prot)) !== null) {
+    if (!m[0]) { re.lastIndex++; continue; }
+    const raw = t.slice(m.index, m.index + m[0].length), lead = raw.length - raw.replace(/^\s+/, '').length, text = raw.trim();
+    const w = text ? wordsOf(text) : [];
+    if (!w.length) continue;
+    const end = /[.!?\u2026]["'\u201D\u2019\u00BB)\]]*$/.test(text);
+    out.push({start:m.index + lead, end:m.index + lead + text.length, text, words:w.length, ends:end, label:!end && w.length < 4});
+  }
+  return out;
+}
+/* the words of the trade, with the plain words to use: [pattern (whole words, any case), plain words, why (optional)] */
+const PLAIN = {
+  en: [
+    ['extinction bursts?', 'the behavior may get worse for a short time before it gets better'],
+    ['(?:escape|attention|automatic|sensory)[- ]extinction|extinction', 'no longer giving what the behavior used to get'],
+    ['schedules? of reinforcement|reinforcement schedules?', 'how often your child gets the reward'],
+    ['negative reinforcement|negatively reinforced', 'getting out of something your child does not like'],
+    ['positive reinforcement|positively reinforced', 'giving something your child likes right after'],
+    ['differential reinforcement(?: of (?:alternative|other|incompatible|low rates? of) behaviou?rs?)?|DR[AOIL]', 'rewarding the new skill, and not the behavior'],
+    ['noncontingent reinforcement|non-contingent reinforcement|NCR', 'giving attention or a reward often, on a regular schedule, no matter what'],
+    ['automatic reinforcement|automatically reinforced|automatically maintained', 'it feels good or interesting on its own'],
+    ['reinforc(?:ers?|ement|ements|ed|es|e|ing)', 'a reward; something your child likes; praise'],
+    ['non-?contingent(?:ly)?', 'on a regular schedule, no matter what'],
+    ['contingen(?:cy|cies|t|tly)(?: (?:up)?on)?', 'only after; if this, then that'],
+    ['antecedents?', 'what happens just before'],
+    ['consequences?', 'what happens right after', 'Many families hear “consequence” as a punishment.'],
+    ['functional behaviou?r(?:al)? assessments?|FBA', 'a study of why the behavior happens'],
+    ['behaviou?r(?:al)? intervention plans?|BIP', 'the behavior plan'],
+    ['functional communication(?: training)?|FCT', 'teaching your child to ask for what they want'],
+    ['functions? of (?:the )?behaviou?rs?|behaviou?ral functions?|function-based|functional(?:ly)?', 'the reason for the behavior; what the behavior gets your child'],
+    ['(?:escape|attention|tangible|sensory)[- ]maintained', 'done to get out of something, to get attention, to get an item, or because it feels good'],
+    ['tangibles?', 'an item or activity'],
+    ['replacement behaviou?rs?|alternative behaviou?rs?', 'the new skill; a better way to ask'],
+    ['target behaviou?rs?', 'the behavior we are working on'],
+    ['operational(?:ly)? defin(?:itions?|ed)', 'a clear description of the behavior'],
+    ['topograph(?:y|ies)', 'what the behavior looks like'],
+    ['prompt hierarch(?:y|ies)|prompt(?:s|ed|ing)?', 'help; a hint'],
+    ['prompt fading|fading', 'slowly giving less help'],
+    ['(?:schedule )?thinning|thinned', 'slowly giving the reward less often'],
+    ['generali[sz](?:ation|e|es|ed|ing)', 'using the skill in new places and with new people'],
+    ['maintenance', 'keeping the skill over time'],
+    ['baselines?', 'how things were before the plan started'],
+    ['interventions?', 'the plan; what we do'],
+    ['implement(?:ation|ed|ing|s)?', 'carry out; use; do'],
+    ['frequency|rate of (?:the )?behaviou?r', 'how often; how many times'],
+    ['duration', 'how long'],
+    ['latency', 'how long before it starts'],
+    ['intensity|magnitude', 'how strong'],
+    ['token economy|token system', 'a point or sticker chart'],
+    ['satiat(?:ion|ed)', 'has had enough of it for now'],
+    ['(?:motivating|establishing|abolishing) operations?', 'how much your child wants it right now'],
+    ['setting events?', 'something earlier in the day that makes the behavior more likely'],
+    ['preference assessments?', 'finding out what your child likes most'],
+    ['(?:treatment|procedural) (?:integrity|fidelity)|fidelity of implementation|treatment integrity', 'how closely the plan is followed'],
+    ['social validity', 'whether the plan is worth it, fits and is fair to you'],
+    ['shaping', 'rewarding small steps toward the skill'],
+    ['(?:forward |backward |total[- ]task )?chaining|task analys[ie]s', 'teaching one small step at a time'],
+    ['elopement|elop(?:e|es|ed|ing)', 'leaving or running off without permission'],
+    ['non-?compliance|non-?compliant', 'not following the direction'],
+    ['response cost', 'losing points or a reward for the behavior'],
+    ['aversives?|punishers?', 'something unpleasant'],
+    ['discriminative stimul(?:us|i)', 'a signal'],
+    ['stimul(?:us|i)', 'a thing, a sign or a sound'],
+    ['mands?|manding', 'asks; a request'],
+    ['tacts?|tacting', 'names; naming'],
+    ['acquisition', 'learning a new skill'],
+    ['mastery criteri(?:on|a)|criteri(?:on|a)', 'the goal; when the goal is met'],
+    ['maladaptive|aberrant', 'problem'],
+    ['interobserver agreement|IOA', 'two people counting the same thing'],
+    ['(?:momentary time|partial[- ]interval|whole[- ]interval) (?:sampling|recording)', 'checking at set times'],
+    ['time[- ]?out(?: from (?:positive )?reinforcement)?', 'a short break from the activity (say where, and for how long)'],
+    ['contingent observation', 'watching the activity from nearby for a short time'],
+    ['data collection|collect(?:ing)? data', 'keeping track'],
+    ['behaviou?r(?:al)? momentum|high-p (?:requests?|sequences?)', 'a few easy requests first, then the harder one'],
+    ['premack(?: principle)?', 'first this, then that (first work, then play)'],
+    ['evidence-based', 'shown to work in studies'],
+    ['deficits?', 'a skill still to learn'],
+    ['manifest(?:s|ed|ing)?', 'shows'],
+    ['utili[sz](?:e|es|ed|ing|ation)', 'use'],
+    ['exhibit(?:s|ed|ing)?', 'shows; does'],
+    ['facilitat(?:e|es|ed|ing)', 'help'],
+    ['modalit(?:y|ies)', 'way']
+  ],
+  es: [
+    ['extinci[oó]n', 'dejar de dar lo que la conducta conseguía antes'],
+    ['programas? de (?:reforzamiento|refuerzo)', 'cada cuánto recibe el premio'],
+    ['reforzamiento negativo|refuerzo negativo', 'librarse de algo que no le gusta'],
+    ['reforzamiento positivo|refuerzo positivo', 'darle algo que le gusta justo después'],
+    ['reforzamiento diferencial|refuerzo diferencial', 'premiar la habilidad nueva y no la conducta'],
+    ['reforzamiento no contingente', 'darle atención o un premio a menudo, con regularidad, pase lo que pase'],
+    ['refuerzos?|reforzamientos?|reforzador(?:es)?|reforza(?:r|do|da|dos|das|ndo)', 'premio; algo que le gusta; elogio'],
+    ['no contingente|contingen(?:cia|cias|te|tes|temente)', 'solo después de; si pasa esto, entonces aquello'],
+    ['antecedentes?', 'lo que pasa justo antes'],
+    ['consecuencias?', 'lo que pasa justo después', 'Muchas familias entienden «consecuencia» como un castigo.'],
+    ['evaluaci[oó]n funcional(?: de (?:la )?conducta)?', 'un estudio de por qué ocurre la conducta'],
+    ['plan de intervenci[oó]n conductual', 'el plan de conducta'],
+    ['funci[oó]n de (?:la )?conducta|funcional(?:es|mente)?', 'la razón de la conducta; lo que la conducta le consigue'],
+    ['conductas? de reemplazo|conductas? alternativas?', 'la habilidad nueva; una mejor forma de pedir'],
+    ['conductas? (?:objetivo|meta)', 'la conducta en la que trabajamos'],
+    ['topograf[ií]a', 'cómo se ve la conducta'],
+    ['l[ií]nea (?:de )?base', 'cómo estaban las cosas antes del plan'],
+    ['intervenci[oó]n(?:es)?', 'el plan; lo que hacemos'],
+    ['implementa(?:r|ci[oó]n|do|da|dos|das)', 'aplicar; usar; hacer'],
+    ['generalizaci[oó]n', 'usar la habilidad en otros lugares y con otras personas'],
+    ['mantenimiento', 'conservar la habilidad con el tiempo'],
+    ['desvanecimiento|desvanecer', 'dar menos ayuda poco a poco'],
+    ['instigaci[oó]n(?:es)?|instigador(?:es)?', 'ayuda; una pista'],
+    ['moldeamiento|moldeado', 'premiar pasos pequeños hacia la habilidad'],
+    ['encadenamiento|an[aá]lisis de tareas?', 'enseñar un paso pequeño a la vez'],
+    ['econom[ií]a de fichas', 'una tabla de puntos o estrellas'],
+    ['operaci[oó]n(?:es)? (?:motivadoras?|establecedoras?|de abolici[oó]n)', 'las ganas que tiene de algo en ese momento'],
+    ['eventos? (?:de contexto|disposicionales?|contextuales?)', 'algo que pasó antes en el día y hace más probable la conducta'],
+    ['latencia', 'cuánto tarda en empezar'],
+    ['integridad del tratamiento|fidelidad (?:de (?:la )?implementaci[oó]n|del tratamiento)', 'qué tan bien se sigue el plan'],
+    ['validez social', 'si el plan vale la pena, encaja y le parece justo'],
+    ['est[ií]mulos?', 'una cosa, una señal o un sonido'],
+    ['saciedad|saciaci[oó]n', 'ya se cansó de eso por ahora'],
+    ['tiempo fuera(?: de (?:reforzamiento|refuerzo))?', 'un descanso corto de la actividad (diga dónde y por cuánto tiempo)'],
+    ['costo de (?:la )?respuesta', 'perder puntos o un premio por la conducta'],
+    ['criterios? de dominio', 'la meta; cuándo se cumple la meta'],
+    ['acuerdo entre observadores', 'dos personas que cuentan lo mismo'],
+    ['inadaptativas?|desadaptativas?|aberrantes?', 'problemática']
+  ],
+  ht: []
+};
+let PLAINC = null;
+/* a pattern's alternatives at its top level ("a|(?:b|c)d" is "a" and "(?:b|c)d") */
+function topAlts(p){
+  const out = []; let d = 0, br = false, cur = '';
+  for (let i = 0; i < p.length; i++) {
+    const c = p.charAt(i);
+    if (c === '\\') { cur += c + p.charAt(i + 1); i++; continue; }
+    if (br) { if (c === ']') br = false; }
+    else if (c === '[') br = true; else if (c === '(') d++; else if (c === ')') d--;
+    else if (c === '|' && !d) { out.push(cur); cur = ''; continue; }
+    cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+function plainRules(){
+  if (PLAINC) return PLAINC;
+  PLAINC = {};
+  Object.keys(PLAIN).forEach(l => {
+    PLAINC[l] = PLAIN[l].map(x => {
+      /* an acronym (FBA, DRA) is matched as written, in capitals; a word in any case */
+      const alts = topAlts(x[0]), cap = a => /^[A-Z][A-Z\[\]]{1,7}$/.test(a), words = alts.filter(a => !cap(a)), caps = alts.filter(cap), res = [];
+      try { if (words.length) res.push(new RegExp(words.join('|'), 'gi' + UFLAG)); } catch (e) {}
+      try { if (caps.length) res.push(new RegExp(caps.join('|'), 'g')); } catch (e) {}
+      return {res, plain:x[1], why:x[2] || ''};
+    });
+  });
+  return PLAINC;
+}
+function jargonIn(t, lang){
+  const list = plainRules()[lang] || [], q = quoteSpans(t), out = [];
+  list.forEach((r, i) => r.res.forEach(re => {
+    re.lastIndex = 0; let m, n = 0;
+    while ((m = re.exec(t)) !== null && n++ < 200) {
+      const s = m.index, e = s + m[0].length;
+      if (e === s) { re.lastIndex = s + 1; continue; }
+      if ((isW(t.charAt(s)) && isW(t.charAt(s - 1))) || (isW(t.charAt(e - 1)) && isW(t.charAt(e)))) { re.lastIndex = s + 1; continue; }
+      if (q.some(p => s >= p[0] && e <= p[1])) continue;
+      out.push({rule:i, start:s, end:e, text:t.slice(s, e), plain:r.plain, why:r.why});
+    }
+  }));
+  /* the longest at a place: "positive reinforcement", not "reinforcement" inside it */
+  out.sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start));
+  const kept = [];
+  out.forEach(f => { if (!kept.some(k => f.start >= k.start && f.end <= k.end)) kept.push(f); });
+  return kept;
+}
+function r1(x){ return Math.round(x * 10) / 10; }
+/* Flesch's school levels for a reading ease */
+function easeBand(e){
+  if (e >= 90) return {g:'about grade 5', k:'easier'};
+  if (e >= 80) return {g:'about grade 6', k:'within'};
+  if (e >= 70) return {g:'about grade 7', k:'within'};
+  if (e >= 60) return {g:'about grades 8 and 9', k:'edge'};
+  if (e >= 50) return {g:'about grades 10 to 12', k:'above'};
+  if (e >= 30) return {g:'about college level', k:'above'};
+  return {g:'college graduate level', k:'above'};
+}
+/* the reading of one text in one language */
+function famRead(text, lang){
+  const t = str(text), L = FAM_LANG[lang] ? lang : 'en';
+  const all = sentencesOf(t), sents = all.filter(s => !s.label);
+  let words = 0, syl = 0;
+  sents.forEach(s => { const w = wordsOf(s.text); words += w.length; w.forEach(x => { x.split('-').forEach(p => { syl += L === 'es' ? sylEs(p) : sylEn(p); }); }); });
+  const n = sents.length, wps = n ? words / n : 0, spw = words ? syl / words : 0;
+  const res = {lang:L, language:FAM_LANG[L], sentences:n, words, syllables:syl, perSentence:r1(wps), labels:all.length - n,
+    formula:'', score:null, grade:null, band:'', status:'', aim:'grades ' + FAM_AIM[0] + ' to ' + FAM_AIM[1],
+    long:sents.filter(s => s.words > FAM_LONG).map(s => ({start:s.start, end:s.end, words:s.words, text:s.text})),
+    jargon:(L === 'ht' ? [] : jargonIn(t, L)).map(j => ({start:j.start, end:j.end, text:j.text, plain:j.plain, why:j.why}))};
+  if (L === 'ht') { res.formula = 'none'; res.status = 'none'; return res; }
+  if (words < FAM_MIN) { res.formula = L === 'es' ? 'Fernández Huerta reading ease' : 'Flesch–Kincaid grade level'; res.status = 'short'; return res; }
+  if (L === 'es') {
+    const e = 206.84 - 0.60 * (100 * spw) - 1.02 * wps, b = easeBand(e);
+    res.formula = 'Fernández Huerta reading ease'; res.score = r1(e); res.band = b.g; res.status = b.k;
+  } else {
+    const g = Math.max(0, 0.39 * wps + 11.8 * spw - 15.59);
+    res.formula = 'Flesch–Kincaid grade level'; res.grade = r1(g); res.score = res.grade;
+    res.band = 'grade ' + res.grade; res.status = g < FAM_AIM[0] ? 'easier' : g < FAM_AIM[1] + 1 ? 'within' : 'above';
+  }
+  return res;
+}
+/* in a sentence: what the result means */
+function famSummary(r){
+  if (r.status === 'none') return 'No standard reading-level formula exists for Haitian Creole, so no grade is given: the long sentences are listed below, and the district translator judges the reading level.';
+  if (r.status === 'short') return 'Too short for a reading-level formula (' + plural(r.words, 'word', 'words') + ' in sentences; it needs ' + FAM_MIN + '). The long sentences and the words to explain are still checked.';
+  const what = r.lang === 'es' ? 'Reading ease ' + Math.round(r.score) + ' by the Fern\u00e1ndez Huerta formula (' + r.band + ')' : 'Grade ' + r.grade + ' by the Flesch\u2013Kincaid formula';
+  if (r.status === 'above') return what + ': above the aim of ' + r.aim + '. Shorter sentences and everyday words bring it down.';
+  if (r.status === 'edge') return what + ': at the top of the aim of ' + r.aim + '. Shorter sentences and everyday words bring it down.';
+  if (r.status === 'easier') return what + ': easier than grade ' + FAM_AIM[0] + ', which suits a family page.';
+  return what + ': within the aim of ' + r.aim + '.';
+}
 
 /* ------------------------------------------------------------------ fields */
 /* Not a narrative, so no button: a field the form has turned spelling check off for (a box to paste a spreadsheet or
@@ -1023,6 +1307,21 @@ ul.li li{margin:0 0 3px}
 .tst button{min-height:36px;padding:6px 12px;border:1px solid rgba(255,255,255,.35);border-radius:6px;background:transparent;color:#fff;
   font:600 13px/1.2 ${SANS};cursor:pointer}
 .tst button.x{border:0;font-size:18px;padding:6px 10px}
+.fw{position:absolute;left:0;top:0;display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;margin:0;padding:0 2px;
+  border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  font:600 12.5px/1 ${SANS};color:var(--nbh-slate,#254657)}
+.fw .pl{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px 0 9px;border-radius:16px;background:#fff;
+  border:1px solid var(--nbh-field,#b7c8c5);white-space:nowrap;box-shadow:0 1px 2px rgba(24,46,67,.10),0 4px 10px -6px rgba(24,46,67,.35)}
+.fw .ic{width:16px;height:16px;flex:0 0 auto}
+.fw:hover .pl{border-color:var(--nbh-teal,#76a2a3);background:var(--nbh-shade,#f5f8f7)}
+.fw:focus{outline:none}
+.fw:focus-visible .pl{border-color:var(--nbh-focus,#2f7fa8);box-shadow:0 0 0 3px var(--nbh-focus-soft,rgba(47,127,168,.26))}
+dialog.pn.rdg{width:min(760px,calc(100% - 32px));height:min(820px,calc(100% - 32px))}
+.rdb{padding:14px 20px 18px}
+.rl{margin:0 0 16px;padding:0 0 6px;border-bottom:1px solid #e3eae8}
+.ckfam:empty{display:none}
+.ckfam{margin:4px 0 12px;padding:0 12px 6px;border:1px solid #e3eae8;border-radius:8px;background:var(--nbh-shade,#f5f8f7)}
+.ckfam .rl{margin:0;border-bottom:0}
 @media print{:host,.lay,.tst,dialog,.fbk{display:none!important}}
 `;
 
@@ -1261,7 +1560,7 @@ function soon(){ clearTimeout(moT); moT = setTimeout(() => { treeV++; schedule()
 const PRINT = window.matchMedia ? window.matchMedia('print') : null;
 function layout(fast){
   if (!lay || host.style.display === 'none' || (PRINT && PRINT.matches)) return;
-  if (panelOpen) { if (!lay.hidden) lay.hidden = true; return; }
+  if (panelOpen || rdOpen) { if (!lay.hidden) lay.hidden = true; return; }
   if (lay.hidden) lay.hidden = false;
   const act = activeTa(), o = lay.getBoundingClientRect(), vw = document.documentElement.clientWidth, keep = new Set();
   if (fast) {
@@ -1287,6 +1586,7 @@ function layout(fast){
     place(b, r, o, vw, isAct && document.activeElement === ta);
   }
   B.forEach((b, ta) => { if (!keep.has(ta)) { b.el.remove(); B.delete(ta); if (RO) RO.unobserve(ta); } });
+  try { famLayout(o, vw); } catch (e) { lastErr = 'reading: ' + (e && e.message); }   /* v25.68 the family pages' Reading level buttons */
   TALL = false; B.forEach(b => { if (b.tall) TALL = true; });
 }
 function remember(ta){ if (ta && ta.tagName === 'TEXTAREA' && typeof ta.selectionStart === 'number') sels.set(ta, {s:ta.selectionStart, e:ta.selectionEnd, v:ta.value}); }
@@ -1317,7 +1617,7 @@ function wire(){
     mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','style']});
   } catch (e) {}
   try { RO = typeof ResizeObserver === 'function' ? new ResizeObserver(() => schedule()) : null; } catch (e) { RO = null; }
-  setInterval(() => { if (B.size && !panelOpen) schedule(); }, 2000);
+  setInterval(() => { if ((B.size || FB.size) && !panelOpen && !rdOpen) schedule(); }, 2000);
   window.addEventListener('beforeprint', () => { if (host) host.style.display = 'none'; });
   window.addEventListener('afterprint', () => { if (host) host.style.display = 'block'; schedule(); });
   try { if (PRINT) { const f = () => { if (!PRINT.matches) schedule(); }; if (PRINT.addEventListener) PRINT.addEventListener('change', f); else if (PRINT.addListener) PRINT.addListener(f); } } catch (e) {}
@@ -1347,6 +1647,7 @@ const PANEL = `<div class="in">
 <div class="tp" role="tabpanel" id="tp1" aria-labelledby="tb1" tabindex="0">
 <p class="sum" id="ckSum" role="status" aria-live="polite"></p>
 <ol class="fds" id="fds"></ol>
+<div class="ckfam" id="ckFam"></div>
 <p class="note" id="ckNote"></p>
 </div>
 <div class="tp" role="tabpanel" id="tp2" aria-labelledby="tb2" tabindex="0" hidden></div>
@@ -1368,7 +1669,7 @@ function buildPanel(){
   root.appendChild(dlg);
   const q = id => root.getElementById(id);
   P = {t:q('pnT'), s:q('pnS'), ed:q('ed'), n:q('edN'), sel:q('edSel'), dr:q('edDraft'), undo:q('undo'), cnt:q('cnt'), sum:q('ckSum'), fds:q('fds'),
-       note:q('ckNote'), tabs:[q('tb1'), q('tb2'), q('tb3')], tps:[q('tp1'), q('tp2'), q('tp3')], fm:q('fm'), use:q('use')};
+       note:q('ckNote'), fam:q('ckFam'), tabs:[q('tb1'), q('tb2'), q('tb3')], tps:[q('tp1'), q('tp2'), q('tp3')], fm:q('fm'), use:q('use')};
   /* v22.07 an edition with Rewrite with Claude turned off ({"rewrite":false} in the config: the school edition): its tab and
      every mention of it are gone, and nothing about it is ever asked of a website */
   if (rwOff()) { P.tabs[1].hidden = true; P.tps[1].hidden = true; root.querySelectorAll('.rw-only').forEach(e => e.remove()); }
@@ -1440,7 +1741,7 @@ function footer(){
 function openPanel(ta, how){
   if (!eligible(ta) || !build()) return false;
   buildPanel();
-  if (panelOpen) return false;
+  if (panelOpen || rdOpen) return false;
   const v = ta.value;
   let s = null, e = null;
   /* the part selected: in the field still focused (a mouse), or in the field that lost its focus to the tap on its
@@ -1584,6 +1885,8 @@ function renderCheck(){
       h('div', {class:'ac'}, acts)
     ])));
   });
+  /* v25.68 a field for the family: its reading level, long sentences and the words to explain (suggestions; nothing is replaced) */
+  if (P.fam) { P.fam.textContent = ''; const fl = famFieldLang(S && S.ta); if (fl && /\S/.test(t)) P.fam.appendChild(famBlock(famRead(t, fl), t, true)); }
   P.note.textContent = 'This check runs on this device and sends nothing. It looks for words that name a feeling, guess at intent or function, label the behavior, or leave a count, a time or an intensity vague; words in quotation marks are the learner\u2019s own and are left alone. Keep a word that is part of the operational definition: press Ignore.' + (kp && kp.note ? ' ' + clean(kp.note, 300) : '') + (rules().version ? ' Rules ' + rules().version + '.' : '');
 }
 function refocus(i){ const b = P.fds.children[Math.min(i, P.fds.children.length - 1)]; const t = b && b.querySelector('button'); try { (t || P.sum).focus({preventScroll:false}); } catch (e) {} }
@@ -1819,6 +2122,179 @@ function renderAnswer(box){
   box.appendChild(h('p', {class:'note', style:'margin-top:10px'}, 'Read it against what you saw: a rewrite can only use what the text says, and it can still get things wrong. Cancel closes the panel and leaves the field as it was.'));
 }
 
+/* ---- 4. v25.68 the reading level of a page for the family (research #12): its button, its dialog, its part of Check wording.
+   A form marks each page that goes home with data-nbh-family (its value a language, "en", "es" or "ht", or empty to go by
+   the lang of what is inside); an optional data-nbh-family-title names it. While the page is on the screen a "Reading level"
+   button sits at its top right corner (drawn here, in the overlay, so nothing is added to the form); it opens a dialog with,
+   for each language on the page, the grade by its formula, every sentence over 25 words, and the words a family may not know
+   with plain words for each. A field inside such a page (or marked itself) gets the same reading in Check wording.
+   nbhWording.reading({title, parts:[{lang, text}]}) opens the dialog for text that is not on the page (a respondent page). It
+   only suggests: nothing on the page or in a field is changed. Text marked data-nbh-family-skip (the draft-translation mark),
+   hidden, or noprint inside a printed page, is not read. */
+const FB = new Map();   /* a family page -> its button */
+let rd = null, RD = null, rdOpen = false, rdBack = null;
+const RICON = '<svg class="ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3.5 4.5h5a2 2 0 0 1 2 2v9a1.6 1.6 0 0 0-1.6-1.6H3.5zM16.5 4.5h-5a2 2 0 0 0-2 2v9a1.6 1.6 0 0 1 1.6-1.6h5.4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+function nodeLang(n){
+  for (let e = n && n.nodeType === 1 ? n : n && n.parentElement; e && e.nodeType === 1; e = e.parentElement) {
+    const f = e.getAttribute('data-nbh-family'), c = f ? famLangOf(f) : '';
+    if (c) return c;
+    const l = e.getAttribute('lang'), c2 = l ? famLangOf(l) : '';
+    if (c2) return c2;
+  }
+  return 'en';
+}
+/* the words of a family page as it goes home, a part for each language in the order they come */
+function famParts(el){
+  const segs = [], keepNoprint = !!el.closest('.noprint');
+  const push = (lang, s) => { if (!s) return; const l = segs[segs.length - 1]; if (l && l.lang === lang) l.text += s; else segs.push({lang, text:s}); };
+  (function walk(n){
+    if (n.nodeType === 3) { push(nodeLang(n), n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    const tag = n.tagName;
+    if (/^(?:SCRIPT|STYLE|TEMPLATE|NOSCRIPT|BUTTON|SVG)$/i.test(tag) || n.hidden) return;
+    if (n !== el && n.matches('[data-nbh-family-skip],[aria-hidden="true"]' + (keepNoprint ? '' : ',.noprint'))) return;
+    if (tag === 'INPUT') { if (!/^(?:checkbox|radio|hidden|button|submit|file)$/i.test(n.type) && n.value) push(nodeLang(n), ' ' + n.value + ' '); return; }
+    if (tag === 'TEXTAREA') { if (n.value) push(nodeLang(n), '\n' + n.value + '\n'); return; }
+    if (tag === 'SELECT') { const o = n.options && n.options[n.selectedIndex]; if (o && n.value) push(nodeLang(n), ' ' + o.text + ' '); return; }
+    if (tag === 'BR') { push(nodeLang(n), '\n'); return; }
+    const d = getComputedStyle(n).display;
+    if (d === 'none') return;
+    const blk = !/^inline/.test(d) && d !== 'contents';
+    if (blk) push(nodeLang(n), '\n');
+    for (let c = n.firstChild; c; c = c.nextSibling) walk(c);
+    if (blk) push(nodeLang(n), '\n');
+  })(el);
+  const by = {}, order = [];
+  segs.forEach(s => { if (!by[s.lang]) { by[s.lang] = ''; order.push(s.lang); } by[s.lang] += s.text; });
+  return order.map(l => ({lang:l, text:by[l].replace(/[ \t ]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{2,}/g, '\n').trim()})).filter(p => wordsOf(p.text).length);
+}
+function famTitle(el){
+  let t = clean(el.getAttribute('data-nbh-family-title'));
+  if (!t) { const h0 = el.querySelector('.hs-title,h1,h2,h3,h4,legend,caption'); if (h0) t = clean(h0.textContent, 80); }
+  return t || 'this page for the family';
+}
+/* the language of a field for the family: its own mark, else the page it is on; '' when it is not on one */
+function famFieldLang(ta){
+  if (!ta || !ta.closest || !ta.closest('[data-nbh-family]')) return '';
+  return nodeLang(ta);
+}
+function famShown(el){
+  if (!el.isConnected || !el.getClientRects().length || el.closest('dialog,[hidden],[data-nbh-nowording],.nbh-pm')) return false;
+  if (typeof el.checkVisibility === 'function') { try { if (!el.checkVisibility()) return false; } catch (e) {} }
+  for (let d = el.closest('details'); d; d = d.parentElement ? d.parentElement.closest('details') : null) if (!d.open) return false;
+  return getComputedStyle(el).visibility !== 'hidden';
+}
+function makeChip(el){
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'fw';
+  b.innerHTML = '<span class="pl">' + RICON + '<span>Reading level</span></span>';
+  const c = {el:b, fam:el, w:0, h:0, title:''};
+  b.addEventListener('click', () => { openReading(el, {back:b}); });
+  lay.appendChild(b);
+  return c;
+}
+function famLayout(o, vw){
+  const keep = new Set();
+  let list = [];
+  try { list = document.querySelectorAll('[data-nbh-family]'); } catch (e) {}
+  for (let i = 0; i < list.length; i++) {
+    const el = list[i];
+    if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.parentElement && el.parentElement.closest('[data-nbh-family]')) continue;   /* a field, or a part of a page already marked */
+    if (!famShown(el)) continue;
+    const r = vrect(el);
+    if (r.width < 160 || r.height < 36) continue;
+    let c = FB.get(el);
+    if (!c) { c = makeChip(el); FB.set(el, c); }
+    keep.add(el);
+    const t = famTitle(el);
+    if (c.title !== t) { c.title = t; c.el.setAttribute('aria-label', 'Check the reading level: ' + t); c.el.title = 'Check the reading level for the family'; }
+    if (!c.w) { c.w = c.el.offsetWidth; c.h = c.el.offsetHeight; }
+    if (!c.w) continue;
+    const left = Math.max(0, Math.min(r.right - c.w - 2, vw - c.w - 1)), top = r.top + 2;
+    const tf = 'translate(' + Math.round(left - o.left) + 'px,' + Math.round(top - o.top) + 'px)';
+    if (c.el.style.transform !== tf) c.el.style.transform = tf;
+  }
+  FB.forEach((c, el) => { if (!keep.has(el)) { c.el.remove(); FB.delete(el); } });
+}
+const RPANEL = `<div class="in">
+<header class="ph"><div><h2 id="rdT" tabindex="-1">Reading level for the family</h2><p class="ps" id="rdS"></p></div>
+<button type="button" class="px" id="rdX" aria-label="Close the reading level">×</button></header>
+<div class="pb"><div class="rdb" id="rdB"></div></div>
+<footer class="pf"><p class="fm" id="rdF">Suggestions only: nothing on the page changes here.</p>
+<div class="fb"><button type="button" class="b pri" id="rdC">Close</button></div></footer>
+</div>`;
+function buildReading(){
+  if (rd) return;
+  rd = document.createElement('dialog');
+  rd.className = 'pn rdg'; rd.setAttribute('aria-labelledby', 'rdT'); rd.setAttribute('aria-describedby', 'rdS');
+  rd.innerHTML = RPANEL;
+  root.appendChild(rd);
+  const q = id => root.getElementById(id);
+  RD = {t:q('rdT'), s:q('rdS'), b:q('rdB')};
+  q('rdX').addEventListener('click', closeReading);
+  q('rdC').addEventListener('click', closeReading);
+  rd.addEventListener('cancel', e => { e.preventDefault(); closeReading(); });
+  rd.addEventListener('keydown', e => { if (e.key === 'Escape' && !rd.showModal) { e.preventDefault(); closeReading(); } });
+}
+/* the reading of one language, as cards: the grade, the long sentences, the words to explain. In the panel ("find"), each
+   place can be found in the text; nothing is ever replaced. */
+function famBlock(res, t, find){
+  const sec = h('section', {class:'rl', lang:res.lang});
+  sec.appendChild(h(find ? 'h4' : 'h3', {class: find ? 'rlh' : 'sh'}, find ? 'Reading level for the family (' + res.language + ')' : res.language));
+  sec.appendChild(h('p', {class:'sum'}, famSummary(res)));
+  if (res.sentences) sec.appendChild(h('p', {class:'note'}, plural(res.sentences, 'sentence', 'sentences') + ', ' + plural(res.words, 'word', 'words') + ', about ' + Math.round(res.perSentence) + ' words a sentence' + (res.labels ? '; ' + plural(res.labels, 'heading or label', 'headings and labels') + ' left out' : '') + '.'));
+  const card = (cat, cx, sg, f) => h('li', {class:'fd'}, [h('p', {class:'cat'}, cat), cx, sg,
+    find && f ? h('div', {class:'ac'}, h('button', {type:'button', class:'lk', onclick: () => findF(f), 'aria-label':'Find “' + clean(f.text, 40) + '” in your text'}, 'Find in text')) : null]);
+  sec.appendChild(h('h4', null, res.long.length ? 'Sentences over ' + FAM_LONG + ' words (' + res.long.length + ')' : 'No sentence is over ' + FAM_LONG + ' words.'));
+  if (res.long.length) sec.appendChild(h('ol', {class:'fds'}, res.long.slice(0, 12).map(s => card(s.words + ' words', h('p', {class:'cx'}, clean(s.text, 420)),
+    h('p', {class:'sg'}, [h('b', null, 'Instead: '), 'two or three shorter sentences, one idea each.']), s))));
+  if (res.lang !== 'ht') {
+    const groups = [], byP = {};
+    res.jargon.forEach(j => { const k = j.plain; let g = byP[k]; if (!g) { g = byP[k] = {plain:j.plain, why:j.why, items:[]}; groups.push(g); } g.items.push(j); });
+    sec.appendChild(h('h4', null, groups.length ? 'Words a family may not know (' + groups.length + ')' : 'No words of the trade were found.'));
+    if (groups.length) sec.appendChild(h('ol', {class:'fds'}, groups.map(g => { const f = g.items[0], c = context(t, f), names = uniqBy(g.items.map(x => ({k:x.text.toLowerCase()})), x => x.k).map(x => x.k);
+      return card(names.slice(0, 3).join(', ') + (g.items.length > 1 ? ' · ' + g.items.length + ' times' : ''), h('p', {class:'cx'}, [c[0], h('mark', null, c[1]), c[2]]),
+        h('p', {class:'sg'}, [h('b', null, 'Plain words: '), g.plain + '.' + (g.why ? ' ' + g.why : '')]), f); })));
+  }
+  return sec;
+}
+const FAM_NOTE = 'Suggestions only: nothing is changed here. Change the words where they are written; consent wording is never rewritten automatically. A formula is a rough guide: the Flesch–Kincaid grade level (Kincaid and others, 1975) for English, the Fernández Huerta reading ease (1959) for Spanish, read against Flesch’s school levels; Haitian Creole has no standard formula. The aim is grades ' + FAM_AIM[0] + ' to ' + FAM_AIM[1] + ', with no sentence over ' + FAM_LONG + ' words.';
+function openReading(target, opt){
+  opt = opt || {};
+  if (!build()) return null;
+  buildReading();
+  if (rdOpen || panelOpen) return null;
+  let parts = [], title = '';
+  if (target && target.nodeType === 1) { parts = famParts(target); title = famTitle(target); }
+  else {
+    const o = target || {};
+    parts = (Array.isArray(o.parts) ? o.parts : [{lang:o.lang, text:o.text}]).map(p => ({lang:famLangOf(p && p.lang) || 'en', text:str(p && p.text)})).filter(p => wordsOf(p.text).length);
+    title = clean(o.title, 120);
+  }
+  const by = {}, order = [];
+  parts.forEach(p => { if (!(p.lang in by)) { by[p.lang] = ''; order.push(p.lang); } by[p.lang] += (by[p.lang] ? '\n' : '') + p.text; });
+  const readings = order.map(l => ({res:famRead(by[l], l), text:by[l]}));
+  RD.s.textContent = title || 'What goes home';
+  RD.b.textContent = '';
+  if (!readings.length) RD.b.appendChild(h('p', {class:'sum'}, 'There are no words on this page to read yet.'));
+  readings.forEach(x => RD.b.appendChild(famBlock(x.res, x.text, false)));
+  RD.b.appendChild(h('p', {class:'note'}, FAM_NOTE));
+  rdBack = opt.back || document.activeElement;
+  rdOpen = true; schedule();
+  try { if (typeof rd.showModal === 'function') rd.showModal(); else throw 0; }
+  catch (x) { rd.setAttribute('open', ''); rd.classList.add('fb'); if (!root.querySelector('.fbk')) root.insertBefore(h('div', {class:'fbk'}), rd); }
+  try { RD.t.focus({preventScroll:true}); } catch (x) { RD.t.focus(); }
+  return readings.map(x => x.res);
+}
+function closeReading(){
+  if (!rdOpen) return;
+  try { rd.close(); } catch (e) { rd.removeAttribute('open'); }
+  rd.classList.remove('fb'); const fbk = root.querySelector('.fbk'); if (fbk) fbk.remove();
+  rdOpen = false; layout();
+  const b = rdBack; rdBack = null;
+  try { if (b && b.isConnected && typeof b.focus === 'function') b.focus({preventScroll:true}); } catch (e) {}
+}
+
 /* ------------------------------------------------------------------ start */
 function start(){ if (!build()) return; wire(); schedule(); }
 window.nbhWording = Object.freeze({
@@ -1829,7 +2305,15 @@ window.nbhWording = Object.freeze({
   open: ta => openPanel(ta),
   close: () => closePanel('cancel'),
   deidentify: (t, extra) => { const r = deidentify(t, Array.isArray(extra) ? extra : []); return {text:r.text, hidden:r.map.filter(m => m.n).map(m => ({placeholder:m.ph, forms:m.forms.slice()}))}; },
-  status: () => { const p = relayPlan(), r = rules(); return {rules:r.rules.length, badRules:r.bad.length, relay: p.ok ? 'ready' : p.why, reach:REACH.state, unlocked: !!(p.ok && getSession(p)), buttons:B.size, open:panelOpen, error:lastErr}; }
+  status: () => { const p = relayPlan(), r = rules(); return {rules:r.rules.length, badRules:r.bad.length, relay: p.ok ? 'ready' : p.why, reach:REACH.state, unlocked: !!(p.ok && getSession(p)), buttons:B.size, open:panelOpen, error:lastErr}; },
+  /* v25.68 (research #12) the reading level for the family: of a text (lang "en", "es" or "ht"), of a page (an element), and
+     the dialog for either; family() lists the pages marked data-nbh-family that have their button now */
+  readability: (t, lang) => famRead(t, famLangOf(lang) || 'en'),
+  readPage: el => el && el.nodeType === 1 ? famParts(el).map(p => Object.assign({text:p.text}, famRead(p.text, p.lang))) : [],
+  reading: (target, opt) => openReading(target, opt),
+  closeReading: () => closeReading(),
+  family: () => Array.from(FB.values()).map(c => ({title:c.title, lang:nodeLang(c.fam), el:c.fam})),
+  langOf: v => famLangOf(v)
 });
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

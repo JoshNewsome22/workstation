@@ -1580,6 +1580,14 @@ td input,td select{max-width:100%}
       <button class="tool" type="button" id="trPrintYear">Print the year summary</button>
       <button class="tool" type="button" id="trPrintFinal">Print the final verification</button>
     </div>
+    <!-- v25.68b the BACB's own form, filled on this device (the BCBA, 11/6) -->
+    <div class="tr-bacb noprint" id="trBacbM" role="group" aria-labelledby="trBacbH">
+      <h2 class="nbh-band" id="trBacbH">The BACB&rsquo;s own form</h2>
+      <p class="hint">The BACB accepts only its own current forms (BCBA Handbook, p. 22). Download the current Monthly Fieldwork Verification Form from bacb.com and pick it here: RS-1 fills in this month&rsquo;s figures and saves a filled copy, leaving the signatures for the supervisor and the trainee to add in a PDF app. The PDF is read and filled on this device only. RS-1&rsquo;s printed form stays the signed record.</p>
+      <div class="tools"><button class="tool" type="button" data-trbacb="month">Fill the BACB&rsquo;s form</button><input type="file" id="trBacbFile" accept="application/pdf,.pdf" hidden style="display:none" tabindex="-1" aria-hidden="true"></div>
+      <p class="hint" id="trBacbOn"></p>
+      <div id="trBacbOut" aria-live="polite"></div>
+    </div>
     <h2 class="nbh-band noprint" style="margin-top:14px">The monthly verification form as it prints</h2>
     <div class="rs-paper tr-paper" id="trFormOut"></div>
     <h2 class="nbh-band noprint" style="margin-top:18px">The month&rsquo;s fieldwork record as it prints</h2>
@@ -1604,6 +1612,12 @@ td input,td select{max-width:100%}
       <div class="ts-prev" aria-hidden="true" data-trtsprev="fin"></div>
       <label class="ts-ok"><input type="checkbox" id="trTsOkFin" data-trtsok="fin"> I adopt this typed name as my electronic signature on this form, with the same intent as signing by hand.</label>
       <button class="tool" type="button" data-trtsgo="fin" disabled>Adopt and sign</button></div></details>
+    <div class="tr-bacb noprint" id="trBacbF" role="group" aria-labelledby="trBacbFinH">
+      <h3 id="trBacbFinH">The BACB&rsquo;s own final form</h3>
+      <p class="hint">Download the current Final Fieldwork Verification Form from bacb.com and pick it here: RS-1 fills in the totals of the final verification and saves a filled copy, leaving the supervisor&rsquo;s signature to add in a PDF app. The PDF is read and filled on this device only.</p>
+      <div class="tools"><button class="tool" type="button" data-trbacb="fin">Fill the BACB&rsquo;s final form</button></div>
+      <div id="trBacbFinOut" aria-live="polite"></div>
+    </div>
     <div class="rs-paper tr-paper" id="trFinalOut"></div>
   </section>
 
@@ -3074,6 +3088,23 @@ table.tr-rules td small,table.tr-rules th small{display:block;color:var(--ink-so
   .tr-fvf .f-ins{margin:2pt 0 4pt}.tr-fvf h5{margin:6pt 0 2pt}.tr-fvf .f-row{margin:3pt 0}.tr-fvf .f-sig{margin:6pt 0 1pt}.tr-fvf .f-foot{margin-top:6pt}.tr-fvf .f-tot{margin:4pt 0}
 }
 </style>
+<style id="rs1-v2568-bacbpdf-css">
+/* v25.68b the BACB's own verification forms, filled on this device: the panel beside the month's printed form and in the final */
+.tr-bacb{margin:14px 0 4px}
+#trBacbF{border-top:1px solid var(--rule-2);padding-top:10px}
+#trBacbF h3{font:700 15px var(--sans);color:var(--nbh-navy,#182e43);margin:0 0 4px}
+.tr-bacb-res{border:1px solid var(--rule-2);border-left:4px solid var(--nbh-navy,#182e43);border-radius:4px;background:#fff;padding:8px 14px;margin:8px 0;font-family:var(--sans);font-size:13.5px;line-height:1.45;color:var(--ink)}
+.tr-bacb-res.no{border-left-color:#8E2A2A;background:#F6E0E0;color:#5e1a1a}
+.tr-bacb-res p{margin:4px 0}
+.tr-bacb-note{border-left:4px solid #9B4E15;background:#FBEEDB;padding:5px 10px;color:#3d2408}
+.tr-bacb-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2px 22px}
+.tr-bacb-cols h4{font:700 12px var(--sans);text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin:8px 0 3px}
+.tr-bacb-cols ul{margin:0;padding-left:1.1em}.tr-bacb-cols li{margin:2px 0;overflow-wrap:anywhere}
+.tr-bacb-decides{font-weight:400}
+.tr-bacb-act{align-items:center}
+.tr-bacb-saved{margin:4px 0;color:#1d4a2c}
+@media print{.tr-bacb{display:none!important}}
+</style>
 <script id="rs1-v2568-trainee">
 /* v25.68 (the BCBA, 11/6; research #21) BCBA trainee fieldwork beside the RBT log. A choice at the top: RBTs (the log as
    before, the default) or BCBA trainees. A trainee's record: each session of independent hours, each supervision contact
@@ -3501,12 +3532,15 @@ function yearOutHTML(t,v){t=t||cur();const ks=periodKeys(t,v),st=t.setup,now=key
     '<div class="p-foot"><span>Check the current BACB documents before signing.</span><span>Form RS-1 &middot; trainee year summary</span></div></div>';}
 /* the final verification: the hours of the signed months in the span, by fieldwork type, as the BACB's final form asks */
 function finDefTo(u){const now=keyOf(todayISO()),e=u.filter(k=>k<now);return e[e.length-1]||u[u.length-1]||'';}
-function finalHTML(t){t=t||cur();const st=t.setup,f=t.final||{},u=usedKeys(t),a=keyS(f.from)||u[0]||'',b=keyS(f.to)||finDefTo(u),ver=f.ver==='2027'||f.ver==='2022'?f.ver:(todayISO()>='2027-01-01'?'2027':'2022'),org=st.structure==='org',sp=respSup(t),g=f.sig||{};
+/* the final's figures: the signed, on-time months in the span, by fieldwork type (the page below, and the BACB's own final form) */
+function finalData(t){t=t||cur();const st=t.setup,f=t.final||{},u=usedKeys(t),a=keyS(f.from)||u[0]||'',b=keyS(f.to)||finDefTo(u),ver=f.ver==='2027'||f.ver==='2022'?f.ver:(todayISO()>='2027-01-01'?'2027':'2022'),org=st.structure==='org',sp=respSup(t),g=f.sig||{};
   const ks=u.filter(k=>k>=a&&k<=b),by={sup:{ind:0,sup:0,n:0},conc:{ind:0,sup:0,n:0}},short=[],unsigned=[],open=[],late=[];let pror=false;
   ks.forEach(k=>{const s=tStats(k,t),h=formHours(k,t,s),x=by[s.ft]||by.sup,g=sigState(k,t);if(s.open){open.push(k);return;}if(!g.both){unsigned.push(k);return;}if(g.late){late.push(k);return;}if(s.status!=='ok')short.push(k);x.ind+=h.ind;x.sup+=h.sup;x.n++;if(tPeek(k,t).prorated)pror=true;});
+  const type=by.sup.n&&by.conc.n?'mixed':by.conc.n?'conc':'sup';
+  return {st,a,b,ver,org,sp,g,ks,by,short,unsigned,open,late,pror,type};}
+function finalHTML(t){t=t||cur();const {st,a,b,ver,org,sp,g,ks,by,short,unsigned,open,late,pror,type}=finalData(t);
   const col=x=>{const tot=x.ind+x.sup;return {i:x.ind,s:x.sup,t:tot,p:tot?x.sup/tot*100:null};},A=col(by.sup),C=col(by.conc);
   const H=mi=>{const x=hm2(mi);return x.h+' hh '+pad2(x.m)+' mm';};
-  const type=by.sup.n&&by.conc.n?'mixed':by.conc.n?'conc':'sup';
   return '<div class="tr-fvf" data-final="'+ver+'"><div class="f-top"><div><div class="f-title">FINAL | FIELDWORK VERIFICATION FORM</div><div class="f-sub">'+(org?'MULTIPLE SUPERVISORS AT ONE ORGANIZATION':'INDIVIDUAL SUPERVISOR')+'</div><div class="f-req">'+ver+' Fieldwork Requirements</div></div><div class="f-ws">'+wsLine('Final',ver,org)+'</div></div>'+
     '<p class="f-ins"><b>Instructions:</b> Please complete one form per '+(org?'organization':'supervisor')+'. Complete this form in its entirety for consideration. Incomplete documents will not be accepted.'+(ver==='2027'?' Both parties must retain a copy of this form for at least 7 years. Do not submit this form to the BACB unless requested.':'')+'</p>'+
     (unsigned.length?'<div class="f-flag">Not counted, no monthly form signed by both: '+esc(unsigned.map(keyLabel).join(', '))+'.</div>':'')+
@@ -3549,7 +3583,7 @@ function renderTPrint(){const t=cur(),keys=tKeys(t);if(!keys.includes(TK))TK=def
   $('#trFinVer').value=f.ver==='2027'||f.ver==='2022'?f.ver:(todayISO()>='2027-01-01'?'2027':'2022');$('#trFinName').value=fg.sup_name||'';$('#trFinName').placeholder=sp?sp.name:'name';$('#trFinDate').value=fg.sup_date||'';
   const fc=$('canvas.tr-pad[data-trpad="fin"]');if(fc)padDraw(fc,fg.sup_img);
   if(window.__trTsKey!==TK){window.__trTsKey=TK;$$('[data-trtsok]').forEach(c=>{c.checked=false;});$$('[data-trtsn]').forEach(i=>{i.value='';});$$('#trPrint details.rs-typesig').forEach(d=>{d.open=false;});$$('[data-trtsgo]').forEach(b=>tsState(b.dataset.trtsgo));}
-  sigStat();renderTPapers();}
+  sigStat();renderTPapers();if(window.__rsBacbPaint)try{window.__rsBacbPaint();}catch(e){}}
 function renderTPapers(){const t=cur();$('#trFormOut').innerHTML=formVers(TK,t).map(v=>mfvfHTML(TK,v,t)).join('');$('#trLogOut').innerHTML=logHTML(TK,t);
   const yv=$('#trYearSel')&&$('#trYearSel').value||String(schoolYearOf(new Date()));$('#trYearOut').innerHTML=yearOutHTML(t,yv);$('#trFinalOut').innerHTML=finalHTML(t);
   const sg=sigState(TK,t),c=$('#trSigChanged');if(c){c.hidden=!sg.changed;c.textContent=sg.changed?'The month’s figures changed after both signed: clear the signatures and sign again, so the form shows what was signed.':'';}}
@@ -3692,7 +3726,7 @@ async function trSim(){if(!(await nbhUI.confirm('Load a simulated trainee?\nTrai
 /* every object written with its keys in one order, however it was built, so a file saved, opened and saved again is the same file */
 const pick=(o,K)=>{const r={};K.forEach(k=>{if(o&&o[k]!==undefined)r[k]=o[k];});return r;};
 const KSET=['name','bacb','state','country','structure','ftype','contract','course','org'],KSUP=['id','name','cert','qual','since','trained','consult','norel','resp'],
-  KENT=['id','date','start','end','kind','fmt','grp','cat','obs','obsMin','obsHow','setting','sup','client','sum'],KMON=['ftype','note','adjInd','adjSup','prorated','form','sig'],
+  KENT=['id','date','start','end','kind','fmt','grp','cat','obs','obsMin','obsHow','setting','sup','client','sum'],KMON=['ftype','note','adjInd','adjSup','prorated','form','bacb','sig'],
   KSIG=['sup_name','sup_date','sup_img','sup_how','sup_at','tr_name','tr_date','tr_img','tr_how','tr_at','fp'],KFIN=['from','to','ver','sig'];
 function tToFile(t){const o={id:t.id,setup:clean(pick(t.setup,KSET)),sups:t.sups.map(s=>clean(pick(s,KSUP))),entries:t.entries.map(e=>clean(pick(e,KENT)))};
   const ms={};Object.keys(t.months||{}).sort().forEach(k=>{const m=pick(t.months[k],KMON);if(m.sig)m.sig=pick(m.sig,KSIG);const c=clean(m);if(Object.keys(c).length)ms[k]=c;});if(Object.keys(ms).length)o.months=ms;
@@ -3704,7 +3738,7 @@ function tFromFile(x){x=obj(x);const t=newTrainee();t.id=str(x.id,40)||uid();con
   const ids=new Set(t.sups.map(s=>s.id));
   t.entries=arr(x.entries).slice(0,3000).map(e=>{e=obj(e);return {id:str(e.id,40)||uid(),date:isoD(e.date),start:hmS(e.start),end:hmS(e.end),kind:e.kind==='sup'?'sup':'ind',fmt:e.fmt==='group'?'group':'indiv',grp:str(e.grp,4).replace(/[^\d]/g,''),cat:e.cat==='res'||e.cat==='unr'?e.cat:'',obs:!!e.obs,obsMin:str(e.obsMin,5).replace(/[^\d]/g,''),obsHow:OBSHOW.some(o=>o[0]===e.obsHow)?e.obsHow:'',setting:str(e.setting,300),sup:ids.has(str(e.sup,40))?str(e.sup,40):'',client:str(e.client,60),sum:str(e.sum,4000)};}).sort(eSort);
   const ms=obj(x.months);Object.keys(ms).filter(keyS).slice(0,240).forEach(k=>{const m=obj(ms[k]),g=obj(m.sig),o={sig:{}};
-    if(m.ftype==='sup'||m.ftype==='conc')o.ftype=m.ftype;if(T(m.note))o.note=str(m.note);['adjInd','adjSup'].forEach(f=>{if(parseH(m[f])!=null)o[f]=str(m[f],12);});if(m.prorated)o.prorated=true;if(m.form==='2027'||m.form==='both')o.form=m.form;
+    if(m.ftype==='sup'||m.ftype==='conc')o.ftype=m.ftype;if(T(m.note))o.note=str(m.note);['adjInd','adjSup'].forEach(f=>{if(parseH(m[f])!=null)o[f]=str(m[f],12);});if(m.prorated)o.prorated=true;if(m.form==='2027'||m.form==='both')o.form=m.form;if(isoD(m.bacb))o.bacb=isoD(m.bacb);
     ['sup','tr'].forEach(w=>{if(T(g[w+'_name']))o.sig[w+'_name']=str(g[w+'_name'],200);if(isoD(g[w+'_date']))o.sig[w+'_date']=isoD(g[w+'_date']);const im=String(g[w+'_img']||'');if(/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(im)&&im.length<400000)o.sig[w+'_img']=im;
       if(g[w+'_how']==='typed'||g[w+'_how']==='drawn')o.sig[w+'_how']=g[w+'_how'];if(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(String(g[w+'_at']||'')))o.sig[w+'_at']=g[w+'_at'];});
     if(T(g.fp))o.sig.fp=str(g.fp,400);t.months[k]=o;});
@@ -3731,7 +3765,225 @@ window.__nbhViewFill=function(k){const L=[];document.querySelectorAll('section.o
 {const due0=window.__nbhDue;window.__nbhDue=function(){const out=due0?due0.apply(this,arguments):[];try{const today=todayISO();
   TR.list.filter(tHas).forEach(t=>usedKeys(t).forEach(k=>{const s=tStats(k,t),g=sigState(k,t);if(s.ended&&s.E.length&&!g.both&&g.by>=addDaysISO(today,-31))out.push({what:('Sign the trainee form for '+keyLabel(k)+' ('+(tName(t)||'trainee')+')').slice(0,60),date:g.by});}));}catch(e){}return out;};}
 const addDaysISO=(s,n)=>{const d=fromIso(s);d.setDate(d.getDate()+n);return isoOf(d);};
-window.__rsTrainee={TR,RS,tStats,sigState,formHours,adjRows,totals,mfvfHTML,finalHTML,setMode,isTr:()=>isTr(),key:()=>TK,setKey:k=>{TK=k;trRender();},cur,tHas,trHas};
+window.__rsTrainee={TR,RS,tStats,sigState,formHours,adjRows,totals,mfvfHTML,finalHTML,setMode,isTr:()=>isTr(),key:()=>TK,setKey:k=>{TK=k;trRender();},cur,tHas,trHas,
+  finalData,respSup,tPeek,tMonth,usedKeys,rsOf,hm2,dec2};
+})();
+</script>
+<script id="rs1-v2568-bacbpdf">
+/* v25.68b (the BCBA, 11/6: "Fill BACB's PDF") the BACB's own monthly and final fieldwork verification forms, filled on
+   this device. The BCBA Handbook (10/2026, p. 22): "Outdated BACB forms or non-BACB forms will not be accepted." So RS-1's
+   printed monthly form stays the signed working record, and the BACB's own PDF, downloaded from bacb.com and picked here,
+   is filled from the month's entries (or the final verification's totals): RS-1 reads the PDF's form fields with the
+   workstation's pdf-lib, loaded only when a form is picked; recognises which of the BACB's forms it is (2022 or 2027
+   requirements, individual supervisor or organization, monthly or final) by its field names, every name and type the
+   same as one form's; fills each field it holds a figure for; and offers the filled copy through the workstation's usual
+   save. Signatures and their dates are left for the people who sign, in a PDF app. A form whose fields RS-1 does not know
+   (a newer version) is not filled, and no field is guessed. The BACB's PDF is never kept, copied or sent: it is read and
+   filled in this window, and nothing of it is in this file but its field names. The file keeps one new value, the date the
+   BACB's form was filled for a month. */
+(function(){
+'use strict';
+if(!window.__rsTrainee)return;
+/* ---------------- the BACB's forms, known by their field names (names only: nothing of the BACB's is kept here) ----------------
+   Each form: its kind (M monthly, F final), the requirements it is for, the structure, and every field the BACB's PDF carries,
+   as [name, type, role]: type t text, c check box, d drop-down list, s signature, b a button (the forms' help buttons). A PDF
+   is recognised only when its fields are exactly one form's (names and types); anything else is not filled. The role says
+   what RS-1 writes there; a signature, and its date, is never filled. */
+const BACB_SIG={supSig:1,supSigDate:1,trSig:1,trSigDate:1};
+const BF=(()=>{const sig1=[['SUPERVISOR_SIGNATURE','s','supSig'],['SUPERVISOR_SIGNATURE_DATE','t','supSigDate']],sig2=sig1.concat([['TRAINEE_SIGNATURE','s','trSig'],['TRAINEE_SIGNATURE_DATE','t','trSigDate']]);
+  const top=id=>[['TRAINEE_NAME','t','name'],[id,'t','bacb']],where=[['TRAINEE_FIELDWORK_STATE','t','state'],['TRAINEE_FIELDWORK_COUNTRY','t','country']];
+  const resp=id=>[['RESPONSIBLE_SUPERVISOR_NAME','t','sName'],[id,'t','sId']];
+  const orgSups=[1,2,3,4].reduce((a,n)=>a.concat([['SUPERVISOR_NAME_'+n,'t','o'+n],['SUPERVISOR_BACB_ID_'+n,'t','o'+n+'Id']]),[]);
+  const btn=L=>L.map(n=>[n,'b']);
+  const m22=pror=>top('TRAINEE_BACB_ID').concat([['TRAINEE_CERTIFICATE_MONTH/YEAR','t','month'],['CHECK_SUPERVISED_FIELDWORK','c','ftype']],where,resp('RESPONSIBLE_SUPERVISOR_BACB_ID'),
+    [['INDEPENDENT_HOURS','t','ind'],['SUPERVISED_HOURS','t','svd'],['TOTAL_FIELDWORK','t','tot'],['PERCENT_HOURS_SUPERVISED','t','pct'],[pror,'c','pror']],sig2,btn(['BACB_ID_BUTTON','INDEPENDENT_HOURS_BUTTON','SUPERVISED_HOURS_BUTTON']));
+  const m27=(obsM,b)=>top('TRAINEE_BACB_ID').concat([['TRAINEE_CERTIFICATE_MONTH/YEAR','t','month']],where,resp('RESPONSIBLE_SUPERVISOR_BACB_ID'),
+    [['Independent_Hours','t','indH'],['Independent_Minutes','t','indM'],['Supervised_Hours','t','svdH'],['Supervised_Minutes','t','svdM'],['Observation_Hours','t','obsH'],[obsM,'t','obsM'],
+     ['Total_Fieldwork_Hours','t','totH'],['Total_Fieldwork_Minutes','t','totM'],['PERCENT_HOURS_SUPERVISED','t','pct']],sig2,btn(b));
+  const f22col=(x,s)=>[['INDEPENDENT_HOURS'+s,'t',x+'ind'],['SUPERVISED_HOURS'+s,'t',x+'svd'],['TOTAL_FIELDWORK'+s,'t',x+'tot'],['PERCENT_HOURS_SUPERVISED'+s,'t',x+'pct']];
+  const f22=(id,pror,type,org,sid,b)=>top(id).concat([['START_DATE','t','from'],['END_DATE','t','to'],[pror,'c','pror']],where,org?orgSups:[],[[type,'c','ftype'],['TOTAL_MONTHS_OF_FIELDWORK_OBTAINED','t','A.n'],['TOTAL_MONTHS_OF_FIELDWORK_OBTAINED 2','t','C.n']],
+    f22col('A.',''),f22col('C.',' 2'),resp(sid),[['RESPONSIBLE_SUPERVISOR_QUALIFICATION','d','qual']],sig1,btn(b));
+  const f27col=(x,p)=>[['Independent_Hours','indH'],['Independent_Minutes','indM'],['Supervised_Hours','svdH'],['Supervised_Minutes','svdM'],['Total_Fieldwork_Hours','totH'],['Total_Fieldwork_Minutes','totM'],['PERCENT_HOURS_SUPERVISED','pct']].map(r=>[p+r[0],'t',x+r[1]]);
+  const f27=(id,org,sid,b)=>top(id).concat([['START_DATE','t','from'],['END_DATE','t','to']],where,org?orgSups:[],resp(sid),f27col('A.',''),f27col('C.','C_'),sig1,btn(b));
+  return [
+    {id:'M22i',kind:'M',ver:'2022',org:false,v:'08/2023',f:m22('This fieldwork included prorated hours for a partial month. ')},
+    {id:'M22o',kind:'M',ver:'2022',org:true,v:'08/2023',f:m22('This fieldwork included prorated hours for a partial month')},
+    {id:'M27i',kind:'M',ver:'2027',org:false,v:'06/2026',f:m27('Independent_Minutes 3',['BACB_ID_BUTTON','BACB_ID_BUTTON 3','INDEPENDENT_HOURS_BUTTON 2','SUPERVISED_HOURS_BUTTON 2'])},
+    {id:'M27o',kind:'M',ver:'2027',org:true,v:'06/2026',f:m27('Independent_Minutes 2',['BACB_ID_BUTTON','BACB_ID_BUTTON 2','INDEPENDENT_HOURS_BUTTON','SUPERVISED_HOURS_BUTTON'])},
+    {id:'F22i',kind:'F',ver:'2022',org:false,v:'12/2023',f:f22('TRAINEE_ACCOUNT_ID','CHECK_prorated fieldwork','Fieldwork-Type',false,'RESPONSIBLE_SUPERVISOR_BACB_ID',['BACB_ID_BUTTON','INDEPENDENT_HOURS_BUTTON','SUPERVISED_HOURS_BUTTON','INDEPENDENT_HOURS_BUTTON 2','SUPERVISED_HOURS_BUTTON 2'])},
+    {id:'F22o',kind:'F',ver:'2022',org:true,v:'12/2023',f:f22('TRAINEE_BACB_ID','CHECK_prorated fieldwork ','CHECK_FIELDWORK',true,'RESPONSIBLE_SUPERVISOR_ACCOUNT_ID',['BACB_ID_BUTTON','INDEPENDENT_HOURS_BUTTON 2','SUPERVISED_HOURS_BUTTON 2','INDEPENDENT_HOURS_BUTTON 3','SUPERVISED_HOURS_BUTTON 3'])},
+    {id:'F27i',kind:'F',ver:'2027',org:false,v:'06/2026',f:f27('TRAINEE_ACCOUNT_ID',false,'RESPONSIBLE_SUPERVISOR_BACB_ID',['BACB_ID_BUTTON','BACB_ID_BUTTON 2','INDEPENDENT_HOURS_BUTTON 2','SUPERVISED_HOURS_BUTTON 2'])},
+    {id:'F27o',kind:'F',ver:'2027',org:true,v:'06/2025',f:f27('TRAINEE_BACB_ID',true,'RESPONSIBLE_SUPERVISOR_ACCOUNT_ID',['BACB_ID_BUTTON','BACB_ID_BUTTON 3','INDEPENDENT_HOURS_BUTTON','SUPERVISED_HOURS_BUTTON'])}];})();
+/* a PDF's fields, as pdf-lib reads them: name and type */
+function bacbFields(P,doc){const form=doc.getForm();return form.getFields().map(f=>{const n=f.getName();
+  const ty=f instanceof P.PDFTextField?'t':f instanceof P.PDFCheckBox?'c':f instanceof P.PDFDropdown?'d':f instanceof P.PDFSignature?'s':f instanceof P.PDFButton?'b':f instanceof P.PDFRadioGroup?'r':f instanceof P.PDFOptionList?'l':'?';
+  return {n,ty,f};});}
+/* which of the BACB's forms this is: every field's name and type the same as one form's, no field more or less */
+function bacbKnow(L){const key=a=>a.map(x=>x[0]+'\u0000'+x[1]).sort().join('\u0001'),k=key(L.map(x=>[x.n,x.ty]));return BF.find(F=>key(F.f)===k)||null;}
+const nmTxt=v=>{try{return v.decodeText();}catch(e){return String(v).replace(/^\//,'').replace(/#([0-9a-f]{2})/gi,(m,h)=>String.fromCharCode(parseInt(h,16)));}};
+const onName=w=>{const v=w.getOnValue&&w.getOnValue();return v?nmTxt(v):'';};
+/* fill a recognised form: vals[role] = {v, show}; returns the bytes and what was filled and left */
+async function bacbFill(P,bytes,F,vals){const doc=await P.PDFDocument.load(bytes,{updateMetadata:false}),form=doc.getForm(),font=await doc.embedFont(P.StandardFonts.Helvetica);
+  const NM=P.PDFName,filled=[],left=[];
+  for(const [n,ty,role] of F.f){if(ty==='b')continue;const fld=form.getField(n),val=vals[role];
+    if(ty==='s'||BACB_SIG[role]){left.push({n,role,why:'sig'});continue;}
+    if(!val||val.v===''||val.v==null){left.push({n,role,why:(val&&val.why)||'none'});continue;}
+    try{
+      if(ty==='t'){const keep=[fld.acroField.dict].concat(fld.acroField.getWidgets().map(w=>w.dict)).map(d=>[d,d.get(NM.of('DA'))]);
+        font.encodeText(String(val.show));font.encodeText(String(val.v));
+        fld.setText(String(val.show));fld.updateAppearances(font);if(String(val.v)!==String(val.show))fld.acroField.setValue(P.PDFHexString.fromText(String(val.v)));
+        keep.forEach(([d,da])=>{if(da)d.set(NM.of('DA'),da);else d.delete(NM.of('DA'));});}
+      else if(ty==='c'){const ws=fld.acroField.getWidgets();
+        if(val.v===true||val.v===false){if(ws.length!==1){left.push({n,role,why:'boxes'});continue;}if(val.v)fld.check();else fld.uncheck();}
+        else{const hit=ws.find(w=>onName(w)===val.v);if(!hit){left.push({n,role,why:'boxes'});continue;}
+          fld.acroField.dict.set(NM.of('V'),hit.getOnValue());ws.forEach(w=>w.setAppearanceState(w===hit?hit.getOnValue():NM.of('Off')));}}
+      else if(ty==='d'){if(!fld.getOptions().includes(val.v)){left.push({n,role,why:'option'});continue;}fld.select(val.v);fld.updateAppearances(font);}
+      else{left.push({n,role,why:'none'});continue;}
+      filled.push({n,role,v:val.v,show:val.show});}
+    catch(e){left.push({n,role,why:/encode/i.test(String(e&&e.message))?'font':'error'});}}
+  const out=await doc.save({useObjectStreams:false,updateFieldAppearances:false});
+  /* read back: every field filled holds what was written, every signature is still empty */
+  const back=await P.PDFDocument.load(out,{updateMetadata:false}),bf=back.getForm();
+  for(const x of filled){const fld=bf.getField(x.n);let got;
+    if(fld instanceof P.PDFTextField)got=fld.getText();else if(fld instanceof P.PDFDropdown)got=(fld.getSelected()||[])[0];
+    else{const V=fld.acroField.dict.get(NM.of('V')),s=V?nmTxt(V):'Off';got=x.v===true||x.v===false?s!=='Off':s;}
+    if(String(got)!==String(x.v))throw new Error('The filled copy did not read back as written ('+x.n+').');}
+  for(const x of F.f)if(x[1]==='s'&&bf.getField(x[0]).acroField.dict.get(NM.of('V')))throw new Error('A signature field is not empty.');
+  return {bytes:out,filled,left};}
+/* ---------------- loading pdf-lib, only when a form is picked ----------------
+   As the workstation loads it for Finish PDF: the copy beside the forms (the folder, and the installed app offline, whose
+   copy holds it); inside the one-file edition, where nothing sits beside the page, the workstation's own copy. */
+let pdfReady=null;
+function pdfLib(){if(window.PDFLib)return Promise.resolve({P:window.PDFLib,U:Uint8Array});
+  if(!pdfReady)pdfReady=new Promise((ok,no)=>{const s=document.createElement('script');s.src='pdf-lib.min.js';s.onload=()=>window.PDFLib?ok():no(new Error('pdf-lib.min.js'));s.onerror=()=>{s.remove();no(new Error('pdf-lib.min.js'));};document.head.appendChild(s);})
+    .then(()=>({P:window.PDFLib,U:Uint8Array}))
+    .catch(e=>{let w=null;try{if(window.parent!==window&&typeof window.parent.pdfTools==='function')w=window.parent;}catch(x){}
+      if(!w)throw e;return w.pdfTools().then(()=>{if(!w.PDFLib)throw e;return {P:w.PDFLib,U:w.Uint8Array};});})
+    .catch(e=>{pdfReady=null;throw e;});
+  return pdfReady;}
+
+/* ---------------- what RS-1 writes in each field: the figures of its own printed form ---------------- */
+const X=window.__rsTrainee;
+const T=v=>String(v==null?'':v).trim();
+const nf=(x,d)=>Number(x).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const V=(v,show)=>({v:String(v),show:String(show==null?v:show)});
+const E=why=>({v:'',why});
+const txt=(x,why)=>T(x)?V(T(x)):E(why);
+const my=k=>k?k.slice(5)+'/'+k.slice(0,4):'';
+const QL={bcba:'BCBA/BCBA-D',vi:'Verified Instructor',abpp:'ABPP/ABA'};
+const FTN={'Supervised Fieldwork':'Supervised fieldwork','Concentrated Supervised Fieldwork':'Concentrated supervised fieldwork','Mixed':'Mixed'};
+const ftV=on=>({v:on,show:FTN[on]||on});
+/* the 2022 forms: hours to two decimals; the 2027 forms: hours and minutes. The total and the percent are what the BACB's
+   form itself works out from the two figures (add A and B; supervised divided by the total), so they stay the same if the
+   form is opened in a PDF app that works them out again. The percent is kept as the form keeps it, a fraction shown as %. */
+function decCols(ind,sup){const a=X.dec2(ind),b=X.dec2(sup),A=Number(a),B=Number(b),t=(A+B).toFixed(2);
+  return {ind:V(a,nf(a,2)),svd:V(b,nf(b,2)),tot:V(t,nf(t,2)),pct:A+B?V(String(B/(A+B)),nf(B/(A+B)*100,2)+'%'):E('nohours')};}
+function hmCols(ind,sup){const I=X.hm2(ind),S=X.hm2(sup),m=I.h*60+I.m+S.h*60+S.m,Tt=X.hm2(m),sm=S.h*60+S.m;
+  return {indH:V(I.h,nf(I.h,0)),indM:V(I.m),svdH:V(S.h,nf(S.h,0)),svdM:V(S.m),totH:V(Tt.h,nf(Tt.h,0)),totM:V(Tt.m),pct:m?V(String(sm/m),nf(sm/m*100,2)+'%'):E('nohours')};}
+function who(t){const st=t.setup||{},sp=X.respSup(t);return {name:txt(st.name,'setup'),bacb:txt(st.bacb,'setup'),state:txt(st.state,'setup'),country:txt(st.country,'setup'),
+  sName:sp?txt(sp.name,'nosup'):E('nosup'),sId:sp?txt(sp.cert,'supcert'):E('nosup'),qual:sp?V(QL[sp.qual||'bcba']||QL.bcba):E('nosup')};}
+function monthVals(F,k,t){const s=X.tStats(k,t),h=X.formHours(k,t,s),m=X.tPeek(k,t),o=Object.assign(who(t),{month:V(my(k)),
+    ftype:ftV(s.ft==='conc'?'Concentrated Supervised Fieldwork':'Supervised Fieldwork'),pror:{v:!!m.prorated,show:m.prorated?'ticked':'not ticked'}});
+  if(F.ver==='2022')Object.assign(o,decCols(h.ind,h.sup));else{Object.assign(o,hmCols(h.ind,h.sup));const O=X.hm2(s.obsMin);o.obsH=V(O.h);o.obsM=V(O.m);}
+  return o;}
+function finalVals(F,t){const D=X.finalData(t),o=who(t),sp=D.sp;
+  Object.assign(o,{from:V(my(D.a)),to:V(my(D.b)),pror:{v:!!D.pror,show:D.pror?'ticked':'not ticked'},ftype:ftV(D.type==='mixed'?'Mixed':D.type==='conc'?'Concentrated Supervised Fieldwork':'Supervised Fieldwork')});
+  if(T(D.g.sup_name))o.sName=V(T(D.g.sup_name));
+  [['A.',D.by.sup],['C.',D.by.conc]].forEach(([x,b])=>{const c=F.ver==='2022'?decCols(b.ind,b.sup):hmCols(b.ind,b.sup);
+    Object.keys(c).forEach(r=>{o[x+r]=b.n?c[r]:E('notype');});o[x+'n']=b.n?V(b.n):E('notype');});
+  const L=(t.sups||[]).filter(x=>T(x.name));[1,2,3,4].forEach(n=>{const x=L[n-1];o['o'+n]=x?V(T(x.name)):E('nomore');o['o'+n+'Id']=x?txt(x.cert,'supcert'):E('nomore');});
+  return {o,D,more:Math.max(0,L.length-4)};}
+
+/* ---------------- the lists on the screen, in RS-1's own words ---------------- */
+const LBL={name:'Trainee’s name',bacb:'Trainee’s BACB ID',month:'Month and year',from:'Start (month and year)',to:'End (month and year)',state:'State where the fieldwork occurred',
+  country:'Country where the fieldwork occurred',sName:'Supervisor’s name',sId:'Supervisor’s certification or BACB ID number',qual:'Supervisor’s qualification',ftype:'Fieldwork type',
+  pror:'Prorated hours for a partial month',ind:'Independent hours',svd:'Supervised hours',tot:'Total fieldwork hours',pct:'Percent of hours supervised',obs:'Observation with a client',n:'Months counted',
+  supSig:'Supervisor’s signature',supSigDate:'Date beside the supervisor’s signature',trSig:'Trainee’s signature',trSigDate:'Date beside the trainee’s signature'};
+const COL={'A.':'Supervised fieldwork: ','C.':'Concentrated supervised fieldwork: '};
+const WHY={sig:'to be signed in a PDF app',sigdate:'to be dated when signing',setup:'not entered on Setup',nosup:'no supervisor entered on Setup',supcert:'the number is not entered on Setup',
+  notype:'no month of this type is counted (the form asks for that part to be left blank)',nomore:'no further supervisor in RS-1',nohours:'no hours to divide',
+  font:'it has a character the form’s font cannot show: type it on the form',boxes:'the form’s boxes are not the ones RS-1 knows: tick it on the form',
+  option:'the form’s list has no such choice: choose it on the form',none:'RS-1 does not hold it',error:'RS-1 could not write it: type it on the form'};
+function lab(x,org,n){const b=/^o\d$/.test(x.k)?'Supervisor '+x.k.slice(1)+' at the organization':x.k==='sName'&&org?'Responsible supervisor’s name':LBL[x.k]||n;return x.col?COL[x.col]+b.charAt(0).toLowerCase()+b.slice(1):b;}
+function lineKey(r){const c=/^[AC]\./.exec(r),b=r.replace(/^[AC]\./,'');let k=/^o\d(Id)?$/.test(b)?b.slice(0,2):b.replace(/([a-z])[HM]$/,'$1');return {col:c?c[0]:'',k};}
+function lines(F,res,org){const L=[],by={};F.f.forEach(([n,ty,r])=>{if(ty==='b')return;const x=lineKey(r),key=x.col+x.k;
+    if(!by[key]){by[key]={key,col:x.col,k:x.k,label:lab(x,org,n),fill:[],left:[]};L.push(by[key]);}
+    const f=res.filled.find(z=>z.n===n);if(f)by[key].fill.push(Object.assign({r},f));else{const l=res.left.find(z=>z.n===n);if(l)by[key].left.push(Object.assign({r},l));}});
+  const show=g=>{const H=g.fill.find(z=>/H$/.test(z.r)),M=g.fill.find(z=>/M$/.test(z.r));if(H||M)return (H?H.show:'0')+' h '+String(M?M.v:'0').padStart(2,'0')+' min';return g.fill.map(z=>z.show).join(', ');};
+  return {filled:L.filter(g=>g.fill.length).map(g=>({label:g.label,show:show(g),part:g.left.length?WHY[g.left[0].why]||WHY.none:''})),
+    left:merge(L.filter(g=>!g.fill.length&&g.left.length).map(g=>({label:g.label,col:g.col,k:g.k,w:g.left[0].why,why:g.left[0].why==='sig'&&/Date$/.test(g.k)?WHY.sigdate:WHY[g.left[0].why]||WHY.none,sig:g.left[0].why==='sig'})))};}
+/* one line for a whole column left blank, and one for the organization's empty supervisor rows */
+function merge(A){const o=[];A.forEach(x=>{const p=o[o.length-1];
+    if(p&&x.w==='notype'&&p.w==='notype'&&p.col===x.col){p.label=COL[x.col].replace(/: $/,'')+', every figure';return;}
+    if(p&&x.w==='nomore'&&p.w==='nomore'){p.n2=x.k.slice(1);p.label='Supervisors '+p.n1+' to '+p.n2+' at the organization';return;}
+    if(x.w==='nomore')x.n1=x.k.slice(1);o.push(x);});return o;}
+const FNAME={M:'Monthly Fieldwork Verification Form',F:'Final Fieldwork Verification Form'};
+const formName=F=>'the BACB’s '+FNAME[F.kind]+' for the '+F.ver+' requirements, '+(F.org?'multiple supervisors at one organization':'individual supervisor')+' (version '+F.v+')';
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const KNOWN='RS-1 knows the BACB’s monthly forms of version 08/2023 (2022 requirements) and 06/2026 (2027 requirements) and the final forms of version 12/2023 (2022) and 06/2026 and 06/2025 (2027), each by its field names.';
+const initials=n=>{const w=T(n).replace(/\([^)]*\)/g,' ').split(/[\s\-–]+/).map(x=>x.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g,'')).filter(Boolean);return w.length?w.map(x=>x[0].toUpperCase()).join('').slice(0,4):'trainee';};
+
+/* ---------------- picking the BACB's form: read, recognise, fill, then Save ---------------- */
+const out=w=>document.getElementById(w==='fin'?'trBacbFinOut':'trBacbOut');
+const last={month:null,fin:null};let busy=false;
+function say(w,html,cls){const o=out(w);if(!o)return;o.innerHTML='<div class="tr-bacb-res'+(cls?' '+cls:'')+'">'+html+'</div>';}
+function no(w,msg){say(w,'<p><b>Not filled.</b> '+msg+'</p><p>RS-1’s printed form stays the record: enter its figures on the BACB’s form by hand.</p>','no');last[w]=null;}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-trbacb]');if(!b||busy)return;const i=document.getElementById('trBacbFile');if(!i)return;i.dataset.w=b.dataset.trbacb;i.value='';i.click();pdfLib().catch(()=>{});});
+document.addEventListener('change',e=>{const i=e.target;if(!i||i.id!=='trBacbFile')return;const f=i.files&&i.files[0],w=i.dataset.w||'month';i.value='';if(f)pick(f,w);});
+async function pick(file,w){if(busy)return;busy=true;try{await pick1(file,w);}finally{busy=false;}}
+async function pick1(file,w){last[w]=null;say(w,'<p>Reading <b>'+esc(file.name)+'</b>…</p>');
+  let lib;try{lib=await pdfLib();}catch(e){no(w,'The PDF tool (pdf-lib.min.js) could not be loaded: it comes with the workstation, beside the forms. Open RS-1 from the workstation’s folder or its web address.');return;}
+  const {P,U}=lib;let bytes;try{bytes=new U(await file.arrayBuffer());}catch(e){no(w,'The file could not be read.');return;}
+  const head=String.fromCharCode.apply(null,Array.from(bytes.subarray(0,1024)));
+  if(!/%PDF-/.test(head)){no(w,'<b>'+esc(file.name)+'</b> is not a PDF. Pick the BACB’s form as you downloaded it from bacb.com (a PDF).');return;}
+  let doc;try{doc=await P.PDFDocument.load(bytes,{updateMetadata:false});}catch(e){no(w,/encrypt/i.test(String(e&&e.message))?'This PDF is password-protected, so RS-1 cannot fill it.':'This PDF could not be read: it may be damaged.');return;}
+  let L;try{L=bacbFields(P,doc);}catch(e){L=[];}
+  const F=L.length?bacbKnow(L):null;
+  if(!F){no(w,'RS-1 does not know this form’s fields, so it filled nothing. It may be a newer version of the BACB’s form, or another PDF; RS-1 never guesses a field. '+KNOWN);return;}
+  if(L.some(x=>x.ty==='s'&&x.f.acroField.dict.get(P.PDFName.of('V')))){no(w,'This copy of the BACB’s form is already signed: filling it would break the signature. Pick a copy that is not signed yet.');return;}
+  const t=X.cur(),st=t.setup||{},org=st.structure==='org',notes=[];
+  if(F.org!==org){no(w,'This is '+formName(F)+'. On Setup, the trainee’s supervision structure is '+(org?'multiple supervisors at one organization':'an individual supervisor')+': pick the BACB’s form for that structure, or change the structure on Setup.');return;}
+  if(w==='month'&&F.kind==='F')notes.push('This is the BACB’s final form: it is filled from the final verification (below), not from the month.');
+  if(w==='fin'&&F.kind==='M')notes.push('This is the BACB’s monthly form: it is filled from the month chosen at the top of this page, '+keyLabel(X.key())+'.');
+  let vals,name,k=null,D=null;
+  if(F.kind==='M'){k=X.key();const s=X.tStats(k,t),own=X.rsOf(k).id;
+    if(!s.E.length){no(w,'No fieldwork is counted for '+keyLabel(k)+' yet, so there is nothing to fill.');return;}
+    if(F.ver==='2022'&&own==='2027'){no(w,'This is '+formName(F)+'. '+keyLabel(k)+' is under the 2027 rules, which use the 2027 form (Guidance for the 2027 Transition, p. 4): download the 2027 monthly form from bacb.com.');return;}
+    if(F.ver!==own)notes.push(keyLabel(k)+' is under the '+own+' rules; this is the '+F.ver+' form, for a trainee who applies on or after January 1, 2027.');
+    if(s.open)notes.push(keyLabel(k)+' is not over yet: its figures can still change. Fill the form again after the month ends.');
+    if(s.planned.length)notes.push(s.planned.length+' planned entr'+(s.planned.length===1?'y is':'ies are')+' not counted.');
+    if(s.status==='fail'&&s.ended)notes.push('This month is short of the '+s.rs.short+'; the hours are '+(X.formHours(k,t,s).adj?'the adjusted hours entered for the form':'as accrued')+'.');
+    vals=monthVals(F,k,t);name='M-FVF'+(F.ver!==own?'-'+F.ver:'')+'_'+initials(st.name)+'_'+k+'.pdf';}
+  else{const r=finalVals(F,t);D=r.D;vals=r.o;
+    if(!D.by.sup.n&&!D.by.conc.n){no(w,'No month from '+(D.a?keyLabel(D.a):'—')+' to '+(D.b?keyLabel(D.b):'—')+' has a monthly form signed by both on time, so there is nothing to total.');return;}
+    if(F.ver!==D.ver)notes.push('The final verification below is set to the '+D.ver+' form; this PDF is the '+F.ver+' form, so it is filled the '+F.ver+' form’s way.');
+    [[D.unsigned,'no monthly form signed by both'],[D.open,'the month is still open'],[D.late,'the monthly form was signed after the last day of the following month']].forEach(([L2,why])=>{if(L2.length)notes.push('Not counted ('+why+'): '+L2.map(keyLabel).join(', ')+'.');});
+    if(D.short.length)notes.push('Signed but short of a requirement, counted with the hours on their forms: '+D.short.map(keyLabel).join(', ')+'.');
+    if(r.more)notes.push('The form has room for four supervisors; RS-1 has '+(r.more+4)+': add the others as the BACB asks.');
+    name='F-FVF'+(F.ver!==D.ver?'-'+F.ver:'')+'_'+initials(st.name)+'_'+D.a+'_to_'+D.b+'.pdf';}
+  let res;try{res=await bacbFill(P,bytes,F,vals);}catch(e){no(w,'RS-1 could not fill this copy: '+esc(String(e&&e.message||e))+'.');return;}
+  const Ls=lines(F,res,org);
+  last[w]={w,k,kind:F.kind,name,bytes:res.bytes,F,filled:res.filled,left:res.left};
+  const li=x=>'<li><b>'+esc(x.label)+':</b> '+esc(x.show)+(x.part?' <i>(part left: '+esc(x.part)+')</i>':'')+'</li>';
+  const sig=Ls.left.filter(x=>x.sig),oth=Ls.left.filter(x=>!x.sig);
+  say(w,'<p class="tr-bacb-what"><b>'+esc(cap(formName(F)))+'</b>, recognised by its fields, filled '+(F.kind==='M'?'from '+esc(keyLabel(k)):'from the final verification, '+esc(keyLabel(D.a))+' to '+esc(keyLabel(D.b)))+'.</p>'+
+    notes.map(n=>'<p class="tr-bacb-note">'+esc(n)+'</p>').join('')+
+    '<div class="tr-bacb-cols"><div><h4 id="trBacbH1'+w+'">Filled by RS-1 ('+Ls.filled.length+')</h4><ul aria-labelledby="trBacbH1'+w+'">'+Ls.filled.map(li).join('')+'</ul></div>'+
+    '<div><h4 id="trBacbH2'+w+'">Left for you ('+Ls.left.length+')</h4><ul aria-labelledby="trBacbH2'+w+'">'+sig.map(x=>'<li><b>'+esc(x.label)+':</b> '+esc(x.why)+'</li>').join('')+oth.map(x=>'<li><b>'+esc(x.label)+':</b> '+esc(x.why)+'</li>').join('')+'</ul></div></div>'+
+    '<p class="tr-bacb-decides"><b>The BACB’s form decides.</b> Check each figure on it against '+(F.kind==='M'?'the month’s record':'the signed monthly forms')+' before signing.</p>'+
+    '<div class="tools tr-bacb-act"><button class="tool primary" type="button" data-trbacbsave="'+w+'">Save the filled form</button><span class="hint">As '+esc(name)+'. The PDF you picked is left as it is.</span></div>');
+  const sb=document.querySelector('[data-trbacbsave="'+w+'"]');if(sb)try{sb.focus({preventScroll:true});}catch(x){}}
+/* the workstation's usual save: a link with the file's name (the share sheet's Save to Files in the installed app on an iPad) */
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-trbacbsave]'),S=b&&last[b.dataset.trbacbsave];if(!S)return;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([S.bytes],{type:'application/pdf'}));a.download=S.name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},60000);
+  if(S.kind==='M'&&S.k){X.tMonth(S.k,X.cur()).bacb=todayISO();changed();paint();}
+  const act=b.closest('.tr-bacb-act');if(act)act.innerHTML='<p class="tr-bacb-saved" role="status"><b>Saved as '+esc(S.name)+'.</b> Open it in a PDF app to sign and date it'+(S.kind==='M'?' (the supervisor and the trainee)':' (the supervisor)')+'.</p>';});
+/* the month's line: when the BACB's form was filled for it (the one thing the file keeps of this) */
+function paint(){const n=document.getElementById('trBacbOn');if(!n||!X.isTr())return;const k=X.key();if(!k){n.textContent='';return;}const d=X.tPeek(k,X.cur()).bacb;
+  n.textContent=d?'The BACB’s form for '+keyLabel(k)+' was filled here on '+mdy(d)+'. Fill it again if the month’s figures change.':'The BACB’s form for '+keyLabel(k)+' has not been filled here yet.';
+  ['month','fin'].forEach(w=>{const L0=last[w];if(L0&&L0.kind==='M'&&L0.k!==k){last[w]=null;const o=out(w);if(o)o.innerHTML='';}});}
+window.__rsBacbPaint=paint;
 })();
 </script>
 

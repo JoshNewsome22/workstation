@@ -34,6 +34,13 @@ PWA = re.compile(r'<!-- nbh-pwa-head[\s\S]*?<!-- /nbh-pwa-head -->\n')
 if len(PWA.findall(idx)) > 1:
     sys.exit('index.html holds more than one nbh-pwa-head block')
 idx = PWA.sub('', idx)
+# v25.68 Read a document moved out of the page into nbh-shell-docread.js (the page's size budget); a one-file edition
+# carries it inline, before the page is packed into nbh-embed-shell, so case files written from it carry it too
+DOCREAD_TAG = '<script id="nbh-docread" src="nbh-shell-docread.js"></script>'
+if idx.count(DOCREAD_TAG) != 1:
+    sys.exit('index.html does not load nbh-shell-docread.js once')
+_dr = open(os.path.join(SRC, 'nbh-shell-docread.js'), encoding='utf-8').read()
+idx = idx.replace(DOCREAD_TAG, '<script id="nbh-docread">\n' + _dr.replace('</script', '<\\/script') + '</script>', 1)
 if re.search(r'<link rel="(manifest|apple-touch-icon)"', idx):
     sys.exit('index.html links the manifest or the touch icon outside its nbh-pwa-head block')
 logo = re.search(r'<img id="logo" alt="[^"]*" src="(data:image/[a-z]+;base64,[A-Za-z0-9+/=]+)"', idx).group(1)

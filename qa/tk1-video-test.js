@@ -94,7 +94,7 @@ let fails=0;const ok=(name,cond,info)=>{console.log((cond?'PASS ':'FAIL ')+name+
   /* the MP4, where this browser can encode H.264 */
   const can=await page.evaluate(async()=>{try{return(await VideoEncoder.isConfigSupported({codec:'avc1.42E01F',width:1280,height:720,bitrate:2e6,framerate:30})).supported;}catch(e){return false;}});
   if(!can)console.log('SKIP the MP4: this Chromium has no H.264 encoder (qa checks it in WebKit: see SETUP.md)');
-  else{const r=await page.evaluate(async()=>{const m=await TKVIDEO.make({until:3});const b=new Uint8Array(await m.blob.arrayBuffer());const s=String.fromCharCode.apply(null,b.subarray(0,Math.min(b.length,400000)));
+  else{const r=await page.evaluate(async()=>{const m=await TKVIDEO.make({until:3});const b=new Uint8Array(await m.blob.arrayBuffer());let s='';const h=b.subarray(0,Math.min(b.length,400000));for(let i=0;i<h.length;i+=8192)s+=String.fromCharCode.apply(null,h.subarray(i,i+8192));   /* v25.68 in pieces: one call over 400 kB overflowed the stack */
       return{size:b.length,ftyp:s.indexOf('ftyp')===4,moov:s.indexOf('moov')>=0,avc:s.indexOf('avc1')>=0,aud:s.indexOf('mp4a')>=0||s.indexOf('Opus')>=0,sound:m.sound,frames:m.frames};});
     ok('the first 3 s make an MP4 with a video track',r.ftyp&&r.moov&&r.avc&&r.frames===90&&r.size>20000,r);
     ok('... and the narration as its sound, where there is an audio encoder',!r.sound||r.aud,r);}
