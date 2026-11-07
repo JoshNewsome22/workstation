@@ -2384,6 +2384,7 @@ function rrTlData(){const D=v=>rrISO(v),inc=incidents().map(x=>D(x.d)).filter(Bo
   for(let i=0;i<4;i++){const n=val(`md[${i}].n`);if(!n)continue;const st=D(val(`md[${i}].start`));if(st)med.push({d:st,n,start:true});
     rrDates(val(`md[${i}].chg`),inc).filter(d=>d!==st).forEach(d=>med.push({d,n,start:false}));}
   for(let i=0;i<5;i++){const d=D(val(`ev[${i}].d`));if(d)ev.push({d,t:val(`ev[${i}].t`)||'Event',e:val(`ev[${i}].e`)});}
+  try{(window.__rrCrEv||[]).forEach(v=>{if(v&&v.d)ev.push({d:v.d,t:v.t,e:v.e});});}catch(e){}   /* v25.68 (research #2) Form CR-1's events, as dated events (rr1-v2568) */
   ev.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);med.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);
   return {inc,rem,med,ev,ab:rrDates(val('a.dates'),inc)};}
 function rrTimeline(){const wrap=document.getElementById('rrTlWrap'),box=document.getElementById('rrTl'),hint=document.getElementById('rrTlHint');if(!wrap||!box)return;
@@ -2471,7 +2472,9 @@ function v65SchoolDays(from,to){const ns=new Set();((typeof LG!=='undefined'&&LG
   const out=[];if(!from||!to)return out;for(let d=new Date(from),c=0;d<=to&&c<1500;d.setDate(d.getDate()+1),c++){const w=d.getDay();if(w&&w<6&&!ns.has(ymd(d)))out.push(ymd(d));}return out;}
 function v65Range(extra){const inc=incidents().map(x=>v65Iso(x.d)).filter(Boolean),all=inc.concat(extra||[]).sort();
   const a=v65D(all[0]),b=v65D(all[all.length-1]);   /* the record's period: its first and last dated entry (the review's own dates are when the review was done) */return {a,b,inc};}
-function v65Events(){const out=[];for(let i=0;i<12;i++){const d=v65Iso(val(`ev[${i}].d`)),t=val(`ev[${i}].t`);if(d&&t)out.push({d,t,i});}return out;}
+function v65Events(){const out=[];for(let i=0;i<12;i++){const d=v65Iso(val(`ev[${i}].d`)),t=val(`ev[${i}].t`);if(d&&t)out.push({d,t,i});}
+  /* v25.68 (research #2) Form CR-1's Baker Act initiations and threat team cases count as setting events (rr1-v2568) */
+  try{(window.__rrCrEv||[]).forEach(v=>{if(v&&v.d&&v.t)out.push({d:v.d,t:v.t,i:-1});});}catch(e){}return out;}
 function v65Compare(){const ev=v65Events(),R=v65Range(ev.map(e=>e.d)),days=v65SchoolDays(R.a,R.b),idx=new Map(days.map((d,k)=>[d,k])),win=val('x.evWin')===''?1:+val('x.evWin');
   const byDay=new Map();R.inc.forEach(d=>byDay.set(d,(byDay.get(d)||0)+1));const out=[];
   [...new Set(ev.map(e=>e.t))].forEach(t=>{const dd=[...new Set(ev.filter(e=>e.t===t).map(e=>e.d))];if(dd.length<3){out.push({t,n:dd.length,few:true});return;}
@@ -3782,6 +3785,31 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
  try{const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';},dx=g('m.dx'),diet=g('m.diet');
   if(dx||diet){o=o||{};o.records=o.records||{};if(dx)o.records.dx=dx;if(diet)o.records.diet=diet;}}catch(e){}
  return o;};})();
+</script>
+<script id="rr1-v2568">
+/* v25.68 (research #2) Form CR-1's Baker Act initiations and threat management team cases, read from the case (crisis.events),
+   count as setting events: they are drawn on the timeline of the record as dated events, listed under it, and compared on
+   the Health and setting events sheet like any other dated event type (incidents on event days and on other school days, once
+   a type has 3 dated days). They come from the case each time it is read, as the timeline itself is drawn; nothing is added
+   to this form's own rows or its saved file. */
+(function(){
+  const T=v=>String(v==null?'':v).trim(),KIND={baker:'Baker Act initiation (Form CR-1)',threat:'Threat management team case (Form CR-1)'};
+  const mdy=v=>{const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(T(v));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:T(v);};
+  function note(){const L=window.__rrCrEv||[],w=document.getElementById('rrTlWrap');if(!w)return;let p=document.getElementById('rrCrEvNote');
+    if(!L.length){if(p)p.remove();return;}
+    if(!p){p=document.createElement('p');p.id='rrCrEvNote';p.className='method';p.style.margin='4px 0 0';const ol=document.getElementById('rrTlEv');(ol||w).insertAdjacentElement('afterend',p);}
+    const t='Baker Act initiations and threat management team cases come from Form CR-1 through the case and count as dated events: '+L.map(v=>mdy(v.d)+' '+v.t.replace(/ \(Form CR-1\)$/,'').toLowerCase()).join('; ')+'.';
+    if(p.textContent!==t)p.textContent=t;}
+  const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+    try{const E=(f&&f.crisis&&Array.isArray(f.crisis.events))?f.crisis.events:[];
+      const L=E.filter(e=>e&&KIND[e.kind]&&/^\d{4}-\d\d-\d\d$/.test(T(e.date))).map(e=>({d:T(e.date),t:KIND[e.kind],
+        e:e.kind==='baker'?(e.attempts?e.attempts+' attempt'+(+e.attempts===1?'':'s')+' to reach the parent'+(e.reached?', reached':', not recorded as reached'):'no attempt to reach the parent recorded'):(e.brief?'brief given to the team '+mdy(e.brief):'')}));
+      const sig=JSON.stringify(L);if(sig!==JSON.stringify(window.__rrCrEv||[])){window.__rrCrEv=L;
+        /* the form draws its timeline and its comparisons again on any change */
+        try{document.body.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}}setTimeout(note,0);}catch(e){}
+    return r;};
+  document.addEventListener('change',()=>setTimeout(()=>{try{note();}catch(e){}},0));
+})();
 </script>
 <script id="fx2-v2492-js">
 /* v24.92 Forms DM-1, IC-1 and RR-1 on screen (the 10/28 design review); v24.95 the six forms refined from the BCBA's
