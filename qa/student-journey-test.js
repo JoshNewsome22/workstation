@@ -744,7 +744,7 @@ PH.H=async()=>{
   br=await chromium.launch();
   ctx=await br.newContext({viewport:{width:1180,height:820},hasTouch:true,deviceScaleFactor:2,serviceWorkers:'block',acceptDownloads:true,userAgent:IPAD_UA});
   await ctx.addInitScript(()=>{window.__gsAsk=0;window.google={accounts:{oauth2:{initTokenClient(cfg){return {requestAccessToken(){window.__gsAsk++;window.__scope=cfg.scope;setTimeout(()=>cfg.callback({access_token:'simulated-mail-token',expires_in:3600}),20);}};}}}};
-    try{localStorage.setItem('nbh.google.client','123-simulated.apps.googleusercontent.com');}catch(e){}
+    try{localStorage.setItem('nbh.google.client','123-simulated.apps.googleusercontent.com');localStorage.setItem('nbh.ws.where@nbh','files');}catch(e){}   /* v25.68 her case files are in Files (Open case asks once where they live when Google Drive is possible) */
     window.__prints=0;window.print=function(){window.__prints++;};});
   await ctx.route('https://accounts.google.com/**',r=>r.fulfill({contentType:'text/javascript',body:'/* simulated */'}));
   await ctx.route('https://www.googleapis.com/oauth2/v3/userinfo',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({email:M.email})}));

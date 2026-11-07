@@ -7881,7 +7881,7 @@ function drvStamp(rec,old){rec.dev=drvDev();const od=old&&old.drv||null;
   {const scr=state.drvKey===rec.key;rec.drv={id:od&&od.id||'',ver:(scr?state.drvBase:(od?od.ver:null))||null,dirty:true,base:(scr?state.drvBaseText:(od?od.base:null))||null};}   /* v23.53 base: the text of that version */
   const k=drvKey(rec);if(k)drvHash(k).then(h=>{const s=drvSkip();if(h in s){delete s[h];drvSkipSet(s);}}).catch(()=>{});}
 function drvDirty(r){r.drv=Object.assign({id:'',ver:null},r.drv||{},{dirty:true});if(drvOn())drvSoon(false,1500);}
-const drvSaveMode=()=>drvOn();
+const drvSaveMode=()=>drvOn()&&!(typeof window.__wsWhere==='function'&&window.__wsWhere()==='files');   /* v25.68 (the BCBA, 11/6) her case files in Files: Save case writes the file, Drive keeps syncing the caseload */
 /* the chip: where this device stands with Drive */
 async function drvPaint(){const c=$('#drvChip'),sf=$('#saveFile');if(sf)sf.hidden=!drvOn();if(!c)return;if(!drvOn()){c.hidden=true;return;}c.hidden=false;
   let L=[];try{L=await clList()||[];}catch(e){}DRV.wait=L.filter(r=>!r.drv||r.drv.dirty).length+drvGone().length;const nc=Object.keys(DRV.conf).length,tok=drvTok();
@@ -8017,746 +8017,9 @@ window.addEventListener('online',()=>{drvPaint();if(drvOn()&&drvTok())drvSoon(fa
 setInterval(()=>{if(!document.hidden&&drvOn()&&drvTok()&&Date.now()-DRV.last>240000)drvSync({});else drvPaint();},60000);
 setTimeout(()=>{drvPaint();if(drvOn()&&drvTok())drvSync({});},1800);
 </script>
-<script id="nbh-docread">
-/* ===================== Read a document (v21.67) =====================
-   A student's details come on paper: the school's information printout, the IEP's cover page, a plan. Rather than type
-   them again, the bar's Read a document takes a PDF, a picture (a photo, a screenshot) or pasted text, finds the details
-   in it and offers each one, with the line it was read from, for the bar and Form DM-1 (and target behaviors found in a
-   plan for the case). Everything happens on this device: a PDF with its own text is read by PDF.js (nbh-doc/), a scanned
-   page or a picture by Tesseract (nbh-ocr/), both kept with the workstation and saved for offline use; nothing is sent
-   anywhere, and the text is kept only while the dialog is open. The one-file edition, and a folder opened from a drive,
-   take pasted text (the iPad's Live Text copies it from any photo or PDF); the readers need the website or the app.
-   The matcher: nbhDocRead.parse(text) -> {fields:[{k,label,value,raw,seen,to,ok,note}], behaviors:[{label,def,isRep}]}.
-   A label is known by its aliases (longest first); what follows it on the line, up to the next label, is its value, or
-   the next line when the label stands alone; a label followed by one space counts only when the value has the field's
-   shape (a date, a grade, an ID, a name). Values are shaped for the form: dates to YYYY-MM-DD, grades to the list,
-   sex, ELL, interpreter, eligibility, placement, diploma, yes/no to Form DM-1's choices. */
-const nbhDocRead=(()=>{
-  const F=[
-    {k:'name',label:'Student',al:'student name|name of (?:the )?student|student(?:\'s|\u2019s)? (?:legal |full )?name|child(?:\'s|\u2019s)? name|legal name|full name|learner|pupil|student|name',kind:'name',to:['bar:client','DM-1:s.first','DM-1:s.last']},
-    {k:'last',label:'Last name',al:'last name|surname|family name',kind:'text',to:['DM-1:s.last']},
-    {k:'first',label:'First name',al:'first name|given name',kind:'text',to:['DM-1:s.first']},
-    {k:'pref',label:'Preferred name',al:'preferred name|nickname|goes by|known as|preferred',kind:'text',to:['DM-1:s.pref']},
-    {k:'dob',label:'Date of birth',al:'date of birth|birth date|birthdate|birthday|d\\.?o\\.?b\\.?|born',kind:'date',to:['DM-1:s.dob']},
-    {k:'sex',label:'Sex',al:'sex|gender',kind:'sex',to:['DM-1:s.sex']},
-    {k:'pron',label:'Pronouns',al:'pronouns?',kind:'text',to:['DM-1:s.pron']},
-    {k:'sid',label:'Student ID',al:'student (?:id|identification) (?:number|no\\.?|#)|student (?:id|number|no\\.?|#)|local (?:id|student id)|district (?:id|student id)|id (?:number|no\\.?|#)|student id|id',kind:'id',to:['bar:sid','DM-1:s.sid']},
-    {k:'fleid',label:'FLEID',al:'fleid|florida education identifier|state (?:student )?id(?: number)?|state identifier',kind:'id',to:['DM-1:s.fleid']},
-    {k:'school',label:'School',al:'school name|name of school|school of (?:enrollment|attendance)|enrolled school|current school|attending school|zoned school|campus|school',kind:'school',to:['bar:site','DM-1:s.school']},
-    {k:'grade',label:'Grade',al:'grade level|current grade|grade|gr\\.',kind:'grade',to:['bar:grade','DM-1:s.grade']},
-    {k:'room',label:'Classroom / teacher',al:'teacher name|homeroom teacher|classroom teacher|teacher|homeroom|classroom|room',kind:'text',to:['DM-1:s.room']},
-    {k:'enroll',label:'Enrolled',al:'enrollment date|date (?:of )?enroll(?:ed|ment)|date enrolled|entry date|date of entry|enrolled (?:on|since)|enrolled',kind:'date',to:['DM-1:s.enroll']},
-    {k:'prior',label:'Previous school',al:'previous school|prior school|last school|former school|transferred from',kind:'text',to:['DM-1:s.prior']},
-    {k:'trans',label:'Transportation',al:'transportation|bus (?:number|no\\.?|#|route)|bus',kind:'text',to:['DM-1:s.trans']},
-    {k:'lang',label:'Home language',al:'home language|primary language|native language|first language|language spoken at home|language at home|parent language|student language|preferred oral language|preferred written language|language',kind:'text',to:['DM-1:s.lang']},
-    {k:'interp',label:'Interpreter',al:'interpreter (?:needed|required)|interpreter',kind:'interp',to:['DM-1:s.interp']},
-    {k:'ell',label:'ELL',al:'ell status|ell code|english language learner|esol(?: status)?|lep status|ell|lep',kind:'ell',to:['DM-1:s.ell']},
-    {k:'eth',label:'Race / ethnicity',al:'single ethnicity|race/ethnicity|race / ethnicity|race and ethnicity|ethnicity|race',kind:'eth',to:['DM-1:s.eth']},
-    {k:'medicaid',label:'Medicaid',al:'medicaid (?:id|number|no\\.?|#)|medicaid',kind:'text',to:['DM-1:s.medicaid']},
-    {k:'elig',label:'Primary exceptionality',al:'primary (?:exceptionality|disability|eligibility|ese program)|exceptionality|eligibility category|disability category|primary ese|eligibility|disability',kind:'elig',to:['DM-1:p.elig']},
-    {k:'elig2',label:'Secondary exceptionality',al:'secondary (?:exceptionality|disability|eligibility)|other exceptionalit(?:y|ies)',kind:'text',to:['DM-1:p.elig2']},
-    {k:'eligdate',label:'Initial eligibility date',al:'initial eligibility(?: date)?|eligibility date|date of (?:initial )?eligibility|initial placement date',kind:'date',to:['DM-1:p.eligdate']},
-    {k:'iepdate',label:'Current IEP date',al:'iep (?:meeting )?date|current iep(?: date)?|date of (?:the )?iep|iep (?:dated|developed|written)|iep start(?: date)?|plan date|meeting date',kind:'date',to:['DM-1:p.iepdate']},
-    {k:'annual',label:'Annual review due',al:'annual review(?: due| date)?|iep (?:annual )?review(?: due| date)?|iep due(?: date)?|next (?:iep|annual review)(?: date)?|iep end(?: date)?|review date|iep expires?',kind:'date',to:['DM-1:p.annual']},
-    {k:'reeval',label:'Reevaluation due',al:'re-?evaluation(?: due| date)?|next re-?eval(?:uation)?(?: date)?|re-?eval due|reevaluation|re-?eval',kind:'date',to:['DM-1:p.reeval']},
-    {k:'place',label:'Placement',al:'placement|educational setting|service delivery(?: model)?|lre|setting',kind:'place',to:['DM-1:p.place']},
-    {k:'matrix',label:'Matrix',al:'matrix of services(?: level| score)?|matrix(?: level| score)?|cost factor',kind:'matrix',to:['DM-1:p.matrix']},
-    {k:'diploma',label:'Diploma option',al:'diploma (?:option|track|type)|diploma',kind:'diploma',to:['DM-1:p.diploma']},
-    {k:'p504',label:'504 plan',al:'section 504(?: plan)?|504 plan|504',kind:'yesno',to:['DM-1:p.p504']},
-    {k:'esy',label:'ESY',al:'extended school year|esy',kind:'yesno',to:['DM-1:p.esy']},
-    {k:'allergy',label:'Allergies',al:'allerg(?:y|ies)',kind:'text',to:['DM-1:h.allergy']},
-    {k:'diet',label:'Diet',al:'diet(?:ary)? (?:restrictions?|needs?)|diet',kind:'text',to:['DM-1:h.diet']},
-    {k:'pcp',label:'Physician',al:'primary care (?:physician|provider|doctor)|physician|pediatrician|doctor|pcp',kind:'text',to:['DM-1:h.pcp']},
-    {k:'psy',label:'Psychiatrist / therapist',al:'psychiatrist|psychologist|therapist|counselor',kind:'text',to:['DM-1:h.psy']},
-    {k:'cond',label:'Medical conditions',al:'medical (?:conditions?|history|diagnos[ei]s|concerns)|health (?:conditions?|concerns)|diagnos[ei]s|conditions?',kind:'text',to:['DM-1:h.cond']},
-    {k:'vh',label:'Vision / hearing',al:'vision/hearing|vision / hearing|vision and hearing|vision(?: screening)?|hearing(?: screening)?',kind:'text',to:['DM-1:h.vh']},
-    {k:'strengths',label:'Strengths',al:'strengths?',kind:'text',to:['DM-1:pf.strengths']},
-    {k:'interests',label:'Interests',al:'interests?|preferred activities|likes',kind:'text',to:['DM-1:pf.interests']},
-    {k:'bcba',label:'BCBA',al:'case bcba|bcba name|behavior analyst|bcba',kind:'text',to:['bar:bcba']},
-    {k:'holder',label:'Rights held by',al:'educational rights(?: held by| holder)?|rights (?:held by|holder)|parental rights',kind:'holder',to:['DM-1:r.holder']},
-    /* labels read so that their values are not taken for another field's; nothing is placed from them */
-    {k:'skip',label:'',al:'former or maiden(?: name)?|maiden name|suffix|location of birth|country of birth|birth date verification|date entered united(?: states)?(?: school)?|resident status|residence county|proof of residence|has custody alert|custody alert|first custody contact|second custody contact|parent/guardian(?: name)?|parent / guardian(?: name)?|parent name|guardian name|mother(?:\'s|\u2019s)? name|father(?:\'s|\u2019s)? name|mother|father|guardian|parent|emergency contact|contact name|contact|phone(?: number)?|telephone|cell|email|address|zip|city|case manager|nurse|examiner|evaluator|author|prepared by|signature|date|age|relationship|former or maiden name|maiden name|former name|suffix|original enter grade|enter grade|entry grade|military family student|grandmother|grandfather|aunt|uncle|sibling|brother|sister|stepmother|stepfather|custody contact|custody alert|resident status|residence county|location of birth|country of birth|security pin|student pin|marital status|survey date',kind:'skip',to:[]}
-  ];
-  const BY={};F.forEach(f=>{BY[f.k]=f;});
-  /* every alias, longest first, so that "student id number" wins over "student id" and "student"; a space is any run of
-     spaces; the match ends at a word's end */
-  const topSplit=al=>{const out=[];let d=0,cur='';for(const c of al){if(c==='(')d++;else if(c===')')d--;if(c==='|'&&!d){out.push(cur);cur='';}else cur+=c;}out.push(cur);return out;};
-  const alts=[];F.forEach(f=>topSplit(f.al).forEach(a=>alts.push({a,k:f.k,re:new RegExp('^(?:'+a.replace(/ /g,'[ \\t]+')+')$','i')})));
-  alts.sort((x,y)=>y.a.length-x.a.length);
-  const LBL=new RegExp('(^|[\\s(\\[\\u2022\\u00b7*|,;?\\u2013\\u2014\\u201c\\u201d"-])('+alts.map(x=>x.a.replace(/ /g,'[ \\t]+')).join('|')+')(?![a-z0-9])([ \\t]*[:\\uff1a=;][ \\t]*|[ \\t]*[\\-\\u2013\\u2014][ \\t]+|[ \\t]{2,}|[ \\t]+|$)','ig');
-  const keyOf=s=>{const t=s.replace(/\s+/g,' ');for(const x of alts){if(x.re.test(t))return x.k;}return 'skip';};
-  const STRICT={date:/^(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}|\d{4}-\d{2}-\d{2}|[A-Za-z]{3,9}\.? \d{1,2},? \d{4})/,grade:/^(\d{1,2}(?:st|nd|rd|th)?|k|kg|pk|pre-?k|kindergarten)(?![a-z0-9])/i,
-    id:/^[A-Z]?\d[\dA-Z\-]{3,}$/i,sex:/^(m|f|male|female|boy|girl)$/i,yesno:/^(y|yes|n|no|x)$/i,matrix:/^25[1-5]$/,
-    name:/^(?!.*\b(?:Information|Record|Report|Profile|Data|Form|Summary|Plan|Services|Details|Demographics|Sheet|Name|Number|ID|Date|School|Grade|Services|Support|Team|Meeting|Review)\b)([A-Z][A-Za-z'\u2019\-]+,\s*[A-Z][A-Za-z'\u2019\-]+|[A-Z][a-z'\u2019\-]+(?:\s+[A-Z]\.?)?\s+[A-Z][A-Za-z'\u2019\-]+)$/,
-    school:/^[A-Z][\w.&'\u2019 \-]{2,60}\b(School|Academy|Center|Centre|Elementary|Middle|High|Campus|Prep|Institute)\b/,ell:/^(ly|lf|lz|zz|ln|lp)$/i};
-  const MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-  const pad=n=>String(n).padStart(2,'0');
-  const iso=(y,m,d)=>{y=+y;m=+m;d=+d;if(!(m>=1&&m<=12&&d>=1&&d<=31&&y>=1900&&y<=2100))return '';return y+'-'+pad(m)+'-'+pad(d);};
-  const year2=y=>{if(String(y).length===4)return +y;const yy=+y,now=new Date().getFullYear()%100;return (yy<=now?2000:1900)+yy;};
-  function toISO(s){
-    s=String(s||'');let m;
-    if((m=s.match(/(\d{4})[\/.\-](\d{1,2})[\/.\-](\d{1,2})/)))return iso(m[1],m[2],m[3]);
-    if((m=s.match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/)))return iso(year2(m[3]),m[1],m[2]);
-    if((m=s.match(/([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})/))&&MON[m[1].slice(0,3).toLowerCase()])return iso(m[3],MON[m[1].slice(0,3).toLowerCase()],m[2]);
-    if((m=s.match(/(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})\.?,?\s+(\d{4})/))&&MON[m[2].slice(0,3).toLowerCase()])return iso(m[3],MON[m[2].slice(0,3).toLowerCase()],m[1]);
-    return '';
-  }
-  function grade(v){const s=String(v||'').trim().toLowerCase();let m;
-    if(/^(pre-?k|pk|vpk|prek|pre-?kindergarten)/.test(s))return 'PK';
-    if(/^(k|kg|kindergarten|kinder)(?![a-z])/.test(s))return 'K';
-    if(/transition|18\s*[-\u2013]\s*22|post-?secondary|adult/.test(s))return 'Transition (18\u201322)';
-    if(/ungraded|un-graded/.test(s))return 'Ungraded';
-    if((m=s.match(/(\d{1,2})(?:st|nd|rd|th)?(?![\d\/.\-])/))){const n=+m[1];if(n>=1&&n<=12)return String(n);if(n===0)return 'K';}
-    return '';}
-  const first=(s,pairs,dflt)=>{const t=String(s||'').toLowerCase();for(const p of pairs){if(p[0].test(t))return p[1];}return dflt===undefined?'':dflt;};
-  const SEX=[[/^\s*(m|male|boy)(?![a-z])/,'Male'],[/^\s*(f|female|girl)(?![a-z])/,'Female']];
-  const YN=[[/^\s*(y|yes|x|\u2713|\u2714|true|eligible|receives?)(?![a-z])/,'Yes'],[/^\s*(n|no|none|false|not|n\/a)(?![a-z])/,'No']];
-  const ELL=[[/\b(ly|active|current)\b|^\s*(y|yes)(?![a-z])/,'ELL: active'],[/\b(lf|monitor(?:ed|ing)?|former|exited)\b/,'ELL: monitored'],[/\b(lz|zz|ln|lp|no|not|none|n\/a)\b/,'Not ELL']];
-  const INTERP=[[/sign|asl/,'Yes: sign'],[/written|translat/,'Yes: written translation'],[/^\s*(n|no|none|not)(?![a-z])/,'No'],[/^\s*(y|yes|needed|required|spoken)(?![a-z])|[a-z]{3,}/,'Yes: spoken']];
-  const ELIG=[[/autis|\basd\b/,'Autism Spectrum Disorder'],[/intellectual|\bind\b|\bid\b|\bimh?\b/,'Intellectual Disability'],[/emotional|behaviou?ral disab|\bebd\b|\be\/?bd\b|\bed\b/,'Emotional/Behavioral Disability'],[/other health|\bohi\b/,'Other Health Impairment'],[/specific learning|learning disab|\bsld\b/,'Specific Learning Disability'],[/language impair|\bli\b/,'Language Impairment'],[/speech|\bsi\b/,'Speech Impairment'],[/developmental(?:ly)? delay|\bdd\b/,'Developmental Delay'],[/deaf|hard of hearing|hearing impair|\bdhh\b|\bhi\b/,'Deaf or Hard of Hearing'],[/dual sensory|deaf-?blind/,'Dual Sensory Impairment'],[/visual|\bvi\b|blind/,'Visual Impairment'],[/orthopedic|\boi\b/,'Orthopedic Impairment'],[/traumatic brain|\btbi\b/,'Traumatic Brain Injury']];
-  const PLACE=[[/center school|ese center|special day school|separate school/,'ESE center school'],[/self-?contained|separate class|special class/,'Separate class (self-contained)'],[/resource/,'Resource'],[/general ed|gen\.? ed|regular (?:class|ed)|inclusion|mainstream|with supports?|consult/,'General education with supports'],[/hospital|homebound|home instruction/,'Hospital / homebound']];
-  const DIPLOMA=[[/access|\bfaa\b|alternate|modified/,'Access Points (FAA)'],[/standard|regular|general/,'Standard diploma'],[/not yet|tbd|undetermined|to be determined/,'Not yet determined']];
-  const HOLDER=[[/both parents|parents\b|shared/,'Both parents (shared)'],[/surrogate/,'Surrogate parent'],[/guardian advocate/,'Guardian advocate (F.S. 393.12)'],[/legal guardian|guardian/,'Legal guardian'],[/supported decision/,'Adult student with supported decision-making'],[/adult student|self|student/,'Adult student (18+)'],[/parent|mother|father/,'Parent (one)']];
-  const SUFFIX=/^(jr|sr|ii|iii|iv|v)\.?$/i;
-  const cap=s=>s===s.toUpperCase()&&/[A-Z]/.test(s)?s.toLowerCase().replace(/(^|[\s\-'\u2019])([a-z])/g,(m,a,b)=>a+b.toUpperCase()):s;
-  /* "Doe, John A" or "John A. Doe" or "DOE JOHN" -> {first, last} */
-  function splitName(v){
-    let s=cap(String(v||'').replace(/\s+/g,' ').trim()),firstN='',lastN='';
-    if(s.indexOf(',')>=0){const p=s.split(',');lastN=p[0].trim();firstN=p.slice(1).join(',').trim();}
-    else{const w=s.split(' ').filter(x=>!SUFFIX.test(x));if(w.length>=2){lastN=w[w.length-1];firstN=w.slice(0,-1).join(' ');}else firstN=s;}
-    firstN=firstN.split(' ').filter(x=>!SUFFIX.test(x)).filter((x,i)=>i===0||!/^[A-Z]\.?$/.test(x)).join(' ');   /* the middle initial stays off the first name */
-    /* a legal name lists every given name ("Rivera, Mateo Josue"): the first goes to the bar, all of them to Form DM-1 */
-    const given=firstN.split(' ')[0]||'';
-    return {first:firstN,last:lastN,given,full:(given+' '+lastN).trim()};
-  }
-  /* a text value ends at a gap or at an unknown label ("Phone:") */
-  const cutText=v=>String(v||'').split(/[ \t]{2,}/)[0].replace(/\s+[A-Z][A-Za-z\/ ]{0,24}:\s.*$/,'').replace(/[\s,;:\-\u2013]+$/,'').trim();
-  function shape(f,raw){
-    const v=String(raw||'').trim();
-    switch(f.kind){
-      case 'date':{const d=toISO(v);return d?{value:d,ok:true}:{value:v,ok:false,note:'not read as a date'};}
-      case 'grade':{const g=grade(v);return g?{value:g,ok:true}:{value:v,ok:false,note:'not one of the grades'};}
-      case 'sex':{const s=first(v,SEX);return s?{value:s,ok:true}:{value:v,ok:false,note:'not Male or Female'};}
-      case 'yesno':{const s=first(v,YN);return s?{value:s,ok:true}:{value:'',ok:false};}   /* v22.30 not answered: nothing (a side menu's "504 Info") */
-      case 'ell':{const s=first(v,ELL);return s?{value:s,ok:true}:{value:v,ok:false,note:'not an ELL status'};}
-      case 'interp':{const s=first(v,INTERP);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the choices'};}
-      case 'elig':{const s=first(v,ELIG);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the eligibilities'};}
-      case 'place':{const s=first(v,PLACE);return s?{value:s,ok:true}:{value:'',ok:false};}   /* v22.30 a heading under the label ("Removal from Programs ...") is not a placement */
-      case 'diploma':{const s=first(v,DIPLOMA);return s?{value:s,ok:true}:{value:'',ok:false};}
-      case 'holder':{const s=first(v,HOLDER);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the choices'};}
-      case 'matrix':{const m=v.match(/\b(25[1-5])\b/);return m?{value:m[1],ok:true}:{value:v,ok:false,note:'not 251 to 255'};}
-      case 'id':{const s=cutText(v).replace(/^[#:\s]+/,'').split(/\s+/)[0]||'';return s?{value:s,ok:/\d/.test(s)}:{value:'',ok:false};}
-      case 'eth':{const q=v.match(/^(hispanic or latino|white|black or african american|asian|american indian or alaska native|native hawaiian or other pacific islander)\s+(yes|no)(?![a-z])/i);
-        if(q)return q[2].toLowerCase()==='yes'?{value:q[1],ok:true}:{value:'',ok:false};   /* "Race: White  No" is a question answered No: nothing to place */
-        const s=cutText(v).slice(0,120);return {value:s,ok:!!s};}
-      case 'name':{const s=cutText(v);const n=splitName(s);return n.last?{value:n.full,ok:true,first:n.first,last:n.last,given:n.given}:{value:s,ok:!!s,note:'one name only',first:n.first,last:'',given:n.given};}
-      default:{const s=cutText(v).slice(0,300);if(/^(?:yes|no)(?:\s+(?:yes|no))+$/i.test(s))return {value:'',ok:false};   /* v22.30 a choice not ticked in the text ("Yes  No") */
-        return {value:s,ok:!!s};}
-    }
-  }
-  /* the labels on a line, each with what follows it; a label with no separator counts only with a value of its shape,
-     and a label standing at the end of a line only at the line's start or after a gap */
-  function hits(line){
-    const out=[];LBL.lastIndex=0;let m;
-    while((m=LBL.exec(line))){
-      const k=keyOf(m[2]),sep=m[3]||'',start=m.index+m[1].length,end=m.index+m[0].length;
-      const type=/[:\uff1a=;\-\u2013\u2014]/.test(sep)?'colon':sep.length>=2?'gap':sep.length===1?'one':'eol';
-      out.push({k,start,end,type,text:m[2],str:type==='colon'?3:type==='one'?1:2});
-      LBL.lastIndex=start+m[2].length;   /* the search goes on from the label's end: its separator may be the next label's boundary */
-    }
-    return out;
-  }
-  function valid(h,line,next){
-    const f=BY[h.k],before=line.slice(0,h.start);
-    /* a label with a colon counts anywhere; one followed by a gap or ending the line only where it stands on its own
-       (the line's start, after a gap, after a bullet or a bracket), so "Royal Palm School  Student Information" has no
-       label in it; one followed by a single space only with a value of its shape */
-    const alone=h.start===0||/[ \t]{2,}$/.test(before)||/[(\[\u2022\u00b7*|,;?]\s*$/.test(before)||/^[ \t]*[\u2022\u00b7*?\-\u2013]\s*$/.test(before);
-    if(h.type==='colon')return true;
-    if(h.type==='gap'||h.type==='eol')return alone;
-    const re=STRICT[f&&f.kind];if(!re)return false;
-    return re.test(next);
-  }
-  /* v22.30 what a screenshot of a student information system adds to its lines: the info and arrow icons read as
-     "\u00a9", "\u00ae", "\u00a5" and the like, the "?" help marks between a label and the next, a quotation mark for a required
-     field's asterisk, and the page's side menu ("Child Safety", "504 Info", ...) read at the head of the lines beside it */
-  const JUNK=/[\u00a9\u00ae\u20ac\u00a3\u00a5\u00a2\u00a7\u2122]/g;
-  const SIDE=/^(?:\[\s*[A-Za-z0-9]{1,3}\s*[\]|]\s*|[A-Z]{1,3}\s+)?(?:primary info|child safety|504 info|aice summary|academic history|addresses (?:&|and) contacts|adult ed|alternative ed|applicant|athletics|behavior|career academies|choice options|classified|comments log|dop|demographics|ese|esol|elementary report card|enrollment|fees and fines|form responses|filter fields\.*)(?=[ \t]{2,}|$)/i;
-  function lines(text){
-    let L=String(text||'').replace(/\r/g,'').replace(/\t/g,'  ').replace(/[|\u2502]/g,'  ').replace(/[\u00a0]/g,' ').replace(JUNK,'  ').split('\n')
-      .map(l=>l.replace(/[\u201c\u201d"](?=[A-Za-z])/g,'').replace(/(^|[ \t]{2,})\?(?=[ \t]{2,}|$)/g,'$1').replace(/[ \t]+$/,'').replace(/^[ \t]*[\u2022\u00b7*?]\s*/,''));
-    if(L.filter(l=>SIDE.test(l.trim())).length>=4)L=L.map(l=>l.trim().replace(SIDE,'').replace(/^[ \t]*[\u2022\u00b7*?]\s*/,''));
-    return L;
-  }
-  function parse(text,cols){
-    const L=lines(text),found={},order=[],used=new Set();
-    /* v22.25 an Edit Contact dialog's First Name, Last Name and Language are the contact's, not the student's: the
-       student's details are read only from above it */
-    const dlg=L.findIndex(l=>/^\s*(?:edit|add|new) contact\b(?:\s*:?\s*$|\s+you\b)/i.test(l));
-    /* v22.27 nor from a Schedule's or an Enrollment's table (its headings are labels, its cells not the student's details) */
-    const en=enrollment(L),sc=schedule(L),bp=bacbSup(L),end=bp?0:Math.min(dlg<0?L.length:dlg,en?en.at:L.length,sc?sc.at:L.length);
-    for(let i=0;i<end;i++){
-      const line=L[i];if(!line.trim())continue;
-      const hs=hits(line).filter(h=>{const rest=line.slice(h.end,(hits(line).find(x=>x.start>h.end)||{start:line.length}).start).trim();return valid(h,line,rest);});
-      for(let j=0;j<hs.length;j++){
-        const h=hs[j],nextStart=j+1<hs.length?hs[j+1].start:line.length;
-        let raw=line.slice(h.end,nextStart).trim(),seen=line.trim(),from=i;
-        const f=BY[h.k];
-        if(!raw&&f&&f.kind!=='skip'&&(h.type==='colon'||h.type==='eol')&&i+1<L.length){
-          /* the value on the next line (a table's label above its value): a short line with no label and no colon of its own (an
-             empty field followed by the next field is not a value), of the field's shape where it has one */
-          const n=L[i+1].trim(),re=STRICT[f.kind];
-          if(n&&n.length<=80&&!/[:\uff1a=]/.test(n)&&!hits(L[i+1]).some(x=>valid(x,L[i+1],L[i+1].slice(x.end).trim()))&&(!re||re.test(n))){raw=n;seen=line.trim()+' / '+n;from=i+1;used.add(i+1);}
-        }
-        if(h.k==='skip'||!raw)continue;
-        const sh=shape(f,raw);if(!sh.value)continue;
-        const cur=found[h.k];
-        if(cur&&(cur.ok||!sh.ok)&&cur.str>=h.str)continue;   /* the first reading stands, unless a later one has a surer label (a colon), or the first was not of the field's shape and this one is */
-        if(!cur)order.push(h.k);
-        found[h.k]=Object.assign({k:f.k,label:f.label,to:f.to.slice(),raw,seen:seen.slice(0,160),line:from,str:h.str},sh);
-      }
-    }
-    /* a first or last name read on its own wins over the split of the whole name */
-    if(found.name){if(found.first){found.name.first=found.first.value;found.name.to=found.name.to.filter(t=>t!=='DM-1:s.first');}if(found.last){found.name.last=found.last.value;found.name.to=found.name.to.filter(t=>t!=='DM-1:s.last');}
-      found.name.value=(((found.first?found.first.value:(found.name.given||found.name.first))||'')+' '+(found.name.last||'')).trim();}
-    else if(found.first||found.last){const full=((found.first||{}).value||'')+' '+((found.last||{}).value||'');found.name={k:'name',label:'Student',to:['bar:client'],value:full.trim(),raw:full.trim(),seen:((found.first||found.last).seen),ok:true,first:(found.first||{}).value||'',last:(found.last||{}).value||''};order.unshift('name');}
-    /* v22.25 a page with no labels for them still names its student in the system's badge ("Rivera, Mateo" over "4471823 - 03") */
-    const bd=badge(L);
-    if(bd&&!found.name){const n=splitName(bd.name);found.name={k:'name',label:'Student',to:BY.name.to.slice(),value:n.full,raw:bd.name,seen:bd.name+' / '+L[bd.idLine].trim(),line:bd.line,str:1,ok:true,first:n.first,last:n.last,given:n.given};order.unshift('name');}
-    if(bd&&!found.sid){found.sid={k:'sid',label:'Student ID',to:BY.sid.to.slice(),value:bd.sid,raw:bd.sid,seen:L[bd.idLine].trim(),line:bd.idLine,str:1,ok:true};order.splice(order.indexOf('name')+1,0,'sid');}
-    /* v22.27 the Enrollment and Schedule pages: the school now, its grade and date, the schools before; the homeroom */
-    const add=(k,value,raw,seen)=>{if(found[k]||!value)return;const f=BY[k],sh=shape(f,raw);if(!sh.value)return;found[k]=Object.assign({k,label:f.label,to:f.to.slice(),raw,seen:String(seen||'').slice(0,160),str:1},sh);order.push(k);};
-    if(en&&en.now){add('school',en.now.school,en.now.school,en.seen);add('grade',en.now.grade,en.now.grade,en.seen);add('enroll',en.now.from,en.now.from,en.seen);}
-    if(en&&en.prior){add('prior',en.prior,en.prior,'Enrollment: '+en.n+(en.n===1?' school':' schools')+' before');if(found.prior)found.prior.value=en.prior.slice(0,300);}
-    if(sc&&sc.room)add('room',sc.room,sc.room,'Schedule: the homeroom');
-    if(bd&&bd.grade&&!found.grade)add('grade',bd.grade,bd.grade,L[bd.idLine].trim());
-    /* v22.30 race and ethnicity asked one question each ("Ethnicity: Hispanic or Latino  No", "Race: White  Yes"), or the
-       one code ("Single Ethnicity  W - White"): the races answered Yes, and whether Hispanic or Latino */
-    {const RC=[[/^hispanic/,'H'],[/^white/,'White'],[/^black/,'Black or African American'],[/^asian/,'Asian'],[/^american indian/,'American Indian or Alaska Native'],[/^native hawaiian/,'Native Hawaiian or Other Pacific Islander']];
-      const yes=[],seen=[];let hisp='';
-      for(let i=0;i<end;i++){const re=/\b(?:ethnicity|race)\s*:\s*([A-Za-z][A-Za-z ,]*?)[ ,]*[ \t]+(yes|ves|yos|no|n0)(?![a-z])/gi;let m;
-        while((m=re.exec(L[i]))){const w=m[1].toLowerCase().trim(),a=/^y|^v/i.test(m[2]),r=RC.find(x=>x[0].test(w));if(!r)continue;seen.push(m[0].trim());
-          if(r[1]==='H')hisp=a?'yes':'no';else if(a&&!yes.includes(r[1]))yes.push(r[1]);}}
-      let v='';
-      if(yes.length||hisp)v=yes.join(', ')+(hisp==='yes'?(yes.length?'; ':'')+'Hispanic or Latino':hisp==='no'&&yes.length?'; not Hispanic or Latino':'');
-      if(!v){const sl=L.slice(0,end).map(l=>l.match(/single ethnicity[ \t]+(?:[A-Z][ \t]*)?[-\u2013][ \t]*([A-Za-z][A-Za-z ]{2,40}?)(?:[ \t]{2,}|$)/i)).find(Boolean);if(sl){v=cap(sl[1].trim().replace(/\b[a-z]/g,c=>c.toUpperCase()));seen.push(sl[0].trim());}}
-      if(v){if(!found.eth)order.push('eth');found.eth={k:'eth',label:BY.eth.label,to:BY.eth.to.slice(),raw:v,value:v,seen:seen.join(' / ').slice(0,160),str:3,ok:true};}}
-    /* v22.30 an IEP's sentences (Florida's, as a district's IEP system prints them): the next annual review and
-       reevaluation, the eligibilities, where the services are received, ESY, a standard diploma deferred, the bus needs */
-    {const T=L.slice(0,end).join('\n'),D='(\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})',g=(re)=>{const m=T.match(re);return m;};let m;
-      const put=(k,v,seen,force)=>{if(!v)return;const f=BY[k],sh=shape(f,v);if(!sh.value)return;if(found[k]&&!force)return;if(!found[k])order.push(k);found[k]=Object.assign({k,label:f.label,to:f.to.slice(),raw:v,seen:String(seen).replace(/\s+/g,' ').slice(0,160),str:3},sh);};
-      if((m=g(new RegExp('next required annual review[^:\\n]{0,40}:\\s*'+D,'i'))))put('annual',m[1],m[0],true);
-      if((m=g(new RegExp('next scheduled re-?evaluation[^:\\n]{0,40}:\\s*'+D,'i'))))put('reeval',m[1],m[0],true);
-      if((m=g(/program eligibilit(?:y|ies)(?:\(ies\))?\s*:\s*([^\n]+)/i))){const e=m[1].split(/\s*[,;]\s*/).map(x=>x.trim()).filter(Boolean);put('elig',e[0],m[0],true);if(e.length>1)put('elig2',e.slice(1).join(', '),m[0],true);}
-      if((m=g(/receives his\/her educational services in an?\s*:?\s*([^\n]+)/i)))put('place',m[1],m[0],true);
-      if((m=g(/this student is (not )?in need of extended school year services/i)))put('esy',m[1]?'No':'Yes',m[0],true);
-      if((m=g(/deferring receipt of a standard high school diploma[^\n]*?\b(yes|no)\b/i))&&/yes/i.test(m[1]))put('diploma','Standard',m[0]+' (deferred)',true);
-      if((m=g(/specific "?transportation needs"? include:?\s*\n((?:\s*[\u25aa\u2022\u25cf\-*][^\n]+\n?){1,8})/i))){const b=m[1].split('\n').map(x=>x.replace(/^\s*[\u25aa\u2022\u25cf\-*]\s*/,'').trim()).filter(Boolean);put('trans','Yes: '+b.join('; '),'Specific Transportation Needs: '+b.join('; '),true);}}
-    const fields=order.map(k=>found[k]);
-    if(bp)return {fields:[],behaviors:[],lines:L.length,contacts:[],student:null,team:[],dropped:0,rbts:bp.rbts,rbtsPast:bp.past};   /* a supervisor's page: no student on it */
-    return {fields,behaviors:behaviors(L.slice(0,end)),lines:L.length,contacts:contacts(cols||text,text),student:bd,team:sc?sc.team:[],dropped:sc?sc.dropped:0};
-  }
-  /* target behaviors in a plan: "Target behavior 1: Aggression", "Behavior: Hitting – any instance of ...", a
-     Definition line after; a replacement behavior keeps its kind */
-  function behaviors(L){
-    const out=[],seen=new Set();
-    for(let i=0;i<L.length;i++){
-      const line=L[i].trim();
-      const m=line.match(/^(?:(target|problem|challenging|interfering|replacement|alternative|desired)\s+)?behaviou?rs?\s*(?:#\s*)?(?:\d{1,2})?\s*[:\uff1a\-\u2013\u2014]\s*(.+)$/i);
-      if(!m)continue;
-      const isRep=/replacement|alternative|desired/i.test(m[1]||'');
-      let label=m[2].trim(),def='';
-      const dm=label.match(/^(.{2,60}?)\s*(?:[:\uff1a]|\s[\-\u2013\u2014]\s|\(|\bis defined as\b|\bdefined as\b|\bmeans\b|\bis any\b)\s*(.{10,})$/i);
-      if(dm){label=dm[1].trim();def=dm[2].replace(/^(?:as|that)\s+/i,'').replace(/\)$/,'').trim();}
-      for(let j=i+1;j<L.length&&j<=i+3;j++){
-        const n=L[j].trim();if(!n)continue;
-        const d2=n.match(/^(?:operational\s+)?definition\s*[:\uff1a\-\u2013\u2014]\s*(.+)$/i);
-        if(d2){def=def||d2[1].trim();break;}
-        if(/^(?:(?:target|problem|replacement|alternative|desired)\s+)?behaviou?r/i.test(n)||hits(L[j]).some(h=>h.start===0&&h.type==='colon'))break;
-        if(!def&&n.length>=30&&(new RegExp('^'+label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(n)||/^(any|defined|occurs|includes|instances?|each)/i.test(n))){def=n;break;}
-      }
-      label=label.replace(/[\s.;:,\-\u2013]+$/,'');
-      if(label.length<2||label.length>80||!/[a-z]/i.test(label)||/^(yes|no|none|n\/?a|current|active|see|n|y)$/i.test(label))continue;
-      const key=label.toLowerCase();if(seen.has(key))continue;seen.add(key);
-      out.push({label,def:def.slice(0,600),isRep,src:'document'});
-    }
-    return out;
-  }
-  /* v22.25 the student's contacts, as a student information system lists them: cards headed "Address" (the student's
-     addresses, each with its "Contacts at this Address": "#1 - Last, First") and "Contact #3" (a name, "(No Address)"
-     or an address, a phone table, the relationship at the card's foot), or the Edit Contact dialog (First Name, Last
-     Name, Relationship, Email, a Type / Number table of phones). The cards are read one after the other: a picture's
-     words are put back into their cards by where they stand (drCardsOfOcr), pasted text comes card after card. Each
-     contact: {n,name,rel,relRaw,phone,phone2,email,addr,lang,note,seen}; the relationship is put in Form DM-1's words,
-     the record's own word kept in the note when DM-1 words it otherwise ("Listed as Cousin"). */
-  const RELS=[[/step[\s\-]?(?:mother|father|parent|mom|dad)/,'Stepparent'],[/guardian advocate/,'Guardian advocate'],[/grand|abuel/,'Grandparent'],
-    [/foster/,'Foster parent'],[/surrogate/,'Surrogate parent'],[/legal guardian|^guardian$/,'Legal guardian'],
-    [/^(?:(?:biological|birth|adoptive) )?(?:mother|mom|madre)$/,'Mother'],[/^(?:(?:biological|birth|adoptive) )?(?:father|dad|padre)$/,'Father'],
-    [/god ?(?:mother|father|parent)|padrino|madrina|friend|neighbou?r/,'Family friend'],[/brother|sister|sibling/,'Adult sibling'],
-    [/aunt|uncle|cousin|niece|nephew|relative|in-law|\bt[ií][ao]\b|\bprim[ao]\b/,'Other relative'],
-    [/case ?manager|case ?worker|\bdcf\b|social worker|agency/,'Case manager (agency)'],[/group home|residential|facility/,'Other'],
-    [/\baide\b|nanny|baby-?sitter|\bsitter\b|care ?giver|day ?care|provider|\bnurse\b|^other$/,'Other']];
-  const RELWORD=/^(?:parent|parent\/guardian|guardian)$/;
-  /* a relationship as the record words it ("Grandmother", "Home Health Aide"): a short line of words */
-  /* v22.30 the icons after a name or a relationship ("Aunt  \u2709 \u26a0", read as "= /\\ &" or "=X A &&"), and a lone mark
-     inside a name ("Ortiz, :  Carmen") */
-  const deIcon=s=>String(s||'').replace(/(^|\s)[^\w\s(),'\u2019.\-]{1,3}(?=\s|$)/g,'$1').replace(/(?:\s+(?:\S*[^A-Za-z\s'\u2019.,)]\S*|[A-Za-z]|[a-z]{2,3}))+\s*$/,'').replace(/\s+/g,' ').trim();
-  const relOf=s=>{s=deIcon(String(s||'').split(/[ \t]{2,}/)[0].replace(/\s*[-\u2013\u2014:]\s*\d.*$/,''));const t=s.toLowerCase().replace(/\s+/g,' ').trim();if(!t||t.length>32||!/^[a-záéíóúñ '\/\-]+$/.test(t))return null;
-    for(const r of RELS){if(r[0].test(t))return {rel:r[1],raw:cap(String(s).trim())};}return RELWORD.test(t)?{rel:'',raw:cap(String(s).trim())}:null;};
-  const PH=/\(?\b(\d{3})\)?[\s.\-]{0,3}(\d{3})[\s.\-]{0,3}(\d{4})\b/g;
-  const phone=m=>'('+m[1]+') '+m[2]+'-'+m[3];
-  const NAMEC=/^([A-Z][A-Za-z'’\-]+(?: [A-Z][A-Za-z'’\-]+)?)\s*,\s*([A-Z][A-Za-z'’\-.]+(?: [A-Z][A-Za-z'’\-.]*){0,2})$/;
-  const NAMEF=/^([A-Z][a-z'’\-]+(?: [A-Z]\.?)?(?: [A-Z][A-Za-z'’\-]+){1,2})$/;
-  const STREET=/^\d+[A-Za-z]?\s+(?=.*[A-Za-z]{2})/,UNIT=/^(?:apt|apartment|unit|ste|suite|lot|bldg|building|#)\.?\s*\S+$/i,CITY=/^[A-Za-z][A-Za-z .'\-]+,\s*[A-Z]{2}\.?\s+\d{5}(?:-\d{4})?$/;
-  const EMAIL=/[\w.+\-]+@[\w\-]+(?:\.[\w\-]+)+/;
-  const HEAD=/^(?:contact\s*#\s*(\d{1,2})|(?:mailing |home |physical |residence )?address(?:\s*#?\s*\d)?|(edit|add|new) contact(?:\s+you\b.*)?)\s*:?$/i;
-  const STOP=/^(?:linked users|no records found|demographic|enrollment|schedule|attendance|save|cancel|delete)\b/i;
-  /* phones in a card's lines: a number the card's narrow cell broke after the dash ("(561) 555-" over "0170") is joined */
-  function phonesIn(T){
-    const t=T.slice(),out=[];
-    for(let i=0;i<t.length;i++){const m=t[i].match(/\(?\b\d{3}\)?[\s.\-]{0,3}\d{3}\s*[\-.]\s*$/);if(!m)continue;
-      for(let j=i+1;j<=i+4&&j<t.length;j++){const k=t[j].match(/(^|\s)(\d{4})(?=\s|$)/);if(k){t[i]=t[i].replace(/\s*$/,'')+k[2];t[j]=(t[j].slice(0,k.index)+t[j].slice(k.index+k[0].length)).trim();break;}}}
-    t.forEach((l,i)=>{let m;PH.lastIndex=0;while((m=PH.exec(l))){const ty=(l+' '+(t[i+1]||'')).match(/\b(cell|mobile|home|work|business|other)\b/i);out.push({p:phone(m),type:ty?ty[1].toLowerCase():''});}});
-    return out.filter((x,i,a)=>a.findIndex(y=>y.p===x.p)===i);
-  }
-  const PH1=/\(?\b\d{3}\)?[\s.\-]{0,3}\d{3}[\s.\-]{0,3}\d{4}\b/;
-  /* an address: a street line, then its unit and its "CITY, ST 12345" line */
-  const addrOf=T=>{const a=[];for(const l of T){const s=l.split(/\s{2,}/)[0].trim();
-    if(!a.length){if(STREET.test(s)&&!PH1.test(s))a.push(s);continue;}
-    if(UNIT.test(s)||CITY.test(s)||/^[A-Za-z][A-Za-z .'\-]+,\s*[A-Z]{2}\b/.test(s)){a.push(s);if(CITY.test(s))break;}else break;}
-    return a.join(', ').replace(/\s+/g,' ');};
-  /* v22.30 a contact kept under an agency's name ("Sunrise Group Home, Dana Lee"): the person, with the agency after */
-  const ORG=/\b(?:center|centre|home|homes|agency|services|group|inc|llc|foundation|house|care|facility|residence)\b/i;
-  const nameOf=s=>{const t=deIcon(s);if(NAMEC.test(t)||NAMEF.test(t)){const n=splitName(t);return n.last?(n.first+' '+n.last).trim():'';}
-    const o=t.match(/^([A-Z][A-Za-z'\u2019&.\-]*(?: [A-Za-z'\u2019&.\-]+){1,5}),\s*([A-Z][a-z'\u2019\-]+(?: [A-Z][a-z'\u2019\-]+){1,2})$/);
-    if(o&&ORG.test(o[1]))return o[2]+' ('+cap(o[1])+')';return '';};
-  function contacts(text,page){
-    const L=lines(text).map(l=>l.trim()),cards=[];let cur=null;
-    L.forEach(l=>{const m=l.replace(/^[^A-Za-z#]+(?=contact|address)/i,'').match(HEAD);if(m){cur={head:l,n:m[1]?+m[1]:0,dlg:!!m[2],T:[]};cards.push(cur);return;}if(STOP.test(l)){cur=null;return;}if(cur&&l)cur.T.push(l);});
-    const out=[];
-    const put=c=>{if(!c.name)return;const same=out.find(o=>(c.n&&o.n===c.n)||o.name.toLowerCase()===c.name.toLowerCase());
-      if(same){Object.keys(c).forEach(k=>{if(c[k]&&!same[k])same[k]=c[k];});return;}out.push(c);};
-    cards.forEach(cd=>{
-      const T=cd.T;
-      if(cd.dlg){   /* the dialog: labels over their values, or a label and its value side by side */
-        const V={},KEY=[[/^first name$/i,'first'],[/^last name$/i,'last'],[/^(?:contact )?name$/i,'name'],[/^relationship(?: to student)?$/i,'rel'],[/^e-?mail(?: address)?$/i,'email'],[/^(?:preferred |home )?language$/i,'lang'],[/^address$/i,'addr']];
-        const keyOf2=s=>{for(const k of KEY){if(k[0].test(s.trim()))return k[1];}return /^(middle name|suffix|contact'?s? priority|priority|type|number|custody|emergency|lives with|mailing|pickup restricted)$/i.test(s.trim())?'-':'';};
-        for(let i=0;i<T.length;i++){const segs=T[i].split(/\s{2,}/),ks=segs.map(keyOf2);
-          if(ks.every(Boolean)&&i+1<T.length){const nx=T[i+1].split(/\s{2,}/);if(!nx.map(keyOf2).some(Boolean)){if(nx.length===segs.length)ks.forEach((k,j)=>{if(k!=='-'&&!V[k])V[k]=nx[j].trim();});else if(segs.length===1&&ks[0]!=='-'&&!V[ks[0]])V[ks[0]]=T[i+1].trim();i++;continue;}}
-          segs.forEach(s=>{const m=s.match(/^([A-Za-z' \-]{3,24}):\s*(.+)$/);if(m){const k=keyOf2(m[1]);if(k&&k!=='-'&&!V[k])V[k]=m[2].trim();}});}
-        if(!V.name&&!V.first&&!V.last){const PHD=/^(?:title\b.*|first name|middle name|last name|suffix|nickname)$/i;
-          /* the name boxes side by side under the heading (Title, First, Middle, Last; an empty one shows its pale
-             placeholder, or nothing), the panel beside them ("Options") left out */
-          const SIDEW=/^(?:options|custody|emergency|pick ?up|hide contact.*|contacts?)$/i;
-          for(let i=0;i<Math.min(4,T.length);i++){const sg=T[i].split(/[ \t]{2,}/).map(x=>x.trim()).filter(x=>x&&!SIDEW.test(x));
-            const nm2=sg.filter(x=>!PHD.test(x));if(nm2.length<2||nm2.length>4||!nm2.every(x=>/^[A-Z][A-Za-z'\u2019.\- ]{0,40}$/.test(x)&&!/\d|@/.test(x)))continue;
-            V.first=nm2[0];V.last=nm2.length>1?nm2[nm2.length-1]:'';if(nm2.length>2)V.middle=nm2.slice(1,-1).join(' ');
-            if(!V.rel){let c0='';for(let j=i+1;j<Math.min(i+6,T.length);j++){const t2=T[j].split(/[ \t]{2,}/)[0].trim();if(!t2||SIDEW.test(t2)||/^e-?mail$/i.test(t2)||EMAIL.test(t2))continue;if(relOf(t2)){c0=t2;break;}if(!c0)c0=t2;}V.rel=c0;}break;}}
-        if(V.last&&V.first&&(ORG.test(V.last)||(V.middle&&/\s/.test(V.last))))V.name=(V.first+(V.middle?' '+V.middle:''))+' ('+cap(V.last)+')';   /* an agency kept as the last name */
-        const nm=V.name||((V.first||'')+' '+(V.last||'')).trim(),r=relOf(V.rel),ph=phonesIn(T),em=(V.email||T.join(' ')).match(EMAIL);
-        put({n:0,name:nm?(NAMEC.test(nm)?nameOf(nm):nm):'',rel:r?r.rel:'',relRaw:r?r.raw:(V.rel||''),phone:(ph[0]||{}).p||'',phone2:(ph[1]||{}).p||'',email:em?em[0]:'',addr:V.addr||addrOf(T),lang:V.lang||'',seen:cd.head+': '+T.slice(0,4).join(' / ')});
-        return;
-      }
-      if(cd.n){   /* a contact's card */
-        let nm='',at=-1;for(let i=0;i<Math.min(3,T.length);i++){nm=nameOf(T[i]);if(nm){at=i;break;}}
-        if(!nm)return;
-        let r=null;for(let i=T.length-1;i>at;i--){r=relOf(T[i]);if(r)break;}
-        const ph=phonesIn(T),em=T.join(' ').match(EMAIL),ad=/^\(?no address\)?$/i.test(T[at+1]||'')?'':addrOf(T.slice(at+1,(i=>i<0?T.length:i)(T.findIndex(l=>/^contact details/i.test(l)))));
-        put({n:cd.n,name:nm,rel:r?r.rel:'',relRaw:r?r.raw:'',phone:(ph[0]||{}).p||'',phone2:(ph[1]||{}).p||'',email:em?em[0]:'',addr:ad,lang:'',seen:(cd.n>=90?'Contact card':'Contact #'+cd.n)+': '+T.slice(0,2).join(' / ')});
-        return;
-      }
-      /* an address card: the address, its phone, and the contacts who live there */
-      const k=T.findIndex(l=>/^contacts?\s+at\s+this\s+(?:[.,:;]\s+)?address/i.test(l));if(k<0)return;
-      const ad=addrOf(T.slice(0,k)),ph=phonesIn(T.slice(0,k));
-      for(let i=k+1;i<T.length;i++){const m=T[i].match(/^#\s*(\d{1,2})\s*[\-–—]?\s*(.+)$/);if(!m)continue;const nm=nameOf(m[2]);if(!nm)continue;   /* v22.30 the dash and the icons after the name may be read apart */
-        const r=relOf(T[i+1]||'');
-        put({n:+m[1],name:nm,rel:r?r.rel:'',relRaw:r?r.raw:'',phone:(ph[0]||{}).p||'',phone2:'',email:'',addr:ad,lang:'',seen:'Address card: '+T[i]});}
-    });
-    out.forEach(c=>{c.note=c.relRaw&&c.relRaw.toLowerCase()!==String(c.rel).toLowerCase()?'Listed as '+c.relRaw:'';});
-    /* v22.30 the address of an address's own window ("Physical Address": the street, then city, state and ZIP in their
-       boxes) for the contacts listed at it */
-    if(page&&/physical address/i.test(page)&&/contacts? at this address/i.test(page)){const P=lines(page).map(l=>l.trim()),k=P.findIndex(l=>/^physical address/i.test(l));
-      let a='';for(let i=k+1;i>0&&i<Math.min(k+8,P.length);i++){const s0=P[i].split(/[ \t]{2,}/)[0];if(STREET.test(s0)&&!PH1.test(s0)){a=s0;   /* the city, state and ZIP a line or a few below, in their own boxes or as one */
-        for(let j=i+1;j<Math.min(i+6,P.length);j++){const c=P[j].split(/[ \t]{2,}/).map(x=>x.trim());
-          if(c.length>=3&&/^[A-Z][A-Za-z .'\-]+$/.test(c[0])&&/^[A-Z]{2}$/.test(c[1])&&/^\d{5}/.test(c[2])){a+=', '+c[0]+', '+c[1]+' '+c[2].slice(0,5);break;}if(CITY.test(c[0])){a+=', '+c[0];break;}}break;}}
-      if(a)out.forEach(c=>{if(!c.addr)c.addr=a;});}
-    /* v22.30 an IEP's cover names the parent: "Parent Name: ...", "Parent Phone Number: ..." */
-    if(page&&!out.length){const P=lines(page),pn=P.map(l=>l.match(/^\s*parent(?:\/guardian)?(?:'s)? name\s*:\s*(.+)$/i)).find(Boolean),pp=P.map(l=>l.match(/^\s*parent(?:\/guardian)?(?:'s)? (?:phone|telephone)(?: number)?\s*:\s*(.+)$/i)).find(Boolean);
-      if(pn){const all=pn[1]+' '+(pp?pp[1]:''),nm0=pn[1].split(/\s+parent(?:\/guardian)?(?:'s)?\s+(?:phone|telephone|e-?mail|address|cell)\b/i)[0].trim(),nm=nameOf(nm0)||nm0;
-        const pt=(all.match(/parent(?:\/guardian)?(?:'s)?\s+(?:phone|telephone)(?: number)?\s*:\s*([\d()\-. ]{10,16})/i)||[])[1]||(pp?pp[1]:''),d=String(pt).replace(/\D/g,''),em=all.match(EMAIL);
-        if(nm&&nm.length<=60)out.push({n:0,name:nm,rel:'',relRaw:'Parent',phone:d.length===10?'('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6):'',phone2:'',email:em?em[0]:'',addr:'',lang:'',seen:pn[0].trim().slice(0,160),note:'Listed as Parent'});}}
-    out.forEach(c=>{if(c.n>=90)c.n=0;});
-    return out.sort((a,b)=>(a.n||99)-(b.n||99));
-  }
-  /* v22.30 the BACB portal's Supervision page: the supervisor's RBTs, "Current" (name, certification number, the
-     supervisee's credential, a requirements coordinator, the date supervision started, status) and "History" (left out).
-     -> {rbts:[{name,cert,cred,rc,from,status}], past} or null */
-  function bacbSup(L){
-    const h=L.findIndex(l=>/supervisee name/i.test(l)&&/certification number/i.test(l));if(h<0)return null;
-    const rbts=[];let past=0,inHist=false;
-    for(let i=h+1;i<L.length&&i<h+80;i++){const l=L[i].trim();if(/^history\b/i.test(l)){inHist=true;continue;}
-      const m=l.match(/^(?:[^A-Za-z]*\s)?([A-Z][A-Za-z'\u2019.\-]+(?:\s[A-Z][A-Za-z'\u2019.\-]+){0,3}),?\s{2,}((?:RBT|BCaBA|BCBA)\s*-\s*\d{2}\s*-\s*\d{3,7}|\d-\d{2}-\d{4,6})\s{2,}(RBT|BCaBA|BCBA)\b(.*)$/);
-      if(!m)continue;if(inHist){past++;continue;}
-      const rest=m[4],dt=rest.match(/\b(\d{1,2}\/\d{1,2}\/\d{4})\b/),st=rest.match(/\b(active|inactive|pending)\b/i),rc=rest.trim().split(/\s{2,}/);
-      rbts.push({name:m[1],cert:m[2].replace(/\s+/g,''),cred:m[3],rc:rc[1]&&!/^n\/?a$/i.test(rc[1])?rc[1]:'',from:dt?toISO(dt[1]):'',status:st?cap(st[1].toLowerCase()).replace(/^./,c=>c.toUpperCase()):'',seen:l.slice(0,160)});}
-    return rbts.length?{rbts,past}:null;}
-  /* the student the page belongs to, from the student information system's badge: "Rivera, Mateo" over "4471823 - 03" */
-  /* v22.30 the badge's close button read as "x" before the name and its menu arrow as "v" after; its ID a line or three
-     below, past the page title and the photo */
-  function badge(L){for(let i=0;i<Math.min(10,L.length-1);i++){const a=L[i].split(/\s{2,}/).map(x=>x.replace(/^[^A-Za-z]+|[^A-Za-z.]+$/g,'').replace(/^[xX]\s+/,'').replace(/\s+[vV]$/,'').trim()).find(x=>NAMEC.test(x));if(!a)continue;
-    for(let j=i+1;j<=i+4&&j<L.length;j++){const b=L[j].split(/\s{2,}/).map(x=>x.trim().replace(/^[A-Za-z]{1,3}\s+(?=\d)/,'')).find(x=>/^\d{5,10}\s*[-–]\s*(?:\d{1,2}|KG|PK)\b/.test(x));
-      if(b){const m=b.match(/^(\d{5,10})\s*[-–]\s*(\d{1,2}|KG|PK)\b/);return {name:a,sid:m[1],grade:m[2],line:i,idLine:j};}}}return null;}
-  /* v22.27 a student information system's Schedule page: each class's row (Period, Term, Subject, Course, "Section -
-     Teacher (seats)", Days, Room, Enrolled, Dropped). A class dropped is left out. The teachers become Form DM-1's team:
-     the homeroom teacher the classroom teacher (with the classes they teach and the room), a therapy's teacher its
-     provider (language or speech therapy: the speech-language pathologist, also on the Related Services row), the other
-     teachers by their class (art, PE, music: Other). -> {team:[{name,role,inv,svc,svcFreq}], room} */
-  const TEACH=/\b[A-Za-z0-9]{2,6}\s*[-–]\s*([A-Z][A-Za-z'’.\-]+(?:\s+[A-Z][A-Za-z'’.\-]+){1,3})\s*\(\s*\d+\s*\/\s*\d+\s*\)/;
-  const DAYN={M:'Mon',T:'Tue',W:'Wed',H:'Thu',R:'Thu',F:'Fri'};
-  const days=d=>d==='MTWHF'||d==='MTWRF'?'daily':d.split('').map(c=>DAYN[c]).filter(Boolean).join(', ');
-  const KIND=[[/thrpy|therapy|speech|\blang(?:uage)?\b.*\bth/i,'Speech-language pathologist',0,'speech-language therapy'],[/occupational|\bot\b/i,'Occupational therapist',1,'occupational therapy'],[/physical th|\bpt\b/i,'Physical therapist',2,'physical therapy'],
-    [/counsel/i,'School counselor / social worker',3,'counseling'],[/homeroom/i,'Classroom teacher',-1,'homeroom']];
-  const tcase=s=>s.replace(/[A-Za-z]+/g,w=>w.length<=2?w.toUpperCase():w[0].toUpperCase()+w.slice(1).toLowerCase());
-  const courseName=s=>tcase(String(s||'').replace(/\s*\([0-9A-Z]{4,}\)?.*$/,'').replace(/[….]+$/,'').replace(/\s+[vV~=@]+$/,'').trim());
-  function schedule(L){
-    const h=L.findIndex(l=>/\bperiod\b/i.test(l)&&/\bcourse\b/i.test(l));if(h<0)return null;
-    const rows=[];
-    for(let i=h+1;i<L.length&&i<h+60;i++){const l=L[i].replace(/[▼▾@]/g,'  ').replace(/'?\u00a5\|?/g,'  ').replace(/\[(?=[A-Za-z])/g,'  ').replace(/[\[\]]/g,'  ');const m=l.match(TEACH);if(!m)continue;
-      const before=l.slice(0,m.index),after=l.slice(m.index+m[0].length);
-      const segs=before.split(/\s{2,}/).map(x=>x.replace(/(?:\s*[vV~=@|]+)+$/,'').replace(/^[\[\]\s|1Il]+(?=[A-Z])/,'').replace(/^[A-Z]{1,2}\s+(?=(?:period|homeroom|therapy)\b)/i,'').trim()).filter(x=>x&&!/^[\[\]|1Il]+$/.test(x)&&!/^[=~\-_|.,:;—–]+$/.test(x)&&(x.match(/[A-Za-z]/g)||[]).length>=3);
-      const course=courseName(segs.length?segs[segs.length-1].replace(/^.*?\b(?:Grade|Courses)\s*[vV]?\s+(?=[A-Z])/,''):''),period=(segs[0]||'').replace(/[vV]+$/,'').trim();
-      const dm=after.match(/(?:^|\s)([MTWHFR]{1,6})[vV]?(?=\s|$)/),rm=after.match(/\b(\d{4,5}[A-Z]{0,2})\b/),
-        span=rm?after.slice(rm.index+rm[0].length).split(/[A-Za-z]/)[0]:'',dt=span.match(/\d{1,2}\/\d{1,2}\/\d{4}/g)||[];
-      rows.push({teacher:cap(m[1]),course,period,days:dm?dm[1]:'',room:rm?rm[1]:'',from:dt[0]||'',dropped:dt[1]||'',seen:l.trim().slice(0,160)});}
-    if(!rows.length)return null;
-    const live=rows.filter(r=>!r.dropped),byT=[];
-    live.forEach(r=>{let t=byT.find(x=>x.name===r.teacher);if(!t){t={name:r.teacher,rows:[]};byT.push(t);}t.rows.push(r);});
-    const team=byT.map(t=>{
-      const all=t.rows.map(r=>r.course+' '+r.period).join(' ');let kind=null;for(const k of KIND){if(k[0].test(all)){kind=k;break;}}
-      const home=t.rows.find(r=>/homeroom|\bhmrm\b|\d{4}hmrm/i.test(r.period+' '+r.course+' '+r.seen)),rooms=[...new Set(t.rows.map(r=>r.room).filter(Boolean))];
-      const what=[...new Set(t.rows.map(r=>/homeroom/i.test(r.course)?'Homeroom':r.course).filter(Boolean))].join(', ');
-      const dd=[...new Set(t.rows.map(r=>days(r.days)).filter(Boolean))].join('; '),since=t.rows.map(r=>r.from).filter(Boolean).sort((a,b)=>toISO(a)<toISO(b)?-1:1)[0]||'';
-      const now=new Date(),today=iso(now.getFullYear(),now.getMonth()+1,now.getDate());   /* the local date, not the world clock's */
-      const sinceTxt=since&&toISO(since)>today?', from '+since:since?', since '+since:'';
-      return {name:t.name,role:home?'Classroom teacher':kind?kind[1]:'Other',inv:(what+(dd?', '+dd:'')+(rooms.length?', room '+rooms.join(', '):'')+sinceTxt).slice(0,200),
-        svc:kind&&kind[2]>=0?kind[2]:-1,svcFreq:kind&&kind[2]>=0?(dd==='daily'?'Daily':dd?'Weekly ('+dd+')':''):'',seen:'Schedule: '+t.rows.length+(t.rows.length===1?' class':' classes')};});
-    const hr=team.find(t=>t.role==='Classroom teacher'),hrRow=live.find(r=>/homeroom|hmrm/i.test(r.period+' '+r.course+' '+r.seen));
-    return {at:h,team,dropped:rows.length-live.length,room:hr?(hrRow&&hrRow.room?'Room '+hrRow.room+', ':'')+hr.name:''};
-  }
-  /* v22.27 the Enrollment page: one row a school and year (Year, School, Grade Level, Enrollment Date, Enrollment Code, Drop
-     Date, Drop Code). The row with no drop date is the school now (its grade and date of enrollment); the schools before
-     it, most recent first, a summer's or a temporary assignment left out, are the previous schools. */
-  function enrollment(L){
-    const h=L.findIndex(l=>/\byear\b/i.test(l)&&/\bschool\b/i.test(l)&&/enrol?lment date|grade level/i.test(l));if(h<0)return null;
-    const rows=[];
-    for(let i=h+1;i<L.length&&i<h+40;i++){const l=L[i].replace(/\s=\s/g,'  ').replace(/\s+/g,' ');
-      const m=l.match(/\b(\d{4})\s*-\s*(\d{4})\s+(.+?)\s+(PK|KG|K|\d{1,2})\s+(\d{1,2}\/\d{1,2}\/\d{4})\s*(?:\(([A-Z0-9]{2,4})\)\s*(.*?))?(?:\s(\d{1,2}\/\d{1,2}\/\d{4})\s*(?:\(([A-Z0-9]{2,4})\)\s*(.*))?)?$/);
-      if(!m)continue;
-      const raw=m[3].trim(),name=raw.replace(/\s*-\s*[A-Z]?\d{3,4}[A-Z]?\s*-\s*[A-Z]{1,5}$/,'').trim();
-      rows.push({year:m[1]+'–'+m[2],school:name,grade:m[4],from:m[5],to:m[8]||'',skip:/^xsummer|summer\b|temporary assignment/i.test(name),seen:L[i].trim().slice(0,160)});}
-    if(!rows.length)return null;
-    const now=rows.find(r=>!r.to&&!r.skip)||null;
-    const past=[];rows.filter(r=>r!==now&&!r.skip&&(!now||r.school!==now.school)).forEach(r=>{const p=past.find(x=>x.school===r.school);
-      if(p){if(toISO(r.from)<toISO(p.from))p.from=r.from;if(toISO(r.to)>toISO(p.to))p.to=r.to;}else past.push({school:r.school,from:r.from,to:r.to});});
-    past.sort((a,b)=>toISO(a.from)<toISO(b.from)?1:-1);
-    return {at:h,now,prior:past.map(p=>p.school+' ('+p.from+(p.to?'–'+p.to:'')+')').join('; '),n:past.length,seen:now?now.seen:rows[0].seen};
-  }
-  return {parse,contacts,schedule,enrollment,toISO,grade,splitName,relOf,fields:F};
-})();
-
-/* ---- the dialog ---- */
-const DR={text:'',cols:'',res:null,worker:null,pdf:null};
-const DR_ROLES=['','Parent','BCBA','Behavioral Health Professional (BHP)','Behavior Intervention Associate (BIA)','Classroom teacher','Fine arts teacher','Paraprofessional','ESE contact / case manager','ESE coordinator','School psychologist','Speech-language pathologist','Occupational therapist','Physical therapist','School nurse','School counselor / social worker','Administrator','District behavior support','Bus driver / aide','Transportation leadership','Home ABA provider','Psychiatrist / prescriber','Pediatrician','Outside therapist / counselor','Agency case manager (DCF, APD)','Group home manager','Other'];   /* Form DM-1's team roles */
-const DR_REL=['','Mother','Father','Stepparent','Grandparent','Legal guardian','Foster parent','Surrogate parent','Guardian advocate','Adult sibling','Other relative','Family friend','Case manager (agency)','Other'];   /* Form DM-1's list */
-const drCan=()=>!EMBED&&/^https?:$/.test(location.protocol);   /* the readers: the website or the app, not the one-file edition or a drive */
-function drProg(t){const p=$('#drProg');if(!p)return;p.hidden=!t;p.textContent=t||'';}
-function drOpen(){
-  DR.text='';DR.cols='';DR.res=null;
-  dialog('Read a document',
-    '<p class="dr-intro">The document is read here, on this device; nothing leaves it. The student\u2019s details it finds are listed for you to check, each with the line it was read from. <b>Place</b> puts the ticked ones into the bar and Form DM-1, into empty fields unless you say otherwise, and target behaviors found in a plan into the case.</p>'+
-    '<div class="dr-src">'+
-    (drCan()?'<div class="dr-file"><label class="dr-pick"><input type="file" id="drFile" accept="application/pdf,image/*"> <span>Choose a PDF or a picture</span></label>'+
-      '<span class="dr-hint">A PDF with its own text is read at once. A scanned page, a photo or a screenshot is read by the text recognizer kept with the workstation: a few seconds a page, and the first picture loads it (about 7 MB, then kept offline).</span></div>'
-      :'<div class="dr-file"><span class="dr-hint">'+(EMBED?'This one-file edition reads pasted text.':'Opened from a drive, the workstation reads pasted text.')+' To read a PDF or a picture itself, open the workstation from its website or the installed app.</span></div>')+
-    '<div class="dr-paste"><textarea id="drText" rows="5" placeholder="Or paste the text here. On the iPad: open the picture or PDF, press and hold on its text, Select All, Copy."></textarea>'+
-    '<div class="dr-acts"><button type="button" id="drRead" class="primary">Read the text</button></div></div></div>'+
-    '<div id="drProg" class="dr-prog" hidden></div><div id="drOut"></div>');
-  $('#drRead').addEventListener('click',()=>{const t=$('#drText').value;if(!t.trim()){alert('Paste the document\u2019s text first.');return;}drShow(t,'the pasted text');});
-  const fi=$('#drFile');if(fi)fi.addEventListener('change',()=>{const f=fi.files&&fi.files[0];if(f)drFile(f);});
-}
-/* v22.30 the ticked RBTs into Form RS-1: the one open, or opened here when no student's case is on screen */
-async function drRbtPlace(){const res=DR.res;if(!res||!res.rbts)return;
-  const list=res.rbts.map((r,i)=>{if(!($('#drOut [data-drb="'+i+'"]')||{}).checked)return null;const v=f=>(($('#drOut [data-drbf="'+f+'"][data-i="'+i+'"]')||{}).value||'').trim();return {name:v('name'),cert:v('cert'),cred:v('cred'),from:v('from')};}).filter(x=>x&&x.name);
-  if(!list.length){wsUI.toast('No RBT is ticked.',{kind:'warn'});return;}
-  if(!state.frames['RS-1']){const p=packet();if(String(p.client||'').trim()||String(p.sid||'').trim()){await wsUI.alert('Open the RBT Supervision Log first (Caseload, Staff records), then read the page again.\nThe RBTs are kept apart from the students\u2019 cases.');return;}
-    try{const L=await clList()||[],r=L.find(isStaffRec);if(r&&!Object.keys(state.frames).length){await caseloadGo(r.key,'RS-1');}else openForm('RS-1');}catch(e){openForm('RS-1');}}
-  let fn=null;for(let k=0;k<80&&!fn;k++){const fr=state.frames['RS-1'];try{fn=fr&&fr.contentWindow&&fr.contentWindow.__nbhAddRbts;}catch(e){}if(!fn)await new Promise(z=>setTimeout(z,250));}
-  if(!fn){wsUI.toast('Form RS-1 did not open in time; try Add to Form RS-1 again.',{kind:'warn'});return;}
-  const r=fn(list);try{$('#dlg').close();}catch(e){}openForm('RS-1');
-  wsUI.toast((r.added?r.added+(r.added===1?' RBT added':' RBTs added'):'')+(r.added&&r.updated?', ':'')+(r.updated?r.updated+' completed':'')+' in Form RS-1 ('+r.total+' in the log). Save case keeps it.',{kind:'ok',ms:7000});}
-async function drFile(file){
-  $('#drOut').innerHTML='';DR.cols='';
-  try{
-    let text='';
-    if(/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name))text=await drPdf(file);
-    else if(/^image\//.test(file.type)||/\.(png|jpe?g|gif|webp|bmp|heic|tiff?)$/i.test(file.name))text=await drImage(file);
-    else{alert('Choose a PDF or a picture (PNG, JPEG, HEIC).');return;}
-    drProg('');
-    drShow(text,file.name,DR.cols);
-  }catch(e){drProg('');$('#drOut').innerHTML='<p class="dr-err">The file could not be read: '+esc(e&&e.message||e)+'. Paste its text instead.</p>';}
-}
-async function drPdfLib(){
-  /* v22.30 the PDF library reads a page's text as a stream it walks with "for await", which Safari on the iPad cannot do
-     (a stream there cannot be walked that way): the text of every page failed, and every page was read as a picture,
-     slowly. The stream is given the means here */
-  if(window.ReadableStream&&!ReadableStream.prototype[Symbol.asyncIterator]){
-    try{Object.defineProperty(ReadableStream.prototype,Symbol.asyncIterator,{configurable:true,writable:true,value:async function*(){const r=this.getReader();try{for(;;){const x=await r.read();if(x.done)return;yield x.value;}}finally{try{r.releaseLock();}catch(e){}}}});}catch(e){}}
-  if(!DR.pdf){const lib=await import(new URL('nbh-doc/pdf.min.js',location.href).href);lib.GlobalWorkerOptions.workerSrc=new URL('nbh-doc/pdf.worker.min.js',location.href).href;DR.pdf=lib;}
-  return DR.pdf;
-}
-/* the text of a page, line by line: items on one height make a line, a wide gap between two a column break */
-function drLinesOf(items){
-  const rows=[];
-  items.forEach(it=>{if(!it.str||!it.transform)return;const y=it.transform[5],x=it.transform[4];let r=rows.find(r=>Math.abs(r.y-y)<=3);if(!r){r={y,items:[]};rows.push(r);}r.items.push({x,w:it.width||0,s:it.str});});
-  rows.sort((a,b)=>b.y-a.y);
-  return rows.map(r=>{r.items.sort((a,b)=>a.x-b.x);let s='',end=null;r.items.forEach(it=>{if(end!==null){const gap=it.x-end;s+=gap>12?'  ':(gap>1.5&&!/\s$/.test(s)&&!/^\s/.test(it.s)?' ':'');}s+=it.s;end=it.x+it.w;});return s;}).join('\n');
-}
-async function drPdf(file){
-  drProg('Opening the PDF\u2026');
-  const lib=await drPdfLib();
-  const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false,disableAutoFetch:true}).promise;
-  const N=Math.min(doc.numPages,60);let text='';   /* v22.30 the whole document (an IEP runs to 30 pages), not its first 8 */
-  for(let p=1;p<=N;p++){
-    drProg('Reading page '+p+' of '+N+'\u2026');
-    const page=await doc.getPage(p);let t='';
-    try{t=drLinesOf(await drPageItems(page));}catch(e){t='';}
-    if(t.replace(/[^A-Za-z]/g,'').length<40){   /* a scanned page: drawn and read as a picture */
-      const vp=page.getViewport({scale:2}),c=document.createElement('canvas');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);
-      await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
-      t=await drOcr(c,'page '+p+' of '+N);
-    }
-    text+=t+'\n';
-  }
-  if(doc.numPages>N)text+='\n';
-  try{await doc.destroy();}catch(e){}
-  return text;
-}
-/* a page's text items, read from the library's stream with a reader (the way every browser can) */
-async function drPageItems(page){const rd=page.streamTextContent({}).getReader(),items=[];for(;;){const x=await rd.read();if(x.done)break;if(x.value&&x.value.items)items.push(...x.value.items);}return items;}
-async function drImage(file){
-  drProg('Opening the picture\u2026');
-  const url=URL.createObjectURL(file);
-  try{
-    const img=new Image();img.src=url;await img.decode();
-    /* small text reads better larger; a camera's picture is brought down to a size the recognizer handles */
-    const w=img.naturalWidth,h=img.naturalHeight;let sc=1;if(w<1400)sc=Math.min(2.5,1400/w);if(w*sc>2600)sc=2600/w;
-    const c=document.createElement('canvas');c.width=Math.round(w*sc);c.height=Math.round(h*sc);
-    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);
-    return await drOcr(c,'the picture');
-  }finally{URL.revokeObjectURL(url);}
-}
-function drScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('the text recognizer did not load ('+src+')'));document.head.appendChild(s);});}
-async function drOcr(canvas,what){
-  if(!window.Tesseract){drProg('Loading the text recognizer\u2026');await drScript('nbh-ocr/tesseract.min.js');}
-  if(!DR.worker){
-    drProg('Starting the text recognizer\u2026');
-    DR.worker=await Tesseract.createWorker('eng',1,{workerPath:'nbh-ocr/worker.min.js',corePath:'nbh-ocr/tesseract-core-simd-lstm.wasm.js',langPath:'nbh-ocr',gzip:true,workerBlobURL:false,
-      logger:m=>{if(m&&m.status==='recognizing text'&&DR.what)drProg('Reading '+DR.what+'\u2026 '+Math.round((m.progress||0)*100)+'%');}});
-  }
-  DR.what=what;drProg('Reading '+what+'\u2026');
-  let r=await DR.worker.recognize(canvas,{},{text:true,blocks:true});
-  /* v22.30 a window whose boxes cannot be edited (a student information system's Edit Contact or address window) shows
-     their contents in pale grey, which the recognizer passes over, reading only the labels: such a page is read again
-     with every shade darkened, and that reading is kept */
-  const t1=drLinesOfOcr(r&&r.data)||(r&&r.data&&r.data.text)||'';
-  if(/edit contact|do not have permission to edit|physical address|mailing address/i.test(t1)){
-    drProg('Reading '+what+' again, for the pale text\u2026');
-    try{const r2=await DR.worker.recognize(drDarken(canvas),{},{text:true,blocks:true});if(r2&&r2.data)r=r2;}catch(e){}}
-  DR.what='';
-  DR.cols=(DR.cols?DR.cols+'\n\n':'')+drCardsOfOcr(r&&r.data);
-  return drLinesOfOcr(r&&r.data)||(r&&r.data&&r.data.text)||'';
-}
-/* the picture in grey with its shades stretched: pale grey text (and anything darker) becomes black, the pale tints of
-   rows and boxes white */
-function drDarken(src){const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const g=c.getContext('2d');g.drawImage(src,0,0);
-  const im=g.getImageData(0,0,c.width,c.height),d=im.data;
-  for(let i=0;i<d.length;i+=4){const l=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2],v=l>=235?255:l<=150?0:Math.round((l-150)*3);d[i]=d[i+1]=d[i+2]=v;}
-  g.putImageData(im,0,0);return c;}
-/* the recognizer's words with their places: a gap wider than two letters between two words on a line is a column break
-   (a label's cell and its value's, a value and the next label), kept as a double space for the matcher, as a PDF's is */
-function drLinesOfOcr(data){
-  const blocks=data&&data.blocks;if(!Array.isArray(blocks)||!blocks.length)return '';
-  const out=[];
-  blocks.forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>{const ws=(l.words||[]).filter(w=>w&&w.text&&w.bbox).sort((a,b)=>a.bbox.x0-b.bbox.x0);if(!ws.length)return;
-    let s='',prev=null;ws.forEach(w=>{if(prev){const cw=Math.max(4,((prev.bbox.x1-prev.bbox.x0)/Math.max(1,prev.text.length)+(w.bbox.x1-w.bbox.x0)/Math.max(1,w.text.length))/2);s+=w.bbox.x0-prev.bbox.x1>2.2*cw?'  ':' ';}s+=w.text;prev=w;});
-    out.push(s);})));
-  return out.join('\n');
-}
-/* v22.25 a page of cards side by side (a student information system's Addresses & Contacts: "Address", "Contact #3", four
-   to a row) is read across, card after card, so each card's lines come out mixed with its neighbours'. Here the words
-   are put back into their cards by place: each card's heading marks its column and its row, every word below a heading
-   and right of it (up to the next heading) is that card's, and the cards are written out one after the other. '' when
-   the page has no such cards. */
-function drCardsOfOcr(data){
-  const blocks=data&&data.blocks;if(!Array.isArray(blocks)||!blocks.length)return '';
-  const words=[],segs=[];
-  blocks.forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>{const ws=(l.words||[]).filter(w=>w&&w.text&&w.bbox).sort((a,b)=>a.bbox.x0-b.bbox.x0);let sg=null,prev=null;
-    ws.forEach(w=>{words.push(w);const cw=prev?Math.max(4,((prev.bbox.x1-prev.bbox.x0)/Math.max(1,prev.text.length)+(w.bbox.x1-w.bbox.x0)/Math.max(1,w.text.length))/2):0;
-      if(!sg||w.bbox.x0-prev.bbox.x1>2.2*cw){sg={x0:w.bbox.x0,x1:w.bbox.x1,y0:w.bbox.y0,y1:w.bbox.y1,t:w.text};segs.push(sg);}else{sg.t+=' '+w.text;sg.x1=w.bbox.x1;sg.y0=Math.min(sg.y0,w.bbox.y0);sg.y1=Math.max(sg.y1,w.bbox.y1);}prev=w;});})));
-  /* v22.30 a card's lines are made from its own words (a line of the picture can run across two cards with too narrow a
-     gap between them to be a column break), and the recognizer's marks before a heading ("& Contact #7") are passed over */
-  const lineOf=(x0,x1,y0,y1)=>{const mine=words.filter(w=>w.bbox.x0>=x0&&w.bbox.x0<x1&&w.bbox.y0>=y0&&w.bbox.y0<y1).sort((a,b)=>a.bbox.y0-b.bbox.y0||a.bbox.x0-b.bbox.x0);
-    const ls=[];mine.forEach(w=>{const h=w.bbox.y1-w.bbox.y0,last=ls[ls.length-1];if(last&&Math.abs(last.y-w.bbox.y0)<h*0.6)last.w.push(w);else ls.push({y:w.bbox.y0,w:[w]});});
-    return ls.map(l=>{l.w.sort((a,b)=>a.bbox.x0-b.bbox.x0);let t='',prev=null;l.w.forEach(w=>{if(prev){const cw=Math.max(4,((prev.bbox.x1-prev.bbox.x0)/Math.max(1,prev.text.length)+(w.bbox.x1-w.bbox.x0)/Math.max(1,w.text.length))/2);t+=w.bbox.x0-prev.bbox.x1>2.2*cw?'  ':' ';}t+=w.text;prev=w;});return t;});};
-  const HD=/^(?:contact\s*#\s*\d{1,2}|address)$/i,clean=t=>t.trim().replace(/^[^A-Za-z#]+(?=contact|address)/i,'');
-  const heads=segs.filter(g=>HD.test(clean(g.t))).sort((a,b)=>a.y0-b.y0);
-  const rows=[];heads.forEach(h=>{const r=rows.find(r=>Math.abs(r.y-h.y0)<Math.max(8,h.y1-h.y0));if(r)r.h.push(h);else rows.push({y:h.y0,h:[h]});});
-  if(heads.length>=2&&rows.some(r=>r.h.length>1)){
-    const cards=[];
-    rows.forEach((r,ri)=>{r.h.sort((a,b)=>a.x0-b.x0);const tol=Math.max(6,(r.h[0].y1-r.h[0].y0));
-      const yEnd=ri+1<rows.length?rows[ri+1].y-tol/2:(ri?r.y+(r.y-rows[ri-1].y)*1.1:Infinity);
-      r.h.forEach((h,ci)=>{const x0=h.x0-tol,x1=ci+1<r.h.length?r.h[ci+1].x0-tol:Infinity;
-        const ls=lineOf(x0,x1,h.y1-1,yEnd);cards.push([clean(h.t)].concat(ls).join('\n'));});});
-    return cards.join('\n\n');
-  }
-  /* v22.30 the page scrolled so that the top row's headings are gone: the cards' columns are found from what cards hold
-     (an address, "Contacts at this Address", "Contact Details:", "(No Address)", a "Last, First" name), each
-     column read down and cut into cards at a heading or after the relationship at a card's foot; a card without its
-     heading is named by what it holds */
-  const ANC=/^(?:\d+[A-Za-z]?\s+\S.*|[A-Za-z .'\-]+,\s*[A-Z]{2}\.?\s+\d{5}.*|contacts? at this address|contact details:?|\(?no address\)?|#\s*\d{1,2}\s*[-\u2013\u2014].*|[A-Z][A-Za-z'\u2019\-]+,\s*[A-Z][A-Za-z'\u2019\-]+.*)$/i;   /* a phone is not one: a contact's table puts it mid-card */
-  const anc=segs.filter(g=>ANC.test(clean(g.t))&&!/[a-z]{3,}\.(?:com|org)/i.test(g.t)).sort((a,b)=>a.x0-b.x0);if(anc.length<4)return '';
-  const W=Math.max(...words.map(w=>w.bbox.x1)),gap=W*0.06,cl=[];anc.forEach(g=>{const c=cl[cl.length-1];if(c&&g.x0-c.x<gap){c.n++;}else cl.push({x:g.x0,n:1});});
-  const cols=cl.filter(c=>c.n>=2);if(cols.length<2)return '';
-  const y0=Math.min(...anc.map(g=>g.y0))-4,stop=segs.find(g=>/^linked (?:users|students)\b/i.test(clean(g.t))&&g.y0>y0),y1=stop?stop.y0-2:Infinity;
-  const rel=window.nbhDocRead&&nbhDocRead.relOf,cards=[];let k=0;
-  cols.forEach((c,ci)=>{const tol=gap/3,ls=lineOf(c.x-tol,ci+1<cols.length?cols[ci+1].x-tol:Infinity,y0,y1);let cur=[];
-    const end=()=>{if(!cur.length)return;const T=cur.slice();cur=[];
-      if(HD.test(clean(T[0]))){T[0]=clean(T[0]);cards.push(T.join('\n'));return;}
-      if(T.some(l=>/^contacts?\s+at\s+this\s+(?:[.,:;]\s+)?address/i.test(l.trim())))cards.push(['Address'].concat(T).join('\n'));
-      else if(T.slice(0,3).some(l=>/^[A-Z][A-Za-z'\u2019\-]+,\s*[A-Z]/.test(l.trim())))cards.push(['Contact #'+(90+(k++))].concat(T).join('\n'));};
-    ls.forEach(l=>{const t=l.trim();if(!t)return;if(HD.test(clean(t))){end();cur.push(t);return;}cur.push(t);if(rel&&rel(t)&&cur.length>2)end();});end();});
-  return cards.length?cards.join('\n\n'):'';
-}
-function drShow(text,from,cols){
-  DR.text=text;const res=DR.res=nbhDocRead.parse(text,cols);
-  const out=$('#drOut');if(!out)return;
-  const haveBeh=!!(state.facts&&(state.facts.behaviors||[]).length&&(state.facts.src||{}).behaviors!=='document');
-  const cons=res.contacts||[];
-  if(res.rbts&&res.rbts.length){   /* v22.30 the BACB portal's supervisees, for Form RS-1 */
-    out.innerHTML='<p class="dr-found"><b>'+res.rbts.length+(res.rbts.length===1?' RBT':' RBTs')+'</b> you supervise, read from '+esc(from)+' (the BACB portal\u2019s Supervision page'+(res.rbtsPast?'; '+res.rbtsPast+' in its History left out':'')+'). Untick what is wrong, or correct it.</p>'+
-      '<table class="dr-tbl dr-ctbl"><thead><tr><th></th><th>Name</th><th>Certification number</th><th>Credential</th><th>Supervision started</th><th>Read from</th></tr></thead><tbody>'+
-      res.rbts.map((r,i)=>'<tr><td><input type="checkbox" data-drb="'+i+'" checked aria-label="Add '+esc(r.name)+'"></td><td><input type="text" data-drbf="name" data-i="'+i+'" value="'+esc(r.name)+'"></td><td><input type="text" data-drbf="cert" data-i="'+i+'" value="'+esc(r.cert)+'"></td><td><input type="text" data-drbf="cred" data-i="'+i+'" value="'+esc(r.cred)+'"></td><td><input type="date" data-drbf="from" data-i="'+i+'" value="'+esc(r.from)+'">'+(r.status&&r.status!=='Active'?'<small class="dr-note">'+esc(r.status)+'</small>':'')+'</td><td class="dr-seen">'+esc(r.seen)+'</td></tr>').join('')+'</tbody></table>'+
-      '<p class="hint">Each one ticked becomes a supervisee in Form RS-1 (the RBT Supervision Log): one already there by name or number is completed, not added again. Nothing goes to the student\u2019s bar or forms.</p>'+
-      '<div class="dr-act"><button type="button" class="primary" id="drRbtPlace">Add to Form RS-1</button></div>';
-    $('#drRbtPlace').addEventListener('click',drRbtPlace);return;}
-  if(!res.fields.length&&!res.behaviors.length&&!cons.length&&!(res.team||[]).length){out.innerHTML='<p class="dr-none">Nothing recognisable in '+esc(from)+' ('+res.lines+' lines read). The details are read from their labels: Student name, Date of birth, Student ID, Grade, School, Teacher, and the IEP\u2019s; contacts from a student information system\u2019s Addresses &amp; Contacts page or its Edit Contact window. '+(text.trim()?'':'The text was empty: a picture of a page needs the text recognizer, which needs the website or the app.')+'</p>';return;}
-  let h='<p class="dr-found">'+(res.fields.length||!cons.length?'<b>'+res.fields.length+(res.fields.length===1?' detail':' details')+'</b> read from '+esc(from):'<b>'+cons.length+(cons.length===1?' contact':' contacts')+'</b> read from '+esc(from))+(res.behaviors.length?', and '+res.behaviors.length+(res.behaviors.length===1?' target behavior':' target behaviors'):'')+(cons.length&&res.fields.length?', and '+cons.length+(cons.length===1?' contact':' contacts'):'')+((res.team||[]).length?', and '+res.team.length+(res.team.length===1?' teacher':' teachers'):'')+'. Untick what is wrong, or correct it.</p>';
-  /* v22.25 a page for another student than the case on screen */
-  const onBar=($('#pClient')||{}).value||'',pg=res.student?nbhDocRead.splitName(res.student.name):null;
-  if(pg&&onBar.trim()&&pg.last&&onBar.toLowerCase().indexOf(pg.last.toLowerCase())<0)h+='<p class="dr-warn">This page is for <b>'+esc(pg.full)+'</b>; the case on screen is <b>'+esc(onBar)+'</b>. Check before placing.</p>';
-  if(res.fields.length)h+='<table class="dr-tbl"><thead><tr><th></th><th>Detail</th><th>Value</th><th>Goes to</th><th>Read from</th></tr></thead><tbody>';
-  res.fields.forEach((f,i)=>{
-    const to=f.to.map(t=>t.split(':')[0]).filter((x,k,a)=>a.indexOf(x)===k).map(x=>x==='bar'?'the bar':'Form '+x).join(', ')||'\u2014';
-    h+='<tr'+(f.ok?'':' class="off"')+'><td><input type="checkbox" data-dr="'+i+'"'+(f.ok?' checked':'')+' aria-label="Place '+esc(f.label)+'"></td><td>'+esc(f.label)+'</td><td><input type="text" data-drv="'+i+'" value="'+esc(f.value)+'">'+(f.note?'<small class="dr-note">'+esc(f.note)+'</small>':'')+'</td><td>'+esc(to)+'</td><td class="dr-seen">'+esc(f.seen)+'</td></tr>';
-  });
-  if(res.fields.length)h+='</tbody></table>';
-  if(cons.length){   /* v22.25 the contacts, for Form DM-1's Contacts */
-    h+='<div class="dr-con"><b>Contacts</b> <small class="dr-note">for Form DM-1\u2019s Contacts, in the record\u2019s order; one already there by the same name is completed, not added again</small>';
-    h+='<table class="dr-tbl dr-ctbl"><thead><tr><th></th><th>Name</th><th>Relationship</th><th>Phone</th><th>Address, email</th><th>Read from</th></tr></thead><tbody>';
-    cons.forEach((c,i)=>{
-      h+='<tr><td><input type="checkbox" data-drc="'+i+'" checked aria-label="Place contact '+esc(c.name)+'"></td><td><input type="text" data-drcf="name" data-i="'+i+'" value="'+esc(c.name)+'"></td>'+
-        '<td><select data-drcf="rel" data-i="'+i+'">'+DR_REL.map(r=>'<option'+(r===c.rel?' selected':'')+'>'+esc(r)+'</option>').join('')+'</select>'+(c.note?'<small class="dr-note">'+esc(c.note)+'</small>':'')+'</td>'+
-        '<td><input type="text" data-drcf="phone" data-i="'+i+'" value="'+esc(c.phone)+'">'+(c.phone2?'<input type="text" data-drcf="phone2" data-i="'+i+'" value="'+esc(c.phone2)+'" aria-label="Alternate phone">':'')+'</td>'+
-        '<td><input type="text" data-drcf="addr" data-i="'+i+'" value="'+esc(c.addr)+'" placeholder="address">'+(c.email?'<input type="text" data-drcf="email" data-i="'+i+'" value="'+esc(c.email)+'" aria-label="Email">':'')+(c.lang?'<small class="dr-note">Language: '+esc(c.lang)+'</small>':'')+'</td>'+
-        '<td class="dr-seen">'+esc(c.seen)+'</td></tr>';
-    });
-    h+='</tbody></table></div>';
-  }
-  const team=res.team||[];
-  if(team.length){   /* v22.27 the teachers from a Schedule page, for Form DM-1's Team and Providers */
-    h+='<div class="dr-con"><b>Team</b> <small class="dr-note">from the schedule, for Form DM-1\u2019s Team and Providers'+(res.dropped?' (a class dropped is left out)':'')+'; a teacher already there by name is completed, not added again</small>';
-    h+='<table class="dr-tbl dr-ctbl"><thead><tr><th></th><th>Name</th><th>Role</th><th>Involvement</th><th>Read from</th></tr></thead><tbody>';
-    team.forEach((t,i)=>{
-      h+='<tr><td><input type="checkbox" data-drt="'+i+'" checked aria-label="Place '+esc(t.name)+'"></td><td><input type="text" data-drtf="name" data-i="'+i+'" value="'+esc(t.name)+'"></td>'+
-        '<td><select data-drtf="role" data-i="'+i+'">'+DR_ROLES.map(r=>'<option'+(r===t.role?' selected':'')+'>'+esc(r)+'</option>').join('')+'</select>'+(t.svc>=0?'<small class="dr-note">also on Related Services</small>':'')+'</td>'+
-        '<td><textarea data-drtf="inv" data-i="'+i+'" rows="2" aria-label="Involvement">'+esc(t.inv)+'</textarea></td><td class="dr-seen">'+esc(t.seen)+'</td></tr>';
-    });
-    h+='</tbody></table></div>';
-  }
-  if(res.behaviors.length){
-    h+='<div class="dr-beh"><b>Target behaviors</b>'+(haveBeh?' <small class="dr-note">(the case already holds the targets from Form TB-1; these are left out unless ticked)</small>':'')+'<div>';
-    res.behaviors.forEach((b,i)=>{h+='<label class="dr-bl"><input type="checkbox" data-drb="'+i+'"'+(haveBeh?'':' checked')+'> <b>'+esc(b.label)+'</b>'+(b.isRep?' <small>(replacement)</small>':'')+(b.def?'<small class="dr-def">'+esc(b.def)+'</small>':'')+'</label>';});
-    h+='</div></div>';
-  }
-  h+='<div class="dr-acts"><label class="dr-over"><input type="checkbox" id="drOver"> Replace what the bar and the form already hold</label><button type="button" id="drPlace" class="primary">Place in the bar and Form DM-1</button></div>';
-  out.innerHTML=h;
-  $('#drPlace').addEventListener('click',drPlace);
-}
-async function drPlace(){
-  const res=DR.res;if(!res)return;
-  const over=!!$('#drOver').checked,bar={},dm={},tick=[];
-  res.fields.forEach((f,i)=>{
-    const c=$('#drOut [data-dr="'+i+'"]');if(!c||!c.checked)return;
-    const v=String(($('#drOut [data-drv="'+i+'"]')||{}).value||'').trim();if(!v)return;
-    tick.push(f);
-    f.to.forEach(t=>{const [where,key]=t.split(':');
-      if(where==='bar'){bar[key]=v;}
-      else if(f.k==='name'){const n=f.value===v?f:nbhDocRead.splitName(v);if(key==='s.first'&&n.first)dm[key]=n.first;if(key==='s.last'&&n.last)dm[key]=n.last;}
-      else dm[key]=v;});
-  });
-  const behs=res.behaviors.filter((b,i)=>{const c=$('#drOut [data-drb="'+i+'"]');return c&&c.checked;});
-  /* v22.25 the ticked contacts, as corrected */
-  const cons=(res.contacts||[]).map((c,i)=>{const t=$('#drOut [data-drc="'+i+'"]');if(!t||!t.checked)return null;const o={name:'',rel:'',phone:'',phone2:'',email:'',addr:'',lang:c.lang||'',note:c.note||''};
-    document.querySelectorAll('#drOut [data-drcf][data-i="'+i+'"]').forEach(e=>{o[e.dataset.drcf]=String(e.value||'').trim();});return o.name?o:null;}).filter(Boolean);
-  /* v22.27 the ticked teachers */
-  const team=(res.team||[]).map((t,i)=>{const c=$('#drOut [data-drt="'+i+'"]');if(!c||!c.checked)return null;const o={name:'',role:'',inv:'',sb:'Yes',svc:t.svc,svcFreq:t.svcFreq};
-    document.querySelectorAll('#drOut [data-drtf][data-i="'+i+'"]').forEach(e=>{o[e.dataset.drtf]=String(e.value||'').trim();});return o.name?o:null;}).filter(Boolean);
-  if(!tick.length&&!behs.length&&!cons.length&&!team.length){alert('Tick at least one detail to place.');return;}
-  const rep={bar:[],kept:[],dm:null,beh:0};
-  /* the bar */
-  const BAR={client:'#pClient',sid:'#pSid',grade:'#pGrade',site:'#pSite',bcba:'#pBcba'};
-  Object.keys(bar).forEach(k=>{const el=$(BAR[k]);if(!el)return;if(el.value.trim()===bar[k])return;if(el.value.trim()&&!over){rep.kept.push(k);return;}
-    el.value=bar[k];el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));rep.bar.push(k);});
-  if(typeof paintSum==='function')paintSum();
-  /* Form DM-1, opened if it is not */
-  if(Object.keys(dm).length||cons.length||team.length){
-    if(!state.frames['DM-1'])openForm('DM-1',true);
-    const t0=Date.now();while(!state.status['DM-1']&&Date.now()-t0<15000)await new Promise(r=>setTimeout(r,120));
-    rep.dm=await grab('DM-1','fill',{fields:dm,over,contacts:cons,team},8000);
-  }
-  /* the case: target behaviors from a plan, when the forms hold none */
-  if(behs.length){
-    const t1=Date.now();while(factsBusy&&Date.now()-t1<6000)await new Promise(r=>setTimeout(r,100));   /* a gather under way would write over them */
-    const f=Object.assign({},state.facts||{});f.src=Object.assign({},f.src||{});
-    f.behaviors=behs.map(b=>({label:b.label,def:b.def||'',ex:'',nex:'',type:b.isRep?'replacement':'',isRep:!!b.isRep,fn:'',fnKey:'',dim:'',unit:'',rep:'',ctx:'',src:'document'}));
-    f.src.behaviors='document';f.when=new Date().toISOString();
-    setFacts(f,true);rep.beh=behs.length;
-  }
-  /* the details reach the other open forms as the packet does */
-  Object.values(state.frames).forEach(fr=>{if(fr!==state.frames['DM-1'])pushPacketTo(fr);});
-  setTimeout(()=>Object.values(state.frames).forEach(fr=>ask(fr,'status')),400);
-  try{$('#dlg').close();}catch(e){}
-  const bits=[],kept=[];
-  if(rep.bar.length)bits.push(rep.bar.length+' in the bar');
-  const rc=rep.dm&&rep.dm.cons||{},rt=rep.dm&&rep.dm.team||{},cput=(rep.dm&&rep.dm.put||[]).filter(k=>/^(?:c|t|sv)\[/.test(k)).length;
-  if(rep.dm&&(rep.dm.put||[]).length-cput)bits.push(((rep.dm.put||[]).length-cput)+' in Form DM-1');
-  if(rc.added||rc.completed)bits.push((rc.added?rc.added+(rc.added===1?' contact':' contacts')+' added':'')+(rc.added&&rc.completed?', ':'')+(rc.completed?rc.completed+(rc.completed===1?' contact':' contacts')+' completed':'')+' in Form DM-1');
-  if(rt.added||rt.completed)bits.push((rt.added?rt.added+(rt.added===1?' team member':' team members')+' added':'')+(rt.added&&rt.completed?', ':'')+(rt.completed?rt.completed+(rt.completed===1?' team member':' team members')+' completed':'')+' in Form DM-1');
-  if(rt.svc)bits.push(rt.svc+(rt.svc===1?' related service':' related services')+' given a provider');
-  if(rt.full)kept.push(rt.full+(rt.full===1?' teacher':' teachers')+' (Form DM-1\u2019s team holds '+rt.max+' at most)');
-  if(rep.beh)bits.push(rep.beh+(rep.beh===1?' target behavior':' target behaviors')+' to the case');
-  if(rep.kept.length)kept.push(rep.kept.length+' in the bar');
-  if(rep.dm&&(rep.dm.kept||[]).length)kept.push(rep.dm.kept.length+' in Form DM-1');
-  let msg=bits.length?'Placed: '+bits.join('; ')+'.':'Nothing new to place.';
-  if(kept.length)msg+=' Left as they were: '+kept.join(', ')+' (tick Replace to change them).';
-  if(!rep.dm&&(Object.keys(dm).length||cons.length||team.length))msg+=' Form DM-1 did not answer: open it and try again.';
-  if(rc.full)msg+=' '+rc.full+(rc.full===1?' contact was':' contacts were')+' not placed: Form DM-1 holds '+rc.max+' at most.';
-  if(rep.dm&&(rep.dm.none||[]).length)msg+=' Not taken by the form: '+rep.dm.none.length+'.';
-  if(rep.dm&&(rep.dm.put||[]).length)msg+=' Check Form DM-1.';
-  wsUI.toast(msg,{ms:9000});
-  if(state.frames['DM-1']&&state.cur!=='DM-1')openForm('DM-1',true);
-}
-$('#readDoc').addEventListener('click',drOpen);
+<script id="nbh-docread" src="nbh-shell-docread.js"></script>   <!-- v25.68 Read a document, its own file beside this page (the page's size budget) -->
+<script>/* v25.68 a copy of the page without nbh-shell-docread.js beside it says so, rather than doing nothing */
+if(typeof nbhDocRead==='undefined'){const b=document.getElementById('readDoc');if(b)b.addEventListener('click',()=>wsUI.alert('Read a document is not in this copy of the workstation: nbh-shell-docread.js is not beside it. Open the workstation from its web address or its folder.'));}
 </script>
 <script id="nbh-pwa">
 /* ================= the offline copy and the installed app (v21.43) =================
@@ -11627,7 +10890,7 @@ function graphHtml(b,d,W,rep){const s=ddStats(b,d);if(!s)return '';const col=rep
 function graphsHtml(f,W){const m=ddMain(f);
   if(!m.main)return '<section class="ch-p ch-o3" aria-labelledby="chGM"><div class="ch-h"><h3 id="chGM">The data</h3><button type="button" class="ch-open" data-chopen="DD-1" aria-label="Open DD-1"><span class="ch-code">DD-1</span></button></div>'+
     '<p class="ch-empty">No days of data from Form DD-1 yet'+(m.d&&m.rep?' for a target to bring down':'')+'. The graph of the main target behavior, with its phases and the change since baseline, shows here once DD-1 holds them.</p><div class="ch-btns"><button type="button" data-chopen="DD-1">Open DD-1</button></div></section>'+(m.rep?graphHtml(m.rep,m.d,W,true):'');
-  return graphHtml(m.main,m.d,W,false)+(m.rep?graphHtml(m.rep,m.d,W,true):'');}
+  return graphHtml(m.main,m.d,W,false)+(typeof w1HoldHtml==='function'?w1HoldHtml(f,m):'')+(m.rep?graphHtml(m.rep,m.d,W,true):'');}   /* v25.68 what may be holding progress back, under the graph */
 /* the plan's parts (Form TD-1's cards and its response to the behavior) and where each stands: "In use" once the plan runs
    (TD-1's start date has come, or Form DD-1 has a phase after baseline), "Starts" or "Planned" before; "Check" on a part
    when a step Form TI-1's last deciding check found missed is one of that part's steps on TD-1, and a Check line of its own
@@ -12085,7 +11348,7 @@ if(!d.getElementById('ws-sr-frame-css')){const st=d.createElement('style');st.id
 w.__srFit=1;}
   /* the sheet column at 180 px: the form measures its boxes and its fit again, once it has settled */
   if(w.__srFit===1&&d.documentElement.classList.contains('nbh-rail')&&state.status[idOf(f)]&&!state.pending[idOf(f)]){w.__srFit=2;try{const F=w.nbhUI&&w.nbhUI.fields;if(F&&F.reset&&F.run){F.reset();F.run();}if(w.nbhFitScreen&&w.nbhFitScreen.fit)w.nbhFitScreen.fit();}catch(e){}}
-patchToast(f);docFrame(f);
+patchToast(f);
 const n=tabsOf(d).length,few=a&&n>0&&n<=6;if(!!w.__nbhNoSheets!==few){w.__nbhNoSheets=few;try{if(w.nbhSheets&&w.nbhSheets.run)w.nbhSheets.run();}catch(e){}}
 sheetMarks(d);focusWords(d);});
 const d=docOf(curFrame()),R=d&&d.documentElement;B.classList.toggle('sr-frail',!!R&&R.classList.contains('nbh-rail')&&!R.classList.contains('nbh-railoff'));}
@@ -12095,11 +11358,18 @@ const nx=$('#aNext');if(nx){nx.classList.remove('sr-cut');if(nx.offsetParent&&nx
 const sp=$('#aSheet');if(sp&&id&&!sp.title)sp.title='Choose a sheet';}
 const ovWide=()=>A()&&COARSE.matches&&innerWidth<1500&&!NARROW.matches&&!B.classList.contains('ws-navrail');
 let hadForm=false;
-function railOv(){const f=B.classList.contains('has-form'),on=ovWide()&&f&&!fullOn();B.classList.toggle('sr-ov',on);
+/* v25.68 (the BCBA, 11/6) the list opened by hand while a form is open is kept, beside the form, until it is closed: opening a
+   form or a sheet no longer puts it away then (kept for this session) */
+let KEEP=false,wasHid=null;try{KEEP=sessionStorage.getItem('nbh.ws.railKeep')==='1';}catch(e){}
+const srKeep=()=>KEEP&&ovWide();
+function keepSet(v){v=!!v;if(KEEP===v)return;KEEP=v;try{if(v)sessionStorage.setItem('nbh.ws.railKeep','1');else sessionStorage.removeItem('nbh.ws.railKeep');}catch(e){}}
+function railOv(){const f=B.classList.contains('has-form'),hid=B.classList.contains('rail-hidden');
+if(ovWide()&&f&&wasHid===true&&!hid&&B.classList.contains('sr-ov'))keepSet(true);else if(KEEP&&hid&&wasHid===false&&ovWide())keepSet(false);wasHid=hid;
+const on=ovWide()&&f&&!fullOn()&&!srKeep();B.classList.toggle('sr-ov',on);
 const sc=$('#railScrim');if(on&&sc){const show=!B.classList.contains('rail-hidden');if(sc.hidden===show)sc.hidden=!show;}
 if(hadForm&&!f&&ovWide()&&!railHidden()&&B.classList.contains('rail-hidden')){B.classList.remove('rail-hidden');}
 hadForm=f;}
-function railAway(){if(!ovWide())return;B.classList.add('rail-hidden');const t=$('#railToggle');if(t)t.setAttribute('aria-expanded','false');const sc=$('#railScrim');if(sc)sc.hidden=true;}
+function railAway(){if(!ovWide()||srKeep())return;B.classList.add('rail-hidden');const t=$('#railToggle');if(t)t.setAttribute('aria-expanded','false');const sc=$('#railScrim');if(sc)sc.hidden=true;}
 document.addEventListener('click',e=>{if(!B.classList.contains('sr-ov')||B.classList.contains('rail-hidden'))return;const t=e.target;
 if(t.closest&&t.closest('nav.rail,#railToggle,#railEdge,#wnForms,#chColBtn,#fsForms,dialog,.wn-menu,#chSwPop,#pal'))return;railAway();},true);
 {const of=openForm;openForm=function(id){const r=of.apply(this,arguments);try{if(ovWide()&&state.frames[id])railAway();srRow();}catch(e){}setTimeout(()=>{try{srRow();frameSync();paintTree();}catch(e){}},400);return r;};}
@@ -12222,7 +11492,7 @@ const last=L[L.length-1];if(last&&last.form===form&&last.how===how&&last.title==
 L.push({form:String(form||'packet'),title:t,at,how:how==='pdf'?'pdf':'print'});if(L.length>50)L.splice(0,L.length-50);
 setTimeout(()=>{try{__wsCH.paint();}catch(e){}},0);}
 window.__srDocNote=docNote;
-function docFrame(f){const w=cw(f);if(!w||w.__srDoc)return;w.__srDoc=1;try{w.addEventListener('beforeprint',()=>{const id=idOf(f);if(id&&!state.pending[id])docNote(id,nameOf(id),'print');});}catch(e){}}
+/* v25.68 (the BCBA, 11/6) only what the workstation makes itself is listed: a form's own print dialog is not */
 function docWatch(w,h){let doc=null,n=0;const tick=()=>{if(!w||w.closed||++n>2400)return;try{const d=w.document;if(d!==doc&&d.readyState!=='loading'&&d.body&&d.body.childNodes.length){doc=d;
 w.addEventListener('beforeprint',()=>{let t='';try{t=T(w.document.title);}catch(e){}docNote(h.form,t||h.title,'print');});}}catch(e){return;}setTimeout(tick,250);};tick();}
 {const wo=window.open;window.open=function(u){const w=wo.apply(window,arguments);try{const s=String(u==null?'':u);if(w&&DOCK.hint&&(!s||s==='about:blank'||/^blob:/i.test(s)))docWatch(w,DOCK.hint);}catch(e){}return w;};}
@@ -12248,13 +11518,21 @@ else{rows=srPapers();note='Dated in the forms';}
 if(!rows.length)return '';
 return '<section class="ch-p ch-o7" id="chDocs" aria-labelledby="chDocsH"><div class="ch-h"><h3 id="chDocsH">Documents</h3><span class="ch-sp"></span>'+(note?'<span class="ch-note">'+note+'</span>':'')+'<button type="button" class="ch-open" data-srdocs="1" style="padding:0 10px">All documents</button></div>'+
 '<ul class="ch-list">'+rows.map(r=>'<li><button type="button" class="ch-row" '+(r.open?'data-chopen="'+esc(r.open)+'"':'data-srdocs="1"')+' aria-label="'+esc(r.t+', '+r.s.replace(/<[^>]+>/g,'')+(r.open?'. Open '+r.open:'. All documents'))+'"><span class="ch-code">'+esc(r.code)+'</span><span class="ch-tx"><span class="ch-t">'+esc(r.t)+'</span><span class="ch-s">'+r.s+'</span></span></button></li>').join('')+'</ul></section>';};
+const docWhenL=x=>new Date(x.at).toLocaleString([],{month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'});
 function docsOpen(){const L=(Array.isArray(state.docs)?state.docs:[]).slice().reverse(),P=srPapers();
-dialog('Documents','<p class="hp-lead">'+esc(T(packet().client)||'This case')+(L.length?': '+L.length+' paper'+(L.length===1?'':'s')+' printed or saved as PDF here, newest first.':': nothing printed or saved as PDF from the workstation yet.')+'</p>'+
-(L.length?'<ul class="sr-docl">'+L.map(x=>'<li><span class="sr-dt"><b>'+esc(docName(x))+'</b><span>'+(x.how==='pdf'?'Saved as PDF':'Print dialog opened')+' · '+esc(new Date(x.at).toLocaleString([],{month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'}))+'</span></span>'+(x.form!=='packet'?'<button type="button" data-clopen-form="'+esc(x.form)+'">Open '+esc(x.form)+'</button>':'')+'</li>').join('')+'</ul>':'')+
+dialog('Documents','<p class="hp-lead">'+esc(T(packet().client)||'This case')+(L.length?': '+L.length+' paper'+(L.length===1?'':'s')+' the workstation made for this case, newest first.':': nothing made by the workstation for this case yet.')+'</p>'+
+(L.length?'<ul class="sr-docl">'+L.map(x=>'<li><span class="sr-dt"><b>'+esc(docName(x))+'</b><span>'+(x.how==='pdf'?'Saved as PDF':'Print dialog opened')+' · '+esc(docWhenL(x))+'</span></span>'+(x.form!=='packet'?'<button type="button" data-clopen-form="'+esc(x.form)+'">Open '+esc(x.form)+'</button>':'')+
+'<button type="button" class="sr-docx" data-srdocx="'+esc(x.at)+'" aria-label="'+esc('Remove '+docName(x)+', '+docWhenL(x)+', from this list')+'">Remove</button></li>').join('')+'</ul>':'')+
 (P.length?'<h3 class="cl-h">Dated in the forms</h3><ul class="sr-docl">'+P.map(x=>'<li><span class="sr-dt"><b>'+esc(x.t)+'</b><span>'+x.s+'</span></span><button type="button" data-clopen-form="'+esc(x.open)+'">Open '+esc(x.open)+'</button></li>').join('')+'</ul>':'')+
-'<p class="hint">Each line is the form or packet, its title, when and how. The paper itself is not kept. A print is listed when its print dialog opened: the browser does not say whether it was printed, saved as PDF or cancelled.</p>'+
+'<p class="hint">Listed: what the workstation makes itself, when its print dialog opens (Build packet and the other papers it writes in its own window) and the PDFs Finish PDF saves; a form’s own print is not listed. Each line is the paper, when and how; the paper itself is not kept. Remove takes only the line off this list: no file is deleted.</p>'+
 '<p class="td-more"><button type="button" id="srDocRead">Read a document</button></p>');}
-document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-srdocs],[data-clopen-form],#srDocRead');if(!t)return;
+/* v25.68 (the BCBA, 11/6) a line comes off the list: asked the first time on this device, the line only, never a file */
+async function docRemove(at){const L=Array.isArray(state.docs)?state.docs:[],i=L.findIndex(x=>x&&x.at===at);if(i<0)return;const x=L[i],K='nbh.ws.docsRemoveAsked';let asked=false;try{asked=kvGet(K)==='1';}catch(e){}
+if(!asked){if(!(await wsUI.confirm('Remove this line from the Documents list?\n'+docName(x)+' ('+(x.how==='pdf'?'saved as PDF':'print dialog opened')+', '+docWhenL(x)+'). Only the line goes: no file is deleted, and nothing printed or saved is touched. This is not asked again on this '+HERE+'.',{ok:'Remove the line'})))return;try{kvSet(K,'1');}catch(e){}}
+const j=L.findIndex(y=>y&&y.at===at);if(j>=0)L.splice(j,1);docsOpen();say0('Line removed from the Documents list');try{__wsCH.paint();}catch(e){}
+setTimeout(()=>{const n=$('#dlgBody [data-srdocx]')||$('#dlgBody .hp-lead');if(n){if(!n.matches('button'))n.tabIndex=-1;try{n.focus({preventScroll:true});}catch(e){}}},30);}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-srdocs],[data-clopen-form],#srDocRead,[data-srdocx]');if(!t)return;
+if(t.dataset.srdocx){e.stopPropagation();docRemove(t.dataset.srdocx);return;}
 if(t.dataset.srdocs){e.stopPropagation();docsOpen();return;}if(t.id==='srDocRead'){try{$('#dlg').close();}catch(x){}$('#readDoc').click();return;}
 try{$('#dlg').close();}catch(x){}openForm(t.dataset.clopenForm);},true);
 /* keeping up */
@@ -12267,7 +11545,338 @@ addEventListener('resize',soon);setInterval(tick,1000);
 try{const ps=paintSave;paintSave=function(){const r=ps.apply(this,arguments);try{paintSaveSt();}catch(e){}return r;};}catch(e){}
 try{const ph=hxBar;hxBar=function(){const r=ph.apply(this,arguments);soon();return r;};}catch(e){}
 tick();renderRail();
-window.__wsSR={tick,paint:()=>paintSaveSt(),saveState,showToast,oneLine,srChoose,docNote,docsOpen,live:()=>live().map(n=>n.id),log:()=>TL.log,railAway,foldNow:()=>{Object.keys(NT.seen).forEach(k=>{NT.seen[k]=1;});tick();},fresh:()=>{NT.seen={};NT.fold={};tick();}};
+window.__wsSR={tick,paint:()=>paintSaveSt(),saveState,showToast,oneLine,srChoose,docNote,docsOpen,live:()=>live().map(n=>n.id),log:()=>TL.log,railAway,keep:v=>{keepSet(v);railOv();},foldNow:()=>{Object.keys(NT.seen).forEach(k=>{NT.seen[k]=1;});tick();},fresh:()=>{NT.seen={};NT.fold={};tick();}};
+})();
+</script>
+<!-- v25.68 wave 1, the shell (the BCBA, 11/6): her case files live in Files or Google Drive, asked once and kept (Caseload
+     settings changes it); Caseload's Key findings and the next 90 days (from the cards' trends, What's due and calEvents);
+     what may be holding progress back on the case home (TI-1, DD-1, TD-1, SR-1, DM-1, each line naming its form; it
+     suggests, it does not decide); previews on hover, the Apple Pencil held over and press and hold (never on a tap); and the
+     shell's motion (the loading outline, the case home in reading order, menus from their button, the save tick), each under
+     0.25 s, ended by a tap, off with Reduce Motion; numbers and graphs never move. Screen only; nothing in the case file. -->
+<style id="ws-w1-css">
+@media print{.w1-kf,.w1-n90w,#w1Pv,#w1Skel,.w1-hold,#w1Tick{display:none!important}}
+/* ---- Key findings and the next 90 days (Caseload) ---- */
+.w1-kf,.w1-n90w{text-align:left;margin:14px 0 18px;font:15px/1.45 var(--sans);color:var(--ink)}
+.w1-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 8px}
+.w1-h h3{margin:0;font:600 17px/1.25 var(--sans)}
+.w1-h span{color:var(--muted);font-size:13.5px}
+.w1-kfs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.w1-k{background:#fff;border:1px solid var(--rule);border-left:6px solid #1f5f8b;border-radius:12px;padding:12px 14px 10px;min-width:0}
+.w1-k.wrong{border-left-color:#c98a1b;background:#fffaf0}
+.w1-k b{display:block;font-size:15.5px;line-height:1.3;margin:0 0 4px}
+.w1-k p{margin:0 0 6px;font-size:14px;line-height:1.45;color:#2f3f47}
+.w1-k .w1-bs{display:flex;flex-wrap:wrap;gap:4px 10px}
+.w1-k button{min-height:44px;background:none;border:0;padding:0 4px;color:#1f4f73;font:600 14.5px/1.2 var(--sans);text-decoration:underline;text-underline-offset:3px;text-align:left;cursor:pointer}
+.w1-k button:hover{color:#123a57}
+.w1-none{color:var(--muted);font-size:14px;margin:0}
+.w1-n90w{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:12px 14px 6px}
+.w1-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
+.w1-chips button{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 12px;border:1px solid var(--rule);border-radius:999px;background:#fff;color:var(--ink);font:500 14px/1.2 var(--sans);cursor:pointer}
+.w1-chips button i{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
+.w1-chips button[aria-pressed="false"]{color:#5b6b72;background:#f3f5f5;text-decoration:line-through;text-decoration-color:#9aa8ad}
+.w1-chips button[aria-pressed="false"] i{background:none;border:2px solid var(--c)}
+.w1-n90{position:relative;margin:6px 0 0;overflow:hidden}
+.w1-ax{position:absolute;left:0;right:0;bottom:22px;border-top:1px solid #b8c6c3}
+.w1-tk{position:absolute;bottom:0;font-size:12.5px;color:#4d5f68;white-space:nowrap;transform:translateX(-50%)}
+.w1-tk::before{content:"";position:absolute;left:50%;top:-8px;height:6px;border-left:1px solid #b8c6c3}
+.w1-tk.l{transform:none}.w1-tk.l::before{left:0}.w1-tk.r{transform:translateX(-100%)}.w1-tk.r::before{left:auto;right:0}
+.w1-wk{position:absolute;bottom:23px;background:#fdf1dc;border-radius:6px 6px 0 0}
+.w1-wk span{position:absolute;left:4px;top:4px;font:600 12px/1.2 var(--sans);color:#7a4a05;white-space:nowrap}
+.w1-dot{position:absolute;width:44px;height:44px;margin-left:-22px;padding:0;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.w1-dot span{width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;font:700 11px/30px var(--sans);text-align:center;box-shadow:0 0 0 2px #fff}
+.w1-dot:hover span,.w1-dot:focus-visible span{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--c)}
+.w1-more{position:absolute;min-width:44px;height:44px;margin-left:-22px;border:1px solid var(--rule);border-radius:999px;background:#fff;font:600 12.5px/1 var(--sans);color:#2f3f47;cursor:pointer}
+.w1-n90e{color:var(--muted);font-size:14px;margin:6px 0 10px}
+.w1-n90l{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+#dlgBody .w1-kf,#dlgBody .w1-n90w{margin:10px 0 14px}
+/* ---- What may be holding progress back (the case home) ---- */
+.w1-lead{margin:0 0 6px;color:#3b4d55;font-size:14px;line-height:1.45}
+.w1-hl{list-style:none;margin:0;padding:0}
+.w1-hl li{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:1px solid #e6ecea}
+.w1-hl li:first-child{border-top:0}
+.w1-ic{flex:0 0 26px;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:700 14px/1 var(--sans);margin-top:1px}
+.w1-hl li.no .w1-ic{border:2px solid #c98a1b;color:#7a5208;background:#fff8ea}
+.w1-hl li.ok .w1-ic{border:2px solid #2f6b37;color:#2f6b37;background:#eef7f0}
+.w1-hl .ch-tx{flex:1 1 auto}
+#caseHome .w1-hl button{flex:0 0 auto;min-height:44px;padding:0 12px;border-radius:8px;font-size:14px;background:#fff;border:1px solid #b8c6c3;color:var(--ink)}
+#caseHome .w1-hl button:hover{background:var(--shade)}
+.w1-foot{margin:8px 0 2px;color:var(--muted);font-size:13px}
+.w1-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+/* ---- previews: hover, the Apple Pencil held over, press and hold ---- */
+#w1Pv{position:fixed;z-index:120;max-width:340px;min-width:220px;background:#fff;color:var(--ink);border:1px solid #cfd9d7;border-radius:12px;box-shadow:0 14px 36px rgba(20,40,50,.22);padding:12px 14px 10px;font:14px/1.42 var(--sans);pointer-events:none}
+#w1Pv[hidden]{display:none}
+#w1Pv .pv-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;margin:0 0 4px}
+#w1Pv .pv-c{display:inline-block;background:#e3eeea;color:#1e3a4f;border-radius:999px;padding:3px 9px;font:600 12px/1.1 var(--sans)}
+#w1Pv p{margin:0 0 4px}
+#w1Pv .pv-f{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #e6ecea;margin-top:8px;padding-top:6px;color:#4d5f68;font:13px/1.3 var(--serif)}
+#w1Pv .pv-bars{display:flex;gap:6px;align-items:flex-end;height:64px;position:relative;margin:8px 0 2px;border-bottom:1px solid #b8c6c3}
+#w1Pv .pv-cl{position:absolute;left:0;right:0;border-top:1.5px dashed #2f6b37;z-index:1}
+#w1Pv .pv-bars i{flex:1 1 0;background:#c98a1b;border-radius:3px 3px 0 0;display:block}
+#w1Pv .pv-bars i.ok{background:#2f7a4f}
+#w1Pv .pv-bl{display:flex;gap:6px;font-size:12px;color:#4d5f68}
+#w1Pv .pv-bl span{flex:1 1 0;text-align:center;white-space:nowrap}
+/* ---- motion: the loading outline (not motion: it shows with Reduce Motion too) ---- */
+#w1Skel{position:absolute;inset:0;z-index:3;background:var(--paper,#f4f6f6);padding:18px 22px;pointer-events:none;overflow:hidden}
+#w1Skel[hidden]{display:none}
+#w1Skel .sk-s{max-width:980px;margin:0 auto;background:#fff;border:1px solid #e3e9e8;border-radius:12px;padding:22px 28px;display:flex;flex-direction:column;gap:16px}
+#w1Skel .sk{background:#e3e9e8;border-radius:8px}
+#w1Skel .sk-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px}
+#dlgBody .sr-docl .sr-docx{background:#fff;border:1px solid #c9d3d1;color:#7c2222;padding:0 12px;border-radius:8px}
+#dlgBody .sr-docl .sr-docx:hover{background:#fbf1f1}
+#w1Tick{position:fixed;z-index:130;width:16px;height:16px;pointer-events:none}
+@media (prefers-reduced-motion:reduce){#w1Tick{display:none}}
+</style>
+<script id="ws-w1">
+/* v25.68 wave 1, the shell (the BCBA, 11/6): where the case files live, Key findings and the next 90 days on Caseload, what
+   may be holding progress back on the case home, previews, and the shell's motion */
+(()=>{
+const $=s=>document.querySelector(s),B=document.body;if(window.__wsW1)return;
+const T=v=>String(v==null?'':v).trim(),say0=t=>{try{say(t);}catch(e){}};
+const ED=typeof DRV_ED==='string'?DRV_ED:'nbh';
+const kv=(k,v)=>{try{if(v===undefined)return kvGet(k)||'';if(v===null)kvDel(k);else kvSet(k,v);}catch(e){}return '';};
+const RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
+const today=()=>tdISO(new Date()),r1=x=>Math.round(x*10)/10;
+const curKey=()=>{try{const p=packet();return T(p.client)&&!isStaffRec(p)?clKey(p):'';}catch(e){return '';}};
+const W={pass:false,goHold:'',off:new Set(),ev:[],ro:null};
+try{(JSON.parse(localStorage.getItem('nbh.ws.n90off')||'[]')||[]).forEach(x=>W.off.add(String(x)));}catch(e){}
+/* ---------- each student's facts, as at the last save (the student on screen: as the open forms give them) ---------- */
+const FC=new Map();
+function factsOf(r){if(!r)return null;if(r.key===curKey()&&state.facts)return state.facts;const k=r.key+'|'+r.saved;if(FC.has(k))return FC.get(k);
+  let f=null;try{const d=parseCase(r.text);f=d&&d.facts||null;}catch(e){f=null;}if(FC.size>80)FC.clear();FC.set(k,f);return f;}
+async function stuList(){let L=[];try{L=(await clList())||[];}catch(e){L=[];}return L.filter(r=>r&&!isStaffRec(r));}
+/* the school days (weekdays) before today, newest first; the days Form DD-1 holds data for */
+function lastSchool(n){const out=[],t=new Date();t.setHours(12,0,0,0);while(out.length<n){t.setDate(t.getDate()-1);const w=t.getDay();if(w&&w!==6)out.push(tdISO(t));}return out;}
+function dataDays(d){const s=new Set();if(!d)return s;[d.series,d.byDay,d.daily].forEach(A=>(Array.isArray(A)?A:[]).forEach(x=>{const k=x&&(x.date||x.d);if(k)s.add(String(k).slice(0,10));}));
+  (Array.isArray(d.behaviors)?d.behaviors:[]).forEach(b=>(Array.isArray(b&&b.series)?b.series:[]).forEach(p=>{if(p&&p.d)s.add(String(p.d).slice(0,10));}));return s;}
+/* of the last 10 school days since Form DD-1's first day, the ones with no data (the days it marks absent or no school left out) */
+function gaps(f){const d=f&&f.data,has=dataDays(d),from=[...has].sort()[0]||'',L=lastSchool(10).filter(x=>from&&x>=from),ab=new Set(d&&Array.isArray(d.absent)?d.absent:[]);
+  const asked=L.filter(x=>!ab.has(x));return {n:asked.length,miss:asked.filter(x=>!has.has(x)).length,ab:L.length-asked.length,any:has.size>0};}
+const fName=id=>((typeof ALL!=='undefined'&&ALL.find(x=>x[0]===id))||[])[1]||id;
+const name=r=>{try{return clName(r);}catch(e){return T(r&&r.client)||'A student';}};
+/* ================= decision 3: where the case files live ================= */
+const WK='nbh.ws.where@'+ED,where=()=>{const v=kv(WK);return v==='drive'||v==='files'?v:'';};
+window.__wsWhere=where;
+const canDrive=()=>typeof drvAvail==='function'&&drvAvail(),drvIs=()=>typeof drvOn==='function'&&drvOn();
+/* asked only where Google Drive could hold them: Drive in use here, or the Google key kept on this device */
+const askable=()=>canDrive()&&(drvIs()||!!(typeof clGid==='function'&&clGid()));
+const filesWord=()=>/iPad|iPhone/.test(HERE)?'Files on this '+HERE:'a folder on this '+HERE;
+const whereTxt=w=>w==='drive'?'your school Google Drive':w==='files'?filesWord():'';
+async function askWhere(){if(!canDrive()){kv(WK,'files');return 'files';}
+  const cur=where()||(drvIs()?'drive':'files');
+  const c=await wsUI.choose('Where do your case files live?\nOpen case and Save case use the place you choose, on this '+HERE+'. Caseload settings can change it.',
+    [{v:'files',label:'In '+filesWord(),kind:cur==='files'?'primary':''},{v:'drive',label:'In Google Drive',kind:cur==='drive'?'primary':''},{v:'',label:'Cancel'}]);
+  if(c!=='files'&&c!=='drive')return '';kv(WK,c);paintWhere();
+  if(c==='drive'&&!drvIs()&&typeof drvLink==='function'){try{await drvLink();}catch(e){}}
+  try{__wsSR.paint();}catch(e){}say0('Case files: '+whereTxt(c));return c;}
+function passClick(sel){W.pass=true;try{const b=$(sel);if(b)b.click();}finally{W.pass=false;}}
+async function driveOpen(){
+  if(!drvIs()){const c=await wsUI.choose('Google Drive is not in use on this '+HERE+' yet\nUse Google Drive keeps the caseload there; or open a file this time.',[{v:'link',label:'Use Google Drive',kind:'primary'},{v:'file',label:'Open a file instead'},{v:'',label:'Cancel'}]);
+    if(c==='link'&&typeof drvLink==='function')await drvLink();else if(c==='file')passClick('#openCase');return;}
+  try{drvSoon(true,50);}catch(e){}const L=(await stuList()).sort((a,b)=>String(b.saved).localeCompare(String(a.saved)));
+  const when=s=>{try{return drvWhen(s);}catch(e){return '';}};
+  dialog('Open a case from Google Drive','<p class="hp-lead">The students in your school Google Drive'+(typeof drvAcct==='function'&&drvAcct()?' ('+esc(drvAcct())+')':'')+', as this '+esc(HERE)+' last brought them. Opening one gets its newest copy first.</p>'+
+    (L.length?'<ul class="sr-docl">'+L.map(r=>'<li><span class="sr-dt"><b>'+esc(name(r))+'</b><span>Saved '+esc(when(r.saved))+(r.dev?' on the '+esc(r.dev):'')+'</span></span><button type="button" data-w1open="'+esc(r.key)+'" aria-label="Open '+esc(name(r))+'’s case">Open</button></li>').join('')+'</ul>'
+      :'<p>No student in Google Drive yet: Save case sends each student there.</p>')+
+    '<p class="td-more"><button type="button" id="w1OpenFile">Open a file instead</button> <button type="button" id="w1WhereChg">Change where case files live</button></p>');}
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('#openCase,#blNew');if(!t||W.pass)return;
+  let w=where();
+  if(!w&&askable()){e.stopImmediatePropagation();e.preventDefault();w=await askWhere();if(!w)return;if(t.id==='blNew'||w==='files'){passClick('#'+t.id);return;}}
+  if(t.id==='openCase'&&w==='drive'&&canDrive()){e.stopImmediatePropagation();e.preventDefault();driveOpen();}},true);
+$('#dlgBody').addEventListener('click',e=>{const o=e.target.closest('[data-w1open]');if(o){try{$('#dlg').close();}catch(x){}caseloadGo(o.dataset.w1open,'');return;}
+  if(e.target.closest('#w1OpenFile')){try{$('#dlg').close();}catch(x){}passClick('#openCase');return;}
+  if(e.target.closest('#w1WhereChg')){askWhere();}});
+function whereHtml(){const w=where(),d=canDrive();
+  return '<div class="cl-drive" id="w1Where"><b>Case files</b> <span id="w1WhereT">'+(!d?'Open case and Save case use '+esc(filesWord())+' (Google Drive works when the workstation is opened from its web address).':
+    w?'Open case and Save case use <b>'+esc(whereTxt(w))+'</b>.':askable()?'Not chosen yet: Open case asks the first time.':'Open case and Save case use '+esc(filesWord())+' until Google Drive is set up here; Choose keeps them in either.')+'</span>'+(d?' <button type="button" class="sm" id="w1WhereChg">'+(w?'Change':'Choose')+'</button>':'')+'</div>';}
+function paintWhere(){const el=$('#w1Where');if(el)el.outerHTML=whereHtml();}
+/* ================= item 4: Key findings on Caseload ================= */
+const lc1=s=>String(s).charAt(0).toLowerCase()+String(s).slice(1);
+const REV=/^(Plan review|Annual IEP review|Reevaluation due|Crisis plan review|Check after exit)/;
+function findings(L){const out=[],wrong=[],thin=[],t0=today(),t30=tdAdd(t0,30);
+  L.forEach(r=>{const t=(clTrendsFor(r)||[])[0],x=t&&clLevelTrend(t);if(x&&x.good===false)wrong.push({r,t,x});});
+  if(wrong.length){const n=wrong.length;out.push({k:'wrong',t:n+' student'+(n===1?' is':'s are')+' trending the wrong way.',
+    p:wrong.slice(0,3).map(w=>esc(name(w.r))+', '+esc(String(w.t.name||'the target behavior').toLowerCase())+' '+esc(w.x.dir)+' over the last '+Math.min(10,(w.t.pts||[]).length)+' days of data').join('; ')+(n>3?'; and '+(n-3)+' more':'')+' (Form DD-1, as on the cards).',
+    b:wrong.slice(0,3).map(w=>w1HoldHtml(factsOf(w.r)||{})?'<button type="button" data-w1hold="'+esc(w.r.key)+'">See what may be holding '+esc(name(w.r))+' back ›</button>':'<button type="button" data-w1go="'+esc(w.r.key)+'" data-w1form="DD-1">Open DD-1 for '+esc(name(w.r))+' ›</button>').join('')});}
+  L.forEach(r=>{const f=factsOf(r)||{};let ev=[];try{ev=calEvents(f).filter(e=>REV.test(e.what)&&e.date>=t0&&e.date<=t30).sort((a,b)=>a.date.localeCompare(b.date));}catch(e){}if(!ev.length)return;
+    const g=gaps(f);if(!g.any||g.miss>=3)thin.push({r,e:ev[0],g});});
+  if(thin.length){const n=thin.length;out.push({k:'thin',t:n+' review'+(n===1?'':'s')+' in the next 30 days '+(n===1?'rests':'rest')+' on thin data.',
+    p:thin.slice(0,3).map(x=>esc(name(x.r))+': '+esc(lc1(x.e.what.replace(/ due$/,'')))+' '+esc(tdMd(x.e.date))+', '+(x.g.any?x.g.miss+' of the last '+(x.g.n+x.g.ab)+' school days without data'+(x.g.ab?' ('+x.g.ab+' marked absent)':''):'no data')+' on Form DD-1').join('; ')+(n>3?'; and '+(n-3)+' more':'')+'.',
+    b:thin.slice(0,3).map(x=>'<button type="button" data-w1go="'+esc(x.r.key)+'" data-w1form="DD-1">Open DD-1 for '+esc(name(x.r))+' ›</button>').join('')});}
+  return out;}
+function kfHtml(L){const F=findings(L);
+  return '<section class="w1-kf" aria-labelledby="w1KfH'+W.n+'"><div class="w1-h"><h3 id="w1KfH'+W.n+'">Key findings</h3><span>from the rules the cards and What’s due already use</span></div>'+
+    (F.length?'<div class="w1-kfs">'+F.map(x=>'<div class="w1-k '+x.k+'"><b>'+esc(x.t)+'</b><p>'+x.p+'</p><div class="w1-bs">'+x.b+'</div></div>').join('')+'</div>'
+      :'<p class="w1-none">Nothing stands out in the students kept here, as at their last save.</p>')+'</section>';}
+/* ================= item 5: the next 90 days ================= */
+const TY=[['fba','FBA due','#8a4b00',e=>e.form==='FS-1'],['rev','Plan reviews','#1f5f8b',e=>e.form==='PR-1'||/^Crisis plan review/.test(e.what)],['iep','Annual IEP','#6a3d9a',e=>/^Annual IEP/.test(e.what)],
+  ['ree','Reevaluations','#2f6b37',e=>/^Reevaluation/.test(e.what)],['cr','CR-1 notices','#a8321e',e=>/restraint or seclusion|restraint debriefing/.test(e.what)],['im','IM-1 follow-ups','#7c2d5b',e=>e.form==='IM-1'],
+  ['pa','PA-1 reassessments','#5b6b00',e=>e.form==='PA-1'],['start','Plan starts','#0e5c63',e=>/^Plan starts/.test(e.what)],['r18','Rights at 18','#4d5f68',e=>e.form==='DM-1'&&/Rights at 18/.test(e.what)],
+  ['cons','Consent renewals','#1e3a4f',e=>e.form==='IC-1']];
+const tyOf=e=>TY.find(t=>t[3](e));
+function events(L){const t0=today(),t90=tdAdd(t0,90),E=[];
+  L.forEach(r=>{const f=factsOf(r)||{};let ev=[];try{ev=calEvents(f);}catch(e){ev=[];}const ini=(()=>{try{return clIniOf(r);}catch(e){return '?';}})();
+    ev.forEach(e=>{const ty=tyOf(e);if(!ty||e.date<t0||e.date>t90)return;E.push({key:r.key,who:name(r),ini,date:e.date,what:e.what,form:e.form,ty:ty[0]});});});
+  const seen=new Set();return E.filter(e=>{const k=e.key+'|'+e.date+'|'+e.what;if(seen.has(k))return false;seen.add(k);return true;}).sort((a,b)=>a.date.localeCompare(b.date)||a.who.localeCompare(b.who));}
+function n90Html(L){W.n++;const E=events(L);W.ev=E;const tys=TY.filter(t=>E.some(e=>e.ty===t[0]));
+  return '<section class="w1-n90w" aria-labelledby="w1NH'+W.n+'"><div class="w1-h"><h3 id="w1NH'+W.n+'">Next 90 days</h3><span>'+(E.length?E.length+' date'+(E.length===1?'':'s')+' the forms hold for '+new Set(E.map(e=>e.key)).size+' student'+(new Set(E.map(e=>e.key)).size===1?'':'s'):'')+'</span></div>'+
+    (E.length?'<div class="w1-chips" role="group" aria-label="Show these dates">'+tys.map(t=>'<button type="button" data-w1ty="'+t[0]+'" aria-pressed="'+!W.off.has(t[0])+'" style="--c:'+t[2]+'"><i aria-hidden="true"></i>'+esc(t[1])+' · '+E.filter(e=>e.ty===t[0]).length+'</button>').join('')+'</div><div class="w1-n90" data-w1n90="1"></div>'
+      :'<p class="w1-n90e">No date in the next 90 days in the students kept here: the forms’ reviews, IEP dates, reevaluations, notices and the FBA timeline show here as the forms hold them.</p>')+'</section>';}
+const DAY=864e5,dIdx=iso=>{const a=new Date(today()+'T12:00:00'),b=new Date(iso+'T12:00:00');return Math.round((b-a)/DAY);};
+function n90Paint(el){if(!el||!el.isConnected)return;const Wd=el.clientWidth;if(!Wd)return;el.dataset.w=String(Wd);
+  const E=W.ev.map((e,i)=>Object.assign({i},e)).filter(e=>!W.off.has(e.ty)),pad=26,X=n=>pad+n/90*(Wd-2*pad),lv=[],LV=4,STEP=40,col=TY.reduce((o,t)=>(o[t[0]]=t[2],o),{});
+  let h='',top=0,more={};
+  E.forEach(e=>{const x=X(dIdx(e.date));let k=0;while(k<LV&&lv[k]!=null&&x-lv[k]<44)k++;if(k>=LV){const mk=Math.round(x/44);more[mk]=more[mk]||{x,n:0,L:[]};more[mk].n++;more[mk].L.push(e);return;}lv[k]=x;top=Math.max(top,k);
+    const lab=TY.find(t=>t[0]===e.ty)[1].replace(/s$/,'')+': '+e.what+', '+e.who+', '+new Date(e.date+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'numeric',day:'numeric'})+', '+(dIdx(e.date)===0?'today':'in '+dIdx(e.date)+' day'+(dIdx(e.date)===1?'':'s'))+'. Opens '+e.form;
+    h+='<button type="button" class="w1-dot" data-w1ev="'+e.i+'" style="left:'+x.toFixed(1)+'px;bottom:'+(26+k*STEP)+'px;--c:'+col[e.ty]+'" aria-label="'+esc(lab)+'"><span aria-hidden="true">'+esc(e.ini)+'</span></button>';});
+  Object.values(more).forEach(m=>{h+='<button type="button" class="w1-more" data-w1more="'+m.L.map(e=>e.i).join(',')+'" style="left:'+m.x.toFixed(1)+'px;bottom:'+(26+LV*STEP)+'px" aria-label="'+m.n+' more dates near '+esc(tdMd(m.L[0].date))+': show them">+'+m.n+'</button>';top=LV;});
+  /* a week with three or more dates is shaded */
+  const wk={};E.forEach(e=>{const d=new Date(e.date+'T12:00:00'),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));const k=tdISO(m);wk[k]=(wk[k]||0)+1;});
+  const H=26+(top+1)*STEP+18;let bands='';
+  Object.entries(wk).filter(x=>x[1]>=3).forEach(([k,n])=>{const a=Math.max(pad,X(dIdx(k))),b=Math.min(Wd-pad,X(dIdx(k)+7));bands+='<div class="w1-wk" style="left:'+a.toFixed(1)+'px;width:'+Math.max(30,b-a).toFixed(1)+'px;height:'+(H-23)+'px"><span>Week of '+esc(tdMd(k))+': '+n+' due</span></div>';});
+  let ax='<div class="w1-ax"></div><span class="w1-tk l" style="left:'+pad+'px">Today</span>';const d=new Date(today()+'T12:00:00');
+  for(let i=1;i<=90;i++){const t=new Date(d.getTime()+i*DAY);if(t.getDate()===1&&i>6&&i<84)ax+='<span class="w1-tk" style="left:'+X(i).toFixed(1)+'px">'+esc(t.toLocaleDateString(undefined,{month:'short'}))+'</span>';}
+  ax+='<span class="w1-tk r" style="left:'+(Wd-pad).toFixed(1)+'px">'+esc(tdMd(tdAdd(today(),90)))+'</span>';
+  el.style.height=H+'px';el.innerHTML=bands+ax+h+(E.length?'':'<p class="w1-n90e" style="position:absolute;left:0;top:0">Every kind is turned off: tap one above to show it.</p>');}
+function n90All(){document.querySelectorAll('[data-w1n90]').forEach(n90Paint);}
+function n90Watch(){if(!window.ResizeObserver)return;if(!W.ro)W.ro=new ResizeObserver(es=>es.forEach(x=>{const el=x.target;if(Math.abs((+el.dataset.w||0)-el.clientWidth)>8)n90Paint(el);}));
+  document.querySelectorAll('[data-w1n90]').forEach(el=>{if(!el.__w1){el.__w1=1;W.ro.observe(el);}});}
+W.n=0;
+async function caseloadParts(host,after){if(!host)return;const L=await stuList();host.querySelectorAll(':scope>.w1-kf,:scope>.w1-n90w').forEach(x=>x.remove());if(!L.length||!host.isConnected)return;
+  const h=kfHtml(L)+n90Html(L);if(after&&after.parentNode===host)after.insertAdjacentHTML('afterend',h);else host.insertAdjacentHTML('afterbegin',h);n90All();n90Watch();}
+{const pb=paintBlank;paintBlank=async function(){const r=await pb.apply(this,arguments);try{const x=$('#blankCl');if(x&&!x.hidden)await caseloadParts(x,x.querySelector(':scope>.bl-rf')||x.querySelector(':scope>h2'));}catch(e){}return r;};}
+{const co=caseloadOpen;caseloadOpen=async function(){const r=await co.apply(this,arguments);try{const b=$('#dlgBody');if(b&&T($('#dlgTitle').textContent)==='Caseload'){await caseloadParts(b,b.querySelector(':scope>.hp-lead'));
+  const set=b.querySelector('#srClSet');if(set&&!set.querySelector('#w1Where'))set.insertAdjacentHTML('beforeend',whereHtml());}}catch(e){}return r;};}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-w1ty],[data-w1ev],[data-w1more],[data-w1hold],[data-w1go]');if(!t)return;
+  if(t.dataset.w1ty){const k=t.dataset.w1ty,on=W.off.has(k);if(on)W.off.delete(k);else W.off.add(k);try{localStorage.setItem('nbh.ws.n90off',JSON.stringify([...W.off]));}catch(x){}
+    document.querySelectorAll('[data-w1ty="'+k+'"]').forEach(b=>b.setAttribute('aria-pressed',String(on)));n90All();say0((on?'Showing ':'Hiding ')+t.textContent.replace(/ · \d+$/,''));return;}
+  if(t.dataset.w1more){const L=t.dataset.w1more.split(',').map(i=>W.ev[+i]).filter(Boolean);dialog('Dates near '+esc(tdMd(L[0].date)),'<ul class="sr-docl">'+L.map(e=>'<li><span class="sr-dt"><b>'+esc(e.what)+'</b><span>'+esc(e.who)+' · '+esc(tdMd(e.date))+'</span></span><button type="button" data-w1go="'+esc(e.key)+'" data-w1form="'+esc(e.form)+'">Open '+esc(e.form)+'</button></li>').join('')+'</ul>');return;}
+  const ev=t.dataset.w1ev!=null?W.ev[+t.dataset.w1ev]:null,key=ev?ev.key:t.dataset.w1hold||t.dataset.w1go,form=ev?ev.form:t.dataset.w1form||'';if(!key)return;
+  e.stopPropagation();try{$('#dlg').open&&$('#dlg').close();}catch(x){}W.goHold=t.dataset.w1hold?key:'';caseloadGo(key,form);if(W.goHold)holdFocus(0);},true);
+function holdFocus(n){if(n>40){W.goHold='';return;}const h=$('#w1Hold');if(h&&B.classList.contains('ws-home')&&curKey()===W.goHold){W.goHold='';h.scrollIntoView({block:'start',behavior:'auto'});const hd=h.querySelector('h3');if(hd){hd.tabIndex=-1;try{hd.focus({preventScroll:true});}catch(e){}}return;}
+  if(B.classList.contains('ws-home')&&curKey()===W.goHold&&n>12&&!h){W.goHold='';return;}setTimeout(()=>holdFocus(n+1),250);}
+/* ================= item 6: what may be holding progress back (the case home) ================= */
+const UP=b=>/replacement|acquisition|skill/i.test(b&&b.kind||'')||(b&&b.direction==='increase');
+window.w1HoldHtml=function(f,m0){try{const d=f&&f.data,m=m0||(window.__wsCH&&__wsCH.ddMain?__wsCH.ddMain(f):{}),b=m.main;if(!d||!b||!b.base||!b.cur||b.base.mean==null||b.cur.mean==null)return '';
+  const R=tdRules(f);if(!(b.cur.days>=R.minDays))return '';const up=UP(b),bm=+b.base.mean,cm=+b.cur.mean,chg=bm?((up?cm-bm:bm-cm)/bm*100):(up?(cm>0?100:0):(cm>0?-100:0));if(chg>=R.improvePct)return '';
+  const how='mean '+r1(cm)+' against '+r1(bm)+' in '+(b.baseName||'baseline')+(Math.abs(chg)>=1?' ('+Math.round(Math.abs(chg))+'% '+(chg<0?'worse':'better')+')':'');
+  const L=[],t0=today(),since=tdAdd(t0,-14),conds=(Array.isArray(d.conds)?d.conds:[]).filter(c=>c&&c.name&&c.from);
+  /* integrity: Form TI-1's deciding check against its criterion */
+  {const ti=f.integrity,tv=typeof tiDecisive==='function'?tiDecisive(ti):null,crit=ti&&ti.criterion||90;
+    if(!tv)L.push({ok:false,o:0,t:'No integrity check yet',s:'Form TI-1: whether the plan is run as written is not known.',open:'TI-1'});
+    else{const short=tv.status==='not met'||(tv.status!=='met'&&tv.pct!=null&&tv.pct<crit),ob=(ti.obs||[]).filter(o=>o&&o.date&&o.pct!=null).slice(-3);
+      if(short)L.push({ok:false,o:0,t:'Integrity '+(tv.pct!=null?r1(+tv.pct)+'%':'not met')+(tv.date?' on '+tdMd(tv.date):'')+', under '+crit+'%',s:'Form TI-1: the plan may not be running as written'+(ob.length>1?' (the last checks: '+ob.map(o=>r1(+o.pct)+'%').join(', ')+')':'')+'.',open:'TI-1'});
+      else L.push({ok:true,o:0,t:'Integrity '+(tv.pct!=null?r1(+tv.pct)+'%':'met')+(tv.date?' on '+tdMd(tv.date):''),s:'Form TI-1: at or above its '+crit+'%.',open:'TI-1'});}}
+  /* plan changes in the last 2 weeks: a phase on Form DD-1, the plan's start on TD-1, a schedule step on SR-1 */
+  {const ch=[];for(let i=1;i<conds.length;i++)if(conds[i].from>=since&&conds[i].from<=t0)ch.push({t:'A new phase on '+tdMd(conds[i].from)+': '+conds[i-1].name+' to '+conds[i].name,s:'Form DD-1: a change this recent may not show in the data yet.',open:'DD-1'});
+    const ad=f.plan&&f.plan.adoption;if(ad&&ad.start&&ad.start>=since&&ad.start<=t0)ch.push({t:'The plan started on '+tdMd(ad.start),s:'Form TD-1: a change this recent may not show in the data yet.',open:'TD-1'});
+    const sd=f.schedule&&f.schedule.decide;if(sd&&sd.since&&sd.since>=since&&sd.since<=t0)ch.push({t:'A schedule step on '+tdMd(sd.since)+(sd.step?': step '+sd.step:''),s:'Form SR-1: its card says when to go back a step.',open:'SR-1'});
+    if(ch.length)ch.forEach(x=>L.push(Object.assign({ok:false,o:1},x)));else L.push({ok:true,o:1,t:'No plan change in the last 2 weeks',s:'Form DD-1’s phases, TD-1’s start and SR-1’s steps.',open:'DD-1'});}
+  /* missing data: the last 10 school days */
+  {const g=gaps(f),n=g.n+g.ab,ab=g.ab?' ('+g.ab+' marked absent or no school)':'';if(g.n){if(g.miss>=3)L.push({ok:false,o:2,t:g.miss+' of the last '+n+' school days without data',s:'Form DD-1: the trend rests on fewer points'+ab+'.',open:'DD-1'});
+    else L.push({ok:true,o:2,t:'Data on '+(g.n-g.miss)+' of the last '+n+' school days',s:'Form DD-1'+ab+'.',open:'DD-1'});}
+    if(g.ab>=2)L.push({ok:false,o:4,t:'Absent or no school on '+g.ab+' of the last 10 school days',s:'Form DD-1 marks them: fewer school days in this phase.',open:'DD-1'});}
+  /* setting events: a change of medication Form DM-1 records since shortly before this phase */
+  {const hl=f.profile&&f.profile.health,cur=conds[conds.length-1],from=tdAdd(cur?cur.from:tdAdd(t0,-30),-14);
+    if(hl&&typeof hl==='object'){const mc=(Array.isArray(hl.changes)?hl.changes:[]).filter(c=>c&&c.date&&c.date>=from&&c.date<=t0).sort((a,b)=>b.date.localeCompare(a.date));
+      if(mc.length)L.push({ok:false,o:3,t:'A medication change on '+tdMd(mc[0].date)+(mc[0].med?': '+mc[0].med+(mc[0].kind?', '+String(mc[0].kind).toLowerCase():''):'')+(mc.length>1?' (and '+(mc.length-1)+' more)':''),s:'Form DM-1: a setting event to look at beside the data; Form MS-1 tracks its effects.',open:'DM-1'});
+      else if(Array.isArray(hl.meds)&&hl.meds.length)L.push({ok:true,o:3,t:'No medication change since '+tdMd(from),s:'Form DM-1’s health record.',open:'DM-1'});}}
+  /* agreement between observers on the main target: Form DD-1's 80% */
+  {const io=b.ioa;if(io&&io.mean!=null){const mn=+io.mean;if(mn<80)L.push({ok:false,o:5,t:'Observers agree on '+r1(mn)+'% ('+io.days+' day'+(io.days===1?'':'s')+'), under 80%',s:'Form DD-1: go over the definition with both observers before judging the plan.',open:'DD-1'});
+      else L.push({ok:true,o:5,t:'Observers agree: '+r1(mn)+'% on '+io.days+' day'+(io.days===1?'':'s'),s:'Form DD-1: at or above its 80%.',open:'DD-1'});}
+    else L.push({ok:false,o:5,t:'No second observer on '+b.name+' yet',s:'Form DD-1: agreement between observers is not known.',open:'DD-1'});}
+  L.sort((a,b)=>(a.ok-b.ok)||(a.o-b.o));
+  return '<section class="ch-p ch-o3 w1-hold" id="w1Hold" aria-labelledby="w1HoldH"><div class="ch-h"><h3 id="w1HoldH">What may be holding progress back</h3><span class="ch-sp"></span><span class="ch-note">from this case’s forms, most likely first</span></div>'+
+    '<p class="w1-lead">'+esc(b.name)+': '+b.cur.days+' days into '+esc(b.curName||'the plan')+', '+esc(how)+'; Form PR-1 counts a '+R.improvePct+'% improvement as progress.</p><ul class="w1-hl">'+
+    L.map(x=>'<li class="'+(x.ok?'ok':'no')+'"><span class="w1-ic" aria-hidden="true">'+(x.ok?'✓':'!')+'</span><span class="ch-tx"><span class="ch-t"><span class="w1-sr">'+(x.ok?'Checked: ':'To check: ')+'</span>'+esc(x.t)+'</span><span class="ch-s">'+esc(x.s)+'</span></span><button type="button" data-chopen="'+x.open+'">Open '+x.open+'</button></li>').join('')+
+    '</ul><p class="w1-foot">A list to check, not a verdict: each line is a rule the workstation already applies, and names the form it comes from. What to change is yours to decide.</p></section>';}catch(e){return '';}};
+/* ================= item 7: previews ================= */
+const PVSEL='#caseHome [data-chopen],#caseHome .ch-graph,.w1-dot,#rail .item[data-id]';
+const PV={el:null,tgt:null,pend:null,t:0,hold:0,sx:0,sy:0,touch:false,swallow:0,desc:null};
+function pvEl(){if(!PV.el){PV.el=document.createElement('div');PV.el.id='w1Pv';PV.el.setAttribute('role','tooltip');PV.el.hidden=true;document.body.appendChild(PV.el);}return PV.el;}
+const code=id=>'<span class="pv-c">'+esc(id)+'</span>';
+function formPv(id){const f=state.facts||{},nm=(typeof FORM_SHORT!=='undefined'&&FORM_SHORT[id])||fName(id),out=[];let foot='Tap to open '+id;
+  try{if(id==='TI-1'){const ti=f.integrity,ob=(ti&&ti.obs||[]).filter(o=>o&&o.date&&o.pct!=null).slice(-3),crit=ti&&ti.criterion||90;
+      if(ob.length){out.push('<div class="pv-bars" aria-hidden="true"><b class="pv-cl" style="bottom:'+crit+'%"></b>'+ob.map(o=>'<i class="'+(+o.pct>=crit?'ok':'')+'" style="height:'+Math.max(3,Math.min(100,+o.pct))+'%"></i>').join('')+'</div><div class="pv-bl">'+ob.map(o=>'<span>'+esc(tdMd(o.date))+' · '+r1(+o.pct)+'%</span>').join('')+'</div>');
+        const ms=(ti.missed||[]).filter(m=>m&&m.d).sort((a,b)=>(+a.pct||0)-(+b.pct||0))[0];if(ms)out.push('<p>Missed most often: <b>step '+esc(ms.n)+'</b>, '+esc(String(ms.d).slice(0,90))+(String(ms.d).length>90?'…':'')+'</p>');
+        foot+='</span><span>dashed line: '+crit+'%';return {h:'Last '+ob.length+' integrity check'+(ob.length===1?'':'s'),c:id,b:out.join(''),foot};}}
+    if(id==='DD-1'){const m=__wsCH.ddMain(f),s=m.main&&__wsCH.ddStats(m.main,m.d);if(s){out.push('<p><b>'+esc(m.main.name)+'</b>: last day of data '+esc(tdMd(s.last.d))+' ('+esc(String(s.last.v))+')</p><p>'+(s.base!=null?esc(s.baseName)+' mean '+r1(s.base)+' · ':'')+'last '+s.n5+' days '+r1(s.last5)+'</p>');}}
+    else if(id==='FS-1'&&f.fn&&(f.fn.label||f.fn.key)){const st=(f.fn.statements||[]).filter(Boolean).length;out.push('<p>Function: <b>'+esc(f.fn.label||f.fn.key)+'</b></p>'+(st?'<p>'+st+' hypothesis statement'+(st===1?'':'s')+'</p>':''));}
+    else if(id==='TD-1'&&f.plan){const p=f.plan,n=(p.antCards||[]).length+(p.teach||[]).length+(p.sched||[]).length+(p.respond&&p.respond.target?1:0),ad=p.adoption||{};out.push('<p>'+n+' plan component'+(n===1?'':'s')+(p.fn?' for '+esc(p.fn):'')+'</p>'+(ad.date?'<p>Adopted '+esc(tdMd(ad.date))+'</p>':ad.start?'<p>Starts '+esc(tdMd(ad.start))+'</p>':''));}
+    else if(id==='IC-1'){const c=csOf(f);out.push('<p>Consent '+esc(c.word)+(c.date?' ('+esc(tdMd(c.date))+')':'')+'</p>');}
+    else if(f.evidence&&f.evidence[id]){const e=f.evidence[id];out.push('<p>'+esc(String(e.fn||e.statement||'').split(/\.\s/)[0].slice(0,140))+'</p><p>'+esc([T(e.strength),T(e.method).slice(0,48),T(e.dates)].filter(Boolean).join(' · '))+'</p>');}
+    else if(id==='CR-1'&&f.crisis){const c=f.crisis,s=c.restraints&&c.restraints.semester;out.push('<p>'+(c.revNext?'Next review '+esc(tdMd(String(c.revNext).slice(0,10)))+'. ':'')+(s?s+' restraint'+(s===1?'':'s')+' this semester.':'')+'</p>');}}catch(e){}
+  if(!out.length){const w=typeof srWord==='function'?srWord(id):null;out.push('<p>'+(w?esc(w.w)+(w.n?' · '+w.n+' fields filled':''):inCase(id)?'In the case':'Not in this case yet: it opens empty')+'</p>');}
+  return {h:nm,c:id,b:out.join(''),foot};}
+function railPv(id){const row=(typeof CASE_MAP!=='undefined'?CASE_MAP:[]).map(s=>(s[2]||[]).find(x=>x[0]===id)).find(Boolean),w=typeof srWord==='function'?srWord(id):null,st=state.status[id];
+  const st2=w?w.w+(w.n?' · '+w.n+' fields filled':st&&st.filled?' · '+st.filled+' fields filled':''):state.frames[id]?'Open, nothing filled yet':'Not started';
+  return {h:fName(id),c:id,b:(row?'<p>For '+esc(row[1])+'.</p>':'')+'<p>'+esc(st2)+'</p>',foot:'Tap to open '+id};}
+function graphPv(t,ev){try{const f=state.facts||{},m=__wsCH.ddMain(f),sec=t.closest('section'),b=sec&&sec.querySelector('#chGR')?m.rep:m.main,s=b&&__wsCH.ddStats(b,m.d),svg=t.querySelector('svg');if(!s||!svg)return null;
+  const C=[...svg.querySelectorAll('circle')];if(!C.length)return null;const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal,sx=r.width/(vb&&vb.width||r.width),px=((ev?ev.clientX:r.left+r.width)-r.left)/sx;
+  let k=0,dk=1e9;C.forEach((c,i)=>{const d=Math.abs(+c.getAttribute('cx')-px);if(d<dk){dk=d;k=i;}});const p=s.P[Math.min(k,s.P.length-1)];if(!p)return null;
+  return {h:b.name,c:'DD-1',b:'<p><b>'+esc(tdMd(p.d))+'</b>: '+esc(String(r1(p.v)))+(/^%/.test(s.unit)?'%':' '+esc(s.unit||'occurrences'))+'</p>'+(p.c?'<p>'+esc(p.c)+'</p>':''),foot:'Tap to open DD-1'};}catch(e){return null;}}
+function dotPv(t){const e=W.ev[+t.dataset.w1ev];if(!e)return null;const n=dIdx(e.date);const ty=TY.find(x=>x[0]===e.ty);
+  return {h:e.what,c:e.form,b:'<p>'+esc(e.who)+' · '+esc(new Date(e.date+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'numeric',day:'numeric'}))+'</p><p>'+esc(ty?ty[1].replace(/s$/,''):'')+'</p>',foot:'Tap the dot to open '+e.form+'</span><span>'+(n===0?'today':n+' day'+(n===1?'':'s'))};}
+function pvFor(t,ev){if(t.matches('.ch-graph'))return graphPv(t,ev);if(t.matches('.w1-dot'))return dotPv(t);if(t.matches('#rail .item[data-id]'))return railPv(t.dataset.id);if(t.dataset.chopen)return formPv(t.dataset.chopen);return null;}
+function pvShow(t,ev){const P=pvFor(t,ev);if(!P){pvHide();return;}const el=pvEl(),was=el.hidden;
+  el.innerHTML='<div class="pv-h">'+esc(P.h)+(P.c?' '+code(P.c):'')+'</div>'+P.b+(P.foot?'<div class="pv-f"><span>'+P.foot+'</span></div>':'');el.hidden=false;
+  if(PV.tgt!==t){pvUndesc();PV.tgt=t;PV.desc=t.getAttribute('aria-describedby');t.setAttribute('aria-describedby','w1Pv');}
+  const r=t.getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight,ax=t.matches('.ch-graph')&&ev?ev.clientX:r.left+r.width/2;
+  let x=Math.max(8,Math.min(innerWidth-w-8,ax-w/2)),y=r.bottom+8;if(t.matches('.ch-graph')&&ev)y=ev.clientY+18;if(y+h>innerHeight-8)y=Math.max(8,(t.matches('.ch-graph')&&ev?ev.clientY:r.top)-h-10);
+  el.style.left=Math.round(x)+'px';el.style.top=Math.round(y)+'px';}
+function pvUndesc(){const t=PV.tgt;if(!t)return;if(PV.desc)t.setAttribute('aria-describedby',PV.desc);else t.removeAttribute('aria-describedby');PV.desc=null;}
+function pvHide(){clearTimeout(PV.t);clearTimeout(PV.hold);PV.hold=0;PV.pend=null;if(PV.el&&!PV.el.hidden)PV.el.hidden=true;pvUndesc();PV.tgt=null;PV.touch=false;}
+document.addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const t=e.target.closest&&e.target.closest(PVSEL);if(!t){return;}if(t===PV.tgt||t===PV.pend)return;
+  clearTimeout(PV.t);PV.pend=t;const ev={clientX:e.clientX,clientY:e.clientY};PV.t=setTimeout(()=>{if(PV.pend===t&&t.isConnected)pvShow(t,ev);PV.pend=null;},PV.tgt?60:350);},true);
+document.addEventListener('pointerout',e=>{if(e.pointerType==='touch')return;const t=PV.tgt||PV.pend;if(!t)return;if(e.relatedTarget&&t.contains(e.relatedTarget))return;if(!t.contains(e.target))return;pvHide();},true);
+document.addEventListener('pointermove',e=>{if(e.pointerType==='touch'){if(PV.hold&&(Math.abs(e.clientX-PV.sx)>10||Math.abs(e.clientY-PV.sy)>10)){clearTimeout(PV.hold);PV.hold=0;}
+    else if(PV.touch&&PV.tgt){const r=PV.tgt.getBoundingClientRect();if(e.clientX<r.left-24||e.clientX>r.right+24||e.clientY<r.top-24||e.clientY>r.bottom+24)pvHide();}return;}
+  if(PV.tgt&&PV.tgt.matches('.ch-graph'))pvShow(PV.tgt,e);},{capture:true,passive:true});
+document.addEventListener('pointerdown',e=>{PV.until=0;if(e.pointerType!=='touch'){pvHide();return;}
+  if(PV.touch&&PV.el&&!PV.el.hidden)pvHide();const t=e.target.closest&&e.target.closest(PVSEL);if(!t)return;PV.sx=e.clientX;PV.sy=e.clientY;clearTimeout(PV.hold);PV.held=false;
+  PV.hold=setTimeout(()=>{PV.hold=0;let u=t;if(!u.isConnected){const x=document.elementFromPoint(PV.sx,PV.sy);u=x&&x.closest&&x.closest(PVSEL);if(!u)return;}PV.touch=true;PV.held=true;pvShow(u,{clientX:PV.sx,clientY:PV.sy});},500);},true);
+['pointerup','pointercancel'].forEach(n=>document.addEventListener(n,e=>{if(e.pointerType!=='touch')return;clearTimeout(PV.hold);PV.hold=0;if(PV.held){PV.held=false;PV.until=Date.now()+450;}},true));
+/* the press that showed a preview does not also press the button: a tap always does what it says, a press and hold only shows */
+addEventListener('click',e=>{if(PV.until&&Date.now()<PV.until&&PV.tgt&&PV.tgt.contains(e.target)){e.preventDefault();e.stopImmediatePropagation();}PV.until=0;},true);   /* on the window: before every listener on the page */
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest(PVSEL)&&(PV.hold||PV.touch))e.preventDefault();},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&PV.el&&!PV.el.hidden){e.preventDefault();e.stopPropagation();pvHide();}},true);
+addEventListener('scroll',()=>{if(PV.el&&!PV.el.hidden)pvHide();},true);
+/* ================= item 8: motion ================= */
+const EASE='cubic-bezier(.2,.7,.2,1)';
+function anim(el,kf,ms,delay){if(RM.matches||!el||!el.animate)return null;delay=delay||0;const d=Math.max(40,Math.min(ms,240-delay));try{const a=el.animate(kf,{duration:d,delay,easing:EASE,fill:'backwards'});a.id='w1';return a;}catch(e){return null;}}
+/* a tap in the middle of a movement ends it at once */
+document.addEventListener('pointerdown',()=>{try{document.getAnimations().forEach(a=>{if(a.id==='w1')a.finish();});}catch(e){}},true);
+/* menus grow from their button */
+let lastBtn=null;document.addEventListener('pointerdown',e=>{lastBtn=e.target.closest&&e.target.closest('button,[role=menuitem]');},true);document.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')lastBtn=document.activeElement;},true);
+function grow(m){if(!m||m.hidden)return;const b=lastBtn&&lastBtn.isConnected&&!m.contains(lastBtn)?lastBtn.getBoundingClientRect():null,r=m.getBoundingClientRect();if(!r.width)return;
+  const ox=b?Math.max(0,Math.min(r.width,b.left+b.width/2-r.left)):0,oy=b&&b.top>r.bottom?r.height:0;m.style.transformOrigin=Math.round(ox)+'px '+Math.round(oy)+'px';
+  anim(m,[{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'scale(1)'}],140);}
+const MW=new MutationObserver(ms=>ms.forEach(x=>{const m=x.target;if(x.attributeName==='hidden'&&x.oldValue!==null&&!m.hidden&&m.matches&&m.matches('#wsNavMenu,#wsViewMenu,#wsSheetMenu,#wsStatPanel,#chSwPop,.sr-cmp'))grow(m);}));
+function menuWatch(){['#wsNavMenu','#wsViewMenu','#wsSheetMenu','#wsStatPanel','#chSwPop'].forEach(s=>{const m=$(s);if(m&&!m.__w1){m.__w1=1;MW.observe(m,{attributes:true,attributeFilter:['hidden'],attributeOldValue:true});}});}
+MW.observe($('#dlgBody'),{attributes:true,attributeFilter:['hidden'],attributeOldValue:true,subtree:true});menuWatch();setTimeout(menuWatch,1500);
+/* the case home arrives in reading order (numbers and graphs are there at once, at their true value) */
+const MO={arrive:0,who:''};
+function arrive(){const h=$('#caseHome');if(!h||RM.matches)return;const P=[...h.querySelectorAll('.ch-alert,.ch-o2,.ch-p')].filter(x=>!x.querySelector('.ch-graph,.ch-stats,svg'));
+  P.map(x=>({x,r:x.getBoundingClientRect()})).filter(o=>o.r.height&&o.r.top<innerHeight).sort((a,b)=>Math.round(a.r.top/40)-Math.round(b.r.top/40)||a.r.left-b.r.left).forEach((o,i)=>anim(o.x,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],150,Math.min(90,i*15)));}
+new MutationObserver(ms=>{const on=B.classList.contains('ws-home'),nm=T(packet().client);if(on&&(!MO.on||nm!==MO.who))MO.arrive=Date.now();MO.on=on;MO.who=nm;}).observe(B,{attributes:true,attributeFilter:['class']});
+{const h=$('#blank');if(h)new MutationObserver(ms=>{const c=$('#caseHome');if(c&&Date.now()-MO.arrive<1500&&ms.some(m=>m.target===c||c.contains(m.target))){MO.arrive=0;arrive();}}).observe(h,{childList:true,subtree:true});}
+/* a form opening: the outline of a form holds the stage until it has loaded (not motion: it shows with Reduce Motion too) */
+const SK=document.createElement('div');SK.id='w1Skel';SK.hidden=true;SK.setAttribute('aria-hidden','true');
+SK.innerHTML='<div class="sk-s"><div class="sk" style="height:28px;width:220px"></div><div class="sk" style="height:16px;width:62%"></div><div class="sk-g">'+'<div><div class="sk" style="height:14px;width:45%;margin-bottom:8px"></div><div class="sk" style="height:44px"></div></div>'.repeat(6)+'</div><div class="sk" style="height:66px"></div></div>';
+{const fr=$('#frames');if(fr)fr.appendChild(SK);}
+let skT=0;function skWatch(id,t0){clearTimeout(skT);const fr=state.frames[id];if(state.cur!==id||!fr||B.classList.contains('ws-split')){SK.hidden=true;return;}
+  const done=!!state.status[id]&&fr.dataset.loaded==='1'&&!state.pending[id];if(done||Date.now()-t0>9000){const was=!SK.hidden;SK.hidden=true;if(was)anim(fr,[{opacity:0},{opacity:1}],180);return;}
+  SK.hidden=false;skT=setTimeout(()=>skWatch(id,t0),90);}
+{const of=openForm;openForm=function(id){const loaded=!!state.status[id]&&!!state.frames[id]&&state.frames[id].dataset.loaded==='1'&&!state.pending[id],was=state.cur;const r=of.apply(this,arguments);
+  try{if(!loaded&&state.frames[id])skWatch(id,Date.now());else{SK.hidden=true;if(was!==id&&state.frames[id])anim(state.frames[id],[{opacity:0},{opacity:1}],150);}}catch(e){}return r;};}
+new MutationObserver(()=>{if(!B.classList.contains('has-form'))SK.hidden=true;}).observe(B,{attributes:true,attributeFilter:['class']});
+/* the save tick: drawn once beside the status, with a brief glow, when Save case has written the case */
+function tick(){if(RM.matches)return;const b=[$('#wsStat'),$('#aStat2')].find(x=>x&&x.offsetParent&&/\bk-on\b/.test(x.className));if(!b)return;const dot=b.querySelector('.wa-dot')||b,r=dot.getBoundingClientRect();
+  const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.id='w1Tick';s.setAttribute('viewBox','0 0 16 16');s.setAttribute('aria-hidden','true');s.innerHTML='<circle cx="8" cy="8" r="8" fill="#2f7a4f"/><path d="M4.5 8.3l2.3 2.3 4.7-5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14" stroke-dashoffset="0"/>';
+  s.style.left=Math.round(r.left+r.width/2-8)+'px';s.style.top=Math.round(r.top+r.height/2-8)+'px';const old=$('#w1Tick');if(old)old.remove();document.body.appendChild(s);
+  anim(s.querySelector('path'),[{strokeDashoffset:14},{strokeDashoffset:0}],200);anim(b,[{backgroundColor:'rgba(111,207,151,.35)'},{backgroundColor:'rgba(111,207,151,0)'}],240);setTimeout(()=>s.remove(),900);}
+{const sc=saveCase;saveCase=async function(){const r=await sc.apply(this,arguments);try{if(r===true)setTimeout(tick,30);}catch(e){}return r;};}
+window.__wsW1={where,askWhere,findings:async()=>findings(await stuList()),events:async()=>events(await stuList()),n90All,pvShow,pvHide,pv:()=>PV,gaps,holdFocus,skel:()=>!SK.hidden};
 })();
 </script>
 </body>

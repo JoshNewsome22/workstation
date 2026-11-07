@@ -7,7 +7,7 @@
    M18 Save case's name says "changes not saved" while they are not, and the live region says it once
    L1  Today's count after its label; upright the indicator keeps one word
    M1  the form row: the code and the short name, the full name in the tooltip; no field count; Next only when it fits
-   H2  sideways under 1500 px on touch, opening a form puts the list away; it comes back over the form, not beside it;
+   H2  sideways under 1500 px on touch, opening a form puts the list away; opened by hand it stays beside the form (11/6);
        a form of 6 sheets or fewer shows no sheet column of its own; past 6, a 180 px column
    M6  with that column showing the edge tab steps aside; each sheet's mark has words for VoiceOver; a legend
    B3  the open form's sheets under it in the list, the current one marked, each with its state; a tap goes there
@@ -28,8 +28,9 @@
    B4  after the share sheet the indicator says "Saved to Files"
    L3  Focus's bar in the sheet's words; L4 Fullscreen's buttons with words from 1000 px; L6 1 occurrence
    H3  upright, TD-1's answers go under the question when the row is under 600 px (container queries)
-   Docs the case home's Documents panel: a form's print, the packet's print window and Finish PDF each add a line to the
-       case (form, title, when, how), kept in the case file; the dated papers before any; All documents
+   Docs the case home's Documents panel: the packet's print window and Finish PDF each add a line to the case (form, title,
+       when, how), kept in the case file; a form's own print adds none (the BCBA, 11/6); the dated papers before any; All
+       documents
    M8, L8 the phone: the name and one menu at the top (two lines), Forms, Today, Log and More at the foot, the form near
        the top, Save case and its dot in More
    usage: WS_URL=http://127.0.0.1:8123 WS_ROOT=<worktree> node qa/v2567-shell-review-test.js */
@@ -92,17 +93,18 @@ const noToasts=p=>p.evaluate(()=>{document.querySelectorAll('#wsToasts > *').for
     return {rail:!!r&&Math.round(r.getBoundingClientRect().width),leg:!!(r&&r.querySelector('.sr-leg')),marks:marks.slice(0,4),edge:getComputedStyle(document.getElementById('railEdge')).display,frail:document.body.classList.contains('sr-frail')};});
   ok('H2 TD-1 (13 sheets): its own sheet column at 180 px',td.rail===180,td);
   ok('M6 with that column showing, the edge tab steps aside (the form row\'s list button opens the list); each sheet\'s mark has words read by VoiceOver ("started", "complete"); a legend at the foot',td.edge==='none'&&td.frail&&td.leg&&td.marks.length>0&&td.marks.every(m=>/^, (started|complete|not started)$/.test(m)),td);
-  /* the list comes back over the form, and goes when a form is chosen */
+  /* v25.68 (the BCBA, 11/6) the list opened by hand while working stays beside the form until she closes it (qa/v2568-shell-test D2) */
   await p.locator('.stagew>.crumb #railToggle').tap();await sleep(500);
-  const ov=await p.evaluate(()=>({rail:getComputedStyle(document.getElementById('railNav')).position,shown:!document.body.classList.contains('rail-hidden'),fw:Math.round(state.frames['TD-1'].getBoundingClientRect().width),scrim:!document.getElementById('railScrim').hidden}));
+  const ov=await p.evaluate(()=>({rail:getComputedStyle(document.getElementById('railNav')).position,shown:!document.body.classList.contains('rail-hidden'),fw:Math.round(state.frames['TD-1'].getBoundingClientRect().width),scrim:getComputedStyle(document.getElementById('railScrim')).display!=='none',ov:document.body.classList.contains('sr-ov')}));
   /* B3 the open form's sheets under it in the list */
   const tree=await p.evaluate(()=>{const li=document.querySelector('#rail .item[data-id="TD-1"]'),x=li&&li.nextElementSibling;const bs=x&&x.classList.contains('sr-shli')?[...x.querySelectorAll('button[data-srsheet]')]:[];
     return {n:bs.length,cur:bs.findIndex(b=>b.getAttribute('aria-current')==='true'),words:bs.map(b=>(b.querySelector('.sr-sw')||{}).textContent||'').filter(Boolean).length,h:bs.length?Math.round(bs[0].getBoundingClientRect().height):0,lab:bs[2]&&bs[2].getAttribute('aria-label')};});
-  ok('H2 the list comes back over the form (an overlay with a scrim), the form keeping its width',ov.rail==='absolute'&&ov.shown&&ov.fw>=1370&&ov.scrim,ov);
+  ok('H2 the list opened by hand while working comes back beside the form (the BCBA, 11/6: kept until she closes it; no scrim)',ov.rail!=='absolute'&&ov.shown&&!ov.ov&&ov.fw<1370&&!ov.scrim,ov);
   ok('B3 one tree: the open form\'s 13 sheets are listed under it in the list of forms, the current one marked, each with its state in words, 44 px each',tree.n===13&&tree.cur>=0&&tree.words>0&&tree.h>=44,tree);
   await p.locator('#rail [data-srsheet="2"]').tap();await sleep(900);
   const sh3=await p.evaluate(()=>({sheet:document.querySelector('#aSheet b').textContent,hidden:document.body.classList.contains('rail-hidden')}));
-  ok('B3 a sheet tapped in the list opens it, and the list goes',/Build components/i.test(sh3.sheet)&&sh3.hidden,sh3);
+  ok('B3 a sheet tapped in the list opens it (the list she opened stays, the BCBA 11/6)',/Build components/i.test(sh3.sheet)&&!sh3.hidden,sh3);
+  await p.locator('#railHide').tap();await sleep(500);
   /* M1 the form row */
   const row=await p.evaluate(()=>{const t=document.getElementById('crumbTitle'),nx=document.getElementById('aNext'),cs=document.getElementById('crumbStatus');
     return {t:t.textContent,tip:t.title,code:document.getElementById('aCode').textContent,cut:t.scrollWidth>t.clientWidth+1,count:cs.offsetParent!==null&&/fields? filled/.test(cs.textContent),next:nx.textContent,nfit:nx.classList.contains('sr-cut')||nx.scrollWidth<=nx.clientWidth+1};});
@@ -122,7 +124,7 @@ const noToasts=p=>p.evaluate(()=>{document.querySelectorAll('#wsToasts > *').for
   await p.evaluate(()=>{window.__al=[];const a0=wsUI.alert;wsUI.alert=t=>{window.__al.push(String(t));return a0(t);};document.getElementById('masterPrint').click();});await sleep(800);
   const m10=await p.evaluate(()=>({choose:document.body.classList.contains('sr-choose'),al:window.__al,shown:!document.body.classList.contains('rail-hidden')}));await p.evaluate(()=>srChoose(false));
   ok('M10 Build packet with nothing chosen opens the choosing of forms in the list, not an error',m10.choose&&m10.shown&&!m10.al.some(t=>/Tick at least/.test(t)),m10);
-  await p.evaluate(()=>{if(!document.body.classList.contains('rail-hidden'))__wsSR.railAway();});
+  await p.evaluate(()=>{if(__wsSR.keep)__wsSR.keep(false);if(!document.body.classList.contains('rail-hidden'))__wsSR.railAway();});   /* v25.68 the list kept by hand is let go first */
   /* H1, M18 the save status */
   await noToasts(p);await sleep(1200);
   const s1=await p.evaluate(()=>{const b=document.getElementById('wsStat');return {t:b.querySelector('.wa-t').textContent,k:b.className,lab:b.getAttribute('aria-label'),save:document.getElementById('saveCase').getAttribute('aria-label'),dirty:caseDirty(),live:document.getElementById('live').textContent};});
@@ -215,23 +217,23 @@ const noToasts=p=>p.evaluate(()=>{document.querySelectorAll('#wsToasts > *').for
   await p.evaluate(()=>{state.docs=[];});
   await ftd.evaluate(()=>window.dispatchEvent(new Event('beforeprint')));await sleep(200);
   const dc1=await p.evaluate(()=>JSON.parse(JSON.stringify(state.docs)));
-  ok('Docs a form\'s print (its print dialog opened) adds one line to the case: the form, the title as the paper says it, when, "print"',dc1.length===1&&dc1[0].form==='TD-1'&&dc1[0].title==='Function-Based Treatment Developer'&&dc1[0].how==='print'&&/^\d{4}-\d\d-\d\dT/.test(dc1[0].at),dc1);
+  ok('Docs a form\'s own print dialog adds no line (the BCBA, 11/6: only what the workstation makes itself)',dc1.length===0,dc1);
   /* the packet's print window (the IEP meeting packet): its own title */
   const pop=p.waitForEvent('popup',{timeout:15000}).catch(()=>null);await p.evaluate(()=>{try{iepPrint();}catch(e){}});const w=await pop;let dc2=[];
   if(w){await sleep(1500);await w.evaluate(()=>window.dispatchEvent(new Event('beforeprint'))).catch(()=>{});await sleep(400);dc2=await p.evaluate(()=>JSON.parse(JSON.stringify(state.docs)));await w.close().catch(()=>{});}
-  ok('Docs a page the workstation prints in its own window (the IEP meeting packet) adds a "packet" line with that page\'s title',dc2.length===2&&dc2[1].form==='packet'&&/IEP meeting/i.test(dc2[1].title)&&dc2[1].how==='print',dc2);
+  ok('Docs a page the workstation prints in its own window (the IEP meeting packet) adds a "packet" line with that page\'s title',dc2.length===1&&dc2[0].form==='packet'&&/IEP meeting/i.test(dc2[0].title)&&dc2[0].how==='print'&&/^\d{4}-\d\d-\d\dT/.test(dc2[0].at),dc2);
   /* Finish PDF's file */
   await p.evaluate(()=>{const a=document.createElement('a');a.href='data:application/pdf;base64,JVBERi0=';a.download='Packet_Sample (finished).pdf';a.addEventListener('click',e=>e.preventDefault());document.body.appendChild(a);a.click();a.remove();});await sleep(200);
   const dc3=await p.evaluate(()=>JSON.parse(JSON.stringify(state.docs)));
-  ok('Docs Finish PDF\'s finished PDF adds a "pdf" line',dc3.length===3&&dc3[2].how==='pdf'&&dc3[2].form==='packet',dc3.slice(-1));
+  ok('Docs Finish PDF\'s finished PDF adds a "pdf" line',dc3.length===2&&dc3[1].how==='pdf'&&dc3[1].form==='packet',dc3.slice(-1));
   const dfile=await p.evaluate(()=>{const d=caseData(packet(),{});const keep=state.docs;state.docs=[];const e=caseData(packet(),{});state.docs=keep;return {n:(d.docs||[]).length,empty:'docs' in JSON.parse(JSON.stringify(e)),pdf:JSON.stringify(d).includes('JVBERi0')};});
-  ok('Docs the lines go into the case file (never the paper itself); a case with none writes none',dfile.n===3&&!dfile.empty&&!dfile.pdf,dfile);
+  ok('Docs the lines go into the case file (never the paper itself); a case with none writes none',dfile.n===2&&!dfile.empty&&!dfile.pdf,dfile);
   await p.evaluate(()=>__wsCH.toHome());await sleep(1500);
   const dh=await p.evaluate(()=>{const s=document.getElementById('chDocs');return s?{rows:[...s.querySelectorAll('.ch-row')].map(r=>r.textContent.replace(/\s+/g,' ').trim()),all:!!s.querySelector('[data-srdocs]')}:null;});
-  ok('Docs the case home\'s Documents panel lists the latest, newest first ("Treatment plan (TD-1) · Print · 11/6"), with All documents',!!dh&&dh.rows.length===3&&/Packet_Sample \(finished\)/.test(dh.rows[0])&&/PDF ·/.test(dh.rows[0])&&/Treatment plan \(TD-1\).*Print · \d+\/\d+/.test(dh.rows[2])&&dh.all,dh);
+  ok('Docs the case home\'s Documents panel lists the latest, newest first ("IEP meeting packet · Print · 11/6"), with All documents',!!dh&&dh.rows.length===2&&/Packet_Sample \(finished\)/.test(dh.rows[0])&&/PDF ·/.test(dh.rows[0])&&/IEP meeting.*Print · \d+\/\d+/i.test(dh.rows[1])&&dh.all,dh);
   await p.locator('#chDocs [data-srdocs]').first().tap();await sleep(500);
   const dd2=await p.evaluate(()=>({t:document.getElementById('dlgTitle').textContent,n:document.querySelectorAll('#dlgBody .sr-docl li').length,read:!!document.getElementById('srDocRead')}));await shut(p);
-  ok('Docs All documents opens the Documents screen: every line, and Read a document',dd2.t==='Documents'&&dd2.n>=3&&dd2.read,dd2);
+  ok('Docs All documents opens the Documents screen: every line, and Read a document',dd2.t==='Documents'&&dd2.n>=2&&dd2.read,dd2);
   /* with none: the dated papers the forms know */
   await p.evaluate(()=>{state.docs=[];state.facts=Object.assign({},state.facts,{consent:{state:'Current',on:true,obtained:'2026-09-02'}});__wsCH.paint();});await sleep(500);
   const dp=await p.evaluate(()=>{const s=document.getElementById('chDocs');return s?{note:(s.querySelector('.ch-note')||{}).textContent,rows:[...s.querySelectorAll('.ch-row')].map(r=>r.textContent.replace(/\s+/g,' ').trim())}:null;});
