@@ -12,6 +12,9 @@ OUT=${1:-qa/out/release}; mkdir -p "$OUT"; SUM="$OUT/summary.txt"
 export WS_URL=${WS_URL:-http://127.0.0.1:8123}
 port=${WS_URL##*:}; port=${port%%/*}
 if ! curl -s -o /dev/null "$WS_URL/"; then (setsid nohup python3 -m http.server "$port" --bind 127.0.0.1 >/dev/null 2>&1 < /dev/null &); sleep 1; fi
+# v25.68: a server already on the port may serve another checkout (a worktree); refuse to test the wrong files
+if ! curl -s "$WS_URL/NBH-Workstation/index.html" | cmp -s - NBH-Workstation/index.html; then
+  echo "run-release: $WS_URL does not serve this checkout's NBH-Workstation/index.html; stop that server or set WS_URL" >&2; exit 2; fi
 { echo "Release run of $(git rev-parse --short HEAD) ($(git log -1 --format=%s | cut -c1-80))"; echo "started $(date '+%Y-%m-%d %H:%M %Z') on $WS_URL"; } > "$SUM"
 python3 tools/check-build.py >> "$SUM" 2>&1 || echo "check-build FAILED" >> "$SUM"
 failed=0; n=0
