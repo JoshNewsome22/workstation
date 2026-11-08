@@ -27,7 +27,8 @@ const HOST='<!doctype html><meta charset="utf-8"><title>host</title><iframe id="
  ok('Sign and print shows the year\'s twelve months across its top, the month being signed marked',bar.n===12&&bar.vis&&bar.cur&&bar.cur.pmonth===await fr.evaluate(()=>yearKeys(setupYear())[0]),bar);
  await fr.click('#printMonthBar button:nth-child(2)');await sleep(300);
  const sw=await fr.evaluate(()=>({key:curKey,title:document.getElementById('signTitle').textContent,out:/Simulated September/.test(document.getElementById('monthOut').textContent),subj:window.__rsShare.subject('month'),view:document.body.className}));
- ok('a tap on September shows September\'s record to sign and print, on the same page (title, record, the email\'s subject)',/Sign the Record for September 2026/.test(sw.title)&&sw.out&&/September 2026/.test(sw.subj)&&sw.key.endsWith('-09'),sw);
+ /* v25.69 fx2: the sheet's heading is read on screen, in sentence case there ("Sign the record for September 2026") */
+ ok('a tap on September shows September\'s record to sign and print, on the same page (title, record, the email\'s subject)',/Sign the Record for September 2026/i.test(sw.title)&&sw.out&&/September 2026/.test(sw.subj)&&sw.key.endsWith('-09'),sw);
  await fr.click('#printMonthBar button:nth-child(1)');await sleep(300);
  /* keep August */
  const none=await fr.evaluate(()=>({btn:document.getElementById('kpKeep').textContent,list:document.getElementById('kpList').textContent}));

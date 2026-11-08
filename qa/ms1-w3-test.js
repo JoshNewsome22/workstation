@@ -39,7 +39,7 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
   await view('report');
   const R=await p.evaluate(()=>({roi:!!document.getElementById('rpRoi'),sig:document.getElementById('rpRoiSig').textContent,date:document.getElementById('rpDate').value,period:document.getElementById('rpPeriod').textContent,
     head:[...document.querySelectorAll('#rpTbl thead th')].map(t=>t.textContent),rows:[...document.querySelectorAll('#rpTbl tbody tr')].map(tr=>[...tr.cells].map(c=>c.textContent).join(' | ')),
-    eps:document.getElementById('rpEps').textContent,ph:document.querySelector('[name="r.note"]').placeholder,meds:document.getElementById('rpMeds').textContent}));
+    eps:document.getElementById('rpEps').textContent,/* v25.69 fx2: on screen the layout keeps the example in data-fx2-ph */ph:(n=>n.placeholder||n.getAttribute('data-fx2-ph')||'')(document.querySelector('[name="r.note"]')),meds:document.getElementById('rpMeds').textContent}));
   const today=await p.evaluate(()=>{const d=new Date();return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();});
   ok('F438 with a release on file the report says so above the signatures, and gives no warning',!R.roi&&/^Release of information on file: \d+\/\d+\/\d{4}\.$/.test(R.sig),R.sig);
   ok('F442 the report date is kept in a field (today when first shown); the period covered names the first and last dates and the days observed',R.date===today&&/^Period covered: \d+\/\d+ – \d+\/\d+, 14 school days observed\.$/.test(R.period),R);
