@@ -9,7 +9,7 @@ Banks in order of reading: Behavior Analysis in Practice and Behavioral Interven
 pmc), then JABA 1968 to 1991 (v25.20 and before), then JABA 1992 on: 1992 v25.22, 1993 v25.23, 1994 v25.24,
 1995 v25.25, 1996 v25.26, 1997 v25.27, 1998 v25.28, 1999 v25.29, 2000 v25.32, 2001 v25.33, 2002 v25.34,
 2003 and 2004 v25.35, 2005 v25.36, 2006 v25.37, 2007 v25.39, 2008 v25.40, 2009 v25.41, 2010 v25.42; the final
-pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 v25.47, 2015 v25.48, 2016 v25.49, 2017 v25.50, 2019 v25.51, 2020 v25.52, 2021 v25.53, 2022 v25.54, 2018 v25.57, 2023 v25.58, 2024 v25.59, 2025 v25.60, 2026 v25.61 (every volume from 1968 to 2026); then Behavioral Interventions 2020 to 2022 (volumes 35 to 37; volume 34, 2019, had no PDFs in the folder).
+pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 v25.47, 2015 v25.48, 2016 v25.49, 2017 v25.50, 2019 v25.51, 2020 v25.52, 2021 v25.53, 2022 v25.54, 2018 v25.57, 2023 v25.58, 2024 v25.59, 2025 v25.60, 2026 v25.61 (every volume from 1968 to 2026); then Behavioral Interventions 2020 to 2023 (volumes 35 to 38; volume 34, 2019, had no PDFs in the folder).
 
 ## The rules now
 
