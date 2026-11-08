@@ -41,9 +41,9 @@ const tabs=()=>{const seg=document.querySelector('#viewSeg');if(!seg)return {n:0
   const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(L.BASE+'/NBH-Workstation/'+encodeURI(TD.file));await sleep(1200);
   /* 2. the Setup fields */
   const A=await p.evaluate(()=>{const s=document.querySelector('[name="m.sessmin"]'),b=document.querySelector('[name="m.beh"]');const eg=s&&s.nextElementSibling&&s.nextElementSibling.classList.contains('nbh-eg')?s.nextElementSibling.textContent:'';
-    const ident=document.querySelector('.ident:not(.c1)');return {ph:s&&s.placeholder,eg,orig:s&&s.dataset.nbhPh,from:b&&b.placeholder,gap:ident?getComputedStyle(ident).rowGap:''};});
+    const ident=document.querySelector('.ident:not(.c1)');return {ph:s&&s.placeholder,eg,orig:s&&s.dataset.nbhPh,from:b&&b.placeholder,gap:ident?getComputedStyle(ident).rowGap:'',fx2:document.documentElement.classList.contains('fx2')};});
   ok('2 TD-1 Setup: the example number reads "e.g. 10" in the box where it fits, else beside it (the number kept for the record); the target behavior says it comes from Form TB-1; the details grid has its row gap',
-    (/^e\.g\. \d+$/.test(A.eg)?A.ph==='':/^e\.g\. \d+$/.test(A.ph))&&/^\d+$/.test(A.orig||'')&&/^From Form TB-1/.test(A.from||'')&&A.gap==='10px',A);
+    (/^e\.g\. \d+$/.test(A.eg)?A.ph==='':/^e\.g\. \d+$/.test(A.ph))&&/^\d+$/.test(A.orig||'')&&/^From Form TB-1/.test(A.from||'')&&A.gap===(A.fx2?'14px':'10px')/* v25.70 fx2: the shared layout's row gap */,A);
   /* 3. the yes/no buttons */
   await p.evaluate(()=>document.querySelector('#viewSeg button[data-view="ante"], #viewSeg button:nth-child(4)').click());await sleep(500);
   const B=await p.evaluate(()=>{const seg=[...document.querySelectorAll('.nbh-seg')].find(s=>s.offsetParent);if(!seg)return {seg:false};const sel=seg.previousElementSibling&&seg.previousElementSibling.tagName==='SELECT'?seg.previousElementSibling:seg.parentElement.querySelector('select.nbh-seg-src');

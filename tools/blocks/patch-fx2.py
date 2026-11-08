@@ -24,8 +24,10 @@ A copy already in a form is replaced where it stands; a form without one gets th
 </head> and the script just above the polish block. The form's own blocks (fx2-own, fx2-cfg) are never changed or
 moved; the tool refuses a form where they stand out of that order (fx2-own before the shared style, fx2-cfg after the
 shared script), or that holds two copies of anything. Every form named is worked out before any is written, so a
-refusal leaves the folder as it was. Files are read and written without newline translation. TD-1 keeps its own,
-earlier layout (v24.89, other ids) and is refused.
+refusal leaves the folder as it was. Files are read and written without newline translation. v25.70 fx2: TD-1 takes the
+layout too (the TD-1 alignment pass, approved 11/8); its own v24.89 layout (html.td9: the selectors' questions beside the
+Recommended margin, the Build cards, Not sure) stays in its own blocks, and its fx2-own and fx2-cfg keep the two apart.
+A form listed in REFUSE (none now) is refused.
 
 usage: python3 tools/blocks/patch-fx2.py [--check] FORM...
   FORM      a form's id (SI-1) or its file (NBH-Workstation/SI-1_..._v2026-10.html); ids are looked up in the FORMS list
@@ -44,7 +46,7 @@ OWN_RE = re.compile(r'<style id="fx2-own">.*?</style>', re.S)
 CFG_RE = re.compile(r'<script id="fx2-cfg">.*?</script>', re.S)
 SWITCH_RE = re.compile(r"<script>document\.documentElement\.classList\.add\('fx2'\);document\.documentElement\.setAttribute\('data-fx2','([A-Z0-9]+-\d+)'\);addEventListener\('beforeprint',function\(\)\{if\(window\.fx2Layout\)fx2Layout\.paper\(true\)\}\)</script>")
 POLISH = '<style id="nbh-polish-css"'
-REFUSE = ('TD-1',)   # its own layout (v24.89)
+REFUSE = ()   # v25.70 fx2: TD-1 was refused until its alignment pass (its own v24.89 layout now sits beside the shared one)
 
 
 def switch(fid):
@@ -215,7 +217,7 @@ def main(argv):
                 continue
             why = []
             if fid in REFUSE:
-                why.append('TD-1 keeps its own layout')
+                why.append('the form keeps its own layout (REFUSE)')
             if not st or st.group(0) != style:
                 why.append('the style differs from tools/blocks/fx2.html' if st else 'no fx2 style')
             if not sc or sc.group(0) != script:
@@ -231,7 +233,7 @@ def main(argv):
                 print('current ' + name)
             continue
         if fid in REFUSE:
-            fail(name + ': TD-1 keeps its own, earlier layout (v24.89)')
+            fail(name + ': the form keeps its own layout (REFUSE)')
         new = patch(s, name, fid, style, script)
         todo.append((p, name, new, new != s))
     if check:

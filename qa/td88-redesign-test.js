@@ -114,6 +114,8 @@ const keys=fs.existsSync(SIM)?fs.readdirSync(SIM).filter(k=>fs.existsSync(path.j
     ok('12 the Sheets menu opens with every sheet, stays open through a click made in code (autosave’s Save data), and a real tap outside closes it',M.a&&M.b&&M.items>=10&&closed,{M,closed});
     await cu.close();}
   /* 13. the masthead's paragraph and the Autosave note run the form's width on screen (v21.93's 80-character measure lifted for them) */
+  /* v25.70 fx2: the description is two lines with "Show the full introduction" (the shared layout); shown in full first */
+  await p.evaluate(()=>{const b=document.querySelector('.nbh-mast button.fx2-more');if(b&&b.getAttribute('aria-expanded')!=='true')b.click();});await new Promise(r=>setTimeout(r,200));
   {const W=await p.evaluate(()=>{const m=document.querySelector('.nbh-mast'),sub=document.querySelector('.nbh-mast .nbh-sub'),note=document.querySelector('.nbh-savenote');const w=e=>e?Math.round(e.getBoundingClientRect().width):null;const inner=m?w(m.querySelector('.nbh-mast-inner')||m):null;return {inner,sub:w(sub),note:w(note),subMax:sub&&getComputedStyle(sub).maxWidth,noteMax:note&&getComputedStyle(note).maxWidth};});
     ok('13 the masthead paragraph and the Autosave note run the form’s width on screen',W.inner>0&&W.sub>=W.inner*0.8&&W.note>=W.inner*0.8&&W.subMax==='none'&&W.noteMax==='none',W);}
   ok('10 no page errors',errs.length===0,errs.slice(0,5));

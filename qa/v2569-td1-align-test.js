@@ -1,0 +1,381 @@
+/* v25.70 fx2: the TD-1 alignment pass (approved by the BCBA, 11/8). Form TD-1 takes the shared screen layout
+   (tools/blocks/fx2.html, put in by tools/blocks/patch-fx2.py) that the other 47 forms carry, and keeps its own v24.89
+   layout beside it (the selectors' questions beside the Recommended margin, Not sure, the Build cards, the Final plan at
+   a glance). The checks of the fx2 groups (qa/v2569-fx2-g5-test.js) on TD-1, on a 13-inch iPad sideways (1376 x 1032) and
+   upright (1032 x 1376), touch and an iPad's user agent, with its simulation loaded, on every sheet:
+     1. nothing wider than the screen (also on a phone, 390 x 844, and an 11-inch iPad sideways, 1180 x 820);
+     2. every box outside a table at 16 px or more, and 44 px tall; on a touch screen the boxes in tables at 16 px too;
+     3. no example of more than a few characters left inside a box (the acceptability raters and "From Form ..." stay);
+     4. an example goes once its box holds an entry and comes back when it is emptied;
+     5. headings in sentence case on screen (the same words; the models' authors keep their capitals), as written on paper;
+     6. the boxes of a row of fields in line;
+     7. choices of two to four short answers as buttons; the selectors' answers, the Build cards' settings and the tables
+        keep their own (FX2_CFG.noseg);
+     8. the lists of entries (the high-p instruction pool, the staff trained, the acceptability ratings): cards on a touch
+        screen at any width, each box under its column's name, and tables with a mouse (1300 x 900); the progress log, the
+        high-p trial sheet, the integrity steps stay tables;
+     9. the masthead's description two lines with "Show the full introduction";
+    10. the layout's own buttons 44 px tall;
+    11. the print the same with the layout as without it, and the saved file and every field the same;
+    12. the master print: the styles read whole, collected for the packet with its headings and examples as written, and
+        no rule of the layout that reaches past it;
+    13. no page errors;  14. patch-fx2.py --check;  15. nothing the form keeps out of sight shown by the layout;
+    16. in the Recommended margins and the Build cards nothing drawn over a label's words or a box, and no example an item
+        of a row of label-and-box pairs, at 1376, 1180, 1032, 820 and 390 px;
+    17. the graph and the bank panel as without the layout;
+    18. inside the workstation no masthead strip for the layout's link alone;
+    19. in the grids of fields nothing drawn over a label or a box;  20. in the cards nothing drawn over another;
+   and TD-1's own, kept:
+    T1. the selectors: questions and the Recommended margin side by side above 1000 px (iPad sideways and upright), one
+        under the other on an 11-inch iPad upright and a phone; "N of M answered"; In plan switches; Add; Not sure;
+    T2. the Build sheet: labels above boxes, boxes at 16 px grown to their text, numbered steps; Remove asks first;
+    T3. "Set the first interval from baseline" on a DRO card works with a tap;
+    T4. the procedure video opens from a card with a tap and closes;
+    T5. the bank panel (a card and its versions) and the video dialog the same with the layout as without it;
+    T6. inside the workstation, Browse all videos in the player opens the video library.
+   WebKit when it is installed, otherwise Chromium as an iPad (qa/lib.js ipadBrowser). Simulated data only.
+   usage: WS_URL=http://127.0.0.1:8123 node qa/v2569-td1-align-test.js */
+const L=require(__dirname+'/lib.js');const {BASE,sleep,ROOT}=L;let pw;try{pw=require('playwright');}catch(e){pw=require('/opt/node22/lib/node_modules/playwright');}
+const fs=require('fs'),path=require('path'),{spawnSync}=require('child_process');
+let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1500):''));if(!c)fails++;};
+const note=(n,i)=>console.log('NOTE '+n+(i!==undefined?'  '+JSON.stringify(i).slice(0,600):''));
+const IDS=['TD-1'];
+const file=id=>L.forms().find(x=>x.id===id).file;
+const OUT=path.join(__dirname,'out','v2569-td1-align');fs.mkdirSync(OUT,{recursive:true});
+/* spot checks on top of the checks of every table: lists that are cards on a touch screen, tables that stay tables */
+const CARDS={'TD-1':['table.hp:has(input[name^="ant.hp.i["])','table:has(input[name^="tr["])','table:has(input[name^="sv["])']};
+const STAY={'TD-1':['#monTbl','#hpFid','table.hp-sess']};
+const KNOWN44={};
+/* 16 TD-1's Recommended margins and Build cards */
+const RUNNERS='.td9-recs, #compWrap .card';
+/* 17 TD-1's progress graph (and every svg the form draws) and the bank panel */
+const GRAPHS='#monFig, #tdBankHost';
+/* 19 the grids of fields (the layout's and the forms' own): nothing in them drawn over a label's words or a box */
+const FIELDS='.fx2-fg, .ident, .defs';
+/* the items that may not meet: every box in view, the words of every label (not the box inside it), every example; and
+   no example of the layout as an item of a row of label-and-box pairs (a grid or a flex row, or a box beside its
+   button), anywhere on a sheet */
+const overlaps=(p,R)=>p.evaluate(RUN=>{const D=document;const sheets=[...D.querySelectorAll('.fx2-sh')].filter(s=>s.getClientRects().length);
+  const vis=e=>{if(!e.getClientRects().length||(e.checkVisibility&&!e.checkVisibility()))return false;const cs=getComputedStyle(e);if(cs.visibility==='hidden'||+cs.opacity===0)return false;const r=e.getBoundingClientRect();return r.width>2&&r.height>2;};
+  const items=[],nm=e=>String(e.id||e.getAttribute('name')||e.getAttribute('data-m')||e.className||e.tagName).slice(0,30),txt=(e,k,n)=>{const rg=D.createRange();rg.selectNodeContents(e);[...rg.getClientRects()].forEach(r=>{if(r.width>2&&r.height>2)items.push({k,n,r,el:e.nodeType===1?e:e.parentElement.closest('label')||e.parentElement});});};
+  sheets.forEach(s=>s.querySelectorAll(RUN).forEach(run=>{
+    run.querySelectorAll('input:not([type=hidden]),select:not(.nbh-seg-src),textarea').forEach(e=>{if(vis(e))items.push({k:'box',n:nm(e),r:e.getBoundingClientRect(),el:e});});
+    run.querySelectorAll('.fx2-hint,.fx2-cellhint,.nbh-hint').forEach(e=>{if(vis(e))txt(e,'example',e.textContent.trim().slice(0,30));});
+    run.querySelectorAll('label').forEach(l=>{if(!vis(l))return;const tw=D.createTreeWalker(l,NodeFilter.SHOW_TEXT,{acceptNode:t=>!/\S/.test(t.nodeValue)||t.parentElement.closest('input,select,textarea,option,button,.fx2-hint,.nbh-hint,.fx2-cellhint,.nbh-seg')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+      let t;while((t=tw.nextNode()))if(vis(t.parentElement)){const rg=D.createRange();rg.selectNodeContents(t);[...rg.getClientRects()].forEach(r=>{if(r.width>2&&r.height>2)items.push({k:'label',n:l.textContent.trim().replace(/\s+/g,' ').slice(0,30),r,el:l});});}});}));
+  const out=[];for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){const a=items[i],b=items[j];if(a.el===b.el||(a.k==='box'&&b.k==='box'&&(a.el.contains(b.el)||b.el.contains(a.el))))continue;
+    const x=Math.min(a.r.right,b.r.right)-Math.max(a.r.left,b.r.left),y=Math.min(a.r.bottom,b.r.bottom)-Math.max(a.r.top,b.r.top);if(x>2&&y>2)out.push(a.k+' "'+a.n+'" over '+b.k+' "'+b.n+'"');}
+  const BQ='input:not([type=hidden]):not([type=checkbox]):not([type=radio]),select,textarea';
+  const row=p=>{if(!p||p.nodeType!==1)return false;const cs=getComputedStyle(p),d=cs.display;if(/flex/.test(d)){if(/column/.test(cs.flexDirection))return false;}else if(/grid/.test(d)){if((cs.gridTemplateColumns||'').split(' ').filter(Boolean).length<2)return false;}else return false;
+    let n=0,x=0;for(let c=p.firstElementChild;c;c=c.nextElementSibling){if(c.matches(BQ)||c.querySelector(BQ)){n++;x++;}else if(c.matches('button')||c.querySelector('button'))n++;}return x>=1&&n>=2;};
+  sheets.forEach(s=>s.querySelectorAll('.fx2-hint,.fx2-cellhint').forEach(e=>{if(vis(e)&&row(e.parentElement))out.push('example "'+e.textContent.trim().slice(0,30)+'" an item of the row '+String(e.parentElement.className).slice(0,24));}));
+  return [...new Set(out)];},R||RUNNERS);
+/* 20 the lists shown as cards: each card's boxes, buttons (Remove, Up, Down, Change) and examples, none drawn over
+   another */
+const cardov=p=>p.evaluate(()=>{const vis=e=>{if(!e.getClientRects().length||(e.checkVisibility&&!e.checkVisibility()))return false;const cs=getComputedStyle(e);if(cs.visibility==='hidden'||+cs.opacity===0)return false;const r=e.getBoundingClientRect();return r.width>2&&r.height>2;};
+  const out=[];[...document.querySelectorAll('.fx2-sh table.fx2-cards > tbody > tr')].filter(vis).forEach(tr=>{const items=[];
+    tr.querySelectorAll('input:not([type=hidden]),select:not(.nbh-seg-src),textarea,button,.nbh-seg,.fx2-cellhint,.fx2-hint').forEach(e=>{if(vis(e))items.push({e,r:e.getBoundingClientRect(),n:(e.tagName.toLowerCase()+' '+(e.getAttribute('aria-label')||e.name||e.getAttribute('data-k')||e.textContent||'').trim()).slice(0,30)});});
+    for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){const a=items[i],b=items[j];if(a.e.contains(b.e)||b.e.contains(a.e))continue;
+      const x=Math.min(a.r.right,b.r.right)-Math.max(a.r.left,b.r.left),y=Math.min(a.r.bottom,b.r.bottom)-Math.max(a.r.top,b.r.top);if(x>2&&y>2)out.push((tr.closest('table').id||tr.closest('table').className.slice(0,20))+': '+a.n+' over '+b.n);}});
+  return [...new Set(out)];});
+const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date;const P0=performance.now();const now=()=>T+Math.floor(performance.now()-P0);
+  class FD extends D0{constructor(...a){if(a.length)super(...a);else super(now());}static now(){return now();}}window.Date=FD;
+  /* the simulations that draw on Math.random draw the same numbers in every load */
+  let seed=20261105;Math.random=()=>{seed=(seed*1103515245+12345)%2147483648;return seed/2147483648;};window.print=function(){};};
+(async()=>{const ipad=await L.ipadBrowser(pw),cr=await pw.chromium.launch();const errs=[];console.log('engine for the iPad: '+ipad._nbhEngine);
+  const sim=async p=>{await L.loadSim(p);await sleep(600);await p.evaluate(()=>{const b=[...document.querySelectorAll('dialog button,[role=dialog] button,[role=alertdialog] button')].find(x=>x.offsetParent&&/^(Replace|Load|OK|Yes)$/i.test(x.textContent.trim()));if(b)b.click();});await sleep(2200);};
+  const open=async(ctx,id,tag)=>{const p=await ctx.newPage();p.on('pageerror',e=>errs.push(id+' '+tag+': '+e.message));p.on('dialog',d=>d.accept().catch(()=>{}));
+    await p.goto(BASE+'/NBH-Workstation/'+file(id));await sleep(1500);await sim(p);
+    /* the toasts ("Simulation loaded: ...") come and go over the page; they are not the sheet's layout */
+    await p.addStyleTag({content:'#nbhToasts,.nbh-toast{display:none!important}'});return p;};
+  const views=p=>p.evaluate(()=>[...new Set([...document.querySelectorAll('[data-view]:not(svg)')].map(b=>b.dataset.view))]);
+  const view=async(p,v)=>{await p.evaluate(v=>{const b=document.querySelector('[data-view="'+v+'"]:not(svg)');if(b)b.click();},v);await sleep(750);await p.evaluate(()=>window.scrollTo(0,0));};
+  /* 15: on each sheet, how many of each element are in view, keyed without the layout's own classes (the layout's own
+     elements have no match on the page without it) */
+  const shown=async p=>{const S={};for(const v of await views(p)){await view(p,v);await sleep(150);S[v]=await p.evaluate(()=>{const out={};
+    const key=e=>{if(e.id)return '#'+e.id;const n=e.getAttribute('name')||e.getAttribute('data-m')||e.getAttribute('data-meta')||e.getAttribute('data-f');let a=e.parentElement;while(a&&!a.id)a=a.parentElement;
+      return (a?'#'+a.id:'')+' '+e.tagName.toLowerCase()+(n?'['+n+']':'')+'.'+[...e.classList].filter(c=>!/^(fx2|nbh-)/.test(c)).sort().join('.')+' '+(e.matches('input,select,textarea')?'':e.textContent.trim().replace(/\s+/g,' ').slice(0,30));};
+    document.querySelectorAll('.sheet *, .fx2-sh *').forEach(e=>{if(e.closest('.nbh-seg,.nbh-xs-bar,svg,canvas'))return;const k=key(e);
+      out[k]=(out[k]||0)+(e.getClientRects().length>0&&getComputedStyle(e).visibility!=='hidden'&&!e.closest('[hidden]')?1:0);});return out;});}return S;};
+  /* 17: on each sheet, each runner (drawn or not, its words without the layout's own notes, its controls) and each graph
+     the form draws (an svg's shapes and words, a canvas's size), keyed by the order they come in */
+  const runs=async p=>{const S={};for(const v of await views(p)){await view(p,v);await sleep(250);S[v]=await p.evaluate(G=>{const sq=t=>String(t||'').replace(/\s+/g,' ').trim();
+    const drawn=e=>e.getClientRects().length>0&&getComputedStyle(e).visibility!=='hidden';
+    const words=e=>{if(e.shadowRoot)return sq(e.shadowRoot.textContent);const c=e.cloneNode(true);c.querySelectorAll('.fx2-hint,.fx2-cellhint,.fx2-addrow').forEach(x=>x.remove());return sq(c.textContent);};
+    const WALK='#tab-walk, #walk, #p10, section.only-walk';const out=[];document.querySelectorAll(G).forEach((e,i)=>out.push(['run',i,e.id||e.className,drawn(e),words(e).slice(0,4000),
+      [...(e.shadowRoot||e).querySelectorAll('input,select,textarea,button')].map(x=>[x.tagName,x.type,x.id,x.name,x.disabled,x.hidden,drawn(x),x.type==='checkbox'||x.type==='radio'?x.checked:x.value].join('|')),
+      e.shadowRoot?[...e.shadowRoot.querySelectorAll('*')].filter(drawn).map(x=>{const r=x.getBoundingClientRect();return Math.round(r.width)+'x'+Math.round(r.height);}).join(' '):'']));
+    let gi=0;document.querySelectorAll('svg').forEach(e=>{if(e.closest('button,.nbh-mast,.toolbar,'+WALK)||e.getBoundingClientRect().width<60)return;const r=e.getBoundingClientRect(),i=gi++;
+      out.push(['svg',i,drawn(e),e.getAttribute('viewBox'),[...e.querySelectorAll('*')].map(x=>{if(!/^(rect|circle|line|path|polyline|polygon|text|g)$/.test(x.tagName))return x.tagName;
+        const b=x.getBBox?(()=>{try{const q=x.getBBox();return [q.x,q.y,q.width,q.height].map(n=>Math.round(n)).join(',');}catch(err){return '';}})():'';return x.tagName+':'+b+':'+sq(x.textContent).slice(0,40);}).join(' ')]);});
+    document.querySelectorAll('canvas').forEach((e,i)=>e.closest(WALK)||out.push(['canvas',i,drawn(e),e.width,e.height]));
+    return out;},GRAPHS);}return S;};
+  /* everything checked on the sheet in sight */
+  const look=(p,spot)=>p.evaluate(spot=>{const C=window.FX2_CFG||{},D=document,R=D.documentElement;
+    const vis=e=>!!(e.offsetParent||e.getClientRects().length)&&e.getBoundingClientRect().width>2&&getComputedStyle(e).visibility!=='hidden';
+    const sheets=[...D.querySelectorAll('.fx2-sh')].filter(vis);const inS=e=>sheets.some(s=>s.contains(e));
+    const BOX='input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),select:not(.nbh-seg-src),textarea';
+    const F=[...D.querySelectorAll(BOX)].filter(e=>inS(e)&&vis(e)&&!e.closest('.nbh-seg,dialog,[role=dialog]'));
+    const nm=e=>(e.name||e.id||e.getAttribute('data-m')||e.getAttribute('data-x')||e.className||e.tagName).slice(0,40);
+    const out=F.filter(e=>!e.closest('table')),card=F.filter(e=>e.closest('table.fx2-cards'));
+    /* on a touch screen the boxes in tables too (under 16 px Safari zooms the page when one is tapped) */
+    const touch=matchMedia('(pointer:coarse)').matches;
+    const small=(touch?F:out).filter(e=>parseFloat(getComputedStyle(e).fontSize)<15.5).map(e=>nm(e)+':'+getComputedStyle(e).fontSize);
+    const short=out.filter(e=>e.getBoundingClientRect().height<43.5).map(e=>nm(e)+':'+Math.round(e.getBoundingClientRect().height));
+    /* an example nbh-ui has cut short in its box ("e.g., fussing for most of the…") keeps the whole in data-nbh-ph */
+    const KI=C.keepin||{};const ph=out.concat(card).filter(e=>{const t=(e.getAttribute('placeholder')||'').trim(),w=(e.getAttribute('data-nbh-ph')||'').trim();return t.length>8&&!/^From Form\b/.test(t)&&!KI[t]&&!(w&&KI[w])&&!(e.hasAttribute('data-fx2-inrow')&&t.length<=36);}).map(e=>nm(e)+':'+e.getAttribute('placeholder').slice(0,40));
+    /* headings */
+    const HS='.fx2-sh h3.sub, .fx2-sh .bar.nbh-band, .fx2-sh h2.nbh-band'+(C.heads?', '+C.heads:'');const H=[...D.querySelectorAll(HS)].filter(vis);
+    const sq=t=>String(t||'').replace(/\s+/g,' ').trim();
+    const hbad=H.filter(h=>{if(h.hasAttribute('data-fx2-origt'))return false;const o=h.getAttribute('data-fx2-orig');return o==null||sq(o).toLowerCase()!==sq(h.textContent).toLowerCase();}).map(h=>sq(h.textContent).slice(0,50));
+    const hchanged=H.filter(h=>h.hasAttribute('data-fx2-orig')&&sq(h.getAttribute('data-fx2-orig'))!==sq(h.textContent)).length;
+    /* rows of fields in line */
+    let rows=0;const rbad=[];[...D.querySelectorAll('.fx2-sh .fx2-al')].filter(vis).forEach(g=>{const by={};[...g.children].filter(vis).forEach(f=>{const b=[...f.children].find(c=>vis(c)&&(c.matches('input,select,textarea')&&!/checkbox|radio|hidden/.test(c.type)&&!c.classList.contains('nbh-seg-src')||c.classList.contains('nbh-seg')));if(!b)return;
+      const k=Math.round(f.getBoundingClientRect().top);(by[k]=by[k]||[]).push(Math.round(b.getBoundingClientRect().top));});
+      Object.values(by).forEach(t=>{if(t.length<2)return;rows++;if(Math.max(...t)-Math.min(...t)>1)rbad.push(g.className.slice(0,40)+' '+t.join('/'));});});
+    /* choices as buttons */
+    const S=[...D.querySelectorAll('.fx2-sh select')].filter(s=>inS(s)&&(vis(s)||s.classList.contains('nbh-seg-src'))&&!s.multiple&&!s.closest('dialog,[role=dialog],.toolbar'));
+    const want=S.filter(s=>{const o=s.options;if(o.length<3||o.length>5||o[0].value!=='')return false;for(let i=1;i<o.length;i++){const t=(o[i].textContent||'').trim();if(!t||t.length>24)return false;}return !(C.noseg&&s.closest(C.noseg));});
+    /* where the buttons have no room on one line (a narrow column, a table cell) nbh-ui keeps the dropdown, as on the six */
+    const cx=D.createElement('canvas').getContext('2d');const room=s=>{const cs=getComputedStyle(s);cx.font=cs.fontStyle+' '+cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily;
+      const o=[...s.options].slice(1);let need=o.reduce((n,x)=>n+cx.measureText(x.textContent.trim()).width+34,0)+(o.length-1)*6;
+      cx.font='600 15px '+cs.fontFamily;need=Math.max(need,o.reduce((n,x)=>n+Math.max(56,cx.measureText(x.textContent.trim()).width+28),0)+(o.length-1)*2+4);let b=s.parentNode;
+      while(b&&b.nodeType===1&&getComputedStyle(b).display.indexOf('inline')===0&&!/^T[DH]$/.test(b.tagName))b=b.parentNode;return !(b&&b.clientWidth&&b.clientWidth-8<need);};
+    const segbad=want.filter(s=>!s.classList.contains('nbh-seg-src')&&!s.closest('table')&&room(s)).map(s=>nm(s)+':'+[...s.options].slice(1).map(o=>o.textContent.trim()).join('/').slice(0,40));
+    const kept=S.filter(s=>C.noseg&&s.closest(C.noseg)&&s.classList.contains('nbh-seg-src')&&s.getAttribute('data-nbh-seg')==='1').map(nm);
+    /* tables */
+    const T=[...D.querySelectorAll('.fx2-sh table')].filter(t=>vis(t)&&t.tBodies[0]&&t.tBodies[0].rows.length);
+    const tab=T.map(t=>{const r=t.tBodies[0].rows[0];const c=[...r.cells].find(x=>x.getAttribute('data-th')&&x.querySelector('input:not([type=hidden]):not([type=checkbox]):not([type=radio]),select,textarea'))||[...r.cells].find(x=>/\w/.test(x.getAttribute('data-th')||''));
+      return {sel:(t.id?'#'+t.id:'table.'+[...t.classList].filter(k=>k!=='fx2-cards'&&k!=='nbh-zebra')[0]),cards:t.classList.contains('fx2-cards'),boxes:!!t.querySelector('tbody input:not([type=hidden]),tbody select,tbody textarea'),tr:getComputedStyle(r).display,lab:c?getComputedStyle(c,'::before').content:''};});
+    /* the spot checks: does a table the form names show on this sheet, and is it a list of entries */
+    const sp={};(spot||[]).forEach(q=>{const m=T.filter(t=>t.matches(q));if(m.length)sp[q]=m.some(t=>t.classList.contains('fx2-cards'));});
+    const hints=[...D.querySelectorAll('.fx2-hint')].filter(x=>/^For example/.test(x.textContent)&&!x.closest('table')&&vis(x)).length;
+    const btn=[...D.querySelectorAll('.fx2-btn')].filter(b=>vis(b)&&inS(b)).filter(b=>b.getBoundingClientRect().height<43.5).map(b=>b.textContent.trim().slice(0,30)+':'+Math.round(b.getBoundingClientRect().height));
+    return {wide:R.scrollWidth-R.clientWidth,n:F.length,small,short,ph,hn:H.length,hbad,hchanged,rows,rbad,segs:want.length,segbad,kept,tab,btn,sp,hints};},spot);
+  const res={};
+  for(const id of IDS){res[id]={};
+    for(const [w,h] of [[1376,1032],[1032,1376]]){const tag=w+'x'+h;const ctx=await L.ipadCtx(ipad,{viewport:{width:w,height:h}});await ctx.addInitScript(clock);const p=await open(ctx,id,tag);
+      const V=await views(p);const agg={cov:[],wide:[],small:[],short:[],ph:[],hbad:[],rbad:[],segbad:[],kept:[],tabs:[],btn:[],ovl:[],fov:[]},spot={};let n=0,hn=0,hch=0,rows=0,segs=0,hints=0;
+      for(const v of V){await view(p,v);const r=await look(p,[...(CARDS[id]||[]),...(STAY[id]||[])]);n+=r.n;hn+=r.hn;hch+=r.hchanged;rows+=r.rows;segs+=r.segs;hints+=r.hints;
+        (await overlaps(p)).forEach(x=>agg.ovl.push(v+' '+x));
+        (await overlaps(p,FIELDS)).filter(x=>/ over /.test(x)).forEach(x=>agg.fov.push(v+' '+x));
+        (await cardov(p)).forEach(x=>agg.cov.push(v+' '+x));
+        for(const q in r.sp)spot[q]=(spot[q]||false)||r.sp[q];
+        if(r.wide>1)agg.wide.push(v+':'+r.wide);['small','short','ph','hbad','rbad','segbad','kept','btn'].forEach(k=>r[k].forEach(x=>agg[k].push(v+' '+x)));r.tab.forEach(t=>agg.tabs.push(Object.assign({v},t)));}
+      ok(`1 ${id} ${tag}: nothing wider than the screen on any of its ${V.length} sheets`,!agg.wide.length,agg.wide);
+      ok(`2 ${id} ${tag}: every box at 16 px, in tables too on this touch screen (${n} boxes in all)`,!agg.small.length,agg.small.slice(0,8));
+      const k44=KNOWN44[id],s44=agg.short.filter(x=>!(k44&&k44.test(x)));
+      ok(`2 ${id} ${tag}: every box outside a table 44 px tall`,!s44.length,s44.slice(0,8));
+      if(agg.short.length>s44.length)note(`${id} ${tag}: boxes the layout leaves as approved, under 44 px`,agg.short.filter(x=>!s44.includes(x)).slice(0,6));
+      ok(`3 ${id} ${tag}: no example left inside a box`,!agg.ph.length,agg.ph.slice(0,8));
+      ok(`5 ${id} ${tag}: ${hn} headings in sentence case on screen (${hch} changed), the words as written`,hn>0&&!agg.hbad.length,agg.hbad.slice(0,8));
+      ok(`6 ${id} ${tag}: the boxes of a row of fields in line (${rows} rows)`,!agg.rbad.length,agg.rbad.slice(0,6));
+      ok(`7 ${id} ${tag}: ${segs} choices of two to four short answers are buttons; the form's lists stay lists`,!agg.segbad.length&&!agg.kept.length,{segbad:agg.segbad.slice(0,6),kept:agg.kept.slice(0,6)});
+      /* v25.67 fx2: on a touch screen the lists are cards at any width (the BCBA's v24.92 approval and design review M17) */
+      const lists=agg.tabs.filter(t=>t.cards),notCard=lists.filter(t=>t.tr!=='grid'||!/\w/.test(t.lab));
+      ok(`8 ${id} ${tag}: lists of entries are cards on this touch screen, each box under its column's name (${lists.length} lists)`,!notCard.length,notCard.slice(0,6));
+      ok(`16 ${id} ${tag}: nothing drawn over a label or a box in the recorders and timers, and no example an item of a row of pairs`,!agg.ovl.length,agg.ovl.slice(0,8));
+      ok(`19 ${id} ${tag}: in the grids of fields nothing drawn over a label's words or a box (an example under its box ends before the next field)`,!agg.fov.length,agg.fov.slice(0,8));
+      ok(`20 ${id} ${tag}: in the lists shown as cards nothing drawn over a box, a button or an example`,!agg.cov.length,agg.cov.slice(0,8));
+      ok(`10 ${id} ${tag}: the layout's own buttons 44 px tall`,!agg.btn.length,agg.btn.slice(0,6));
+      if(w===1376){
+        /* 9 the masthead */
+        /* the description and, behind the link, the rest of the introduction (the note on saving) */
+        const it=await p.evaluate(async()=>{const s=document.querySelector('header.nbh-mast p.nbh-sub'),n=document.querySelector('header.nbh-mast p.nbh-savenote'),b=document.querySelector('button.fx2-more');if(!s||!b)return {missing:true};
+          const tall=()=>s.getBoundingClientRect().height+(n&&n.offsetParent?n.getBoundingClientRect().height:0);const p0=s.getBoundingClientRect().height,h0=tall(),t=b.textContent;b.click();await new Promise(r=>setTimeout(r,120));
+          const h1=tall(),t1=b.textContent;b.click();await new Promise(r=>setTimeout(r,120));
+          /* the link is drawn 32 px tall and takes a tap 44 px tall: a point 5 px above it and 5 px below it reach it */
+          const r=b.getBoundingClientRect(),hit=y=>{const e=document.elementFromPoint(r.left+r.width/2,y);return !!e&&(e===b||b.contains(e));},tap=hit(r.top-5)&&hit(r.bottom+5);
+          return {ok:p0<=(parseFloat(getComputedStyle(s).lineHeight)||20)*2.2&&h1>h0*1.2&&t==='Show the full introduction'&&t1==='Hide the full introduction'&&tall()===h0&&tap,p0,h0,h1,t,tap};});
+        ok(`9 ${id}: the description is two lines with "Show the full introduction" (a tap 44 px tall)`,it.ok,it);
+        /* 4 an example goes once its box is filled */
+        let eg=null;for(const v of V){await view(p,v);eg=await p.evaluate(async()=>{const f=[...document.querySelectorAll('input,textarea')].find(x=>x._fx2eg&&x.offsetParent&&!x.readOnly&&!x.disabled&&!x.closest('table'));if(!f)return null;
+          const h=f._fx2eg,v0=f.value,set=async v=>{f.value=v;f.dispatchEvent(new Event('input',{bubbles:true}));await new Promise(r=>setTimeout(r,150));return !!h.offsetParent;};
+          const a=await set(''),b=await set('Simulated entry'),c=await set('');await set(v0);return {name:f.name||f.getAttribute('data-m')||f.id,t:h.textContent.slice(0,50),a,b,c,desc:(f.getAttribute('aria-describedby')||'').includes(h.id)};});if(eg)break;}
+        if(!eg&&!hints)note(`${id}: no example outside a table in view to check (the form's examples are in its tables, which keep them, or under a part it shows only when needed)`);
+        else ok(`4 ${id}: an example goes once its box holds an entry and comes back when it is emptied`+(eg?' ('+eg.t+')':''),!!eg&&eg.a&&!eg.b&&eg.c&&/^For example/.test(eg.t)&&eg.desc,eg);
+        /* the spot checks: which tables the form makes lists of */
+        const miss=(CARDS[id]||[]).filter(q=>spot[q]!==true),wrong=(STAY[id]||[]).filter(q=>spot[q]!==false);
+        ok(`8 ${id}: the lists of entries are marked as lists (${(CARDS[id]||[]).join(' ')||'none'}), and ${(STAY[id]||[]).join(' ')||'no table named'} stay tables`,!miss.length&&!wrong.length,{miss,wrong});
+        /* 12 collected for the packet */
+        const pl=await p.evaluate(()=>{const H=[...document.querySelectorAll('[data-fx2-orig]')],F=[...document.querySelectorAll('[data-fx2-ph]')];if(!window.nbhPolish||!nbhPolish.plain)return {nopolish:true};
+          nbhPolish.plain(true);const on={h:H.filter(h=>h.textContent.trim()===h.getAttribute('data-fx2-orig').trim()).length,f:F.filter(f=>f.getAttribute('placeholder')===f.getAttribute('data-fx2-ph')).length};
+          nbhPolish.plain(false);const off={f:F.filter(f=>f.hasAttribute('placeholder')).length,h:H.filter(h=>h.textContent.trim()!==h.getAttribute('data-fx2-orig').trim()).length};
+          return {nh:H.length,nf:F.length,on,off,changed:H.filter(h=>h.getAttribute('data-fx2-set')!==h.getAttribute('data-fx2-orig')).length};});
+        ok(`12 ${id}: collected for the packet, its ${pl.nh} headings as written and its ${pl.nf} examples in their boxes; the screen layout after`,!pl.nopolish&&pl.on.h===pl.nh&&pl.on.f===pl.nf&&pl.off.f===0&&pl.off.h===pl.changed,pl);}
+      await ctx.close();}
+    /* 8 at 820 px (an iPad upright, the six's cards) */
+    {const ctx=await L.ipadCtx(ipad,{viewport:{width:820,height:1180}});const p=await open(ctx,id,'820');const V=await views(p);const T=[],wide=[],ovl=[];
+      for(const v of V){await view(p,v);const r=await look(p);(await overlaps(p)).forEach(x=>ovl.push(v+' '+x));(await cardov(p)).forEach(x=>ovl.push(v+' (a card) '+x));if(r.wide>1)wide.push(v+':'+r.wide+' '+(await p.evaluate(()=>{const W=document.documentElement.clientWidth;return [...document.querySelectorAll('body *')].filter(e=>{const b=e.getBoundingClientRect();if(!(b.right>W+0.5&&b.width>0&&e.offsetParent))return false;for(let x=e.parentElement;x&&x!==document.body;x=x.parentElement)if(/auto|scroll|hidden|clip/.test(getComputedStyle(x).overflowX))return false;return true;}).slice(0,3).map(e=>e.tagName+'.'+String(e.className).slice(0,30)+'#'+e.id).join(' ');})));r.tab.forEach(t=>T.push(Object.assign({v},t)));}
+      /* the layout's cards; a table it does not name stays as the form draws it (TB-1 lays out its own candidates) */
+      const cards=T.filter(t=>t.cards),bad=cards.filter(t=>t.tr!=='grid'||!/\w/.test(t.lab)),stay=T.filter(t=>!t.cards&&t.boxes),stbad=[];
+      ok(`8 ${id} 820x1180: ${cards.length} lists of entries are cards, each box under its column's name; ${stay.length} tables of scores, trials and checklists stay tables; nothing wider`,!bad.length&&!stbad.length&&!wide.length&&(!(CARDS[id]||[]).length||cards.length>0),{bad:bad.slice(0,5),stbad:stbad.slice(0,5),wide});
+      ok(`16 ${id} 820x1180: nothing drawn over a label or a box in the recorders and timers, and no example an item of a row of pairs; 20 nothing drawn over another in the cards`,!ovl.length,ovl.slice(0,8));
+      await ctx.close();}
+    /* 8 with a mouse or trackpad (1300 x 900, no touch): the lists are tables, as on a laptop */
+    {const ctx=await cr.newContext({viewport:{width:1300,height:900}});await ctx.addInitScript(clock);const p=await open(ctx,id,'mouse');const V=await views(p);const T=[],wide=[];
+      for(const v of V){await view(p,v);const r=await look(p);r.tab.forEach(t=>T.push(Object.assign({v},t)));if(r.wide>1)wide.push(v+':'+r.wide);}
+      const lists=T.filter(t=>t.cards),notTable=lists.filter(t=>t.tr!=='table-row');const fine=await p.evaluate(()=>matchMedia('(pointer:fine)').matches);
+      ok(`8 ${id} 1300x900 with a mouse: ${lists.length} lists of entries are tables, as on a laptop; nothing wider`,fine&&!notTable.length&&!wide.length,{fine,notTable:notTable.slice(0,5),wide});
+      await ctx.close();}
+    /* 1 on a phone, and on an 11-inch iPad sideways */
+    for(const [w,h,what] of [[390,844,'a phone\'s screen'],[1180,820,'an 11-inch iPad\'s screen']]){const ctx=await L.ipadCtx(ipad,{viewport:{width:w,height:h}});const p=await open(ctx,id,String(w));const V=await views(p);const wide=[];
+      const ovl=[];for(const v of V){await view(p,v);const r=await p.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);if(r>1)wide.push(v+':'+r);(await overlaps(p)).forEach(x=>ovl.push(v+' '+x));}
+      ok(`1 ${id} ${w}x${h}: nothing wider than ${what} on any sheet`,!wide.length,wide);
+      ok(`16 ${id} ${w}x${h}: nothing drawn over a label or a box in the recorders and timers, and no example an item of a row of pairs`,!ovl.length,ovl.slice(0,8));await ctx.close();}
+    /* 11 the print, with the layout and without it, from the same data, on the iPad */
+    {const strip=s=>s.replace(/<style id="fx2-v2492">[\s\S]*?<\/style>\n?/,'').replace(/<script id="fx2-v2492-js">[\s\S]*?<\/script>\n?/,'').replace(/<script id="fx2-cfg">[\s\S]*?<\/script>\n?/,'')
+        .replace(/<script>document\.documentElement\.classList\.add\('fx2'\);[^<]*<\/script>\n?/,'');
+      const mk=async(off)=>{const ctx=await L.ipadCtx(ipad,{viewport:{width:1376,height:1032}});await ctx.addInitScript(clock);
+        if(off)await ctx.route('**/NBH-Workstation/'+file(id),async r=>{const res=await r.fetch();r.fulfill({response:res,body:strip(await res.text())});});return ctx;};
+      const snapshot=p=>p.evaluate(()=>new Promise(res=>{const h=ev=>{if(ev.data&&ev.data.nbh==='snapshot'&&ev.data.snap){removeEventListener('message',h);res(ev.data.snap);}};addEventListener('message',h);postMessage({nbh:'snapshot'},'*');setTimeout(()=>res(null),10000);}));
+      const restore=(p,s)=>p.evaluate(s=>new Promise(res=>{const h=ev=>{if(ev.data&&ev.data.nbh==='restored'){removeEventListener('message',h);res(true);}};addEventListener('message',h);postMessage({nbh:'restore',snap:s},'*');setTimeout(()=>res(false),10000);}),s);
+      const keys=p=>p.evaluate(()=>[...document.querySelectorAll('input,select,textarea')].map(e=>[e.tagName,e.type,e.id,e.name,e.getAttribute('data-m'),e.getAttribute('data-x'),e.getAttribute('data-k')].join('|')));
+      let ctx=await mk(false);let p=await open(ctx,id,'print');const s=await snapshot(p),k1=await keys(p),v1=await shown(p),g1=await runs(p);await ctx.close();
+      /* the saved file and the fields: the same with the layout as without it (the simulation loaded in each) */
+      ctx=await mk(true);p=await open(ctx,id,'print (no layout)');const s0=await snapshot(p),k0=await keys(p),v0=await shown(p),g0=await runs(p);await ctx.close();
+      /* 17 the recorders, timers and graphs as without the layout */
+      {const diff=[];let n=0;for(const v of Object.keys(g0)){const a=g1[v]||[],b=g0[v];n+=b.length;if(a.length!==b.length)diff.push(v+': '+a.length+' and '+b.length+' items');
+        else b.forEach((x,i)=>{const p=JSON.stringify(a[i]),q=JSON.stringify(x);if(p!==q){let j=0;while(j<p.length&&p[j]===q[j])j++;diff.push(v+' '+x[0]+' '+x[1]+' '+String(x[2]).slice(0,30)+': '+p.slice(Math.max(0,j-40),j+60)+' | without: '+q.slice(Math.max(0,j-40),j+60));}});}
+        const ng=Object.values(g0).flat().filter(x=>x[0]!=='run').length;
+        ok(`17 ${id}: the recorders, timers and graphs as without the layout (${n} on its ${Object.keys(g0).length} sheets: ${ng} graphs, the runners drawn or not, their words and controls)`,!diff.length&&Object.keys(g1).length===Object.keys(g0).length,diff.slice(0,8));}
+      /* 15 an element the form keeps out of sight on a sheet (in view nowhere on it without the layout) is not shown by the
+         layout's display rules (SP-1's Sheet no. box, before its own rule) */
+      {const un=[];for(const v of Object.keys(v1)){const a=v1[v],b=v0[v]||{};for(const k of Object.keys(a))if(a[k]>0&&k in b&&b[k]===0)un.push(v+' '+k);}
+        ok(`15 ${id}: nothing the form keeps out of sight shows with the layout (${Object.keys(v1).length} sheets at 1376 x 1032)`,!un.length,un.slice(0,8));}
+      /* an id a form makes from the clock (IA-1's targets, "tmw3djtf86gt") differs between any two loads */
+      const cid=t=>String(t).replace(/"t[a-z0-9]{9,13}"/g,'"(id)"').replace(/(?<![a-z0-9])[a-z]_m[a-z0-9]{7,9}(?![a-z0-9])/g,'(id)')
+        /* RS-1's service days: an id from the clock's last five base-36 digits and five of Math.random ("d_djt1hzx7sf_date") */
+        .replace(/(?<![a-z0-9])d_[a-z0-9]{10}(?![a-z0-9])/g,'d_(id)');
+      /* DD-1's ids from the clock too: a behavior's ("b_mw3djsxp1") and a day's ("r_mw3djsxrq") */
+      const dj=x=>cid(JSON.stringify(x&&(x.data||x)));const K1=k1.map(cid),K0=k0.map(cid);const kd=K1.filter(x=>!K0.includes(x)).concat(K0.filter(x=>!K1.includes(x)));
+      ok(`11 ${id}: every field keeps its id, name and data key, and the saved file (${s?Object.keys(s.data||s).length:0} entries) is the same with the layout as without it`,!!s&&!!s0&&dj(s)===dj(s0)&&!kd.length&&k1.length===k0.length,
+        {keys:kd.slice(0,6),n:[k1.length,k0.length],data:s&&s0?[...new Set(Object.keys(s.data||{}).concat(Object.keys(s0.data||{})))].filter(k=>cid(k+JSON.stringify((s.data||{})[k]))!==cid(k+JSON.stringify((s0.data||{})[k]))).slice(0,6).map(k=>k+': '+String(JSON.stringify((s.data||{})[k])).slice(0,120)+' | without: '+String(JSON.stringify((s0.data||{})[k])).slice(0,120)):'no snapshot'});
+      const out={};for(const off of [false,true]){ctx=await mk(off);p=await ctx.newPage();p.on('pageerror',e=>errs.push(id+' print'+(off?' (no layout)':'')+': '+e.message));p.on('dialog',d=>d.accept().catch(()=>{}));
+        await p.goto(BASE+'/NBH-Workstation/'+file(id));await sleep(1500);if(s){await restore(p,s);await sleep(2200);}
+        /* as a print starts: the print media, and beforeprint (a headless page may deliver the media's change late) */
+        const has=await p.evaluate(()=>!!window.fx2Layout);await p.emulateMedia({media:'print'});await p.evaluate(()=>dispatchEvent(new Event('beforeprint')));await sleep(600);
+        /* once the screen's changes have gone back (on the print media's change, a moment after it). The paper is
+           compared as the PDF reads, page by page: the page's own text in print media differs where it should not matter
+           (a list's options count there, and polish prints a long choice through a copy where the layout's 16 px type
+           made it too long for its box: DM-1's "Educational rights held by") */
+        let text='';for(let k=0;k<8;k++){text=await p.evaluate(()=>document.body.innerText.replace(/\s+/g,' ').trim());
+          if(!(await p.evaluate(()=>window.fx2Layout&&([...document.querySelectorAll('[data-fx2-orig]')].some(h=>!h.children.length&&h.textContent!==h.getAttribute('data-fx2-orig'))||
+            [...document.querySelectorAll('[data-fx2-origt]')].some(h=>{const t=[...h.childNodes].find(n=>n.nodeType===3&&n.nodeValue.trim());return t&&t._fx2o!=null&&t.nodeValue!==t._fx2o;})))))break;await sleep(400);}const f=path.join(OUT,id+(off?'-without':'-with')+'.pdf');
+        fs.writeFileSync(f,await p.pdf({preferCSSPageSize:true,printBackground:true}));out[off?'without':'with']={has,text,f};await ctx.close();}
+      const py=spawnSync('python3',['-c','import sys,json\ntry:\n import pymupdf as m\nexcept Exception:\n import fitz as m\nr=[]\nfor f in sys.argv[1:]:\n d=m.open(f); r.append([p.get_text() for p in d])\nprint(json.dumps(r))',out.with.f,out.without.f],{encoding:'utf8',maxBuffer:1<<27});
+      let pages=null;try{pages=JSON.parse(py.stdout);}catch(e){}
+      const cnt=f=>(fs.readFileSync(f,'latin1').match(/\/Type\s*\/Page[^s]/g)||[]).length;
+      const same=pages?pages[0].length===pages[1].length&&pages[0].every((t,i)=>t===pages[1][i]):cnt(out.with.f)===cnt(out.without.f);
+      ok(`11 ${id}: the print is the same with the layout as without it (${pages?pages[0].length+' and '+pages[1].length:cnt(out.with.f)+' and '+cnt(out.without.f)} pages, the same text${pages?' on every page':''}); the snapshot ${s?'restored':'missing'}`,
+        !!s&&out.with.has&&!out.without.has&&same,{pages:pages?[pages[0].length,pages[1].length]:null,text:out.with.text===out.without.text,has:[out.with.has,out.without.has],firstDiff:pages?pages[0].findIndex((t,i)=>t!==pages[1][i]):null,at:(()=>{const a=out.with.text,b=out.without.text;let i=0;while(i<a.length&&a[i]===b[i])i++;return i<Math.max(a.length,b.length)?[a.slice(Math.max(0,i-60),i+80),b.slice(Math.max(0,i-60),i+80)]:null;})()});}
+  }
+  /* 12 the master print keeps each form's styles whole */
+  {const ctx=await cr.newContext({viewport:{width:1300,height:900}});const ws=await ctx.newPage();ws.on('pageerror',e=>errs.push('workstation: '+e.message));await ws.goto(BASE+'/NBH-Workstation/index.html');await sleep(1500);
+    const pk=await ws.evaluate(async files=>{const out=[];for(const f of files){const h=await (await fetch(f)).text();const d=new DOMParser().parseFromString(h,'text/html');
+      const css=[...d.querySelectorAll('style:not([data-nbh-screen])')].map(x=>x.textContent).join('\n');const sc=scopeCSS(css,'.mp-0');const sh=new CSSStyleSheet();sh.replaceSync(sc);
+      const cnt=r=>[...r].reduce((n,x)=>n+((x instanceof CSSMediaRule||x instanceof CSSSupportsRule)?cnt(x.cssRules):1),0);
+      const written=(sc.match(/\{/g)||[]).length-(sc.match(/@(media|supports)[^{]*\{/g)||[]).length;out.push({f:f.slice(0,4),read:cnt(sh.cssRules),written});}return out;},IDS.map(file));
+    ok('12 the master print keeps each form\'s styles: every form\'s rules, scoped by the workstation, read whole (no rule swallows the rest)',pk.every(x=>x.read>=x.written-200),pk);
+    /* and the layout gives the packet no rule of its own: the workstation splits a rule's selectors at every comma and
+       gives a control's name standing alone to every value it prints, so a rule of the layout that names input, select
+       or textarea in a list could reach every value in the packet (a Focus rule did, before it was written otherwise).
+       Every rule the shared block adds to the packet names the layout; a form's own block (fx2-own, which may hold the
+       form's own rules for paper, as IN-1's does) adds no rule on every printed value of the form */
+    const st=await ws.evaluate(async files=>{const strip=s=>s.replace(/<style id="fx2-v2492">[\s\S]*?<\/style>/,''),strip2=s=>strip(s).replace(/<style id="fx2-own">[\s\S]*?<\/style>/,'');
+      const rules=css=>{const sh=new CSSStyleSheet();sh.replaceSync(scopeCSS(css,'.mp-0'));const o=[];const walk=(L,pre)=>{for(const x of L){if(x.cssRules&&!x.selectorText)walk(x.cssRules,pre+(x.conditionText||'')+'|');else o.push({k:pre+x.cssText,s:x.selectorText||''});}};walk(sh.cssRules,'');return o;};
+      const out=[];for(const f of files){const h=await (await fetch(f)).text();const css=t=>[...new DOMParser().parseFromString(t,'text/html').querySelectorAll('style:not([data-nbh-screen])')].map(x=>x.textContent).join('\n');
+        const w=rules(css(h)),o=rules(css(strip(h))),n=new Set(o.map(r=>r.k)),n2=new Set(rules(css(strip2(h))).map(r=>r.k));
+        const paper=r=>!/(^|\|)[^|]*\bscreen\b[^|]*\|/.test(r.k)||/print/.test(r.k.split('{')[0]);   /* a rule for the screen only never reaches the paper */
+        const stray=w.filter(r=>paper(r)&&!n.has(r.k)&&!/fx2/.test(r.s)).concat(o.filter(r=>paper(r)&&!n2.has(r.k)&&/(^|,\s*)\.mp-0 \.nbh-val/.test(r.s))).map(r=>r.k.slice(0,160));
+        if(stray.length)out.push({f:f.slice(0,4),stray:stray.slice(0,3)});}return out;},IDS.map(file));
+    ok('12 the master print gets no rule from the layout that reaches past it (every rule it adds names the layout)',!st.length,st);await ctx.close();}
+  /* 18 inside the workstation (framed) the form drops its masthead's title and description; the masthead stays only for
+     a button of the form's own, never for the layout's "Show the full introduction" alone (DD-1, DT-1, AD-1 and VI-1
+     showed a strip 55 px tall holding only that link, which opened nothing in sight): these nine */
+  {const ctx=await L.ipadCtx(ipad,{viewport:{width:1180,height:820},serviceWorkers:'block'});const ws=await ctx.newPage();ws.on('pageerror',e=>errs.push('workstation: '+e.message));
+    await ws.goto(BASE+'/NBH-Workstation/index.html');await sleep(1300);const bad=[];
+    const F18=[...new Set(IDS)];
+    for(const id of F18){await ws.evaluate(id=>openForm(id),id);await ws.waitForFunction(id=>!!state.status[id],id,{timeout:40000});await sleep(1500);
+      const f=file(id),fr=ws.frames().find(x=>x.url().indexOf(encodeURI(f))>=0||x.url().indexOf(f)>=0);if(!fr){bad.push(id+': no frame');continue;}
+      const m=await fr.evaluate(()=>{const m=document.querySelector('.nbh-mast');if(!m||!m.getClientRects().length)return null;const own=[...m.querySelectorAll('button')].filter(b=>!b.classList.contains('fx2-more')&&b.getClientRects().length);
+        return {h:Math.round(m.getBoundingClientRect().height),own:own.length,framed:document.documentElement.classList.contains('nbh-framed')};});
+      if(m&&m.framed&&!m.own)bad.push(id+': a masthead '+m.h+' px tall with no button of its own');}
+    ok(`18 inside the workstation no masthead stays for the layout's link alone (${F18.length} forms: ${F18.join(' ')})`,!bad.length,bad);await ctx.close();}
+  /* ---------- TD-1's own layout (v24.89), kept beside the shared one ---------- */
+  /* T1 the selectors: the questions on the left and the Recommended margin on the right while there is room (above
+     1000 px), the margin under the questions upright on a smaller iPad and on a phone; "N of M answered"; Not sure
+     beside Yes and No; TD-1's In plan switch and Add button in the margin */
+  const SEL=['select','antecedent','reinf','teach','skills','respond'];
+  const selector=p=>p.evaluate(()=>{const vis=e=>!!e&&e.getClientRects().length>0;const out=[];
+    document.querySelectorAll('.sheet .td9-recs').forEach(r=>{if(!vis(r))return;const q=r._td9q||r.parentNode.querySelector('.td9-q');const sh=r.parentNode,a=q&&q.getBoundingClientRect(),b=r.getBoundingClientRect();
+      out.push({sheet:sh.id,grid:getComputedStyle(sh).display,side:!!a&&b.left>=a.right-1&&b.top<a.bottom,below:!!a&&b.top>=a.bottom-1,head:(r.querySelector('.td9-rh b')||{}).textContent||'',
+        prog:((q&&q.querySelector('.td9-prog'))||{}).textContent||'',add:!!r.querySelector('.td9-add'),sw:r.querySelectorAll('.td-pk input').length,
+        ns:q?q.querySelectorAll('.nbh-segb[data-v="not sure"]').length:0,qn:q?q.querySelectorAll('.qrow').length:0});});return out;});
+  for(const [w,h,want] of [[1376,1032,'side'],[1032,1376,'side'],[820,1180,'below'],[390,844,'below']]){const ctx=await L.ipadCtx(ipad,{viewport:{width:w,height:h}});await ctx.addInitScript(clock);const p=await open(ctx,'TD-1','T1 '+w);const got=[];
+    for(const v of SEL){await view(p,v);(await selector(p)).forEach(x=>got.push(Object.assign({v},x)));}
+    const bad=got.filter(x=>!x[want]||x.head!=='Recommended'||!/^\d+ of \d+ answered$/.test(x.prog)||!x.add||!x.sw||(want==='side'&&x.grid!=='grid'));
+    const ns=got.reduce((n,x)=>n+x.ns,0);
+    ok(`T1 TD-1 ${w}x${h}: on the ${got.length} selectors with recommendations the questions and the Recommended margin ${want==='side'?'side by side':'one under the other'}, "N of M answered", In plan switches, the Add button; Not sure beside Yes and No (${ns})`,got.length>=1&&got.some(x=>x.v==='select')&&!bad.length&&ns>0,{bad:bad.slice(0,4),got:got.map(x=>x.v+':'+x.grid+':'+(x.side?'side':x.below?'below':'?'))});
+    await ctx.close();}
+  /* T2 the Build sheet: labels above their boxes, the example under the label, boxes that grow to their text at 16 px,
+     numbered steps, Remove asks first; T3 the DRO helper; T4 the video dialog (touch) */
+  {const ctx=await L.ipadCtx(ipad,{viewport:{width:1376,height:1032}});await ctx.addInitScript(clock);const p=await open(ctx,'TD-1','T2');await view(p,'build');
+    const b=await p.evaluate(()=>{const cs=[...document.querySelectorAll('#compWrap .card')].filter(c=>c.getClientRects().length);const bad=[];let n=0;
+      cs.forEach(c=>c.querySelectorAll('.param .f').forEach(f=>{const l=f.querySelector(':scope > label'),t=f.querySelector(':scope > textarea');if(!l||!t||!t.getClientRects().length)return;n++;
+        const lr=l.getBoundingClientRect(),tr=t.getBoundingClientRect(),fs=parseFloat(getComputedStyle(t).fontSize);
+        if(lr.bottom>tr.top+1||fs<16||t.scrollHeight>t.clientHeight+3)bad.push((t.name||'')+' '+Math.round(lr.bottom)+'/'+Math.round(tr.top)+' '+fs+' '+t.scrollHeight+'/'+t.clientHeight);}));
+      const li=document.querySelector('#compWrap ol.steps li');return {cards:cs.length,n,bad,num:li?getComputedStyle(li,'::before').content:'',steps:(document.querySelector('#compWrap .td9-stepsn')||{}).textContent||''};});
+    ok(`T2 TD-1: the Build sheet's ${b.cards} cards, ${b.n} settings: each label above its box, the box at 16 px and grown to its text; the steps numbered and counted ("${b.steps}")`,b.cards>0&&b.n>10&&!b.bad.length&&/counter/.test(b.num)&&/^\d+ steps/.test(b.steps),b);
+    /* Remove asks first */
+    const rm=await p.evaluate(async()=>{let asked='';const keep=window.nbhUI&&nbhUI.confirm;if(window.nbhUI)nbhUI.confirm=async q=>{asked=q;return false;};const n0=document.querySelectorAll('#compWrap .card').length;return {n0};});
+    await p.locator('#compWrap .card .chd .rm').first().tap();await sleep(500);
+    const rm2=await p.evaluate(()=>document.querySelectorAll('#compWrap .card').length);
+    ok('T2 TD-1: Remove on a Build card asks first (kept when the answer is no)',rm2===rm.n0,{rm,rm2});
+    /* T3 the DRO helper on a DRO card from the menu */
+    await p.evaluate(()=>{window.nbhUI=window.nbhUI||{};nbhUI.confirm=async()=>true;nbhUI.choose=async()=>'second';const s=document.getElementById('addComp');s.value='DRO';document.getElementById('addCompBtn').click();});await sleep(1200);
+    const dro=await p.evaluate(()=>{const cs=document.querySelectorAll('#compWrap .card[data-code="DRO"]'),c=cs[cs.length-1];if(!c)return {card:false};const w=c.querySelector('.td-iv');if(!w)return {card:true,iv:false};c.scrollIntoView({block:'start'});return {card:true,iv:true,id:c.id};});
+    let iv={};if(dro.iv){await p.locator('#'+dro.id+' .td-iv-tog').tap();await sleep(300);
+      const ins=p.locator('#'+dro.id+' .td-iv input');const k=await ins.count();if(k>=2){await ins.nth(0).fill('10');await ins.nth(1).fill('15');await ins.nth(1).dispatchEvent('input');}await sleep(400);
+      iv=await p.evaluate(id=>{const w=document.querySelector('#'+id+' .td-iv'),box=w.querySelector('.td-iv-box'),t=w.querySelector('.td-iv-tog');return {exp:t.getAttribute('aria-expanded'),shown:!!box&&!box.hidden&&box.getClientRects().length>0,out:(w.querySelector('.td-iv-out')||{}).textContent||'',
+        h:[...w.querySelectorAll('input,button')].filter(x=>x.getClientRects().length).map(x=>Math.round(x.getBoundingClientRect().height)),fs:[...w.querySelectorAll('input')].map(x=>parseFloat(getComputedStyle(x).fontSize))};},dro.id);}
+    ok('T3 TD-1: "Set the first interval from baseline" on a DRO card opens with a tap and works out the interval as it is typed (10 min, 15 responses: 40 s); its boxes at 16 px',dro.iv&&iv.exp==='true'&&iv.shown&&/40 s/.test(iv.out)&&iv.fs.every(x=>x>=16),{dro,iv});
+    /* T4 the video dialog: the card's Watch the video, with a tap */
+    const vb=p.locator('#'+(dro.id||'none')+' .td-vid-btn');let vd={};
+    if(dro.id&&await vb.count()){await vb.first().scrollIntoViewIfNeeded();await vb.first().tap();
+      await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&!v.hidden&&v.readyState>=1;},null,{timeout:30000}).catch(()=>{});
+      vd=await p.evaluate(()=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {open:!!d&&!d.hidden,title:(d.querySelector('#tv-title')||{}).textContent||'',dur:v&&v.duration,lib:!!d.querySelector('#tv-lib'),err:d.querySelector('#tv-msg')&&d.querySelector('#tv-msg').classList.contains('tv-err')};});
+      await p.keyboard.press('Escape');await sleep(300);vd.closed=await p.evaluate(()=>document.getElementById('tdVideo').hidden);}
+    ok('T4 TD-1: the procedure video opens from the DRO card with a tap, plays from the device, has Browse all videos, and closes',vd.open&&vd.title.length>10&&vd.dur>60&&vd.lib&&!vd.err&&vd.closed,vd);
+    await ctx.close();}
+  /* T5 the bank panel, its card versions and the video dialog: as without the layout (the bank is drawn in a shadow root
+     the layout cannot reach; its host's place is the sheet's) */
+  {const strip=s=>s.replace(/<style id="fx2-v2492">[\s\S]*?<\/style>\n?/,'').replace(/<style id="fx2-own">[\s\S]*?<\/style>\n?/,'').replace(/<script id="fx2-v2492-js">[\s\S]*?<\/script>\n?/,'').replace(/<script id="fx2-cfg">[\s\S]*?<\/script>\n?/,'')
+      .replace(/<script>document\.documentElement\.classList\.add\('fx2'\);[^<]*<\/script>\n?/,'');
+    const bank=async off=>{const ctx=await L.ipadCtx(ipad,{viewport:{width:1376,height:1032}});await ctx.addInitScript(clock);
+      if(off)await ctx.route('**/NBH-Workstation/'+file('TD-1'),async r=>{const res=await r.fetch();r.fulfill({response:res,body:strip(await res.text())});});
+      const p=await open(ctx,'TD-1','T5'+(off?' (no layout)':''));await view(p,'build');
+      const o=await p.evaluate(async()=>{const has=!!window.fx2Layout;window.__tdBank.show('dro-whole-then-momentary');await new Promise(r=>setTimeout(r,700));const h=document.getElementById('tdBankHost'),R=h&&h.shadowRoot;if(!R)return {has,none:true};
+        const drawn=e=>e.getClientRects().length>0&&getComputedStyle(e).visibility!=='hidden';
+        const shape=[...R.querySelectorAll('*')].filter(drawn).map(x=>{const r=x.getBoundingClientRect();return x.tagName+':'+Math.round(r.width)+'x'+Math.round(r.height);}).join(' ');
+        const chips=R.querySelectorAll('[aria-current], .vchip, .ver button').length;const words=R.textContent.replace(/\s+/g,' ').trim();
+        window.__tdVideo.play('dro_class');await new Promise(r=>setTimeout(r,800));const d=document.getElementById('tdVideo');
+        const vshape=[...d.querySelectorAll('*')].filter(drawn).map(x=>{const r=x.getBoundingClientRect();return x.tagName+':'+Math.round(r.width)+'x'+Math.round(r.height)+':'+getComputedStyle(x).fontSize;}).join(' ');
+        window.__tdVideo.close();return {has,words,shape,chips,vwords:d.textContent.replace(/\s+/g,' ').trim(),vshape};});
+      await ctx.close();return o;};
+    const a=await bank(false),b=await bank(true);
+    ok(`T5 TD-1: the bank panel (a card and its versions, ${a.chips} chips) and the video dialog the same with the layout as without it: their words, and every element's size`,a.has&&!b.has&&!a.none&&a.words===b.words&&a.shape===b.shape&&a.vwords===b.vwords&&a.vshape===b.vshape,
+      {words:a.words===b.words,shape:a.shape===b.shape,vwords:a.vwords===b.vwords,vshape:a.vshape===b.vshape,at:(()=>{const x=a.shape||'',y=b.shape||'';let i=0;while(i<x.length&&x[i]===y[i])i++;return [x.slice(Math.max(0,i-80),i+80),y.slice(Math.max(0,i-80),i+80)];})()});}
+  /* T6 inside the workstation: Browse all videos in TD-1's player opens the library */
+  {const ctx=await L.ipadCtx(ipad,{viewport:{width:1180,height:820},serviceWorkers:'block'});const ws=await ctx.newPage();ws.on('pageerror',e=>errs.push('workstation: '+e.message));
+    await ws.goto(BASE+'/NBH-Workstation/index.html');await sleep(1300);await ws.evaluate(()=>openForm('TD-1'));await ws.waitForFunction(()=>!!state.status['TD-1'],null,{timeout:40000});await sleep(2000);
+    await ws.evaluate(()=>{const f=state.frames['TD-1'];f.contentWindow.__tdVideo.play('dro_class');});await sleep(800);
+    await ws.frameLocator('iframe[src*="TD-1_"]').locator('#tv-lib').tap();await sleep(1200);
+    const br=await ws.evaluate(()=>({shown:!!document.getElementById('vlLayer')&&!document.getElementById('vlLayer').hidden,dlg:state.frames['TD-1'].contentDocument.getElementById('tdVideo').hidden}));
+    ok('T6 TD-1 inside the workstation: Browse all videos closes the player and opens the video library',br.shown&&br.dlg===true,br);await ctx.close();}
+  /* 14 the tool */
+  {const forms=fs.readdirSync(path.join(ROOT,'NBH-Workstation')).filter(f=>/^[A-Z].*\.html$/.test(f)).map(f=>path.join(ROOT,'NBH-Workstation',f));
+    const r=spawnSync('python3',[path.join(ROOT,'tools','blocks','patch-fx2.py'),'--check',...forms],{encoding:'utf8'});const cur=(r.stdout.match(/^current /mg)||[]).length;
+    ok(`14 patch-fx2.py --check: every form that carries the layout holds the source's copy (${cur} forms)`,r.status===0&&cur>=IDS.length,{status:r.status,out:(r.stdout+r.stderr).slice(-600)});}
+  ok('13 no page errors',!errs.length,errs.slice(0,6));
+  await ipad.close();await cr.close();console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);console.log('RESULT: 1 failure(s)');process.exit(1);});

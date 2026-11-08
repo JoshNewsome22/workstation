@@ -37,7 +37,8 @@ const dir=L.ROOT+'/NBH-Workstation/',file=pre=>fs.readdirSync(dir).find(f=>f.sta
     return {hs,boxes:[...document.querySelectorAll('#rlList input[type=checkbox]')].map(e=>e.name),tags:[...document.querySelectorAll('#rlList .rl-ev')].map(e=>e.textContent),
       text:document.querySelector('#rlSec').textContent.replace(/\s+/g,' '),href:a&&a.getAttribute('href'),tgt:a&&a.target,note:!!document.querySelector('#rlSec textarea[name="rl.note"]'),
       moments:[...document.querySelectorAll('#rlRisk .rl-m')].map(m=>({k:m.dataset.k,on:m.classList.contains('on'),t:m.textContent})),fits:[...document.querySelectorAll('#rlList .rl-fit')].filter(e=>!e.hidden).length};});
-  const gi=lay.hs.indexOf('Generalization and Maintenance'),ri=lay.hs.indexOf('Relapse Safeguards'),si=lay.hs.indexOf('Social Validity and Acceptability');
+  /* v25.70 fx2: the headings read on screen are in sentence case on TD-1 too (the shared layout): matched without regard to case */
+  const hl=lay.hs.map(h=>h.toLowerCase()),gi=hl.indexOf('generalization and maintenance'),ri=hl.indexOf('relapse safeguards'),si=hl.indexOf('social validity and acceptability');
   ok('TD-1 the plan has Relapse Safeguards between Generalization and Maintenance and Social Validity, with item H.5 of the BCBA Test Content Outline (6th ed.)',
     gi>=0&&ri===gi+1&&si===ri+1&&/BCBA Test Content Outline \(6th ed\.\) item H\.5: plan for and attempt to mitigate possible relapse of the target behavior/.test(lay.text),{hs:lay.hs});
   /* v25.67 (BC-RM-M2, batch 3) an eleventh: the replacement response goes everywhere (the card in every setting), last */
