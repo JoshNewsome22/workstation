@@ -1766,7 +1766,7 @@ let CASE=null;
 function caseState(f){CASE=f;const box=$('#caseState');if(!box)return;
   if(!f){box.className='warn';box.innerHTML='<b>Nothing from the case yet.</b> Open this form in the workstation with the case’s other forms open (DM-1, TB-1, FS-1, TD-1, CR-1, GB-1, PA-1), or open a case file, and what they hold is placed here as a starting point. You can also write everything yourself.';return;}
   const s=f.src||{},bits=[];if(f.profile)bits.push('the profile and precautions (Form '+(s.profile||'DM-1')+')');if((f.behaviors||[]).length)bits.push(f.behaviors.length+(f.behaviors.length===1?' behavior':' behaviors')+' (Form '+(s.behaviors||'TB-1')+')');
-  if(f.fn&&(f.fn.label||f.fn.key))bits.push('the function (Form '+(s.fn||'FS-1')+')');if(f.plan)bits.push('the plan (Form '+(s.plan||'TD-1')+')');if(f.crisis)bits.push('the crisis stages (Form '+(s.crisis||'CR-1')+')');
+  if(f.fn&&(f.fn.label||f.fn.key))bits.push('the function (Form '+(s.fn||'FS-1')+')');if(f.plan)bits.push('the plan (Form '+(s.plan||'TD-1')+')');if(f.crisis&&(f.crisis.stages||[]).length)bits.push('the crisis stages (Form '+(s.crisis||'CR-1')+')');
   const g=f.goals||{};if((g.red||[]).length||(g.acq||[]).length)bits.push('the goals (Form '+(s.goals||'GB-1')+')');if((f.menu||[]).length)bits.push('the reinforcer menu (Form '+(s.menu||'PA-1')+')');
   box.className='note';box.innerHTML='<b>From the case:</b> '+(bits.length?bits.join(', '):'nothing this form uses')+'. Placed into empty fields only, each marked until rewritten. <b>From the case</b> on the toolbar picks items into fields already in use.';}
 /* v21.74 what the case places. An empty field takes the plan's words. A field still holding the words placed before follows
