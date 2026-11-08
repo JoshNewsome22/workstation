@@ -9905,6 +9905,58 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.69: One screen layout for every form, the video library, Matilda's narration, the print presets, and Behavioral Interventions and BAP in the banks
+(the BCBA, 11/7 and 11/8: the rest of the screen layout, a YouTube-style library for the procedure videos, the voice she
+chose for them, the design review's print group, and the studies in her two new Drive folders)
+
+- **One screen layout for all 48 forms (fx2).** The layout the BCBA approved on DM-1, IC-1 and RR-1 now runs on every form:
+  groups 2 to 5 added ABC-1, FS-1, SA-1, SR-1, RM-1, CR-1, GC-1, VS-1; DD-1, DT-1, RA-1, AD-1,
+  BC-1, CF-1, CT-1, ST-1; GB-1, HD-1, PD-1, PR-1, SM-1, SV-1, TE-1, TI-1; and TK-1, TV-1, CN-1, EB-1, FD-1, IM-1, MS-1,
+  QS-1, RS-1. Lists are cards on a touch screen and tables with a mouse; data grids, logs that feed a graph, scored
+  tables, checklists, runners and timers stay as they were, and wide data grids scroll in their own frame on the iPad.
+  Saved fields, exports and each form's own printout are unchanged. Inside the workstation no form shows an empty
+  masthead strip (VI-1's is gone). CR-1's spreadsheet export no longer glues the screen's note onto a row's name.
+- **TD-1 joins the shared layout.** TD-1 keeps its selector, build cards and Final plan as they were and takes the
+  rest from the shared layout: the heading scale, 16 px boxes and 44 px fields and buttons (Safari no longer zooms into
+  the selector and DRO helper boxes), examples under labels, and on the iPad the high-p instruction pool, staff trained
+  and acceptability ratings as cards. The progress log shows dates in full on the iPad. Six boxes are now named by their
+  row's label in addenda and for screen readers ("Session length (min)", not "Session length (min) e.g. 10"). Saved
+  fields, exports, TD-1's printout, the staff packet and the master packet are unchanged. Checked by
+  `qa/v2569-td1-align-test.js`.
+- **Video library.** Videos in the top bar opens a library of TD-1's procedure videos: chips by procedure (DRO, NCR, RIRD,
+  high-p, FCT) and by function, search, a poster and length on every card, Continue watching (kept on this device only),
+  and a watch page with the studies, "Open the TD-1 card" and Up next. TD-1's player has Browse all videos. Works offline.
+  The list of videos is one file, nbh-videos.js, that TD-1 and the library share.
+- **Narration.** All 17 TD-1 videos are narrated in the voice the BCBA chose (an ElevenLabs voice, read from the plain
+  script); pictures, captions, steps and timers are unchanged, each video is 4 to 9% longer, and the loudness is even
+  across them.
+- **Print for the reader (H8, B2).** Build packet first asks who it is for: IEP team and file (today's packet, page for
+  page), Teacher and staff, Family (first name, no record line or ID, the family's language named), or Records request,
+  with about how many pages before building; a signature block never prints alone on a page.
+- **HD-1's home sheets (M12)** print on their own: "Page 1 of 10", the child's first name and the week, and a home
+  footer with the BCBA's name and phone. **DD-1's graphs (M13)** label dates level and spaced, with the full date on tap;
+  DD-1's packet section no longer starts with a half-empty page.
+- **The banks.** Behavioral Interventions 2020 to 2024 (volumes 35 to 39; volume 34's folder had no PDFs): 170 TD-1
+  cards and 10 GB-1 objectives. Behavior Analysis in Practice 2019 to 2026, the studies the first reading did not have:
+  55 TD-1 cards and 10 GB-1 objectives. The gap check of Behavioral Residential Treatment/Behavioral Interventions
+  1986 to 1994 and BAP 2008 to 2018 found nearly everything already banked or set aside: 2 more cards and one reference
+  split (Curran et al., 1991). Studies whose main procedure is never written (a strapped containment chair, mittens
+  fastened as a consequence, pressure after toe walking) are set aside and recorded.
+- **Checks.** New tests: v2568-fx2-g2, -g3, -g4, v2569-fx2-g5, v2569-video-library and v2569-print-group. The release
+  run checks that the server it uses serves this checkout.
+- **Safety events on Today (wave 3).** A Baker Act initiation with the parent not yet reached, and a threat team case
+  with the brief not yet given, show on Today, What's due and the caseload, each opening CR-1 at that event, until done
+  or 30 days old; the calendar shows the event dates (a downloaded calendar file says only "Safety event (Form CR-1)").
+  "A plan with no crisis plan" now reads CR-1's stages, so a CR-1 holding only events counts as no plan.
+- **The staff daily self-check in DD-1.** A staff phone link can ask "Did I do it?" (TI-1's questions for that adult,
+  else QS-1's); DD-1 keeps the answers, logs them and shades a day under the integrity criterion on its graphs, and
+  sends them to TI-1, which compares them with what was observed. OB-1's classroom check travels in the case on its own.
+- **DRA videos.** Four new procedure videos on TD-1, narrated like the others: praise for working with planned
+  ignoring (Hall, Lund & Jackson, 1968); a better break for finished work, without extinction (Briggs et al., 2019);
+  coupons for ending a favorite item when asked (Wilder et al., 2007); and earned periods of free stereotypy for play
+  (Potter et al., 2013; Hanley et al., 2000). Every DRA card shows its closest video, with one line on how it differs;
+  the library has a DRA shelf (21 videos).
+
 ### v25.68: Procedure videos on TD-1, the shell's three decisions, safety records, family language, classroom checks and RS-1's fieldwork
 (the BCBA, 11/6 and 11/7: wave 1 and the first parts of wave 2 of the research; the procedure videos for high-p, DRO, NCR and RIRD)
 

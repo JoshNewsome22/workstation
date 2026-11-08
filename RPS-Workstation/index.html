@@ -1471,6 +1471,27 @@ body:not(.has-form) #focusBtn{display:none}
 .po-row{display:flex;gap:8px;align-items:flex-start;padding:4px 0;line-height:1.4;cursor:pointer}
 .po-row input{margin:3px 0 0;flex:0 0 auto}
 .po-hint{color:#54676f;font-size:12px}
+/* v25.69 (design review H8, B2) Build packet: who is this for (four cards), then the sections with a running page count */
+.pk-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0 4px}
+.pk-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:44px;padding:12px 14px;border:1px solid var(--rule);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;font:inherit}
+.pk-card:hover:not(:disabled),.pk-card:focus-visible{border-color:var(--navy);box-shadow:0 0 0 2px var(--mist)}
+.pk-card b{font-size:15px;color:var(--navy)}
+.pk-card .pk-d{font-size:12.5px;line-height:1.4;color:var(--muted)}
+.pk-card .pk-f{font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
+.pk-card .pk-n{font-size:13px;font-weight:600;color:var(--navy)}
+.pk-card:disabled{opacity:.55;cursor:default}
+.pk-top{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:0 0 8px}
+.pk-top span{font-size:12.5px;color:var(--muted);flex:1 1 240px}
+.pk-back{min-height:44px}
+.pk-secs{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.pk-secs li{border-bottom:1px solid var(--rule)}
+.pk-secs label{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;min-height:44px;padding:4px 2px;cursor:pointer}
+.pk-secs .pk-sn{flex:1 1 200px;color:var(--ink)}
+.pk-secs .pk-sp{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pk-total{font-weight:600;color:var(--navy);margin:8px 0}
+.pk-fam,.pk-note{font-size:12.5px;line-height:1.45;color:var(--ink);margin:6px 0}
+.pk-adv{margin:8px 0;border:1px solid var(--rule);border-radius:6px;padding:4px 10px}
+.pk-adv summary{min-height:36px;display:flex;align-items:center;cursor:pointer;font-weight:600;color:var(--navy)}
 /* v21.94 Log it now: the sheet in the dialog */
 #dlg .ln{display:flex;flex-direction:column;gap:10px;margin-top:4px}
 #dlg .ln .ln-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px}
@@ -2913,7 +2934,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v25.68';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v25.69';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3259,6 +3280,8 @@ FACT_SRC['DA-1']='demands';FACT_GEN.push('DA-1');
 /* v25.66 (FEED-H3..H6) Form FD-1 joins the case as 'feeding': the screen and gate, the meal observation, the plan and the data */
 FACT_SRC['FD-1']='feeding';FACT_GEN.push('FD-1');
 {const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.feeding);};factsSig=function(f){return fsg(f)+(f&&f.feeding?JSON.stringify(f.feeding):'');};}
+/* v25.69 (wave 3) Form OB-1's classroom practices check, carried in gatherFacts below */
+{const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.classroom);};factsSig=function(f){return fsg(f)+(f&&f.classroom?'|cls'+JSON.stringify(f.classroom):'');};}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
   factsBusy=true;
@@ -3284,6 +3307,9 @@ async function gatherFacts(push){
       if(out&&out.replies&&typeof out.replies==='object'){f.replies=Object.assign({},f.replies||{},out.replies);f.src.replies='forms';}   /* v21.86 what came back, per form */
       /* v24.39 (review R-122) which open forms hold the simulated example: the packet check and the case file read it */
       {const sm=Object.assign({},f.simulated||{});if(out&&out.simulated)sm[id]=true;else delete sm[id];if(Object.keys(sm).length){f.simulated=sm;f.src.simulated='forms';}else{delete f.simulated;delete f.src.simulated;}}
+      /* v25.69 (wave 3, W2-CLASSSTAFF) Form OB-1's classroom practices check as a part of its own, so a record holding a check and no
+         observation of the student still reaches Forms GC-1 and TI-1 (they read classroom first, then evidence['OB-1'].classroom) */
+      if(id==='OB-1'){if(out&&out.classroom){f.classroom=out.classroom;f.src.classroom='OB-1';}else if(f.src.classroom==='OB-1')drop('classroom');}
       if(FACT_SRC[id]==='evidence'){const ev=Object.assign({},f.evidence||{});if(out&&out.evidence)ev[id]=out.evidence;else delete ev[id];if(Object.keys(ev).length){f.evidence=ev;f.src.evidence=Object.keys(ev).join(', ');}else drop('evidence');}
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
@@ -3337,7 +3363,7 @@ function paintFacts(){
   /* v23.09 (review I3) the family facts Form DM-1 holds: the home language and the interpreter need, who holds the rights, who signs */
   {const fam=dmFamily(f,true);if(fam.length)bits.push('<b>Family:</b> '+esc(fam.join(' \u00b7 '))+' <i>('+esc(s.profile||'DM-1')+')</i>');}
   if(f.plan)bits.push('<b>Plan:</b> '+esc(f.plan.rep?'replacement '+f.plan.rep:(f.plan.beh||'developed'))+' <i>('+esc(s.plan||'')+')</i>');
-  if(f.crisis)bits.push('<b>Crisis plan:</b> '+(f.crisis.stages||[]).length+' stages <i>('+esc(s.crisis||'')+')</i>');
+  if(f.crisis)bits.push('<b>Crisis plan:</b> '+((f.crisis.stages||[]).length?(f.crisis.stages||[]).length+' stages':'no stages yet')+' <i>('+esc(s.crisis||'')+')</i>');   /* v25.69 (wave 3) events alone are not a plan */
   if(f.data)bits.push('<b>Data:</b> '+(f.data.days|0)+' school day'+((f.data.days|0)===1?'':'s')+' <i>('+esc(s.data||'')+')</i>');
   if(f.points)bits.push('<b>Point sheet:</b> '+((f.points.days||[]).length)+' days <i>('+esc(s.points||'')+')</i>');
   if(f.quick)bits.push('<b>Quick start</b> <i>('+esc(s.quick||'')+')</i>');
@@ -3681,9 +3707,11 @@ function mpCaseOrder(list){const rank={};CASE_MAP.forEach((st,i)=>st[2].forEach(
   return list.map((x,k)=>({x,k,r:rank[x[0]]!=null?rank[x[0]]:100000+k})).sort((a,b)=>a.r-b.r||a.k-b.k).map(o=>o.x);}
 function packetOptsSave(o){try{localStorage.setItem('nbh.packet',JSON.stringify(o));}catch(e){}}
 function prChoice(k){try{return localStorage.getItem(k)==='1';}catch(e){return false;}}   /* v24.31 */
-function packetOptsOpen(){const o=packetOpts();const ticked=ALL.filter(([id])=>state.ticked[id]),withGuide=ticked.filter(([id])=>MP_GUIDE_FORMS.includes(id));
+/* v25.69 (design review H8, B2) the options as a part of their own: the Packet options dialog shows them, and so does Build packet's
+   second step, as its advanced settings */
+function packetOptsHtml(o,ticked){const withGuide=ticked.filter(([id])=>MP_GUIDE_FORMS.includes(id));
   const radio=(name,val,label,hint)=>'<label class="po-row"><input type="radio" name="'+name+'" value="'+val+'"'+(o[name]===val?' checked':'')+'> <b>'+label+'</b>'+(hint?' <span class="po-hint">'+hint+'</span>':'')+'</label>';
-  dialog('Packet options',
+  return (
     '<p class="hp-lead">The master print reads as one report: each form is a section with its own running head, its sheets run on, and the forms’ guides, reference lists and on-screen notes stay out. Choose what to keep. Kept in this browser.</p>'+
     '<h4 class="po-h">Guides</h4>'+(withGuide.length?'<p class="po-hint">A form’s Guide (its evidence and guidance pages) stays out of the packet unless you keep it here. Ticked forms with a Guide:</p>'+
       withGuide.map(([id,name])=>'<label class="po-row"><input type="checkbox" data-po-guide="'+esc(id)+'"'+(o.guides[id]?' checked':'')+'> Keep the Guide of <b>Form '+esc(id)+'</b> <span class="po-hint">'+esc(name)+'</span></label>').join(''):
@@ -3696,13 +3724,103 @@ function packetOptsOpen(){const o=packetOpts();const ticked=ALL.filter(([id])=>s
     '<h4 class="po-h">References and sources</h4>'+radio('refs','end','One list at the end','the forms’ citations gathered in a last section, repeats dropped (default)')+radio('refs','form','With each form','as the form prints on its own')+radio('refs','none','Left out','')+
     '<h4 class="po-h">Form ABC-1’s incident log</h4>'+radio('abc','compact','Compact','smaller type and tighter rows (default)')+radio('abc','full','Full','as the form prints on its own')+
     '<h4 class="po-h">Empty boxes</h4><label class="po-row"><input type="checkbox" id="poBlanks"'+(o.blanks?' checked':'')+'> <b>Print the empty boxes meant for handwriting</b> <span class="po-hint">(Data collected, Materials and cues) in a form that already holds data; a form printed blank keeps them either way</span></label>'+
-    '<div class="bm-act"><button class="primary" id="poDone">Done</button><span>Build packet uses these.</span></div>');
-  const save=()=>{const g={};$('#dlgBody').querySelectorAll('[data-po-guide]').forEach(c=>{if(c.checked)g[c.dataset.poGuide]=true;});
-    const v=n=>{const r=$('#dlgBody').querySelector('input[name="'+n+'"]:checked');return r?r.value:'';};
-    const next=Object.assign({},o,{guides:Object.assign({},o.guides,g),refs:v('refs')||o.refs,abc:v('abc')||o.abc,order:v('order')||o.order,blanks:!!($('#poBlanks')&&$('#poBlanks').checked)});
+    '');}
+/* the options read back as they change; withGuide: the ticked forms with a Guide, whose kept Guides are set from the boxes */
+function packetOptsBind(box,o,ticked){const withGuide=ticked.filter(([id])=>MP_GUIDE_FORMS.includes(id)),q=s=>box.querySelector(s);
+  const save=()=>{const g={};box.querySelectorAll('[data-po-guide]').forEach(c=>{if(c.checked)g[c.dataset.poGuide]=true;});
+    const v=n=>{const r=box.querySelector('input[name="'+n+'"]:checked');return r?r.value:'';};
+    const next=Object.assign({},o,{guides:Object.assign({},o.guides,g),refs:v('refs')||o.refs,abc:v('abc')||o.abc,order:v('order')||o.order,blanks:!!(q('#poBlanks')&&q('#poBlanks').checked)});
     withGuide.forEach(([id])=>{if(!g[id])delete next.guides[id];});packetOptsSave(next);
-    try{localStorage.setItem('nbh.print.guide',$('#poFormGuide')&&$('#poFormGuide').checked?'1':'0');localStorage.setItem('nbh.print.blank',$('#poFormBlank')&&$('#poFormBlank').checked?'1':'0');}catch(e){}};
-  $('#dlgBody').addEventListener('change',save);$('#poDone').addEventListener('click',()=>{save();try{$('#dlg').close();}catch(e){}});}
+    try{localStorage.setItem('nbh.print.guide',q('#poFormGuide')&&q('#poFormGuide').checked?'1':'0');localStorage.setItem('nbh.print.blank',q('#poFormBlank')&&q('#poFormBlank').checked?'1':'0');}catch(e){}};
+  box.addEventListener('change',save);return save;}
+function packetOptsOpen(){const o=packetOpts(),ticked=ALL.filter(([id])=>state.ticked[id]);
+  dialog('Packet options',packetOptsHtml(o,ticked)+'<div class="bm-act"><button class="primary" id="poDone">Done</button><span>Build packet uses these.</span></div>');
+  const save=packetOptsBind($('#dlgBody'),o,ticked);$('#poDone').addEventListener('click',()=>{save();try{$('#dlg').close();}catch(e){}});}
+/* v25.69 (design review H8, B2) "Who is this for?". Build packet opens a sheet in two steps. Step 1: four readers, each with the
+   forms it takes from this case and about how many pages they print. Step 2: those forms (or the part of a form that reader
+   needs) with a switch each and a running page count, Packet options as the advanced settings, and Print / Save PDF; for the
+   family, the home sheets too. "IEP team and file" builds the packet exactly as Build packet always has: the ticked forms, in
+   the case's order, with Packet options. The others: Teacher and staff (the staff summary, the plan's steps, the data and point
+   sheets, the crisis plan), Family (the consent pages, the family card and the home sheets; first names and a home footer, and
+   the home language from Form DM-1), Records request (the ticked forms, each complete as it prints on its own). */
+const PK_AUD=[
+  ['iep','IEP team and file','Everything ticked in the list, as the packet has always printed: the case’s order, the references gathered at the end.'],
+  ['staff','Teacher and staff','What staff use in the room: the summary, the plan’s steps, the data and point sheets and the crisis plan.'],
+  ['family','Family','In plain words, to keep: the consent pages, the family card and the home sheets, with first names and a home footer.'],
+  ['records','Records request','The forms ticked in the list, each complete as it prints on its own, with its own references.']];
+/* a part of a form a reader takes: what is kept, its name on the sheet, about how many pages it prints; show: a part the form prints
+   only from a button of its own (Form CT-1's family card), shown in the packet */
+const PK_PARTS={'TD-1:final':{q:['#final'],n:'Final treatment plan: step by step',pg:4},'EB-1:brief':{q:['[data-pane="brief"]'],n:'The brief',pg:2},
+  'CR-1:plan':{q:['section.only-plan'],n:'The crisis plan',pg:4},'DD-1:sheet':{q:['#tab-data'],n:'The daily data sheet',pg:2},'SM-1:sheet':{q:['section.only-sheet'],n:'The point sheet',pg:2},
+  'IC-1:family':{q:['#consent','#proc','#planproc'],n:'The consent pages',pg:7},'CT-1:card':{q:['#ctCard'],n:'The family card',pg:1,show:true},'HD-1:sheets':{q:['#sheetOut'],n:'The home sheets',pg:7}};
+/* each reader's forms, in the order they print: [form, part ('' for the whole form)] */
+const PK_TAKES={staff:[['QS-1',''],['EB-1','brief'],['TD-1','final'],['CR-1','plan'],['DD-1','sheet'],['SM-1','sheet']],
+  family:[['IC-1','family'],['CT-1','card'],['HD-1','sheets']]};
+/* a first name for the family's pages: Form DM-1's preferred name when it is open, else the first word of the bar's name */
+function pkFirst(name){let pref='';try{const f=state.frames['DM-1'],e=f&&f.contentDocument&&f.contentDocument.querySelector('[name="s.pref"]');pref=e?String(e.value||'').trim():'';}catch(e){}
+  if(pref)return pref.split(/\s+/)[0];
+  const n=String(name||'').replace(/^\s*simulated\s*[–—-]\s*/i,'').trim();if(/,/.test(n))return (n.split(',')[1]||'').trim().split(/\s+/)[0]||n;return n.split(/\s+/)[0]||'';}
+/* the BCBA the family calls: the bar's name (before its credentials) and the phone the staff directory holds for that name */
+function pkBcbaName(b){return String(b||'').split(',')[0].trim();}
+async function pkBcba(){const b=($('#pBcba')||{}).value||'',nm=pkBcbaName(b),k=s=>pplKey(String(s||'').replace(/\(simulated\)/i,'').split(',')[0]);let phone='';
+  try{const j=await pplLoad();const m=(j.list||[]).find(x=>x&&x.phone&&k(nm)&&k(x.name)===k(nm));if(m)phone=m.phone;}catch(e){}
+  return {name:nm,phone};}
+function pkHomeFoot(first,c){return 'For '+(first?first+'’s':'the')+' family'+(c&&c.name?'. Questions: '+c.name+(c.phone?', '+c.phone:''):'')+'.';}
+/* the family's home language, from Form DM-1 (through the case's facts) */
+function pkLang(){const L=(((state.facts||{}).profile)||{}).language||{};const h=String(L.home||'').trim();return {home:h,interp:L.interpreter===true,english:!h||/^\s*english(\s+only)?\s*\.?\s*$/i.test(h)};}
+/* the forms a reader takes from this case */
+function pkForms(aud){const caseHas=id=>inCase(id)||!!state.ticked[id]||!!state.status[id];
+  if(aud==='iep'||aud==='records'){const L=ALL.filter(([id])=>state.ticked[id]);return (aud==='records'||packetOpts().order==='list'?L:mpCaseOrder(L)).map(f=>[f[0],'']);}
+  return (PK_TAKES[aud]||[]).filter(([id])=>ALL.some(f=>f[0]===id)&&caseHas(id));}
+/* about how many pages: what this browser measured the last time the form (or part) was built, else its usual length */
+function pkEstLoad(){try{return JSON.parse(localStorage.getItem('nbh.packet.est')||'{}')||{};}catch(e){return {};}}
+function pkEst(id,part,cache){const k=id+(part?':'+part:'');if(cache[k])return cache[k];const P=part&&PK_PARTS[id+':'+part];let n=P?P.pg:(MP_PAGES[id]||8);
+  const st=state.status[id]||(state.pending[id]||{}).status;if(!P&&st&&!(st.filled>4))n=Math.max(1,Math.round(n/2));return n;}
+function pkTotal(aud,list,cache){if(!list.length)return 0;let n=list.reduce((t,[id,part])=>t+pkEst(id,part,cache),0);n+=list.length>16?2:1;   /* the cover */
+  const refs=aud==='iep'?packetOpts().refs:'';if(refs==='end')n+=Math.max(1,Math.round(list.length/3));return n;}
+function pkEstSave(est,parts){const c=pkEstLoad();Object.keys(est||{}).forEach(id=>{if(id==='REFS')return;const k=id+(parts&&parts[id]?':'+parts[id]:'');c[k]=est[id];});try{localStorage.setItem('nbh.packet.est',JSON.stringify(c));}catch(e){}}
+const pkName=(id,part)=>part&&PK_PARTS[id+':'+part]?PK_PARTS[id+':'+part].n:((ALL.find(f=>f[0]===id)||[])[1]||id);
+/* Build packet: with nothing ticked, the list opens to choose the forms (v25.68, M10); else the sheet */
+async function pkSheet(){
+  if(!ALL.some(([id])=>state.ticked[id])){if(typeof srChoose==='function'){srChoose(true,true);return;}alert('Choose at least one form in the list first.');return;}
+  dialog('Build packet: who is this for?','');
+  const contact=await pkBcba(),cache=pkEstLoad();let aud=null,off={};
+  const pages=n=>'about '+n+' page'+(n===1?'':'s');
+  const step1=()=>{aud=null;off={};const b=$('#dlgBody');$('#dlgTitle').textContent='Build packet: who is this for?';
+    b.innerHTML='<p class="hp-lead">Each choice takes the forms it needs from this case. You can switch any of them off in the next step.</p><div class="pk-cards">'+
+      PK_AUD.map(([k,t,d])=>{const L=pkForms(k),n=pkTotal(k,L,cache);return '<button type="button" class="pk-card" data-aud="'+k+'"'+(L.length?'':' disabled')+'><b>'+esc(t)+'</b><span class="pk-d">'+esc(d)+'</span>'+
+        '<span class="pk-f">'+(L.length?esc(L.map(([id])=>id).join(', ')):'None of its forms is in this case')+'</span><span class="pk-n">'+(L.length?pages(n):'')+'</span></button>';}).join('')+'</div>';
+    b.querySelectorAll('.pk-card').forEach(c=>c.addEventListener('click',()=>step2(c.dataset.aud)));};
+  const list=()=>pkForms(aud).filter(([id])=>!off[id]);
+  const total=()=>{const t=$('#pkTotal');if(t){const L=list();t.textContent=L.length?'About '+pkTotal(aud,L,cache)+' pages in all: '+L.length+' section'+(L.length===1?'':'s')+' and the cover.':'Nothing switched on: switch on at least one section.';}const pr=$('#pkPrint');if(pr)pr.disabled=!list().length;};
+  const step2=k=>{aud=k;off={};const A=PK_AUD.find(a=>a[0]===k),L=pkForms(k),b=$('#dlgBody'),o=packetOpts(),ticked=L.map(([id])=>ALL.find(f=>f[0]===id)).filter(Boolean);
+    $('#dlgTitle').textContent='Build packet: '+A[1];
+    const lang=pkLang(),hd=L.some(([id])=>id==='HD-1'),first=pkFirst(packet().client);
+    b.innerHTML='<p class="pk-top"><button type="button" class="pk-back">‹ Who it is for</button> <span>'+esc(A[2])+'</span></p>'+
+      '<ul class="pk-secs">'+L.map(([id,part])=>'<li><label><input type="checkbox" checked data-pk-id="'+esc(id)+'"> <b>Form '+esc(id)+'</b> <span class="pk-sn">'+esc(pkName(id,part))+'</span><span class="pk-sp">'+pages(pkEst(id,part,cache))+'</span></label></li>').join('')+'</ul>'+
+      '<p class="pk-total" id="pkTotal" aria-live="polite"></p>'+
+      (k==='family'?'<p class="pk-fam">The family’s pages carry the child’s first name'+(first?' ('+esc(first)+')':'')+' and, at the foot of each page, “'+esc(pkHomeFoot(first,contact))+'”'+(contact.phone?'':' (add the BCBA’s phone in the Staff directory to print it here)')+'. '+
+        (lang.english?'Home language: English'+(lang.home?'':' (none recorded in Form DM-1)')+'.':'Home language (Form DM-1): <b>'+esc(lang.home)+'</b>. '+(/creole|krey|haitian/i.test(lang.home)?'Form HD-1’s home sheets carry the Haitian Creole beside the English (a draft translation). ':'')+'Have the pages translated or explained by an interpreter before they go home.')+'</p>':'')+
+      (k==='iep'?'':'<p class="pk-note">The packet’s cover says who it is for'+(k==='records'?'; each form keeps its own references, as it prints on its own':'; the references are left out')+'.</p>')+
+      (k==='iep'?'<details class="pk-adv"><summary>Advanced settings (Packet options)</summary><div class="pk-advb">'+packetOptsHtml(o,ticked)+'</div></details>':'')+
+      '<div class="bm-act"><button class="primary" id="pkPrint" type="button">Print / Save PDF</button>'+(k==='family'&&hd?'<button type="button" id="pkHome">Print the home sheets</button>':'')+'<span>The print window opens; save it as PDF from there.</span></div>';
+    b.querySelector('.pk-back').addEventListener('click',step1);
+    b.querySelectorAll('[data-pk-id]').forEach(c=>c.addEventListener('change',()=>{off[c.dataset.pkId]=!c.checked;total();}));
+    if(k==='iep')packetOptsBind(b.querySelector('.pk-advb'),o,ticked);
+    total();
+    $('#pkPrint').addEventListener('click',()=>{const L=list();if(!L.length)return;try{$('#dlg').close();}catch(e){}pkRun(aud,L,contact);});
+    if($('#pkHome'))$('#pkHome').addEventListener('click',()=>{try{$('#dlg').close();}catch(e){}pkHomeSheets();});};
+  step1();}
+/* the packet for a reader. IEP team and file: exactly what Build packet built before (masterRun with the forms alone) */
+function pkRun(aud,L,contact){const F=L.map(([id])=>ALL.find(f=>f[0]===id)).filter(Boolean);
+  if(aud==='iep'){masterRun(packetOpts().order==='list'?F:mpCaseOrder(F));return;}
+  const parts={};L.forEach(([id,part])=>{if(part)parts[id]=part;});const first=pkFirst(packet().client);
+  const T={staff:'Behavior plan for staff',family:(first?first+'’s':'Your child’s')+' plan, for the family',records:'Copy of education records, as requested'};
+  masterRun(F,{aud,parts,title:T[aud],packet:aud==='records'?{refs:'form',order:'list'}:{refs:'none'},homeFoot:aud==='family'?pkHomeFoot(first,contact):'',first,contact});}
+/* Form HD-1's home sheets, printed on their own from the form (its own page numbers and home footer) */
+async function pkHomeSheets(){openForm('HD-1');const t0=Date.now();let fr=null;
+  while(Date.now()-t0<15000){fr=state.frames['HD-1'];try{if(fr&&fr.contentWindow&&typeof fr.contentWindow.hdHomePrint==='function')break;}catch(e){}await new Promise(r=>setTimeout(r,200));}
+  try{fr.contentWindow.hdHomePrint();}catch(e){wsUI.toast('Open Form HD-1’s Home sheets and press Print the home sheets there.');}}
 /* the sheets of a form that are documents of their own: they keep a page of their own in the packet */
 const MP_KEEP={'IC-1':['#consent','#proc','#assent','#record'],'TD-1':['#final','#monitor']};
 const MP_KEEP_TITLE={'OB-1':/^Direct Observation Record/};
@@ -3718,6 +3836,22 @@ function packetShape(x,i,mo,bag){
   const titleOf=sh=>{const h=[...sh.querySelectorAll('.bar,.nbh-band,h2,h1')].find(b=>!b.closest('.nbh-print-head'));if(!h)return '';const inner=h.querySelector('h1,h2');return txt(inner||h).replace(/\s*\d+ of \d+ shown$/,'');};
   const drop=e=>{const w=e.parentElement;e.remove();if(w&&w.classList.contains('nbh-page')&&!txt(w)&&!w.querySelector('img,svg,canvas,table,input,textarea,select'))w.remove();};
   root.querySelectorAll('.noprint').forEach(e=>e.remove());
+  /* v25.69 (design review H8, B2) a reader who takes a part of a form (Form TD-1's step-by-step plan for staff, Form HD-1's home
+     sheets for the family): the parts named are kept where they stand, inside the form's own page and sheets so its print rules
+     still reach them, with the form's letterhead; everything beside them goes */
+  const part=x.part&&PK_PARTS[id+':'+x.part];
+  if(part){const keep=[];part.q.forEach(q=>root.querySelectorAll(q).forEach(e=>{if(!keep.some(k=>k===e||k.contains(e)))keep.push(e);}));
+    if(keep.length){const head=root.querySelector('.nbh-print-head');const first=head?head.cloneNode(true):null;
+      const prune=el=>{[...el.children].forEach(c=>{if(keep.some(k=>k===c||k.contains(c)))return;if(keep.some(k=>c.contains(k))){prune(c);return;}if(c.tagName==='STYLE')return;c.remove();});};
+      prune(root);if(first&&!root.querySelector('.nbh-print-head'))root.insertBefore(first,root.firstChild);
+      if(part.show)keep.forEach(k=>{for(let e=k;e&&e!==root;e=e.parentElement)e.classList.add('mp-partshow');});
+      /* the part's first sheet starts under the letterhead, not on a page of its own (Form HD-1's home sheets each start a page) */
+      const s1=keep[0].matches('.hs')?keep[0]:keep[0].querySelector(':scope > .hs');if(s1)s1.classList.add('mp-partfirst');}}
+  /* v25.69 (design review M13) Form DD-1 on the packet's upright pages: its "How to read these graphs" prints right after the first
+     graph (the form draws it there too, hidden), so the first graph follows the student's details on the section's first page and
+     that page is not left half empty */
+  if(id==='DD-1'){const a=root.querySelector('.dd-key-after');if(a&&root.querySelector('.dd-key-top')){root.querySelectorAll('.dd-key-top').forEach(e=>e.remove());
+    a.classList.remove('dd-key-after');a.classList.add('mp-ddkey');a.removeAttribute('aria-hidden');}}
   /* v22.81 (review F220) Form SV-1 prints its team copy in the packet, whatever the form's own choice: the ratings and open
      answers by role, no respondent named beside a rating (the respondents were told the rated staff see only aggregates) */
   if(id==='SV-1'){root.querySelectorAll('.sv-byname,.sv-nmcol,.sv-nm').forEach(e=>e.remove());
@@ -3775,6 +3909,18 @@ function packetShape(x,i,mo,bag){
     if(id==='DM-1')root.querySelectorAll('#pkTbl tbody tr').forEach(r=>{const cb=r.querySelector('input[type="checkbox"]');if(!(cb&&cb.hasAttribute('checked'))&&!r.querySelector('.nbh-val'))r.remove();});}
   /* v22.77 (review I241) for the packet check: the values in this section that say they are simulated (a worked example) */
   const sim=[];root.querySelectorAll('.nbh-val').forEach(v=>{const t=txt(v);if(sim.length<8&&/\bsimulated\b/i.test(t)&&!sim.includes(t))sim.push(t.slice(0,120));});
+  /* v25.69 (design review H8; packet gate check 5) a signature block is read whole and comes with what it signs. Form IC-1's
+     decision and signatures are one block: the staff's parts between them (how consent was obtained, its status, the say-it-back
+     check) follow the signatures, as on the form's own copy for the school's file, so the block fits a page. A table of
+     signature lines (Form FS-1's Signatures) is one block with its heading, and none starts a page of its own: it keeps with the
+     last lines before it. */
+  if(id==='IC-1')root.querySelectorAll('.ic-signpart').forEach(sp=>{const kids=[...sp.children],h6=kids.find(h=>h.tagName==='H3'&&/^6\.\s*how consent was obtained/i.test(txt(h))),
+      sigs=kids.find(e=>e.classList.contains('ic-sigs'));if(!h6||!sigs||kids.indexOf(h6)>kids.indexOf(sigs))return;
+    const staff=doc.createElement('div');staff.className='mp-icstaff';for(let e=h6;e&&e!==sigs;){const nx=e.nextElementSibling;staff.appendChild(e);e=nx;}
+    sp.parentNode.insertBefore(staff,sp.nextSibling);});
+  root.querySelectorAll('table').forEach(t=>{const L=[...t.querySelectorAll('td.sigline')];if(!L.length||t.closest('.mp-sigkeep'))return;
+    const w=doc.createElement('div');w.className='mp-sigkeep';const h=t.previousElementSibling;t.parentNode.insertBefore(w,t);
+    if(h&&(/^H[2-4]$/.test(h.tagName)||h.classList.contains('nbh-band')||h.classList.contains('bar'))&&txt(h).length<80)w.appendChild(h);w.appendChild(t);});
   const band=doc.createElement('div');band.className='mp-band';band.innerHTML='<span>Section '+(i+1)+' of %%MPN%%</span><span>Form '+esc(id)+'</span>';root.insertBefore(band,root.firstChild);
   return {id,title:x.title,html:root.innerHTML,sheets:names,guide:keepGuide&&guides.size>0,sim};
 }
@@ -3933,6 +4079,7 @@ async function masterRun(chosen,opt){opt=opt||{};
     }finally{state.mpBusy.delete(id);}}};
   try{await Promise.all([work(),work()]);}finally{state.mpBusy=null;}
   got.forEach(x=>{if(x)parts.push(x);});
+  if(opt.parts)parts.forEach(x=>{x.part=opt.parts[x.id]||'';});   /* v25.69 (H8, B2) a reader who takes a part of a form */
   $('#masterPrint').textContent='Build packet';
   if(!parts.length){try{w.close();}catch(e){}alert('Nothing could be collected from the ticked forms.');return;}
 
@@ -3949,25 +4096,32 @@ async function masterRun(chosen,opt){opt=opt||{};
   const kept=shaped.filter(s=>s.guide).map(s=>'Form '+s.id);
 
   const p=packet();
+  /* v25.69 (H8, B2) the family's packet: the child's first name, the BCBA to call, a home footer in place of the record's */
+  const fam=opt.aud==='family',first=fam?(opt.first||pkFirst(p.client)):'',who=opt.contact||{};
   const t1=performance.now(),chk=opt.check===false?'':mpCheckHtml(mpCheckItems(chosen,parts,shaped,p),shaped.map(s=>s.id));state.mpLast.ms=Math.round(performance.now()-t1);   /* v22.77 (I241) */
   const stamp=new Date();
   const head=`<div class="mp-cover" data-mk="NBHPKT;%%MPRUN%%">
     <div class="mp-brand"><img src="${$('#logo').src}" alt="Royal Palm School"></div>
     <h1>${esc(opt.title||'Functional Behavior Assessment and Behavior Intervention Plan')}</h1>
-    <table><tr><th>Student</th><td>${esc(p.client)||'&mdash;'}</td><th>Student ID</th><td>${esc(p.sid)||'&mdash;'}</td></tr>
+    ${fam?`<table><tr><th>Child</th><td>${esc(first)||'&mdash;'}</td><th>School</th><td>${esc(p.site)||'&mdash;'}</td></tr>
+    <tr><th>Questions</th><td>${esc([who.name,who.phone].filter(Boolean).join(', '))||'&mdash;'}</td><th>Printed</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr></table>
+    <div class="mp-conf"><b>These pages are yours to keep.</b> They are about your child, so keep them somewhere private. If anything
+      here is unclear, or you would like it explained in your own language, ${who.name?'call '+esc(who.name)+(who.phone?' at '+esc(who.phone):''):'call the school'}.</div>`:
+    `<table><tr><th>Student</th><td>${esc(p.client)||'&mdash;'}</td><th>Student ID</th><td>${esc(p.sid)||'&mdash;'}</td></tr>
     <tr><th>Grade</th><td>${esc(p.grade)||'&mdash;'}</td><th>School</th><td>${esc(p.site)||'&mdash;'}</td></tr>
     <tr><th>Case BCBA</th><td>${esc(p.bcba)||'&mdash;'}</td><th>Compiled</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr>
     ${factLine?'<tr><th>Period<\/th><td colspan="3">'+esc(factLine)+'<\/td><\/tr>':''}</table>
     <div class="mp-conf"><b>Confidential student record.</b> This packet contains personally identifiable
       information from a student&rsquo;s education record and is protected under FERPA. It is released only to
       individuals authorised under the student&rsquo;s IEP team or by written parental consent. If you have
-      received this in error, return it to the case BCBA and destroy any copy.</div>
+      received this in error, return it to the case BCBA and destroy any copy.</div>`}
     <h2 id="mp-contents">Contents</h2><ol>${shaped.map(s=>`<li data-mk="NBHTOC:${esc(s.id)};"><a class="mp-jump" href="#sec-${esc(s.id)}" data-mk="NBHTOC:${esc(s.id)};">Form ${esc(s.id)} &mdash; ${esc(s.title)}</a>${s.sheets.length?`<div class="mp-sub">${esc(s.sheets.join('  \u00b7  '))}${s.guide?'  \u00b7  Guide':''}</div>`:''}</li>`).join('')}${refsHtml?`<li data-mk="NBHTOC:REFS;"><a class="mp-jump" href="#sec-REFS" data-mk="NBHTOC:REFS;">References and Sources</a><div class="mp-sub">Every form’s citations, gathered once</div></li>`:''}</ol>
-    <p class="mp-note">Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Royal Palm School packet. Each section is that form as it stood when this was built${refsHtml?', with the forms’ references gathered in the last section':''}${mo.refs==='none'?', its references left out':''}${kept.length?'; the Guide of '+esc(kept.join(', '))+' is included':''}. The forms’ guides and on-screen notes are not printed.</p>
+    <p class="mp-note">${opt.aud&&opt.aud!=='iep'?esc({staff:'For the teachers and staff who carry out the plan.',family:'For the family.',records:'A copy of these education records, as requested.'}[opt.aud]||'')+' ':''}Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Royal Palm School packet. Each section is that form as it stood when this was built${refsHtml?', with the forms’ references gathered in the last section':''}${mo.refs==='none'?', its references left out':''}${kept.length?'; the Guide of '+esc(kept.join(', '))+' is included':''}. The forms’ guides and on-screen notes are not printed.</p>
   </div>`;
 
   const css=parts.map((x,i)=>scopeCSS(x.css,'.mp-'+i)).join('\n');
-  const runHead=[p.client||'Student not named',p.sid?'ID '+p.sid:''].filter(Boolean).join('  \u00b7  ');
+  const runHead=fam?(first?first+'\u2019s plan':'Your child\u2019s plan')+'  \u00b7  for the family':[p.client||'Student not named',p.sid?'ID '+p.sid:''].filter(Boolean).join('  \u00b7  ');
+  const footLine=fam?(opt.homeFoot||pkHomeFoot(first,who)):"Confidential student record \u2014 FERPA protected. Retain in the student's behavior file.";   /* v25.69 the family's pages: a home footer */
   /* v21.96 A section opens with a thin section line and the form's own letterhead, once; its sheets follow. Every page of a
      section carries the section's name in the running head, through a named page: Chromium 141 breaks the page between a
      caption or footer and its table under a named page, which is why packetShape makes them ordinary rows. */
@@ -3988,7 +4142,7 @@ async function masterRun(chosen,opt){opt=opt||{};
       size:letter;margin:0.62in 0.45in 0.62in;
       @top-left{content:"Royal Palm School";font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#254657}
       @top-right{content:${cssStr(runHead)};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}
-      @bottom-left{content:"Confidential student record \u2014 FERPA protected. Retain in the student's behavior file.";font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:7.5pt;color:#54676f}
+      @bottom-left{content:${cssStr(footLine)};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:7.5pt;color:#54676f}
       @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}
     }
     html,body{margin:0;background:#fff}
@@ -4074,6 +4228,19 @@ async function masterRun(chosen,opt){opt=opt||{};
     /* v22.81 (found by the packet gate): every signature block the gate checks stays on one page, Form RA-1's and Form SM-1's
        signature rows too (a row of three lines split, its last line alone at the top of the next page) */
     .mp-sec .sig,.mp-sec .eb-sig,.mp-sec .hs-sig,.mp-sec .cn-sig{break-inside:avoid;page-break-inside:avoid}
+    /* v25.69 (design review H8) a table of signature lines with its heading: whole, and never first on a page */
+    .mp-sec .mp-sigkeep{break-inside:avoid;page-break-inside:avoid;break-before:avoid;page-break-before:avoid}
+    .mp-sec .mp-sigkeep>table{break-inside:avoid;page-break-inside:avoid}
+    .mp-sec .mp-icstaff .ic-tb{break-inside:avoid;page-break-inside:avoid}   /* Form IC-1's say-it-back check, after its signatures: whole */
+    .mp-sec .mp-ddkey{break-inside:avoid;page-break-inside:avoid;margin-top:10px}
+    .mp-sec .mp-partfirst{break-before:auto!important;page-break-before:auto!important}
+    .mp-sec .mp-partshow.mp-partshow.mp-partshow{display:block!important}   /* v25.69 (B2) a part a form prints only from its own button (over its own rule hiding it) */
+    /* v25.69 (M13) Form DD-1 on upright pages: a little less white around its graphs (their type the size it was), so the first one fits
+       under the student's details on the section's first page */
+    #sec-DD-1 .chartbox{padding:2px!important}
+    #sec-DD-1 .behavior-report h3.kind-head{padding-bottom:4px!important;margin-bottom:0!important}
+    #sec-DD-1 .behavior-report .legend{margin-top:4px!important;row-gap:2px!important}
+    #sec-DD-1 p.dd-rng-l{margin:4px 0!important}
     .mp-band{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid #cfdad8;margin:0 0 10px;padding:0 0 4px;
       font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#54676f;break-after:avoid;page-break-after:avoid}
     .mp-cap{font:600 12px/1.35 Inter,"Segoe UI",Arial,sans-serif;color:#254657;margin:10px 0 4px;break-after:avoid;page-break-after:avoid}
@@ -4325,12 +4492,13 @@ async function masterRun(chosen,opt){opt=opt||{};
   if(!w||w.closed)w=window.open('','_blank');
   if(!w){alert('The browser blocked the print window. Allow pop-ups for this page and try again.');return;}
   w.document.open();w.document.write(mpPicsOnce(docM));w.document.close();   /* v23.62 (review I240) each picture once */
+  try{pkEstSave(w.__nbhPages,opt.parts);}catch(e){}   /* v25.69 (H8) what each form took, for Build packet's "about N pages" next time */
   /* v22.77 (I241) with anything on the packet check, the print dialog waits for Print as it is, so the list is read first */
   setTimeout(()=>{let n=0;try{n=(w.__nbhCheck||{}).n||0;}catch(e){}try{w.focus();if(!n)w.print();}catch(e){}},900);
   /* v21.90 Safari prints the packet without its page header and footer; saved as PDF, Finish PDF adds them */
   if(appleMobile()||!chromeMajor())try{wsUI.toast('To file the packet as a PDF: in the print window, Share, then Save to Files. Then Finish PDF here adds the page header and footer, the bookmarks and the page numbers.',{ms:14000});}catch(e){}
 }
-$('#masterPrint').addEventListener('click',()=>{const L=ALL.filter(([id])=>state.ticked[id]);masterRun(packetOpts().order==='list'?L:mpCaseOrder(L));});   /* v22.39 (F466) */
+$('#masterPrint').addEventListener('click',()=>{pkSheet();});   /* v22.39 (F466); v25.69 (H8, B2) who it is for first (pkSheet), then masterRun as before */
 $('#packetOpts').addEventListener('click',packetOptsOpen);
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 /* a value going inside a CSS content:"..." string, where a stray quote or
@@ -6190,7 +6358,7 @@ async function todayOpen(){await gatherFacts(false);try{await gatherDue();}catch
   const L=todayItems(),p=packet(),f=state.facts;
   dialog('Today',
     '<p class="hp-lead">'+esc(new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}))+(p.client?' · '+esc(p.client):'')+'</p>'+
-    (L.length?'<ul class="td-list">'+L.map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+x.k+'</span> <span>'+x.t+'</span>'+(x.open?' <button type="button" data-open="'+esc(x.open)+'">Open '+esc(x.open)+'</button>':'')+'</li>').join('')+'</ul>'
+    (L.length?'<ul class="td-list">'+L.map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+x.k+'</span> <span>'+x.t+'</span>'+(x.open?' <button type="button" data-open="'+esc(x.open)+'"'+crAtAttr(x)+'>Open '+esc(x.open)+'</button>':'')+'</li>').join('')+'</ul>'
       :'<p>'+(f?'Nothing needs you today in this case.':'Nothing to go on yet: open the case’s forms (Form DD-1, TI-1, GB-1 and the rest) and this list fills from them.')+'</p>')+
     '<p class="td-more"><button type="button" class="primary" id="tdWeek">End of the week: print the packet</button> <button type="button" id="tdKit">Staff kit for next week</button> <button type="button" id="tdHand">Hand-over check</button></p>');}   /* v25.68 (design review M2) Caseload is in the bar; the two buttons explain themselves in their tooltips */
 /* v23.78 the lines of the staff kit below (v23.65). Wording approved by the BCBA, October 2026. */
@@ -6218,7 +6386,8 @@ function handoverItems(){const f=state.facts||{},fl=f.profile&&f.profile.flags,L
   if(!tg.length)L.push({t:'No target behaviors defined (Form TB-1)',open:'TB-1'});
   const und=tg.filter(b=>!String(b.def||'').trim());if(und.length)L.push({t:und.length+' target behavior'+(und.length===1?'':'s')+' without a definition: '+esc(und.map(b=>b.label).join(', ')),open:'TB-1'});
   if(!(f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length)))L.push({t:'No goals written (Form GB-1)',open:'GB-1'});
-  if(f.plan&&!f.crisis)L.push({t:'A plan with no crisis plan: Form CR-1 is not in the case',open:'CR-1'});
+  /* v25.69 (wave 3) a crisis plan is its stages: Form CR-1 holding only Baker Act or threat team events, or only restraints, sends crisis with none */
+  if(f.plan&&!(f.crisis&&(f.crisis.stages||[]).length))L.push({t:'A plan with no crisis plan: '+(inCase('CR-1')||f.crisis?'Form CR-1 holds no crisis stages yet':'Form CR-1 is not in the case'),open:'CR-1'});
   if(fl&&fl.crisis==='No'&&f.crisis&&(f.crisis.stages||[]).length)L.push({t:'Form DM-1 still records no crisis plan, but Form CR-1 holds one: update DM-1\u2019s crisis-plan status',open:'DM-1'});   /* v22.29 (F465) */
   else if(fl&&(fl.crisis==='No'||/outdated/i.test(fl.crisis||'')))L.push({t:'Form DM-1 records the crisis plan as '+(fl.crisis==='No'?'missing':'outdated')+esc(dmAsOf(fl,'crisis')),open:'CR-1'});
   /* v23.09 (review F4) DM-1's status answers last confirmed more than 90 days ago are named to confirm again */
@@ -6361,6 +6530,34 @@ function tdHome(f){const h=f.home;if(!h||!Array.isArray(h.sheets))return [];cons
   rsUnlogged(f).forEach(x=>L.push({t:'A '+x.kind+' on Form '+x.src+' ('+esc(tdMd(x.date))+') is not on Form DD-1’s incident record',open:'DD-1'}));
   if(f.review&&f.review.next&&(tdLeft(f.review.next)||0)<0)L.push({t:'The plan review was due '+esc(tdMd(f.review.next))+' (Form PR-1)',open:'PR-1'});
   tdHome(f).forEach(x=>L.push({t:x.t,open:'HD-1'}));}catch(e){}return L;};}
+/* v25.69 (wave 3, W2-SAFETY "What other files would need") Form CR-1's Baker Act initiations and threat management team cases
+   (crisis.events: the kind, the date and time, the attempts to reach the parent and whether one reached them, the date the
+   brief was given; no names, no notes). Today, What's due and the caseload name a Baker Act initiation whose parent is not
+   recorded as reached and a threat team case whose brief is not recorded as given, each for 30 days after the event (as an
+   incident home has not been told about), and each opens Form CR-1 at that event (its Threat team brief view, the event's
+   card: the at "tm-<id>"). The calendar has the events' dates. Not in the tdSafety list, so the transition summary and the
+   IEP meeting packet stay as they were (naming the events there waits on district policy). */
+const CREV_DAYS=30;
+function crEvents(f){const cr=f&&f.crisis;return (cr&&Array.isArray(cr.events)?cr.events:[]).filter(e=>e&&(e.kind==='baker'||e.kind==='threat')&&/^\d{4}-\d\d-\d\d$/.test(String(e.date||'')));}
+const crEvAt=e=>'tm'+(/^[a-z0-9]{1,24}$/.test(String(e&&e.id||''))?'-'+e.id:'');
+const crEvTime=v=>{const m=/^(\d\d):(\d\d)$/.exec(String(v||''));if(!m)return '';let h=+m[1];const ap=h<12?'AM':'PM';h=h%12||12;return h+':'+m[2]+' '+ap;};
+function crEvItems(f){const L=[];crEvents(f).forEach(e=>{const n=tdDays(e.date);if(n===null||n>CREV_DAYS)return;
+    const on=esc(tdMd(e.date))+(crEvTime(e.time)?' at '+crEvTime(e.time):''),n0=+e.attempts||0;
+    if(e.kind==='baker'&&!e.reached)L.push({k:'Safety',t:'The Baker Act initiation of '+on+' (Form CR-1): the parent or guardian is not recorded as reached ('+(n0?n0+' attempt'+(n0===1?'':'s')+' recorded':'no attempt recorded')+'). Record each attempt, and when the parent is reached',open:'CR-1',at:crEvAt(e)});
+    else if(e.kind==='threat'&&!e.brief)L.push({k:'Safety',t:'The threat management team case of '+on+' (Form CR-1): the brief for the team is not recorded as given. Give the brief (Threat team brief) and record the date it was given',open:'CR-1',at:crEvAt(e)});});
+  return L;}
+{const ti1=todayItems;todayItems=function(){const L=ti1.apply(this,arguments);try{return crEvItems(state.facts||{}).concat(L);}catch(e){return L;}};}
+{const ce1=calEvents;calEvents=function(f){const E=ce1.apply(this,arguments);try{crEvents(f||{}).forEach(e=>E.push({date:e.date,what:e.kind==='baker'?'Baker Act initiation':'Threat management team case',form:'CR-1',sev:true}));}catch(x){}return E;};}
+/* the button an item gives (data-at beside data-open, data-chopen or data-clform) opens its form at that place: at once for the
+   case on screen, or once another student's case has opened (caseloadGo) */
+let crAtNext=null;
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button[data-at]'):null;if(!b)return;
+  const at=String(b.dataset.at||''),id=b.dataset.open||b.dataset.chopen||b.dataset.clform||b.dataset.atform||'';if(!id||!/^[a-z][a-z0-9-]{0,30}$/.test(at)){crAtNext=null;return;}
+  crAtNext={id,at,t:Date.now()};if(b.dataset.clopen)return;
+  setTimeout(()=>{const p=crAtNext;if(p&&p.id===id&&p.at===at&&state.frames[id]){crAtNext=null;openAt(id,at);}},0);},true);
+{const cg=caseloadGo;caseloadGo=async function(key,form){const p=crAtNext;const r=await cg.apply(this,arguments);
+  try{if(p&&form&&p.id===form&&Date.now()-p.t<60000&&state.frames[form]){crAtNext=null;openAt(form,p.at);}}catch(e){}return r;};}
+const crAtAttr=(x,id)=>x&&x.at&&(!id||x.open===id)?' data-at="'+esc(x.at)+'"':'';
 /* the transition summary: what the next BCBA needs on one page, from the case as the open forms give it */
 function tdSummaryHTML(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{},rs=pl.respond||{},A=v=>Array.isArray(v)?v.filter(x=>tdT(x)):[];
   const sec=(h,b)=>b?'<h2>'+h+'<\/h2>'+b:'',li=a=>a.length?'<ul>'+a.map(x=>'<li>'+x+'<\/li>').join('')+'<\/ul>':'';
@@ -6404,7 +6601,7 @@ const clKey=p=>{let n=String(p.client||'').trim().toLowerCase().replace(/\s+/g,'
   if(!n&&!s){const st=staffOnlyName();if(st)n=st.toLowerCase();}   /* v22.30 the staff record on screen (no student): the key of its caseload entry */
   return n||s?clScope()+'|'+s+'|'+n:'';};
 const clStrip=h=>String(h||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
-function clSummary(){let items=[];try{items=todayItems().map(x=>({k:x.k,t:clStrip(x.t),open:x.open||''}));}catch(e){}const f=state.facts||{};
+function clSummary(){let items=[];try{items=todayItems().map(x=>Object.assign({k:x.k,t:clStrip(x.t),open:x.open||''},x.at?{at:x.at}:{}));}catch(e){}const f=state.facts||{};
   return {items,lastData:f.data&&f.data.to||'',forms:Object.keys(state.frames).concat(Object.keys(state.pending)).filter((v,i,a)=>a.indexOf(v)===i).length};}
 async function caseloadKeep(p,forms,late){if(clOff())return;const key=clKey(p);if(!key)return;
   try{await gatherFacts(false);}catch(e){}   /* the summary from the case as it is now */
@@ -6433,7 +6630,7 @@ async function caseloadOpen(){let L=await clList();
   dialog('Caseload',
     '<p class="hp-lead">'+L.length+' student'+(L.length===1?'':'s')+(typeof drvOn==='function'&&drvOn()?' on this '+HERE+' and in your school Google Drive (the folder '+DRV_FOLDER+'), each as at their last save.':' on this '+HERE+', each as at their last Save case, kept in this browser on this device until you remove them. The case files you save are the record.')+'</p>'+   /* v22.07 true with Drive on or off (review F509) */
     (L.length?'<h3 class="cl-h">Students<\/h3>'+clCards(L,'dlg')+   /* v21.91 a card each (nbh-find); v21.92 the students first */
-      '<h3 class="cl-h">What needs you, across the caseload</h3>'+(all.length?'<ul class="td-list">'+all.slice(0,40).map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+esc(x.k)+'</span> <span><b>'+esc(x.who)+'</b>: '+esc(x.t)+'</span> <button type="button" data-clopen="'+esc(x.key)+'" data-clform="'+esc(x.open||'')+'">Open'+(x.open?' '+esc(x.open):'')+'</button></li>').join('')+'</ul>'+(all.length>40?'<p class="hint">and '+(all.length-40)+' more</p>':'')
+      '<h3 class="cl-h">What needs you, across the caseload</h3>'+(all.length?'<ul class="td-list">'+all.slice(0,40).map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+esc(x.k)+'</span> <span><b>'+esc(x.who)+'</b>: '+esc(x.t)+'</span> <button type="button" data-clopen="'+esc(x.key)+'" data-clform="'+esc(x.open||'')+'"'+crAtAttr(x)+'>Open'+(x.open?' '+esc(x.open):'')+'</button></li>').join('')+'</ul>'+(all.length>40?'<p class="hint">and '+(all.length-40)+' more</p>':'')
         :'<p>Nothing needs you in the students kept here, as at their last save.</p>')
      :'<p>No student kept yet. Each Save case keeps a copy of that student’s case here, and Caseload lists them.</p>')+staffBox+
     /* v21.92 backups, Google Drive, the settings and the notes under the students, folded (open while there is no student) */
@@ -6710,7 +6907,7 @@ function clFrame(){const rec=ALL.find(x=>x[0]==='DD-1');return new Promise(res=>
   fr.addEventListener('load',()=>setTimeout(()=>fin(fr),500),{once:true});setTimeout(()=>fin(null),25000);
   host.appendChild(fr);window.__clRfWin=fr.contentWindow;loadFrame(fr,rec[2]);});}
 function clResum(r,facts){const sf=state.facts,sd=state.due;let items=[];
-  try{state.facts=facts||null;state.due=[];items=todayItems().map(x=>({k:x.k,t:clStrip(x.t),open:x.open||''}));}catch(e){}finally{state.facts=sf;state.due=sd;}
+  try{state.facts=facts||null;state.due=[];items=todayItems().map(x=>Object.assign({k:x.k,t:clStrip(x.t),open:x.open||''},x.at?{at:x.at}:{}));}catch(e){}finally{state.facts=sf;state.due=sd;}
   const kept=((r.sum&&r.sum.items)||[]).filter(x=>x.k==='Due');   /* what was due as the forms gave it at the save */
   return {items:kept.concat(items),lastData:facts&&facts.data&&facts.data.to||'',forms:r.sum&&r.sum.forms||0};}
 async function clRefreshOne(r,L){let fr=null;
@@ -6976,13 +7173,15 @@ function calEvents(f){const E=[],add=(date,what,form)=>{const s=String(date||'')
   ((f.home||{}).sheets||[]).filter(s=>s&&s.due&&!s.back).forEach(s=>add(s.due,'Home sheet back: '+(s.name||'sheet'),'HD-1'));
   return E;}
 const clInitials=r=>{const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/).filter(Boolean);return w.length?w.map(x=>x[0].toUpperCase()+'.').join(' '):'Student';};
+/* v25.69 (wave 3) Form CR-1's Baker Act initiations and threat team cases are in the file by their dates, written "Safety event
+   (Form CR-1)": a calendar is synced to other devices and services, so the kind of event stays in the workstation */
 async function clCalendar(){const L=await clList()||[],now=new Date(),lo=tdAdd(tdISO(now),-7),hi=tdAdd(tdISO(now),366),ev=[];
   L.forEach(r=>{let d=null;try{d=parseCase(r.text);}catch(e){}if(!d)return;calEvents(d.facts||{}).forEach(e=>{if(e.date>=lo&&e.date<=hi)ev.push(Object.assign({who:clInitials(r),key:r.key},e));});});
   if(!ev.length){alert('No dated deadline in the students kept here (their reviews, IEP dates, reevaluations, notices and the FBA timeline come from their forms).');return;}
   const h=s=>{let x=5381;for(let i=0;i<s.length;i++)x=((x<<5)+x+s.charCodeAt(i))|0;return (x>>>0).toString(36);},ymd=s=>s.replace(/-/g,''),esc2=s=>String(s).replace(/[\\;,]/g,m=>'\\'+m).replace(/\n/g,' ');
   const stamp=now.toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z');
   const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//NBH Workstation//Caseload//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:Caseload deadlines'];
-  ev.forEach(e=>{lines.push('BEGIN:VEVENT','UID:'+h(e.key+'|'+e.what+'|'+e.form)+'-'+ymd(e.date)+'@nbh-workstation','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+ymd(e.date),'DTEND;VALUE=DATE:'+ymd(tdAdd(e.date,1)),'SUMMARY:'+esc2(e.who+': '+e.what+' (Form '+e.form+')'),'TRANSP:TRANSPARENT','END:VEVENT');});
+  ev.forEach(e=>{lines.push('BEGIN:VEVENT','UID:'+h(e.key+'|'+e.what+'|'+e.form)+'-'+ymd(e.date)+'@nbh-workstation','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+ymd(e.date),'DTEND;VALUE=DATE:'+ymd(tdAdd(e.date,1)),'SUMMARY:'+esc2(e.who+': '+(e.sev?'Safety event':e.what)+' (Form '+e.form+')'),'TRANSP:TRANSPARENT','END:VEVENT');});
   lines.push('END:VCALENDAR');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\r\n')+'\r\n'],{type:'text/calendar'}));a.download='Caseload-deadlines_'+tdISO(now)+'.ics';document.body.appendChild(a);a.click();a.remove();
   if(typeof PWA!=='undefined'&&PWA.shareHow)await PWA.shareHow(a);
@@ -7036,6 +7235,8 @@ function gbUnfinished(g){g=g||{};const out=[];
   return out;}
 function gbGoalLines(g,T){g=g||{};const line=(x,kind,i)=>{if(x&&Array.isArray(x.unfinished)&&x.unfinished.length)return 'The '+kind+' objective '+(i+1)+(x.beh?' for '+T(x.beh):'')+' is not finished on Form GB-1 ('+x.unfinished.join(', ')+' still to be written).';return T(x&&x.text||x);};
   return [].concat((g.red||[]).map((x,i)=>line(x,'reduction',i)),(g.acq||[]).map((x,i)=>line(x,'skill',i))).filter(Boolean);}
+/* v25.69 (wave 3) Form CR-1's Baker Act initiations and threat team cases (crisis.events) are not named in the IEP meeting packet or
+   the transition summary: whether they belong there is for district policy (W2-SAFETY, "What other files would need" 4) */
 function iepParts(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{},pf=f.profile||{},g=f.goals||{},rv=f.review||{},ad=pl.adoption||{},cr=f.crisis||{},rc=f.records||{};
   const who=(p.client||'The student').replace(/^SIMULATED\s*[–-]\s*/,'').split(/\s+/)[0]||'The student',T=x=>String(x==null?'':x).trim();
   const lv=(d.behaviors||[]).filter(b=>b&&b.name).map(b=>{const u=b.unit||'',bm=b.base&&b.base.mean!=null?b.base.mean:null,cm=b.cur&&b.cur.mean!=null?b.cur.mean:b.mean;
@@ -7149,7 +7350,7 @@ async function dueIcsSave(){const L=await clList();if(!L||!L.length)return;const
   try{wsUI.toast(c.n+' date'+(c.n===1?'':'s')+' in '+name+'. Open the file to add '+(c.n===1?'it':'them')+' to your calendar (on an iPad, from Files): each has a reminder a week before and a day before. Made again later, the same dates update rather than repeat.',{kind:'ok',ms:12000});}catch(e){}}
 function dueGroups(L){const today=new Date();today.setHours(0,0,0,0);const rows={},flat=[];
   L.forEach(r=>{((r.sum&&r.sum.items)||[]).forEach(i=>{const t=String(i.t||''),w=dueWhen(t,r.saved),f0=/^\s*([A-Z]{2,3}-\d+)\s/.exec(t),forms=[i.open,f0&&f0[1]].filter(Boolean);
-    if(!w){flat.push({who:clName(r),key:r.key,k:i.k,t,forms});return;}
+    if(!w){flat.push({who:clName(r),key:r.key,k:i.k,t,forms,at:i.at||''});return;}
     const iso=tdISO(w.d),id=r.key+'|'+iso,row=rows[id]||(rows[id]={who:clName(r),full:clFull(r),key:r.key,d:w.d,n:Math.round((w.d-today)/864e5),ev:{},forms:[],hot:false});
     const what=dueWhat(t,w),k=dueKey(what)||what,e=row.ev[k]||(row.ev[k]={what,forms:[],due:i.k==='Due'});
     if(i.k==='Due'&&!e.due){e.what=what;e.due=true;}   /* the form's own words are the shorter */
@@ -7162,10 +7363,10 @@ function dueGroups(L){const today=new Date();today.setHours(0,0,0,0);const rows=
 function dueBoard(L){const G=dueGroups(L);
   const total=G.now.length+G.od.length+G.wk.length+G.up.length+G.look.length;
   if(!total&&!G.long.length)return '<p>Nothing needs you in the students kept here, as at their last save.<\/p>';
-  const all=dueAllOn(),btns=(key,forms)=>(forms.length?forms.slice(0,3):['']).map(f=>'<button type="button" data-clopen="'+esc(key)+'" data-clform="'+esc(f)+'">Open'+(f?' '+esc(f):'')+'<\/button>').join('');
+  const all=dueAllOn(),btns=(key,forms,at)=>(forms.length?forms.slice(0,3):['']).map((f,k)=>'<button type="button" data-clopen="'+esc(key)+'" data-clform="'+esc(f)+'"'+(at&&!k&&f?' data-at="'+esc(at)+'"':'')+'>Open'+(f?' '+esc(f):'')+'<\/button>').join('');
   const dated=(x,cls)=>'<li class="due-row '+cls+'"><div class="due-date"><b>'+esc(dueDateTxt(x.d))+'<\/b><span>'+esc(dueRel(x.n))+'<\/span><\/div><div class="due-who">'+esc(x.who)+'<\/div>'+
     '<div class="due-what">'+Object.values(x.ev).map(e=>esc(e.what)+(e.forms.length?' <span class="due-f">'+esc(e.forms.join(', '))+'<\/span>':'')).join('<span class="due-sep"> · <\/span>')+'<\/div><div class="due-act">'+btns(x.key,x.forms)+'<\/div><\/li>';
-  const plain=(x,cls)=>'<li class="due-row '+cls+'"><div class="due-date"><span class="td-k">'+esc(x.k)+'<\/span><\/div><div class="due-who">'+esc(x.who)+'<\/div><div class="due-what">'+esc(x.t)+'<\/div><div class="due-act">'+btns(x.key,x.forms)+'<\/div><\/li>';
+  const plain=(x,cls)=>'<li class="due-row '+cls+'"><div class="due-date"><span class="td-k">'+esc(x.k)+'<\/span><\/div><div class="due-who">'+esc(x.who)+'<\/div><div class="due-what">'+esc(x.t)+'<\/div><div class="due-act">'+btns(x.key,x.forms,x.at)+'<\/div><\/li>';
   let hid=0;const sec=(g,title,cls,fn)=>{const list=G[g];if(!list.length)return '';const show=all?list:list.slice(0,DUE_LIM[g]);hid+=list.length-show.length;
     return '<h4 class="due-grp '+cls+'">'+title+' <span>'+list.length+'<\/span><\/h4><ul class="due-rows">'+show.map(x=>fn(x,cls)).join('')+'<\/ul>';};
   const body=sec('now','Needs you now','now',plain)+sec('od','Overdue','od',dated)+sec('wk','This week','wk',dated)+sec('up','Coming up','up',dated)+sec('look','To look at','look',plain);
@@ -10157,7 +10358,7 @@ bar.parentNode.insertBefore(nav,bar);
 /* the menus: each item runs the bar's own button (left in the bar, out of sight), so its work and its id are unchanged */
 const MENUS={   /* v25.68 (design review H7) the Packet menu is gone: "packet" is the printed document only; the student's details file is in Case */
   case:[['openCase','Open case'],['closeCase','Close case'],['saveFile','Save case to a file'],['saveWhole','Save a case that opens on its own'],['shareEdit','Share for editing'],'hr',['caseXlsx','Case as spreadsheet'],['hxBtn','History'],'hr',['savePacket','Save student details'],['openPacket','Open student details']],
-  tools:[['pushPacket','Fill open forms'],['readDoc','Read a document','wn-narrow'],['caseMap','Case map','wn-narrow'],'hr',['dirBtn','Staff directory'],['diag','Diagnostics'],['bookmarkPdf','Finish PDF','wn-narrow'],
+  tools:[['pushPacket','Fill open forms'],['readDoc','Read a document','wn-narrow'],['caseMap','Case map','wn-narrow'],['wsVideos','Videos','wn-narrow'],'hr',['dirBtn','Staff directory'],['diag','Diagnostics'],['bookmarkPdf','Finish PDF','wn-narrow'],
     'hr',['aNavTop','Navigation: Top bar'],['aNavRail','Navigation: Side rail']]};   /* v25.65 top bar A: where the places sit (top bar or side rail) */
 const M=document.createElement('div');M.className='wn-menu';M.id='wsNavMenu';M.setAttribute('role','menu');M.hidden=true;document.body.appendChild(M);
 let openFor=null;
@@ -10829,7 +11030,7 @@ const KIND={Overdue:'Overdue',Safety:'Safety',Injury:'Injury',Removals:'Removals
 function alertHtml(){const a=alertOf(),x=a.top;if(!x)return '';
   const h=a.od?'Overdue':KIND[x.k]||x.k,ti=x.k==='Integrity'?(()=>{const t=(state.facts||{}).integrity,c=t&&t.criterion||90;return /under|below|not met|wrongly/i.test(x.t)?'Treatment integrity is under '+c+'%':/No integrity check/.test(x.t)?'Treatment integrity has not been checked lately':'Treatment integrity';})():h;
   return '<section class="ch-alert ch-o1" aria-labelledby="chAlH"><h3 id="chAlH">'+esc(ti)+'</h3><p class="ch-at">'+x.t+'</p><div class="ch-btns">'+
-    (x.open?'<button type="button" data-chopen="'+esc(x.open)+'">Open '+esc(x.open)+'</button>':'')+
+    (x.open?'<button type="button" data-chopen="'+esc(x.open)+'"'+crAtAttr(x)+'>Open '+esc(x.open)+'</button>':'')+
     (a.rest>0?'<button type="button" data-chtoday="1">Today: '+a.rest+' more</button>':'')+'</div></section>';}
 const EV_ORDER=['RR-1','IA-1','IN-1','SI-1','ABC-1','OB-1','SP-1','VI-1','DA-1','EA-1'];
 const md2=(a,b)=>{const x=tdMd(a),y=tdMd(b);return a&&b&&a!==b?x+'–'+y:x||y;};
@@ -11299,7 +11500,7 @@ function noteDlg(L){dialog('Notices',L.map((n,i)=>{const e=n.el(),tx=e.querySele
 $('#dlgBody').addEventListener('click',e=>{const b=e.target.closest('[data-srnote]');if(!b)return;try{$('#dlg').close();}catch(x){}const o=document.getElementById(b.dataset.srnote);if(o)setTimeout(()=>o.click(),0);});
 function live(){return NOTES.map(n=>{const e=n.el();if(!e||!n.on(e))return null;const tx=e.querySelector('span'),sig=n.id+'|'+T((tx||e).textContent).slice(0,200);return Object.assign({},n,{sig});}).filter(Boolean);}
 function paintSafety(){let x=null;if(A()&&caseOn()&&state.facts)try{x=(todayItems()||[]).find(i=>i&&i.k==='Safety');}catch(e){}const want=!!x;
-if(want){const t=clStrip(x.t),h='<b>Safety.</b> '+esc(t);const s=safeBar.querySelector('#srSafeText');if(s.innerHTML!==h)s.innerHTML=h;safeBar.dataset.open=x.open||'';const g=safeBar.querySelector('#srSafeGo');g.textContent=x.open?'Open '+x.open:'';g.hidden=!x.open;}
+if(want){const t=clStrip(x.t),h='<b>Safety.</b> '+esc(t);const s=safeBar.querySelector('#srSafeText');if(s.innerHTML!==h)s.innerHTML=h;safeBar.dataset.open=x.open||'';const g=safeBar.querySelector('#srSafeGo');g.textContent=x.open?'Open '+x.open:'';g.hidden=!x.open;g.dataset.atform=x.open||'';if(x.at)g.dataset.at=x.at;else delete g.dataset.at;}
 if(safeBar.hidden===want)safeBar.hidden=!want;}
 function paintNotes(){const on=A();B.classList.toggle('sr-nt',on);B.classList.toggle('sr-focus',typeof focusOn==='function'&&focusOn()&&B.classList.contains('has-form'));
 const L=on?live():[];const now=Date.now(),chipOnly=B.classList.contains('ws-full')||B.classList.contains('sr-focus');
@@ -11711,7 +11912,7 @@ function kfHtml(L){const F=findings(L);
 const TY=[['fba','FBA due','#8a4b00',e=>e.form==='FS-1'],['rev','Plan reviews','#1f5f8b',e=>e.form==='PR-1'||/^Crisis plan review/.test(e.what)],['iep','Annual IEP','#6a3d9a',e=>/^Annual IEP/.test(e.what)],
   ['ree','Reevaluations','#2f6b37',e=>/^Reevaluation/.test(e.what)],['cr','CR-1 notices','#a8321e',e=>/restraint or seclusion|restraint debriefing/.test(e.what)],['im','IM-1 follow-ups','#7c2d5b',e=>e.form==='IM-1'],
   ['pa','PA-1 reassessments','#5b6b00',e=>e.form==='PA-1'],['start','Plan starts','#0e5c63',e=>/^Plan starts/.test(e.what)],['r18','Rights at 18','#4d5f68',e=>e.form==='DM-1'&&/Rights at 18/.test(e.what)],
-  ['cons','Consent renewals','#1e3a4f',e=>e.form==='IC-1']];
+  ['cons','Consent renewals','#1e3a4f',e=>e.form==='IC-1'],['sev','Baker Act and threat team','#7a1f3d',e=>!!e.sev]];   /* v25.69 (wave 3) Form CR-1's events */
 const tyOf=e=>TY.find(t=>t[3](e));
 function events(L){const t0=today(),t90=tdAdd(t0,90),E=[];
   L.forEach(r=>{const f=factsOf(r)||{};let ev=[];try{ev=calEvents(f);}catch(e){ev=[];}const ini=(()=>{try{return clIniOf(r);}catch(e){return '?';}})();
@@ -11876,6 +12077,86 @@ function tick(){if(RM.matches)return;const b=[$('#wsStat'),$('#aStat2')].find(x=
   anim(s.querySelector('path'),[{strokeDashoffset:14},{strokeDashoffset:0}],200);anim(b,[{backgroundColor:'rgba(111,207,151,.35)'},{backgroundColor:'rgba(111,207,151,0)'}],240);setTimeout(()=>s.remove(),900);}
 {const sc=saveCase;saveCase=async function(){const r=await sc.apply(this,arguments);try{if(r===true)setTimeout(tick,30);}catch(e){}return r;};}
 window.__wsW1={where,askWhere,findings:async()=>findings(await stuList()),events:async()=>events(await stuList()),n90All,pvShow,pvHide,pv:()=>PV,gaps,holdFocus,skel:()=>!SK.hidden};
+})();
+</script>
+<!-- v25.69 (the BCBA, 11/8: "a video layout dashboard like YouTube") Videos: the video library (videos.html: every procedure
+     video of Form TD-1's protocol bank, to browse and to watch) over the workstation, below its bar, in a frame of its own
+     that stays loaded while the workstation is used (what was playing waits where it stopped). Videos in the bar (Tools
+     on a narrow window, More on a phone, and the command box) opens and closes it; a form's Browse all videos opens it
+     ({nbh:'videos-open', video:<key>}, from an open form only); the library's Open the TD-1 card opens Form TD-1 at that
+     card ({nbh:'videos-card', card:<id>}: TD-1 reads #card=<id>). Not in the one-file edition, which carries no videos. -->
+<style id="ws-videos-css">
+#vlLayer{position:fixed;left:0;top:0;right:0;bottom:0;z-index:8000;background:#F2F6F5;display:flex}
+#vlLayer[hidden]{display:none!important}
+#vlLayer iframe{flex:1 1 auto;width:100%;height:100%;border:0;display:block;background:#F2F6F5}
+#wsNav #wsVideos[aria-pressed=true]{background:#2a4b61!important;box-shadow:inset 0 -3px 0 #8fd0ee!important}
+body.ws-a.ws-navrail #wsNav #wsVideos[aria-pressed=true]{box-shadow:inset 3px 0 0 #8fd0ee!important}
+#wsNav #wsVideos .wa-t{display:inline}
+/* a window narrower than an iPad upright (the 13-inch, 1032 px): the bar has no room for it (Today and Caseload would be
+   squeezed), so it is in Tools, with Case map and Documents below 900 px; the side rail has room */
+@media (max-width:1031px){body:not(.ws-navrail) #wsNav #wsVideos,body:not(.ws-navrail) #wsNav #wsVideosSep{display:none!important}
+  body:not(.ws-navrail) .wn-menu [data-wn-for="wsVideos"]{display:flex}}
+@media print{#vlLayer{display:none!important}}
+</style>
+<script id="ws-videos">
+(()=>{
+const $=s=>document.querySelector(s),B=document.body;
+if(window.__wsVideos)return;
+const nav=$('#wsNav');
+/* the place in the bar: after Documents (or Case map), with the bar's own look; its icon shows in the side rail */
+const btn=document.createElement('button');btn.type='button';btn.id='wsVideos';btn.className='wn-item';btn.setAttribute('aria-pressed','false');
+btn.title='Videos: the procedure video library';
+btn.innerHTML='<svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.3v5.4l4.5-2.7z"/></svg><span class="wa-t">Videos</span>';
+if(nav){const after=$('#readDoc')&&nav.contains($('#readDoc'))?$('#readDoc'):($('#caseMap')&&nav.contains($('#caseMap'))?$('#caseMap'):null);
+  const sep=document.createElement('span');sep.id='wsVideosSep';sep.className='wn-sep wn-wide';sep.setAttribute('aria-hidden','true');
+  if(after){after.insertAdjacentElement('afterend',btn);after.insertAdjacentElement('afterend',sep);}
+  else{const first=nav.querySelector('.wn-sp');nav.insertBefore(btn,first||null);}
+  if(typeof EMBED!=='undefined'&&EMBED){btn.hidden=true;sep.hidden=true;}}
+/* the layer: a region over the page below the bar (beside the rail); what it covers takes no taps or keys meanwhile */
+const layer=document.createElement('div');layer.id='vlLayer';layer.hidden=true;layer.setAttribute('role','region');layer.setAttribute('aria-label','Video library');
+document.body.appendChild(layer);
+let fr=null,opener=null,held=[];
+const isOpen=()=>!layer.hidden;
+const seen=el=>!!el&&el.getClientRects().length>0&&getComputedStyle(el).visibility!=='hidden';   /* a fixed bar has no offsetParent */
+function place(){let top=0,left=0,bottom=0;
+  if(seen(nav)){const r=nav.getBoundingClientRect();if(B.classList.contains('ws-navrail')&&r.height>r.width)left=Math.max(0,Math.round(r.right));else top=Math.max(0,Math.round(r.bottom));}
+  const ph=$('#phoneBar');if(seen(ph)){const r=ph.getBoundingClientRect();if(r.top>innerHeight/2)bottom=Math.max(0,Math.round(innerHeight-r.top));}
+  layer.style.top=top+'px';layer.style.left=left+'px';layer.style.bottom=bottom+'px';}
+const KEEP='#vlLayer,#wsNav,#phoneBar,dialog,.wn-menu,.wa-pop,#wsToasts,.pal,.pal-back,script,style,template,link,meta';
+function hold(on){if(on){held=[...B.children].filter(el=>!el.matches(KEEP)&&!el.contains(nav)&&!el.inert);held.forEach(el=>{el.inert=true;});}
+  else{held.forEach(el=>{el.inert=false;});held=[];}}
+const tell=m=>{try{if(fr&&fr.contentWindow)fr.contentWindow.postMessage(m,'*');}catch(e){}};
+function open(key,from){if(typeof EMBED!=='undefined'&&EMBED){try{wsUI.toast('The video library is in the workstation opened from its folder or the website; the one-file edition does not carry the videos.',{kind:'warn',ms:9000});}catch(e){}return;}
+  const hash=key?'#video='+encodeURIComponent(key):'';
+  if(!fr){fr=document.createElement('iframe');fr.title='Video library';fr.src='videos.html'+hash;layer.appendChild(fr);
+    fr.addEventListener('load',()=>{if(isOpen())tell({nbh:'videos-focus'});},{once:true});}
+  else if(key!==undefined){try{const w=fr.contentWindow;if(w.location.hash!==hash){if(hash)w.location.hash=hash.slice(1);else w.location.hash='';}}catch(e){}}
+  if(!isOpen()){opener=from||document.activeElement;place();layer.hidden=false;hold(true);btn.setAttribute('aria-pressed','true');B.classList.add('vl-open');
+    try{if(typeof say==='function')say('Video library');}catch(e){}}
+  setTimeout(()=>{try{fr.focus();}catch(e){}tell({nbh:'videos-focus'});},60);}
+function close(focusBack){if(!isOpen())return;tell({nbh:'videos-pause'});layer.hidden=true;hold(false);btn.setAttribute('aria-pressed','false');B.classList.remove('vl-open');
+  if(focusBack!==false){const t=opener&&opener.isConnected&&opener.offsetParent!==null?opener:btn;try{t.focus({preventScroll:true});}catch(e){}}opener=null;}
+/* a card from the library: Form TD-1 opens (as from the list) and shows the card in its bank panel */
+function card(id){if(!/^[A-Za-z0-9_-]{1,80}$/.test(String(id||'')))return;close(false);
+  try{openForm('TD-1');}catch(e){return;}
+  const go=()=>{const f=state.frames['TD-1'];if(!f)return;try{const w=f.contentWindow;if(w.location.hash==='#card='+id)w.location.hash='';w.location.hash='card='+id;}catch(e){}};
+  const f=state.frames['TD-1'];if(f&&f.dataset.loaded)go();else if(f)f.addEventListener('load',()=>setTimeout(go,50),{once:true});}
+btn.addEventListener('click',()=>{if(isOpen())close();else open(undefined,btn);});
+window.addEventListener('message',ev=>{const d=ev.data;if(!d||typeof d.nbh!=='string')return;
+  if(d.nbh==='videos-open'){let from='';try{from=relayFrom(ev.source);}catch(e){}if(!from)return;const k=typeof d.video==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(d.video)?d.video:'';open(k,null);return;}
+  if(!fr||ev.source!==fr.contentWindow)return;
+  if(d.nbh==='videos-close')close();else if(d.nbh==='videos-card')card(d.card);});
+/* anything else chosen in the bar, a form opened, Escape: the library steps aside */
+if(nav)nav.addEventListener('click',e=>{if(!isOpen())return;const b=e.target.closest('button');if(!b||b===btn||b.closest('#wsVideos')||b.dataset.wnMenu||b.id==='wsStat')return;close(false);},true);
+document.addEventListener('click',e=>{if(!isOpen())return;const b=e.target.closest('#wsNavMenu [data-wn-for],#phoneBar button');if(b&&b.dataset.wnFor!=='wsVideos')close(false);},true);
+{const of=openForm;openForm=function(){if(isOpen())close(false);return of.apply(this,arguments);};}
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||!isOpen()||e.defaultPrevented)return;if(document.querySelector('dialog[open]'))return;const m=$('#wsNavMenu');if(m&&!m.hidden)return;e.preventDefault();close();});
+addEventListener('resize',()=>{if(isOpen())place();});
+try{new MutationObserver(()=>{if(isOpen())place();}).observe(B,{attributes:true,attributeFilter:['class']});}catch(e){}
+/* the command box, and More on a phone */
+try{CMDS.push({k:'videos video library watch procedure dro ncr rird high-p fct youtube',n:'Videos: watch the procedure videos of the protocol bank',s:'command',go:()=>open(undefined,null)});}catch(e){}
+try{const g=PH_MORE.find(x=>x[0]==='The workstation');if(g&&!(typeof EMBED!=='undefined'&&EMBED))g[1].splice(1,0,['wsVideos','Videos']);}catch(e){}
+window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr};
 })();
 </script>
 </body>
