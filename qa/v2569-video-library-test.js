@@ -1,11 +1,11 @@
 /* v25.69 (the BCBA, 11/8: "a video layout dashboard like YouTube ... that can show all the video protocols that I have in
    the bank") the video library: videos.html, the workstation's Videos. Simulated data only: the videos are AI-generated
    with simulated people, and nothing here is about a student.
-   A. the files: nbh-videos.js the one list (17 videos, each its file, its picture, its card or cards, its length and
+   A. the files: nbh-videos.js the one list (21 videos, each its file, its picture, its card or cards, its length and
       functions; Form TD-1 reads it, from its copy, which tools/blocks/patch-videos.py --check finds current); each picture a
       640 x 360 JPEG under 40 KB beside the forms; the offline list (tools/pwa-sw.py) finds the page, the list and every
       picture; this test in the release list.
-   B. the home page, on an iPad sideways and upright, a laptop and a phone: all 17 cards with their pictures (loaded) and
+   B. the home page, on an iPad sideways and upright, a laptop and a phone: all 21 cards with their pictures (loaded) and
       lengths, in a shelf per procedure; 3 columns sideways and on the laptop, 2 upright, 1 on a phone; nothing wider than
       the screen (390 px too); every control 44 px; the search box 16 px.
    C. the chips and the search: each procedure, each function (from the cards' functions), Watched and Not watched, words
@@ -40,11 +40,11 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
  /* ---------------- A. the files ---------------- */
  {const fams={};LIST.forEach(v=>{fams[v.family]=(fams[v.family]||0)+1;});
   const wrong=LIST.filter(v=>!(fs.existsSync(path.join(DIR,v.file))&&fs.existsSync(path.join(DIR,v.poster))&&v.cards.length&&v.cards.every(id=>V.cards[id]&&V.cards[id].lab)&&v.dur>60&&v.dur<200&&v.title&&v.note&&Array.isArray(v.fn)));
-  ok('A nbh-videos.js: 17 videos (DRO 4, NCR 4, RIRD 3, high-p 5, FCT 1), each its file, its picture, its cards from the bank, its length, its note',
-   LIST.length===17&&fams.dro===4&&fams.ncr===4&&fams.rird===3&&fams.highp===5&&fams.fct===1&&!wrong.length&&/^TD-1_.*\.html$/.test(V.form)&&fs.existsSync(path.join(DIR,V.form)),{fams,wrong:wrong.map(v=>v.key)});
+  ok('A nbh-videos.js: 21 videos (DRO 4, DRA 4, NCR 4, RIRD 3, high-p 5, FCT 1), each its file, its picture, its cards from the bank, its length, its note',
+   LIST.length===21&&fams.dro===4&&fams.dra===4&&fams.ncr===4&&fams.rird===3&&fams.highp===5&&fams.fct===1&&!wrong.length&&/^TD-1_.*\.html$/.test(V.form)&&fs.existsSync(path.join(DIR,V.form)),{fams,wrong:wrong.map(v=>v.key)});
   const fnOf=k=>BY[k].fn.join(',');
-  ok('A the functions come from the cards: NCR attention attention, NCR during work escape, RIRD automatic, FCT escape, attention and tangible; a high-p video (cards with none) escape, as most high-p cards',
-   fnOf('ncr_attention')==='attention'&&fnOf('ncr_work')==='escape'&&fnOf('rird_pica')==='automatic'&&fnOf('fct-practical-guide-thinning')==='escape,attention,tangible'&&fnOf('a_highp_peer')==='escape',LIST.map(v=>v.key+':'+fnOf(v.key)));
+  ok('A the functions come from the cards: NCR attention attention, NCR during work escape, DRA items tangible, DRA automatic automatic, RIRD automatic, FCT escape, attention and tangible; a high-p video (cards with none) escape, as most high-p cards',
+   fnOf('ncr_attention')==='attention'&&fnOf('ncr_work')==='escape'&&fnOf('dra_tangible')==='tangible'&&fnOf('dra_automatic')==='automatic'&&fnOf('rird_pica')==='automatic'&&fnOf('fct-practical-guide-thinning')==='escape,attention,tangible'&&fnOf('a_highp_peer')==='escape',LIST.map(v=>v.key+':'+fnOf(v.key)));
   const jp=LIST.map(v=>{const b=fs.readFileSync(path.join(DIR,v.poster));let w=0,h=0;for(let i=2;i<b.length-9;){if(b[i]!==0xFF){i++;continue;}const m=b[i+1];if(m>=0xC0&&m<=0xC3){h=b.readUInt16BE(i+5);w=b.readUInt16BE(i+7);break;}i+=2+b.readUInt16BE(i+2);}
    return {f:v.poster,jpg:b[0]===0xFF&&b[1]===0xD8,w,h,kb:b.length/1024};});
   ok('A each picture a JPEG of 640 x 360, under 40 KB, beside the forms (nbh-td1-poster-<the video file>.jpg)',jp.every(x=>x.jpg&&x.w===640&&x.h===360&&x.kb<40)&&LIST.every(v=>v.poster===v.file.replace('nbh-td1-video-','nbh-td1-poster-').replace(/\.js$/,'.jpg')),jp.filter(x=>!(x.jpg&&x.w===640&&x.h===360&&x.kb<40)));
@@ -80,8 +80,8 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
      shelves:[...document.querySelectorAll('#vlList .vl-fam')].map(s=>s.dataset.fam+':'+s.querySelectorAll('.vl-card').length).join(' '),cols,
      wide:document.documentElement.scrollWidth-innerWidth,small,q:getComputedStyle(document.getElementById('vlQ')).fontSize,meta:(cards[0].querySelector('.vl-m')||{}).textContent};});
    const want=size==='phone'?1:size==='up'?2:3;
-   ok('B '+E+' '+size+': all 17 cards with their pictures loaded, titles and lengths ('+r.dur.slice(0,2).map(x=>x[1]).join(', ')+'…), a shelf per procedure, '+want+' column'+(want>1?'s':'')+', nothing wider than the screen',
-    r.n===17&&new Set(r.keys).size===17&&loaded&&r.poster&&r.title&&r.dur.every(([k,d])=>d===mmss(BY[k].dur))&&r.shelves==='dro:4 ncr:4 rird:3 highp:5 fct:1'&&r.cols===want&&r.wide<=0&&/Kodak et al\. \(2003\) · DRO/.test(r.meta),r);
+   ok('B '+E+' '+size+': all 21 cards with their pictures loaded, titles and lengths ('+r.dur.slice(0,2).map(x=>x[1]).join(', ')+'…), a shelf per procedure, '+want+' column'+(want>1?'s':'')+', nothing wider than the screen',
+    r.n===21&&new Set(r.keys).size===21&&loaded&&r.poster&&r.title&&r.dur.every(([k,d])=>d===mmss(BY[k].dur))&&r.shelves==='dro:4 dra:4 ncr:4 rird:3 highp:5 fct:1'&&r.cols===want&&r.wide<=0&&/Kodak et al\. \(2003\) · DRO/.test(r.meta),r);
    ok('B '+E+' '+size+': every control 44 px or more, the search box 16 px',!r.small.length&&r.q==='16px',r.small.slice(0,6).concat([r.q]));
    await ctx.close();}
 
@@ -90,7 +90,7 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
    const shown=()=>p.evaluate(()=>[...document.querySelectorAll('#vlList .vl-card')].map(c=>c.dataset.key).sort().join(' '));
    const exp=f=>LIST.filter(f).map(v=>v.key).sort().join(' ');
    const chips=await p.evaluate(()=>[...document.querySelectorAll('#vlChips .vl-chip')].map(c=>c.dataset.chip));
-   ok('C '+E+' the chips: All, DRO, NCR, RIRD, High-p, FCT, Attention, Escape, Tangible, Automatic, Watched, Not watched',chips.join(' ')==='all fam:dro fam:ncr fam:rird fam:highp fam:fct fn:attention fn:escape fn:tangible fn:automatic seen unseen',chips);
+   ok('C '+E+' the chips: All, DRO, DRA, NCR, RIRD, High-p, FCT, Attention, Escape, Tangible, Automatic, Watched, Not watched',chips.join(' ')==='all fam:dro fam:dra fam:ncr fam:rird fam:highp fam:fct fn:attention fn:escape fn:tangible fn:automatic seen unseen',chips);
    const wrong=[];
    for(const c of chips.filter(c=>c!=='all')){await tap(p,'#vlChips [data-chip="'+c+'"]');await sleep(120);const got=await shown();
     const e=c.startsWith('fam:')?exp(v=>v.family===c.slice(4)):c.startsWith('fn:')?exp(v=>v.fn.includes(c.slice(3))):c==='seen'?'':exp(()=>true);
@@ -102,7 +102,7 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
    const s1=await search('pica'),s2=await search('Kodak'),s3=await search('peer'),s4=await search('momentary'),s5=await search('zzz no such');
    const none=await p.evaluate(()=>({t:(document.querySelector('.vl-none')||{}).textContent||'',c:document.getElementById('vlCount').textContent}));
    ok('C '+E+' the search: a word of a title (pica), a study (Kodak), a card’s words (peer), words of several (momentary); nothing found says so',
-    s1==='rird_pica'&&s2==='dro_resetting'&&s3==='a_highp_peer'&&s4.split(' ').includes('dro_momentary')&&s4.split(' ').includes('dro_class')&&s5===''&&/No video matches “zzz no such”/.test(none.t)&&/^0 of 17 videos/.test(none.c),{s1,s2,s3,s4,none});
+    s1==='rird_pica'&&s2==='dro_resetting'&&s3==='a_highp_peer'&&s4.split(' ').includes('dro_momentary')&&s4.split(' ').includes('dro_class')&&s5===''&&/No video matches “zzz no such”/.test(none.t)&&/^0 of 21 videos/.test(none.c),{s1,s2,s3,s4,none});
    await tap(p,'.vl-none [data-chip="all"]');await sleep(200);
    ok('C '+E+' Show all videos clears the search and the chip',await shown()===exp(()=>true)&&await p.inputValue('#vlQ')==='');
    await p.fill('#vlQ','transition');await sleep(250);await tap(p,'#vlChips [data-chip="fam:highp"]');await sleep(150);
@@ -164,14 +164,14 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
    const wd=await p.evaluate(()=>({cont:!!document.getElementById('vlCont'),badge:!!document.querySelector('#vlList .vl-card[data-key="dro_tokens"] .vl-seen'),st:(document.querySelector('#vlList .vl-card[data-key="dro_tokens"] .vl-st')||{}).textContent}));
    await tap(p,'#vlChips [data-chip="seen"]');await sleep(150);const seen=await p.evaluate(()=>[...document.querySelectorAll('#vlList .vl-card')].map(c=>c.dataset.key).join());
    await tap(p,'#vlChips [data-chip="unseen"]');await sleep(150);const unseen=await p.evaluate(()=>document.querySelectorAll('#vlList .vl-card').length);
-   ok('E '+E+' played to its end: Watched (the card’s mark and words, the Watched chip), not in Continue watching; Not watched the other 16',!wd.cont&&wd.badge&&wd.st==='Watched'&&seen==='dro_tokens'&&unseen===16,{wd,seen,unseen});
+   ok('E '+E+' played to its end: Watched (the card’s mark and words, the Watched chip), not in Continue watching; Not watched the other 20',!wd.cont&&wd.badge&&wd.st==='Watched'&&seen==='dro_tokens'&&unseen===20,{wd,seen,unseen});
    await ctx.close();}
 
   /* ---------------- F. the address ---------------- */
   {const {ctx,p}=await mk('up');await home(p,'#video=a_highp_class');await sleep(300);
    const a=await p.evaluate(()=>({k:__vl.key(),t:document.getElementById('vlTitle').textContent,title:document.title}));
    await p.goto(U+'videos.html#video=nope');await sleep(800);const b2=await p.evaluate(()=>({v:__vl.view(),n:document.querySelectorAll('#vlList .vl-card').length}));
-   ok('F '+E+' videos.html#video=<key> opens the video’s page; an unknown key the home page',a.k==='a_highp_class'&&a.t===BY.a_highp_class.title&&/^High-probability instructions/.test(a.title)&&b2.v==='home'&&b2.n===17,{a,b2});
+   ok('F '+E+' videos.html#video=<key> opens the video’s page; an unknown key the home page',a.k==='a_highp_class'&&a.t===BY.a_highp_class.title&&/^High-probability instructions/.test(a.title)&&b2.v==='home'&&b2.n===21,{a,b2});
    /* on its own, Open the TD-1 card goes to the form at the card */
    await p.goto(U+'videos.html#video=rird_pica');await sleep(500);await tap(p,'.vl-open[data-card="rird-pica-block-redirect-food"]');
    await p.waitForURL(/TD-1_.*#card=rird-pica-block-redirect-food$/,{timeout:15000}).catch(()=>{});
@@ -208,7 +208,7 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
    const nb=await p.evaluate(()=>{const b=document.getElementById('wsVideos'),n=document.getElementById('wsNav'),r=b.getBoundingClientRect();return {h:Math.round(r.height),w:Math.round(r.width),txt:b.textContent.trim(),pressed:b.getAttribute('aria-pressed'),over:n.scrollWidth-n.clientWidth,after:(b.previousElementSibling&&b.previousElementSibling.previousElementSibling||{}).id};});
    ok('H '+E+' Videos in the workstation’s bar, after Documents, 44 px tall, the bar no wider than the window',nb.txt==='Videos'&&nb.h>=44&&nb.w>=44&&nb.over<=0&&nb.after==='readDoc'&&nb.pressed==='false',nb);
    await tap(p,'#wsVideos');
-   const fr=await p.waitForFunction(()=>{const f=document.querySelector('#vlLayer iframe');return f&&f.contentWindow.__vl&&f.contentDocument.querySelectorAll('.vl-card').length===17;},null,{timeout:20000}).then(()=>true,()=>false);
+   const fr=await p.waitForFunction(()=>{const f=document.querySelector('#vlLayer iframe');return f&&f.contentWindow.__vl&&f.contentDocument.querySelectorAll('.vl-card').length===21;},null,{timeout:20000}).then(()=>true,()=>false);
    const lay=await p.evaluate(()=>{const L=document.getElementById('vlLayer'),r=L.getBoundingClientRect(),n=document.getElementById('wsNav').getBoundingClientRect(),f=L.querySelector('iframe').contentDocument;
     return {shown:!L.hidden,top:Math.round(r.top),navBottom:Math.round(n.bottom),h:Math.round(r.height),pressed:document.getElementById('wsVideos').getAttribute('aria-pressed'),main:document.querySelector('main').inert,close:!f.getElementById('vlClose').hidden,
      framed:f.documentElement.classList.contains('nbh-framed'),wide:f.documentElement.scrollWidth-f.defaultView.innerWidth};});

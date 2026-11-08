@@ -7,9 +7,9 @@ const file=pre=>fs.readdirSync(ROOT+'/NBH-Workstation').find(f=>f.startsWith(pre
 let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')+n+' '+t+(c?'':' '+JSON.stringify(d||'')));};
 (async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});const p=await b.newPage({viewport:{width:1180,height:820}});const errs=[];p.on('pageerror',e=>errs.push(String(e)));
  await p.goto(URL+file('TD-1_'));await p.waitForTimeout(1500);
- const ID='fct-practical-guide-thinning',OTHER='dra-teacher-approval-rules';
+ const ID='fct-practical-guide-thinning',OTHER='rird-arm-overcorrection';
  const h=await p.evaluate(([a,c])=>[window.__tdVideo&&window.__tdVideo.has(a),window.__tdVideo&&window.__tdVideo.has(c),window.__tdVideo&&window.__tdVideo.count(),!!(window.__tdBank&&window.__tdBank.show)],[ID,OTHER]);
- ok('the FCT card has a video, the DRA card none',h[0]===true&&h[1]===false&&h[2]>=1&&h[3],h);
+ ok('the FCT card has a video, the overcorrection card (RIRD) none',h[0]===true&&h[1]===false&&h[2]>=1&&h[3],h);
  ok('the video file is not loaded until asked',await p.evaluate(()=>!window.NBH_TD1_VIDEO&&![...document.scripts].some(s=>/nbh-td1-video/.test(s.src))));
  const host='[...document.querySelectorAll("*")].find(e=>e.shadowRoot&&e.shadowRoot.querySelector(".detail"))';
  const det=async id=>p.evaluate(([id,host])=>{window.__tdBank.show(id);const hh=eval(host);const d=hh&&hh.shadowRoot.querySelector('.detail');return {vid:!!(d&&d.querySelector('button.vid')),add:!!(d&&d.querySelector('button.add')),text:d?(d.querySelector('button.vid')||{}).textContent:''};},[id,host]);
@@ -28,7 +28,7 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  await p.evaluate(([id,host])=>{window.__tdBank.show(id);eval(host).shadowRoot.querySelector('.detail button.add').click();},[OTHER,host]);
  await p.waitForTimeout(900);
  const c=await p.evaluate(()=>[...document.querySelectorAll('#compWrap .card')].map(c=>({bank:(c.querySelector('[name$="].bank"]')||{}).value,btn:!!c.querySelector('.td-vid-btn')})));
- ok('the plan card built from the FCT protocol carries Watch the video; the DRA card does not',c.length===2&&c[0].bank===ID&&c[0].btn&&c[1].bank===OTHER&&!c[1].btn,c);
+ ok('the plan card built from the FCT protocol carries Watch the video; the overcorrection card does not',c.length===2&&c[0].bank===ID&&c[0].btn&&c[1].bank===OTHER&&!c[1].btn,c);
  await p.evaluate(()=>document.querySelector('#compWrap .card .td-vid-btn').click());await p.waitForTimeout(600);
  ok('the card\'s button opens the same player, the video ready',await p.evaluate(()=>!document.getElementById('tdVideo').hidden&&document.getElementById('tv-video').src.startsWith('blob:')));
  await p.keyboard.press('Escape');await p.waitForTimeout(200);

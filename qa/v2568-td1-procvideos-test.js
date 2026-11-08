@@ -1,6 +1,7 @@
 /* v25.68 (the BCBA, 11/7) Form TD-1's procedure videos for DRO, NCR (with NCE and A_NCA) and RIRD, and Set the first
-   interval from baseline on each DRO card. Simulated data only.
-   A. the eleven files: each beside the forms, a header that says what it is (AI-generated, simulated people), MP4 data
+   interval from baseline on each DRO card; v25.69 (the BCBA, 11/8) the four for DRA (attention, escape, items, automatic)
+   and every DRA card (162). Simulated data only.
+   A. the fifteen files: each beside the forms, a header that says what it is (AI-generated, simulated people), MP4 data
       whose size and SHA-256 match the header; each in pwa-test's list of files kept offline; this test in the release list.
    B. the mapping: every card of DRO (90), NCR (75), NCE (13), A_NCA (11) and RIRD (53) shows the video this test expects
       (the lists below, read from each card's fields), the counts by video; the 6 RIRD cards none fits have none.
@@ -24,8 +25,8 @@ const IPAD='Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (
 let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')+n+' '+t+(c?'':' '+JSON.stringify(d===undefined?'':d).slice(0,900)));};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const bsrc=fs.readFileSync(path.join(DIR,'nbh-td1-bank.js'),'utf8');const bctx={};vm.createContext(bctx);vm.runInContext(bsrc.replace('const TD1_BANK=','this.TD1_BANK='),bctx);const BANK=bctx.TD1_BANK;
-const CODES=['DRO','NCR','NCE','A_NCA','RIRD'];const CARDS=BANK.protocols.filter(p=>CODES.includes(p.code));
-/* the eleven videos: file, the cards each was made from, its studies, its length (s) */
+const CODES=['DRO','NCR','NCE','A_NCA','RIRD','DRA'];const CARDS=BANK.protocols.filter(p=>CODES.includes(p.code));
+/* the fifteen videos: file, the cards each was made from, its studies, its length (s) */
 const VID={
  dro_resetting:{f:'nbh-td1-video-dro-resetting.js',src:['dro-break-after-calm-interval'],after:'Kodak et al. (2003)',dur:135.3},
  dro_class:{f:'nbh-td1-video-dro-class.js',src:['dro-whole-interval-classroom','dro-whole-then-momentary'],after:'Repp et al. (1983) and Barton et al. (1986)',dur:143.6},
@@ -37,7 +38,11 @@ const VID={
  ncr_between:{f:'nbh-td1-video-ncr-between.js',src:['ncr-presession-item-access','ncr-signaled-thinning-alternatives'],after:'Rispoli et al. (2011) and Slocum et al. (2018)',dur:88.5},
  rird_vocal:{f:'nbh-td1-video-rird-vocal.js',src:['rird-vocal-stereotypy-demands','rird-vocal-questions','rird-one-question-vocal-stereotypy'],after:'Ahearn et al. (2007), Ahrens et al. (2011) and Toper-Korkmaz et al. (2018)',dur:102.8},
  rird_motor:{f:'nbh-td1-video-rird-motor.js',src:['rird-motor-directions-school','rird-one-motor-demand'],after:'Cassella et al. (2011) and Saini et al. (2015)',dur:91.4},
- rird_pica:{f:'nbh-td1-video-rird-pica.js',src:['rird-block-pica-on-touch','rird-pica-block-redirect-food','rird-pica-block-redirect-discard'],after:'McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025)',dur:83.2}};
+ rird_pica:{f:'nbh-td1-video-rird-pica.js',src:['rird-block-pica-on-touch','rird-pica-block-redirect-food','rird-pica-block-redirect-discard'],after:'McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025)',dur:83.2},
+ dra_attention:{f:'nbh-td1-video-dra-attention.js',src:['dra-teacher-attention-study'],after:'Hall, Lund & Jackson (1968)',dur:138.5},
+ dra_escape:{f:'nbh-td1-video-dra-escape.js',src:['dra-break-plus-favorites-no-ext'],after:'Briggs et al. (2019)',dur:142.3},
+ dra_tangible:{f:'nbh-td1-video-dra-tangible.js',src:['dra-coupons-end-preferred'],after:'Wilder et al. (2007a)',dur:128.2},
+ dra_automatic:{f:'nbh-td1-video-dra-automatic.js',src:['dra-earn-stereotypy-access-leisure','dra-stereotypy-access-play'],after:'Potter et al. (2013) and Hanley et al. (2000)',dur:141.4}};
 /* the closest video for every card, read by hand from its fields (lab, params, steps, fn) */
 const EXP={
  dro_class:'dro-30min-engagement-medication dro-calm-transition dro-classwide-star-board dro-cough-mealtime-praise dro-evening-call dro-free-time-staying-seated dro-injury-check-levels dro-peer-play-prompts-timeout dro-presession-rule dro-recess-safety-prize dro-whole-interval-classroom dro-whole-then-momentary',
@@ -48,32 +53,41 @@ const EXP={
  ncr_work:'ncr-edibles-during-evoking-sounds ncr-enriched-break-on-timer-during-work ncr-feeding-continuous-play ncr-feeding-toys-throughout ncr-ft-edible-during-work ncr-glasses-wearing-package ncr-meal-video-thinned-plus-preferred-bite ncr-mealtime-continuous-access ncr-music-response-cost ncr-nondirective-prompts-hygiene ncr-preferred-exercise-routine ncr-prosthesis-wear ncr-snack-before-demands ncr-snack-during-work ncr-tokens-fixed-time ncr-toy-attention-prone ncr-video-food-refusal ncr-vt-food-during-demands ncr-vt-food-praise-demands',
  rird_motor:'rird-blocking-demands-automatic rird-context-specific-redirection rird-dtt-redirect-stereotypy rird-hand-mouthing-toy-play rird-infant-toy-redirection rird-motor-demands rird-motor-demands-adult-vs-talk rird-motor-demands-every-third rird-motor-directions-school rird-multiple-schedule-bracelet-free-access rird-nonvocal-demands-two-settings rird-one-motor-demand rird-positive-practice-stereotypy rird-signaled-stereotypy-breaks',
  rird_pica:'rird-arranging-block-matched rird-block-hand-to-mouth-emesis rird-block-mouthing-reward-items rird-block-pica-on-touch rird-block-picking-redirect-toy rird-block-redirect-matched-toy rird-block-stereotypy-leisure rird-block-tapping-hanging-items rird-blocking-motor-stereotypy rird-eye-poke-blocking rird-hand-mouthing-block rird-immediate-interruption rird-pica-block-redirect-discard rird-pica-block-redirect-food rird-pica-card-cue rird-pica-teen-parent-proximity-fading rird-poison-hazard-insitu rird-rocking-ratio-praise rird-rocking-task-ratio',
+ dra_escape:'dra-accumulated-or-distributed-meal-video dra-break-plus-favorites-no-ext dra-caregiver-compliance-praise dra-caregiver-toilet-sit-schedule dra-compliance-attention dra-compliance-cereal-preschool dra-compliance-choice-snack-break dra-compliance-cued-parent dra-compliance-guided-tasks dra-compliance-requests dra-do-dont-compliance dra-edible-compliance-escape dra-edible-for-compliance-escape dra-edible-for-compliance-no-ext dra-favor-alternative-no-extinction dra-feeding-play-after-bite dra-feeding-protocol-adult-training dra-feeding-toy-after-bite dra-food-acceptance-edible dra-food-acceptance-items dra-food-praise-for-compliance dra-hourly-errand-praise dra-job-checklist-paid-hours dra-main-dish-after-new-food dra-mask-preference-attention-tokens dra-mask-synchronous-childcare dra-mask-video-while-worn dra-model-eats-and-earns-then-student dra-picky-eating-bite-criterion dra-points-for-honest-reports-homework dra-pool-exit-no-extinction dra-praise-following-instructions dra-praise-treats-eating dra-preferred-bite-feeding dra-preferred-food-bites dra-preferred-item-compliance dra-relapse-resistant-plan dra-response-deprivation-firstthen dra-seatwork-earns-ipad dra-self-drinking-toy dra-self-feeding-play-eo dra-self-management-toothbrushing-checklist dra-sequential-bites-school dra-simultaneous-preferred-food dra-simultaneous-presentation-new-foods dra-social-initiation-avoidance dra-sorting-redirect dra-specific-directions-preferred-activity dra-structured-meal dra-synchronous-device-wearing dra-synchronous-hygiene-routines dra-target-food-prompts-praise dra-task-compliance-praise dra-toilet-underwear-sit-schedule dra-toilet-underwear-sits dra-tokens-task-engagement dra-transition-snacks-continue dra-voice-volume-meter-break',
+ dra_tangible:'dra-coupons-end-preferred dra-edible-for-handing-over-toy dra-peer-pecs-mands dra-play-instead-offlimits dra-please-sign-replace-reaching dra-preferred-toy-classwork dra-quality-without-extinction dra-quality-without-extinction-2023 dra-reach-for-toys dra-reinforce-giving-up-item dra-request-item-delay',
+ dra_automatic:'dra-choose-new-item-change dra-earn-stereotypy-access-leisure dra-exchange-found-cigarette dra-food-switch-task-sib dra-heel-squeakers-toewalking dra-leisure-engagement-count-fade dra-leisure-engagement-prompt-then-dra dra-pica-discard-training-acsa dra-plate-placemat-eating dra-request-matched-chew-for-pica dra-request-toy-pause dra-sitting-during-tv dra-stereotypy-access-play dra-task-completion-stereotypy',
  none:'rird-arm-overcorrection rird-awareness-tone-device rird-bruxism-vocal-chin-cue rird-bruxism-vocal-chin-cue-2021 rird-erp-repetitive-arranging rird-foot-overcorrection'};
 const WANT={};Object.keys(EXP).forEach(k=>EXP[k].split(' ').forEach(id=>{WANT[id]=k==='none'?'':k;}));
-/* the rest of each code: DRO resetting, NCE during work, A_NCA and the other NCR attention, RIRD vocal */
-CARDS.forEach(p=>{if(p.id in WANT)return;WANT[p.id]=p.code==='DRO'?'dro_resetting':p.code==='NCE'?'ncr_work':p.code==='A_NCA'?'ncr_attention':p.code==='NCR'?'ncr_attention':p.code==='RIRD'?'rird_vocal':'?';});
-const COUNTS={dro_resetting:43,dro_tokens:24,dro_class:12,dro_momentary:11,ncr_attention:36,ncr_items:26,ncr_work:32,ncr_between:5,rird_vocal:14,rird_motor:14,rird_pica:19,'':6};
+/* the rest of each code: DRO resetting, NCE during work, A_NCA and the other NCR attention, RIRD vocal, DRA attention (praise,
+   approval, attention, peers, self-monitoring: each read from its fields) */
+CARDS.forEach(p=>{if(p.id in WANT)return;WANT[p.id]=p.code==='DRO'?'dro_resetting':p.code==='NCE'?'ncr_work':p.code==='A_NCA'?'ncr_attention':p.code==='NCR'?'ncr_attention':p.code==='RIRD'?'rird_vocal':p.code==='DRA'?'dra_attention':'?';});
+const COUNTS={dro_resetting:43,dro_tokens:24,dro_class:12,dro_momentary:11,ncr_attention:36,ncr_items:26,ncr_work:32,ncr_between:5,rird_vocal:14,rird_motor:14,rird_pica:19,dra_attention:79,dra_escape:58,dra_tangible:11,dra_automatic:14,'':6};
 /* the clause this test expects on named cards (every other card: none, or one of these forms) */
 const CLAUSE={'dro-sticker-chart-assault':'This card does not restart the interval after the behavior.','dro-hourly-token-rules':'This card does not restart the interval after the behavior.',
  'ncr-preferred-item-substitute':'This card is for behavior maintained by attention.','a_nca-praise-during-hard-work':'This card is for behavior maintained by escape from tasks.',
  'ncr-tangible-video-elopement':'This card gives the reinforcer throughout, not on a timer.','ncr-thin-no-ext-plus-card-request':'',
  'rird-eye-poke-blocking':'The clip shows pica; this card is for another behavior: block eye poking hand over hand while toys and attention stay available.','rird-pica-card-cue':'',
  'rird-dtt-redirect-stereotypy':'This card redirects to the task or activity at hand, not to one-step directions.','rird-motor-demands':'',
- 'rird-echo-demands-vocal-stereotypy':'This card asks for echoes (vocal imitation), not answers to questions.','rird-vocal-stereotypy-questions':'','dro-tic-free-tokens':'','dro-30min-engagement-medication':''};
+ 'rird-echo-demands-vocal-stereotypy':'This card asks for echoes (vocal imitation), not answers to questions.','rird-vocal-stereotypy-questions':'','dro-tic-free-tokens':'','dro-30min-engagement-medication':'',
+ 'dra-target-food-prompts-praise':'This card also uses extinction: problem behavior no longer gets its reinforcer.',
+ 'dra-reinforce-giving-up-item':'This card’s alternative: handing over the preferred toy within 10 s of the instruction "Give me the [toy]".',
+ 'dra-voice-volume-app':'This card names no function; its alternative: answering a picture question at conversational volume, shown as the green zone of a voice-meter app.',
+ 'dra-teacher-attention-study':'','dra-break-plus-favorites-no-ext':'','dra-coupons-end-preferred':'','dra-stereotypy-access-play':''};
 const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,/^This card restarts the interval after the behavior\.$/,/^This card is for behavior maintained by (attention|access to items|escape from tasks|automatic reinforcement)\.$/,
- /^This card gives the reinforcer throughout, not on a timer\.$/,/^The clip shows pica; this card is for another behavior: [a-z].+\.$/,/^This card redirects to the task or activity at hand, not to one-step directions\.$/,/^This card asks for echoes \(vocal imitation\), not answers to questions\.$/];
+ /^This card gives the reinforcer throughout, not on a timer\.$/,/^This card also uses extinction: problem behavior no longer gets its reinforcer\.$/,/^This card does not use extinction: problem behavior still gets its reinforcer\.$/,
+ /^This card’s alternative: [^ ].+\.$/,/^This card names no function; its alternative: [^ ].+\.$/,/^The clip shows pica; this card is for another behavior: [a-z].+\.$/,/^This card redirects to the task or activity at hand, not to one-step directions\.$/,/^This card asks for echoes \(vocal imitation\), not answers to questions\.$/];
 (async()=>{
  /* ---------------- A. the files ---------------- */
  {const out=[];for(const k of Object.keys(VID)){const s=fs.readFileSync(path.join(DIR,VID[k].f),'utf8');const h=/^\/\* Form TD-1’s video for [^]*?, (\d+):(\d\d)\. An AI-generated video of\s+simulated people, with captions and narration added\. MP4 \(H\.264 720p, AAC\), (\d+) bytes, SHA-256 ([0-9a-f]{64})/.exec(s);
    const m=/NBH_TD1_VIDEO\['([a-z_]+)'\]='([A-Za-z0-9+/=]+)';\s*$/.exec(s);const buf=m?Buffer.from(m[2],'base64'):Buffer.alloc(0);
    out.push({k,head:!!h,key:m&&m[1],size:h&&+h[3]===buf.length,sha:h&&h[4]===crypto.createHash('sha256').update(buf).digest('hex'),mp4:buf.slice(4,8).toString()==='ftyp',len:h&&Math.abs(+h[1]*60+ +h[2]-VID[k].dur)<=1});}
   const wrong=out.filter(x=>!(x.head&&x.key===x.k&&x.size&&x.sha&&x.mp4&&x.len));
-  ok('A the eleven video files beside the forms: a header (AI-generated, simulated people, the size, the SHA-256), its key, MP4 data that matches',out.length===11&&!wrong.length,wrong);}
+  ok('A the fifteen video files beside the forms: a header (AI-generated, simulated people, the size, the SHA-256), its key, MP4 data that matches',out.length===15&&!wrong.length,wrong);}
  {const pw=fs.readFileSync(path.join(ROOT,'qa','pwa-test.js'),'utf8'),rl=fs.readFileSync(path.join(ROOT,'qa','release-list.txt'),'utf8');const miss=Object.values(VID).map(v=>v.f).filter(f=>!pw.includes("'"+f+"'"));
   ok('A pwa-test lists each file to be kept offline; the release list runs this test',!miss.length&&/^v2568-td1-procvideos-test$/m.test(rl),miss);}
  {const ids=new Set(BANK.protocols.map(p=>p.id)),miss=[].concat(...Object.values(VID).map(v=>v.src)).concat(Object.keys(WANT)).filter(id=>!ids.has(id));
   const by={};CARDS.forEach(p=>{by[p.code]=(by[p.code]||0)+1;});
-  ok('A the cards: DRO 90, NCR 75, NCE 13, A_NCA 11, RIRD 53; every card a video was made from is in the bank',by.DRO===90&&by.NCR===75&&by.NCE===13&&by.A_NCA===11&&by.RIRD===53&&!miss.length,{by,miss});}
+  ok('A the cards: DRO 90, NCR 75, NCE 13, A_NCA 11, RIRD 53, DRA 162; every card a video was made from is in the bank',by.DRO===90&&by.NCR===75&&by.NCE===13&&by.A_NCA===11&&by.RIRD===53&&by.DRA===162&&!miss.length,{by,miss});}
  const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});
  const errs=[];
  const ctxOf=(w,h)=>b.newContext({viewport:{width:w||1376,height:h||1032},hasTouch:true,isMobile:true,deviceScaleFactor:1,userAgent:IPAD});
@@ -85,8 +99,8 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
  /* ---------------- B. the mapping ---------------- */
  const R=await p.evaluate(C=>TD1_BANK.protocols.filter(x=>C.includes(x.code)).map(x=>({id:x.id,code:x.code,k:window.__tdVideo.key(x.id),has:window.__tdVideo.has(x.id),line:window.__tdVideo.line(x.id)})),CODES);
  {const wrong=R.filter(x=>x.k!==WANT[x.id]),cnt={};R.forEach(x=>{cnt[x.k]=(cnt[x.k]||0)+1;});
-  ok('B every card of the five codes shows the video this test expects',R.length===242&&!wrong.length,wrong.slice(0,6));
-  ok('B the counts: DRO resetting 43, tokens 24, class 12, momentary 11; NCR, NCE and A_NCA attention 36, items 26, during work 32, before and between 5; RIRD vocal 14, motor 14, pica 19, none 6',Object.keys(COUNTS).every(k=>cnt[k]===COUNTS[k]),cnt);
+  ok('B every card of the six codes shows the video this test expects',R.length===404&&!wrong.length,wrong.slice(0,6));
+  ok('B the counts: DRO resetting 43, tokens 24, class 12, momentary 11; NCR, NCE and A_NCA attention 36, items 26, during work 32, before and between 5; RIRD vocal 14, motor 14, pica 19, none 6; DRA attention 79, escape 58, items 11, automatic 14',Object.keys(COUNTS).every(k=>cnt[k]===COUNTS[k]),cnt);
   const nv=R.filter(x=>!x.k);ok('B the 6 RIRD cards none fits (overcorrection, the awareness device, exposure and response prevention, the chin cue) have no video and no line',nv.length===6&&nv.every(x=>x.code==='RIRD'&&!x.has&&!x.line),nv);}
  /* ---------------- C. the lines ---------------- */
  {const VS=await p.evaluate(K=>{const o={};K.forEach(k=>{o[k]=window.__tdVideo.line(k);});return o;},Object.keys(VID));
@@ -98,8 +112,13 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
    if(src&&rest)wrong.push([x.id,'source with a clause',rest]);else if(rest&&!CLAUSES.some(re=>re.test(rest)))wrong.push([x.id,'clause',rest]);
    if(x.id in CLAUSE&&rest!==CLAUSE[x.id])wrong.push([x.id,'want',CLAUSE[x.id],'got',rest]);});
   ok('C the card a video was made from says "The video shows this card’s steps"; every other card names the closest version and its studies, with at most one clause, the one expected',!wrong.length,wrong.slice(0,5));
-  const nsrc=R.filter(x=>x.line.startsWith('The video shows this card’s steps')).length,ncl=R.filter(x=>x.k&&!/^The video shows this card/.test(x.line)&&/\. (This card|The clip)[^.]*\..*$/.test(x.line)).length;
-  ok('C 24 source cards; clauses only where a field shows the difference (about one card in four)',nsrc===24&&ncl>20&&ncl<80,{nsrc,ncl});}
+  const nsrc=R.filter(x=>x.line.startsWith('The video shows this card’s steps')).length,ncl=R.filter(x=>x.code!=='DRA'&&x.k&&!/^The video shows this card/.test(x.line)&&/\. (This card|The clip)[^.]*\..*$/.test(x.line)).length;
+  ok('C 29 source cards (24, and 5 for DRA); outside DRA, clauses only where a field shows the difference (about one card in four)',nsrc===29&&ncl>20&&ncl<80,{nsrc,ncl});
+  /* DRA: the function or extinction clause only where the card's fields show it; every other DRA card names its own alternative */
+  const D=R.filter(x=>x.code==='DRA'&&!/^The video shows this card/.test(x.line)),kind=x=>/This card is for behavior maintained by/.test(x.line)?'fn':/This card (also uses|does not use) extinction/.test(x.line)?'ext':/This card names no function; its alternative: /.test(x.line)?'nofn':/This card’s alternative: /.test(x.line)?'alt':'none';
+  const dk={};D.forEach(x=>{dk[kind(x)]=(dk[kind(x)]||0)+1;});const B=Object.fromEntries(BANK.protocols.map(p=>[p.id,p]));
+  const dbad=D.filter(x=>{const p=B[x.id],k=kind(x);return k==='none'||(k==='nofn')!==!(p.fn||[]).length&&k!=='ext'&&k!=='fn';});
+  ok('C DRA: 157 cards beside the 5 sources each with one clause: its alternative (named with "names no function" when fn is empty), or extinction where the card withholds or still gives the reinforcer (1 card)',D.length===157&&!dbad.length&&dk.ext===1&&!dk.fn&&!dk.none&&dk.nofn+dk.alt===156,{dk,dbad:dbad.slice(0,4).map(x=>[x.id,x.line.slice(-120)])});}
  {const r=await p.evaluate(()=>{const out={};['dro-sticker-chart-assault','rird-arm-overcorrection','ncr-presession-item-access'].forEach(id=>{window.__tdBank.show(id);const d=document.getElementById('tdBankHost').shadowRoot.querySelector('.detail');
     const bt=d.querySelector('.load button.vid'),l=d.querySelector('.load .vidln');out[id]={btn:bt?bt.textContent:'',line:l?l.textContent:'',h:bt?Math.round(bt.getBoundingClientRect().height):0};});return out;});
   const line=id=>R.find(x=>x.id===id).line;
@@ -125,7 +144,7 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
   ok('D '+k+': its card’s button loads '+x.f+' and plays it from the device (about '+x.dur+' s, 720p); the note: an AI video model, the cards after '+x.after+', simulated, adapt every step',
    o.k===k&&o.script&&o.src==='blob:'&&Math.abs(o.dur-x.dur)<1.5&&o.w===1280&&o.h===720&&!o.err&&o.title.length>10&&/AI-generated/.test(o.ai)&&o.note.startsWith('Made with an AI video model from the steps of the card')&&o.note.includes(x.after)&&/simulated: it shows the procedure, not a real session/.test(o.note)&&/Adapt every step to the student’s plan\./.test(o.note),o);
   await p.keyboard.press('Escape');await sleep(200);}
- ok('D each file loaded once, only when asked',got.length===11&&new Set(got).size===11,got);
+ ok('D each file loaded once, only when asked',got.length===15&&new Set(got).size===15,got);
  /* ---------------- E. the interval helper ---------------- */
  {const r=await p.evaluate(()=>{const C=window.__tdDroIv.calc;return {a:C([{min:'10',n:'15'},{min:'10',n:'20'},{min:'10',n:'12'}]),b:C([{min:'1',n:'30'}]),c:C([{min:'10',n:'0'},{min:'20',n:'10'}]),d:C([{min:'',n:''}]),e:C([{min:'15',n:'4'}])};});
   ok('E the arithmetic: session seconds ÷ responses, averaged (40, 30 and 50 s: 40 s); 50% to 100% of it (20 to 40 s)',r.a.n===3&&r.a.per.join()==='40,30,50'&&r.a.mean===40&&r.a.lo===20&&r.a.hi===40,r.a);
