@@ -42,6 +42,10 @@ Paths below are from the repository root. The test server the checks expect:
   v21.84: `shared_js.py` (the list of the scripts every form loads from one file beside it, used by the patchers and
   the builds) and `patch-shared.py` (moves inline copies out of forms; see *The shared scripts* below).
   v25.67: `fx2.html` + `patch-fx2.py` (the forms' screen layout on an iPad; see *The screen layout (fx2)* below).
+  v25.69: `patch-videos.py` (the procedure videos' one list, `NBH-Workstation/nbh-videos.js`, read by Form TD-1 and the
+  video library `videos.html`: it writes the list's part from the protocol bank, index.html and each video's length, and
+  Form TD-1's copy of the file; `check-build.py` runs it with `--check`). `tools/video-posters.py` makes each video's
+  picture (`nbh-td1-poster-*.jpg`) from its title card, when a video's pictures change.
 - `tools/relay/` — the rewrite service for the writing help: PHP for newsomebh.com, with its
   tests, its upload zip (`build-zip.sh`) and a README with the upload steps.
 - `tools/reply-box/` — the reply box for IA-1's respondent pages (v21.65): `public_html/reply/box.php`

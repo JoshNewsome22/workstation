@@ -42,6 +42,7 @@ try:
         ['python3', B + 'patch-shared.py', '--check', *forms],
         ['python3', B + 'patch-narration.py', '--check', *forms],
         ['python3', B + 'patch-fx2.py', '--check', *forms],   # v25.67 fx2: the shared screen layout, tools/blocks/fx2.html
+        ['python3', B + 'patch-videos.py', '--check', 'NBH-Workstation'],   # v25.69 the videos' one list (nbh-videos.js) and TD-1's copy
     ]
     by_id = {}
     for f in forms:

@@ -193,8 +193,9 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
    for(const ss of document.styleSheets){try{for(const r of ss.cssRules){if(r.media&&/print/.test(r.media.mediaText)&&/td-vid-line/.test(r.cssText)&&/td-vid-btn/.test(r.cssText))pr=true;}}catch(e){}}
    return {saved:/The video shows|Watch the video|blob:/.test(txt),pr,noprint:[...document.querySelectorAll('.td-vid-line')].every(x=>x.classList.contains('noprint'))};});
   ok('C nothing of the video or its line is in the save file; the button and the line are left out of print',!r.saved&&r.pr&&r.noprint,r);}
- /* the offline copy's list: pwa-sw's loadScript('...') pattern finds the file */
- {const html=fs.readFileSync(path.join(DIR,file('TD-1_')),'utf8');const refs=[...html.matchAll(/\b(?:fetch|loadScript)\(\s*(["'])([^"']+)\1/g)].map(m=>m[2]);
+ /* the offline copy's list: pwa-sw's loadScript('...') pattern finds the file; v25.69 the videos' list is TD-1's copy of
+    nbh-videos.js, whose names pwa-sw finds as quoted nbh-td1-video-….js names */
+ {const html=fs.readFileSync(path.join(DIR,file('TD-1_')),'utf8');const refs=[...html.matchAll(/\b(?:fetch|loadScript)\(\s*(["'])([^"']+)\1/g)].map(m=>m[2]).concat([...html.matchAll(/(["'])(nbh-td1-video-[A-Za-z0-9-]+\.js)\1/g)].map(m=>m[2]));
   const js=fs.readFileSync(path.join(DIR,'nbh-td1-video-highp.js'),'utf8');const m=/NBH_TD1_VIDEO\['a_highp'\]='([A-Za-z0-9+/=]+)'/.exec(js);const bin=m?Buffer.from(m[1],'base64'):Buffer.alloc(0);
   const hd=/(\d+) bytes, SHA-256 ([0-9a-f]{64})/.exec(js);
   ok('C the offline copy finds nbh-td1-video-highp.js (TD-1 names it in loadScript, as the FCT video); its header gives the video’s size and SHA-256',refs.includes('nbh-td1-video-highp.js')&&refs.includes('nbh-td1-video-fct.js')&&!!hd&&+hd[1]===bin.length&&hd[2]===crypto.createHash('sha256').update(bin).digest('hex')&&bin.length>5e6,{refs,len:bin.length});}

@@ -10158,7 +10158,7 @@ bar.parentNode.insertBefore(nav,bar);
 /* the menus: each item runs the bar's own button (left in the bar, out of sight), so its work and its id are unchanged */
 const MENUS={   /* v25.68 (design review H7) the Packet menu is gone: "packet" is the printed document only; the student's details file is in Case */
   case:[['openCase','Open case'],['closeCase','Close case'],['saveFile','Save case to a file'],['saveWhole','Save a case that opens on its own'],['shareEdit','Share for editing'],'hr',['caseXlsx','Case as spreadsheet'],['hxBtn','History'],'hr',['savePacket','Save student details'],['openPacket','Open student details']],
-  tools:[['pushPacket','Fill open forms'],['readDoc','Read a document','wn-narrow'],['caseMap','Case map','wn-narrow'],'hr',['dirBtn','Staff directory'],['diag','Diagnostics'],['bookmarkPdf','Finish PDF','wn-narrow'],
+  tools:[['pushPacket','Fill open forms'],['readDoc','Read a document','wn-narrow'],['caseMap','Case map','wn-narrow'],['wsVideos','Videos','wn-narrow'],'hr',['dirBtn','Staff directory'],['diag','Diagnostics'],['bookmarkPdf','Finish PDF','wn-narrow'],
     'hr',['aNavTop','Navigation: Top bar'],['aNavRail','Navigation: Side rail']]};   /* v25.65 top bar A: where the places sit (top bar or side rail) */
 const M=document.createElement('div');M.className='wn-menu';M.id='wsNavMenu';M.setAttribute('role','menu');M.hidden=true;document.body.appendChild(M);
 let openFor=null;
@@ -11877,6 +11877,86 @@ function tick(){if(RM.matches)return;const b=[$('#wsStat'),$('#aStat2')].find(x=
   anim(s.querySelector('path'),[{strokeDashoffset:14},{strokeDashoffset:0}],200);anim(b,[{backgroundColor:'rgba(111,207,151,.35)'},{backgroundColor:'rgba(111,207,151,0)'}],240);setTimeout(()=>s.remove(),900);}
 {const sc=saveCase;saveCase=async function(){const r=await sc.apply(this,arguments);try{if(r===true)setTimeout(tick,30);}catch(e){}return r;};}
 window.__wsW1={where,askWhere,findings:async()=>findings(await stuList()),events:async()=>events(await stuList()),n90All,pvShow,pvHide,pv:()=>PV,gaps,holdFocus,skel:()=>!SK.hidden};
+})();
+</script>
+<!-- v25.69 (the BCBA, 11/8: "a video layout dashboard like YouTube") Videos: the video library (videos.html: every procedure
+     video of Form TD-1's protocol bank, to browse and to watch) over the workstation, below its bar, in a frame of its own
+     that stays loaded while the workstation is used (what was playing waits where it stopped). Videos in the bar (Tools
+     on a narrow window, More on a phone, and the command box) opens and closes it; a form's Browse all videos opens it
+     ({nbh:'videos-open', video:<key>}, from an open form only); the library's Open the TD-1 card opens Form TD-1 at that
+     card ({nbh:'videos-card', card:<id>}: TD-1 reads #card=<id>). Not in the one-file edition, which carries no videos. -->
+<style id="ws-videos-css">
+#vlLayer{position:fixed;left:0;top:0;right:0;bottom:0;z-index:8000;background:#F2F6F5;display:flex}
+#vlLayer[hidden]{display:none!important}
+#vlLayer iframe{flex:1 1 auto;width:100%;height:100%;border:0;display:block;background:#F2F6F5}
+#wsNav #wsVideos[aria-pressed=true]{background:#2a4b61!important;box-shadow:inset 0 -3px 0 #8fd0ee!important}
+body.ws-a.ws-navrail #wsNav #wsVideos[aria-pressed=true]{box-shadow:inset 3px 0 0 #8fd0ee!important}
+#wsNav #wsVideos .wa-t{display:inline}
+/* a window narrower than an iPad upright (the 13-inch, 1032 px): the bar has no room for it (Today and Caseload would be
+   squeezed), so it is in Tools, with Case map and Documents below 900 px; the side rail has room */
+@media (max-width:1031px){body:not(.ws-navrail) #wsNav #wsVideos,body:not(.ws-navrail) #wsNav #wsVideosSep{display:none!important}
+  body:not(.ws-navrail) .wn-menu [data-wn-for="wsVideos"]{display:flex}}
+@media print{#vlLayer{display:none!important}}
+</style>
+<script id="ws-videos">
+(()=>{
+const $=s=>document.querySelector(s),B=document.body;
+if(window.__wsVideos)return;
+const nav=$('#wsNav');
+/* the place in the bar: after Documents (or Case map), with the bar's own look; its icon shows in the side rail */
+const btn=document.createElement('button');btn.type='button';btn.id='wsVideos';btn.className='wn-item';btn.setAttribute('aria-pressed','false');
+btn.title='Videos: the procedure video library';
+btn.innerHTML='<svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.3v5.4l4.5-2.7z"/></svg><span class="wa-t">Videos</span>';
+if(nav){const after=$('#readDoc')&&nav.contains($('#readDoc'))?$('#readDoc'):($('#caseMap')&&nav.contains($('#caseMap'))?$('#caseMap'):null);
+  const sep=document.createElement('span');sep.id='wsVideosSep';sep.className='wn-sep wn-wide';sep.setAttribute('aria-hidden','true');
+  if(after){after.insertAdjacentElement('afterend',btn);after.insertAdjacentElement('afterend',sep);}
+  else{const first=nav.querySelector('.wn-sp');nav.insertBefore(btn,first||null);}
+  if(typeof EMBED!=='undefined'&&EMBED){btn.hidden=true;sep.hidden=true;}}
+/* the layer: a region over the page below the bar (beside the rail); what it covers takes no taps or keys meanwhile */
+const layer=document.createElement('div');layer.id='vlLayer';layer.hidden=true;layer.setAttribute('role','region');layer.setAttribute('aria-label','Video library');
+document.body.appendChild(layer);
+let fr=null,opener=null,held=[];
+const isOpen=()=>!layer.hidden;
+const seen=el=>!!el&&el.getClientRects().length>0&&getComputedStyle(el).visibility!=='hidden';   /* a fixed bar has no offsetParent */
+function place(){let top=0,left=0,bottom=0;
+  if(seen(nav)){const r=nav.getBoundingClientRect();if(B.classList.contains('ws-navrail')&&r.height>r.width)left=Math.max(0,Math.round(r.right));else top=Math.max(0,Math.round(r.bottom));}
+  const ph=$('#phoneBar');if(seen(ph)){const r=ph.getBoundingClientRect();if(r.top>innerHeight/2)bottom=Math.max(0,Math.round(innerHeight-r.top));}
+  layer.style.top=top+'px';layer.style.left=left+'px';layer.style.bottom=bottom+'px';}
+const KEEP='#vlLayer,#wsNav,#phoneBar,dialog,.wn-menu,.wa-pop,#wsToasts,.pal,.pal-back,script,style,template,link,meta';
+function hold(on){if(on){held=[...B.children].filter(el=>!el.matches(KEEP)&&!el.contains(nav)&&!el.inert);held.forEach(el=>{el.inert=true;});}
+  else{held.forEach(el=>{el.inert=false;});held=[];}}
+const tell=m=>{try{if(fr&&fr.contentWindow)fr.contentWindow.postMessage(m,'*');}catch(e){}};
+function open(key,from){if(typeof EMBED!=='undefined'&&EMBED){try{wsUI.toast('The video library is in the workstation opened from its folder or the website; the one-file edition does not carry the videos.',{kind:'warn',ms:9000});}catch(e){}return;}
+  const hash=key?'#video='+encodeURIComponent(key):'';
+  if(!fr){fr=document.createElement('iframe');fr.title='Video library';fr.src='videos.html'+hash;layer.appendChild(fr);
+    fr.addEventListener('load',()=>{if(isOpen())tell({nbh:'videos-focus'});},{once:true});}
+  else if(key!==undefined){try{const w=fr.contentWindow;if(w.location.hash!==hash){if(hash)w.location.hash=hash.slice(1);else w.location.hash='';}}catch(e){}}
+  if(!isOpen()){opener=from||document.activeElement;place();layer.hidden=false;hold(true);btn.setAttribute('aria-pressed','true');B.classList.add('vl-open');
+    try{if(typeof say==='function')say('Video library');}catch(e){}}
+  setTimeout(()=>{try{fr.focus();}catch(e){}tell({nbh:'videos-focus'});},60);}
+function close(focusBack){if(!isOpen())return;tell({nbh:'videos-pause'});layer.hidden=true;hold(false);btn.setAttribute('aria-pressed','false');B.classList.remove('vl-open');
+  if(focusBack!==false){const t=opener&&opener.isConnected&&opener.offsetParent!==null?opener:btn;try{t.focus({preventScroll:true});}catch(e){}}opener=null;}
+/* a card from the library: Form TD-1 opens (as from the list) and shows the card in its bank panel */
+function card(id){if(!/^[A-Za-z0-9_-]{1,80}$/.test(String(id||'')))return;close(false);
+  try{openForm('TD-1');}catch(e){return;}
+  const go=()=>{const f=state.frames['TD-1'];if(!f)return;try{const w=f.contentWindow;if(w.location.hash==='#card='+id)w.location.hash='';w.location.hash='card='+id;}catch(e){}};
+  const f=state.frames['TD-1'];if(f&&f.dataset.loaded)go();else if(f)f.addEventListener('load',()=>setTimeout(go,50),{once:true});}
+btn.addEventListener('click',()=>{if(isOpen())close();else open(undefined,btn);});
+window.addEventListener('message',ev=>{const d=ev.data;if(!d||typeof d.nbh!=='string')return;
+  if(d.nbh==='videos-open'){let from='';try{from=relayFrom(ev.source);}catch(e){}if(!from)return;const k=typeof d.video==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(d.video)?d.video:'';open(k,null);return;}
+  if(!fr||ev.source!==fr.contentWindow)return;
+  if(d.nbh==='videos-close')close();else if(d.nbh==='videos-card')card(d.card);});
+/* anything else chosen in the bar, a form opened, Escape: the library steps aside */
+if(nav)nav.addEventListener('click',e=>{if(!isOpen())return;const b=e.target.closest('button');if(!b||b===btn||b.closest('#wsVideos')||b.dataset.wnMenu||b.id==='wsStat')return;close(false);},true);
+document.addEventListener('click',e=>{if(!isOpen())return;const b=e.target.closest('#wsNavMenu [data-wn-for],#phoneBar button');if(b&&b.dataset.wnFor!=='wsVideos')close(false);},true);
+{const of=openForm;openForm=function(){if(isOpen())close(false);return of.apply(this,arguments);};}
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||!isOpen()||e.defaultPrevented)return;if(document.querySelector('dialog[open]'))return;const m=$('#wsNavMenu');if(m&&!m.hidden)return;e.preventDefault();close();});
+addEventListener('resize',()=>{if(isOpen())place();});
+try{new MutationObserver(()=>{if(isOpen())place();}).observe(B,{attributes:true,attributeFilter:['class']});}catch(e){}
+/* the command box, and More on a phone */
+try{CMDS.push({k:'videos video library watch procedure dro ncr rird high-p fct youtube',n:'Videos: watch the procedure videos of the protocol bank',s:'command',go:()=>open(undefined,null)});}catch(e){}
+try{const g=PH_MORE.find(x=>x[0]==='The workstation');if(g&&!(typeof EMBED!=='undefined'&&EMBED))g[1].splice(1,0,['wsVideos','Videos']);}catch(e){}
+window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr};
 })();
 </script>
 </body>
