@@ -118,7 +118,7 @@ let fails=0,oks=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL '
   check(!B.shown,'1 question 4 unanswered, nothing written: no block yet',B.note);
   await set(p,'rb.3','yes');await sleep(150);
   B=await block(p);
-  check(B.shown&&B.title==='Escape Extinction: Guidance, Stopping, Assent, and Consent','1 question 4 "yes": the block shows on the Responding sheet');
+  check(B.shown&&B.title.toLowerCase()==='Escape Extinction: Guidance, Stopping, Assent, and Consent'.toLowerCase()/* v25.70 fx2: sentence case on screen */,'1 question 4 "yes": the block shows on the Responding sheet');
   check([NOGUIDE,NOEND,NOASSENT,NOSAYNO,NOWITHDRAW,NOCONSENT,NOTEAM].every(x=>B.note.includes(x)),'1 ... and names what is not in place: guidance, when the task ends, the assent plan, saying no, a withdrawal of assent, the parent\'s and the team\'s agreement',B.note);
   check(B.yes.every(x=>!x)&&!B.norule&&!B.rev&&!B.teach,'1 ... the rows for guidance, the rule for saying no, the review tick and the teaching prompts wait',B);
   check(B.least===LEAST['']&&NEVER.test(B.never)&&!B.never.includes('Guidance is gentle'),'1 ... the least help first and never force are fixed lines (no guidance before it is allowed)',{least:B.least,never:B.never});
@@ -356,7 +356,7 @@ let fails=0,oks=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL '
   /* ---------- 12: hands-on help in a plan for another function ---------- */
   console.log('\n=== TD-1: hands-on help in another function\'s plan (F16)');
   p=await fresh('attention','yes');await set(p,'rb.target','Three-step guided compliance: tell, show, then guide the hands through the task (typed)');await sleep(150);B=await block(p);
-  check(B.shown&&B.title==='Physical Guidance: Stopping, Assent, and Consent'&&B.note.includes(NOGUIDE)&&B.consentLab==='The parent or guardian agreed to physical guidance, as its own item','12 attention, guided compliance typed: the block shows, about physical guidance',B);
+  check(B.shown&&B.title.toLowerCase()==='Physical Guidance: Stopping, Assent, and Consent'.toLowerCase()/* v25.70 fx2: sentence case on screen */&&B.note.includes(NOGUIDE)&&B.consentLab==='The parent or guardian agreed to physical guidance, as its own item','12 attention, guided compliance typed: the block shows, about physical guidance',B);
   C=await copy(p);check(C.D&&C.D.head==='Physical guidance is not ready.'&&eeSection(C.text,PGHEAD).includes('- Not in place yet: The parent or guardian has not agreed to physical guidance yet.'),'12 ... the copy asks first and carries the section',C.D);
   await view(p,'respond');await set(p,'ee.pg','no');await sleep(100);B=await block(p);
   check(B.note.includes('The step "On the target behavior" calls for hands-on help, but the guidance answer is No. Change it, or change the answer.')&&/No: staff do not guide the student.s hands; help stops at a gesture or a model/.test(await p.evaluate(()=>document.querySelector('[name="ee.pg"] option[value="no"]').textContent)),'12 ... "No": the step is named',B.note);
