@@ -39,7 +39,8 @@ const tabs=()=>{const seg=document.querySelector('#viewSeg');if(!seg)return {n:0
   ok('1 every sheet tab in sight in all '+FORMS.length+' forms, sideways and upright, and no row of tap buttons broken over two lines ('+segs+' rows of buttons seen)',!bad.length&&segs>=10,bad.slice(0,8));
   const ctx=await br.newContext({viewport:{width:1180,height:820},hasTouch:true,userAgent:IPAD,serviceWorkers:'block'});ctx.on('dialog',d=>d.accept().catch(()=>{}));
   const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(L.BASE+'/NBH-Workstation/'+encodeURI(TD.file));await sleep(1200);
-  /* 2. the Setup fields */
+  /* 2. the Setup fields (v25.69: the case-fill note is written into the empty box after fx2 settles; wait for it) */
+  await p.waitForFunction(()=>{const b=document.querySelector('[name="m.beh"]');return b&&/^From Form/.test(b.placeholder||'');},null,{timeout:6000}).catch(()=>{});
   const A=await p.evaluate(()=>{const s=document.querySelector('[name="m.sessmin"]'),b=document.querySelector('[name="m.beh"]');const eg=s&&s.nextElementSibling&&s.nextElementSibling.classList.contains('nbh-eg')?s.nextElementSibling.textContent:'';
     const ident=document.querySelector('.ident:not(.c1)');return {ph:s&&s.placeholder,eg,orig:s&&s.dataset.nbhPh,from:b&&b.placeholder,gap:ident?getComputedStyle(ident).rowGap:'',fx2:document.documentElement.classList.contains('fx2')};});
   ok('2 TD-1 Setup: the example number reads "e.g. 10" in the box where it fits, else beside it (the number kept for the record); the target behavior says it comes from Form TB-1; the details grid has its row gap',

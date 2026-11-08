@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = 'd74924a4754f';
+const VERSION = 'dd8849eec193';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -425,7 +425,9 @@ function sane(path, u8, ctype) {
     if (t && !/html/.test(t)) return 'type';
     const s = bin(u8);
     if (!/<\/html>\s*(?:<script\b[^>]*>[\s\S]*?<\/script\s*>\s*)*$/i.test(s.slice(-8192))) return 'end';
-    if (path !== 'respond.html' && s.indexOf(SAVE_TAG) < 0) return 'mark';
+    // v25.69: the video library (videos.html) is a page of its own like respond.html: no save tag, its own mark
+    if (path !== 'respond.html' && path !== 'videos.html' && s.indexOf(SAVE_TAG) < 0) return 'mark';
+    if (path === 'videos.html' && s.indexOf('nbh-videos.js') < 0) return 'mark';
     if (path === 'index.html' && (s.indexOf('const FORMS=[') < 0 || s.indexOf('<script id="nbh-pwa">') < 0)) return 'mark';
     if (path === 'respond.html' && s.indexOf('nbh-respond.js') < 0) return 'mark';
     return '';
