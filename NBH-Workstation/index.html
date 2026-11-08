@@ -3280,6 +3280,8 @@ FACT_SRC['DA-1']='demands';FACT_GEN.push('DA-1');
 /* v25.66 (FEED-H3..H6) Form FD-1 joins the case as 'feeding': the screen and gate, the meal observation, the plan and the data */
 FACT_SRC['FD-1']='feeding';FACT_GEN.push('FD-1');
 {const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.feeding);};factsSig=function(f){return fsg(f)+(f&&f.feeding?JSON.stringify(f.feeding):'');};}
+/* v25.69 (wave 3) Form OB-1's classroom practices check, carried in gatherFacts below */
+{const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.classroom);};factsSig=function(f){return fsg(f)+(f&&f.classroom?'|cls'+JSON.stringify(f.classroom):'');};}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
   factsBusy=true;
@@ -3305,6 +3307,9 @@ async function gatherFacts(push){
       if(out&&out.replies&&typeof out.replies==='object'){f.replies=Object.assign({},f.replies||{},out.replies);f.src.replies='forms';}   /* v21.86 what came back, per form */
       /* v24.39 (review R-122) which open forms hold the simulated example: the packet check and the case file read it */
       {const sm=Object.assign({},f.simulated||{});if(out&&out.simulated)sm[id]=true;else delete sm[id];if(Object.keys(sm).length){f.simulated=sm;f.src.simulated='forms';}else{delete f.simulated;delete f.src.simulated;}}
+      /* v25.69 (wave 3, W2-CLASSSTAFF) Form OB-1's classroom practices check as a part of its own, so a record holding a check and no
+         observation of the student still reaches Forms GC-1 and TI-1 (they read classroom first, then evidence['OB-1'].classroom) */
+      if(id==='OB-1'){if(out&&out.classroom){f.classroom=out.classroom;f.src.classroom='OB-1';}else if(f.src.classroom==='OB-1')drop('classroom');}
       if(FACT_SRC[id]==='evidence'){const ev=Object.assign({},f.evidence||{});if(out&&out.evidence)ev[id]=out.evidence;else delete ev[id];if(Object.keys(ev).length){f.evidence=ev;f.src.evidence=Object.keys(ev).join(', ');}else drop('evidence');}
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
@@ -3358,7 +3363,7 @@ function paintFacts(){
   /* v23.09 (review I3) the family facts Form DM-1 holds: the home language and the interpreter need, who holds the rights, who signs */
   {const fam=dmFamily(f,true);if(fam.length)bits.push('<b>Family:</b> '+esc(fam.join(' \u00b7 '))+' <i>('+esc(s.profile||'DM-1')+')</i>');}
   if(f.plan)bits.push('<b>Plan:</b> '+esc(f.plan.rep?'replacement '+f.plan.rep:(f.plan.beh||'developed'))+' <i>('+esc(s.plan||'')+')</i>');
-  if(f.crisis)bits.push('<b>Crisis plan:</b> '+(f.crisis.stages||[]).length+' stages <i>('+esc(s.crisis||'')+')</i>');
+  if(f.crisis)bits.push('<b>Crisis plan:</b> '+((f.crisis.stages||[]).length?(f.crisis.stages||[]).length+' stages':'no stages yet')+' <i>('+esc(s.crisis||'')+')</i>');   /* v25.69 (wave 3) events alone are not a plan */
   if(f.data)bits.push('<b>Data:</b> '+(f.data.days|0)+' school day'+((f.data.days|0)===1?'':'s')+' <i>('+esc(s.data||'')+')</i>');
   if(f.points)bits.push('<b>Point sheet:</b> '+((f.points.days||[]).length)+' days <i>('+esc(s.points||'')+')</i>');
   if(f.quick)bits.push('<b>Quick start</b> <i>('+esc(s.quick||'')+')</i>');
@@ -6354,7 +6359,7 @@ async function todayOpen(){await gatherFacts(false);try{await gatherDue();}catch
   const L=todayItems(),p=packet(),f=state.facts;
   dialog('Today',
     '<p class="hp-lead">'+esc(new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}))+(p.client?' · '+esc(p.client):'')+'</p>'+
-    (L.length?'<ul class="td-list">'+L.map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+x.k+'</span> <span>'+x.t+'</span>'+(x.open?' <button type="button" data-open="'+esc(x.open)+'">Open '+esc(x.open)+'</button>':'')+'</li>').join('')+'</ul>'
+    (L.length?'<ul class="td-list">'+L.map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+x.k+'</span> <span>'+x.t+'</span>'+(x.open?' <button type="button" data-open="'+esc(x.open)+'"'+crAtAttr(x)+'>Open '+esc(x.open)+'</button>':'')+'</li>').join('')+'</ul>'
       :'<p>'+(f?'Nothing needs you today in this case.':'Nothing to go on yet: open the case’s forms (Form DD-1, TI-1, GB-1 and the rest) and this list fills from them.')+'</p>')+
     '<p class="td-more"><button type="button" class="primary" id="tdWeek">End of the week: print the packet</button> <button type="button" id="tdKit">Staff kit for next week</button> <button type="button" id="tdHand">Hand-over check</button></p>');}   /* v25.68 (design review M2) Caseload is in the bar; the two buttons explain themselves in their tooltips */
 /* v23.78 the lines of the staff kit below (v23.65). Wording approved by the BCBA, October 2026. */
@@ -6382,7 +6387,8 @@ function handoverItems(){const f=state.facts||{},fl=f.profile&&f.profile.flags,L
   if(!tg.length)L.push({t:'No target behaviors defined (Form TB-1)',open:'TB-1'});
   const und=tg.filter(b=>!String(b.def||'').trim());if(und.length)L.push({t:und.length+' target behavior'+(und.length===1?'':'s')+' without a definition: '+esc(und.map(b=>b.label).join(', ')),open:'TB-1'});
   if(!(f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length)))L.push({t:'No goals written (Form GB-1)',open:'GB-1'});
-  if(f.plan&&!f.crisis)L.push({t:'A plan with no crisis plan: Form CR-1 is not in the case',open:'CR-1'});
+  /* v25.69 (wave 3) a crisis plan is its stages: Form CR-1 holding only Baker Act or threat team events, or only restraints, sends crisis with none */
+  if(f.plan&&!(f.crisis&&(f.crisis.stages||[]).length))L.push({t:'A plan with no crisis plan: '+(inCase('CR-1')||f.crisis?'Form CR-1 holds no crisis stages yet':'Form CR-1 is not in the case'),open:'CR-1'});
   if(fl&&fl.crisis==='No'&&f.crisis&&(f.crisis.stages||[]).length)L.push({t:'Form DM-1 still records no crisis plan, but Form CR-1 holds one: update DM-1\u2019s crisis-plan status',open:'DM-1'});   /* v22.29 (F465) */
   else if(fl&&(fl.crisis==='No'||/outdated/i.test(fl.crisis||'')))L.push({t:'Form DM-1 records the crisis plan as '+(fl.crisis==='No'?'missing':'outdated')+esc(dmAsOf(fl,'crisis')),open:'CR-1'});
   /* v23.09 (review F4) DM-1's status answers last confirmed more than 90 days ago are named to confirm again */
@@ -6525,6 +6531,34 @@ function tdHome(f){const h=f.home;if(!h||!Array.isArray(h.sheets))return [];cons
   rsUnlogged(f).forEach(x=>L.push({t:'A '+x.kind+' on Form '+x.src+' ('+esc(tdMd(x.date))+') is not on Form DD-1’s incident record',open:'DD-1'}));
   if(f.review&&f.review.next&&(tdLeft(f.review.next)||0)<0)L.push({t:'The plan review was due '+esc(tdMd(f.review.next))+' (Form PR-1)',open:'PR-1'});
   tdHome(f).forEach(x=>L.push({t:x.t,open:'HD-1'}));}catch(e){}return L;};}
+/* v25.69 (wave 3, W2-SAFETY "What other files would need") Form CR-1's Baker Act initiations and threat management team cases
+   (crisis.events: the kind, the date and time, the attempts to reach the parent and whether one reached them, the date the
+   brief was given; no names, no notes). Today, What's due and the caseload name a Baker Act initiation whose parent is not
+   recorded as reached and a threat team case whose brief is not recorded as given, each for 30 days after the event (as an
+   incident home has not been told about), and each opens Form CR-1 at that event (its Threat team brief view, the event's
+   card: the at "tm-<id>"). The calendar has the events' dates. Not in the tdSafety list, so the transition summary and the
+   IEP meeting packet stay as they were (naming the events there waits on district policy). */
+const CREV_DAYS=30;
+function crEvents(f){const cr=f&&f.crisis;return (cr&&Array.isArray(cr.events)?cr.events:[]).filter(e=>e&&(e.kind==='baker'||e.kind==='threat')&&/^\d{4}-\d\d-\d\d$/.test(String(e.date||'')));}
+const crEvAt=e=>'tm'+(/^[a-z0-9]{1,24}$/.test(String(e&&e.id||''))?'-'+e.id:'');
+const crEvTime=v=>{const m=/^(\d\d):(\d\d)$/.exec(String(v||''));if(!m)return '';let h=+m[1];const ap=h<12?'AM':'PM';h=h%12||12;return h+':'+m[2]+' '+ap;};
+function crEvItems(f){const L=[];crEvents(f).forEach(e=>{const n=tdDays(e.date);if(n===null||n>CREV_DAYS)return;
+    const on=esc(tdMd(e.date))+(crEvTime(e.time)?' at '+crEvTime(e.time):''),n0=+e.attempts||0;
+    if(e.kind==='baker'&&!e.reached)L.push({k:'Safety',t:'The Baker Act initiation of '+on+' (Form CR-1): the parent or guardian is not recorded as reached ('+(n0?n0+' attempt'+(n0===1?'':'s')+' recorded':'no attempt recorded')+'). Record each attempt, and when the parent is reached',open:'CR-1',at:crEvAt(e)});
+    else if(e.kind==='threat'&&!e.brief)L.push({k:'Safety',t:'The threat management team case of '+on+' (Form CR-1): the brief for the team is not recorded as given. Give the brief (Threat team brief) and record the date it was given',open:'CR-1',at:crEvAt(e)});});
+  return L;}
+{const ti1=todayItems;todayItems=function(){const L=ti1.apply(this,arguments);try{return crEvItems(state.facts||{}).concat(L);}catch(e){return L;}};}
+{const ce1=calEvents;calEvents=function(f){const E=ce1.apply(this,arguments);try{crEvents(f||{}).forEach(e=>E.push({date:e.date,what:e.kind==='baker'?'Baker Act initiation':'Threat management team case',form:'CR-1',sev:true}));}catch(x){}return E;};}
+/* the button an item gives (data-at beside data-open, data-chopen or data-clform) opens its form at that place: at once for the
+   case on screen, or once another student's case has opened (caseloadGo) */
+let crAtNext=null;
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button[data-at]'):null;if(!b)return;
+  const at=String(b.dataset.at||''),id=b.dataset.open||b.dataset.chopen||b.dataset.clform||b.dataset.atform||'';if(!id||!/^[a-z][a-z0-9-]{0,30}$/.test(at)){crAtNext=null;return;}
+  crAtNext={id,at,t:Date.now()};if(b.dataset.clopen)return;
+  setTimeout(()=>{const p=crAtNext;if(p&&p.id===id&&p.at===at&&state.frames[id]){crAtNext=null;openAt(id,at);}},0);},true);
+{const cg=caseloadGo;caseloadGo=async function(key,form){const p=crAtNext;const r=await cg.apply(this,arguments);
+  try{if(p&&form&&p.id===form&&Date.now()-p.t<60000&&state.frames[form]){crAtNext=null;openAt(form,p.at);}}catch(e){}return r;};}
+const crAtAttr=(x,id)=>x&&x.at&&(!id||x.open===id)?' data-at="'+esc(x.at)+'"':'';
 /* the transition summary: what the next BCBA needs on one page, from the case as the open forms give it */
 function tdSummaryHTML(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{},rs=pl.respond||{},A=v=>Array.isArray(v)?v.filter(x=>tdT(x)):[];
   const sec=(h,b)=>b?'<h2>'+h+'<\/h2>'+b:'',li=a=>a.length?'<ul>'+a.map(x=>'<li>'+x+'<\/li>').join('')+'<\/ul>':'';
@@ -6568,7 +6602,7 @@ const clKey=p=>{let n=String(p.client||'').trim().toLowerCase().replace(/\s+/g,'
   if(!n&&!s){const st=staffOnlyName();if(st)n=st.toLowerCase();}   /* v22.30 the staff record on screen (no student): the key of its caseload entry */
   return n||s?clScope()+'|'+s+'|'+n:'';};
 const clStrip=h=>String(h||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
-function clSummary(){let items=[];try{items=todayItems().map(x=>({k:x.k,t:clStrip(x.t),open:x.open||''}));}catch(e){}const f=state.facts||{};
+function clSummary(){let items=[];try{items=todayItems().map(x=>Object.assign({k:x.k,t:clStrip(x.t),open:x.open||''},x.at?{at:x.at}:{}));}catch(e){}const f=state.facts||{};
   return {items,lastData:f.data&&f.data.to||'',forms:Object.keys(state.frames).concat(Object.keys(state.pending)).filter((v,i,a)=>a.indexOf(v)===i).length};}
 async function caseloadKeep(p,forms,late){if(clOff())return;const key=clKey(p);if(!key)return;
   try{await gatherFacts(false);}catch(e){}   /* the summary from the case as it is now */
@@ -6597,7 +6631,7 @@ async function caseloadOpen(){let L=await clList();
   dialog('Caseload',
     '<p class="hp-lead">'+L.length+' student'+(L.length===1?'':'s')+(typeof drvOn==='function'&&drvOn()?' on this '+HERE+' and in your school Google Drive (the folder '+DRV_FOLDER+'), each as at their last save.':' on this '+HERE+', each as at their last Save case, kept in this browser on this device until you remove them. The case files you save are the record.')+'</p>'+   /* v22.07 true with Drive on or off (review F509) */
     (L.length?'<h3 class="cl-h">Students<\/h3>'+clCards(L,'dlg')+   /* v21.91 a card each (nbh-find); v21.92 the students first */
-      '<h3 class="cl-h">What needs you, across the caseload</h3>'+(all.length?'<ul class="td-list">'+all.slice(0,40).map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+esc(x.k)+'</span> <span><b>'+esc(x.who)+'</b>: '+esc(x.t)+'</span> <button type="button" data-clopen="'+esc(x.key)+'" data-clform="'+esc(x.open||'')+'">Open'+(x.open?' '+esc(x.open):'')+'</button></li>').join('')+'</ul>'+(all.length>40?'<p class="hint">and '+(all.length-40)+' more</p>':'')
+      '<h3 class="cl-h">What needs you, across the caseload</h3>'+(all.length?'<ul class="td-list">'+all.slice(0,40).map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+esc(x.k)+'</span> <span><b>'+esc(x.who)+'</b>: '+esc(x.t)+'</span> <button type="button" data-clopen="'+esc(x.key)+'" data-clform="'+esc(x.open||'')+'"'+crAtAttr(x)+'>Open'+(x.open?' '+esc(x.open):'')+'</button></li>').join('')+'</ul>'+(all.length>40?'<p class="hint">and '+(all.length-40)+' more</p>':'')
         :'<p>Nothing needs you in the students kept here, as at their last save.</p>')
      :'<p>No student kept yet. Each Save case keeps a copy of that student’s case here, and Caseload lists them.</p>')+staffBox+
     /* v21.92 backups, Google Drive, the settings and the notes under the students, folded (open while there is no student) */
@@ -6874,7 +6908,7 @@ function clFrame(){const rec=ALL.find(x=>x[0]==='DD-1');return new Promise(res=>
   fr.addEventListener('load',()=>setTimeout(()=>fin(fr),500),{once:true});setTimeout(()=>fin(null),25000);
   host.appendChild(fr);window.__clRfWin=fr.contentWindow;loadFrame(fr,rec[2]);});}
 function clResum(r,facts){const sf=state.facts,sd=state.due;let items=[];
-  try{state.facts=facts||null;state.due=[];items=todayItems().map(x=>({k:x.k,t:clStrip(x.t),open:x.open||''}));}catch(e){}finally{state.facts=sf;state.due=sd;}
+  try{state.facts=facts||null;state.due=[];items=todayItems().map(x=>Object.assign({k:x.k,t:clStrip(x.t),open:x.open||''},x.at?{at:x.at}:{}));}catch(e){}finally{state.facts=sf;state.due=sd;}
   const kept=((r.sum&&r.sum.items)||[]).filter(x=>x.k==='Due');   /* what was due as the forms gave it at the save */
   return {items:kept.concat(items),lastData:facts&&facts.data&&facts.data.to||'',forms:r.sum&&r.sum.forms||0};}
 async function clRefreshOne(r,L){let fr=null;
@@ -7140,13 +7174,15 @@ function calEvents(f){const E=[],add=(date,what,form)=>{const s=String(date||'')
   ((f.home||{}).sheets||[]).filter(s=>s&&s.due&&!s.back).forEach(s=>add(s.due,'Home sheet back: '+(s.name||'sheet'),'HD-1'));
   return E;}
 const clInitials=r=>{const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/).filter(Boolean);return w.length?w.map(x=>x[0].toUpperCase()+'.').join(' '):'Student';};
+/* v25.69 (wave 3) Form CR-1's Baker Act initiations and threat team cases are in the file by their dates, written "Safety event
+   (Form CR-1)": a calendar is synced to other devices and services, so the kind of event stays in the workstation */
 async function clCalendar(){const L=await clList()||[],now=new Date(),lo=tdAdd(tdISO(now),-7),hi=tdAdd(tdISO(now),366),ev=[];
   L.forEach(r=>{let d=null;try{d=parseCase(r.text);}catch(e){}if(!d)return;calEvents(d.facts||{}).forEach(e=>{if(e.date>=lo&&e.date<=hi)ev.push(Object.assign({who:clInitials(r),key:r.key},e));});});
   if(!ev.length){alert('No dated deadline in the students kept here (their reviews, IEP dates, reevaluations, notices and the FBA timeline come from their forms).');return;}
   const h=s=>{let x=5381;for(let i=0;i<s.length;i++)x=((x<<5)+x+s.charCodeAt(i))|0;return (x>>>0).toString(36);},ymd=s=>s.replace(/-/g,''),esc2=s=>String(s).replace(/[\\;,]/g,m=>'\\'+m).replace(/\n/g,' ');
   const stamp=now.toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z');
   const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//NBH Workstation//Caseload//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:Caseload deadlines'];
-  ev.forEach(e=>{lines.push('BEGIN:VEVENT','UID:'+h(e.key+'|'+e.what+'|'+e.form)+'-'+ymd(e.date)+'@nbh-workstation','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+ymd(e.date),'DTEND;VALUE=DATE:'+ymd(tdAdd(e.date,1)),'SUMMARY:'+esc2(e.who+': '+e.what+' (Form '+e.form+')'),'TRANSP:TRANSPARENT','END:VEVENT');});
+  ev.forEach(e=>{lines.push('BEGIN:VEVENT','UID:'+h(e.key+'|'+e.what+'|'+e.form)+'-'+ymd(e.date)+'@nbh-workstation','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+ymd(e.date),'DTEND;VALUE=DATE:'+ymd(tdAdd(e.date,1)),'SUMMARY:'+esc2(e.who+': '+(e.sev?'Safety event':e.what)+' (Form '+e.form+')'),'TRANSP:TRANSPARENT','END:VEVENT');});
   lines.push('END:VCALENDAR');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\r\n')+'\r\n'],{type:'text/calendar'}));a.download='Caseload-deadlines_'+tdISO(now)+'.ics';document.body.appendChild(a);a.click();a.remove();
   if(typeof PWA!=='undefined'&&PWA.shareHow)await PWA.shareHow(a);
@@ -7200,6 +7236,8 @@ function gbUnfinished(g){g=g||{};const out=[];
   return out;}
 function gbGoalLines(g,T){g=g||{};const line=(x,kind,i)=>{if(x&&Array.isArray(x.unfinished)&&x.unfinished.length)return 'The '+kind+' objective '+(i+1)+(x.beh?' for '+T(x.beh):'')+' is not finished on Form GB-1 ('+x.unfinished.join(', ')+' still to be written).';return T(x&&x.text||x);};
   return [].concat((g.red||[]).map((x,i)=>line(x,'reduction',i)),(g.acq||[]).map((x,i)=>line(x,'skill',i))).filter(Boolean);}
+/* v25.69 (wave 3) Form CR-1's Baker Act initiations and threat team cases (crisis.events) are not named in the IEP meeting packet or
+   the transition summary: whether they belong there is for district policy (W2-SAFETY, "What other files would need" 4) */
 function iepParts(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{},pf=f.profile||{},g=f.goals||{},rv=f.review||{},ad=pl.adoption||{},cr=f.crisis||{},rc=f.records||{};
   const who=(p.client||'The student').replace(/^SIMULATED\s*[–-]\s*/,'').split(/\s+/)[0]||'The student',T=x=>String(x==null?'':x).trim();
   const lv=(d.behaviors||[]).filter(b=>b&&b.name).map(b=>{const u=b.unit||'',bm=b.base&&b.base.mean!=null?b.base.mean:null,cm=b.cur&&b.cur.mean!=null?b.cur.mean:b.mean;
@@ -7313,7 +7351,7 @@ async function dueIcsSave(){const L=await clList();if(!L||!L.length)return;const
   try{wsUI.toast(c.n+' date'+(c.n===1?'':'s')+' in '+name+'. Open the file to add '+(c.n===1?'it':'them')+' to your calendar (on an iPad, from Files): each has a reminder a week before and a day before. Made again later, the same dates update rather than repeat.',{kind:'ok',ms:12000});}catch(e){}}
 function dueGroups(L){const today=new Date();today.setHours(0,0,0,0);const rows={},flat=[];
   L.forEach(r=>{((r.sum&&r.sum.items)||[]).forEach(i=>{const t=String(i.t||''),w=dueWhen(t,r.saved),f0=/^\s*([A-Z]{2,3}-\d+)\s/.exec(t),forms=[i.open,f0&&f0[1]].filter(Boolean);
-    if(!w){flat.push({who:clName(r),key:r.key,k:i.k,t,forms});return;}
+    if(!w){flat.push({who:clName(r),key:r.key,k:i.k,t,forms,at:i.at||''});return;}
     const iso=tdISO(w.d),id=r.key+'|'+iso,row=rows[id]||(rows[id]={who:clName(r),full:clFull(r),key:r.key,d:w.d,n:Math.round((w.d-today)/864e5),ev:{},forms:[],hot:false});
     const what=dueWhat(t,w),k=dueKey(what)||what,e=row.ev[k]||(row.ev[k]={what,forms:[],due:i.k==='Due'});
     if(i.k==='Due'&&!e.due){e.what=what;e.due=true;}   /* the form's own words are the shorter */
@@ -7326,10 +7364,10 @@ function dueGroups(L){const today=new Date();today.setHours(0,0,0,0);const rows=
 function dueBoard(L){const G=dueGroups(L);
   const total=G.now.length+G.od.length+G.wk.length+G.up.length+G.look.length;
   if(!total&&!G.long.length)return '<p>Nothing needs you in the students kept here, as at their last save.<\/p>';
-  const all=dueAllOn(),btns=(key,forms)=>(forms.length?forms.slice(0,3):['']).map(f=>'<button type="button" data-clopen="'+esc(key)+'" data-clform="'+esc(f)+'">Open'+(f?' '+esc(f):'')+'<\/button>').join('');
+  const all=dueAllOn(),btns=(key,forms,at)=>(forms.length?forms.slice(0,3):['']).map((f,k)=>'<button type="button" data-clopen="'+esc(key)+'" data-clform="'+esc(f)+'"'+(at&&!k&&f?' data-at="'+esc(at)+'"':'')+'>Open'+(f?' '+esc(f):'')+'<\/button>').join('');
   const dated=(x,cls)=>'<li class="due-row '+cls+'"><div class="due-date"><b>'+esc(dueDateTxt(x.d))+'<\/b><span>'+esc(dueRel(x.n))+'<\/span><\/div><div class="due-who">'+esc(x.who)+'<\/div>'+
     '<div class="due-what">'+Object.values(x.ev).map(e=>esc(e.what)+(e.forms.length?' <span class="due-f">'+esc(e.forms.join(', '))+'<\/span>':'')).join('<span class="due-sep"> · <\/span>')+'<\/div><div class="due-act">'+btns(x.key,x.forms)+'<\/div><\/li>';
-  const plain=(x,cls)=>'<li class="due-row '+cls+'"><div class="due-date"><span class="td-k">'+esc(x.k)+'<\/span><\/div><div class="due-who">'+esc(x.who)+'<\/div><div class="due-what">'+esc(x.t)+'<\/div><div class="due-act">'+btns(x.key,x.forms)+'<\/div><\/li>';
+  const plain=(x,cls)=>'<li class="due-row '+cls+'"><div class="due-date"><span class="td-k">'+esc(x.k)+'<\/span><\/div><div class="due-who">'+esc(x.who)+'<\/div><div class="due-what">'+esc(x.t)+'<\/div><div class="due-act">'+btns(x.key,x.forms,x.at)+'<\/div><\/li>';
   let hid=0;const sec=(g,title,cls,fn)=>{const list=G[g];if(!list.length)return '';const show=all?list:list.slice(0,DUE_LIM[g]);hid+=list.length-show.length;
     return '<h4 class="due-grp '+cls+'">'+title+' <span>'+list.length+'<\/span><\/h4><ul class="due-rows">'+show.map(x=>fn(x,cls)).join('')+'<\/ul>';};
   const body=sec('now','Needs you now','now',plain)+sec('od','Overdue','od',dated)+sec('wk','This week','wk',dated)+sec('up','Coming up','up',dated)+sec('look','To look at','look',plain);
@@ -10993,7 +11031,7 @@ const KIND={Overdue:'Overdue',Safety:'Safety',Injury:'Injury',Removals:'Removals
 function alertHtml(){const a=alertOf(),x=a.top;if(!x)return '';
   const h=a.od?'Overdue':KIND[x.k]||x.k,ti=x.k==='Integrity'?(()=>{const t=(state.facts||{}).integrity,c=t&&t.criterion||90;return /under|below|not met|wrongly/i.test(x.t)?'Treatment integrity is under '+c+'%':/No integrity check/.test(x.t)?'Treatment integrity has not been checked lately':'Treatment integrity';})():h;
   return '<section class="ch-alert ch-o1" aria-labelledby="chAlH"><h3 id="chAlH">'+esc(ti)+'</h3><p class="ch-at">'+x.t+'</p><div class="ch-btns">'+
-    (x.open?'<button type="button" data-chopen="'+esc(x.open)+'">Open '+esc(x.open)+'</button>':'')+
+    (x.open?'<button type="button" data-chopen="'+esc(x.open)+'"'+crAtAttr(x)+'>Open '+esc(x.open)+'</button>':'')+
     (a.rest>0?'<button type="button" data-chtoday="1">Today: '+a.rest+' more</button>':'')+'</div></section>';}
 const EV_ORDER=['RR-1','IA-1','IN-1','SI-1','ABC-1','OB-1','SP-1','VI-1','DA-1','EA-1'];
 const md2=(a,b)=>{const x=tdMd(a),y=tdMd(b);return a&&b&&a!==b?x+'–'+y:x||y;};
@@ -11463,7 +11501,7 @@ function noteDlg(L){dialog('Notices',L.map((n,i)=>{const e=n.el(),tx=e.querySele
 $('#dlgBody').addEventListener('click',e=>{const b=e.target.closest('[data-srnote]');if(!b)return;try{$('#dlg').close();}catch(x){}const o=document.getElementById(b.dataset.srnote);if(o)setTimeout(()=>o.click(),0);});
 function live(){return NOTES.map(n=>{const e=n.el();if(!e||!n.on(e))return null;const tx=e.querySelector('span'),sig=n.id+'|'+T((tx||e).textContent).slice(0,200);return Object.assign({},n,{sig});}).filter(Boolean);}
 function paintSafety(){let x=null;if(A()&&caseOn()&&state.facts)try{x=(todayItems()||[]).find(i=>i&&i.k==='Safety');}catch(e){}const want=!!x;
-if(want){const t=clStrip(x.t),h='<b>Safety.</b> '+esc(t);const s=safeBar.querySelector('#srSafeText');if(s.innerHTML!==h)s.innerHTML=h;safeBar.dataset.open=x.open||'';const g=safeBar.querySelector('#srSafeGo');g.textContent=x.open?'Open '+x.open:'';g.hidden=!x.open;}
+if(want){const t=clStrip(x.t),h='<b>Safety.</b> '+esc(t);const s=safeBar.querySelector('#srSafeText');if(s.innerHTML!==h)s.innerHTML=h;safeBar.dataset.open=x.open||'';const g=safeBar.querySelector('#srSafeGo');g.textContent=x.open?'Open '+x.open:'';g.hidden=!x.open;g.dataset.atform=x.open||'';if(x.at)g.dataset.at=x.at;else delete g.dataset.at;}
 if(safeBar.hidden===want)safeBar.hidden=!want;}
 function paintNotes(){const on=A();B.classList.toggle('sr-nt',on);B.classList.toggle('sr-focus',typeof focusOn==='function'&&focusOn()&&B.classList.contains('has-form'));
 const L=on?live():[];const now=Date.now(),chipOnly=B.classList.contains('ws-full')||B.classList.contains('sr-focus');
@@ -11875,7 +11913,7 @@ function kfHtml(L){const F=findings(L);
 const TY=[['fba','FBA due','#8a4b00',e=>e.form==='FS-1'],['rev','Plan reviews','#1f5f8b',e=>e.form==='PR-1'||/^Crisis plan review/.test(e.what)],['iep','Annual IEP','#6a3d9a',e=>/^Annual IEP/.test(e.what)],
   ['ree','Reevaluations','#2f6b37',e=>/^Reevaluation/.test(e.what)],['cr','CR-1 notices','#a8321e',e=>/restraint or seclusion|restraint debriefing/.test(e.what)],['im','IM-1 follow-ups','#7c2d5b',e=>e.form==='IM-1'],
   ['pa','PA-1 reassessments','#5b6b00',e=>e.form==='PA-1'],['start','Plan starts','#0e5c63',e=>/^Plan starts/.test(e.what)],['r18','Rights at 18','#4d5f68',e=>e.form==='DM-1'&&/Rights at 18/.test(e.what)],
-  ['cons','Consent renewals','#1e3a4f',e=>e.form==='IC-1']];
+  ['cons','Consent renewals','#1e3a4f',e=>e.form==='IC-1'],['sev','Baker Act and threat team','#7a1f3d',e=>!!e.sev]];   /* v25.69 (wave 3) Form CR-1's events */
 const tyOf=e=>TY.find(t=>t[3](e));
 function events(L){const t0=today(),t90=tdAdd(t0,90),E=[];
   L.forEach(r=>{const f=factsOf(r)||{};let ev=[];try{ev=calEvents(f);}catch(e){ev=[];}const ini=(()=>{try{return clIniOf(r);}catch(e){return '?';}})();

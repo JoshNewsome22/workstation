@@ -4498,6 +4498,7 @@ body.add68-on{padding-bottom:72px}
 body:not(.view-tm) .only-tm{display:none}
 body.view-tm .only-setup,body.view-tm .only-plan,body.view-tm .only-deb,body.view-tm .only-log,body.view-tm .only-guide{display:none}
 .tm-card{border:1px solid var(--rule-2,#c9d3d6);border-left:4px solid #254657;background:#fff;padding:8px 12px 10px;margin:10px 0}
+.tm-card.tm-go{outline:3px solid #b5651d;outline-offset:2px}   /* v25.69 opened at this event from the workstation */
 .tm-card h3{margin:2px 0 6px;font-size:15px}
 .tm-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 14px;margin:4px 0}
 .tm-g label,.tm-wide,.tm-ar label{display:block;font-family:var(--sans,sans-serif);font-size:11.5px;color:var(--ink-soft,#47535a)}
@@ -4841,7 +4842,7 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
       if(n)try{crcPaper();}catch(e){}briefSoon();}catch(e){}return r;};}
   {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
     try{const L=evOn()?S.tm.filter(x=>x.d):[];if(!L.length)return o;o=o||{};const m=S.meta||{};o.crisis=o.crisis||{beh:T(m.dbeh),precursor:T(m.precursor),stages:[],src:'CR-1'};
-      o.crisis.events=L.map(x=>{const e={kind:x.kind,date:x.d};if(x.t)e.time=x.t;if(x.kind==='baker'){const A=(x.att||[]).filter(attFilled),r=A.findIndex(reached);e.attempts=A.length;e.reached=r>=0;if(r>=0&&A[r].d)e.reachedOn=A[r].d+(A[r].t?' '+A[r].t:'');}
+      o.crisis.events=L.map(x=>{const e={kind:x.kind,date:x.d};if(/^[a-z0-9]{1,24}$/.test(T(x.id)))e.id=T(x.id);if(x.t)e.time=x.t;if(x.kind==='baker'){const A=(x.att||[]).filter(attFilled),r=A.findIndex(reached);e.attempts=A.length;e.reached=r>=0;if(r>=0&&A[r].d)e.reachedOn=A[r].d+(A[r].t?' '+A[r].t:'');}
         else if(x.brief)e.brief=x.brief;if(R.ok(x.rec)){e.rec=x.rec;e.late=R.late(x.rec,x.d,x.t);}return e;});}catch(e){}
     return o;};}
   /* ---------------- a file keeps the events and the recorded-at ---------------- */
@@ -4906,6 +4907,21 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
   if(typeof renderAll==='function'){const a0=renderAll;renderAll=function(){const r=a0.apply(this,arguments);try{evDraw();debPaint();if(ADD)ADD.refresh();}catch(e){}return r;};}
   if(typeof crDebRefresh==='function'){const d0=crDebRefresh;crDebRefresh=function(){const r=d0.apply(this,arguments);debPend=null;try{debPaint();}catch(e){}return r;};}
   document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('#viewSeg button[data-view="tm"]'):null;if(b)briefSoon();});
+  /* v25.69 (wave 3) opened at one event: the workstation's Today, What's due and caseload name a Baker Act initiation whose parent is
+     not recorded as reached and a threat team case whose brief is not recorded as given, and open this form with #tm-<id> (the
+     event's id goes to the case with crisis.events) or #tm: the Threat team brief view, the event's card in view and outlined. A
+     record restored from the case after the page loads is waited for, a few seconds. */
+  let goT=0;
+  function goEvent(n){clearTimeout(goT);const m=/^#tm(?:-([a-z0-9]{1,24}))?$/.exec(location.hash||'');if(!m)return;
+    const L=evOn()?S.tm:[],i=m[1]?L.findIndex(x=>x.id===m[1]):-1;
+    if(m[1]&&i<0){if((n||0)<40)goT=setTimeout(()=>goEvent((n||0)+1),250);return;}
+    const b=document.querySelector('#viewSeg button[data-view="tm"]');if(b&&b.getAttribute('aria-pressed')!=='true')b.click();
+    setTimeout(()=>{const c=i>=0?document.querySelector('[data-tmc="'+i+'"]'):document.getElementById('tmSec');if(!c)return;
+      document.querySelectorAll('.tm-card.tm-go').forEach(x=>x.classList.remove('tm-go'));
+      try{c.scrollIntoView({block:'start'});}catch(e){}
+      if(i>=0){c.classList.add('tm-go');const h=c.querySelector('h3');if(h){h.tabIndex=-1;try{h.focus({preventScroll:true});}catch(e){}}}},60);}
+  window.addEventListener('hashchange',()=>goEvent(0));setTimeout(()=>goEvent(0),0);
+  window.__cr1Go=goEvent;   /* for the workstation's checks */
   try{evRender();debPaint();crcPaper();crcUpdate();if(ADD)ADD.refresh();}catch(e){}
 })();
 </script>
