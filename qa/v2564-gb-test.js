@@ -139,7 +139,7 @@ const OLD=path.join(__dirname,'data','sim','mateo','gb1-save.json');
     D.c10.some(x=>/^gb-ok . A4: mastery level 10 of 10 \(100%\)/.test(x))&&D.c100.some(x=>/^gb-ok . A4: mastery level 100%/.test(x))&&
     D.c1.some(x=>/^gb-note . A4: across 1 session: below the workstation’s standard of 3 consecutive sessions/.test(x))&&!/Wong et al\., 2022/.test(D.html),{c80:D.c80,c90:D.c90,c9:D.c9,c10:D.c10,c1:D.c1});
   ok('M9 a listener program applied to each target needs a mixed-array check (Cordeiro et al., 2022); the Guide states the standard; the reference list carries the studies',
-    D.cL.some(x=>/^gb-note . Each target: in a listener \(match-to-sample\) program, a target also needs a mixed-array check.*one-cue responding.*Cordeiro et al\., 2022/.test(x))&&/5\. The Mastery Standard/.test(D.guide)&&/is 100%\s+independent across 3 consecutive teaching sessions, with 2 instructors for the whole set/.test(D.guide)&&
+    D.cL.some(x=>/^gb-note . Each target: in a listener \(match-to-sample\) program, a target also needs a mixed-array check.*one-cue responding.*Cordeiro et al\., 2022/.test(x))&&/5\. The Mastery Standard/i.test(D.guide)&&/is 100%\s+independent across 3 consecutive teaching sessions, with 2 instructors for the whole set/.test(D.guide)&&
     ['Richling, S. M.','Wong, K. K., & Fienup, D. M. (2022)','Cordeiro, M. C.','Rooker, G. W.','Horner, R. H., & Day, H. M. (1991)','Deitz, S. M., & Repp, A. C. (1973)','Walker, H. M., & Hops, H. (1976)','Stokes, T. F., & Baer, D. M. (1977)'].every(r=>D.refs.includes(r)),{cL:D.cL});
   await p3.close();
 

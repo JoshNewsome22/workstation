@@ -98,7 +98,7 @@ const FORM={GC:'GC-1_Group-Contingencies_v2026-10.html',SM:'SM-1_Self-Monitoring
     const l1=await p.evaluate(()=>({a2:AUDIT[2],a4:AUDIT[4][2],d:[...document.querySelectorAll('[data-m="exDelayTest"] option')].map(e=>e.textContent),econ:document.querySelector('[data-m="econ"]').closest('td').textContent}));
     ok('TE L1 delivery is a research point (Leon et al., 2016), same-day exchange cites Reed & Martens (2011), the closed economy Roane et al. (2005), and a one-week delay test',l1.a2[1]==='research'&&/Leon et al\., 2016/.test(l1.a2[2])&&/Reed & Martens, 2011/.test(l1.a4)&&/Roane et al\., 2005/.test(l1.econ)&&l1.d.some(x=>/one week: kept only if the rate holds/.test(x)),l1);
     const g=await txt(p,'.only-guide');
-    ok('TE L2 the Guide: after the token system ends (Kazdin, 1982), with the relapse plan on Form RM-1',/After the Token System Ends/.test(g)&&/Kazdin \(1982\)/.test(g)&&/Form RM-1/.test(g));
+    ok('TE L2 the Guide: after the token system ends (Kazdin, 1982), with the relapse plan on Form RM-1',/After the Token System Ends/i.test(g)&&/Kazdin \(1982\)/.test(g)&&/Form RM-1/.test(g));
     const h2=await p.evaluate(()=>{const k=JSON.stringify(S);Object.assign(S.meta,{loss:'Yes — described below',lossRule:'one token for a hit',lossBeh:'hitting',lossN:'1',lossFloor:'0',lossTried:'DRA 3 weeks',lossCons:'10/1/26',lossRev:'10/3/26 J.E.',lossMeas:'DD-1',lossStop:'no decrease by 11/1'});renderAll();const o=window.__nbhFactsOut();S=JSON.parse(k);renderAll();return o&&o.token&&o.token.loss;});
     ok('TE H2 (its part) the case carries token loss with its floor, consent and review, which Form TK-1 checks',h2&&h2.on&&h2.floor==='0'&&h2.consent==='10/1/26'&&/10\/3\/26/.test(h2.review),h2);
     await p.close();}

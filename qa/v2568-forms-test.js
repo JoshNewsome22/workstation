@@ -199,7 +199,7 @@ const OLD_TB=(()=>{const src=fs.readFileSync(path.join(__dirname,'v2565-tb1lib-t
   await ti.evaluate(P=>{window.__nbhFactsIn({staff:{people:[{name:S.meta.int,role:'RBT',plan:Object.assign({},P,{first:(S.obs.map(o=>o.date).filter(Boolean).sort()[0])||'2026-11-09'})}]}});},PLAN);await sleep(500);
   await ti.evaluate(()=>document.querySelector('#viewSeg button[data-view="rt"]').click());await sleep(300);
   const t1=await ti.evaluate(()=>({h:document.getElementById('tiIpBox').textContent,sel:!!document.getElementById('tiIpRun'),plan:!!S.ipPlan,empty:document.getElementById('tiIpBox').classList.contains('ti-ip-empty')}));
-  ok('IP 13 TI-1 shows the interventionist\'s plan from Form ST-1 to check at the first visit (3 to 5 school days in), with the steps run as planned and each barrier',t0.box===''&&t1.sel&&t1.plan&&/Implementation Plan, Checked at the First Visit/.test(t1.h)&&/3 to 5 school days in/.test(t1.h)&&/A substitute para on Fridays/.test(t1.h),{t0:t0.box.slice(0,60),t1});
+  ok('IP 13 TI-1 shows the interventionist\'s plan from Form ST-1 to check at the first visit (3 to 5 school days in), with the steps run as planned and each barrier',t0.box===''&&t1.sel&&t1.plan&&/Implementation Plan, Checked at the First Visit/i.test(t1.h)&&/3 to 5 school days in/.test(t1.h)&&/A substitute para on Fridays/.test(t1.h),{t0:t0.box.slice(0,60),t1});
   const pe2=await printShown(ti,'#tiIpBox');
   ok('IP 14 the check does not print until something is recorded',pe2[0]===false,pe2);
   await ti.selectOption('#tiIpRun','Partly');await sleep(150);await ti.selectOption('#tiIpCame0','Yes');await sleep(150);await ti.selectOption('#tiIpWork0','No');await sleep(150);

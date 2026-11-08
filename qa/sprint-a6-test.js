@@ -119,7 +119,12 @@ async function tapOn(p,sel,fx,fy,inset){
     /* a target out of sight, or covered by a bar pinned at the top (v22.15: TI-1's status line, MT-1's timer), is scrolled to
        the middle first, as a person would */
     const covered=r=>{const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return !h||!(h===tgt||tgt.contains(h)||(h.tagName==='LABEL'&&h.control===e));};
-    const r0=tgt.getBoundingClientRect();if(r0.top<120||r0.bottom>innerHeight-60||covered(r0))e.scrollIntoView({block:'center'});const r=tgt.getBoundingClientRect();
+    const r0=tgt.getBoundingClientRect();if(r0.top<120||r0.bottom>innerHeight-60||covered(r0))e.scrollIntoView({block:'center'});
+    /* a tap area partly outside the frame it scrolls in (a wide table on a touch screen, v25.68 fx2) is brought into the
+       frame, as a person would scroll it */
+    {let f=tgt.parentElement;while(f&&f!==document.body&&!/auto|scroll/.test(getComputedStyle(f).overflowX))f=f.parentElement;
+      if(f&&f!==document.body){const a=f.getBoundingClientRect(),q=tgt.getBoundingClientRect();if(q.left<a.left||q.right>a.right)tgt.scrollIntoView({block:'nearest',inline:'nearest'});}}
+    const r=tgt.getBoundingClientRect();
     const x=fx<0?r.left+inset:fx>1?r.right-inset:r.left+r.width*fx,y=fy<0?r.top+inset:fy>1?r.bottom-inset:r.top+r.height*fy;
     const hit=document.elementFromPoint(x,y),on=!!hit&&(hit===tgt||tgt.contains(hit)||(hit.tagName==='LABEL'&&hit.control===e));
     return {x,y,on,hit:hit?(hit.id||hit.className||hit.tagName):null};},[sel,fx,fy,inset||3]);

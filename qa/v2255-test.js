@@ -152,7 +152,7 @@ const ESC={fn:'Escape / avoidance (social negative)',fnKey:'escape'};
 
   /* ---------- F422 the break request ---------- */
   p=await open(TE);
-  const run=(f)=>p.evaluate(f=>{S=blank();renderAll();const rep=nbhCase.apply(f);return {beh:S.meta.beh||'',input:document.querySelector('[data-m="beh"]').value,ph:document.querySelector('[data-m="beh"]').placeholder,rep};},f);
+  const run=(f)=>p.evaluate(f=>{S=blank();renderAll();const rep=nbhCase.apply(f);return {beh:S.meta.beh||'',input:document.querySelector('[data-m="beh"]').value,ph:(x=>x.getAttribute('placeholder')||x.getAttribute('data-fx2-ph')||'')(document.querySelector('[data-m="beh"]')),rep};},f);
   const escCase={behaviors:[T('Aggression (simulated)',Object.assign({rep:'Break request'},ESC)),R('Break request',ESC)],goals:{red:[],acq:[{beh:'hand the break card to an adult (simulated)'}]}};
   let x=await run(escCase);
   ok('23 F422 an escape case whose replacement and objective are the break request: the field stays empty, its prompt asks for the work, and the fill says why',
@@ -197,7 +197,7 @@ const ESC={fn:'Escape / avoidance (social negative)',fnKey:'escape'};
   await bk(p,3,'note','An extra break beyond the IEP\'s every-20-minute break (simulated)');const g4=await p.evaluate(()=>[...document.querySelectorAll('#genFlags .verdict')].map(e=>[e.className,e.textContent]).find(x=>/beanbag/.test(x[1])));
   ok('30 F419 a backup that matches an IEP accommodation is flagged and keeps the entitlement point from holding; a note naming the IEP answers it',/Break in the beanbag \(simulated\) matches the IEP accommodation “Break every 20 min” \(Form DM-1\)\. What the IEP provides is given as the IEP says, not earned \(34 CFR §300\.323\(c\)\(2\), \(d\)\)/.test(g.f)&&
     /“Break in the beanbag \(simulated\)” matches an IEP accommodation/.test(g.a)&&/matches an IEP accommodation/.test(g.item)&&!!g4&&/v-info/.test(g4[0])&&/Its notes say which it is/.test(g4[1]),{g,g4});
-  ok('31 F419 the rights example says what the student already has a right to is not earnable, and extras may be backups',await p.evaluate(()=>document.querySelector('[data-m="rights"]').placeholder)==='What the student already has a right to (meals, snack, drink, the bathroom, belongings, and the breaks and adult attention the IEP or the school day provides) is not earnable; extras may be backups');
+  ok('31 F419 the rights example says what the student already has a right to is not earnable, and extras may be backups',await p.evaluate(()=>(x=>x.getAttribute('placeholder')||x.getAttribute('data-fx2-ph')||'')(document.querySelector('[data-m="rights"]')))==='What the student already has a right to (meals, snack, drink, the bathroom, belongings, and the breaks and adult attention the IEP or the school day provides) is not earnable; extras may be backups');
   await p.close();
   {const dm=await open('DM-1_Student-Demographics-and-Profile_v2026-09.html');await dm.evaluate(()=>{document.querySelector('#simBtn').click();});await sleep(1500);
    const acc=await dm.evaluate(()=>{const o=window.__nbhFactsOut();return o&&o.profile&&o.profile.accom;});await dm.close();

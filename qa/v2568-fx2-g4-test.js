@@ -34,7 +34,9 @@
         graph draws (an svg's shapes, their place and words; a canvas's size), the same with the layout as without
         it, on the iPad sideways (the walkthroughs' pictures left out);
     18. inside the workstation no masthead stays on screen for the layout's "Show the full introduction" alone, on
-        these eight and on VI-1 (group 1), which showed a strip 55 px tall holding only that link.
+        these eight and on VI-1 (group 1), which showed a strip 55 px tall holding only that link;
+    19. in the grids of fields, on every sheet, nothing drawn over a label's words or a box (GB-1's objectives had a
+        field's example run over the next field's label).
    WebKit when it is installed, otherwise Chromium as an iPad (qa/lib.js ipadBrowser). Simulated data only.
    usage: WS_URL=http://127.0.0.1:8123 node qa/v2568-fx2-g4-test.js [ID,ID...] */
 const L=require(__dirname+'/lib.js');const {BASE,sleep,ROOT}=L;let pw;try{pw=require('playwright');}catch(e){pw=require('/opt/node22/lib/node_modules/playwright');}
@@ -60,10 +62,12 @@ const RUNNERS='#tiRun, #mmPrac, #mmRate, #smRWrap';
 /* 17 the recorders, timers and GB-1's objective bank: whether each is drawn, what each holds (its words, its controls
    and their state) and what each graph draws (its shapes, their place inside it and its words) */
 const GRAPHS='#tiRun, #mmPrac, #mmRate, #smRWrap, #gbBankHost';
+/* 19 the grids of fields (the layout's and the forms' own): nothing in them drawn over a label's words or a box */
+const FIELDS='.fx2-fg, .ident, .defs';
 /* the items that may not meet: every box in view, the words of every label (not the box inside it), every example; and
    no example of the layout as an item of a row of label-and-box pairs (a grid or a flex row, or a box beside its
    button), anywhere on a sheet */
-const overlaps=p=>p.evaluate(RUN=>{const D=document;const sheets=[...D.querySelectorAll('.fx2-sh')].filter(s=>s.getClientRects().length);
+const overlaps=(p,R)=>p.evaluate(RUN=>{const D=document;const sheets=[...D.querySelectorAll('.fx2-sh')].filter(s=>s.getClientRects().length);
   const vis=e=>{if(!e.getClientRects().length)return false;const cs=getComputedStyle(e);if(cs.visibility==='hidden'||+cs.opacity===0)return false;const r=e.getBoundingClientRect();return r.width>2&&r.height>2;};
   const items=[],nm=e=>String(e.id||e.getAttribute('name')||e.getAttribute('data-m')||e.className||e.tagName).slice(0,30),txt=(e,k,n)=>{const rg=D.createRange();rg.selectNodeContents(e);[...rg.getClientRects()].forEach(r=>{if(r.width>2&&r.height>2)items.push({k,n,r,el:e.nodeType===1?e:e.parentElement.closest('label')||e.parentElement});});};
   sheets.forEach(s=>s.querySelectorAll(RUN).forEach(run=>{
@@ -77,7 +81,7 @@ const overlaps=p=>p.evaluate(RUN=>{const D=document;const sheets=[...D.querySele
   const row=p=>{if(!p||p.nodeType!==1)return false;const cs=getComputedStyle(p),d=cs.display;if(/flex/.test(d)){if(/column/.test(cs.flexDirection))return false;}else if(/grid/.test(d)){if((cs.gridTemplateColumns||'').split(' ').filter(Boolean).length<2)return false;}else return false;
     let n=0,x=0;for(let c=p.firstElementChild;c;c=c.nextElementSibling){if(c.matches(BQ)||c.querySelector(BQ)){n++;x++;}else if(c.matches('button')||c.querySelector('button'))n++;}return x>=1&&n>=2;};
   sheets.forEach(s=>s.querySelectorAll('.fx2-hint,.fx2-cellhint').forEach(e=>{if(vis(e)&&row(e.parentElement))out.push('example "'+e.textContent.trim().slice(0,30)+'" an item of the row '+String(e.parentElement.className).slice(0,24));}));
-  return [...new Set(out)];},RUNNERS);
+  return [...new Set(out)];},R||RUNNERS);
 const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date;const P0=performance.now();const now=()=>T+Math.floor(performance.now()-P0);
   class FD extends D0{constructor(...a){if(a.length)super(...a);else super(now());}static now(){return now();}}window.Date=FD;window.print=function(){};};
 (async()=>{const ipad=await L.ipadBrowser(pw),cr=await pw.chromium.launch();const errs=[];console.log('engine for the iPad: '+ipad._nbhEngine);
@@ -153,9 +157,10 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
   const res={};
   for(const id of IDS){res[id]={};
     for(const [w,h] of [[1376,1032],[1032,1376]]){const tag=w+'x'+h;const ctx=await L.ipadCtx(ipad,{viewport:{width:w,height:h}});await ctx.addInitScript(clock);const p=await open(ctx,id,tag);
-      const V=await views(p);const agg={wide:[],small:[],short:[],ph:[],hbad:[],rbad:[],segbad:[],kept:[],tabs:[],btn:[],ovl:[]},spot={};let n=0,hn=0,hch=0,rows=0,segs=0,hints=0;
+      const V=await views(p);const agg={wide:[],small:[],short:[],ph:[],hbad:[],rbad:[],segbad:[],kept:[],tabs:[],btn:[],ovl:[],fov:[]},spot={};let n=0,hn=0,hch=0,rows=0,segs=0,hints=0;
       for(const v of V){await view(p,v);const r=await look(p,[...(CARDS[id]||[]),...(STAY[id]||[])]);n+=r.n;hn+=r.hn;hch+=r.hchanged;rows+=r.rows;segs+=r.segs;hints+=r.hints;
         (await overlaps(p)).forEach(x=>agg.ovl.push(v+' '+x));
+        (await overlaps(p,FIELDS)).filter(x=>/ over /.test(x)).forEach(x=>agg.fov.push(v+' '+x));
         for(const q in r.sp)spot[q]=(spot[q]||false)||r.sp[q];
         if(r.wide>1)agg.wide.push(v+':'+r.wide);['small','short','ph','hbad','rbad','segbad','kept','btn'].forEach(k=>r[k].forEach(x=>agg[k].push(v+' '+x)));r.tab.forEach(t=>agg.tabs.push(Object.assign({v},t)));}
       ok(`1 ${id} ${tag}: nothing wider than the screen on any of its ${V.length} sheets`,!agg.wide.length,agg.wide);
@@ -171,6 +176,7 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
       const lists=agg.tabs.filter(t=>t.cards),notCard=lists.filter(t=>t.tr!=='grid'||!/\w/.test(t.lab));
       ok(`8 ${id} ${tag}: lists of entries are cards on this touch screen, each box under its column's name (${lists.length} lists)`,!notCard.length,notCard.slice(0,6));
       ok(`16 ${id} ${tag}: nothing drawn over a label or a box in the recorders and timers, and no example an item of a row of pairs`,!agg.ovl.length,agg.ovl.slice(0,8));
+      ok(`19 ${id} ${tag}: in the grids of fields nothing drawn over a label's words or a box (an example under its box ends before the next field)`,!agg.fov.length,agg.fov.slice(0,8));
       ok(`10 ${id} ${tag}: the layout's own buttons 44 px tall`,!agg.btn.length,agg.btn.slice(0,6));
       if(w===1376){
         /* 9 the masthead */

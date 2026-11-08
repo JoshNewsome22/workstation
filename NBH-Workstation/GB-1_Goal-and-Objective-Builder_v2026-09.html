@@ -1025,11 +1025,12 @@ html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .defs .
 <style id="fx2-own">
 /* v25.68 fx2: GB-1's own screen rules for the shared layout */
 @media screen{
-/* an objective's note, and the fields a kind of objective adds one level down (the generalization and maintenance
-   kinds, the pairing, the reason a replacement applies), at a touch target's height, as the layout's own fields are */
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .card.grow > .f > input:not([type=checkbox]):not([type=radio]){min-height:44px!important}
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .card.grow .param > :not(.fx2-f) .f > input:not([type=checkbox]):not([type=radio]){min-height:44px!important}
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .card.grow .param > :not(.fx2-f) .f > select:not(.nbh-seg-src){min-height:44px!important}
+/* an objective's fields take the field layout (label above its box): the form's own row rules (the label a fixed 40 %
+   beside the box, right-aligned; the box growing into the rest) would size them in the column, so a field's example
+   ran over the next field's label */
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .card.grow .fx2-fg > .fx2-f > label{flex:none;text-align:left}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .card.grow .fx2-fg > .fx2-f > input{flex:none}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .card.grow .fx2-fg > .fx2-f > select{flex:none}
 /* where a filled current level came from (DD-1's baseline), under its box: the form wraps it onto a line of its own
    under a label 40 % wide beside the box; the layout sets the label above the box in a column, so the note goes under
    the box (in the field's third row, where its example was: the example goes once the box is filled) */
@@ -1047,7 +1048,7 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .card.grow:is([dat
 /* v25.68 fx2: GB-1's settings for the shared layout (tools/blocks/fx2.html; the list is at the top of its script).
    No cards: the objectives are cards of the form's own, and the progress report (one row per goal) and the
    baseline sources stay tables. The objective bank (in its own shadow root) is as it was */
-window.FX2_CFG = { cards: '', fields: '.card.grow .param',
+window.FX2_CFG = { cards: '', fields: '.card.grow, .card.grow .param, .card.grow .param > :is(.gb-k-gen, .gb-k-maint, .gb64-pair, .gb64-apply)',
   noseg: '#planTable, table.gp',
   /* the words the form writes again while it runs: the progress period's dates (from the objectives' data, while the
      boxes are empty) and the criterion's example (rewritten as the objective is paired or not) */

@@ -12,7 +12,7 @@ const OUT=__dirname+'/out/sv1-w3b';fs.mkdirSync(OUT,{recursive:true});
     await p.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};if(window.nbhUI)nbhUI.confirm=async()=>true;});return p;};
   const p=await open(SV);
   /* F223 */
-  const g=await p.evaluate(()=>({btn:$('#gRound button[data-r="pre"]').textContent,instr:document.querySelector('.only-goals .instr').textContent,guide:document.querySelector('.only-guide').textContent,ph:$('[data-m="pre_when"]').placeholder}));
+  const g=await p.evaluate(()=>({btn:$('#gRound button[data-r="pre"]').textContent,instr:document.querySelector('.only-goals .instr').textContent,guide:document.querySelector('.only-guide').textContent,ph:(x=>x.getAttribute('placeholder')||x.getAttribute('data-fx2-ph')||'')($('[data-m="pre_when"]'))}));
   ok('1 F223 the Goals pre round is taken at plan sign-off, with Procedures: G2 to G4 ask about what only the plan sets; the open item, G1 and G5 may come earlier',
     /Pre — at plan sign-off/.test(g.btn)&&/pre at plan sign-off, with the Procedures pre round/.test(g.instr)&&/would be answered about a plan that does not exist yet/.test(g.instr)&&/Pre, GoalsAt plan sign-off/.test(g.guide.replace(/\s+/g,' ').replace(/Goals At/,'GoalsAt'))&&/Goals and Procedures at plan sign-off/.test(g.ph),g);
   /* I113 */
