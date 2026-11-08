@@ -295,7 +295,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **taber2017** [taber2017]: Under her existing behavior plan, staff physically escorted an 18-year-old student after aggression (slapping, biting, pushing, hair pulling), and the study counted escorts per month from incident reports. *Part of a package.* Reported: Escorts fell to about 120 per month after staff were trained to give her preferred kinds of attention, a correlational result. Bank: study skipped.
 - **zencius1990b** [zencius1990b]: Each time the man swore in a therapy class, the clinician marked an X on a sheet headed with the word swearing held in front of him and said nothing else; later he was told his count when class ended. *Main procedure.* Reported: Swearing fell from about 5–6 to under 1 per class in all three classes and stayed low when he was told his count at the end of class. Bank: study skipped.
 
-## Tier B: never used (128)
+## Tier B: never used (129)
 
 ### Shock (13)
 
@@ -383,7 +383,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **nord1991** [nord1991]: Of 654 controlled procedures proposed in 459 Minnesota program plans (October 1987 to January 1989) for aggression, self-injury or property destruction, 42 were room time-out. *Main procedure.* Reported: usage data only; no effects on behavior were reported. Bank: study skipped.
 - **sturmey1994** [sturmey1994]: When the man with moderate intellectual disability would not give a no-harm agreement after a suicide threat or gesture, staff took him to a bare infirmary room with a silent staff member and no contact with peers or other staff until he agreed the next day, a median of 25 hours (15 to 64) about once a week. *Part of a package.* Reported: Admissions to a distant hospital unit stopped for 7 months (against 5 admissions totaling 177 days in the 7 months before), the room was used 13 times, and he said he hated it. Bank: kept out of the steps; note flags it; study skipped.
 
-### Restraint (33)
+### Restraint (34)
 
 - **Azrin et al., 1988** [azrin1988]: After each self-injurious act, the trainer blocked it and guided and held the person’s hands in the lap for 2 minutes, extended until 5 seconds of calm, alone or combined with reinforcement of incompatible activities. *Part of a package.* Reported: Alone it lowered self-injury to about 25% of intervals versus 57% under ignoring, and combined with DRI to about 6%, with near-zero levels for up to 48 months under the combined package. Bank: kept out of the steps; note flags it; study skipped.
 - **Birnbrauer (1968)** [birnbrauer1968]: Restraint was also part of the boy's treatment program, as the GB-1 draft notes. *Part of a package.* Bank: study skipped.
@@ -403,6 +403,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Solnick et al. (1977)** [solnick1977]: After each tantrum the teacher held the girl’s self-stimulating body parts (such as her hands and fingers) still for 10 seconds, and in a comparison phase held other body parts still while leaving her free to self-stimulate. *Main procedure.* Reported: Holding the self-stimulating body parts still eliminated tantrums, while the version that left self-stimulation free increased them. Bank: study skipped.
 - **Tiger et al. (2008)** [tiger2008]: The FCT review lists brief manual restraint as a possible punishment add-on when FCT alone is not enough. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Vukelich & Hake (1971)** [vukelich1971]: Dangerous aggression led to restraint in a time-out chair for at least an hour, later screened off, plus scheduled restraint after meals. *Main procedure.* Bank: study skipped.
+- **Wilder et al., 2022** [wilder2022]: For one 5-year-old boy, each instance of toe walking was followed by the therapist placing a hand on his shoulder and pressing gently until his heel touched the ground, added to textured shoe insoles. *Part of a package.* Reported: used five times; not separated from the insoles. Bank: kept out of the steps; note flags it.
 - **blankenship1989** [blankenship1989]: A helmet with a clear face shield was strapped on for five minutes right after each self-injurious act by two women with profound intellectual disability, with praise and edibles on a DRO schedule thinned from 3 to 30 minutes. *Main procedure.* Reported: With the clear shield, self-injury fell to about 7% of baseline for both women, and low rates held over a 6-month maintenance period. Bank: study skipped.
 - **bodfish1992b** [bodfish1992b]: Seventeen of 32 residents had individual plans that used personal restraint for aggression, destruction or self-injury, and the outcome counted incidents that needed such procedures. *Part of a package.* Reported: incidents needing restrictive procedures fell 83% in the leisure hour; the procedures themselves were not evaluated. Bank: study skipped.
 - **calamari1990** [calamari1990]: After aggression she could be put in mechanical restraints or a protective helmet and mitts, and from month 42 restraints were applied sooner after repeated aggression. *Part of a package.* Reported: not separated from the package; the report tied changes in aggression to propranolol dose and heart rate. Bank: study skipped.
@@ -559,6 +560,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Wesolowski, M. D., & Zencius, A. H. (1992). Treatment of aggression in a brain injured adolescent. Behavioral Residential Treatment, 7(3), 205–210.
 - Wesolowski, M. D., Zencius, A., & Burke, W. H. (1993). Effects of feedback and behavior contracting on head trauma persons’ inappropriate sexual behavior. Behavioral Residential Treatment, 8(2), 89–96.
 - White-Blackburn, G., Semb, S., & Semb, G. (1977). The effects of a good-behavior contract on the classroom behaviors of sixth-grade students. Journal of Applied Behavior Analysis, 10(2), 312.
+- Wilder, D. A., Ingram, G., & Hodges, A. C. (2022). Evaluation of shoe inserts to reduce toe walking in young children with autism. Behavioral Interventions, 37(3), 754–765.
 - Winkler, R. C. (1970). Management of chronic psychiatric patients by a token reinforcement system. Journal of Applied Behavior Analysis, 3(1), 47–55.
 - Wulbert, M., & Dries, R. (1977). The relative efficacy of methylphenidate (Ritalin) and behavior-modification techniques in the treatment of a hyperactive child. Journal of Applied Behavior Analysis, 10(1), 21–31.
 - Zeilberger, J., Sampen, S. E., & Sloane, H. N., Jr. (1968). Modification of a child's problem behaviors in the home with the mother as therapist. Journal of Applied Behavior Analysis, 1(1), 47–53.
