@@ -23305,6 +23305,121 @@ window.nbhRec=window.nbhRec||(function(){
   try{ddIncRender();}catch(e){}
 })();
 </script>
+<style id="dd1-v2569-css">
+/* v25.69 (wave 3, research #5) the daily self-check on a staff phone link, and its days on the graphs */
+.dd-staff .st-sc{border:1px solid var(--rule-soft,#dce3e7);border-radius:3px;padding:6px 10px;margin:0 0 8px;background:#fff}
+.dd-staff .st-sc label.st-sc-on{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px;cursor:pointer}
+.dd-staff .st-sc label.st-sc-on input{width:22px;height:22px;margin:0;flex:none}
+.dd-staff .st-sc ol{margin:2px 0 4px 1.4em;padding:0;font-size:13.5px}.dd-staff .st-sc ol li{margin:2px 0}
+.dd-staff .st-sc .hint{margin:2px 0 4px}
+.dd-staff .st-asks{display:block;font-size:12px;color:var(--ink-soft,#5a6a72);margin-top:2px;max-width:34em}
+.dd-staff .st-scd{color:#7a4a00;white-space:nowrap}
+.swatch.dd-sc-sw{background:#E8A33D;opacity:.45}
+.dd-sc-h{margin-top:4px}
+</style>
+<script id="dd1-v2569">
+/* v25.69 (wave 3, research #5; W2-CLASSSTAFF "What other files would need", the BCBA's decision of 11/6) the daily self-check
+   on the staff phone page, carried by this form. Built on the Staff phones panel (v21.85, dd-v2185), by wrapping its functions:
+   - The link. When the case holds the questions, the panel offers "Ask the daily self-check" (ticked) and the link carries
+     k: [{i, n}]: Form TI-1's (integrity.selfCheck) when its interventionist is the person the link is for (names compared up to
+     the first comma, one the start of the other, as TI-1 does), else Form QS-1's (quick.selfCheck); five at most, i as
+     /^[A-Za-z0-9_-]{1,24}$/, n the question's words (120 characters). They are kept on the link (links[i].k), so a QR made again
+     is the same link, and the panel says what the link asks. A link made without them is as it was.
+   - The entry. What the phone sends with a period's data, sc: [{i, n, a}] (a: y yes, n no, x did not come up; five at most), is
+     kept with the entry while it is held and is not placed on the day's row. Once the entry is taken (placed, or held for one
+     of its targets only), the answers are kept in the record as S.staff.self [{id, date, who, code, at, items:[{i, n, a}]}] (the
+     link's person and code, at the entry's made; the last 300), each entry once.
+   - To the case: data.staff.self = [{date, who, code, at, items}] beside links, entries and last. Form TI-1 reads exactly this
+     and compares it with its observations.
+   - The graphs. A school day whose self-check (yes of yes and no, every entry that day) is under the plan's integrity criterion
+     (Form TI-1's, 90% when it sets none) or, while Form TI-1 is not in the case, 80%, is shaded on each line graph, with a
+     legend line ("Self-check under 90%: staff phone") and a line under the graph; when Form TI-1 has found the self-checks
+     running high against what it observed (integrity.selfCal.high), the line says a day not shaded may still be under. The
+     Staff phones log shows each entry's self-check ("self-check 2 of 3 yes").
+   A record that never had a self-check opens, saves and prints exactly as before (nothing new is written without one). */
+(function(){
+"use strict";
+if(typeof stNorm!=="function"||typeof stTake!=="function"||typeof buildChart!=="function")return;
+const IDRX=/^[A-Za-z0-9_-]{1,24}$/,MAXQ=5,KEEP=300;
+const K=s=>String(s==null?"":s).replace(/\s+/g," ").trim().toLowerCase();
+const same=(a,b)=>{a=K(a).replace(/,.*$/,"").trim();b=K(b).replace(/,.*$/,"").trim();return !!a&&!!b&&(a===b||a.indexOf(b)===0||b.indexOf(a)===0);};
+const qClean=L=>{const seen={};return (Array.isArray(L)?L:[]).filter(x=>x&&typeof x==="object"&&IDRX.test(String(x.i||""))&&stS(x.n,120)&&!seen[x.i]&&(seen[x.i]=1)).slice(0,MAXQ).map(x=>({i:String(x.i),n:stS(x.n,120)}));};
+const aClean=L=>{const seen={};return (Array.isArray(L)?L:[]).filter(x=>x&&typeof x==="object"&&IDRX.test(String(x.i||""))&&/^[ynx]$/.test(String(x.a||""))&&!seen[x.i]&&(seen[x.i]=1)).slice(0,MAXQ).map(x=>({i:String(x.i),n:stS(x.n,120),a:String(x.a)}));};
+/* ---------------- the questions the case holds for a person ---------------- */
+function selfQs(who){const f=ddCaseFacts||{},ti=f.integrity&&f.integrity.selfCheck,qs=f.quick&&f.quick.selfCheck;
+  const words=L=>qClean((Array.isArray(L)?L:[]).map(x=>x&&typeof x==="object"?{i:x.i,n:x.d!=null?x.d:x.n}:null));
+  const tq=ti?words(ti.items):[],qq=qs?words(qs.items):[];
+  if(tq.length&&same(ti.who,who))return {src:"TI-1",items:tq,tiWho:stS(ti.who,60)};
+  if(qq.length)return {src:"QS-1",items:qq,tiWho:tq.length?stS(ti.who,60):""};
+  return {src:"",items:[],tiWho:tq.length?stS(ti.who,60):""};}
+let scOn=true;
+/* ---------------- the record: the links keep their questions, the record its answers ---------------- */
+{const n0=stNorm;stNorm=function(x){const o=n0.apply(this,arguments);try{const raw=x&&typeof x==="object"&&!Array.isArray(x)?x:{};
+    const rl=Array.isArray(raw.links)?raw.links:[];o.links.forEach(l=>{const r=rl.find(y=>y&&String(y.code||"")===l.code);const k=r?qClean(r.k):[];if(k.length)l.k=k;});
+    const self=(Array.isArray(raw.self)?raw.self:[]).filter(e=>e&&typeof e==="object"&&/^[a-f0-9]{16,32}$/.test(String(e.id||""))&&stIso(e.date)).map(e=>({id:String(e.id),date:e.date,who:stS(e.who,60),code:stS(e.code,12),at:stS(e.at,30),items:aClean(e.items)})).filter(e=>e.items.length);
+    const seen={},one=self.filter(e=>!seen[e.id]&&(seen[e.id]=1)).slice(-KEEP);if(one.length)o.self=one;}catch(e){}return o;};}
+{const e0=stEntryNorm;stEntryNorm=function(x){const o=e0.apply(this,arguments);try{if(o){const sc=aClean(x&&x.sc);if(sc.length)o.sc=sc;}}catch(e){}return o;};}
+{const p0=stPayload;stPayload=function(l){const p=p0.apply(this,arguments);try{const k=qClean(l&&l.k);if(k.length)p.k=k;}catch(e){}return p;};}
+{const t0=stTake;stTake=function(o){const r=t0.apply(this,arguments);try{const sc=aClean(o&&o.sc);if(!sc.length)return r;const s=stSt();
+    const h=s.held.find(x=>x.id===o.id);if(h)h.sc=sc;
+    if(r&&/^(link|stopped|future)$/.test(r.all||""))return r;   /* held whole: kept with the entry until it is placed */
+    const self=s.self||(s.self=[]);if(self.some(e=>e.id===o.id))return r;
+    const l=s.links.find(x=>x.code===o.c)||null;
+    self.push({id:o.id,date:o.date,who:stS((l&&l.who)||o.w,60),code:stS(o.c,12),at:stS(o.made,30),items:sc});if(self.length>KEEP)self.splice(0,self.length-KEEP);}catch(e){}return r;};}
+{const m0=stMakeLink;stMakeLink=async function(who,ids,sets,opt){const r=await m0.apply(this,arguments);try{if(!r||!r.link)return r;
+    const on=opt&&typeof opt.self==="boolean"?opt.self:scOn,q=selfQs(who);
+    if(on&&q.items.length){r.link.k=q.items.map(x=>({i:x.i,n:x.n}));r.url=stUrlOf(r.link);gsEdited();stPaint();}}catch(e){}return r;};}
+/* ---------------- the day's self-check ---------------- */
+function scDays(){const s=S.staff,L=s&&Array.isArray(s.self)?s.self:[],m=new Map();
+  L.forEach(e=>{const d=m.get(e.date)||{date:e.date,y:0,n:0,x:0,periods:0};d.periods++;e.items.forEach(a=>{if(a.a==="y")d.y++;else if(a.a==="n")d.n++;else d.x++;});m.set(e.date,d);});
+  m.forEach(d=>{d.share=d.y+d.n?100*d.y/(d.y+d.n):null;});return m;}
+function scThr(){const ti=(ddCaseFacts||{}).integrity;if(ti&&typeof ti==="object"){const c=Number(ti.criterion);return c>0&&c<=100?c:90;}return 80;}
+const scHigh=()=>{const ti=(ddCaseFacts||{}).integrity;return !!(ti&&ti.selfCal&&ti.selfCal.high);};
+const scLine=e=>{const y=e.items.filter(a=>a.a==="y").length,n=e.items.filter(a=>a.a!=="x").length,x=e.items.length-n;return "self-check "+(n?y+" of "+n+" yes":"no yes-or-no answer")+(x?" ("+x+" did not come up)":"");};
+/* ---------------- the graphs: the days under the criterion, shaded ---------------- */
+{const bc=buildChart;buildChart=function(beh,rows){const svg=bc.apply(this,arguments);try{
+  const D=scDays();if(!svg||!D.size||!Array.isArray(rows))return svg;
+  const m=/data-plot="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg);if(!m)return svg;
+  const l=+m[1],t=+m[2],iw=+m[3],ih=+m[4],xEnd=ddPlotEnd(rows),X=i=>l+(xEnd<=0?iw/2:i*iw/xEnd),dx=xEnd>0?iw/xEnd:Math.min(iw,40),thr=scThr();
+  let g="",n=0;const on=new Set();
+  rows.forEach((r,i)=>{if(i>xEnd||!r||!r.date)return;const d=D.get(r.date);if(!d)return;on.add(r.date);if(d.share==null||d.share>=thr)return;
+    const x0=Math.max(l,X(i)-dx/2),x1=Math.min(l+iw,X(i)+dx/2);if(x1-x0<=0)return;n++;
+    g+=`<rect class="dd-sc-day" data-sc-day="${esc(r.date)}" x="${x0.toFixed(1)}" y="${t.toFixed(1)}" width="${(x1-x0).toFixed(1)}" height="${ih.toFixed(1)}" fill="#E8A33D" opacity="0.22"><title>${esc(shortDay(r.date))}: the staff phone's self-check, ${d.y} of ${d.y+d.n} yes (${Math.round(d.share)}%), under ${thr}%<\/title><\/rect>`;});
+  ddDrawn.sc={n,thr,days:D.size,off:[...D.keys()].filter(k=>!on.has(k)).length,high:scHigh()};if(!g)return svg;
+  /* behind the data: after the plot's white ground and the sections' grey bands */
+  let at=svg.lastIndexOf('class="dd-shade"');at=at>=0?svg.indexOf("/>",at):svg.indexOf('fill="#fff"/>');if(at<0)return svg;at=svg.indexOf("/>",at)+2;
+  return svg.slice(0,at)+`<g class="dd-sc-s">${g}<\/g>`+svg.slice(at);}catch(e){return svg;}};}
+{const le=ddLegendExtra;ddLegendExtra=function(d){const h=le.apply(this,arguments);return h+(d&&d.sc&&d.sc.n?`<span><span class="swatch dd-sc-sw"><\/span>Self-check under ${d.sc.thr}%: staff phone<\/span>`:"");};}
+{const cl=ddClipHtml;ddClipHtml=function(d){const h=cl.apply(this,arguments),x=d&&d.sc;if(!x||!x.n)return h;
+  const why=(ddCaseFacts||{}).integrity?`the plan's integrity criterion, Form TI-1`:`while Form TI-1 is not in the case`;
+  return h+`<p class="hint dd-sc-h">Shaded: ${x.n} day${x.n===1?"":"s"} whose self-check on the staff phone (Did I do it?) was under ${x.thr}% yes (${why}), counting yes of yes and no in every entry that day. The self-check is what the adult reports; Form TI-1's observations stay the measure.${x.high?" Form TI-1 found the self-checks running high against what it observed, so a day not shaded may still be under.":""}<\/p>`;};}
+/* ---------------- the panel ---------------- */
+function scBox(p){let b=p.querySelector("#stSc");if(b)return b;const act=p.querySelector(".st-make .dd-actions");if(!act)return null;
+  b=document.createElement("div");b.className="st-sc";b.id="stSc";act.parentNode.insertBefore(b,act);
+  b.addEventListener("change",e=>{if(e.target&&e.target.id==="stScOn"){scOn=!!e.target.checked;scPaint();}});
+  const w=p.querySelector("#stWho");if(w)w.addEventListener("input",()=>scPaint());
+  const mk=p.querySelector("#stMake");if(mk)mk.addEventListener("click",()=>setTimeout(scPaint,400));return b;}
+function scPaint(){const p=document.getElementById("ddStaff");if(!p)return;const b=scBox(p);if(!b)return;const w=p.querySelector("#stWho"),who=w?w.value:"",q=selfQs(who);
+  if(!q.items.length){b.hidden=!q.tiWho;b.innerHTML=q.tiWho?`<p class="hint">Form TI-1 holds a daily self-check for <b>${esc(q.tiWho)}</b>: a link for that person asks it. Type their name under Who the link is for.</p>`:"";return;}
+  b.hidden=false;
+  b.innerHTML=`<label class="st-sc-on"><input type="checkbox" id="stScOn"${scOn?" checked":""}> Ask the daily self-check (Did I do it?)</label>`+
+    `<p class="hint">After each period the phone asks ${q.items.length===1?"this":"these"}, from Form ${esc(q.src)}${q.src==="TI-1"?" (the steps for "+esc(q.tiWho)+")":q.tiWho?" (Form TI-1’s are for "+esc(q.tiWho)+")":""}:</p><ol>${q.items.map(x=>`<li>${esc(x.n)}</li>`).join("")}</ol>`;}
+{const sp=stPaint;stPaint=function(){const r=sp.apply(this,arguments);try{const p=document.getElementById("ddStaff");if(!p)return r;scPaint();const s=S.staff;if(!s||!Array.isArray(s.links))return r;
+    p.querySelectorAll("#stLinks tr[data-code]").forEach(tr=>{const l=s.links.find(x=>x.code===tr.dataset.code),td=tr.children[1];if(!l||!td||!(l.k||[]).length)return;
+      td.insertAdjacentHTML("beforeend",`<span class="st-asks">Asks the self-check: ${l.k.map((x,i)=>(i+1)+". "+esc(x.n)).join("; ")}</span>`);});
+    const R=(s.log||[]).slice(-40).reverse(),self=Array.isArray(s.self)?s.self:[];
+    p.querySelectorAll("#stRecent tbody tr").forEach((tr,i)=>{const e=R[i],x=e&&self.find(y=>y.id===e.id),td=tr.children[2];if(x&&td)td.insertAdjacentHTML("beforeend",` <span class="st-scd">· ${esc(scLine(x))}</span>`);});}catch(e){}return r;};}
+/* ---------------- the case ---------------- */
+{const fo=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=fo?fo.apply(this,arguments):null;}catch(e){o=null;}
+  try{const s=S.staff,L=s&&Array.isArray(s.self)?s.self:[];if(L.length&&o&&o.data&&o.data.staff)o.data.staff.self=L.slice(-KEEP).map(e=>({date:e.date,who:e.who,code:e.code,at:e.at,items:e.items.map(a=>({i:a.i,n:a.n,a:a.a}))}));}catch(e){}return o;};}
+let scSig=null;
+{const fi=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=fi?fi.apply(this,arguments):null;try{scPaint();
+    const sig=scThr()+"|"+scHigh();if(scSig!==null&&sig!==scSig&&S.staff&&(S.staff.self||[]).length&&typeof renderResults==="function")setTimeout(()=>{try{renderResults();}catch(e){}},0);scSig=sig;}catch(e){}return r;};}
+window.__dd2569={selfQs,days:scDays,thr:scThr};   /* for the workstation's checks */
+if(window.__ddStaff)window.__ddStaff.selfQs=selfQs;
+try{stPaint();}catch(e){}
+})();
+</script>
 <script id="fx2-v2492-js">
 /* v24.92 Forms DM-1, IC-1 and RR-1 on screen (the 10/28 design review); v24.95 the six forms refined from the BCBA's
    iPad screenshots (boxes in line across a row, an example gone once its box is filled, the toolbar on one row). It arranges what the sheets already hold:
