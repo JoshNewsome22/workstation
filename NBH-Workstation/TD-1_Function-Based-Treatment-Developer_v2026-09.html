@@ -1469,9 +1469,12 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .td46-pill{min-hei
 /* "Set the first interval from baseline" on a DRO card: its minutes and counts at 16 px (TD-1 drew them at 13 px, and
    Safari zooms into a box under 16 px) */
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh #compWrap .card .td-iv input{font-size:16px!important}
-/* the progress log (a data grid of 14 columns, it draws the graph) scrolls sideways in its own frame under 1000 px:
-   on an iPad upright at 820 px it ran 10 px past the screen (before the layout too) */
-@media (max-width:1000px){html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table#monTbl{display:block;overflow-x:auto;max-width:100%}}
+/* the progress log (a data grid of 14 columns, it draws the graph) on a touch screen and under 1000 px: its dates whole
+   at 16 px ("9/22/2026" was cut to "9/22/20" in its 74 px column, before the layout too), and the grid scrolls sideways
+   in its own frame where that makes it wider than the sheet (on an iPad upright at 820 px it ran 10 px past the screen,
+   before the layout too) */
+@media (pointer:coarse), (max-width:1000px){html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table#monTbl{display:block;overflow-x:auto;max-width:100%}}
+@media (pointer:coarse), (max-width:1000px){html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh #monTbl input[name$=".d"]{min-width:104px}}
 /* links drawn small that take a tap 44 px tall, as the layout's "Show the full introduction" (nothing else that takes a
    tap is that near): a Build card's "Studies this card is based on", the Final plan's Change, the sheet's own
    introduction */
