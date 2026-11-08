@@ -71,7 +71,10 @@ def loads(text):
     out += [m.group(2) for m in re.finditer(r'\b(?:fetch|loadScript)\(\s*(["\'])([^"\']+)\1', text)]
     # v25.68: TD-1's procedure videos are named in its VIDS list (pv('title','nbh-td1-video-….js',…)) and loaded from
     # that name, so no loadScript('…') holds them; the offline copy must still save every one
+    # v25.69: the list is nbh-videos.js now (TD-1 carries a copy of it, so the names are still in the page), and each video
+    # has its picture beside it (nbh-td1-poster-….jpg), which the video library shows
     out += [m.group(2) for m in re.finditer(r'(["\'])(nbh-td1-video-[A-Za-z0-9-]+\.js)\1', text)]
+    out += [m.group(2) for m in re.finditer(r'(["\'])(nbh-td1-poster-[A-Za-z0-9-]+\.jpg)\1', text)]
     seen, keep = set(), []
     for x in out:
         x = x.split('?')[0].split('#')[0]
@@ -96,7 +99,8 @@ def check_page(name, s):
     for word in ('_trfq', '_trfd', 'wsimg.com'):
         if word in s:
             fail('%s names %s: the worker cuts the host\'s snippet by that name, so no page of the workstation may' % (name, word))
-    if name != 'respond.html' and s.count(SAVE_TAG) != 1:
+    # v25.69 the video library (videos.html) saves no file, as respond.html saves none: neither carries the save block
+    if name not in ('respond.html', 'videos.html') and s.count(SAVE_TAG) != 1:
         fail('%s holds %d copies of %s, not one: run python3 tools/blocks/patch-pwa.py on the folder'
              % (name, s.count(SAVE_TAG), SAVE_TAG))
 
@@ -128,7 +132,9 @@ def files_of(folder):
     if '<script id="nbh-pwa">' not in idx:
         fail('index.html has no <script id="nbh-pwa"> part')
     out = ['index.html'] + forms
-    pages = ['index.html'] + forms + (['respond.html'] if os.path.isfile(os.path.join(folder, 'respond.html')) else [])
+    # v25.69 the video library (videos.html, the workstation's Videos) is a page of the folder like respond.html
+    extra = [x for x in ('respond.html', 'videos.html') if os.path.isfile(os.path.join(folder, x))]
+    pages = ['index.html'] + forms + extra
     for p in pages:
         s = read(os.path.join(folder, p))
         check_page(p, s)
@@ -138,10 +144,17 @@ def files_of(folder):
             if x.endswith('.html') or x in out:
                 continue
             out.append(x)
+    # v25.69 the videos' list names every video and its picture: what it names is saved too (TD-1's copy names them already)
+    if 'nbh-videos.js' in out and os.path.isfile(os.path.join(folder, 'nbh-videos.js')):
+        out += [x for x in loads(read(os.path.join(folder, 'nbh-videos.js'))) if not x.endswith('.html') and x not in out]
     if 'respond.html' in pages:
         if 'nbh-respond.js' not in read(os.path.join(folder, 'respond.html')):
             fail('respond.html does not name nbh-respond.js')
         out.append('respond.html')
+    if 'videos.html' in pages:
+        if 'nbh-videos.js' not in read(os.path.join(folder, 'videos.html')):
+            fail('videos.html does not name nbh-videos.js')
+        out.append('videos.html')
     try:
         man = json.loads(read(os.path.join(folder, 'manifest.json')))
     except (OSError, ValueError) as e:
