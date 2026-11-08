@@ -148,7 +148,10 @@ const pdfText=f=>cp.execFileSync('python3',['-c','import pymupdf,sys;d=pymupdf.o
   await p.emulateMedia({media:'print'});await p.pdf({path:path.join(OUT,'sheets.pdf'),printBackground:true,preferCSSPageSize:true});await p.emulateMedia({media:'screen'});
   await p.evaluate(()=>window.dispatchEvent(new Event('afterprint')));
   const pt=pdfText(path.join(OUT,'sheets.pdf'));const pages=+pt.split('\n')[0];
-  ok('35 F373 Print the home sheets: the page header and footer are blanked, so the family\'s copy has no "Confidential student record ... behavior file", no student ID and no page numbers',/@bottom-left\{content:none\}/.test(pst.style)&&/@top-left\{content:none\}/.test(pst.style)&&pst.cls&&!/Confidential student record|Newsome Behavioral Health|ID SIM-000|Page 1 of/.test(pt)&&/Home Tally Sheet/.test(pt),pst.style);
+  /* v25.69 print group M12 (approved by the BCBA): the home sheets print with their own head (the child's first name and the
+     week), a home footer (the BCBA and the phone) and "Page N of M"; still never the record's confidential line, the
+     practice's record header or the student ID */
+  ok('35 F373 Print the home sheets: the record\'s header and footer are replaced by the home ones, so the family\'s copy has no "Confidential student record ... behavior file" and no student ID; it carries the first name and week, the home footer and its own page numbers',/@top-left\{content:"[^"]*home sheets[^"]*Week of/.test(pst.style)&&/@bottom-left\{content:"[^"]*Questions:/.test(pst.style)&&/counter\(pages\)/.test(pst.style)&&pst.cls&&!/Confidential student record|Newsome Behavioral Health|ID SIM-000/.test(pt)&&/Home Tally Sheet/.test(pt),pst.style);
   ok('36 I189 the marks a week (231: 105 on the tally sheet, 126 on the checklist), the warning above 70, and the pages, which match the printed copy ('+pages+')',/Each week the sheets ask the family for 231 marks: 105 on the tally sheet \(3 behaviors × 5 routines × 7 days\), 126 on the checklist \(18 steps under the routines × 7 days\)/.test(cost)&&/more than 70 marks a week \(a working convention/.test(cost)&&cost.indexOf('They print on about '+pages+' pages')>0&&/^Each week/.test(await txt(p,'#hdCost')),cost);
   await p.close();
 
