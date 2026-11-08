@@ -40,9 +40,9 @@ const VID={
  rird_motor:{f:'nbh-td1-video-rird-motor.js',src:['rird-motor-directions-school','rird-one-motor-demand'],after:'Cassella et al. (2011) and Saini et al. (2015)',dur:91.4},
  rird_pica:{f:'nbh-td1-video-rird-pica.js',src:['rird-block-pica-on-touch','rird-pica-block-redirect-food','rird-pica-block-redirect-discard'],after:'McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025)',dur:83.2},
  dra_attention:{f:'nbh-td1-video-dra-attention.js',src:['dra-teacher-attention-study'],after:'Hall, Lund & Jackson (1968)',dur:138.5},
- dra_escape:{f:'nbh-td1-video-dra-escape.js',src:['dra-break-plus-favorites-no-ext'],after:'Briggs et al. (2019)',dur:142.3},
- dra_tangible:{f:'nbh-td1-video-dra-tangible.js',src:['dra-coupons-end-preferred'],after:'Wilder et al. (2007a)',dur:128.2},
- dra_automatic:{f:'nbh-td1-video-dra-automatic.js',src:['dra-earn-stereotypy-access-leisure','dra-stereotypy-access-play'],after:'Potter et al. (2013) and Hanley et al. (2000)',dur:141.4}};
+ dra_escape:{f:'nbh-td1-video-dra-escape.js',src:['dra-break-plus-favorites-no-ext'],after:'Briggs et al. (2019)',dur:142.2},
+ dra_tangible:{f:'nbh-td1-video-dra-tangible.js',src:['dra-coupons-end-preferred'],after:'Wilder et al. (2007a)',dur:135.6},
+ dra_automatic:{f:'nbh-td1-video-dra-automatic.js',src:['dra-earn-stereotypy-access-leisure','dra-stereotypy-access-play'],after:'Potter et al. (2013) and Hanley et al. (2000)',dur:137.3}};
 /* the closest video for every card, read by hand from its fields (lab, params, steps, fn) */
 const EXP={
  dro_class:'dro-30min-engagement-medication dro-calm-transition dro-classwide-star-board dro-cough-mealtime-praise dro-evening-call dro-free-time-staying-seated dro-injury-check-levels dro-peer-play-prompts-timeout dro-presession-rule dro-recess-safety-prize dro-whole-interval-classroom dro-whole-then-momentary',
