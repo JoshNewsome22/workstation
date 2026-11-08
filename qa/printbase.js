@@ -66,7 +66,7 @@ async function pdf(page,file){
   await page.waitForFunction(()=>$('#openCase').textContent==='Open case',null,{timeout:180000});
   await L.sleep(4000);
   await page.evaluate(()=>{ALL.forEach(([id])=>state.ticked[id]=true);renderRail();});
-  const [popup]=await Promise.all([page.waitForEvent('popup'),page.click('#masterPrint')]);
+  const [popup]=await Promise.all([page.waitForEvent('popup'),(async()=>{await page.click('#masterPrint');await L.packetChoose(page);})()]);   /* v25.69 (B2) IEP team and file */
   await popup.evaluate(()=>{window.print=function(){};}).catch(()=>{});
   await popup.waitForFunction(()=>window.__nbhFitted!==undefined&&document.querySelector('.mp-sec'),null,{timeout:300000});
   await L.sleep(1500);

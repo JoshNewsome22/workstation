@@ -979,7 +979,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     /* the master print: built into the window inside the app, then printed from it */
     await openIn(up,'PD-1');await sleep(600);
     await up.evaluate(()=>{state.ticked={'PD-1':true};});
-    await up.evaluate(()=>$('#masterPrint').click());
+    await up.evaluate(()=>$('#masterPrint').click());await require(__dirname+'/lib.js').packetChoose(up);   /* v25.69 (B2) IEP team and file */
     await up.waitForFunction(()=>{const o=document.querySelector('[id^="nbhInApp"]'),f=o&&o.querySelector('iframe');try{return !!(f&&f.contentDocument&&f.contentDocument.body&&/PD-1|Performance Diagnostic/.test(f.contentDocument.body.innerText));}catch(e){return false;}},null,{timeout:40000}).catch(()=>{});
     await sleep(4500);
     const o2=await overlay();

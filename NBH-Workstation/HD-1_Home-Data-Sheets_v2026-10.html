@@ -3293,6 +3293,54 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
  window.__hdSched=()=>({H,lang});
 })();
 </script>
+<style id="hd1-v2569-css">
+/* v25.69 (design review M12) Print the home sheets: the primary button on the Home sheets sheet */
+.hd-printrow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:8px 0 12px}
+.hd-printrow .hint{flex:1 1 260px;margin:0}
+</style>
+<script id="hd1-v2569">
+/* v25.69 (design review M12) the family's sheets print as a set of their own. "Print the home sheets" is the primary button on
+   the Home sheets sheet (the toolbar's button does the same): the sheets alone, numbered on their own ("Page 1 of 9"), each
+   page headed with the child's first name and the week, and at its foot a home footer ("Please bring these back on Monday.
+   Questions: [the BCBA, the phone]") in place of the record's ("Confidential student record. Retain in the student's
+   behavior file.", the student's full name and ID). The BCBA's name is the case's (the bar's, through Setup); the phone is the
+   one the workstation's Staff directory holds for that name, else the one in "Who to call". The form's own Print keeps the
+   record's header and footer on every page, the BCBA's pages included. The sheets name the child by first name. */
+(function(){
+ const T=s=>String(s==null?'':s).trim();
+ window.hdFirst=function(){const n=T(S.meta.nick);if(n)return n;const c=T(S.meta.client).replace(/^simulated\s*[\u2013\u2014-]\s*/i,'');
+   return /,/.test(c)?T(c.split(',')[1]).split(/\s+/)[0]:(c.split(/\s+/)[0]||'');};
+ kid=function(){return window.hdFirst();};
+ const key=s=>T(s).replace(/\(simulated\)/i,'').split(',')[0].trim().toLowerCase().replace(/\s+/g,' ');
+ function contact(){const name=T(S.meta.bcba).split(',')[0].trim()||T(S.meta.call).split(/[,(]/)[0].trim();let phone='';
+   try{const j=JSON.parse(localStorage.getItem('nbh.people')||'null'),L=(j&&j.list)||[];const m=L.find(x=>x&&x.phone&&key(name)&&key(x.name)===key(name));if(m)phone=T(m.phone);}catch(e){}
+   if(!phone){const m=/(\(?\d{3}\)?[\s.-]?)?\d{3}[\s.-]\d{4}/.exec(T(S.meta.call));if(m)phone=m[0];}
+   return {name,phone};}
+ window.hdContact=contact;
+ const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+ function back(){const f=T(S.meta.freq),ds=DAYS.filter(d=>new RegExp('\\b'+d+'\\b','i').test(f));
+   const when=/every school day/i.test(f)?'each school day':ds.length?'on '+ds.join(' and '):'on Monday';
+   return (/^A photo/.test(T(S.meta.ret_how))?'Please send a photo of these ':'Please bring these back ')+when+'.';}
+ window.hdHomeFoot=function(){const c=contact();return back()+(c.name||c.phone?' Questions: '+[c.name,c.phone].filter(Boolean).join(', ')+'.':'');};
+ window.hdHomeHead=function(){const f=window.hdFirst(),w=T(S.meta.sh_week);return (f?f+'\u2019s':'Your child\u2019s')+' home sheets'+(w?'  \u00b7  Week of '+w:'');};
+ const q=t=>'"'+String(t).replace(/[\\"]/g,'\\$&').replace(/[\r\n]+/g,' ')+'"',F='font-family:"Inter","Segoe UI",Arial,sans-serif;color:#24313c';
+ window.hdHomePage=function(){return '@media print{@page{size:letter portrait;margin:0.5in;@top-left{content:'+q(hdHomeHead())+';'+F+';font-size:10pt}@top-center{content:none}@top-right{content:none}'+
+   '@bottom-left{content:'+q(hdHomeFoot())+';'+F+';font-size:9.5pt}@bottom-center{content:none}@bottom-right{content:"Page " counter(page) " of " counter(pages);'+F+';font-size:9.5pt}}}';};
+ window.hdHomePrint=function(){if(!S.bh.some(b=>b.name)||!document.querySelector('#sheetOut .hs')){alert('Name a behavior and tick a sheet on the Setup page first; there is nothing to print yet.');return;}
+   document.body.classList.add('hd-sheets-only');
+   const st=document.createElement('style');st.id='hdSheetPage';st.textContent=hdHomePage();document.head.appendChild(st);
+   /* last in the page: after the student's name and the page numbers the print adds as it starts */
+   const last=()=>{st.textContent=hdHomePage();document.head.appendChild(st);};
+   const off=()=>{document.body.classList.remove('hd-sheets-only');st.remove();window.removeEventListener('afterprint',off);window.removeEventListener('beforeprint',last);};
+   window.addEventListener('beforeprint',last);window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);};
+ const tb=document.getElementById('sheetPrintBtn');if(tb){const nb=tb.cloneNode(true);tb.replaceWith(nb);nb.addEventListener('click',()=>hdHomePrint());}
+ const cost=document.getElementById('hdCostS'),out=document.getElementById('sheetOut'),at=cost||out;
+ if(at&&!document.getElementById('hdHomePrintBtn')){const row=document.createElement('div');row.className='hd-printrow noprint';
+   row.innerHTML='<button type="button" class="nbh-btn nbh-btn-primary" id="hdHomePrintBtn">Print the home sheets</button><span class="hint">These pages alone, numbered on their own, headed with the child&rsquo;s first name and the week, and with when to bring them back and whom to call at the foot of each page.</span>';
+   at.parentNode.insertBefore(row,at);row.querySelector('button').addEventListener('click',()=>hdHomePrint());}
+ try{renderSheets();}catch(e){}
+})();
+</script>
 <style id="v2565-hd1-css">
 /* v25.65 (FEED-M2, CARE-M5, M6, M7, L4) */
 .v65-tbl input,.v65-tbl select{width:100%;box-sizing:border-box;font:inherit;font-size:12.5px}

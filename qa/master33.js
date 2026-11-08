@@ -30,7 +30,7 @@ const FORMS=()=>L.forms().filter(f=>f.id!=='RS-1'&&f.id!=='PD-1');
   const restored=await page.evaluate(()=>new Set(Object.keys(state.frames).concat(Object.keys(state.pending))).size);   /* a form loaded and not filled yet is in both */
   await page.evaluate(()=>{ALL.forEach(([id])=>{if(id!=='RS-1'&&id!=='PD-1')state.ticked[id]=true;});renderRail();});
   await page.evaluate(()=>{wsUI.confirm=async()=>true;});   /* v21.78 the shell's questions (forms not loaded yet: include them) answered yes */
-  const [popup]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.evaluate(()=>$('#masterPrint').click())]);
+  const [popup]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),(async()=>{await page.evaluate(()=>$('#masterPrint').click());await L.packetChoose(page);})()]);
   await popup.evaluate(()=>{window.print=function(){};}).catch(()=>{});
   await popup.waitForFunction(()=>window.__nbhFitted!==undefined&&document.querySelector('.mp-sec'),null,{timeout:300000}); await L.sleep(1500);
   const secs=await popup.evaluate(()=>Array.from(document.querySelectorAll('.mp-sec:not(.mp-app)')).length);   /* v21.96 the references appendix (.mp-app) is counted apart */

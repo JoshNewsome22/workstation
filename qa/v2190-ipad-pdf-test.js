@@ -29,7 +29,7 @@ async function safariLike(bytes){const d=await P.PDFDocument.load(bytes);const c
     const file=await page.evaluate(id=>ALL.find(f=>f[0]===id)[2],id);const fr=page.frames().find(f=>f.url().indexOf(encodeURI(file))>=0||f.url().indexOf(file)>=0);
     await fr.evaluate(()=>{window.confirm=()=>true;try{nbhUI.confirm=async()=>true;}catch(e){}});try{await L.loadSim(fr);}catch(e){}await L.sleep(700);}
   await page.evaluate(ids=>{Object.keys(state.ticked||{}).forEach(k=>state.ticked[k]=false);ids.forEach(id=>state.ticked[id]=true);renderRail();},FORMS);
-  const [pop]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.evaluate(()=>$('#masterPrint').click())]);
+  const [pop]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),(async()=>{await page.evaluate(()=>$('#masterPrint').click());await L.packetChoose(page);})()]);   /* v25.69 (B2) */
   await pop.evaluate(()=>{window.print=function(){};}).catch(()=>{});
   await pop.waitForFunction(()=>window.__nbhFitted!==undefined&&document.querySelector('.mp-sec'),null,{timeout:180000});await L.sleep(1200);
   const lab=await pop.evaluate(()=>({cover:document.querySelector('.mp-cover').dataset.mk,secs:[...document.querySelectorAll('.mp-sec')].map(s=>s.dataset.mk),toc:[...document.querySelectorAll('.mp-cover li')].map(l=>l.dataset.mk),
