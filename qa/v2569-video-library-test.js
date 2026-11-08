@@ -147,7 +147,7 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
    await sleep(300);
    const st=await p.evaluate(()=>JSON.parse(localStorage.getItem('nbh.videos.v1')||'null'));
    const it=st&&st.items&&st.items.dro_tokens;
-   ok('E '+E+' the second it stopped is kept (nbh.videos.v1: the key, the second, the length, when; nothing else)',!!it&&it.t>=30&&it.t<=34&&Math.abs(it.d-107)<=1&&!it.w&&Object.keys(st.items).every(k=>!!BY[k])&&Object.keys(it).sort().join()==='at,d,t,w',st);
+   ok('E '+E+' the second it stopped is kept (nbh.videos.v1: the key, the second, the length, when; nothing else)',!!it&&it.t>=30&&it.t<=34&&Math.abs(it.d-BY.dro_tokens.dur)<=1&&!it.w&&Object.keys(st.items).every(k=>!!BY[k])&&Object.keys(it).sort().join()==='at,d,t,w',st);
    await p.goto(U+'videos.html');await p.waitForSelector('.vl-card');await sleep(300);
    const c=await p.evaluate(()=>{const s=document.getElementById('vlCont');if(!s)return null;const c=s.querySelector('.vl-card');const bar=c&&c.querySelector('.vl-pbar i');
     return {keys:[...s.querySelectorAll('.vl-card')].map(x=>x.dataset.key),bar:bar?parseFloat(bar.style.width):0,st:(document.querySelector('#vlList .vl-fam .vl-card[data-key="dro_tokens"] .vl-st')||{}).textContent,first:document.querySelector('#vlList section').id};});
