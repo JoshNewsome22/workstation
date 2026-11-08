@@ -27,17 +27,17 @@ const bsrc=fs.readFileSync(path.join(DIR,'nbh-td1-bank.js'),'utf8');const bctx={
 const CODES=['DRO','NCR','NCE','A_NCA','RIRD'];const CARDS=BANK.protocols.filter(p=>CODES.includes(p.code));
 /* the eleven videos: file, the cards each was made from, its studies, its length (s) */
 const VID={
- dro_resetting:{f:'nbh-td1-video-dro-resetting.js',src:['dro-break-after-calm-interval'],after:'Kodak et al. (2003)',dur:127.8},
- dro_class:{f:'nbh-td1-video-dro-class.js',src:['dro-whole-interval-classroom','dro-whole-then-momentary'],after:'Repp et al. (1983) and Barton et al. (1986)',dur:134.3},
- dro_momentary:{f:'nbh-td1-video-dro-momentary.js',src:['dro-unsignaled-momentary','dro-variable-momentary'],after:'Hammond et al. (2011) and Lindberg et al. (1999)',dur:127.1},
- dro_tokens:{f:'nbh-td1-video-dro-tokens.js',src:['dro-self-monitored-timer','dro-selfmanage-timer-tokens'],after:'Tiger et al. (2009) and Tereshko et al. (2021)',dur:106.5},
- ncr_attention:{f:'nbh-td1-video-ncr-attention.js',src:['ncr-attention-ft1-after-school','ncr-ft-attention-classroom'],after:'Noel & Getch (2016) and Rasmussen & O’Neill (2006)',dur:85.4},
- ncr_items:{f:'nbh-td1-video-ncr-items.js',src:['ncr-latency-based-tangible','ncr-signaled-timer-return','ncr-thin-first-then-requests'],after:'Lalli et al. (1997), Gouboth et al. (2007) and Goh et al. (2000)',dur:94.1},
- ncr_work:{f:'nbh-td1-video-ncr-work.js',src:['ncr-vt-food-praise-demands','nce-fixed-time-breaks-notes'],after:'Lomas et al. (2010) and Waller & Higbee (2010)',dur:83.4},
- ncr_between:{f:'nbh-td1-video-ncr-between.js',src:['ncr-presession-item-access','ncr-signaled-thinning-alternatives'],after:'Rispoli et al. (2011) and Slocum et al. (2018)',dur:85.0},
- rird_vocal:{f:'nbh-td1-video-rird-vocal.js',src:['rird-vocal-stereotypy-demands','rird-vocal-questions','rird-one-question-vocal-stereotypy'],after:'Ahearn et al. (2007), Ahrens et al. (2011) and Toper-Korkmaz et al. (2018)',dur:97.2},
- rird_motor:{f:'nbh-td1-video-rird-motor.js',src:['rird-motor-directions-school','rird-one-motor-demand'],after:'Cassella et al. (2011) and Saini et al. (2015)',dur:84.7},
- rird_pica:{f:'nbh-td1-video-rird-pica.js',src:['rird-block-pica-on-touch','rird-pica-block-redirect-food','rird-pica-block-redirect-discard'],after:'McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025)',dur:79.4}};
+ dro_resetting:{f:'nbh-td1-video-dro-resetting.js',src:['dro-break-after-calm-interval'],after:'Kodak et al. (2003)',dur:135.3},
+ dro_class:{f:'nbh-td1-video-dro-class.js',src:['dro-whole-interval-classroom','dro-whole-then-momentary'],after:'Repp et al. (1983) and Barton et al. (1986)',dur:143.6},
+ dro_momentary:{f:'nbh-td1-video-dro-momentary.js',src:['dro-unsignaled-momentary','dro-variable-momentary'],after:'Hammond et al. (2011) and Lindberg et al. (1999)',dur:135.4},
+ dro_tokens:{f:'nbh-td1-video-dro-tokens.js',src:['dro-self-monitored-timer','dro-selfmanage-timer-tokens'],after:'Tiger et al. (2009) and Tereshko et al. (2021)',dur:113.0},
+ ncr_attention:{f:'nbh-td1-video-ncr-attention.js',src:['ncr-attention-ft1-after-school','ncr-ft-attention-classroom'],after:'Noel & Getch (2016) and Rasmussen & O’Neill (2006)',dur:89.4},
+ ncr_items:{f:'nbh-td1-video-ncr-items.js',src:['ncr-latency-based-tangible','ncr-signaled-timer-return','ncr-thin-first-then-requests'],after:'Lalli et al. (1997), Gouboth et al. (2007) and Goh et al. (2000)',dur:98.6},
+ ncr_work:{f:'nbh-td1-video-ncr-work.js',src:['ncr-vt-food-praise-demands','nce-fixed-time-breaks-notes'],after:'Lomas et al. (2010) and Waller & Higbee (2010)',dur:87.9},
+ ncr_between:{f:'nbh-td1-video-ncr-between.js',src:['ncr-presession-item-access','ncr-signaled-thinning-alternatives'],after:'Rispoli et al. (2011) and Slocum et al. (2018)',dur:88.5},
+ rird_vocal:{f:'nbh-td1-video-rird-vocal.js',src:['rird-vocal-stereotypy-demands','rird-vocal-questions','rird-one-question-vocal-stereotypy'],after:'Ahearn et al. (2007), Ahrens et al. (2011) and Toper-Korkmaz et al. (2018)',dur:102.8},
+ rird_motor:{f:'nbh-td1-video-rird-motor.js',src:['rird-motor-directions-school','rird-one-motor-demand'],after:'Cassella et al. (2011) and Saini et al. (2015)',dur:91.4},
+ rird_pica:{f:'nbh-td1-video-rird-pica.js',src:['rird-block-pica-on-touch','rird-pica-block-redirect-food','rird-pica-block-redirect-discard'],after:'McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025)',dur:83.2}};
 /* the closest video for every card, read by hand from its fields (lab, params, steps, fn) */
 const EXP={
  dro_class:'dro-30min-engagement-medication dro-calm-transition dro-classwide-star-board dro-cough-mealtime-praise dro-evening-call dro-free-time-staying-seated dro-injury-check-levels dro-peer-play-prompts-timeout dro-presession-rule dro-recess-safety-prize dro-whole-interval-classroom dro-whole-then-momentary',
