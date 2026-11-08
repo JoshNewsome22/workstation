@@ -894,12 +894,14 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh > .bar.nbh-band:fi
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .bar.nbh-band,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .bar.nbh-band *,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh h2.nbh-band,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh h2.nbh-band *{font-family:var(--fx2-serif)!important;font-size:26px!important;font-weight:600!important;color:var(--fx2-navy)!important;letter-spacing:0!important;text-transform:none!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh h3.sub{font:600 19px/1.3 var(--fx2-sans)!important;color:var(--fx2-ink)!important;text-transform:none!important;letter-spacing:0!important;border:0!important;margin:32px 0 12px!important;padding:0!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh :is(.bar.nbh-band,h2.nbh-band) + h3.sub{margin-top:8px!important}
-/* reading text: 15 px, the notes under a section 14 px (USWDS, NHS) */
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh p,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh li{font-size:15px!important;line-height:1.55!important;color:var(--fx2-ink)}
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh p.method,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .hint,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .readout{font-size:14px!important;line-height:1.5!important;color:var(--fx2-hint)!important}
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .cite{font-size:13px!important;line-height:1.5!important}
+/* reading text: 15 px, the notes under a section 14 px (USWDS, NHS). v25.69 fx2: on a form with paper copies drawn on
+   screen (FX2_CFG.paper) the script puts these four rules back with the copies left out (they keep the type they print
+   with); the same selectors, so the same weight and the same place in the cascade */
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)):where(:not(.fx2-pp)) .fx2-sh p,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)):where(:not(.fx2-pp)) .fx2-sh li{font-size:15px!important;line-height:1.55!important;color:var(--fx2-ink)}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)):where(:not(.fx2-pp)) .fx2-sh p.method,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)):where(:not(.fx2-pp)) .fx2-sh .hint,html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)):where(:not(.fx2-pp)) .fx2-sh .readout{font-size:14px!important;line-height:1.5!important;color:var(--fx2-hint)!important}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)):where(:not(.fx2-pp)) .fx2-sh .cite{font-size:13px!important;line-height:1.5!important}
 /* a bold lead-in reads at its sentence's size; the small labels beside a box at 15 px */
-html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh :is(p,li) > :is(b,strong):first-child{font-size:inherit!important}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)):where(:not(.fx2-pp)) .fx2-sh :is(p,li) > :is(b,strong):first-child{font-size:inherit!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh :is(.decide,.chkrow,.rl-ns,.rl-grid,.rl-row) label{font-size:15px!important;color:var(--fx2-ink)}
 /* RR-1's removal and no-school entries: the label above its box, left-aligned, at 14 px */
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .rl-f > span:not(.fx2-hint){font:600 14px/1.3 var(--fx2-sans)!important;color:var(--fx2-ink)!important;text-align:left!important}
@@ -1049,6 +1051,12 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > 
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr > :is(td,th)[data-fx2k="act"]{position:absolute!important;top:8px;right:8px}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr > :is(td,th)[data-fx2k="act"]::before{display:none}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr > :is(td,th)[data-fx2k="act"] button{min-width:44px;min-height:44px}
+/* v25.69 fx2: the card's corner is kept for its buttons. A card with no title (FD-1's foods, AD-1's inventory, FS-1's
+   hypotheses, CT-1's changes) had its Remove drawn over the last box of its first row; a long title ran under them */
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr:has(> [data-fx2k="act"]):not(:has(> [data-fx2k="title"])){padding-right:68px}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr:has(> [data-fx2k="act"] button + button):not(:has(> [data-fx2k="title"])){padding-right:120px}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr:has(> [data-fx2k="act"]) > :is(td,th)[data-fx2k="title"]{padding-right:52px!important}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr:has(> [data-fx2k="act"] button + button) > :is(td,th)[data-fx2k="title"]{padding-right:104px!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr > :is(td,th):is([data-fx2k="ro"],[data-fx2k="rowide"]){font:400 15px/1.5 var(--fx2-sans)!important;color:var(--fx2-ink)!important}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr > :is(td,th)[data-fx2k="rowide"]{grid-column:1/-1}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table.fx2-cards > tbody > tr > td.fx2-wall{grid-column:1/-1}
@@ -4318,7 +4326,11 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
        noseg    where a list stays a list on a touch screen (a selector: a grid of intervals or trials, a ledger)
      v25.68 fx2 (group 2):
        sheets   more parts of the page laid out as sheets (a selector), for a form whose screen is not a .sheet or a
-                section.only-*: ABC-1's tab panels (its paper is a .sheet of its own) */
+                section.only-*: ABC-1's tab panels (its paper is a .sheet of its own)
+     v25.69 fx2 (group 5):
+       paper    a copy of the paper the form draws on screen inside a sheet (a selector: TK-1's book pages, QS-1's quick
+                start as it prints): its words keep the type they print with, not the layout's reading type (TK-1 fits
+                its pages to the type it finds there, and the master print takes them as they stand) */
   var C = window.FX2_CFG || {};
   /* what is typed in DM-1's contacts and packet redraws their summaries at once */
   var LIVE = [C.contacts && '#' + C.contacts.wrap, C.packet && '#' + C.packet].filter(Boolean).join(',');
@@ -4667,6 +4679,19 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
   /* the form's pages: a .sheet, or a section shown one at a time (IN-1's section.only-setup) */
   function mark(){ $$('.sheet, section[class*="only-"]' + (C.sheets ? ', ' + C.sheets : '')).forEach(function(x){ if (!x.classList.contains('fx2-sh')) x.classList.add('fx2-sh'); }); }
+  /* v25.69 fx2: the paper copies a form draws on screen (FX2_CFG.paper) keep the type they print with. The reading-type
+     rules of the style above that end :where(:not(.fx2-pp)) go off (the class on the page) and come back in a style of
+     their own, right after the shared style, each selector ending :where(:not(:is(PAPER) *)): pure CSS, so a copy the form
+     draws and measures at once (TK-1's book pages, fitted as they are drawn) never takes the reading type */
+  function paperCSS(){ if (!C.paper || D.getElementById('fx2-paper-css')) return; var st = D.getElementById('fx2-v2492'), out;
+    function gen(list){ var o = []; Array.prototype.forEach.call(list, function(r){
+      if (r.cssRules && !r.selectorText) { var inner = gen(r.cssRules); if (inner.length && (r.media || r.conditionText)) o.push((r.media ? '@media ' + r.media.mediaText : '@supports ' + r.conditionText) + '{' + inner.join('\n') + '}'); return; }
+      var t = r.selectorText || ''; if (t.indexOf(':where(:not(.fx2-pp))') < 0) return;
+      var parts = [], d = 0, a = 0; for (var i = 0; i < t.length; i++) { var c = t.charAt(i); if (c === '(') d++; else if (c === ')') d--; else if (c === ',' && !d) { parts.push(t.slice(a, i)); a = i + 1; } } parts.push(t.slice(a));
+      o.push(parts.map(function(x){ return x.trim().split(':where(:not(.fx2-pp))').join(':where(.fx2-pp)') + ':where(:not(:is(' + C.paper + ') *))'; }).join(',') + '{' + r.style.cssText + '}'); }); return o; }
+    try { out = gen(st.sheet.cssRules); } catch (e) { return; }
+    if (!out.length) return; var el = D.createElement('style'); el.id = 'fx2-paper-css'; el.setAttribute('data-nbh-screen', ''); el.textContent = out.join('\n');
+    st.after(el); R.classList.add('fx2-pp'); }
   function run(){ if (printing) return; try { wrapPlain(); mark(); intro(); heads(); fields(); hints(); rows(); segs(); cards(); contacts(); packet(); nsFold(); parentView(); align(); egAll(); long(); tbFit(); } catch (e) { if (window.console) console.warn('fx2', e); } }
   var timer = 0; function soon(){ clearTimeout(timer); timer = setTimeout(run, 120); }
   /* TB-1's chips jump to a target's card; a sheet just shown still grows its boxes to their text, so the jump is aimed
@@ -4693,7 +4718,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   /* nbh-polish may load after this script (the release build puts it last): wrapped as soon as it is there */
   wrapPlain(); D.addEventListener('DOMContentLoaded', wrapPlain); addEventListener('load', wrapPlain);
   window.fx2Layout = { run: run, paper: paper };
-  segs(); run();
+  paperCSS(); segs(); run();
   try { new MutationObserver(function(recs){ segs(); if (recs.some(function(m){ return !(m.target.closest && m.target.closest('.fx2-csum,.fx2-nsbar,.fx2-pkall,.fx2-addrow')); })) soon(); }).observe(D.body, { childList: true, subtree: true }); } catch (e) {}
   D.addEventListener('change', soon); D.addEventListener('input', function(e){ if (e.target._fx2eg) egSync(e.target); if (LIVE && e.target.closest && e.target.closest(LIVE)) soon(); });
   addEventListener('resize', function(){ tbKey = ''; soon(); });

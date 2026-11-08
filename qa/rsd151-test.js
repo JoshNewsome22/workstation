@@ -21,7 +21,9 @@ const IPAD='Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (
      off8:r8.classList.contains('offrow')&&r8.querySelector('td[data-l="Start"]').classList.contains('off')&&/usually 8:45 am/.test(r8.querySelector('td[data-l="Start"]').title)&&!r8.querySelector('td[data-l="End"]').classList.contains('off'),
      off30:r30.querySelector('td[data-l="End"]').classList.contains('off'),usual:!r2.classList.contains('offrow'),
      line:(document.getElementById('dayDiff')||{}).textContent||'',wk:r7.classList.contains('wk')&&!r2.classList.contains('wk'),
-     ph:r2.querySelector('input[data-f="brk"]').placeholder,card:document.querySelector('details.rs-contact>summary').textContent};},k);
+     /* v25.69 fx2: at 16 px on a touch screen the "0" no longer fits the box beside its value, and nbh-ui shows it under the
+        box ("e.g. 0", the words kept in data-nbh-ph); with the layout an example may also be kept in data-fx2-ph */
+     ph:(e=>e.placeholder||e.getAttribute('data-nbh-ph')||e.getAttribute('data-fx2-ph')||'')(r2.querySelector('input[data-f="brk"]')),card:document.querySelector('details.rs-contact>summary').textContent};},k);
  ok('the weekday and the date share one line',R.oneLine,R);
  ok('the days that are not the usual hours are marked: the value (with the usual in its title) and the row; a usual day is not',R.off8&&R.off30&&R.usual,R);
  ok('the line above the table lists them: "2 days not the usual hours", Tue 9/8 start 9:45 am, Wed 9/30 end 3:00 pm',/^2 days not the usual hours/.test(R.line)&&/Tue 9\/8 start 9:45 am/.test(R.line)&&/Wed 9\/30 end 3:00 pm/.test(R.line),R.line);
