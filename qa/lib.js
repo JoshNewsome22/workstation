@@ -51,4 +51,11 @@ async function tapOrMenu(page,sel,touch){const l=page.locator(sel).first();if(aw
 const IPAD_UA='Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
 async function ipadBrowser(pw){try{const b=await pw.webkit.launch();b._nbhEngine='webkit';return b;}catch(e){const b=await pw.chromium.launch();b._nbhEngine='chromium';return b;}}
 function ipadCtx(b,o){return b.newContext(Object.assign({hasTouch:true},b._nbhEngine==='chromium'?{isMobile:true,userAgent:IPAD_UA}:{},o||{}));}
-module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts,navTap,tapOrMenu,IPAD_UA,ipadBrowser,ipadCtx};
+/* v25.69 (design review H8, B2) Build packet asks who the packet is for before it prints: once it has been pressed, choose the reader
+   ('iep', IEP team and file: the packet as it always printed; 'staff', 'family', 'records') and press Print / Save PDF, as a
+   person does (a tap with touch). The print window opens from that press. */
+async function packetChoose(page,aud,touch){aud=aud||'iep';const card='#dlg .pk-card[data-aud="'+aud+'"]';
+  await page.waitForSelector('#dlg[open] .pk-card[data-aud="'+aud+'"]',{timeout:20000});
+  const go=async sel=>{if(touch)await page.locator(sel).tap();else await page.evaluate(s=>document.querySelector(s).click(),sel);};
+  await go(card);await page.waitForSelector('#dlg[open] #pkPrint',{timeout:10000});await go('#pkPrint');}
+module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts,navTap,tapOrMenu,IPAD_UA,ipadBrowser,ipadCtx,packetChoose};

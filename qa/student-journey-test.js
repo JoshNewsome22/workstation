@@ -699,7 +699,7 @@ PH.H=async()=>{
   const ticked=await shell(()=>Object.keys(state.ticked).filter(k=>state.ticked[k]));const inCaseIds=await shell(()=>[...new Set(Object.keys(state.frames).concat(Object.keys(state.pending)))]);
   ok('H14 Tick the ones I’ve used ticks every form in the case ('+inCaseIds.length+')',inCaseIds.every(id=>ticked.includes(id))&&ticked.length===inCaseIds.length,{ticked,inCaseIds});
   if(await page.locator('#railScrim').isVisible().catch(()=>false)){await page.locator('#railScrim').tap({position:{x:1100,y:400}});await sleep(300);}
-  const e0=ERRS.length;const popM=page.waitForEvent('popup',{timeout:60000});await tapShell('#masterPrint');
+  const e0=ERRS.length;const popM=page.waitForEvent('popup',{timeout:60000});await tapShell('#masterPrint');await require(__dirname+'/lib.js').packetChoose(page,'iep',true);   /* v25.69 (B2) who it is for, then Print */
   await answer(/not open yet/,/Include blanks/,3000);
   const mw=await popM;mw.on('pageerror',e=>ERRS.push({step:stepName,where:'master print',text:String(e.message||e).slice(0,400)}));
   await mw.waitForFunction(()=>document.querySelector('.mp-sec')&&window.__nbhFitted!==undefined,null,{timeout:300000}).catch(()=>{});await sleep(2000);

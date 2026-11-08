@@ -1471,6 +1471,27 @@ body:not(.has-form) #focusBtn{display:none}
 .po-row{display:flex;gap:8px;align-items:flex-start;padding:4px 0;line-height:1.4;cursor:pointer}
 .po-row input{margin:3px 0 0;flex:0 0 auto}
 .po-hint{color:#54676f;font-size:12px}
+/* v25.69 (design review H8, B2) Build packet: who is this for (four cards), then the sections with a running page count */
+.pk-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0 4px}
+.pk-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:44px;padding:12px 14px;border:1px solid var(--rule);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;font:inherit}
+.pk-card:hover:not(:disabled),.pk-card:focus-visible{border-color:var(--navy);box-shadow:0 0 0 2px var(--mist)}
+.pk-card b{font-size:15px;color:var(--navy)}
+.pk-card .pk-d{font-size:12.5px;line-height:1.4;color:var(--muted)}
+.pk-card .pk-f{font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
+.pk-card .pk-n{font-size:13px;font-weight:600;color:var(--navy)}
+.pk-card:disabled{opacity:.55;cursor:default}
+.pk-top{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:0 0 8px}
+.pk-top span{font-size:12.5px;color:var(--muted);flex:1 1 240px}
+.pk-back{min-height:44px}
+.pk-secs{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.pk-secs li{border-bottom:1px solid var(--rule)}
+.pk-secs label{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;min-height:44px;padding:4px 2px;cursor:pointer}
+.pk-secs .pk-sn{flex:1 1 200px;color:var(--ink)}
+.pk-secs .pk-sp{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pk-total{font-weight:600;color:var(--navy);margin:8px 0}
+.pk-fam,.pk-note{font-size:12.5px;line-height:1.45;color:var(--ink);margin:6px 0}
+.pk-adv{margin:8px 0;border:1px solid var(--rule);border-radius:6px;padding:4px 10px}
+.pk-adv summary{min-height:36px;display:flex;align-items:center;cursor:pointer;font-weight:600;color:var(--navy)}
 /* v21.94 Log it now: the sheet in the dialog */
 #dlg .ln{display:flex;flex-direction:column;gap:10px;margin-top:4px}
 #dlg .ln .ln-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px}
@@ -3681,9 +3702,11 @@ function mpCaseOrder(list){const rank={};CASE_MAP.forEach((st,i)=>st[2].forEach(
   return list.map((x,k)=>({x,k,r:rank[x[0]]!=null?rank[x[0]]:100000+k})).sort((a,b)=>a.r-b.r||a.k-b.k).map(o=>o.x);}
 function packetOptsSave(o){try{localStorage.setItem('nbh.packet',JSON.stringify(o));}catch(e){}}
 function prChoice(k){try{return localStorage.getItem(k)==='1';}catch(e){return false;}}   /* v24.31 */
-function packetOptsOpen(){const o=packetOpts();const ticked=ALL.filter(([id])=>state.ticked[id]),withGuide=ticked.filter(([id])=>MP_GUIDE_FORMS.includes(id));
+/* v25.69 (design review H8, B2) the options as a part of their own: the Packet options dialog shows them, and so does Build packet's
+   second step, as its advanced settings */
+function packetOptsHtml(o,ticked){const withGuide=ticked.filter(([id])=>MP_GUIDE_FORMS.includes(id));
   const radio=(name,val,label,hint)=>'<label class="po-row"><input type="radio" name="'+name+'" value="'+val+'"'+(o[name]===val?' checked':'')+'> <b>'+label+'</b>'+(hint?' <span class="po-hint">'+hint+'</span>':'')+'</label>';
-  dialog('Packet options',
+  return (
     '<p class="hp-lead">The master print reads as one report: each form is a section with its own running head, its sheets run on, and the forms’ guides, reference lists and on-screen notes stay out. Choose what to keep. Kept in this browser.</p>'+
     '<h4 class="po-h">Guides</h4>'+(withGuide.length?'<p class="po-hint">A form’s Guide (its evidence and guidance pages) stays out of the packet unless you keep it here. Ticked forms with a Guide:</p>'+
       withGuide.map(([id,name])=>'<label class="po-row"><input type="checkbox" data-po-guide="'+esc(id)+'"'+(o.guides[id]?' checked':'')+'> Keep the Guide of <b>Form '+esc(id)+'</b> <span class="po-hint">'+esc(name)+'</span></label>').join(''):
@@ -3696,13 +3719,103 @@ function packetOptsOpen(){const o=packetOpts();const ticked=ALL.filter(([id])=>s
     '<h4 class="po-h">References and sources</h4>'+radio('refs','end','One list at the end','the forms’ citations gathered in a last section, repeats dropped (default)')+radio('refs','form','With each form','as the form prints on its own')+radio('refs','none','Left out','')+
     '<h4 class="po-h">Form ABC-1’s incident log</h4>'+radio('abc','compact','Compact','smaller type and tighter rows (default)')+radio('abc','full','Full','as the form prints on its own')+
     '<h4 class="po-h">Empty boxes</h4><label class="po-row"><input type="checkbox" id="poBlanks"'+(o.blanks?' checked':'')+'> <b>Print the empty boxes meant for handwriting</b> <span class="po-hint">(Data collected, Materials and cues) in a form that already holds data; a form printed blank keeps them either way</span></label>'+
-    '<div class="bm-act"><button class="primary" id="poDone">Done</button><span>Build packet uses these.</span></div>');
-  const save=()=>{const g={};$('#dlgBody').querySelectorAll('[data-po-guide]').forEach(c=>{if(c.checked)g[c.dataset.poGuide]=true;});
-    const v=n=>{const r=$('#dlgBody').querySelector('input[name="'+n+'"]:checked');return r?r.value:'';};
-    const next=Object.assign({},o,{guides:Object.assign({},o.guides,g),refs:v('refs')||o.refs,abc:v('abc')||o.abc,order:v('order')||o.order,blanks:!!($('#poBlanks')&&$('#poBlanks').checked)});
+    '');}
+/* the options read back as they change; withGuide: the ticked forms with a Guide, whose kept Guides are set from the boxes */
+function packetOptsBind(box,o,ticked){const withGuide=ticked.filter(([id])=>MP_GUIDE_FORMS.includes(id)),q=s=>box.querySelector(s);
+  const save=()=>{const g={};box.querySelectorAll('[data-po-guide]').forEach(c=>{if(c.checked)g[c.dataset.poGuide]=true;});
+    const v=n=>{const r=box.querySelector('input[name="'+n+'"]:checked');return r?r.value:'';};
+    const next=Object.assign({},o,{guides:Object.assign({},o.guides,g),refs:v('refs')||o.refs,abc:v('abc')||o.abc,order:v('order')||o.order,blanks:!!(q('#poBlanks')&&q('#poBlanks').checked)});
     withGuide.forEach(([id])=>{if(!g[id])delete next.guides[id];});packetOptsSave(next);
-    try{localStorage.setItem('nbh.print.guide',$('#poFormGuide')&&$('#poFormGuide').checked?'1':'0');localStorage.setItem('nbh.print.blank',$('#poFormBlank')&&$('#poFormBlank').checked?'1':'0');}catch(e){}};
-  $('#dlgBody').addEventListener('change',save);$('#poDone').addEventListener('click',()=>{save();try{$('#dlg').close();}catch(e){}});}
+    try{localStorage.setItem('nbh.print.guide',q('#poFormGuide')&&q('#poFormGuide').checked?'1':'0');localStorage.setItem('nbh.print.blank',q('#poFormBlank')&&q('#poFormBlank').checked?'1':'0');}catch(e){}};
+  box.addEventListener('change',save);return save;}
+function packetOptsOpen(){const o=packetOpts(),ticked=ALL.filter(([id])=>state.ticked[id]);
+  dialog('Packet options',packetOptsHtml(o,ticked)+'<div class="bm-act"><button class="primary" id="poDone">Done</button><span>Build packet uses these.</span></div>');
+  const save=packetOptsBind($('#dlgBody'),o,ticked);$('#poDone').addEventListener('click',()=>{save();try{$('#dlg').close();}catch(e){}});}
+/* v25.69 (design review H8, B2) "Who is this for?". Build packet opens a sheet in two steps. Step 1: four readers, each with the
+   forms it takes from this case and about how many pages they print. Step 2: those forms (or the part of a form that reader
+   needs) with a switch each and a running page count, Packet options as the advanced settings, and Print / Save PDF; for the
+   family, the home sheets too. "IEP team and file" builds the packet exactly as Build packet always has: the ticked forms, in
+   the case's order, with Packet options. The others: Teacher and staff (the staff summary, the plan's steps, the data and point
+   sheets, the crisis plan), Family (the consent pages, the family card and the home sheets; first names and a home footer, and
+   the home language from Form DM-1), Records request (the ticked forms, each complete as it prints on its own). */
+const PK_AUD=[
+  ['iep','IEP team and file','Everything ticked in the list, as the packet has always printed: the case’s order, the references gathered at the end.'],
+  ['staff','Teacher and staff','What staff use in the room: the summary, the plan’s steps, the data and point sheets and the crisis plan.'],
+  ['family','Family','In plain words, to keep: the consent pages, the family card and the home sheets, with first names and a home footer.'],
+  ['records','Records request','The forms ticked in the list, each complete as it prints on its own, with its own references.']];
+/* a part of a form a reader takes: what is kept, its name on the sheet, about how many pages it prints; show: a part the form prints
+   only from a button of its own (Form CT-1's family card), shown in the packet */
+const PK_PARTS={'TD-1:final':{q:['#final'],n:'Final treatment plan: step by step',pg:4},'EB-1:brief':{q:['[data-pane="brief"]'],n:'The brief',pg:2},
+  'CR-1:plan':{q:['section.only-plan'],n:'The crisis plan',pg:4},'DD-1:sheet':{q:['#tab-data'],n:'The daily data sheet',pg:2},'SM-1:sheet':{q:['section.only-sheet'],n:'The point sheet',pg:2},
+  'IC-1:family':{q:['#consent','#proc','#planproc'],n:'The consent pages',pg:7},'CT-1:card':{q:['#ctCard'],n:'The family card',pg:1,show:true},'HD-1:sheets':{q:['#sheetOut'],n:'The home sheets',pg:7}};
+/* each reader's forms, in the order they print: [form, part ('' for the whole form)] */
+const PK_TAKES={staff:[['QS-1',''],['EB-1','brief'],['TD-1','final'],['CR-1','plan'],['DD-1','sheet'],['SM-1','sheet']],
+  family:[['IC-1','family'],['CT-1','card'],['HD-1','sheets']]};
+/* a first name for the family's pages: Form DM-1's preferred name when it is open, else the first word of the bar's name */
+function pkFirst(name){let pref='';try{const f=state.frames['DM-1'],e=f&&f.contentDocument&&f.contentDocument.querySelector('[name="s.pref"]');pref=e?String(e.value||'').trim():'';}catch(e){}
+  if(pref)return pref.split(/\s+/)[0];
+  const n=String(name||'').replace(/^\s*simulated\s*[–—-]\s*/i,'').trim();if(/,/.test(n))return (n.split(',')[1]||'').trim().split(/\s+/)[0]||n;return n.split(/\s+/)[0]||'';}
+/* the BCBA the family calls: the bar's name (before its credentials) and the phone the staff directory holds for that name */
+function pkBcbaName(b){return String(b||'').split(',')[0].trim();}
+async function pkBcba(){const b=($('#pBcba')||{}).value||'',nm=pkBcbaName(b),k=s=>pplKey(String(s||'').replace(/\(simulated\)/i,'').split(',')[0]);let phone='';
+  try{const j=await pplLoad();const m=(j.list||[]).find(x=>x&&x.phone&&k(nm)&&k(x.name)===k(nm));if(m)phone=m.phone;}catch(e){}
+  return {name:nm,phone};}
+function pkHomeFoot(first,c){return 'For '+(first?first+'’s':'the')+' family'+(c&&c.name?'. Questions: '+c.name+(c.phone?', '+c.phone:''):'')+'.';}
+/* the family's home language, from Form DM-1 (through the case's facts) */
+function pkLang(){const L=(((state.facts||{}).profile)||{}).language||{};const h=String(L.home||'').trim();return {home:h,interp:L.interpreter===true,english:!h||/^\s*english(\s+only)?\s*\.?\s*$/i.test(h)};}
+/* the forms a reader takes from this case */
+function pkForms(aud){const caseHas=id=>inCase(id)||!!state.ticked[id]||!!state.status[id];
+  if(aud==='iep'||aud==='records'){const L=ALL.filter(([id])=>state.ticked[id]);return (aud==='records'||packetOpts().order==='list'?L:mpCaseOrder(L)).map(f=>[f[0],'']);}
+  return (PK_TAKES[aud]||[]).filter(([id])=>ALL.some(f=>f[0]===id)&&caseHas(id));}
+/* about how many pages: what this browser measured the last time the form (or part) was built, else its usual length */
+function pkEstLoad(){try{return JSON.parse(localStorage.getItem('nbh.packet.est')||'{}')||{};}catch(e){return {};}}
+function pkEst(id,part,cache){const k=id+(part?':'+part:'');if(cache[k])return cache[k];const P=part&&PK_PARTS[id+':'+part];let n=P?P.pg:(MP_PAGES[id]||8);
+  const st=state.status[id]||(state.pending[id]||{}).status;if(!P&&st&&!(st.filled>4))n=Math.max(1,Math.round(n/2));return n;}
+function pkTotal(aud,list,cache){if(!list.length)return 0;let n=list.reduce((t,[id,part])=>t+pkEst(id,part,cache),0);n+=list.length>16?2:1;   /* the cover */
+  const refs=aud==='iep'?packetOpts().refs:'';if(refs==='end')n+=Math.max(1,Math.round(list.length/3));return n;}
+function pkEstSave(est,parts){const c=pkEstLoad();Object.keys(est||{}).forEach(id=>{if(id==='REFS')return;const k=id+(parts&&parts[id]?':'+parts[id]:'');c[k]=est[id];});try{localStorage.setItem('nbh.packet.est',JSON.stringify(c));}catch(e){}}
+const pkName=(id,part)=>part&&PK_PARTS[id+':'+part]?PK_PARTS[id+':'+part].n:((ALL.find(f=>f[0]===id)||[])[1]||id);
+/* Build packet: with nothing ticked, the list opens to choose the forms (v25.68, M10); else the sheet */
+async function pkSheet(){
+  if(!ALL.some(([id])=>state.ticked[id])){if(typeof srChoose==='function'){srChoose(true,true);return;}alert('Choose at least one form in the list first.');return;}
+  dialog('Build packet: who is this for?','');
+  const contact=await pkBcba(),cache=pkEstLoad();let aud=null,off={};
+  const pages=n=>'about '+n+' page'+(n===1?'':'s');
+  const step1=()=>{aud=null;off={};const b=$('#dlgBody');$('#dlgTitle').textContent='Build packet: who is this for?';
+    b.innerHTML='<p class="hp-lead">Each choice takes the forms it needs from this case. You can switch any of them off in the next step.</p><div class="pk-cards">'+
+      PK_AUD.map(([k,t,d])=>{const L=pkForms(k),n=pkTotal(k,L,cache);return '<button type="button" class="pk-card" data-aud="'+k+'"'+(L.length?'':' disabled')+'><b>'+esc(t)+'</b><span class="pk-d">'+esc(d)+'</span>'+
+        '<span class="pk-f">'+(L.length?esc(L.map(([id])=>id).join(', ')):'None of its forms is in this case')+'</span><span class="pk-n">'+(L.length?pages(n):'')+'</span></button>';}).join('')+'</div>';
+    b.querySelectorAll('.pk-card').forEach(c=>c.addEventListener('click',()=>step2(c.dataset.aud)));};
+  const list=()=>pkForms(aud).filter(([id])=>!off[id]);
+  const total=()=>{const t=$('#pkTotal');if(t){const L=list();t.textContent=L.length?'About '+pkTotal(aud,L,cache)+' pages in all: '+L.length+' section'+(L.length===1?'':'s')+' and the cover.':'Nothing switched on: switch on at least one section.';}const pr=$('#pkPrint');if(pr)pr.disabled=!list().length;};
+  const step2=k=>{aud=k;off={};const A=PK_AUD.find(a=>a[0]===k),L=pkForms(k),b=$('#dlgBody'),o=packetOpts(),ticked=L.map(([id])=>ALL.find(f=>f[0]===id)).filter(Boolean);
+    $('#dlgTitle').textContent='Build packet: '+A[1];
+    const lang=pkLang(),hd=L.some(([id])=>id==='HD-1'),first=pkFirst(packet().client);
+    b.innerHTML='<p class="pk-top"><button type="button" class="pk-back">‹ Who it is for</button> <span>'+esc(A[2])+'</span></p>'+
+      '<ul class="pk-secs">'+L.map(([id,part])=>'<li><label><input type="checkbox" checked data-pk-id="'+esc(id)+'"> <b>Form '+esc(id)+'</b> <span class="pk-sn">'+esc(pkName(id,part))+'</span><span class="pk-sp">'+pages(pkEst(id,part,cache))+'</span></label></li>').join('')+'</ul>'+
+      '<p class="pk-total" id="pkTotal" aria-live="polite"></p>'+
+      (k==='family'?'<p class="pk-fam">The family’s pages carry the child’s first name'+(first?' ('+esc(first)+')':'')+' and, at the foot of each page, “'+esc(pkHomeFoot(first,contact))+'”'+(contact.phone?'':' (add the BCBA’s phone in the Staff directory to print it here)')+'. '+
+        (lang.english?'Home language: English'+(lang.home?'':' (none recorded in Form DM-1)')+'.':'Home language (Form DM-1): <b>'+esc(lang.home)+'</b>. '+(/creole|krey|haitian/i.test(lang.home)?'Form HD-1’s home sheets carry the Haitian Creole beside the English (a draft translation). ':'')+'Have the pages translated or explained by an interpreter before they go home.')+'</p>':'')+
+      (k==='iep'?'':'<p class="pk-note">The packet’s cover says who it is for'+(k==='records'?'; each form keeps its own references, as it prints on its own':'; the references are left out')+'.</p>')+
+      (k==='iep'?'<details class="pk-adv"><summary>Advanced settings (Packet options)</summary><div class="pk-advb">'+packetOptsHtml(o,ticked)+'</div></details>':'')+
+      '<div class="bm-act"><button class="primary" id="pkPrint" type="button">Print / Save PDF</button>'+(k==='family'&&hd?'<button type="button" id="pkHome">Print the home sheets</button>':'')+'<span>The print window opens; save it as PDF from there.</span></div>';
+    b.querySelector('.pk-back').addEventListener('click',step1);
+    b.querySelectorAll('[data-pk-id]').forEach(c=>c.addEventListener('change',()=>{off[c.dataset.pkId]=!c.checked;total();}));
+    if(k==='iep')packetOptsBind(b.querySelector('.pk-advb'),o,ticked);
+    total();
+    $('#pkPrint').addEventListener('click',()=>{const L=list();if(!L.length)return;try{$('#dlg').close();}catch(e){}pkRun(aud,L,contact);});
+    if($('#pkHome'))$('#pkHome').addEventListener('click',()=>{try{$('#dlg').close();}catch(e){}pkHomeSheets();});};
+  step1();}
+/* the packet for a reader. IEP team and file: exactly what Build packet built before (masterRun with the forms alone) */
+function pkRun(aud,L,contact){const F=L.map(([id])=>ALL.find(f=>f[0]===id)).filter(Boolean);
+  if(aud==='iep'){masterRun(packetOpts().order==='list'?F:mpCaseOrder(F));return;}
+  const parts={};L.forEach(([id,part])=>{if(part)parts[id]=part;});const first=pkFirst(packet().client);
+  const T={staff:'Behavior plan for staff',family:(first?first+'’s':'Your child’s')+' plan, for the family',records:'Copy of education records, as requested'};
+  masterRun(F,{aud,parts,title:T[aud],packet:aud==='records'?{refs:'form',order:'list'}:{refs:'none'},homeFoot:aud==='family'?pkHomeFoot(first,contact):'',first,contact});}
+/* Form HD-1's home sheets, printed on their own from the form (its own page numbers and home footer) */
+async function pkHomeSheets(){openForm('HD-1');const t0=Date.now();let fr=null;
+  while(Date.now()-t0<15000){fr=state.frames['HD-1'];try{if(fr&&fr.contentWindow&&typeof fr.contentWindow.hdHomePrint==='function')break;}catch(e){}await new Promise(r=>setTimeout(r,200));}
+  try{fr.contentWindow.hdHomePrint();}catch(e){wsUI.toast('Open Form HD-1’s Home sheets and press Print the home sheets there.');}}
 /* the sheets of a form that are documents of their own: they keep a page of their own in the packet */
 const MP_KEEP={'IC-1':['#consent','#proc','#assent','#record'],'TD-1':['#final','#monitor']};
 const MP_KEEP_TITLE={'OB-1':/^Direct Observation Record/};
@@ -3718,6 +3831,22 @@ function packetShape(x,i,mo,bag){
   const titleOf=sh=>{const h=[...sh.querySelectorAll('.bar,.nbh-band,h2,h1')].find(b=>!b.closest('.nbh-print-head'));if(!h)return '';const inner=h.querySelector('h1,h2');return txt(inner||h).replace(/\s*\d+ of \d+ shown$/,'');};
   const drop=e=>{const w=e.parentElement;e.remove();if(w&&w.classList.contains('nbh-page')&&!txt(w)&&!w.querySelector('img,svg,canvas,table,input,textarea,select'))w.remove();};
   root.querySelectorAll('.noprint').forEach(e=>e.remove());
+  /* v25.69 (design review H8, B2) a reader who takes a part of a form (Form TD-1's step-by-step plan for staff, Form HD-1's home
+     sheets for the family): the parts named are kept where they stand, inside the form's own page and sheets so its print rules
+     still reach them, with the form's letterhead; everything beside them goes */
+  const part=x.part&&PK_PARTS[id+':'+x.part];
+  if(part){const keep=[];part.q.forEach(q=>root.querySelectorAll(q).forEach(e=>{if(!keep.some(k=>k===e||k.contains(e)))keep.push(e);}));
+    if(keep.length){const head=root.querySelector('.nbh-print-head');const first=head?head.cloneNode(true):null;
+      const prune=el=>{[...el.children].forEach(c=>{if(keep.some(k=>k===c||k.contains(c)))return;if(keep.some(k=>c.contains(k))){prune(c);return;}if(c.tagName==='STYLE')return;c.remove();});};
+      prune(root);if(first&&!root.querySelector('.nbh-print-head'))root.insertBefore(first,root.firstChild);
+      if(part.show)keep.forEach(k=>{for(let e=k;e&&e!==root;e=e.parentElement)e.classList.add('mp-partshow');});
+      /* the part's first sheet starts under the letterhead, not on a page of its own (Form HD-1's home sheets each start a page) */
+      const s1=keep[0].matches('.hs')?keep[0]:keep[0].querySelector(':scope > .hs');if(s1)s1.classList.add('mp-partfirst');}}
+  /* v25.69 (design review M13) Form DD-1 on the packet's upright pages: its "How to read these graphs" prints right after the first
+     graph (the form draws it there too, hidden), so the first graph follows the student's details on the section's first page and
+     that page is not left half empty */
+  if(id==='DD-1'){const a=root.querySelector('.dd-key-after');if(a&&root.querySelector('.dd-key-top')){root.querySelectorAll('.dd-key-top').forEach(e=>e.remove());
+    a.classList.remove('dd-key-after');a.classList.add('mp-ddkey');a.removeAttribute('aria-hidden');}}
   /* v22.81 (review F220) Form SV-1 prints its team copy in the packet, whatever the form's own choice: the ratings and open
      answers by role, no respondent named beside a rating (the respondents were told the rated staff see only aggregates) */
   if(id==='SV-1'){root.querySelectorAll('.sv-byname,.sv-nmcol,.sv-nm').forEach(e=>e.remove());
@@ -3775,6 +3904,18 @@ function packetShape(x,i,mo,bag){
     if(id==='DM-1')root.querySelectorAll('#pkTbl tbody tr').forEach(r=>{const cb=r.querySelector('input[type="checkbox"]');if(!(cb&&cb.hasAttribute('checked'))&&!r.querySelector('.nbh-val'))r.remove();});}
   /* v22.77 (review I241) for the packet check: the values in this section that say they are simulated (a worked example) */
   const sim=[];root.querySelectorAll('.nbh-val').forEach(v=>{const t=txt(v);if(sim.length<8&&/\bsimulated\b/i.test(t)&&!sim.includes(t))sim.push(t.slice(0,120));});
+  /* v25.69 (design review H8; packet gate check 5) a signature block is read whole and comes with what it signs. Form IC-1's
+     decision and signatures are one block: the staff's parts between them (how consent was obtained, its status, the say-it-back
+     check) follow the signatures, as on the form's own copy for the school's file, so the block fits a page. A table of
+     signature lines (Form FS-1's Signatures) is one block with its heading, and none starts a page of its own: it keeps with the
+     last lines before it. */
+  if(id==='IC-1')root.querySelectorAll('.ic-signpart').forEach(sp=>{const kids=[...sp.children],h6=kids.find(h=>h.tagName==='H3'&&/^6\.\s*how consent was obtained/i.test(txt(h))),
+      sigs=kids.find(e=>e.classList.contains('ic-sigs'));if(!h6||!sigs||kids.indexOf(h6)>kids.indexOf(sigs))return;
+    const staff=doc.createElement('div');staff.className='mp-icstaff';for(let e=h6;e&&e!==sigs;){const nx=e.nextElementSibling;staff.appendChild(e);e=nx;}
+    sp.parentNode.insertBefore(staff,sp.nextSibling);});
+  root.querySelectorAll('table').forEach(t=>{const L=[...t.querySelectorAll('td.sigline')];if(!L.length||t.closest('.mp-sigkeep'))return;
+    const w=doc.createElement('div');w.className='mp-sigkeep';const h=t.previousElementSibling;t.parentNode.insertBefore(w,t);
+    if(h&&(/^H[2-4]$/.test(h.tagName)||h.classList.contains('nbh-band')||h.classList.contains('bar'))&&txt(h).length<80)w.appendChild(h);w.appendChild(t);});
   const band=doc.createElement('div');band.className='mp-band';band.innerHTML='<span>Section '+(i+1)+' of %%MPN%%</span><span>Form '+esc(id)+'</span>';root.insertBefore(band,root.firstChild);
   return {id,title:x.title,html:root.innerHTML,sheets:names,guide:keepGuide&&guides.size>0,sim};
 }
@@ -3933,6 +4074,7 @@ async function masterRun(chosen,opt){opt=opt||{};
     }finally{state.mpBusy.delete(id);}}};
   try{await Promise.all([work(),work()]);}finally{state.mpBusy=null;}
   got.forEach(x=>{if(x)parts.push(x);});
+  if(opt.parts)parts.forEach(x=>{x.part=opt.parts[x.id]||'';});   /* v25.69 (H8, B2) a reader who takes a part of a form */
   $('#masterPrint').textContent='Build packet';
   if(!parts.length){try{w.close();}catch(e){}alert('Nothing could be collected from the ticked forms.');return;}
 
@@ -3949,25 +4091,32 @@ async function masterRun(chosen,opt){opt=opt||{};
   const kept=shaped.filter(s=>s.guide).map(s=>'Form '+s.id);
 
   const p=packet();
+  /* v25.69 (H8, B2) the family's packet: the child's first name, the BCBA to call, a home footer in place of the record's */
+  const fam=opt.aud==='family',first=fam?(opt.first||pkFirst(p.client)):'',who=opt.contact||{};
   const t1=performance.now(),chk=opt.check===false?'':mpCheckHtml(mpCheckItems(chosen,parts,shaped,p),shaped.map(s=>s.id));state.mpLast.ms=Math.round(performance.now()-t1);   /* v22.77 (I241) */
   const stamp=new Date();
   const head=`<div class="mp-cover" data-mk="NBHPKT;%%MPRUN%%">
     <div class="mp-brand"><img src="${$('#logo').src}" alt="Newsome Behavioral Health"></div>
     <h1>${esc(opt.title||'Functional Behavior Assessment and Behavior Intervention Plan')}</h1>
-    <table><tr><th>Student</th><td>${esc(p.client)||'&mdash;'}</td><th>Student ID</th><td>${esc(p.sid)||'&mdash;'}</td></tr>
+    ${fam?`<table><tr><th>Child</th><td>${esc(first)||'&mdash;'}</td><th>School</th><td>${esc(p.site)||'&mdash;'}</td></tr>
+    <tr><th>Questions</th><td>${esc([who.name,who.phone].filter(Boolean).join(', '))||'&mdash;'}</td><th>Printed</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr></table>
+    <div class="mp-conf"><b>These pages are yours to keep.</b> They are about your child, so keep them somewhere private. If anything
+      here is unclear, or you would like it explained in your own language, ${who.name?'call '+esc(who.name)+(who.phone?' at '+esc(who.phone):''):'call the school'}.</div>`:
+    `<table><tr><th>Student</th><td>${esc(p.client)||'&mdash;'}</td><th>Student ID</th><td>${esc(p.sid)||'&mdash;'}</td></tr>
     <tr><th>Grade</th><td>${esc(p.grade)||'&mdash;'}</td><th>School</th><td>${esc(p.site)||'&mdash;'}</td></tr>
     <tr><th>Case BCBA</th><td>${esc(p.bcba)||'&mdash;'}</td><th>Compiled</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr>
     ${factLine?'<tr><th>Period<\/th><td colspan="3">'+esc(factLine)+'<\/td><\/tr>':''}</table>
     <div class="mp-conf"><b>Confidential student record.</b> This packet contains personally identifiable
       information from a student&rsquo;s education record and is protected under FERPA. It is released only to
       individuals authorised under the student&rsquo;s IEP team or by written parental consent. If you have
-      received this in error, return it to the case BCBA and destroy any copy.</div>
+      received this in error, return it to the case BCBA and destroy any copy.</div>`}
     <h2 id="mp-contents">Contents</h2><ol>${shaped.map(s=>`<li data-mk="NBHTOC:${esc(s.id)};"><a class="mp-jump" href="#sec-${esc(s.id)}" data-mk="NBHTOC:${esc(s.id)};">Form ${esc(s.id)} &mdash; ${esc(s.title)}</a>${s.sheets.length?`<div class="mp-sub">${esc(s.sheets.join('  \u00b7  '))}${s.guide?'  \u00b7  Guide':''}</div>`:''}</li>`).join('')}${refsHtml?`<li data-mk="NBHTOC:REFS;"><a class="mp-jump" href="#sec-REFS" data-mk="NBHTOC:REFS;">References and Sources</a><div class="mp-sub">Every form’s citations, gathered once</div></li>`:''}</ol>
-    <p class="mp-note">Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Newsome Behavioral Health packet. Each section is that form as it stood when this was built${refsHtml?', with the forms’ references gathered in the last section':''}${mo.refs==='none'?', its references left out':''}${kept.length?'; the Guide of '+esc(kept.join(', '))+' is included':''}. The forms’ guides and on-screen notes are not printed.</p>
+    <p class="mp-note">${opt.aud&&opt.aud!=='iep'?esc({staff:'For the teachers and staff who carry out the plan.',family:'For the family.',records:'A copy of these education records, as requested.'}[opt.aud]||'')+' ':''}Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Newsome Behavioral Health packet. Each section is that form as it stood when this was built${refsHtml?', with the forms’ references gathered in the last section':''}${mo.refs==='none'?', its references left out':''}${kept.length?'; the Guide of '+esc(kept.join(', '))+' is included':''}. The forms’ guides and on-screen notes are not printed.</p>
   </div>`;
 
   const css=parts.map((x,i)=>scopeCSS(x.css,'.mp-'+i)).join('\n');
-  const runHead=[p.client||'Student not named',p.sid?'ID '+p.sid:''].filter(Boolean).join('  \u00b7  ');
+  const runHead=fam?(first?first+'\u2019s plan':'Your child\u2019s plan')+'  \u00b7  for the family':[p.client||'Student not named',p.sid?'ID '+p.sid:''].filter(Boolean).join('  \u00b7  ');
+  const footLine=fam?(opt.homeFoot||pkHomeFoot(first,who)):"Confidential student record \u2014 FERPA protected. Retain in the student's behavior file.";   /* v25.69 the family's pages: a home footer */
   /* v21.96 A section opens with a thin section line and the form's own letterhead, once; its sheets follow. Every page of a
      section carries the section's name in the running head, through a named page: Chromium 141 breaks the page between a
      caption or footer and its table under a named page, which is why packetShape makes them ordinary rows. */
@@ -3988,7 +4137,7 @@ async function masterRun(chosen,opt){opt=opt||{};
       size:letter;margin:0.62in 0.45in 0.62in;
       @top-left{content:"Newsome Behavioral Health";font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#254657}
       @top-right{content:${cssStr(runHead)};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}
-      @bottom-left{content:"Confidential student record \u2014 FERPA protected. Retain in the student's behavior file.";font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:7.5pt;color:#54676f}
+      @bottom-left{content:${cssStr(footLine)};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:7.5pt;color:#54676f}
       @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}
     }
     html,body{margin:0;background:#fff}
@@ -4074,6 +4223,19 @@ async function masterRun(chosen,opt){opt=opt||{};
     /* v22.81 (found by the packet gate): every signature block the gate checks stays on one page, Form RA-1's and Form SM-1's
        signature rows too (a row of three lines split, its last line alone at the top of the next page) */
     .mp-sec .sig,.mp-sec .eb-sig,.mp-sec .hs-sig,.mp-sec .cn-sig{break-inside:avoid;page-break-inside:avoid}
+    /* v25.69 (design review H8) a table of signature lines with its heading: whole, and never first on a page */
+    .mp-sec .mp-sigkeep{break-inside:avoid;page-break-inside:avoid;break-before:avoid;page-break-before:avoid}
+    .mp-sec .mp-sigkeep>table{break-inside:avoid;page-break-inside:avoid}
+    .mp-sec .mp-icstaff .ic-tb{break-inside:avoid;page-break-inside:avoid}   /* Form IC-1's say-it-back check, after its signatures: whole */
+    .mp-sec .mp-ddkey{break-inside:avoid;page-break-inside:avoid;margin-top:10px}
+    .mp-sec .mp-partfirst{break-before:auto!important;page-break-before:auto!important}
+    .mp-sec .mp-partshow.mp-partshow.mp-partshow{display:block!important}   /* v25.69 (B2) a part a form prints only from its own button (over its own rule hiding it) */
+    /* v25.69 (M13) Form DD-1 on upright pages: a little less white around its graphs (their type the size it was), so the first one fits
+       under the student's details on the section's first page */
+    #sec-DD-1 .chartbox{padding:2px!important}
+    #sec-DD-1 .behavior-report h3.kind-head{padding-bottom:4px!important;margin-bottom:0!important}
+    #sec-DD-1 .behavior-report .legend{margin-top:4px!important;row-gap:2px!important}
+    #sec-DD-1 p.dd-rng-l{margin:4px 0!important}
     .mp-band{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid #cfdad8;margin:0 0 10px;padding:0 0 4px;
       font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#54676f;break-after:avoid;page-break-after:avoid}
     .mp-cap{font:600 12px/1.35 Inter,"Segoe UI",Arial,sans-serif;color:#254657;margin:10px 0 4px;break-after:avoid;page-break-after:avoid}
@@ -4325,12 +4487,13 @@ async function masterRun(chosen,opt){opt=opt||{};
   if(!w||w.closed)w=window.open('','_blank');
   if(!w){alert('The browser blocked the print window. Allow pop-ups for this page and try again.');return;}
   w.document.open();w.document.write(mpPicsOnce(docM));w.document.close();   /* v23.62 (review I240) each picture once */
+  try{pkEstSave(w.__nbhPages,opt.parts);}catch(e){}   /* v25.69 (H8) what each form took, for Build packet's "about N pages" next time */
   /* v22.77 (I241) with anything on the packet check, the print dialog waits for Print as it is, so the list is read first */
   setTimeout(()=>{let n=0;try{n=(w.__nbhCheck||{}).n||0;}catch(e){}try{w.focus();if(!n)w.print();}catch(e){}},900);
   /* v21.90 Safari prints the packet without its page header and footer; saved as PDF, Finish PDF adds them */
   if(appleMobile()||!chromeMajor())try{wsUI.toast('To file the packet as a PDF: in the print window, Share, then Save to Files. Then Finish PDF here adds the page header and footer, the bookmarks and the page numbers.',{ms:14000});}catch(e){}
 }
-$('#masterPrint').addEventListener('click',()=>{const L=ALL.filter(([id])=>state.ticked[id]);masterRun(packetOpts().order==='list'?L:mpCaseOrder(L));});   /* v22.39 (F466) */
+$('#masterPrint').addEventListener('click',()=>{pkSheet();});   /* v22.39 (F466); v25.69 (H8, B2) who it is for first (pkSheet), then masterRun as before */
 $('#packetOpts').addEventListener('click',packetOptsOpen);
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 /* a value going inside a CSS content:"..." string, where a stray quote or

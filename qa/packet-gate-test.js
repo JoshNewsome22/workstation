@@ -81,7 +81,7 @@ const SIGS='.td85-card,.sigblock,.ic-signpart,.eb-sig,.sig,.hs-sig,.cn-sig';
   const ids=FORMS.map(f=>f.id);
   await page.evaluate(ids=>{Object.keys(state.ticked).forEach(k=>state.ticked[k]=false);ids.forEach(id=>state.ticked[id]=true);renderRail();},ids);
   const want=await page.evaluate(()=>{const L=ALL.filter(([id])=>state.ticked[id]);return (packetOpts().order==='list'?L:mpCaseOrder(L)).map(f=>[f[0],f[1]]);});
-  const [win]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.evaluate(()=>$('#masterPrint').click())]);
+  const [win]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),(async()=>{await page.evaluate(()=>$('#masterPrint').click());await L.packetChoose(page);})()]);   /* v25.69 (B2) IEP team and file */
   win.on('pageerror',e=>errs.push('print window: '+e.message));
   await win.evaluate(()=>{window.__printed=0;window.print=function(){window.__printed++;};}).catch(()=>{});   /* the print dialog, counted */
   await win.waitForFunction(()=>window.__nbhFitted!==undefined&&document.querySelector('.mp-sec'),null,{timeout:300000});await L.sleep(1500);
