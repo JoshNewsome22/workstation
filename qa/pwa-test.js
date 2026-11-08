@@ -305,7 +305,9 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     'nbh-td1-video-highp.js','nbh-td1-video-highp-praise.js','nbh-td1-video-highp-class.js','nbh-td1-video-highp-seatwork.js','nbh-td1-video-highp-peer.js' /* v25.68 TD-1's high-p videos, loaded when asked */,
     'nbh-td1-video-dro-resetting.js','nbh-td1-video-dro-class.js','nbh-td1-video-dro-momentary.js','nbh-td1-video-dro-tokens.js','nbh-td1-video-ncr-attention.js','nbh-td1-video-ncr-items.js',
     'nbh-td1-video-ncr-work.js','nbh-td1-video-ncr-between.js','nbh-td1-video-rird-vocal.js','nbh-td1-video-rird-motor.js','nbh-td1-video-rird-pica.js' /* v25.68 (the BCBA, 11/7) TD-1's DRO, NCR and RIRD videos, loaded when asked */,
-    'nbh-shell-docread.js' /* v25.68 the workstation's Read a document, loaded by the shell (its page's size budget) */];
+    'nbh-shell-docread.js' /* v25.68 the workstation's Read a document, loaded by the shell (its page's size budget) */,
+    'videos.html','nbh-videos.js' /* v25.69 the video library and the videos' one list */,
+    ...fs.readdirSync(path.join(ROOT,'NBH-Workstation')).filter(f=>/^nbh-td1-poster-[a-z0-9-]+\.jpg$/.test(f)) /* v25.69 each video's picture */];
   /* v21.67 the document readers (PDF.js, Tesseract) in their folders, named by index.html's nbh-offline meta */
   const offline=(/<meta name="nbh-offline" content="([^"]*)"/.exec(fs.readFileSync(path.join(ROOT,'NBH-Workstation','index.html'),'utf8'))||[0,''])[1].split(/\s+/).filter(Boolean);need.push(...offline);
   /* v21.84 the scripts every form loads from one file beside it (tools/blocks/shared_js.py: the writing help, the letterhead, ...) */
@@ -977,7 +979,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     /* the master print: built into the window inside the app, then printed from it */
     await openIn(up,'PD-1');await sleep(600);
     await up.evaluate(()=>{state.ticked={'PD-1':true};});
-    await up.evaluate(()=>$('#masterPrint').click());
+    await up.evaluate(()=>$('#masterPrint').click());await require(__dirname+'/lib.js').packetChoose(up);   /* v25.69 (B2) IEP team and file */
     await up.waitForFunction(()=>{const o=document.querySelector('[id^="nbhInApp"]'),f=o&&o.querySelector('iframe');try{return !!(f&&f.contentDocument&&f.contentDocument.body&&/PD-1|Performance Diagnostic/.test(f.contentDocument.body.innerText));}catch(e){return false;}},null,{timeout:40000}).catch(()=>{});
     await sleep(4500);
     const o2=await overlay();

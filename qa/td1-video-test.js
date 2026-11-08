@@ -19,7 +19,7 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1;},null,{timeout:20000}).catch(()=>{});
  const o=await p.evaluate(()=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {open:d&&!d.hidden,src:v?v.src.slice(0,5):'',dur:v?v.duration:0,w:v?v.videoWidth:0,title:d?d.querySelector('#tv-title').textContent:'',ai:d?d.querySelector('.tv-ai').textContent:'',note:d?/escape-extinction consent/.test(d.querySelector('.tv-note').textContent):false,err:d?d.querySelector('#tv-msg').classList.contains('tv-err'):true};});
  ok('the player opens with the card\'s name, the AI label and the consent note',o.open&&/^Functional communication training/.test(o.title)&&/AI-generated/.test(o.ai)&&o.note,o);
- ok('the video plays from the device (a blob address), about 109 s, 720p',o.src==='blob:'&&Math.abs(o.dur-109.3)<1.5&&o.w===1280&&!o.err,o);
+ ok('the video plays from the device (a blob address), about 117 s, 720p',o.src==='blob:'&&Math.abs(o.dur-117.0)<1.5&&o.w===1280&&!o.err,o);
  await p.evaluate(()=>document.getElementById('tv-video').play().catch(()=>{}));await p.waitForTimeout(800);
  await p.click('#tdVideo #tv-close');await p.waitForTimeout(300);
  ok('Close hides the player and pauses the video',await p.evaluate(()=>document.getElementById('tdVideo').hidden&&document.getElementById('tv-video').paused));

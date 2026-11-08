@@ -55,8 +55,9 @@ async function viewTap(p,id){const v=p.locator('#aView');await v.tap();await sle
   ok('2 the logo is a small mark at the left of the dark row; it keeps its name, and the page keeps the workstation\'s name',brand.inRow&&brand.mark<=40&&/Workstation/.test(brand.title)&&brand.alt.length>3&&brand.h1==='FBA and BIP Workstation'&&!brand.chipsTop,brand);
   const order=await p.evaluate(()=>[...document.querySelectorAll('#wsNav > *')].filter(e=>e.getBoundingClientRect().width>0&&!e.classList.contains('wn-sep')&&!e.classList.contains('wn-sp')).map(e=>e.id==='wsMark'?'mark':e.classList.contains('wn-right')?[...e.children].filter(c=>c.getBoundingClientRect().width>0).map(c=>c.textContent.replace(/\s+/g,' ').trim()).join('+'):(e.querySelector('.wa-t')||e).textContent.replace(/\s+/g,' ').trim()));
   /* v25.68 (design review H7): no Packet menu ("packet" is the printed document: Build packet); the indicator reports the case file */
-  ok('2 the dark row: the mark, Forms, Case map, Documents, Case, Tools, Today, Caseload, Help, the indicator, then Save case, Build packet, Finish PDF',
-    JSON.stringify(order.slice(0,9))===JSON.stringify(['mark','Forms','Case map','Documents','Case','Tools','Today','Caseload','Help'])&&/saved|nothing to save|no case/i.test(order[9]||'')&&/^Save case\+Build packet\+Finish PDF$/.test(order[10]||''),order);
+  /* v25.69 Videos (the video library) after Documents */
+  ok('2 the dark row: the mark, Forms, Case map, Documents, Videos, Case, Tools, Today, Caseload, Help, the indicator, then Save case, Build packet, Finish PDF',
+    JSON.stringify(order.slice(0,10))===JSON.stringify(['mark','Forms','Case map','Documents','Videos','Case','Tools','Today','Caseload','Help'])&&/saved|nothing to save|no case/i.test(order[10]||'')&&/^Save case\+Build packet\+Finish PDF$/.test(order[11]||''),order);
   const formsBtns=await p.evaluate(()=>[...document.querySelectorAll('header.top button, #bar button, .crumb button')].filter(b=>b.getBoundingClientRect().width>0&&/^Forms$/.test((b.innerText||'').trim())).length);
   ok('3 one Forms button above the form (the form row has the list\'s icon only)',formsBtns===1&&(await box(p,'#railToggle')).vis&&!(await p.evaluate(()=>{const l=document.querySelector('#railToggle .lbl');return l&&l.getBoundingClientRect().width>0;})),formsBtns);
   /* the student line */
@@ -177,7 +178,7 @@ async function viewTap(p,id){const v=p.locator('#aView');await v.tap();await sle
   MEAS.railShown=rft.frame;MEAS.railCard=rft.card;
   ok('14 the top keeps the student line (Save case, Build packet and Finish PDF at its right) and the form row: the form from '+rft.frame+' px',rb.y===0&&rb.x>=80&&rc.y===rb.h&&rft.frame<=115&&JSON.stringify(rr)===JSON.stringify(['Save case','Build packet','Finish PDF']),{rb,rc,rft,rr});
   const ritems=await p.evaluate(()=>[...document.querySelectorAll('#wsNav > *')].filter(e=>e.getBoundingClientRect().width>0).map(e=>e.id==='wsMark'?'mark':e.id==='wsStat'?'status':(e.querySelector('.wa-t')||e).textContent.replace(/\s+/g,' ').trim()));
-  ok('14 the rail: the mark at the top, Forms, Case map, Documents, Case, Tools, Today, Caseload, Help, the status at the bottom (v25.68 H7: no Packet menu)',JSON.stringify(ritems)===JSON.stringify(['mark','Forms','Case map','Documents','Case','Tools','Today','Caseload','Help','status']),ritems);
+  ok('14 the rail: the mark at the top, Forms, Case map, Documents, Videos, Case, Tools, Today, Caseload, Help, the status at the bottom (v25.68 H7: no Packet menu; v25.69 Videos)',JSON.stringify(ritems)===JSON.stringify(['mark','Forms','Case map','Documents','Videos','Case','Tools','Today','Caseload','Help','status']),ritems);
   const icoOk=await p.evaluate(()=>[...document.querySelectorAll('#wsNav .wn-item')].filter(e=>e.getBoundingClientRect().width>0).every(e=>{const i=e.querySelector('svg.wa-ico'),t=e.querySelector('.wa-t,.lbl');return i&&t&&i.getBoundingClientRect().bottom<=t.getBoundingClientRect().top+1;}));
   ok('14 each rail item is an icon above a short label',icoOk);
   /* every rail item opens what its twin in the dark row opens */
