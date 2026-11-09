@@ -7956,6 +7956,50 @@ setInterval(mark,2500);mark();
 window.__tdDroIv={calc,base:()=>BASE,fromFacts,mark};
 })();
 </script>
+<style id="td1-v2570-signal">
+/* v25.70 (the BCBA, 11/9) Make signal cards: screen only, never saved or printed */
+.td-sig{margin:2px 0 8px;font:13px/1.45 var(--td9-sans,var(--nbh-sans,sans-serif));color:var(--nbh-ink-soft,#54676f)}
+.td-sig a.td-sig-go{display:inline-flex;align-items:center;min-height:44px;font-weight:600;color:var(--nbh-accent,#0e5c63);text-decoration:underline;text-underline-offset:2px}
+.td-sig a.td-sig-go:focus-visible{outline:2px solid var(--nbh-accent,#0e5c63);outline-offset:2px}
+@media print{.td-sig{display:none!important}}
+</style>
+<script id="td1-v2570-signal-js">
+/* v25.70 (the BCBA, 11/9) Make signal cards: on each FCT card (FCT, FCT keyed to a component FA, the skill-based "my way"
+   request), each multiple-schedule card, each card from the bank whose protocol thins the schedule of a request or an alternative (FCT, DRA, delay tolerance, chained schedules), and under the
+   Reinforcement Thinning Plan, a link to Form VS-1's Signal cards sheet: the red "not now" and green "you can ask" card that
+   signals when the request will be honored. The template follows the plan's function (attention, items, escape: a break;
+   else the general card). Inside the workstation the shell opens VS-1 beside this form at that sheet ({nbh:'open', want:'VS-1',
+   beside:true, at:'signal-cards-<template>'}; index.html OPEN_AT); on its own, or when the shell does not answer, the link opens
+   VS-1 in a new tab at the same place. Nothing is saved or printed. */
+(function(){
+const VS='VS-1_Visual-Supports_v2026-10.html',SIG={FCT:1,FCT_CFA:1,SBT_FCR:1,S_MULT:1},THINC={FCT:1,FCT_CFA:1,SBT_FCR:1,SBT_TR:1,DT_PROG:1,DRA:1,DNRA:1,S_MULT:1,S_CHAIN:1},T=v=>String(v==null?'':v).trim();
+let THIN=null;
+function thinIds(){if(THIN)return THIN;THIN=new Set();try{if(typeof TD1_BANK!=='undefined')TD1_BANK.protocols.forEach(p=>{if(/\bthin/i.test(p.lab||'')||/-thin/.test(p.id))THIN.add(p.id);});}catch(e){}return THIN;}
+function tpl(){const e=document.querySelector('[name="m.fn"]'),fn=e?T(e.value):'';return fn==='attention'?'attention':fn==='tangible'?'items':fn==='escape'?'break':'general';}
+const NAME={attention:'attention',items:'items or toys',break:'a break',general:'the general card'};
+function want(c){const code=c.dataset.code||'';if(SIG[code])return true;const b=c.querySelector('[name$="].bank"]'),id=b?T(b.value):'';return !!id&&!!THINC[code]&&thinIds().has(id);}
+function link(){const k=tpl();return '<a class="td-sig-go" href="'+VS+'#signal-cards-'+k+'" target="_blank" rel="noopener" data-sig="'+k+'">Make signal cards</a> <span>(Form VS-1: a red &ldquo;not now&rdquo; side and a green &ldquo;you can ask&rdquo; side, 5 &times; 7 in; the template for '+NAME[k]+')</span>';}
+function mark(){const k=tpl();
+  document.querySelectorAll('#compWrap .card').forEach(c=>{let p=c.querySelector('.td-sig');const w=want(c);
+    if(w&&!p){p=document.createElement('p');p.className='noprint td-sig';const h=c.querySelector('.chd');if(h)h.insertAdjacentElement('afterend',p);else c.insertBefore(p,c.firstChild);}
+    else if(!w&&p){p.remove();p=null;}
+    if(p&&p.dataset.k!==k){p.dataset.k=k;p.innerHTML=link();}});
+  const sw=document.getElementById('tdThinSw');if(sw){let p=document.getElementById('tdSigThin');
+    const any=[...document.querySelectorAll('#compWrap .card')].some(c=>want(c)||c.dataset.code==='DRA');
+    if(any&&!p){p=document.createElement('p');p.id='tdSigThin';p.className='noprint td-sig';sw.insertAdjacentElement('afterend',p);}
+    else if(!any&&p){p.remove();p=null;}
+    if(p&&p.dataset.k!==k){p.dataset.k=k;p.innerHTML='Signals for thinning: '+link();}}}
+/* inside the workstation: the shell opens VS-1 beside this form at the sheet; the link itself is the fallback */
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a.td-sig-go');if(!a||window.parent===window)return;e.preventDefault();
+  const href=a.getAttribute('href'),at=(href.split('#')[1]||'').trim();let t=0;
+  const h=ev=>{const d=ev.data;if(ev.source===window.parent&&d&&d.nbh==='opened'&&d.want==='VS-1'){clearTimeout(t);window.removeEventListener('message',h);}};
+  window.addEventListener('message',h);t=setTimeout(()=>{window.removeEventListener('message',h);try{window.open(href,'_blank','noopener');}catch(x){}},1500);
+  try{window.parent.postMessage({nbh:'open',want:'VS-1',beside:true,at},'*');}catch(x){clearTimeout(t);}});
+try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true});}catch(e){}
+document.addEventListener('change',ev=>{if(ev.target&&/^m\.fn$|\]\.bank$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
+window.__tdSignal={mark,tpl,want};
+})();
+</script>
 
 <script id="td112">
 /* v24.12 the protocol's steps refer to this student. Form DM-1 sends the student's first name, preferred name, pronouns and sex
