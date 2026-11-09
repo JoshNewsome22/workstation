@@ -1210,9 +1210,9 @@ html.td9:not(.nbh-pr-measure) .sheet .defs .dval > label .nbh-eg{margin-left:2px
    collects the form for the master print), so field care measures every box at its paper height: the master print kept
    the empty boxes at the screen's taller height. :where() adds nothing to a rule's weight, and has no comma, which the
    master print's scoping of the form's styles cannot take inside :not() */
-html.nbh-pr-measure :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit){display:none!important}
+html.nbh-pr-measure :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit,.fx2-stsw,.fx2-stbar,.fx2-strev){display:none!important}
 /* v25.67 fx2: nor while the page is plain (field care measures the boxes then: an example beside a box narrowed it) */
-html.nbh-plain :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit){display:none!important}
+html.nbh-plain :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit,.fx2-stsw,.fx2-stbar,.fx2-strev){display:none!important}
 /* v25.67 fx2: Focus (nbh-ui: one part of a form at a time) keeps out of sight what it folds. The layout's display rules
    carry !important and outweigh Focus's own rule (a head's fields, a row of definitions, a field grid showed in a folded
    part), so these carry an id's weight: #fx2-never is on no page. A folded part's line hides its controls (:enabled,
@@ -1440,7 +1440,44 @@ html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh p,html.
 html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh p,html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh ul{max-width:68ch}
 html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh h3.sub{font-size:22px!important;margin-top:36px!important}
 html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .defs .dlab{font-size:17px!important}
+
+/* ---------- v25.70 step by step (the BCBA's approval, 11/9; the script's step 13): the questions one, two or three at a
+   time, Back and Next in a bar at the foot, and at the end the blank ones. The form's own switch (FX2_CFG.step) sits under
+   its toolbar; while it steps (html.fx2-st) the parts of the sheet not on this screen are marked data-fx2-st="x" and kept
+   out of sight here, with an id's weight over the layout's display rules (#fx2-never is on no page). Screen only, and none
+   of it while the page is plain or measured for paper. ---------- */
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;box-sizing:border-box;max-width:1100px;margin:10px auto 6px;padding:6px 14px;font:400 15px/1.4 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stl{font-weight:600}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg{display:inline-flex;flex-wrap:wrap;padding:2px;gap:2px;border-radius:10px;background:#E9EFED}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg button{min-height:44px;min-width:44px;padding:0 14px;margin:0;border:0;border-radius:8px;background:transparent;color:var(--fx2-navy);font:600 15px var(--fx2-sans);cursor:pointer}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg button[aria-pressed="true"]{background:var(--fx2-navy);color:#fff}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw [hidden]{display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) :is([data-fx2-st="x"],#fx2-never){display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .nbh-pagenav{display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .ident > [data-fx2-st="q"]{grid-column:1/-1!important;max-width:640px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-fg > [data-fx2-st="q"]{grid-column:1/-1!important;max-width:640px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) [data-fx2-stf]:focus{outline:none}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) body::after{content:"";display:block;height:120px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar{position:fixed;z-index:61;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(760px,calc(100% - 20px));box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border:1px solid var(--fx2-rule);border-radius:16px;box-shadow:0 16px 40px -16px rgba(24,46,67,.5);font:400 14px/1.3 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;min-width:56px;padding:0 22px;margin:0;border:1px solid var(--fx2-box);border-radius:12px;background:#fff;color:var(--fx2-navy);font:600 17px var(--fx2-sans);cursor:pointer;flex:0 0 auto;white-space:nowrap}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stnext{min-width:150px;background:var(--fx2-navy);border-color:var(--fx2-navy);color:#fff}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stback{min-width:112px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stblank{min-height:44px;padding:0 12px;font-size:14px;border-color:transparent}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button[hidden]{display:none}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button:disabled{opacity:.4;cursor:default}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button:focus-visible{outline:3px solid #9DBAD3;outline-offset:2px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stwhere{flex:1 1 auto;min-width:0;text-align:center}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stwhere b{display:block;font:600 15px/1.3 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stwhere span{display:block;font:400 13px/1.3 var(--fx2-sans);color:var(--fx2-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev{box-sizing:border-box;max-width:760px;margin:20px auto 30px;padding:22px 24px;background:#fff;border:1px solid var(--fx2-rule);border-radius:14px;font:400 16px/1.5 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev h2{font:600 26px/1.25 var(--fx2-serif);color:var(--fx2-navy);margin:0 0 8px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev h3{font:600 17px/1.3 var(--fx2-sans);color:var(--fx2-ink);margin:20px 0 8px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev ul{list-style:none;margin:0;padding:0}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev li{margin:0 0 8px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev li button{display:block;width:100%;min-height:48px;padding:10px 14px;margin:0;text-align:left;border:1px solid var(--fx2-box);border-radius:10px;background:#fff;color:var(--fx2-navy);font:500 16px/1.35 var(--fx2-sans);cursor:pointer}
+@media (max-width:640px){html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar{gap:6px;padding:6px;width:calc(100% - 12px)} html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button{padding:0 14px;font-size:16px} html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stnext{min-width:96px} html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stback{min-width:80px}}
 }
+@media print{.fx2-stsw,.fx2-stbar,.fx2-strev{display:none!important}}
 </style>
 <style id="fx2-own">
 /* v25.70 fx2: TD-1's own screen rules for the shared layout. TD-1's own v24.89 layout (html.td9, the style element
@@ -7374,7 +7411,7 @@ function vTable(a,b){const same=a.id===b.id,R=vRows(a,b);let nd=0;
  return `<section class="vdiff" aria-labelledby="tdVdH"><div class="vh" id="tdVdH">${esc(title)}</div><div class="vtw" role="region" aria-labelledby="tdVdH" tabindex="0"><table class="vtab${same?'':' v3'}"><thead><tr><td></td><th scope="col">${esc('Started from: '+vCite(a))}</th>${same?'':`<th scope="col">${esc('This version: '+vCite(b))}</th>`}</tr></thead><tbody>${body}</tbody></table></div><p class="vsame">${esc(note)}</p></section>`;}
 /* the buttons a card's detail carries (Add to the plan, Show me, Watch the video with its line), in the panel and in each column */
 function loadHtml(p,label){const V=window.__tdVideo,vl=V&&V.has(p.id)&&V.line?V.line(p.id):'';
- return `<div class="load" data-id="${esc(p.id)}"><div class="btns">${hasPun(p)?'<button type="button" class="add primary" data-pun="0">Add without punishment</button><button type="button" class="add" data-pun="1">Add with punishment (consent required)</button>':`<button type="button" class="add primary">${esc(label||'Add to the plan')}</button>`}${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${V&&V.has(p.id)?'<button type="button" class="vid">Watch the video</button>':''}</div>${vl?`<p class="vidln">${esc(vl)}</p>`:''}${hasPun(p)?'<p class="punnote">This study used a punishment element, marked in the steps below. <b>Add without punishment</b> leaves those steps off the card. <b>Add with punishment</b> puts them on the card, labeled; they need district review and written consent before they are used.</p>':''}${hasOpt(p)?'<label class="optpick"><input type="checkbox" class="optck"> Include the optional step: it reinforces problem behavior on purpose</label><p class="optnote">This study reinforced the problem behavior on purpose in one step, marked OPTION below; the step says what it does, why the study did it and when it ends. It is left off the card unless you tick the box. If you use it, run it only with a safety plan for the behavior and end it as soon as its own criterion is met.</p>':''}<div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>`;}
+ return `<div class="load" data-id="${esc(p.id)}"><div class="btns">${hasPun(p)?'<button type="button" class="add primary" data-pun="0">Add without punishment</button><button type="button" class="add" data-pun="1">Add with punishment (consent required)</button>':`<button type="button" class="add primary">${esc(label||'Add to the plan')}</button>`}${window.__tdScenes&&window.__tdScenes.has(p.id)?'<button type="button" class="show">Show me</button>':''}${V&&V.has(p.id)?'<button type="button" class="vid" title="Watch the video of this procedure">Watch how</button>':''}</div>${vl?`<p class="vidln">${esc(vl)}</p>`:''}${hasPun(p)?'<p class="punnote">This study used a punishment element, marked in the steps below. <b>Add without punishment</b> leaves those steps off the card. <b>Add with punishment</b> puts them on the card, labeled; they need district review and written consent before they are used.</p>':''}${hasOpt(p)?'<label class="optpick"><input type="checkbox" class="optck"> Include the optional step: it reinforces problem behavior on purpose</label><p class="optnote">This study reinforced the problem behavior on purpose in one step, marked OPTION below; the step says what it does, why the study did it and when it ends. It is left off the card unless you tick the box. If you use it, run it only with a safety plan for the behavior and end it as soon as its own criterion is met.</p>':''}<div class="same" hidden></div><div class="st" hidden aria-live="polite"></div></div>`;}
 const stepLi=s=>'<li'+(PUN.test(s)?' class="pun"':OPT.test(s)?' class="opt"':'')+'>'+esc(tdW(s))+'</li>';
 const refsHtml=p=>'<ul class="refs">'+(p.src||[]).map(k=>REF[k]).filter(Boolean).map(r=>`<li>${esc(r.apa)}${r.doi?` <a href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener noreferrer">https://doi.org/${esc(r.doi)}</a>`:''}</li>`).join('')+'</ul>';
 /* one column of Side by side: rows the other column shares (heading, buttons, the study, settings, the steps heading, one row
@@ -7606,7 +7643,7 @@ html.td9:not(.nbh-pr-measure) #compWrap .card .td-vid-line{font:13px/1.45 var(--
 (function () {
 'use strict';
 var LIST = [
- {key:'fct-practical-guide-thinning',family:'fct',title:'Functional communication training: the break request, step by step',file:'nbh-td1-video-fct.js',poster:'nbh-td1-poster-fct.jpg',open:['fct-practical-guide-thinning'],note:'Made with an AI video model from the card’s steps, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.'},
+ {key:'fct-practical-guide-thinning',family:'fct',title:'Functional communication training: the break request, step by step',file:'nbh-td1-video-fct.js',poster:'nbh-td1-poster-fct.jpg',open:['fct-practical-guide-thinning'],note:'Made with an AI video model from the card’s steps, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.',after:'Tiger et al. (2008a)',shows:{fn:'escape',ext:1,summary:'for escape, a break card taught at the task before problem behavior starts (a point to the card, faded over trials), each request honored with a break at once, problem behavior earning no break with the work kept in place and the card pointed to, then “two more problems first” as the schedule is thinned, and the request, grown to a full sentence, honored by a new adult in a new place'}},
  {key:'a_highp',family:'highp',title:'High-probability request sequence: three easy requests, then the hard one',file:'nbh-td1-video-highp.js',poster:'nbh-td1-poster-highp.jpg',open:['a_highp-three-quick-requests'],note:'Made with an AI video model from TD-1’s steps for this card, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan. If the student does not do the hard request, follow the Responding to behavior sheet for the function.',shows:{n_easy:'3',spacing:'1–3 s',easy_reinforcer:'Praise and a small edible',to_hard:'Within 3 s',missed_easy:'Wait 30 s, start a new sequence',summary:'3 easy requests 1–3 s apart, praise and a snack after each, the hard request within 3 s, a 30-s restart after a missed one'}},
  {key:'a_highp_praise',family:'highp',title:'High-probability request sequence: praise only',file:'nbh-td1-video-highp-praise.js',poster:'nbh-td1-poster-highp-praise.jpg',src:'a_highp-momentum-cooperation',after:'Wilder, Sheppard, et al. (2025)',note:'Made with an AI video model from the steps of the card after Wilder, Sheppard, et al. (2025), with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan. If the student does not do the hard request, follow the Responding to behavior sheet for the function.',shows:{n_easy:'3',spacing:'1–2 s',easy_reinforcer:'Brief praise',to_hard:'1–2 s after the last one',missed_easy:'Stop, wait 15 s, restart from the first',summary:'3 easy requests 1–2 s apart, brief praise only after each, the hard request 1–2 s after the last, nothing said if it is not done, a 15-s restart from the first after a missed one'}},
  {key:'a_highp_class',family:'highp',title:'High-probability instructions for the whole class, before a transition',file:'nbh-td1-video-highp-class.js',poster:'nbh-td1-poster-highp-class.jpg',src:'a_highp-group-transition-fading',after:'Ardoin et al. (1999)',note:'Made with an AI video model from the steps of the card after Ardoin et al. (1999), with captions and narration added. The teacher, the children and the room are simulated: it shows the sequence, not a real session. Adapt every step to the class and the student’s plan. If the student does not follow the transition, follow the Responding to behavior sheet for the function.',shows:{n_easy:'3, faded to 2, then 1',spacing:'No more than 5 s',easy_reinforcer:'Not stated',to_hard:'Within 5 s',missed_easy:'Not stated',summary:'3 easy instructions to the whole class at most 5 s apart, the transition within 5 s, praise for named students and the class, then faded to 1'}},
@@ -7626,10 +7663,13 @@ var LIST = [
  {key:'dra_attention',family:'dra',pv:1,title:'DRA with attention: praise for working, planned ignoring of off-task behavior',file:'nbh-td1-video-dra-attention.js',poster:'nbh-td1-poster-dra-attention.jpg',src:['dra-teacher-attention-study'],after:'Hall, Lund & Jackson (1968)',last:'Use planned ignoring only for behavior that is safe to ignore; if problem behavior is unsafe, follow the Responding to behavior sheet for the function.',shows:{fn:'attention',ext:1,summary:'no reminders, urging or scolding while the student is off task, the teacher going to the student right away to praise the first steps of work, then brief praise or a pat after each minute of steady work (an observer’s card cueing it at first), no response to leaving the seat for help and a quick answer to a hand raised while seated'}},
  {key:'dra_escape',family:'dra',pv:1,title:'DRA for escape, without extinction: doing the task earns the better break',file:'nbh-td1-video-dra-escape.js',poster:'nbh-td1-poster-dra-escape.jpg',src:['dra-break-plus-favorites-no-ext'],after:'Briggs et al. (2019)',last:'Physical help after the model is a restrictive step: plan it with consent, and stop if the student pulls away.',shows:{fn:'escape',ext:0,summary:'each instruction followed earning praise, the end of the task and a 2-min break with favorite things and the adult’s full attention, while problem behavior ends the task with only a 30-s plain break with no attention and no items, then a token for each task toward the better break once problem behavior is low, the requirement raised toward 20'}},
  {key:'dra_tangible',family:'dra',pv:1,title:'DRA for items, without extinction: coupons for ending a favorite activity',file:'nbh-td1-video-dra-tangible.js',poster:'nbh-td1-poster-dra-tangible.jpg',src:['dra-coupons-end-preferred'],after:'Wilder et al. (2007a)',last:'The study did not thin the coupons: plan that step before you start.',shows:{fn:'tangible',ext:0,summary:'one instruction to end the favorite activity, a thank-you and a coupon at once when the student starts within 10 s, no coupon, no comment and no repeat when she does not, and the coupons traded at the end of the session, each for 3 min of uninterrupted time with the activity'}},
- {key:'dra_automatic',family:'dra',pv:1,title:'DRA for automatic stereotypy: play earns free time for it',file:'nbh-td1-video-dra-automatic.js',poster:'nbh-td1-poster-dra-automatic.jpg',src:['dra-earn-stereotypy-access-leisure','dra-stereotypy-access-play'],after:'Potter et al. (2013) and Hanley et al. (2000)',last:'These studies also blocked stereotypy at the table, a restrictive step not shown here: it needs district review and written consent.',shows:{fn:'automatic',summary:'a prompt every 30 s to use the leisure materials (a model, a point or a word), and each requirement met without stereotypy earning 30 s of free stereotypy, the chair turned back from the table and the adult a meter away with no prompts and no blocking, then back to the table, the requirement raised one step at a time'}}
+ {key:'dra_automatic',family:'dra',pv:1,title:'DRA for automatic stereotypy: play earns free time for it',file:'nbh-td1-video-dra-automatic.js',poster:'nbh-td1-poster-dra-automatic.jpg',src:['dra-earn-stereotypy-access-leisure','dra-stereotypy-access-play'],after:'Potter et al. (2013) and Hanley et al. (2000)',last:'These studies also blocked stereotypy at the table, a restrictive step not shown here: it needs district review and written consent.',shows:{fn:'automatic',summary:'a prompt every 30 s to use the leisure materials (a model, a point or a word), and each requirement met without stereotypy earning 30 s of free stereotypy, the chair turned back from the table and the adult a meter away with no prompts and no blocking, then back to the table, the requirement raised one step at a time'}},
+ {key:'fct_attention',family:'fct',pv:1,title:'FCT for attention: a card to call the teacher, and one plain reminder',file:'nbh-td1-video-fct-attention.js',poster:'nbh-td1-poster-fct-attention.jpg',src:['fct-precursor-attention-card'],after:'Najdowski et al. (2008)',last:'Warning signs are not the dangerous behavior: have a crisis plan, and follow it if severe behavior occurs.',shows:{fn:'attention',ext:1,summary:'a card the student raises when he wants the teacher, the warning signs that come before serious behavior (here stopping work, crossing his arms and slumping) met only with “Remember to use your card if you need something”, no reprimand and no redirection, the raised card answered at once with “Good, what do you need?” and 5 to 10 s of attention, and for a student who needs more support the card prompted on a short timer, lengthened after 3 prompted requests in a row with no warning signs'}},
+ {key:'fct_tangible',family:'fct',pv:1,title:'FCT for items: ask with a card, then wait, then accept no',file:'nbh-td1-video-fct-tangible.js',poster:'nbh-td1-poster-fct-tangible.jpg',src:['fct-card-delay-denial-prevention'],after:'Fahmie et al. (2016)',last:'Do not copy the study’s test trials, which reinforced severe behavior on purpose.',shows:{fn:'tangible',summary:'2-min trials with favorite things in sight but out of reach and a picture card within reach, the card handed over earning the items at once for the rest of the trial, a second adult pointing to the card and then guiding the hand when no request comes, free-access trials mixed in, then “Wait” with a red card shown for 30 s before the items, and last some requests answered “No” with the red card up for the rest of the trial and no items'}},
+ {key:'fct_thinning_mult',family:'fct',pv:1,title:'FCT schedule thinning: green for ask now, red for not now',file:'nbh-td1-video-fct-thinning.js',poster:'nbh-td1-poster-fct-thinning.jpg',src:['fct-signaled-schedule-thinning'],after:'Greer et al. (2016b)',last:'For escape, withholding the break after problem behavior is escape extinction: complete the escape-extinction consent block first.',shows:{fn:'attention',ext:1,summary:'once the taught request is steady and problem behavior low, a green and red signal: on green every request honored at once with 20 to 30 s of attention, on red the teacher busy, with no answer and no look, red starting at about 2 s and lengthened toward 4 min only when problem behavior is at least 90% below baseline and at least 70% of requests come on green, the card taken away during red if requests go on, and a preferred item added during red if problem behavior stays high'}}
 ];
 /* ---- written by tools/blocks/patch-videos.py; run it again rather than editing this part ---- */
-var GEN = {"cards":{"a_highp-group-transition-fading":{"cite":"Ardoin et al., 1999","code":"A_HIGHP","fn":[],"lab":"Give the class quick easy instructions before each transition instruction, then fade them"},"a_highp-math-seatwork-start":{"cite":"Wehby & Hollahan, 2000","code":"A_HIGHP","fn":[],"lab":"Three quick math-related requests before asking the student to start independent seatwork"},"a_highp-momentum-cooperation":{"cite":"Wilder, Sheppard, et al., 2025","code":"A_HIGHP","fn":[],"lab":"High-p instruction sequence to raise cooperation with a hard (low-p) instruction"},"a_highp-three-quick-requests":{"cite":"Bullock & Normand, 2006","code":"A_HIGHP","fn":[],"lab":"Three easy requests, each rewarded, just before a harder instruction"},"a_highp-variant-peer-requests":{"cite":"Davis & Reichle, 1996","code":"A_HIGHP","fn":[],"lab":"Classmates give easy play requests in a varied order before a social request"},"dra-break-plus-favorites-no-ext":{"cite":"Briggs et al., 2019","code":"DRA","fn":["escape"],"lab":"Reward following instructions with a longer break with favorite things, while problem behavior gets only a short plain break"},"dra-coupons-end-preferred":{"cite":"Wilder et al., 2007a","code":"DRA","fn":["tangible"],"lab":"Coupons for ending a favorite activity when asked, traded later for uninterrupted time with it"},"dra-earn-stereotypy-access-leisure":{"cite":"Potter et al., 2013","code":"DRA","fn":["automatic"],"lab":"Earn short periods of free stereotypy by playing with leisure materials"},"dra-stereotypy-access-play":{"cite":"Hanley et al., 2000","code":"DRA","fn":["automatic"],"lab":"Earn 30 s of free stereotypy by handling a leisure item for a growing time"},"dra-teacher-attention-study":{"cite":"R. V. Hall, Lund, & Jackson, 1968","code":"DRA","fn":["attention"],"lab":"Contingent teacher attention for study with planned ignoring of off-task behavior"},"dro-break-after-calm-interval":{"cite":"Kodak et al., 2003","code":"DRO","fn":["escape"],"lab":"Earn a short break from work after each interval without problem behavior"},"dro-self-monitored-timer":{"cite":"Tiger et al., 2009","code":"DRO","fn":["automatic"],"lab":"Staff-run, then self-run timer DRO with tickets for intervals without skin picking"},"dro-selfmanage-timer-tokens":{"cite":"Tereshko et al., 2021","code":"DRO","fn":["automatic"],"lab":"Self-managed timer and token board for intervals without motor stereotypy, faded to a vibrating watch"},"dro-unsignaled-momentary":{"cite":"Hammond et al., 2011","code":"DRO","fn":["tangible"],"lab":"Give the item when no problem behavior occurs as an unsignaled interval ends"},"dro-variable-momentary":{"cite":"Lindberg et al., 1999","code":"DRO","fn":["attention","tangible"],"lab":"Variable-momentary DRO: check at unpredictable times and reinforce if the behavior is not happening"},"dro-whole-interval-classroom":{"cite":"Repp et al., 1983","code":"DRO","fn":[],"lab":"Whole-interval DRO for classroom disruption, with momentary checks only to maintain"},"dro-whole-then-momentary":{"cite":"L. E. Barton et al., 1986","code":"DRO","fn":[],"lab":"Whole-interval DRO to reduce behavior, then momentary DRO to maintain the reduction"},"fct-practical-guide-thinning":{"cite":"Tiger et al., 2008a","code":"FCT","fn":["escape","attention","tangible"],"lab":"Functional communication training with extinction and gradual, signaled schedule thinning (practice guide)"},"nce-fixed-time-breaks-notes":{"cite":"Waller & Higbee, 2010","code":"NCE","fn":["escape"],"lab":"Scheduled breaks from seatwork on a timer, cued by work and break notes"},"ncr-attention-ft1-after-school":{"cite":"Noel & Getch, 2016","code":"NCR","fn":["attention"],"lab":"Fixed-time attention every minute, cued by a vibrating timer, for attention-maintained disruption during group lessons"},"ncr-ft-attention-classroom":{"cite":"Rasmussen & O'Neill, 2006","code":"NCR","fn":["attention"],"lab":"Timed teacher attention on a fixed schedule to reduce talking out in class"},"ncr-latency-based-tangible":{"cite":"Lalli et al., 1997","code":"NCR","fn":["tangible"],"lab":"Timed free access to a preferred item, starting at the baseline latency"},"ncr-presession-item-access":{"cite":"Rispoli et al., 2011","code":"NCR","fn":["tangible"],"lab":"Free access to the wanted item until the student loses interest, just before class work"},"ncr-signaled-thinning-alternatives":{"cite":"Slocum et al., 2018","code":"NCR","fn":["tangible","attention"],"lab":"Free access to the item or attention, then signaled no-access periods with other reinforcers kept available"},"ncr-signaled-timer-return":{"cite":"Gouboth et al., 2007","code":"NCR","fn":["tangible","attention"],"lab":"Scheduled access to items or attention, with a spoken signal and timer for their return"},"ncr-thin-first-then-requests":{"cite":"Goh et al., 2000; Kahng et al., 2000a","code":"NCR","fn":["tangible","attention"],"lab":"Free access on a dense schedule, thinned so the student's new request can grow"},"ncr-vt-food-praise-demands":{"cite":"Lomas et al., 2010","code":"NCR","fn":["escape"],"lab":"Give a preferred snack and praise on a variable-time schedule during demands"},"rird-block-pica-on-touch":{"cite":"McCord et al., 2005","code":"RIRD","fn":["automatic"],"lab":"Block pica early, as soon as the student touches an inedible item"},"rird-motor-directions-school":{"cite":"Cassella et al., 2011; Ahrens et al., 2011","code":"RIRD","fn":["automatic"],"lab":"Interrupt vocal stereotypy at school with one-step motor directions"},"rird-one-motor-demand":{"cite":"Saini et al., 2015","code":"RIRD","fn":["automatic"],"lab":"Interrupt stereotypy and redirect with one motor instruction instead of three"},"rird-one-question-vocal-stereotypy":{"cite":"Toper-Korkmaz et al., 2018","code":"RIRD","fn":["automatic"],"lab":"Interrupt vocal stereotypy with one known question during play"},"rird-pica-block-redirect-discard":{"cite":"Frank-Crawford et al., 2025","code":"RIRD","fn":["automatic"],"lab":"Pica plan: competing items, block and redirect each attempt, and reward throwing items away"},"rird-pica-block-redirect-food":{"cite":"Hagopian & Adelinis, 2001","code":"RIRD","fn":["automatic"],"lab":"Block pica and redirect the student to a freely available preferred food"},"rird-vocal-questions":{"cite":"Ahrens et al., 2011","code":"RIRD","fn":["automatic"],"lab":"Interrupt vocal stereotypy with known questions the student answers out loud"},"rird-vocal-stereotypy-demands":{"cite":"Ahearn et al., 2007","code":"RIRD","fn":["automatic"],"lab":"Interrupt vocal stereotypy and redirect to known vocal answers until three are correct"}},"dur":{"a_highp":169.2,"a_highp_class":86.4,"a_highp_peer":82.6,"a_highp_praise":105.9,"a_highp_seatwork":88.7,"dra_attention":138.5,"dra_automatic":137.3,"dra_escape":142.2,"dra_tangible":135.6,"dro_class":143.6,"dro_momentary":135.4,"dro_resetting":135.3,"dro_tokens":113.0,"fct-practical-guide-thinning":117.0,"ncr_attention":89.4,"ncr_between":88.5,"ncr_items":98.6,"ncr_work":87.9,"rird_motor":91.4,"rird_pica":83.2,"rird_vocal":102.8},"fn":{"a_highp":["escape"],"a_highp_class":["escape"],"a_highp_peer":["escape"],"a_highp_praise":["escape"],"a_highp_seatwork":["escape"],"dra_attention":["attention"],"dra_automatic":["automatic"],"dra_escape":["escape"],"dra_tangible":["tangible"],"dro_class":[],"dro_momentary":["attention","tangible"],"dro_resetting":["escape"],"dro_tokens":["automatic"],"fct-practical-guide-thinning":["escape","attention","tangible"],"ncr_attention":["attention"],"ncr_between":["attention","tangible"],"ncr_items":["attention","tangible"],"ncr_work":["escape"],"rird_motor":["automatic"],"rird_pica":["automatic"],"rird_vocal":["automatic"]},"form":"TD-1_Function-Based-Treatment-Developer_v2026-09.html"};
+var GEN = {"cards":{"a_highp-group-transition-fading":{"cite":"Ardoin et al., 1999","code":"A_HIGHP","fn":[],"lab":"Give the class quick easy instructions before each transition instruction, then fade them"},"a_highp-math-seatwork-start":{"cite":"Wehby & Hollahan, 2000","code":"A_HIGHP","fn":[],"lab":"Three quick math-related requests before asking the student to start independent seatwork"},"a_highp-momentum-cooperation":{"cite":"Wilder, Sheppard, et al., 2025","code":"A_HIGHP","fn":[],"lab":"High-p instruction sequence to raise cooperation with a hard (low-p) instruction"},"a_highp-three-quick-requests":{"cite":"Bullock & Normand, 2006","code":"A_HIGHP","fn":[],"lab":"Three easy requests, each rewarded, just before a harder instruction"},"a_highp-variant-peer-requests":{"cite":"Davis & Reichle, 1996","code":"A_HIGHP","fn":[],"lab":"Classmates give easy play requests in a varied order before a social request"},"dra-break-plus-favorites-no-ext":{"cite":"Briggs et al., 2019","code":"DRA","fn":["escape"],"lab":"Reward following instructions with a longer break with favorite things, while problem behavior gets only a short plain break"},"dra-coupons-end-preferred":{"cite":"Wilder et al., 2007a","code":"DRA","fn":["tangible"],"lab":"Coupons for ending a favorite activity when asked, traded later for uninterrupted time with it"},"dra-earn-stereotypy-access-leisure":{"cite":"Potter et al., 2013","code":"DRA","fn":["automatic"],"lab":"Earn short periods of free stereotypy by playing with leisure materials"},"dra-stereotypy-access-play":{"cite":"Hanley et al., 2000","code":"DRA","fn":["automatic"],"lab":"Earn 30 s of free stereotypy by handling a leisure item for a growing time"},"dra-teacher-attention-study":{"cite":"R. V. Hall, Lund, & Jackson, 1968","code":"DRA","fn":["attention"],"lab":"Contingent teacher attention for study with planned ignoring of off-task behavior"},"dro-break-after-calm-interval":{"cite":"Kodak et al., 2003","code":"DRO","fn":["escape"],"lab":"Earn a short break from work after each interval without problem behavior"},"dro-self-monitored-timer":{"cite":"Tiger et al., 2009","code":"DRO","fn":["automatic"],"lab":"Staff-run, then self-run timer DRO with tickets for intervals without skin picking"},"dro-selfmanage-timer-tokens":{"cite":"Tereshko et al., 2021","code":"DRO","fn":["automatic"],"lab":"Self-managed timer and token board for intervals without motor stereotypy, faded to a vibrating watch"},"dro-unsignaled-momentary":{"cite":"Hammond et al., 2011","code":"DRO","fn":["tangible"],"lab":"Give the item when no problem behavior occurs as an unsignaled interval ends"},"dro-variable-momentary":{"cite":"Lindberg et al., 1999","code":"DRO","fn":["attention","tangible"],"lab":"Variable-momentary DRO: check at unpredictable times and reinforce if the behavior is not happening"},"dro-whole-interval-classroom":{"cite":"Repp et al., 1983","code":"DRO","fn":[],"lab":"Whole-interval DRO for classroom disruption, with momentary checks only to maintain"},"dro-whole-then-momentary":{"cite":"L. E. Barton et al., 1986","code":"DRO","fn":[],"lab":"Whole-interval DRO to reduce behavior, then momentary DRO to maintain the reduction"},"fct-card-delay-denial-prevention":{"cite":"Fahmie et al., 2016","code":"FCT","fn":["tangible"],"lab":"Teach a picture-card request for items, then waiting and accepting no, as prevention"},"fct-practical-guide-thinning":{"cite":"Tiger et al., 2008a","code":"FCT","fn":["escape","attention","tangible"],"lab":"Functional communication training with extinction and gradual, signaled schedule thinning (practice guide)"},"fct-precursor-attention-card":{"cite":"Najdowski et al., 2008","code":"FCT","fn":["attention"],"lab":"Teach a request for attention when early warning behavior shows an attention function"},"fct-signaled-schedule-thinning":{"cite":"Greer et al., 2016b","code":"FCT","fn":["tangible","escape","attention"],"lab":"Functional communication training thinned with signals showing when requests will be honored"},"nce-fixed-time-breaks-notes":{"cite":"Waller & Higbee, 2010","code":"NCE","fn":["escape"],"lab":"Scheduled breaks from seatwork on a timer, cued by work and break notes"},"ncr-attention-ft1-after-school":{"cite":"Noel & Getch, 2016","code":"NCR","fn":["attention"],"lab":"Fixed-time attention every minute, cued by a vibrating timer, for attention-maintained disruption during group lessons"},"ncr-ft-attention-classroom":{"cite":"Rasmussen & O'Neill, 2006","code":"NCR","fn":["attention"],"lab":"Timed teacher attention on a fixed schedule to reduce talking out in class"},"ncr-latency-based-tangible":{"cite":"Lalli et al., 1997","code":"NCR","fn":["tangible"],"lab":"Timed free access to a preferred item, starting at the baseline latency"},"ncr-presession-item-access":{"cite":"Rispoli et al., 2011","code":"NCR","fn":["tangible"],"lab":"Free access to the wanted item until the student loses interest, just before class work"},"ncr-signaled-thinning-alternatives":{"cite":"Slocum et al., 2018","code":"NCR","fn":["tangible","attention"],"lab":"Free access to the item or attention, then signaled no-access periods with other reinforcers kept available"},"ncr-signaled-timer-return":{"cite":"Gouboth et al., 2007","code":"NCR","fn":["tangible","attention"],"lab":"Scheduled access to items or attention, with a spoken signal and timer for their return"},"ncr-thin-first-then-requests":{"cite":"Goh et al., 2000; Kahng et al., 2000a","code":"NCR","fn":["tangible","attention"],"lab":"Free access on a dense schedule, thinned so the student's new request can grow"},"ncr-vt-food-praise-demands":{"cite":"Lomas et al., 2010","code":"NCR","fn":["escape"],"lab":"Give a preferred snack and praise on a variable-time schedule during demands"},"rird-block-pica-on-touch":{"cite":"McCord et al., 2005","code":"RIRD","fn":["automatic"],"lab":"Block pica early, as soon as the student touches an inedible item"},"rird-motor-directions-school":{"cite":"Cassella et al., 2011; Ahrens et al., 2011","code":"RIRD","fn":["automatic"],"lab":"Interrupt vocal stereotypy at school with one-step motor directions"},"rird-one-motor-demand":{"cite":"Saini et al., 2015","code":"RIRD","fn":["automatic"],"lab":"Interrupt stereotypy and redirect with one motor instruction instead of three"},"rird-one-question-vocal-stereotypy":{"cite":"Toper-Korkmaz et al., 2018","code":"RIRD","fn":["automatic"],"lab":"Interrupt vocal stereotypy with one known question during play"},"rird-pica-block-redirect-discard":{"cite":"Frank-Crawford et al., 2025","code":"RIRD","fn":["automatic"],"lab":"Pica plan: competing items, block and redirect each attempt, and reward throwing items away"},"rird-pica-block-redirect-food":{"cite":"Hagopian & Adelinis, 2001","code":"RIRD","fn":["automatic"],"lab":"Block pica and redirect the student to a freely available preferred food"},"rird-vocal-questions":{"cite":"Ahrens et al., 2011","code":"RIRD","fn":["automatic"],"lab":"Interrupt vocal stereotypy with known questions the student answers out loud"},"rird-vocal-stereotypy-demands":{"cite":"Ahearn et al., 2007","code":"RIRD","fn":["automatic"],"lab":"Interrupt vocal stereotypy and redirect to known vocal answers until three are correct"}},"dur":{"a_highp":169.2,"a_highp_class":86.4,"a_highp_peer":82.6,"a_highp_praise":105.9,"a_highp_seatwork":88.7,"dra_attention":139.7,"dra_automatic":138.6,"dra_escape":145.3,"dra_tangible":137.7,"dro_class":143.6,"dro_momentary":135.4,"dro_resetting":135.3,"dro_tokens":113.0,"fct-practical-guide-thinning":117.0,"fct_attention":124.8,"fct_tangible":151.0,"fct_thinning_mult":125.3,"ncr_attention":89.4,"ncr_between":88.5,"ncr_items":98.6,"ncr_work":87.9,"rird_motor":91.4,"rird_pica":83.2,"rird_vocal":102.8},"fn":{"a_highp":["escape"],"a_highp_class":["escape"],"a_highp_peer":["escape"],"a_highp_praise":["escape"],"a_highp_seatwork":["escape"],"dra_attention":["attention"],"dra_automatic":["automatic"],"dra_escape":["escape"],"dra_tangible":["tangible"],"dro_class":[],"dro_momentary":["attention","tangible"],"dro_resetting":["escape"],"dro_tokens":["automatic"],"fct-practical-guide-thinning":["escape","attention","tangible"],"fct_attention":["attention"],"fct_tangible":["tangible"],"fct_thinning_mult":["escape","attention","tangible"],"ncr_attention":["attention"],"ncr_between":["attention","tangible"],"ncr_items":["attention","tangible"],"ncr_work":["escape"],"rird_motor":["automatic"],"rird_pica":["automatic"],"rird_vocal":["automatic"]},"form":"TD-1_Function-Based-Treatment-Developer_v2026-09.html"};
 /* ---- end of the part tools/blocks/patch-videos.py writes ---- */
 /* the procedures, in the order the library shows them: key, short name, name */
 var FAMILIES = [['dro', 'DRO', 'Differential reinforcement of other behavior'], ['dra', 'DRA', 'Differential reinforcement of alternative behavior'], ['ncr', 'NCR', 'Noncontingent reinforcement'],
@@ -7676,7 +7716,13 @@ window.NBH_VIDEOS = { list: LIST, families: FAMILIES, cards: GEN.cards || {}, fo
    things for doing the task, a short plain one after problem behavior, after Briggs et al., 2019), items without extinction
    (coupons for ending a favorite activity, after Wilder et al., 2007a) and automatic (play earns short periods of free
    stereotypy, after Potter et al., 2013, and Hanley et al., 2000). Every DRA card shows the closest (pvKey), with one clause
-   on how it differs (pvDiff): another function, extinction used or not, or else the card's own alternative response. */
+   on how it differs (pvDiff): another function, extinction used or not, or else the card's own alternative response.
+   v25.70 (the BCBA, 11/9) three more for FCT, each in its own file, loaded only when asked: attention (a card to call the
+   teacher, one plain reminder after warning signs, after Najdowski et al., 2008), items (a picture card, then "wait" with a
+   red card, then "no", after Fahmie et al., 2016) and signaled thinning (green for ask now, red for not now, after Greer et
+   al., 2016b). Every FCT card shows the closest of the four FCT videos (pvKey), with one clause on how it differs (pvDiff):
+   another function, extinction not used, or else the card's own request; the first FCT video's card says it shows its steps,
+   and an FCT card from the menu shows that video. */
 (function(){
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=()=>res();s.onerror=()=>rej(new Error(src));document.head.appendChild(s);});}
 /* v25.69 the videos: one list for TD-1 and the video library, nbh-videos.js (its copy in the script element nbh-videos above, written
@@ -7691,7 +7737,7 @@ const VMAP={'a_highp-group-transition-fading':'a_highp_class','a_highp-math-seat
  'a_highp-escape-extinction-instruction-pace','a_highp-four-quick-requests','a_highp-higher-quality-reinforcer','a_highp-medical-hold-still','a_highp-before-giving-up-toy',
  'a_highp-medical-exam-requests','a_highp-varied-order-sequence'].forEach(id=>{VMAP[id]='a_highp_praise';});
 /* a component's video, for every card of it (the bank's and the plan's) */
-const BYCODE={A_HIGHP:'a_highp',DRO:'dro_resetting',NCR:'ncr_items',NCE:'ncr_work',A_NCA:'ncr_attention',RIRD:'rird_vocal',DRA:'dra_attention'};
+const BYCODE={A_HIGHP:'a_highp',DRO:'dro_resetting',NCR:'ncr_items',NCE:'ncr_work',A_NCA:'ncr_attention',RIRD:'rird_vocal',DRA:'dra_attention',FCT:'fct-practical-guide-thinning'};
 /* v25.68 (the BCBA, 11/7) the closest video for each card of DRO, NCR, NCE, A_NCA and RIRD, read from its fields (lab, params,
    fn): a card a video was made from shows that video. DRO: momentary cards, fixed or variable (lab or params: momentary, at
    the second it ends), the momentary video; token, point, sticker, coupon or self-managed cards the tokens video (a
@@ -7708,15 +7754,32 @@ const BYCODE={A_HIGHP:'a_highp',DRO:'dro_resetting',NCR:'ncr_items',NCE:'ncr_wor
    a card that names none by its title: stereotypy the automatic video; handing over, giving up, ending or turning off an item
    or activity, or leaving an off-limits one, the items video; bites, food, meals, eating, instructions, requests,
    directions, compliance, tasks, toileting, masks, hygiene and work that earns an activity the escape video (a demand met
-   earns the better consequence); the rest (praise, approval, attention, self-monitoring, peers) the attention video. */
+   earns the better consequence); the rest (praise, approval, attention, self-monitoring, peers) the attention video.
+   v25.70 (the BCBA, 11/9) FCT: by how the card thins the schedule (the first tactic its Thinning tactic names): signaled
+   periods (a multiple schedule, green and red, wristbands, the card taken away) the signaled-thinning video; a growing work
+   requirement (chained, demand fading) the first FCT video (the break request); a growing wait, delay or denial the items
+   video. A card that does not thin (none, not studied) by the first function in fn: attention the attention video, items
+   the items video, escape the first; a card that names none by its title (attention, play, praise, talk and the life-skills
+   programs the attention video; items, toys, waiting the items video; else the first).
+   v25.70 the FCT cards banked from Behavioral Interventions volumes 30 to 34 go by the same rule; three read by hand (PVX),
+   whose Thinning tactic the rule misreads: a task added to the request and moved farther away (a growing work requirement,
+   the first video), free periods of an adult who is not busy and door time signaled when available (signaled periods, the
+   green and red video). */
 const PVX={'dro-injury-check-levels':'dro_class','dro-stated-rule-stereotypy':'dro_resetting','ncr-adjusting-irt-thinning':'ncr_items','ncr-yoked-ft-after-dra':'ncr_items',
  'ncr-thin-five-minute-start':'ncr_items','ncr-dense-to-thin-ext':'ncr_items','ncr-severe-behavior-case-series':'ncr_items','ncr-self-restraint-pillow':'ncr_items','ncr-preferred-item-substitute':'ncr_items',
  'ncr-pretrial-preferred-access':'ncr_between','ncr-preferred-exercise-routine':'ncr_work','ncr-toy-attention-prone':'ncr_work','ncr-ft-edible-during-work':'ncr_work','rird-positive-practice-stereotypy':'rird_motor',
  'dra-leisure-engagement-prompt-then-dra':'dra_automatic','dra-please-sign-replace-reaching':'dra_tangible','dra-peer-pecs-mands':'dra_tangible',
- 'dra-friendly-peer-skills':'dra_attention','dra-self-monitor-engagement':'dra_attention','dra-selfmonitor-work-beeps':'dra_attention'};
+ 'dra-friendly-peer-skills':'dra_attention','dra-self-monitor-engagement':'dra_attention','dra-selfmonitor-work-beeps':'dra_attention',
+ 'fct-escape-from-conversation-attention-choices':'fct-practical-guide-thinning','fct-want-and-break-requests':'fct-practical-guide-thinning',
+ 'fct-mand-then-task-moved-farther-fading':'fct-practical-guide-thinning','fct-attention-request-adult-free-varied-periods':'fct_thinning_mult','fct-request-stereotypy-plus-ncr-matched-item':'fct_thinning_mult'};
 const PSRC={};Object.keys(VIDS).forEach(k=>{if(VIDS[k].pv)VIDS[k].src.forEach(id=>{PSRC[id]=k;});});
 const prm=(p,re)=>{const o=p.params||{},k=Object.keys(o).find(x=>re.test(x));return k?String(o[k]):'';};
 const NORESET=/no reset|not reset|nonresetting|non-resetting|no full reset|no timer to reset|stood alone|forfeits only|ends? (that|the) (day|hour)'s chance|loses (that period's|the reward for that trial)|cancelled that segment|starts? fresh|ran on|all or none|wait for the next check|on schedule with n/i;
+/* v25.70 FCT: how a card thins the schedule, the first of these its Thinning tactic names ('' when it does not thin) */
+const FTH=[['mult',/multiple schedule|signals? \(|signaled (periods|by|availab)|\bgreen\b|wristband|bracelet|colou?red card|white card|busy|picture on the wall|card (itself )?was (taken|removed)|removing the request card/i],
+ ['chain',/chain|demand fading|work (required|needed|time)|work and wait|raise the work|amount of work|tasks? (required|before)|more tasks|tokens required|taps needed|number of (steps|requests)|items thrown/i],
+ ['delay',/delay|\bwait|denial|tolerance|put off|interruption was lengthened|timer (signaled|sounds)|heard? .no/i]];
+const fthin=p=>{const T=prm(p,/thinning tactic/i);if(/^(none|not)\b/i.test(T))return '';let b='',at=1e9;FTH.forEach(([k,re])=>{const m=re.exec(T);if(m&&m.index<at){at=m.index;b=k;}});return b;};
 function pvKey(p){if(PSRC[p.id])return PSRC[p.id];if(PVX[p.id])return PVX[p.id];const L=p.lab+' '+JSON.stringify(p.params||{}),f=(p.fn||[])[0]||'';
  if(p.code==='DRO'){if(/momentar|at the (exact )?(second|moment|instant)|only the moment/i.test(L))return 'dro_momentary';
   if(/self-(managed|run|record|monitor|timed)|timed by the student/i.test(L))return 'dro_tokens';
@@ -7731,6 +7794,9 @@ function pvKey(p){if(PSRC[p.id])return PSRC[p.id];if(PVX[p.id])return PVX[p.id];
   if(/handing over|hand(s|ing)? (it )?over|giving up|off-limits|ending a|turn(s|ing)? off/i.test(T))return 'dra_tangible';
   if(/\bbites?\b|\bfoods?\b|\bmeals?\b|feeding|\beat(s|ing)?\b|instruction|request|direction|compliance|(^|[^-])\btasks?\b(?!-)|toilet|\bmasks?\b|toothbrush|hygiene|seatwork earns|first-then/i.test(T))return 'dra_escape';
   return 'dra_attention';}
+ if(p.code==='FCT'){const t=fthin(p);if(t==='mult')return 'fct_thinning_mult';if(t==='chain')return 'fct-practical-guide-thinning';if(t==='delay')return 'fct_tangible';
+  if(f==='attention')return 'fct_attention';if(f==='tangible')return 'fct_tangible';if(f==='escape')return 'fct-practical-guide-thinning';
+  const T=String(p.lab||'');return /attention|play with me|praise|talk|life skills/i.test(T)?'fct_attention':/item|toy|tangible|wait|delay/i.test(T)?'fct_tangible':'fct-practical-guide-thinning';}
  if(p.code==='RIRD'){const D=prm(p,/interruption demands/i),no=/^(none|no )/i.test(D);
   if(/overcorrection|awareness|exposure and response prevention|\bchin\b/i.test(p.lab))return '';
   if(!no&&/motor|direction/i.test(D))return 'rird_motor';
@@ -7748,6 +7814,11 @@ function pvDiff(p,k){const S=VIDS[k].shows,L=String(p.lab||''),D=prm(p,/interrup
   if(S.ext===1&&no)return 'This card does not use extinction: problem behavior still gets its reinforcer.';
   if(S.ext===0&&!no&&/planned ignoring|\bignor(e|es|ed|ing)\b|on extinction|no attention for/i.test(X))return 'This card also uses extinction: problem behavior no longer gets its reinforcer.';
   return A?(f.length?'This card’s alternative: ':'This card names no function; its alternative: ')+A.charAt(0).toLowerCase()+A.slice(1)+'.':'';}
+ /* v25.70 FCT: another function; no extinction where the video withholds the reinforcer; else the card's request (its first part) */
+ if(p.code==='FCT'){const f=p.fn||[],X=prm(p,/extinction/i),M=prm(p,/mand form/i).split(/;\s/)[0].trim().replace(/^[a-z ]{3,24}: (?=\S)/i,'').replace(/\.$/,'');
+  if(f.length&&f.indexOf(S.fn)<0&&FNW[f[0]])return 'This card is for behavior maintained by '+FNW[f[0]]+'.';
+  if(S.ext===1&&/^(none|no planned extinction)\b|without (escape )?extinction|\b(still|also) (gets?|got|produced?|ended|drew)\b|kept its usual|extinction was not used/i.test(X))return 'This card does not use extinction: problem behavior still gets its reinforcer.';
+  return M?(f.length?'This card’s request: ':'This card names no function; its request: ')+M.charAt(0).toLowerCase()+M.slice(1)+'.':'';}
  if(p.code==='DRO'){const R=prm(p,/reset/i);if(!R||S.mom)return '';const nr=NORESET.test(R);
   if(nr&&S.reset)return 'This card does not restart the interval after the behavior.';
   if(!nr&&!S.reset&&/restart|reset|start(s|ed)? again/i.test(R))return 'This card restarts the interval after the behavior.';return '';}
@@ -7760,13 +7831,15 @@ function pvDiff(p,k){const S=VIDS[k].shows,L=String(p.lab||''),D=prm(p,/interrup
 let BID=null;
 function bank(id){if(!BID){BID={};try{if(typeof TD1_BANK!=='undefined'&&TD1_BANK&&Array.isArray(TD1_BANK.protocols))TD1_BANK.protocols.forEach(p=>{BID[p.id]=p;});}catch(e){}}return BID[id]||null;}
 const keyOf=id=>{if(!id)return '';if(VIDS[id])return id;const p=bank(id);if(!p)return '';if(p.code==='A_HIGHP'&&VMAP[id])return VMAP[id];
- if(/^(DRO|NCR|NCE|A_NCA|RIRD|DRA)$/.test(p.code))return pvKey(p);return BYCODE[p.code]||'';};
+ if(/^(DRO|NCR|NCE|A_NCA|RIRD|DRA|FCT)$/.test(p.code))return pvKey(p);return BYCODE[p.code]||'';};
 /* the line under the button: what the video shows, and the rows where this version differs (as the BCBA's approved mockup) */
 const LROW={spacing:'Time between them',easy_reinforcer:'After each easy one',to_hard:'The hard request comes',missed_easy:'If an easy one is missed'};
 const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-function line(id){const k=keyOf(id),v=VIDS[k];if(!v||!v.shows)return '';const S=v.shows,p=VIDS[id]?null:bank(id),c=p&&p.cmp;
+/* v25.70 menu: a card from the menu (no bank card), whose video key may also be a card's id (the first FCT video's) */
+function line(id,menu){const k=keyOf(id),v=VIDS[k];if(!v||!v.shows)return '';const S=v.shows,p=menu?null:bank(id),c=p&&p.cmp;
  if(v.src&&p&&[].concat(v.src).indexOf(p.id)>=0)return 'The video shows this card’s steps: '+S.summary+'.';
- if(v.pv){const d=p?pvDiff(p,k):'';return 'The video shows the closest version, after '+v.after+': '+S.summary+'.'+(d?' '+d:'');}
+ if(v.family==='fct'&&p&&[].concat(v.open||[]).indexOf(p.id)>=0)return 'The video shows this card’s steps: '+S.summary+'.';
+ if(v.pv||v.family==='fct'){const d=p?pvDiff(p,k):'';return 'The video shows the closest version, after '+v.after+': '+S.summary+'.'+(d?' '+d:'');}
  let t=(v.after?'The video shows the closest version, after '+v.after+': ':'The video shows TD-1’s steps for this card: ')+S.summary+'.';
  if(c){const dd=Object.keys(LROW).filter(x=>norm(c[x])!==norm(S[x])&&!/^not stated/i.test(c[x]||'')).map(x=>LROW[x].toLowerCase()+': '+c[x]);
   t+=' '+(dd.length?'This version differs in '+dd.join('; ')+'.':'This version matches it on timing and reinforcers.');}
@@ -7797,9 +7870,9 @@ function close(){if(!box)return;const vid=$('tv-video');try{vid.pause();}catch(e
 /* v25.68 (11/7) a card from the menu shows its component's video; a DRO card set to "Momentary, variable times" the momentary one */
 const cardKey=c=>c.dataset.code==='DRO'&&/^momentary/i.test((c.querySelector('select[name$=".dtype"]')||{}).value||'')?'dro_momentary':(BYCODE[c.dataset.code]||'');
 function mark(){document.querySelectorAll('#compWrap .card').forEach(c=>{const inp=c.querySelector('[name$="].bank"]');const id=(inp&&inp.value)||'';const k=id&&bank(id)?keyOf(id):(keyOf(id)||cardKey(c));const has=!!VIDS[k];let b=c.querySelector('.td-vid-btn'),ln=c.querySelector('.td-vid-line');
- if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch the video';b.addEventListener('click',()=>{const i2=c.querySelector('[name$="].bank"]'),x=(i2&&i2.value)||'';play(keyOf(x)?x:cardKey(c),b);});const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
+ if(has&&!b){b=document.createElement('button');b.type='button';b.className='tool noprint td-vid-btn';b.textContent='Watch how';b.title='Watch the video of this procedure';b.addEventListener('click',()=>{const i2=c.querySelector('[name$="].bank"]'),x=(i2&&i2.value)||'';play(keyOf(x)?x:cardKey(c),b);});const rm=c.querySelector('[data-rm]');if(rm){rm.style.marginLeft='0';rm.insertAdjacentElement('beforebegin',b);}else(c.querySelector('.chd')||c).appendChild(b);}
  else if(!has&&b)b.remove();
- const t=has?line(keyOf(id)?id:k):'';
+ const t=has?(keyOf(id)?line(id):line(k,1)):'';
  if(t){if(!ln){ln=document.createElement('p');ln.className='noprint td-vid-line';const h=c.querySelector('.chd');if(h)h.insertAdjacentElement('afterend',ln);else c.insertBefore(ln,c.firstChild);}if(ln.textContent!==t)ln.textContent=t;}
  else if(ln)ln.remove();});}
 try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true,subtree:true});}catch(e){}
@@ -7917,6 +7990,50 @@ function mark(){document.querySelectorAll('#compWrap .card[data-code="DRO"]').fo
 try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true});}catch(e){}
 setInterval(mark,2500);mark();
 window.__tdDroIv={calc,base:()=>BASE,fromFacts,mark};
+})();
+</script>
+<style id="td1-v2570-signal">
+/* v25.70 (the BCBA, 11/9) Make signal cards: screen only, never saved or printed */
+.td-sig{margin:2px 0 8px;font:13px/1.45 var(--td9-sans,var(--nbh-sans,sans-serif));color:var(--nbh-ink-soft,#54676f)}
+.td-sig a.td-sig-go{display:inline-flex;align-items:center;min-height:44px;font-weight:600;color:var(--nbh-accent,#0e5c63);text-decoration:underline;text-underline-offset:2px}
+.td-sig a.td-sig-go:focus-visible{outline:2px solid var(--nbh-accent,#0e5c63);outline-offset:2px}
+@media print{.td-sig{display:none!important}}
+</style>
+<script id="td1-v2570-signal-js">
+/* v25.70 (the BCBA, 11/9) Make signal cards: on each FCT card (FCT, FCT keyed to a component FA, the skill-based "my way"
+   request), each multiple-schedule card, each card from the bank whose protocol thins the schedule of a request or an alternative (FCT, DRA, delay tolerance, chained schedules), and under the
+   Reinforcement Thinning Plan, a link to Form VS-1's Signal cards sheet: the red "not now" and green "you can ask" card that
+   signals when the request will be honored. The template follows the plan's function (attention, items, escape: a break;
+   else the general card). Inside the workstation the shell opens VS-1 beside this form at that sheet ({nbh:'open', want:'VS-1',
+   beside:true, at:'signal-cards-<template>'}; index.html OPEN_AT); on its own, or when the shell does not answer, the link opens
+   VS-1 in a new tab at the same place. Nothing is saved or printed. */
+(function(){
+const VS='VS-1_Visual-Supports_v2026-10.html',SIG={FCT:1,FCT_CFA:1,SBT_FCR:1,S_MULT:1},THINC={FCT:1,FCT_CFA:1,SBT_FCR:1,SBT_TR:1,DT_PROG:1,DRA:1,DNRA:1,S_MULT:1,S_CHAIN:1},T=v=>String(v==null?'':v).trim();
+let THIN=null;
+function thinIds(){if(THIN)return THIN;THIN=new Set();try{if(typeof TD1_BANK!=='undefined')TD1_BANK.protocols.forEach(p=>{if(/\bthin/i.test(p.lab||'')||/-thin/.test(p.id))THIN.add(p.id);});}catch(e){}return THIN;}
+function tpl(){const e=document.querySelector('[name="m.fn"]'),fn=e?T(e.value):'';return fn==='attention'?'attention':fn==='tangible'?'items':fn==='escape'?'break':'general';}
+const NAME={attention:'attention',items:'items or toys',break:'a break',general:'the general card'};
+function want(c){const code=c.dataset.code||'';if(SIG[code])return true;const b=c.querySelector('[name$="].bank"]'),id=b?T(b.value):'';return !!id&&!!THINC[code]&&thinIds().has(id);}
+function link(){const k=tpl();return '<a class="td-sig-go" href="'+VS+'#signal-cards-'+k+'" target="_blank" rel="noopener" data-sig="'+k+'">Make signal cards</a> <span>(Form VS-1: a red &ldquo;not now&rdquo; side and a green &ldquo;you can ask&rdquo; side, 5 &times; 7 in; the template for '+NAME[k]+')</span>';}
+function mark(){const k=tpl();
+  document.querySelectorAll('#compWrap .card').forEach(c=>{let p=c.querySelector('.td-sig');const w=want(c);
+    if(w&&!p){p=document.createElement('p');p.className='noprint td-sig';const h=c.querySelector('.chd');if(h)h.insertAdjacentElement('afterend',p);else c.insertBefore(p,c.firstChild);}
+    else if(!w&&p){p.remove();p=null;}
+    if(p&&p.dataset.k!==k){p.dataset.k=k;p.innerHTML=link();}});
+  const sw=document.getElementById('tdThinSw');if(sw){let p=document.getElementById('tdSigThin');
+    const any=[...document.querySelectorAll('#compWrap .card')].some(c=>want(c)||c.dataset.code==='DRA');
+    if(any&&!p){p=document.createElement('p');p.id='tdSigThin';p.className='noprint td-sig';sw.insertAdjacentElement('afterend',p);}
+    else if(!any&&p){p.remove();p=null;}
+    if(p&&p.dataset.k!==k){p.dataset.k=k;p.innerHTML='Signals for thinning: '+link();}}}
+/* inside the workstation: the shell opens VS-1 beside this form at the sheet; the link itself is the fallback */
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a.td-sig-go');if(!a||window.parent===window)return;e.preventDefault();
+  const href=a.getAttribute('href'),at=(href.split('#')[1]||'').trim();let t=0;
+  const h=ev=>{const d=ev.data;if(ev.source===window.parent&&d&&d.nbh==='opened'&&d.want==='VS-1'){clearTimeout(t);window.removeEventListener('message',h);}};
+  window.addEventListener('message',h);t=setTimeout(()=>{window.removeEventListener('message',h);try{window.open(href,'_blank','noopener');}catch(x){}},1500);
+  try{window.parent.postMessage({nbh:'open',want:'VS-1',beside:true,at},'*');}catch(x){clearTimeout(t);}});
+try{new MutationObserver(()=>{clearTimeout(mark._t);mark._t=setTimeout(mark,150);}).observe(document.getElementById('compWrap'),{childList:true});}catch(e){}
+document.addEventListener('change',ev=>{if(ev.target&&/^m\.fn$|\]\.bank$/.test(ev.target.name||''))mark();});setInterval(mark,2500);mark();
+window.__tdSignal={mark,tpl,want};
 })();
 </script>
 
@@ -8809,8 +8926,16 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
      v25.69 fx2 (group 5):
        paper    a copy of the paper the form draws on screen inside a sheet (a selector: TK-1's book pages, QS-1's quick
                 start as it prints): its words keep the type they print with, not the layout's reading type (TK-1 fits
-                its pages to the type it finds there, and the master print takes them as they stand) */
+                its pages to the type it finds there, and the master print takes them as they stand)
+     v25.70 fx2 (the BCBA, 11/9):
+       narrow   tables that are cards only on a narrow touch screen, an iPad held upright (or a phone), and stay tables on
+                an iPad held sideways and on a laptop (a selector: SA-1's probes, GC-1's record of game days, RM-1's
+                inoculation plan). Upright is the screen taller than it is wide, so the form in the workstation beside
+                its list follows the iPad, not the width; under 640 px they are cards on any screen. Turning the iPad
+                turns them, the boxes and their values as they were */
   var C = window.FX2_CFG || {};
+  /* v25.70 fx2: the narrow screens where the tables of FX2_CFG.narrow are cards */
+  var NARROW = null; try { NARROW = matchMedia('(pointer:coarse) and (orientation:portrait), (max-width:640px)'); } catch (e) {}
   /* what is typed in DM-1's contacts and packet redraws their summaries at once */
   var LIVE = [C.contacts && '#' + C.contacts.wrap, C.packet && '#' + C.packet].filter(Boolean).join(',');
   var $$ = function(s, r){ return Array.prototype.slice.call((r || D).querySelectorAll(s)); };
@@ -8975,11 +9100,14 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
   function cards(){
     /* which tables are lists of entries: on DM-1, IC-1 and RR-1 every .grid table holding boxes; elsewhere the form names
        them (a table of scores by item, a checklist of criteria by target and a yes/no/sometimes grid stay tables) */
-    var named = C.cards; if (named === '') return;
-    $$(named || '.fx2-sh table.grid').forEach(function(t){
-      if (!named && !t.querySelector('tbody input, tbody select, tbody textarea')) return;
+    var named = C.cards, nar = C.narrow ? $$(C.narrow) : [], up = !!(NARROW && NARROW.matches); if (named === '' && !nar.length) return;
+    (named === '' ? [] : $$(named || '.fx2-sh table.grid')).filter(function(t){ return nar.indexOf(t) < 0; }).concat(nar).forEach(function(t){
+      var isN = nar.indexOf(t) >= 0, on = !isN || up;
+      if (!named && !isN && !t.querySelector('tbody input, tbody select, tbody textarea')) return;
       if (!t.closest('.fx2-sh')) return;
-      tog(t, 'fx2-cards', true);
+      /* v25.70 fx2: a table of FX2_CFG.narrow is laid out for cards either way (each cell's column name and kind), and is a
+         card list only while the screen is narrow (fx2-ncards marks it for the form's own rules) */
+      tog(t, 'fx2-cards', on); if (isN) tog(t, 'fx2-ncards', true);
       var hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1]; if (!hr) return;
       var heads = []; Array.prototype.forEach.call(hr.cells, function(c){ for (var k = 0; k < (c.colSpan || 1); k++) heads.push(headText(c)); });
       var rows = [], fixed = false, ro = !t.querySelector('tbody input, tbody select, tbody textarea');
@@ -9009,7 +9137,7 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
           if (r) { r.dataset.fx2open = '1'; tog(r, 'fx2-more', false); var f = r.querySelector('input:not([type=checkbox]),select,textarea'); if (f) try { f.focus(); } catch (e) {} return; }
           var cn = COUNT[t.id] && D.getElementById(COUNT[t.id]); if (cn && +cn.value < +cn.max) { cn.value = +cn.value + 1; cn.dispatchEvent(new Event('change', { bubbles: true })); } });
         wrap.after(btn); }
-      var cnt = COUNT[t.id] && D.getElementById(COUNT[t.id]); btn.hidden = !waiting && !(cnt && +cnt.value < +cnt.max);
+      var cnt = COUNT[t.id] && D.getElementById(COUNT[t.id]); btn.hidden = !on || (!waiting && !(cnt && +cnt.value < +cnt.max));
     });
   }
 
@@ -9121,16 +9249,27 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
   function cols(g){ var t = getComputedStyle(g).gridTemplateColumns.split(' ').filter(function(x){ return /px$/.test(x); }); return { n: t.length, w: parseFloat(t[0]) || 0, gap: parseFloat(getComputedStyle(g).columnGap) || 0 }; }
   /* v25.67 fx2: a box out of sight (in a part Focus folds) keeps what it was given: measured as nothing, it lost its
      width and kept the loss once Focus was off (EA-1) */
+  /* v25.70 fx2: what a box is given while Focus draws its part a size larger holds while Focus is on; once Focus is off a
+     box out of sight gets back what it had with Focus off (VS-1: a field on a sheet visited with Focus on kept fx2-w2
+     after Focus was off, so Focus left something behind); the boxes in sight are measured again at once */
+  var fxWas = false, wSeen = [];
+  function wSet(f, a, b, fx){ if (fx && !f._fx2wb) f._fx2wb = [f.classList.contains('fx2-w2'), f.classList.contains('fx2-wall')];
+    tog(f, 'fx2-w2', a); tog(f, 'fx2-wall', b); if (!fx) f._fx2wb = [a, b]; if (wSeen.indexOf(f) < 0) wSeen.push(f); }
   function long(){
+    var fx = R.hasAttribute('data-nbh-fx');
+    if (fxWas && !fx) { wSeen = wSeen.filter(function(f){ return f.isConnected; });
+      wSeen.forEach(function(f){ var x = f.tagName === 'TD' ? f.querySelector('input,select') : Array.prototype.filter.call(f.children, isBox)[0];
+        if (f._fx2wb && !(x && x.offsetParent)) { tog(f, 'fx2-w2', f._fx2wb[0]); tog(f, 'fx2-wall', f._fx2wb[1]); } }); }
+    fxWas = fx;
     $$('.fx2-sh .ident.fx2-al, .fx2-sh .fx2-fg.fx2-al').forEach(function(g){ var c = cols(g); if (c.n < 2 || !c.w) return;
       Array.prototype.forEach.call(g.children, function(f){ if (g.classList.contains('fx2-fg') && !f.classList.contains('fx2-f')) return; var x = Array.prototype.filter.call(f.children, isBox)[0];
         if (x && x.type !== 'date' && x.type !== 'number' && !x.offsetParent) return;
         var w = x && x.type !== 'date' && x.type !== 'number' ? textW(x) : 0, k = 1;
         while (k < c.n && w > k * c.w + (k - 1) * c.gap) k++;
-        tog(f, 'fx2-w2', k === 2 && c.n > 2); tog(f, 'fx2-wall', k > 1 && (k >= c.n)); }); });
+        wSet(f, k === 2 && c.n > 2, k > 1 && (k >= c.n), fx); }); });
     $$('.fx2-sh table.fx2-cards > tbody > tr').forEach(function(r){ var c = cols(r); if (c.n < 2 || !c.w) return;
       Array.prototype.forEach.call(r.cells, function(td){ if (td.getAttribute('data-fx2k') !== 'f') return; var x = td.querySelector('input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=date]):not([type=number]),select:not(.nbh-seg-src)');
-        tog(td, 'fx2-wall', !!(x && x.offsetParent && textW(x) > c.w)); }); });
+        wSet(td, false, !!(x && x.offsetParent && textW(x) > c.w), fx); }); });
   }
 
   /* 12. v24.95 the form's toolbar on one row on an iPad held sideways: while it wraps, it gives up, a step at a time, the
@@ -9173,6 +9312,8 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
     st.after(el); R.classList.add('fx2-pp'); }
   function run(){ if (printing) return; try { wrapPlain(); mark(); intro(); heads(); fields(); hints(); rows(); segs(); cards(); contacts(); packet(); nsFold(); parentView(); align(); egAll(); long(); tbFit(); } catch (e) { if (window.console) console.warn('fx2', e); } }
   var timer = 0; function soon(){ clearTimeout(timer); timer = setTimeout(run, 120); }
+  /* v25.70 fx2: the iPad turned (upright or sideways): the tables of FX2_CFG.narrow become cards or tables again */
+  if (C.narrow && NARROW) try { if (NARROW.addEventListener) NARROW.addEventListener('change', soon); else NARROW.addListener(soon); } catch (e) {}
   /* TB-1's chips jump to a target's card; a sheet just shown still grows its boxes to their text, so the jump is aimed
      again once that has settled (a smooth scroll aimed at the first position stopped short of the card) */
   if (C.jump) D.addEventListener('click', function(e){ var a = e.target.closest && e.target.closest(C.jump.split(',').map(function(s){ return s.trim() + ' a[href^="#"]'; }).join(', ')); if (!a) return; var id = a.getAttribute('href').slice(1);
@@ -9188,16 +9329,381 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
       if (o != null && o !== '1') { tn.nodeValue = on ? o : sentence(o); tn._fx2s = tn.nodeValue; tn._fx2o = o; } });
     $$('[data-fx2-ph]').forEach(function(f){ if (on) f.setAttribute('placeholder', f.getAttribute('data-fx2-ph')); else f.removeAttribute('placeholder'); });
   }
-  window.addEventListener('beforeprint', function(){ paper(true); });
-  window.addEventListener('afterprint', function(){ paper(false); });
-  try { var pm = matchMedia('print'); var pf = function(e){ paper(e.matches); }; if (pm.addEventListener) pm.addEventListener('change', pf); else pm.addListener(pf); } catch (e) {}
+  /* v25.70 fx2 (the packet gate): a box on a part of the page out of sight (a sheet not shown) keeps the height field care
+     gave it while it was on the screen, where this layout draws boxes in larger type with more room; field care measures
+     only the boxes it can see, so the master print took those at the screen's height (HD-1's ABC lists a line taller
+     each, BC-1's, SV-1's and FD-1's notes). As the page goes plain such a box is measured again as field care measures
+     a box, in the paper's type and room: the parts out of sight that hold it are shown for that moment only (in the same
+     task, so nothing is drawn and no observer of sizes hears of it) and the scroll is kept; a box that still cannot be
+     seen gets the same number of lines in the paper's type. The screen's height comes back after. Read before the page
+     goes plain, set once it is: in the master print after nbhPolish.plain(true), on a print after nbh-polish's own
+     beforeprint (a listener put on once the page has loaded, so it runs after it), as the print media starts where there
+     was no beforeprint */
+  var boxes = null, SHOWAS = { TR: 'table-row', TD: 'table-cell', TH: 'table-cell', TBODY: 'table-row-group', THEAD: 'table-header-group', TFOOT: 'table-footer-group', TABLE: 'table', LI: 'list-item', SPAN: 'inline' };
+  function boxM(t){ var cs = getComputedStyle(t), n = function(v){ return parseFloat(v) || 0; }, fs = n(cs.fontSize);
+    return { lh: cs.lineHeight === 'normal' ? fs * 1.2 : n(cs.lineHeight),
+      extra: cs.boxSizing === 'border-box' ? n(cs.paddingTop) + n(cs.paddingBottom) + n(cs.borderTopWidth) + n(cs.borderBottomWidth) : 0 }; }
+  function boxesRead(){ if (boxes || R.classList.contains('nbh-plain')) return; boxes = [];
+    $$('textarea').forEach(function(t){ if (t.offsetParent || !/^[\d.]+px$/.test(t.style.height)) return; var m = boxM(t); if (m.lh > 0) boxes.push({ t: t, h: t.style.height, m: m }); }); }
+  /* field care's measure (nbh-field-care.js grow) */
+  function careH(t){ var cs = getComputedStyle(t); t.style.height = 'auto'; var h = t.scrollHeight;
+    if (cs.boxSizing === 'border-box') h += (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+    else h -= (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    return Math.ceil(h) + 'px'; }
+  function boxesPaper(){
+    var todo = (boxes || []).filter(function(b){ return !b.done && !b.t.offsetParent && b.t.isConnected && b.t.style.height === b.h; }); if (!todo.length) return;
+    var shown = [], sx = scrollX, sy = scrollY;
+    try {
+      todo.forEach(function(b){ for (var a = b.t.parentElement; a && a !== D.body && a !== R; a = a.parentElement) {
+        if (shown.some(function(x){ return x[0] === a; }) || getComputedStyle(a).display !== 'none') continue;
+        shown.push([a, a.style.getPropertyValue('display'), a.style.getPropertyPriority('display'), a.hasAttribute('style')]); a.style.setProperty('display', SHOWAS[a.tagName] || 'block', 'important'); } });
+      todo.forEach(function(b){ var t = b.t; if (t.offsetParent) { b.done = 1; b.set = careH(t); t.style.height = b.set; } });
+    } catch (e) {}
+    finally { shown.reverse().forEach(function(x){ if (x[1]) x[0].style.setProperty('display', x[1], x[2]); else x[0].style.removeProperty('display'); if (!x[3] && !x[0].getAttribute('style')) x[0].removeAttribute('style'); });
+      if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); }
+    todo.forEach(function(b){ var t = b.t, p, n; if (b.done) return; t.style.height = b.h; p = boxM(t); if (!(p.lh > 0) || (p.lh === b.m.lh && p.extra === b.m.extra)) return;
+      n = Math.max(1, Math.round((parseFloat(b.h) - b.m.extra) / b.m.lh)); b.done = 1; b.set = Math.ceil(n * p.lh + p.extra) + 'px'; t.style.height = b.set; });
+  }
+  function boxesBack(){ (boxes || []).forEach(function(b){ if (b.done && b.t.style.height === b.set) b.t.style.height = b.h; }); boxes = null; }
+  window.addEventListener('beforeprint', function(){ ST.plainOn(); boxesRead(); paper(true); });
+  function boxesLate(){ if (boxesLate.on) return; boxesLate.on = 1; addEventListener('beforeprint', boxesPaper); }
+  window.addEventListener('afterprint', function(){ paper(false); boxesBack(); ST.plainOff(); });
+  try { var pm = matchMedia('print'); var pf = function(e){ paper(e.matches); if (e.matches) boxesPaper(); else boxesBack(); }; if (pm.addEventListener) pm.addEventListener('change', pf); else pm.addListener(pf); } catch (e) {}
   /* the workstation's packet collects a form after nbhPolish.plain(true), not on the browser's print: the paper headings
      and the examples in their boxes go into the packet too */
-  function wrapPlain(){ try { var P = window.nbhPolish; if (P && P.plain && !P.plain.fx2) { var pl = P.plain; P.plain = function(on){ if (on) paper(true); var r = pl.apply(this, arguments); if (!on) paper(false); return r; }; P.plain.fx2 = true; } } catch (e) {} }
+  function wrapPlain(){ try { var P = window.nbhPolish; if (P && P.plain && !P.plain.fx2) { var pl = P.plain; P.plain = function(on){ if (on) { ST.plainOn(); boxesRead(); paper(true); } var r = pl.apply(this, arguments); if (on) boxesPaper(); else { paper(false); boxesBack(); ST.plainOff(); } return r; }; P.plain.fx2 = true; } } catch (e) {} }
   /* nbh-polish may load after this script (the release build puts it last): wrapped as soon as it is there */
-  wrapPlain(); D.addEventListener('DOMContentLoaded', wrapPlain); addEventListener('load', wrapPlain);
-  window.fx2Layout = { run: run, paper: paper };
+  wrapPlain(); D.addEventListener('DOMContentLoaded', function(){ wrapPlain(); boxesLate(); }); addEventListener('load', function(){ wrapPlain(); boxesLate(); });
+  /* 13. v25.70 step by step (approved by the BCBA, 11/9: "a mode that presents the questions one, two or three at a time
+     ... like TurboTax", with "Review the blank ones"). A form whose settings ask for it (FX2_CFG.step) has a switch under
+     its toolbar: All at once (as always, the default) or Step by step, with 1, 2 or 3 questions on a screen. Built as Focus
+     is (nbh-ui): nothing is moved, wrapped or renamed; the parts of the sheet not on this screen are marked
+     data-fx2-st="x" and kept out of sight by the screen rules above, so saving, the exports and every print read the same
+     fields as ever. A question is a label with its box, or a whole small table, a whole selector (a list, its buttons, a
+     set of ticks), a row of definitions, a card's field, with the words before it; a heading starts a new screen. A
+     question the form keeps out of sight (asked only on an answer) is skipped while it is out of sight and joins the line
+     once it shows. The bar at the foot: Back, where the person is ("Question 5 of 32 · Sheet 2 of 6", told politely to a
+     screen reader), Next; Next past a sheet's last screen opens the next sheet, past the last sheet the blank ones, each a
+     button that goes to it, then Done: the whole form for now, and Step by step (with its 1, 2 or 3) kept for the next
+     time the form is opened on this device (the BCBA, 11/9); choosing All at once is kept the same way. Enter goes to the
+     next question (Shift+Enter the one before), as Focus has it; the cursor moves to the question. Focus and step by step are one or the other. The marks come off
+     while the page is plain or printed, and off a copy the form makes of a part of itself. The other sheets are counted
+     as nbh-ui counts their fields for its dots: each view's class on the body in turn, in one go, put back at once.
+     FX2_CFG.step: true, or {skip: parts never taken for questions (a selector), one: more parts kept whole (a selector),
+     rows: tables whose items (the rows of the body) are each a question, under the table's head (a questionnaire),
+     views: the sheets stepped through, in order (their data-view), noviews: sheets left out (the Guide always is)}.
+     For the checks: fx2Layout.step (on, set, next, back, state, enable). */
+  var ST = (function(){
+    var CF = C.step === true ? {} : (C.step || null), FID = R.getAttribute('data-fx2') || 'form', KEY = 'nbh.fx2.step.' + FID;
+    var on = false, per = 1, list = [], scr = [], at = 0, key = null, scans = {}, rev = false, seenRev = false;
+    var sw = null, bar = null, live = null, revEl = null, marked = [], focusEl = null, mo = null, rt = 0, scanning = false, aside = 0, built = 0;
+    var SKIP = '.toolbar,.nbh-mast,dialog,#nbhToasts,.nbh-pagenav,nav,#nbhFxBar,#nbhFxRing,.fx2-stsw,.fx2-stbar,.fx2-strev,.fx2-pvexit,.sim-banner,script,style,template,link,noscript';
+    var ATOM = 'table,fieldset,ul,ol,dl,details,[role="radiogroup"],.nbh-seg,.chkrow,.ident > .f,.fx2-fg > .fx2-f,.defs .drow,label,.rl-f,canvas,svg';
+    var HEADQ = 'h1,h2,h3,h4,.nbh-band,legend';
+    var AFTER = '.fx2-hint,.fx2-cellhint,.nbh-hint,.hint,small,.readout,.fx2-addrow,.fx2-conadd,.fx2-pkall,.fx2-btn,.fx2-nsbar,.nbh-xs-bar';
+    function is(e, s){ try { return !!(s && e.matches(s)); } catch (x) { return false; } }
+    function vis(e){ return !!(e.getClientRects && e.getClientRects().length); }
+    function store(v){ try { if (v === undefined) return localStorage.getItem(KEY) || ''; if (v) localStorage.setItem(KEY, v); else localStorage.removeItem(KEY); } catch (e) {} return v; }
+    function sq(t){ return String(t || '').replace(/\s+/g, ' ').trim(); }
+    /* a box to answer: a field on screen (a list drawn as buttons, a tick box drawn as its label count too), not one the
+       form fills itself */
+    function isField(e){ return /^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName) && !/^(hidden|file|button|submit|reset|image)$/i.test(e.type || ''); }
+    function shownF(f){ if (vis(f)) return true; if ((f.type === 'checkbox' || f.type === 'radio')) { var l = f.closest('label') || (f.id && D.querySelector('label[for="' + f.id.replace(/"/g, '') + '"]')); return !!(l && vis(l)); } return false; }
+    function liveF(f){ return isField(f) && !f.disabled && !f.readOnly && shownF(f) && !f.closest('.toolbar,dialog,.nbh-mast'); }
+    function fieldsIn(e){ if (isField(e)) return liveF(e) ? [e] : []; return Array.prototype.filter.call(e.querySelectorAll('input,select,textarea'), liveF); }
+    function choice(f){ return f.type === 'checkbox' || f.type === 'radio'; }
+    function heady(e){ return is(e, HEADQ) || !!(e.firstElementChild && is(e.firstElementChild, 'h1,h2,h3,h4') && sq(e.textContent).length < 140); }
+    function atom(e, f){
+      if (is(e, ATOM) || is(e, CF && CF.one)) return true;
+      if (f.length === 1) return true;
+      if (f.every(function(x){ return x.type === 'radio' && x.name && x.name === f[0].name; })) return true;
+      if (e.querySelector('h1,h2,h3,h4,.nbh-band')) return false;
+      if (f.every(choice) && f.length <= 8) return true;
+      return f.length <= 3 && /^(P|LI|SPAN)$/.test(e.tagName);
+    }
+    function afterish(e){ if (is(e, AFTER) || e.tagName === 'BUTTON') return true; var b = e.querySelectorAll('button'); if (!b.length) return false;
+      var t = sq(e.textContent); Array.prototype.forEach.call(b, function(x){ t = t.replace(sq(x.textContent), ''); }); return sq(t).length < 3; }
+    /* the roots of the sheet on screen, as Focus finds them */
+    function roots(){ var l = $$('main.sheet,.sheet:not(table),main' + (C.sheets ? ',' + C.sheets : '')).filter(function(e){ return !e.closest(SKIP) && vis(e); });
+      l = l.filter(function(e){ return !l.some(function(x){ return x !== e && x.contains(e); }); });
+      for (var c = D.body.firstElementChild; c; c = c.nextElementSibling) {
+        if (is(c, SKIP) || !vis(c) || l.some(function(x){ return x === c || x.contains(c) || c.contains(x); })) continue;
+        var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky' || p === 'absolute') continue;
+        if (fieldsIn(c).length) l.push(c); }
+      l.sort(function(a, b){ return a.compareDocumentPosition(b) & 4 ? -1 : 1; }); return l; }
+    /* the questions of the sheet on screen, in reading order */
+    function questions(rs){
+      var out = [], pend = [], sec = '';
+      function add(e, f, x){ pend.concat([e]).forEach(function(y){ var h = heady(y) ? y : y.querySelector && y.querySelector('h1,h2,h3,h4,.nbh-band'); if (h && h.getClientRects().length) sec = cut(words(h)); });
+        var q = { atom: e, els: pend.concat(x || [], [e]), fields: f, sec: sec }; q.head = pend.some(heady) || heady(e) || !!e.querySelector('h1,h2,h3,h4,.nbh-band');
+        q.heavy = (e.tagName === 'TABLE' || !!e.querySelector('table')) && f.length > 4 || f.length > 8 || is(e, 'canvas,svg'); pend = []; out.push(q); }
+      function text(e){ if (!pend.length && out.length && afterish(e)) out[out.length - 1].els.push(e); else pend.push(e); }
+      function walk(box){
+        for (var c = box.firstElementChild; c; c = c.nextElementSibling) {
+          if (is(c, SKIP) || is(c, CF && CF.skip)) continue;
+          if (!vis(c)) { if (getComputedStyle(c).display === 'contents') walk(c); continue; }
+          var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky') continue;
+          var f = fieldsIn(c);
+          if (!f.length) { text(c); continue; }
+          /* a questionnaire (FX2_CFG.step.rows): each item of its body a question, under the table's head */
+          if (c.tagName === 'TABLE' && is(c, CF && CF.rows)) { Array.prototype.forEach.call(c.tBodies, function(tb){ Array.prototype.forEach.call(tb.rows, function(r){ if (!vis(r)) return; var g = fieldsIn(r); if (g.length) add(r, g, c.tHead && vis(c.tHead) ? [c.tHead] : null); else text(r); }); }); continue; }
+          if (atom(c, f)) add(c, f); else walk(c);
+        } }
+      rs.forEach(walk);
+      if (pend.length && out.length) out[out.length - 1].els = out[out.length - 1].els.concat(pend);
+      out.forEach(function(q){ q.title = title(q); });
+      return out;
+    }
+    function words(e){ var o = []; (function w(n){ for (var c = n.firstChild; c; c = c.nextSibling) { if (c.nodeType === 3) { var t = sq(c.nodeValue); if (t) o.push(t); }
+      else if (c.nodeType === 1 && !/^(BUTTON|SCRIPT|STYLE|SELECT|TEXTAREA|INPUT|OPTION|svg)$/i.test(c.tagName) && !c.classList.contains('fx2-hint') && !c.classList.contains('fx2-cellhint')) w(c); } })(e); return sq(o.join(' ')); }
+    function cut(t){ t = sq(t); return t.length > 90 ? t.slice(0, 88).replace(/\s+\S*$/, '') + '…' : t; }
+    function title(q){ var a = q.atom, t = '', f = q.fields[0]; if (a.tagName === 'TR') return cut(words(a)) || 'An item';
+      var l = is(a, 'label') ? a : a.querySelector('label,.dlab,legend,caption,th,h3,h4,b,strong');
+      if (l) t = words(l);
+      if (!t && f && f.id) { var lf = D.querySelector('label[for="' + f.id.replace(/"/g, '') + '"]'); if (lf) t = words(lf); }
+      for (var i = q.els.length - 2; !t && i >= 0; i--) { var w = words(q.els[i]); if (w && w.length <= 160) t = w; }
+      if (!t && f) t = f.getAttribute('aria-label') || f.getAttribute('data-fx2-ph') || f.getAttribute('placeholder') || f.name || '';
+      return cut(t) || 'A question'; }
+    function blankQ(q){ return q.fields.filter(function(f){ return f.isConnected; }).every(function(f){ return choice(f) ? !f.checked : f.tagName === 'SELECT' ? (f.selectedIndex <= 0 || !f.value) : !String(f.value || '').trim(); }); }
+    /* the screens: n questions each; a heading, a table or a large set of boxes starts one of its own */
+    function chunk(qs){ var out = [], s = null; qs.forEach(function(q){ if (!s || s.length >= per || q.heavy || (s.length && (s[0].heavy || q.head))) { s = []; out.push(s); } s.push(q); }); return out; }
+
+    /* ---- the sheets ---- */
+    function views(){ var b = $$('#viewSeg button[data-view]').filter(function(x){ return !x.disabled && !x.hidden; });
+      var want = CF && CF.views, no = (CF && CF.noviews) || [];
+      b = b.filter(function(x){ var v = x.getAttribute('data-view'); return !/^(guide|refs|references)$/i.test(v) && no.indexOf(v) < 0 && (!want || want.indexOf(v) >= 0); });
+      if (want) b.sort(function(x, y){ return want.indexOf(x.getAttribute('data-view')) - want.indexOf(y.getAttribute('data-view')); });
+      return b; }
+    function pressedV(){ var b = D.querySelector('#viewSeg button[aria-pressed="true"],#viewSeg button[aria-selected="true"]'); return b ? b.getAttribute('data-view') : ''; }
+    function vlabel(v){ var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (!b) return ''; var t = ''; for (var n = b.firstChild; n; n = n.nextSibling) { var s = n.textContent || ''; if (n.nodeType === 1 && (/^\s*\d+\s*$/.test(s) || is(n, '[class*="sr-"],.visually-hidden,.mark'))) continue; t += s; } return sq(t); }
+    /* every sheet's questions, counted with each view's class on the body in turn (nbh-ui's way for its dots) */
+    function scanAll(){
+      var vs = views(); if (!vs.length) { scans = {}; return; }
+      var body = D.body, was = body.className, sx = scrollX, sy = scrollY; scanning = true; hold(true);
+      try { vs.forEach(function(b){ var v = b.getAttribute('data-view'), cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + v); body.className = cls.join(' ');
+        scans[v] = questions(roots()); }); }
+      finally { body.className = was; hold(false); if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); if (mo) mo.takeRecords(); scanning = false; }
+    }
+    function sheetList(){ var vs = views().map(function(b){ return b.getAttribute('data-view'); }); if (!vs.length) return [''];
+      return vs.filter(function(v){ return v === key ? list.length : (scans[v] || []).length; }); }
+
+    /* ---- the marks ---- */
+    function set(e, v){ if (v == null) { if (e.hasAttribute('data-fx2-st')) e.removeAttribute('data-fx2-st'); } else if (e.getAttribute('data-fx2-st') !== v) e.setAttribute('data-fx2-st', v); }
+    function unmarkAll(){ marked.forEach(function(e){ set(e, null); }); marked = []; $$('[data-fx2-st]').forEach(function(e){ set(e, null); }); unfocus(); }
+    function unfocus(){ if (focusEl) { focusEl.removeAttribute('data-fx2-stf'); if (focusEl.getAttribute('data-fx2-sttab') !== null) { focusEl.removeAttribute('tabindex'); focusEl.removeAttribute('data-fx2-sttab'); } focusEl = null; } }
+    /* the page as it is, for a measure: the class off (the marks then hide nothing), and on again after */
+    function hold(v){ if (v) { if (!aside++) R.classList.remove('fx2-st'); } else if (aside && !--aside && on) R.classList.add('fx2-st'); }
+    function paint(){
+      var now = [], rs, show = [], keep = [];
+      hold(true); try { rs = roots(); } finally { hold(false); }   /* the roots as they are, not as the marks leave them */
+      if (rev) rs.forEach(function(r){ now.push(r); set(r, 'x'); });
+      else if (scr[at]) {
+        scr[at].forEach(function(q){ show = show.concat(q.els); });
+        show.forEach(function(e){ for (var a = e.parentElement; a && a !== D.body; a = a.parentElement) { if (keep.indexOf(a) >= 0) break; keep.push(a); } });
+        var hide = function(box){ for (var c = box.firstElementChild; c; c = c.nextElementSibling) {
+          if (show.indexOf(c) >= 0) { set(c, 'q'); now.push(c); continue; }
+          if (keep.indexOf(c) >= 0) { hide(c); continue; }
+          if (is(c, 'script,style,template,link,colgroup,col,caption') || is(c, '.fx2-stsw,.fx2-stbar,.fx2-strev')) continue;
+          var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky') continue;
+          set(c, 'x'); now.push(c); } };
+        rs.forEach(function(r){ if (keep.indexOf(r) >= 0 || show.indexOf(r) >= 0) hide(r); else { set(r, 'x'); now.push(r); } });
+      }
+      marked.forEach(function(e){ if (now.indexOf(e) < 0) set(e, null); }); marked = now;
+      paintBar();
+      try { if (window.nbhFieldCare && nbhFieldCare.grow) setTimeout(function(){ try { nbhFieldCare.grow(); } catch (e) {} }, 30); } catch (e) {}
+    }
+    /* ---- build: the questions of the sheet on screen again, the screen kept by its first question ---- */
+    function build(where){
+      if (!on || printing || scanning) return;
+      built++;
+      var k = pressedV(), changed = k !== key, anchor = !changed && scr[at] && scr[at][0] ? scr[at][0].atom : null;
+      if (changed || where === 'scan') scanAll();
+      key = k; hold(true);
+      try { list = questions(roots()); } finally { hold(false); }
+      if (key) scans[key] = list;
+      scr = chunk(list);
+      var i = -1;
+      if (where === 'last') i = scr.length - 1;
+      else if (where === 'first' || changed) i = 0;
+      else if (anchor) { scr.forEach(function(s, j){ if (i < 0 && s.some(function(q){ return q.atom === anchor || q.atom.contains(anchor) || anchor.contains(q.atom); })) i = j; });
+        if (i < 0) scr.forEach(function(s, j){ if (i < 0 && (anchor.compareDocumentPosition(s[0].atom) & 4)) i = j; }); }
+      at = Math.max(0, Math.min(i < 0 ? at : i, scr.length - 1));
+      paint();
+    }
+    function soon(){ clearTimeout(rt); rt = setTimeout(function(){ build(); }, 160); }
+
+    /* ---- moving ---- */
+    function tbBottom(){ var t = D.querySelector('.toolbar'); if (!t) return 0; var c = getComputedStyle(t); if (c.position !== 'sticky' && c.position !== 'fixed') return 0; return Math.max(0, t.getBoundingClientRect().bottom); }
+    function bring(){ var s = scr[at], e = rev ? revEl : s && s[0] && s[0].els.filter(vis)[0]; if (!e) return; var r = e.getBoundingClientRect(), top = tbBottom() + 12;
+      if (r.top < top || r.top > innerHeight * 0.45) { try { scrollTo({ top: Math.max(0, scrollY + r.top - top), behavior: 'auto' }); } catch (x) { scrollTo(0, Math.max(0, scrollY + r.top - top)); } } }
+    function seat(byKey){
+      unfocus(); var s = scr[at];
+      if (rev) { var h = revEl && revEl.querySelector('h2'); if (h) { focusEl = h; h.setAttribute('tabindex', '-1'); h.setAttribute('data-fx2-sttab', ''); h.setAttribute('data-fx2-stf', ''); try { h.focus({ preventScroll: true }); } catch (e) {} } return; }
+      if (!s) return;
+      if (byKey) { var f = firstF(s[0]); if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} return; } }
+      var e = s[0].els.filter(vis)[0]; if (!e) return; focusEl = e; e.setAttribute('data-fx2-stf', '');
+      if (!e.hasAttribute('tabindex')) { e.setAttribute('tabindex', '-1'); e.setAttribute('data-fx2-sttab', ''); }
+      try { e.focus({ preventScroll: true }); } catch (x) {}
+    }
+    function firstF(q){ var f = q && q.fields.filter(function(x){ return x.isConnected && liveF(x); })[0]; if (f && f.classList.contains('nbh-seg-src') && f.nbhSeg) { var b = f.nbhSeg.querySelector('button'); if (b) return b; } return f; }
+    function moved(byKey){ paint(); bring(); seat(byKey); }
+    function goSheet(v, where, byKey){ var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (!b) return false;
+      b.click(); key = null; build(where); moved(byKey);
+      /* a sheet the form draws as it opens is read again once it has */
+      setTimeout(function(){ if (on && !rev) build(); }, 400); return true; }
+    function next(byKey){
+      if (!on) return false;
+      if (rev) { done(); return true; }
+      if (at < scr.length - 1) { at++; moved(byKey); return true; }
+      var sh = sheetList(), i = sh.indexOf(key);
+      for (var j = i + 1; j < sh.length; j++) if (sh[j] !== key) return goSheet(sh[j], 'first', byKey);
+      review(true); return true;
+    }
+    function back(byKey){
+      if (!on) return false;
+      if (rev) { review(false); var sh0 = sheetList(), last = sh0[sh0.length - 1]; if (last && last !== key) goSheet(last, 'last', byKey); else { build('last'); moved(byKey); } return true; }
+      if (at > 0) { at--; moved(byKey); return true; }
+      var sh = sheetList(), i = sh.indexOf(key);
+      for (var j = (i < 0 ? sh.length : i) - 1; j >= 0; j--) if (sh[j] !== key) return goSheet(sh[j], 'last', byKey);
+      return false;
+    }
+    /* ---- the blank ones ---- */
+    function review(v){
+      rev = !!v;
+      if (revEl && revEl.parentNode) revEl.parentNode.removeChild(revEl); revEl = null;
+      if (!rev) { paint(); return; }
+      seenRev = true; scanAll(); if (key) scans[key] = list;
+      var vs = views().map(function(b){ return b.getAttribute('data-view'); }), groups = [], n = 0;
+      (vs.length ? vs : ['']).forEach(function(v){ var qs = (v === key || !v ? list : scans[v] || []).filter(blankQ); if (qs.length) { groups.push([v, qs]); n += qs.length; } });
+      revEl = el('section', 'fx2-strev noprint'); revEl.setAttribute('aria-labelledby', 'fx2StRevH');
+      var h = el('h2', null, 'Review the blank ones'); h.id = 'fx2StRevH'; revEl.append(h);
+      revEl.append(el('p', null, n ? n + (n === 1 ? ' question has' : ' questions have') + ' no answer yet. Choose one to go to it, or press Done.' : 'Every question has an answer. Press Done to see the whole form.'));
+      groups.forEach(function(g){ if (g[0]) revEl.append(el('h3', null, vlabel(g[0]) || g[0])); var ul = el('ul');
+        g[1].forEach(function(q){ var li = el('li'), b = el('button', null, q.title); b.type = 'button'; b.addEventListener('click', function(){ jump(g[0], q); }); li.append(b); ul.append(li); });
+        revEl.append(ul); });
+      var at0 = sw && sw.parentNode ? sw : null; if (at0) at0.after(revEl); else D.body.prepend(revEl);
+      paint(); bring(); seat(false);
+    }
+    function jump(v, q){
+      review(false);
+      var go = function(){ var i = -1; scr.forEach(function(s, j){ if (i < 0 && s.some(function(x){ return x.atom === q.atom || x.fields.some(function(f){ return q.fields.indexOf(f) >= 0; }); })) i = j; });
+        if (i >= 0) at = i; moved(false); var f = firstF(scr[at] && scr[at].filter(function(x){ return x.atom === q.atom; })[0] || (scr[at] || [])[0]); if (f) try { f.focus({ preventScroll: true }); } catch (e) {} };
+      if (v && v !== key) { var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (b) b.click(); key = null; build('first'); } else build();
+      go();
+    }
+    function done(){ review(false); var m = String(per); stop(); store(m); paintSwitch(); try { scrollTo(0, 0); } catch (e) {} try { if (window.nbhUI && nbhUI.toast) nbhUI.toast('Step by step is finished: the whole form is shown. The form opens in Step by step again next time; All at once is under the toolbar.'); } catch (e) {} }
+
+    /* ---- the bar at the foot, and the switch under the toolbar ---- */
+    function mkBar(){
+      if (bar) return; bar = el('div', 'fx2-stbar noprint'); bar.setAttribute('role', 'region'); bar.setAttribute('aria-label', 'Step by step');
+      var b1 = el('button', 'fx2-stback', 'Back'), w = el('div', 'fx2-stwhere'), b2 = el('button', 'fx2-stnext', 'Next'), b3 = el('button', 'fx2-stblank', 'Blank ones');
+      [b1, b2, b3].forEach(function(b){ b.type = 'button'; });
+      live = el('b'); live.setAttribute('aria-live', 'polite'); live.setAttribute('aria-atomic', 'true'); w.append(live, el('span'));
+      b1.addEventListener('click', function(){ back(false); }); b2.addEventListener('click', function(){ next(false); }); b3.addEventListener('click', function(){ review(true); });
+      b3.title = 'The questions with no answer yet'; bar.append(b1, w, b3, b2);
+    }
+    function paintBar(){
+      if (!bar) return; var b1 = bar.querySelector('.fx2-stback'), b2 = bar.querySelector('.fx2-stnext'), b3 = bar.querySelector('.fx2-stblank'), sp = bar.querySelector('.fx2-stwhere span');
+      var sh = sheetList(), si = sh.indexOf(key), before = 0, total = 0;
+      sh.forEach(function(v, j){ var n = v === key ? list.length : (scans[v] || []).length; total += n; if (j < si) before += n; });
+      if (!views().length) total = list.length;
+      var txt;
+      if (rev) { txt = 'Review the blank ones'; setText(sp, total + ' question' + (total === 1 ? '' : 's') + ' in all'); }
+      else if (!scr.length) { txt = 'Nothing to answer on this sheet'; setText(sp, vlabel(key)); }
+      else { var s = scr[at], a = list.indexOf(s[0]) + 1 + before, z = list.indexOf(s[s.length - 1]) + 1 + before;
+        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + total + (sh.length > 1 || si >= 0 ? ' · Sheet ' + (si + 1) + ' of ' + sh.length : '');
+        setText(sp, [vlabel(key), s[0].sec].filter(Boolean).join(' \u00b7 ') || s[0].title); }
+      setText(live, txt);
+      var last = !rev && at >= scr.length - 1 && sh.indexOf(key) === sh.length - 1;
+      setText(b2, rev ? 'Done' : last ? 'Review the blank ones' : 'Next');
+      b1.disabled = !rev && at <= 0 && sh.indexOf(key) <= 0;
+      b3.hidden = rev || !seenRev;
+    }
+    function mkSwitch(){
+      if (sw || !CF) return; var tb = D.querySelector('div.toolbar'); sw = el('div', 'fx2-stsw noprint'); sw.setAttribute('role', 'group'); sw.setAttribute('aria-label', 'How the questions are shown');
+      var g1 = el('span', 'fx2-stg'), g2 = el('span', 'fx2-stg fx2-stper'), l2 = el('span', 'fx2-stl fx2-stper', 'Per screen');
+      [['', 'All at once'], ['1', 'Step by step']].forEach(function(o){ var b = el('button', null, o[1]); b.type = 'button'; b.setAttribute('data-fx2-stm', o[0]); b.addEventListener('click', function(){ setMode(o[0] ? String(per) : ''); }); g1.append(b); });
+      ['1', '2', '3'].forEach(function(n){ var b = el('button', null, n); b.type = 'button'; b.setAttribute('data-fx2-stn', n); b.setAttribute('aria-label', n + (n === '1' ? ' question' : ' questions') + ' per screen'); b.addEventListener('click', function(){ setMode(n); }); g2.append(b); });
+      sw.append(el('span', 'fx2-stl', 'Questions'), g1, l2, g2);
+      if (tb && tb.parentNode) tb.after(sw); else D.body.prepend(sw);
+      paintSwitch();
+    }
+    function paintSwitch(){ if (!sw) return;
+      $$('[data-fx2-stm]', sw).forEach(function(b){ attr(b, 'aria-pressed', String(b.getAttribute('data-fx2-stm') === '' ? !on : on)); });
+      $$('[data-fx2-stn]', sw).forEach(function(b){ attr(b, 'aria-pressed', String(on && +b.getAttribute('data-fx2-stn') === per)); });
+      $$('.fx2-stper', sw).forEach(function(e){ e.hidden = !on; }); }
+
+    /* ---- on and off ---- */
+    function setMode(m){ m = /^[123]$/.test(m) ? m : ''; store(m); if (m) { per = +m; if (on) { build(); moved(false); } else start(true); } else stop(); paintSwitch(); }
+    function start(user){
+      if (on || !D.body) return;
+      try { if (window.nbhUI && nbhUI.focus && nbhUI.focus.on()) nbhUI.focus.set(false); } catch (e) {}
+      on = true; R.classList.add('fx2-st'); mkBar(); D.body.appendChild(bar); key = null; at = 0; rev = false;
+      build(user ? 'first' : 'scan'); if (user) { bring(); seat(false); }
+      watch(true); paintSwitch();
+    }
+    function stop(){
+      if (!on) return; var s = scr[at], a = s && s[0] && s[0].els.filter(vis)[0], y = a ? a.getBoundingClientRect().top : null;
+      on = false; watch(false); clearTimeout(rt); if (revEl && revEl.parentNode) revEl.parentNode.removeChild(revEl); revEl = null; rev = false;
+      unmarkAll(); R.classList.remove('fx2-st'); if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+      list = []; scr = []; scans = {}; key = null; at = 0;
+      if (a && y != null) { var n = a.getBoundingClientRect().top; scrollTo(scrollX, Math.max(0, scrollY + n - y)); }
+      try { if (window.nbhFieldCare && nbhFieldCare.grow) nbhFieldCare.grow(); } catch (e) {}
+      paintSwitch();
+    }
+    function own(n){ return n && n.nodeType === 1 && !!n.closest && !!n.closest('.fx2-stbar,.fx2-stsw,.fx2-strev'); }
+    function watch(v){
+      if (!v) { if (mo) mo.disconnect(); return; }
+      if (!mo) mo = new MutationObserver(function(recs){ if (!on || scanning || printing) return;
+        if (recs.some(function(m){ var t = m.target; if (t === R) return m.attributeName === 'data-nbh-fx' && R.hasAttribute('data-nbh-fx'); if (own(t)) return false;
+          if (m.type === 'childList') return !(Array.prototype.every.call(m.addedNodes, own) && Array.prototype.every.call(m.removedNodes, own));
+          /* only a change in what shows (as Focus reads it): not a box's own height, which field care sets as it grows */
+          if (/^(INPUT|SELECT|TEXTAREA|OPTION)$/.test(t.tagName)) return false;
+          if (m.attributeName === 'style') return /display|visibility/.test(String(m.oldValue || '') + String(t.getAttribute('style') || ''));
+          return true; })) {
+          if (R.hasAttribute('data-nbh-fx')) { setMode(''); return; } soon(); } });
+      mo.observe(D.body, { childList: true, subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class', 'hidden', 'style', 'open', 'aria-pressed', 'aria-selected', 'disabled'] });
+      mo.observe(R, { attributes: true, attributeFilter: ['data-nbh-fx'] });
+    }
+    D.addEventListener('change', function(e){ if (on && !own(e.target)) soon(); });
+    /* Enter: the next question (on this screen, then the next screen); Shift+Enter the one before. A box of several lines
+       keeps its Enter; a form that answers Enter in a box itself (it marks the key handled) keeps it too */
+    D.addEventListener('keydown', function(e){
+      if (!on || e.key !== 'Enter' || e.defaultPrevented || e.isComposing || e.altKey || e.ctrlKey || e.metaKey) return;
+      var t = e.target; if (!t || !t.tagName || own(t) || t.isContentEditable || t.tagName === 'TEXTAREA' || t.tagName === 'BUTTON' || t.tagName === 'A' || (t.tagName === 'INPUT' && /^(button|submit|reset|file|image)$/i.test(t.type || ''))) return;
+      if (t !== D.body && !t.closest('[data-fx2-st="q"]') && !t.matches('[data-fx2-st="q"]')) return;
+      e.preventDefault();
+      var s = scr[at] || [], qi = -1; s.forEach(function(q, j){ if (q.atom === t || q.atom.contains(t) || q.els.indexOf(t) >= 0) qi = j; });
+      var to = qi < 0 ? -1 : qi + (e.shiftKey ? -1 : 1), f = to >= 0 && to < s.length ? firstF(s[to]) : null;
+      if (f) { try { f.focus(); } catch (x) {} return; }
+      if (e.shiftKey) back(true); else next(true);
+    });
+    /* a copy of a part of the page the form makes while it steps carries no mark */
+    (function(){ var CN = window.Node && Node.prototype.cloneNode; if (!CN) return;
+      Node.prototype.cloneNode = function(){ var c = CN.apply(this, arguments);
+        if (on && marked.length && c && c.nodeType === 1) { try { var l = [c].concat(Array.prototype.slice.call(c.querySelectorAll ? c.querySelectorAll('[data-fx2-st],[data-fx2-stf]') : [])); l.forEach(function(x){ x.removeAttribute('data-fx2-st'); x.removeAttribute('data-fx2-stf'); if (x.hasAttribute('data-fx2-sttab')) { x.removeAttribute('data-fx2-sttab'); x.removeAttribute('tabindex'); } }); } catch (e) {} }
+        return c; }; })();
+    /* the page plain or printed: the marks step aside, and come back after */
+    function plainOn(){ if (!on) return; watch(false); unmarkAll(); R.classList.remove('fx2-st'); if (revEl) revEl.hidden = true; }
+    function plainOff(){ if (!on) return; R.classList.add('fx2-st'); if (revEl) revEl.hidden = false; watch(true); build(); }
+    /* a saved page opened again, or a copy: no stale marks */
+    $$('[data-fx2-st],[data-fx2-stf]').forEach(function(e){ e.removeAttribute('data-fx2-st'); e.removeAttribute('data-fx2-stf'); if (e.hasAttribute('data-fx2-sttab')) { e.removeAttribute('data-fx2-sttab'); e.removeAttribute('tabindex'); } });
+    /* nbh-ui counts each view's fields for its dots with Focus's folds held aside: the marks are held aside with them */
+    try { var U = window.nbhUI; if (U && U.fxHold && !U.fxHold.fx2) { var F0 = U.fxHold; U.fxHold = function(){ var a = F0.apply(this, arguments), b = on;
+      if (b) hold(true); return a || b ? function(){ if (a) a(); if (b) { b = false; hold(false); } } : null; }; U.fxHold.fx2 = 1; } } catch (e) {}
+    function init(){ if (!CF) return; mkSwitch(); var m = store(); if (/^[123]$/.test(m)) { per = +m; start(false); } else paintSwitch(); }
+    return { init: init, plainOn: plainOn, plainOff: plainOff,
+      api: { on: function(){ return on; }, set: function(m){ setMode(m == null || m === false ? '' : String(m)); }, next: function(){ return next(false); }, back: function(){ return back(false); },
+        review: function(){ review(true); }, done: done, build: function(){ build(); },
+        enable: function(o){ if (!CF) { CF = o || {}; mkSwitch(); } return true; },
+        state: function(){ var sh = sheetList(); return { on: on, per: per, key: key, at: at, screens: scr.length, rev: rev, sheets: sh, si: sh.indexOf(key),
+          counts: sh.map(function(v){ return v === key ? list.length : (scans[v] || []).length; }), progress: live ? live.textContent : '', built: built,
+          qs: list.map(function(q){ return { title: q.title, n: q.fields.length, head: q.head, heavy: !!q.heavy, tag: q.atom.tagName.toLowerCase() + (q.atom.className && typeof q.atom.className === 'string' ? '.' + q.atom.className.trim().split(/\s+/).join('.') : ''), blank: blankQ(q) }; }),
+          screen: (scr[at] || []).map(function(q){ return list.indexOf(q); }), blanks: rev && revEl ? revEl.querySelectorAll('li').length : -1 }; } } };
+  })();
+  window.fx2Layout = { run: run, paper: paper, step: ST.api };
   paperCSS(); segs(); run();
+  if (D.readyState === 'complete') setTimeout(ST.init, 0); else addEventListener('load', function(){ setTimeout(ST.init, 300); });
   try { new MutationObserver(function(recs){ segs(); if (recs.some(function(m){ return !(m.target.closest && m.target.closest('.fx2-csum,.fx2-nsbar,.fx2-pkall,.fx2-addrow')); })) soon(); }).observe(D.body, { childList: true, subtree: true }); } catch (e) {}
   D.addEventListener('change', soon); D.addEventListener('input', function(e){ if (e.target._fx2eg) egSync(e.target); if (LIVE && e.target.closest && e.target.closest(LIVE)) soon(); });
   addEventListener('resize', function(){ tbKey = ''; soon(); });

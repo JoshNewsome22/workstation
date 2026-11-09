@@ -9905,6 +9905,71 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.70: Undo and What's new, Step by step, publication graphs, signal cards, the family's plan page, seven procedure videos, and Behavioral Interventions 2015 to 2019 and 2025 to 2026 in the banks
+(the BCBA, 11/8 and 11/9: the shell's next steps, the graph review, the backlog answers, red and green signal cards, the
+approved DRA and FCT videos, and her full Behavioral Interventions folder)
+
+- **Undo.** After Clear all, Remove last, Remove this or Delete this, Discard, Start over or Reset timer in any of the 48
+  forms, and after a student is removed from the caseload, a form is removed from the case, Fill open forms runs or a
+  line leaves the Documents list, a message at the foot of the window offers **Undo** for about 8 seconds (held while
+  touched; Ctrl Z or Command Z also works outside a text box). The form's own question still comes first. Where Undo now
+  covers an action, the workstation's extra "Are you sure?" is gone. Remove everywhere (Google Drive), Remove all student
+  data, Delete all copies, Reset the offline copy and Delete my bank still ask as before and have no Undo.
+- **What's new.** After an update, the first Today shows a short card with a few lines about the release and a link to
+  these notes, once per version on each device. A new device does not see it.
+- **Back where you left off.** The workstation opens on the student, form, sheet and place you were at, with Start
+  fresh beside it.
+- **Progress rings** on each caseload card and at the top of the case map count the started forms of each phase
+  (Assessment, Plan, Implementation, Review) among the forms the case map expects.
+- **Watch how.** TD-1's video buttons now say Watch how. A list that names a procedure the video library has (TI-1's
+  Main procedure, SR-1's Schedule to design, PA-1's validation context, the delay tolerance toolkit) shows Watch how
+  once one is chosen, opening the library at that procedure. Screen only.
+- **Step by step (37 forms).** A switch under the toolbar: All at once (the default) or Step by step, one, two or
+  three questions per screen, with large Back and Next buttons, "Question 5 of 32 · Sheet 2 of 6", and at the end
+  Review the blank ones. The answers are the same fields, so saving, exports, prints and the packet are unchanged. Not
+  yet on ABC-1, VI-1, DT-1, AD-1, TD-1, GB-1, CF-1, TK-1, TV-1, DD-1 or EA-1.
+- **Graphs (DD-1 and EA-1).** A Colour (default) or Publication switch, kept on this device: Publication draws black on
+  white with a symbol per series, no gridlines, Arial in points, condition labels and a figure caption, at 2:3 (5:8 and
+  3:4 offered), with Save as SVG (initials only in the file name) and Print figure. Colour graphs are unchanged except
+  for a colour-vision-safe palette (no two DD-1 colours closer than 8.8 under protan, deutan or normal vision) and EA-1's
+  lighter fourth colour. Every graph has a plain sentence (also read by VoiceOver) and Show as table; DD-1 points can be
+  tapped, and days zoomed by pinch or double-tap. Breaks of more than 7 school days show "//", and IOA days are marked.
+- **Signal cards (VS-1).** A new Signal cards sheet makes 5 × 7 red "not now" and green "you can ask" cards for FCT
+  schedule thinning and multiple schedules. Templates for attention, items, break, help and general. Red #C8102E with a
+  stop hand in an octagon, green #1E8E3E with a check on a white panel, so the sides differ in shape, symbol and
+  lightness as well as colour. The student's first name follows the family name rule, and a picture is optional. The back
+  can carry staff instructions. It prints duplex with crop marks and bleed, or as one sheet to fold and laminate. TD-1's FCT,
+  multiple-schedule and thinning cards and the Reinforcement Thinning Plan carry **Make signal cards**, which opens
+  VS-1 at that sheet with the template for the plan's function.
+- **The plan in plain words (Family packet).** Build packet → Family now opens with one page: what we are working on,
+  how we will help at school, what you can do at home and who to call, at about a grade-6 reading level, without
+  safety events, restraints, the crisis plan or record numbers. You edit it in an editable preview, and it prints only after you tick
+  **Reviewed**. A change to the plan removes the tick. Your edits are kept with the case.
+- **One name on every family page.** The Family packet, the plan page, HD-1's home sheets and the signal cards use
+  HD-1's **Called at home**, else DM-1's preferred name, else the first word of the student's name.
+- **Upright iPad cards.** SA-1's probes, GC-1's game days and RM-1's inoculation plan are cards on an iPad held upright
+  and tables when it is sideways or on a laptop.
+- **RS-1 and the BACB's form.** The filled copy keeps its fields (not flattened, not encrypted), with the signature
+  fields empty, so it signs in Apple Markup or Adobe Acrobat; How to sign the filled form sits beside the fill buttons.
+- **Procedure videos.** The four DRA videos are replaced by the cuts the BCBA approved on 11/9 (fixed hands, coupons,
+  props and sync). There are three new FCT videos: attention with a card and one plain reminder (Najdowski et al., 2008); items
+  with "wait" and then "no" (Fahmie et al., 2016); and signaled thinning with green and red (Greer et al., 2016b). All 151 FCT
+  cards (and the new FCT cards from the Behavioral Interventions reading) show their closest video, with one line on how
+  the card differs. DT-1's Delay requirement opens the items video. The library holds 24 videos, and the offline copy saves
+  139 files. All videos are AI-generated with simulated people.
+- **The banks.** Behavioral Interventions 2015 to 2019 (volumes 30 to 34, not banked before): 101 TD-1 cards and 3
+  GB-1 objectives. The 2025 and 2026 volumes, reread under the current rules (2026 issues 1 and 3 for the first time):
+  25 TD-1 cards and 3 GB-1 objectives. The dental-exam card's baseline break after challenging behavior is now an
+  unticked OPTION step, like the other nine approved cards.
+- **Fixes.** HD-1's ABC lists and BC-1's, SV-1's and FD-1's notes print in the master packet exactly as before the new
+  layout. Turning Focus off no longer leaves a VS-1 field widened.
+- **Checks.** New tests: v2570-shell, v2570-graphs, v2570-backlog, v2570-signal-cards and v2570-stepper; v2568-td1-procvideos
+  and v2569-video-library cover the new videos and counts.
+- **Open, for the BCBA.** Should Done in Step by step keep Step by step next time? Should IA-1's questionnaires stay
+  one item per screen? From the Behavioral Interventions reading: optional steps left out of Della Rosa et al. (2015)
+  and Ghaemmaghami et al. (2016), Pritchard et al.'s (2018) levels-system "review status", Manente & LaRue's (2017)
+  reprimand for an adult's self-injury, and two high-p studies not banked (Planer, 2018; Trejo, 2018).
+
 ### v25.69: One screen layout for every form, the video library, Matilda's narration, the print presets, and Behavioral Interventions and BAP in the banks
 (the BCBA, 11/7 and 11/8: the rest of the screen layout, a YouTube-style library for the procedure videos, the voice she
 chose for them, the design review's print group, and the studies in her two new Drive folders)

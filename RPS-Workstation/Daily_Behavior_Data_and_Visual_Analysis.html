@@ -1633,9 +1633,9 @@ document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest
    collects the form for the master print), so field care measures every box at its paper height: the master print kept
    the empty boxes at the screen's taller height. :where() adds nothing to a rule's weight, and has no comma, which the
    master print's scoping of the form's styles cannot take inside :not() */
-html.nbh-pr-measure :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit){display:none!important}
+html.nbh-pr-measure :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit,.fx2-stsw,.fx2-stbar,.fx2-strev){display:none!important}
 /* v25.67 fx2: nor while the page is plain (field care measures the boxes then: an example beside a box narrowed it) */
-html.nbh-plain :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit){display:none!important}
+html.nbh-plain :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit,.fx2-stsw,.fx2-stbar,.fx2-strev){display:none!important}
 /* v25.67 fx2: Focus (nbh-ui: one part of a form at a time) keeps out of sight what it folds. The layout's display rules
    carry !important and outweigh Focus's own rule (a head's fields, a row of definitions, a field grid showed in a folded
    part), so these carry an id's weight: #fx2-never is on no page. A folded part's line hides its controls (:enabled,
@@ -1863,7 +1863,44 @@ html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh p,html.
 html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh p,html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh ul{max-width:68ch}
 html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh h3.sub{font-size:22px!important;margin-top:36px!important}
 html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .defs .dlab{font-size:17px!important}
+
+/* ---------- v25.70 step by step (the BCBA's approval, 11/9; the script's step 13): the questions one, two or three at a
+   time, Back and Next in a bar at the foot, and at the end the blank ones. The form's own switch (FX2_CFG.step) sits under
+   its toolbar; while it steps (html.fx2-st) the parts of the sheet not on this screen are marked data-fx2-st="x" and kept
+   out of sight here, with an id's weight over the layout's display rules (#fx2-never is on no page). Screen only, and none
+   of it while the page is plain or measured for paper. ---------- */
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;box-sizing:border-box;max-width:1100px;margin:10px auto 6px;padding:6px 14px;font:400 15px/1.4 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stl{font-weight:600}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg{display:inline-flex;flex-wrap:wrap;padding:2px;gap:2px;border-radius:10px;background:#E9EFED}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg button{min-height:44px;min-width:44px;padding:0 14px;margin:0;border:0;border-radius:8px;background:transparent;color:var(--fx2-navy);font:600 15px var(--fx2-sans);cursor:pointer}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg button[aria-pressed="true"]{background:var(--fx2-navy);color:#fff}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw [hidden]{display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) :is([data-fx2-st="x"],#fx2-never){display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .nbh-pagenav{display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .ident > [data-fx2-st="q"]{grid-column:1/-1!important;max-width:640px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-fg > [data-fx2-st="q"]{grid-column:1/-1!important;max-width:640px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) [data-fx2-stf]:focus{outline:none}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) body::after{content:"";display:block;height:120px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar{position:fixed;z-index:61;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(760px,calc(100% - 20px));box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border:1px solid var(--fx2-rule);border-radius:16px;box-shadow:0 16px 40px -16px rgba(24,46,67,.5);font:400 14px/1.3 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;min-width:56px;padding:0 22px;margin:0;border:1px solid var(--fx2-box);border-radius:12px;background:#fff;color:var(--fx2-navy);font:600 17px var(--fx2-sans);cursor:pointer;flex:0 0 auto;white-space:nowrap}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stnext{min-width:150px;background:var(--fx2-navy);border-color:var(--fx2-navy);color:#fff}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stback{min-width:112px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stblank{min-height:44px;padding:0 12px;font-size:14px;border-color:transparent}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button[hidden]{display:none}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button:disabled{opacity:.4;cursor:default}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button:focus-visible{outline:3px solid #9DBAD3;outline-offset:2px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stwhere{flex:1 1 auto;min-width:0;text-align:center}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stwhere b{display:block;font:600 15px/1.3 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stwhere span{display:block;font:400 13px/1.3 var(--fx2-sans);color:var(--fx2-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev{box-sizing:border-box;max-width:760px;margin:20px auto 30px;padding:22px 24px;background:#fff;border:1px solid var(--fx2-rule);border-radius:14px;font:400 16px/1.5 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev h2{font:600 26px/1.25 var(--fx2-serif);color:var(--fx2-navy);margin:0 0 8px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev h3{font:600 17px/1.3 var(--fx2-sans);color:var(--fx2-ink);margin:20px 0 8px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev ul{list-style:none;margin:0;padding:0}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev li{margin:0 0 8px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev li button{display:block;width:100%;min-height:48px;padding:10px 14px;margin:0;text-align:left;border:1px solid var(--fx2-box);border-radius:10px;background:#fff;color:var(--fx2-navy);font:500 16px/1.35 var(--fx2-sans);cursor:pointer}
+@media (max-width:640px){html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar{gap:6px;padding:6px;width:calc(100% - 12px)} html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button{padding:0 14px;font-size:16px} html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stnext{min-width:96px} html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stback{min-width:80px}}
 }
+@media print{.fx2-stsw,.fx2-stbar,.fx2-strev{display:none!important}}
 </style>
 <style id="fx2-own">
 /* v25.68 fx2: DD-1's own screen rules for the shared layout */
@@ -2335,7 +2372,10 @@ window.FX2_CFG = { sheets: 'main > section[data-panel]:not(#tab-walk)', cards: '
 /* ---------------------------------------------------------------
    State
 ---------------------------------------------------------------- */
-const PALETTE = ["#8E2A2A","#0E5C63","#1F4E8C","#7A5B0B","#4B2E6B","#1F6B4A","#A14A17","#3D4A55"];
+/* v25.70 (research NEXT2 #6) tested for colour-vision deficiency (Machado et al., 2009, CIELAB): the olive and orange, and
+   the teal and slate, were 3.7 and 5.2 apart under deuteranopia; three are moved a little, and no two of the eight are
+   closer than 8.8 for normal, protan or deutan vision. A behavior keeps the color it was given. */
+const PALETTE = ["#8E2A2A","#186068","#1F4E8C","#907030","#4B2E6B","#1F6B4A","#A14A17","#404850"];
 const MEASURES = {
   count:    {label:"Frequency (count)",        unit:"occurrences",      axis:"Occurrences per day"},
   rate:     {label:"Rate (per hour)",          unit:"per hour",         axis:"Responses per hour"},
@@ -3259,7 +3299,8 @@ function buildChart(beh,rows,conds,analyses){
     };
     let expect=null;
     a.pts.forEach(p=>{
-      if(expect!==null && p.x!==expect && !alt) flush();
+      /* v25.70 (GRAPHS.md gap 4) nor across a break in time (ddGapIn: more school days between two days than the break allows) */
+      if(expect!==null && ((p.x!==expect && !alt) || (typeof ddGapIn==="function" && seg.length && ddGapIn(rows,seg[seg.length-1].x,p.x)))) flush();
       seg.push(p); expect=p.x+1;
     });
     flush();
@@ -4142,7 +4183,7 @@ function pairChart(a1,b1,a2,b2,rows,conds){
       if(!a.n) return;
       let seg=[], expect=null;
       const flush=()=>{ if(seg.length>1) g.push(`<polyline points="${seg.map(p=>X(p.x).toFixed(1)+","+Yf(p.y).toFixed(1)).join(" ")}" fill="none" stroke="${esc(beh.color)}" stroke-width="2" ${dashed?'stroke-dasharray="6 3"':""}/>`); seg=[]; };
-      a.pts.forEach(p=>{ if(expect!==null&&p.x!==expect) flush(); seg.push(p); expect=p.x+1; });
+      a.pts.forEach(p=>{ if(expect!==null&&(p.x!==expect||(typeof ddGapIn==="function"&&ddGapIn(rows,expect-1,p.x)))) flush(); seg.push(p); expect=p.x+1; });
       flush();
       a.pts.forEach(p=>{
         const cy=Yf(p.y);
@@ -5526,7 +5567,7 @@ function ddStackHtml(behs,rows,conds){if(!ddStackWanted(behs))return "";
     g.push(`<text x="${ML+6}" y="${y0+10}" font-size="12" font-weight="700" fill="${esc(t.b.color)}" font-family="${DD_SERIF}">${esc(t.b.name||"Untitled")}<\/text>`);
     t.bc.forEach((c,ci)=>{if(!ci||c.rowIdx[0]>xEnd)return;const x=(X(c.rowIdx[0]-1)+X(c.rowIdx[0]))/2;if(ci===1)step.push({x,y0,yb});else g.push(`<line class="dd-full" x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${yb}" stroke="#16242E" stroke-width="1.6"/>`);});
     t.an.forEach(a=>{if(!a.n)return;let seg=[],ex=null;const fl=()=>{if(seg.length>1)g.push(`<polyline points="${seg.map(p=>X(p.x).toFixed(1)+","+Y(p.y).toFixed(1)).join(" ")}" fill="none" stroke="${esc(t.b.color)}" stroke-width="1.8"/>`);seg=[];};
-      a.pts.forEach(p=>{if(ex!==null&&p.x!==ex)fl();seg.push(p);ex=p.x+1;});fl();
+      a.pts.forEach(p=>{if(ex!==null&&(p.x!==ex||(typeof ddGapIn==="function"&&ddGapIn(rows,ex-1,p.x))))fl();seg.push(p);ex=p.x+1;});fl();
       a.pts.forEach(p=>g.push(`<circle cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="3.2" fill="${esc(t.b.color)}" stroke="#fff" stroke-width="0.8"><title>${esc(t.b.name)} ${esc(fmtDate(p.date))}: ${r1(p.y)}<\/title><\/circle>`));});
     if(!t.bc[1]||t.bc[1].rowIdx[0]>xEnd)step.push({x:null,y0,yb});});
   /* the stepped phase line: down each tier at its own line, across the gap to the next tier's */
@@ -23428,6 +23469,452 @@ if(window.__ddStaff)window.__ddStaff.selfQs=selfQs;
 try{stPaint();}catch(e){}
 })();
 </script>
+<style id="dd1-v2570-css">
+/* v25.70 the graphs: the style switch, the Publication figures, the sentence and the table, the design check */
+.nbh-gs{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:10px 0 12px}
+.nbh-gs-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.nbh-gs-l{font-size:13px;color:var(--ink-soft,#4A5C68)}
+.nbh-gs-b{min-height:44px!important;min-width:44px;padding:6px 12px;border:1px solid var(--rule,#c9d3d9);background:#fff;color:var(--ink,#16242E);border-radius:3px;font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation}
+.nbh-gs-b[aria-pressed="true"]{background:#16242E;color:#fff;border-color:#16242E}
+.nbh-gs-b:focus-visible{outline:3px solid #1F4E8C;outline-offset:2px}
+svg.graph.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;min-width:0;height:auto;display:block;margin:0 auto;background:#fff}
+@media screen{#nbhPubPrint{display:none}}
+@media print{.nbh-gs{display:none!important}
+  svg.graph.ddpub{width:calc(var(--w) * 1pt)!important;max-width:100%!important;height:auto!important}
+  body.nbh-pubprint > *:not(#nbhPubPrint){display:none!important}
+  body.nbh-pubprint #nbhPubPrint{display:block!important;margin:0}
+  #nbhPubPrint svg{width:calc(var(--w) * 1pt)!important;max-width:100%;height:auto;display:block}}
+.dd-gsum{margin:8px 0 4px;font-size:14px;line-height:1.45;color:var(--ink,#16242E);max-width:72em}
+.dd-gsum .dd-touchhint{display:block;font-size:12.5px;margin-top:2px}
+.dd-gsum.dd-gsum-pub{max-width:calc(var(--w,460) * 1.9px);margin-left:auto;margin-right:auto}
+.dd-gtab{margin:6px 0 10px;overflow-x:auto;max-width:100%}
+.dd-gtab-t{border-collapse:collapse;font-size:13px;min-width:0}
+.dd-gtab-t caption{text-align:left;font-weight:600;font-size:13px;padding:2px 0 6px}
+.dd-gtab-t th,.dd-gtab-t td{border-bottom:1px solid var(--rule-soft,#dce3e7);padding:5px 8px;text-align:left;vertical-align:top}
+.dd-gtab-t thead th{position:static;font-size:12.5px}
+#resultsOut .dd-graphsave button[data-g70]{min-height:44px!important}
+.dd-zoomctl .dd-zoomtxt{font-size:12.5px}
+.dd-dcheck{border:1px solid var(--rule-soft,#dce3e7);border-left:3px solid #4A5C68;border-radius:3px;padding:8px 12px;margin:12px 0 4px;background:#fafbfc;font-size:13.5px;line-height:1.45}
+.dd-dcheck h4{margin:0 0 4px;font-size:14px}.dd-dcheck p{margin:4px 0}.dd-dcheck ul{margin:4px 0 4px 1.3em;padding:0}.dd-dcheck li{margin:2px 0}
+.dd-capedit{border:1px solid #1F4E8C;border-radius:3px;padding:8px 10px;margin:6px 0;font-size:14px;line-height:1.45;background:#fff;min-height:44px}
+.dd-pubsize{margin:4px 0;font-size:12.5px}
+#ddPtTip{position:fixed;z-index:60;background:#16242E;color:#fff;font-size:13.5px;line-height:1.4;padding:8px 10px;border-radius:4px;max-width:250px;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none;opacity:0;transition:opacity .15s}
+#ddPtTip.on{opacity:1}
+#resultsOut .chartbox svg.graph[data-dd-b]:not(.ddpub){touch-action:pan-x pan-y}
+.dd-ioa-key,.dd-brk-key{white-space:nowrap}
+/* Publication: the colour keys and the colour image button step aside; the other graphs are drawn in gray */
+body.dd-pubmode #resultsOut .legend,body.dd-pubmode #resultsOut [data-act="saveGraph"]{display:none!important}
+body.dd-pubmode #resultsOut .chartbox svg.graph:not(.ddpub){filter:grayscale(1)}
+body.dd-pubmode #resultsOut .chartbox{text-align:center}
+@media print{.dd-gsum:not(.dd-gsum-pub),.dd-dcheck,.dd-zoomctl,.dd-pubsize,#ddPtTip,.dd-capedit{display:none!important}
+  .dd-gsum.dd-gsum-pub{display:block;margin:4pt auto 10pt;max-width:calc(var(--w,460) * 1pt);font:9pt/1.35 Arial,Helvetica,sans-serif;color:#000;text-align:left;break-before:avoid;page-break-before:avoid;break-inside:avoid}}
+body.dd-pubmode #resultsOut .chartbox:has(svg.ddpub){border:0;padding:0}
+</style>
+<script id="dd1-v2570">
+/* ---- v25.70 the publication figure (GRAPHS.md, "Publication-ready mode: the specification"). One drawing for every graph
+   this form shows in the Publication style: black ink on white, a symbol and a line style for each series, no gridlines,
+   shading or aids, ticks outside, sans-serif type set in points at the final size, condition labels at the top, the
+   caption below. The plot keeps the chosen y:x proportion (2:3, 5:8 or 3:4) and its width follows the number of sessions
+   (12 pt a session, 150 to 340 pt), so a few points are not stretched across a page and a double column (14.6 cm) holds
+   the widest. The SVG is in points: saved, it opens at that size, and it prints at it. */
+var nbhPub=(function(){
+"use strict";
+var FONT="Arial, Helvetica, sans-serif";
+/* the series, in order: filled circle, open circle, filled triangle, open square, filled square, open triangle, filled
+   diamond, open diamond; the paths solid, dashed, dotted, dash-dot */
+var SYM=[["circle",1],["circle",0],["triangle",1],["square",0],["square",1],["triangle",0],["diamond",1],["diamond",0]];
+var DASH=["","3 1.6","0.9 1.6","3.2 1.4 0.9 1.4"];
+var SYMW={circle:"circles",triangle:"triangles",square:"squares",diamond:"diamonds"};
+var ctx=null;
+function tw(s,pt,bold){if(ctx===null){try{ctx=document.createElement("canvas").getContext("2d")||false;}catch(e){ctx=false;}}
+  if(!ctx)return String(s).length*pt*0.55;ctx.font=(bold?"700 ":"400 ")+pt+"px "+FONT;return ctx.measureText(String(s)).width;}
+function x(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function f(n){return (Math.round(n*100)/100).toString();}
+function wrap(t,w,pt,max){var out=[],cur="";String(t||"").split(/\s+/).filter(Boolean).forEach(function(word){var s=cur?cur+" "+word:word;if(!cur||tw(s,pt)<=w)cur=s;else{out.push(cur);cur=word;}});if(cur)out.push(cur);return max&&out.length>max?null:out;}
+function marker(sym,cx,cy,r,title){var k=SYM[sym%SYM.length],fill=k[1]?"#000":"#fff",a=' fill="'+fill+'" stroke="#000" stroke-width="0.8"',t=title?"<title>"+x(title)+"</title>":"",s;
+  if(k[0]==="circle")s='<circle cx="'+f(cx)+'" cy="'+f(cy)+'" r="'+f(r)+'"'+a+">";
+  else if(k[0]==="square"){var h=r*0.9;s='<rect x="'+f(cx-h)+'" y="'+f(cy-h)+'" width="'+f(2*h)+'" height="'+f(2*h)+'"'+a+">";}
+  else if(k[0]==="triangle"){var q=r*1.2;s='<polygon points="'+f(cx)+","+f(cy-q)+" "+f(cx+q)+","+f(cy+q*0.75)+" "+f(cx-q)+","+f(cy+q*0.75)+'"'+a+">";}
+  else{var d=r*1.25;s='<polygon points="'+f(cx)+","+f(cy-d)+" "+f(cx+d)+","+f(cy)+" "+f(cx)+","+f(cy+d)+" "+f(cx-d)+","+f(cy)+'"'+a+">";}
+  return s+t+(k[0]==="circle"?"</circle>":k[0]==="square"?"</rect>":"</polygon>");}
+function symName(sym){var k=SYM[sym%SYM.length];return (k[1]?"filled ":"open ")+SYMW[k[0]];}
+function ratioOf(r){return r==="5:8"?0.625:r==="3:4"?0.75:2/3;}
+/* spec: {ratio:"2:3", nSlots, xTitle, xLabel(i)->text|"" , panels:[{yTitle, top, step, tier, series:[{name, sym, dash,
+   segs:[[{i,y}]], pts:[{i,y,title}]}], singles:[{i,y,title}] (open, unjoined), vlines:[{s, dash}], labels:[{s0,s1,text}],
+   crit:[{s0,s1,y,label}], tmarks:[{s,kind,title}], bmarks:[{s,text,title}], events:[{s,text}], dog:s|null}], breaks:[s], zero:true,
+   caption, label (accessible name), figNo} */
+function figure(sp){
+  var n=Math.max(1,sp.nSlots|0),ratio=ratioOf(sp.ratio),P=sp.panels||[],k=P.length||1;
+  var pw=Math.max(150,Math.min(340,n*12)),ph=k===1?pw*ratio:Math.max(52,pw*ratio*1.2/k),gapP=12,z=sp.zero?3:0;
+  var T={tick:7.5,title:9,lab:8.5,small:6.5,cap:8.5,dl:8};
+  /* the left margin holds the widest tick label and the rotated title */
+  var tickW=0;P.forEach(function(p){for(var v=0;v<=p.top*(1+1e-9);v+=p.step){tickW=Math.max(tickW,tw(p.tick?p.tick(v):f(v),T.tick));}});
+  var ML=Math.ceil(5+T.title+5+tickW+5+3.5);
+  /* direct labels: at the right end of each path, in a gutter, when a panel has more than one series and they fit */
+  var dl=[],gut=0;P.forEach(function(p,pi){if((p.series||[]).length<2)return;var w=0;p.series.forEach(function(s){w=Math.max(w,tw(s.name,T.dl));});gut=Math.max(gut,w+8);});
+  /* a panel's name (a tier, or one of two behaviors) at the right of its panel, wrapped to 80 pt */
+  P.forEach(function(p){if(!p.tier)return;p.tierL=wrap(p.tier,80,T.dl)||[p.tier];var w=0;p.tierL.forEach(function(l){w=Math.max(w,tw(l,T.dl));});gut=Math.max(gut,Math.min(84,w)+8);});
+  var MR=8+gut;
+  var left=ML,X=function(s){return left+(s+0.5)*pw/n;};
+  /* the condition labels at the top, over the first panel's sections */
+  var L0=(P[0]&&P[0].labels)||[],notes=[],lines1=1;
+  L0.forEach(function(l){var w=Math.max(10,X(l.s1)-X(l.s0)-4);var ls=wrap(l.text,w,T.lab,2),pt=T.lab;if(!ls){ls=wrap(l.text,w,7,2);pt=7;}
+    if(!ls){notes.push(l.text);ls=["["+notes.length+"]"];pt=7;}l.lines=ls;l.pt=pt;lines1=Math.max(lines1,ls.length);});
+  var ev0=(P[0]&&P[0].events||[]).length?9:0,MT=(L0.length?Math.ceil(4+lines1*10+4):8)+ev0;
+  var g=[],H0=MT,py=[];P.forEach(function(p,pi){py.push(H0+pi*(ph+z+gapP));});
+  var plotB=py[k-1]+ph+z,MB=3.5+2+T.tick+5+T.title+4;
+  var W=Math.ceil(ML+pw+MR),cw=W-10,cap=sp.caption?wrap(sp.caption,cw,T.cap):[],capH=cap.length?6+cap.length*10.5:0,H=Math.ceil(plotB+MB+capH+4);
+  g.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>');
+  P.forEach(function(p,pi){
+    var y0=py[pi],yb=y0+ph,top=p.top>0?p.top:1,Y=function(v){return yb-Math.max(0,Math.min(v,top))/top*ph;};
+    /* axes: left and bottom only, meeting at the origin */
+    g.push('<line x1="'+f(left)+'" y1="'+f(y0)+'" x2="'+f(left)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.8"/>');
+    g.push('<line x1="'+f(left)+'" y1="'+f(yb+z)+'" x2="'+f(left+pw)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.8"/>');
+    /* y ticks outside, at round numbers; every other one labelled when there are more than six */
+    var nt=Math.round(top/p.step),every=nt>6?2:1;
+    for(var q=0;q<=nt;q++){var v=q*p.step,yy=Y(v);g.push('<line x1="'+f(left-3.5)+'" y1="'+f(yy)+'" x2="'+f(left)+'" y2="'+f(yy)+'" stroke="#000" stroke-width="0.6"/>');
+      if(q%every===0)g.push('<text x="'+f(left-5)+'" y="'+f(yy+2.6)+'" font-size="'+T.tick+'" text-anchor="end">'+x(p.tick?p.tick(v):f(v))+"</text>");}
+    /* x ticks outside: each session while they are few, else a minor tick each and a major one every 5 */
+    var major=n<=12?1:n<=60?5:10,minor=n<=60?1:5;
+    for(var i=0;i<n;i++){if(i%minor&&(i+1)%major)continue;var mj=n<=12||(i+1)%major===0||i===0,xx=X(i);
+      g.push('<line x1="'+f(xx)+'" y1="'+f(yb+z)+'" x2="'+f(xx)+'" y2="'+f(yb+z+(mj?3.5:2))+'" stroke="#000" stroke-width="0.6"/>');
+      if(pi===k-1&&mj){var t=sp.xLabel?sp.xLabel(i):String(i+1);if(t)g.push('<text x="'+f(xx)+'" y="'+f(yb+z+3.5+2+T.tick)+'" font-size="'+T.tick+'" text-anchor="middle">'+x(t)+"</text>");}}
+    /* a break in time: "//" across the x-axis, and no path across it */
+    (sp.breaks||[]).forEach(function(s){var bx=X(s),by=yb+z;g.push('<g class="pub-brk"><rect x="'+f(bx-2.2)+'" y="'+f(by-1.5)+'" width="4.4" height="3" fill="#fff"/><line x1="'+f(bx-3.6)+'" y1="'+f(by+3)+'" x2="'+f(bx-0.6)+'" y2="'+f(by-3)+'" stroke="#000" stroke-width="0.7"/><line x1="'+f(bx+0.6)+'" y1="'+f(by+3)+'" x2="'+f(bx+3.6)+'" y2="'+f(by-3)+'" stroke="#000" stroke-width="0.7"/></g>');});
+    /* the y title, rotated, centred on the panel (once on the figure when every panel shares it) */
+    if(p.yTitle){var cy=y0+ph/2,yt=T.title,yl=[p.yTitle];while(yt>6.5&&tw(p.yTitle,yt)>ph+z+8)yt-=0.5;if(tw(p.yTitle,yt)>ph+z+8){yl=wrap(p.yTitle,ph+z+8,yt,2)||[p.yTitle];}
+      yl.forEach(function(l,m){var tx=5+yt*0.8+(m-(yl.length-1))*yt*1.05+(yl.length-1)*yt*0.5;g.push('<text class="pub-yt" x="'+f(tx)+'" y="'+f(cy)+'" font-size="'+yt+'" text-anchor="middle" transform="rotate(-90 '+f(tx)+" "+f(cy)+')">'+x(l)+"</text>");});}
+    if(p.tierL){var ty=y0+ph/2-(p.tierL.length-1)*4.75+2.8;p.tierL.forEach(function(l,m){g.push('<text class="pub-tier" x="'+f(left+pw+5)+'" y="'+f(ty+m*9.5)+'" font-size="'+T.dl+'">'+x(l)+"</text>");});}
+    /* phase-change lines: solid, the full height; a minor change or event dashed */
+    (p.vlines||[]).forEach(function(l){var vx=X(l.s);g.push('<line class="pub-ph" x1="'+f(vx)+'" y1="'+f(pi===0&&L0.length?y0-2:y0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.8"'+(l.dash?' stroke-dasharray="2.4 1.6"':"")+"/>");});
+    (p.events||[]).forEach(function(l){var vx=X(l.s),e0=pi===0&&ev0?y0-ev0+1:y0;g.push('<line class="pub-ev" x1="'+f(vx)+'" y1="'+f(e0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="2.4 1.6"/>');
+      if(l.text&&pi===0&&ev0){var ew=tw(l.text,T.small),ex=Math.min(vx+2,left+pw+MR-ew-2);g.push('<text class="pub-evl" x="'+f(ex)+'" y="'+f(y0-3)+'" font-size="'+T.small+'">'+x(l.text)+"</text>");}});
+    /* criterion: a thin dashed line across its conditions */
+    (p.crit||[]).forEach(function(c){var cy2=Y(c.y);g.push('<line class="pub-crit" x1="'+f(c.s0<=-0.5?left:X(c.s0))+'" y1="'+f(cy2)+'" x2="'+f(c.s1>=n-0.5?left+pw:X(c.s1))+'" y2="'+f(cy2)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="3 2"/>');
+      if(c.label)g.push('<text x="'+f(c.s1>=n-0.5?left+pw:X(c.s1))+'" y="'+f(cy2-2)+'" font-size="'+T.small+'" text-anchor="end">'+x(c.label)+"</text>");});
+    /* the stepped (dogleg) phase line of a multiple baseline: down this panel, across the gap to the next one's */
+    if(p.dog!=null){var dx=X(p.dog),nx=P[pi+1]&&P[pi+1].dog!=null?X(P[pi+1].dog):null;var d="M"+f(dx)+" "+f(y0)+"V"+f(yb+z);if(nx!==null)d+="V"+f(yb+z+gapP/2)+"H"+f(nx)+"V"+f(py[pi+1]);g.push('<path class="pub-dog" d="'+d+'" fill="none" stroke="#000" stroke-width="0.8"/>');}
+    /* the data: each segment joined, points drawn over the paths; an open point is filled white */
+    (p.series||[]).forEach(function(s){(s.segs||[]).forEach(function(seg){if(seg.length<2)return;g.push('<polyline points="'+seg.map(function(o){return f(X(o.i))+","+f(Y(o.y));}).join(" ")+'" fill="none" stroke="#000" stroke-width="0.9"'+(DASH[s.dash%DASH.length]?' stroke-dasharray="'+DASH[s.dash%DASH.length]+'"':"")+"/>");});});
+    (p.singles||[]).forEach(function(o){g.push('<circle cx="'+f(X(o.i))+'" cy="'+f(Y(o.y))+'" r="2.4" fill="#fff" stroke="#000" stroke-width="0.7" stroke-dasharray="1 0.8"><title>'+x(o.title||"")+"</title></circle>");});
+    (p.series||[]).forEach(function(s){(s.pts||[]).forEach(function(o){g.push(marker(s.sym,X(o.i),Y(o.y),2.5,o.title));if(o.mark)g.push('<text x="'+f(X(o.i))+'" y="'+f(Y(o.y)-4.5)+'" font-size="'+T.small+'" text-anchor="middle">'+x(o.mark)+"</text>");});});
+    /* marks: a second observer's day (an open inverted triangle) and probes at the top; absences above the axis */
+    (p.tmarks||[]).forEach(function(m){var mx=X(m.s);if(m.kind==="ioa")g.push('<polygon class="pub-ioa" points="'+f(mx-2)+","+f(y0+0.5)+" "+f(mx+2)+","+f(y0+0.5)+" "+f(mx)+","+f(y0+3.8)+'" fill="#000"><title>'+x(m.title||"")+"</title></polygon>");
+      else g.push('<text x="'+f(mx)+'" y="'+f(y0+T.small+5)+'" font-size="'+T.small+'" text-anchor="middle">'+x(m.kind)+"<title>"+x(m.title||"")+"</title></text>");});
+    (p.bmarks||[]).forEach(function(m){g.push('<text x="'+f(X(m.s))+'" y="'+f(yb-1.5)+'" font-size="'+T.small+'" text-anchor="middle">'+x(m.text)+"<title>"+x(m.title||"")+"</title></text>");});
+    /* direct labels at the right end of each path, kept 8.5 pt apart; given up (for the caption's key) when one would
+       sit too far from its path */
+    if((p.series||[]).length>1){var want=p.series.map(function(s,si){var last=null;(s.pts||[]).forEach(function(o){if(!last||o.i>=last.i)last=o;});return last?{si:si,y:Y(last.y)+2.8,w:Y(last.y)+2.8,s:s}:null;}).filter(Boolean).sort(function(a,b){return a.y-b.y;});
+      for(var j=1;j<want.length;j++)if(want[j].y<want[j-1].y+8.5)want[j].y=want[j-1].y+8.5;
+      var over=want.length?want[want.length-1].y-(yb+z+4):0;if(over>0)want.forEach(function(o){o.y-=over;});for(var j2=want.length-2;j2>=0;j2--)if(want[j2].y>want[j2+1].y-8.5)want[j2].y=want[j2+1].y-8.5;
+      var ok=want.every(function(o){return Math.abs(o.y-o.w)<=14&&o.y>=y0;});
+      if(ok)want.forEach(function(o){g.push('<text class="pub-dl" x="'+f(left+pw+5)+'" y="'+f(o.y)+'" font-size="'+T.dl+'">'+x(o.s.name)+"</text>");});
+      dl.push(ok);}
+  });
+  /* the condition labels: centred over each condition, above the data, horizontal, no boxes */
+  L0.forEach(function(l){var cx=(X(l.s0)+X(l.s1))/2;l.lines.forEach(function(ln,m){g.push('<text class="pub-lab" x="'+f(cx)+'" y="'+f(MT-ev0-4-(l.lines.length-1-m)*10)+'" font-size="'+l.pt+'" text-anchor="middle">'+x(ln)+"</text>");});});
+  if(sp.xTitle)g.push('<text x="'+f(left+pw/2)+'" y="'+f(plotB+MB-4)+'" font-size="'+T.title+'" text-anchor="middle">'+x(sp.xTitle)+"</text>");
+  cap.forEach(function(ln,m){g.push('<text class="pub-cap" x="5" y="'+f(plotB+MB+6+8+m*10.5)+'" font-size="'+T.cap+'">'+x(ln)+"</text>");});
+  return {svg:'<svg class="graph ddpub" viewBox="0 0 '+W+" "+H+'" width="'+W+'pt" height="'+H+'pt" style="--w:'+W+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+x(sp.label||"Graph")+'" font-family="'+FONT+'" fill="#000">'+g.join("")+"</svg>",
+    W:W,H:H,pw:pw,ph:ph,notes:notes,direct:dl.every(Boolean)&&dl.length>0,nSlots:n};
+}
+/* the proportions line and the size at print */
+function sizeLine(fig,ratio,unit){var cm=function(pt){return (pt/72*2.54).toFixed(1);};
+  return "Proportions "+(ratio==="5:8"||ratio==="3:4"?ratio:"2:3")+" (y:x) · "+fig.nSlots+" "+unit+" · plot "+cm(fig.pw)+" × "+cm(fig.ph)+" cm · figure "+cm(fig.W)+" cm wide ("+(fig.W<=199?"a single column, 7.0 cm":fig.W<=414?"a double column, 14.6 cm":"wider than a double column")+")";}
+/* the figure saved as an SVG file: vector, sharp at any size, opens in Word, Google Docs, Keynote and Illustrator */
+function saveSvg(svgEl,name){var s=svgEl.cloneNode(true);s.removeAttribute("class");s.removeAttribute("style");s.setAttribute("xmlns","http://www.w3.org/2000/svg");
+  var src='<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(s);var url=URL.createObjectURL(new Blob([src],{type:"image/svg+xml"})),a=document.createElement("a");
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove();},400);return name;}
+/* print one figure alone, at its size: everything else on the page is set aside for that print */
+function printFig(svgEl){var w=document.getElementById("nbhPubPrint");if(!w){w=document.createElement("div");w.id="nbhPubPrint";document.body.appendChild(w);}
+  w.innerHTML="";w.appendChild(svgEl.cloneNode(true));document.body.classList.add("nbh-pubprint");
+  var off=function(){document.body.classList.remove("nbh-pubprint");w.innerHTML="";window.removeEventListener("afterprint",off);};window.addEventListener("afterprint",off);
+  try{window.print();}finally{setTimeout(function(){if(!window.matchMedia||!window.matchMedia("print").matches)off();},1500);}}
+/* the view preference: Colour (the default) or Publication, the proportions, the break after a gap. Kept on this device
+   (localStorage), never in the record, so a saved file, an export and the case are the same whichever is chosen. */
+var PK="nbh.graphs.v1";
+function prefs(){try{var o=JSON.parse(localStorage.getItem(PK)||"{}");return o&&typeof o==="object"?o:{};}catch(e){return {};}}
+function setPref(k,v){var o=prefs();if(v==null||v==="")delete o[k];else o[k]=v;try{if(Object.keys(o).length)localStorage.setItem(PK,JSON.stringify(o));else localStorage.removeItem(PK);}catch(e){}return o;}
+function isPub(){return prefs().style==="pub";}
+function ratio(){var r=prefs().ratio;return r==="5:8"||r==="3:4"?r:"2:3";}
+function breakDays(){var v=+prefs().breakDays;return [3,5,7,10,15].indexOf(v)>-1?v:7;}
+/* school days (Monday to Friday) strictly between two dates */
+function schoolDaysBetween(a,b){if(!/^\d{4}-\d\d-\d\d$/.test(a||"")||!/^\d{4}-\d\d-\d\d$/.test(b||""))return 0;var d0=new Date(a+"T12:00:00"),d1=new Date(b+"T12:00:00");if(!(d1>d0))return 0;
+  var n=0,d=new Date(d0.getTime());for(var k=0;k<4000;k++){d=new Date(d.getTime()+86400000);if(d>=d1)break;var w=d.getDay();if(w!==0&&w!==6)n++;}return n;}
+function initials(name){var c=String(name||"").replace(/^\s*SIMULATED\b\s*[–—-]?\s*/i,"").trim();var m=/^([^,]+),\s*(.+)$/.exec(c);if(m)c=m[2]+" "+m[1];
+  var p=c.split(/\s+/).filter(function(w){return /^[A-Za-zÀ-ɏ]/.test(w);});return p.length?p.map(function(w){return w.charAt(0).toUpperCase();}).join("").slice(0,3):"";}
+/* the style switch: buttons, not form controls, so the form's saved fields and the case's snapshot do not change */
+function switchHtml(o){var p=prefs(),pub=p.style==="pub",r=ratio(),bd=breakDays(),b=function(attr,val,on,t,tip){return '<button type="button" class="nbh-gs-b" '+attr+'="'+val+'" aria-pressed="'+(on?"true":"false")+'"'+(tip?' title="'+x(tip)+'"':"")+">"+t+"</button>";};
+  return '<div class="nbh-gs-row" role="group" aria-label="Graph style"><span class="nbh-gs-l">Graphs</span>'+b("data-gs-style","colour",!pub,"Colour (default)","The graphs as they are: colour, the reading aids, the screen layout")+b("data-gs-style","pub",pub,"Publication","Journal style: black and white, a symbol and line for each series, no gridlines or shading, the caption below; saves as SVG")+"</div>"+
+    (pub?'<div class="nbh-gs-row" role="group" aria-label="Proportions, y to x"><span class="nbh-gs-l">Proportions (y:x)</span>'+["2:3","5:8","3:4"].map(function(v){return b("data-gs-ratio",v,r===v,v+(v==="2:3"?" (default)":""),v==="2:3"?"The vertical axis two-thirds the horizontal (Cooper, Heron, & Heward)":v==="5:8"?"Johnston & Pennypacker; Tufte":"The tall end of the range taught");}).join("")+"</div>":"")+
+    (o&&o.breaks?'<div class="nbh-gs-row" role="group" aria-label="Break the time axis"><span class="nbh-gs-l">Break the time axis (//) after more than</span>'+[3,5,7,10,15].map(function(v){return b("data-gs-break",v,bd===v,String(v)+(v===7?" (default)":""));}).join("")+'<span class="nbh-gs-l">'+x(o.breaks)+"</span></div>":"");}
+return {SYM:SYM,DASH:DASH,figure:figure,sizeLine:sizeLine,saveSvg:saveSvg,printFig:printFig,prefs:prefs,setPref:setPref,isPub:isPub,ratio:ratio,breakDays:breakDays,schoolDaysBetween:schoolDaysBetween,initials:initials,symName:symName,switchHtml:switchHtml,esc:x,wrap:wrap,tw:tw};
+})();
+/* v25.70 the graphs (research GRAPHS.md gaps 1, 2, 4, 7 and 8; NEXT2 #5 and #6; the BCBA's approval of 11/8). Built on the
+   line graph (buildChart), the paired graph (pairChart), the stacked view (ddStackHtml) and the Graphs page
+   (renderResults), by wrapping them:
+   - Publication: a switch beside the graphs, "Colour (default)" or "Publication" (nbhPub above). In Publication every line
+     graph is drawn by nbhPub.figure: black and white, a symbol and line for each series, no gridlines, shading or aids,
+     journal ticks and type, condition labels at the top and the caption below, at y:x 2:3 (or 5:8, 3:4) with a frame that
+     follows the number of school days; the paired graph as two panels on one time axis; the stacked view as one panel a
+     tier with its stepped phase line; the other graphs in gray. Save as SVG, and Print figure, under each. Colour is the
+     default and draws exactly as before.
+   - A sentence and a table: under each line graph a one-sentence description computed from the same analysis (it is the
+     graph's accessible name too), and Show as table: every day plotted, with its condition, the change in effect, the value
+     and its notes. Screen only, and the table prints when it is open.
+   - Tap and zoom (the iPad): a tap within 22 px of a point (a 44 px target) shows its date, value, condition and the change
+     in effect; a double tap or a pinch zooms the days shown, and Reset zoom (or Escape) puts them back. Screen only: a print
+     shows every day.
+   - What this design can show: a neutral list beside each graph (A-B, reversal, alternating, changing criterion) and under
+     the stacked view (multiple baseline) of what the design can show and what it has. It never rates the effect.
+   - Breaks in time: where more than 7 school days (Monday to Friday; 3, 5, 10 or 15 by choice) pass between two days on the
+     sheet, "//" across the time axis, and no data path across it.
+   - IOA days: a small triangle at the top of each day with a second observer's count (or Form OB-1's agreement).
+   Nothing new is written to the record: the switch, the proportions and the break are kept on this device. */
+(function(){
+"use strict";
+if(typeof buildChart!=="function"||typeof renderResults!=="function"||typeof nbhPub!=="object")return;
+const P=nbhPub, G={args:{},pts:{},cap:{},zoom:{},altdl:{},rendering:false,blind:false,stackPass:false,figNo:{}};
+const U=m=>(MEASURES[m]||{}).unit||"";
+/* ---------------- breaks in time ---------------- */
+function gapAt(rows,i){if(!rows||i<=0||i>=rows.length)return null;const a=(rows[i-1]||{}).date,b=(rows[i]||{}).date;const n=P.schoolDaysBetween(a,b);return n>P.breakDays()?{i,n,a,b}:null;}
+function gapsOf(rows,xEnd){const out=[];for(let i=1;i<=Math.min(xEnd,rows.length-1);i++){const g=gapAt(rows,i);if(g)out.push(g);}return out;}
+/* the line graph's own data path asks this (v25.70): a path is not joined from day a to day b across a break */
+window.ddGapIn=function(rows,a,b){if(a===null||a===undefined)return false;for(let i=a+1;i<=b;i++)if(gapAt(rows,i))return true;return false;};
+/* ---------------- what each graph shows, in a sentence ---------------- */
+function condAt(an,i){return an.find(a=>a.rowIdx&&a.rowIdx.indexOf(i)>-1)||null;}
+function eventAt(i){let e=null;const k=ddRangeOn;try{if(!G.rendering)ddRangeOn=true;conditionalMarks().forEach(m=>{if(m.x<=i&&!m.auto)e=m;});}catch(x){}finally{ddRangeOn=k;}return e;}
+function phaseAt(i){const k=ddRangeOn;try{ddRangeOn=true;const c=buildConditions().find(c=>c.rowIdx.indexOf(i)>-1);return c?c.name:"";}catch(x){return "";}finally{ddRangeOn=k;}}
+function sentence(beh,rows,an){const A=an.filter(a=>a.n);if(!A.length)return "";const u=U(beh.measure),alt=ddAltNow;
+  const parts=A.map((a,k)=>`${a.name} mean ${r1(a.mean)}${k===0&&u?" "+u:""} (${a.n} day${a.n===1?"":"s"})`);
+  let cmp="";if(A.length>1&&!alt){const f=A[0],L=A[A.length-1],k=Math.min(5,L.n),last=L.vals.slice(-k),lo=Math.min(...f.vals),hi=Math.max(...f.vals),bl=last.filter(v=>v<lo).length,ab=last.filter(v=>v>hi).length;
+    cmp=bl===k?`the last ${k} day${k===1?" is":"s are all"} below the ${f.name} range (${r1(lo)} to ${r1(hi)})`:ab===k?`the last ${k} day${k===1?" is":"s are all"} above the ${f.name} range (${r1(lo)} to ${r1(hi)})`
+      :`${k-bl-ab} of the last ${k} day${k===1?"":"s"} ${k-bl-ab===1?"is":"are"} within the ${f.name} range (${r1(lo)} to ${r1(hi)})`;}
+  const xEnd=ddPlotEnd(rows);let miss=0,abs=0;for(let i=0;i<=xEnd&&i<rows.length;i++){const r=rows[i];if(r.absent==="absent"||r.absent==="noschool")abs++;else if(plotValue(r,beh)===null)miss++;}
+  const tail=[cmp,miss?`${miss} day${miss===1?"":"s"} without data`:"",abs?`${abs} day${abs===1?"":"s"} absent or no school`:""].filter(Boolean);
+  return `${beh.name||"Untitled behavior"}: ${parts.join("; ")}${tail.length?"; "+tail.join("; "):""}.`;}
+/* ---------------- the table of the days plotted ---------------- */
+function tableHtml(beh,rows,an){const xEnd=ddPlotEnd(rows),u=U(beh.measure),io=typeof ddIoaRow==="function";
+  const tr=[];for(let i=0;i<=xEnd&&i<rows.length;i++){const r=rows[i]||{},v=plotValue(r,beh),c=condAt(an,i),e=eventAt(i),n=[];
+    if(r.absent==="absent")n.push("absent");if(r.absent==="noschool")n.push("no school");
+    if(c&&(c.samples||[]).some(s=>s.x===i))n.push("part-day sample, left out of the figures");
+    const pr=typeof ddPrOk==="function"?ddPrOk(r.probe):"";if(pr)n.push(pr==="gen"?"generalization probe":"maintenance probe");
+    const ag=io?ddIoaRow(r,beh):null;if(ag!==null)n.push("second observer, agreement "+r1(ag)+"%");
+    const g=gapAt(rows,i);if(g)n.push(`after a break of ${g.n} school days`);
+    tr.push(`<tr><td>${i+1}</td><td>${esc(r.date?fmtDate(r.date):"")}</td><td>${esc(c?c.name:"")}</td><td>${esc(e?e.label:"")}</td><td>${v===null?"—":esc(r1(v))}</td><td>${esc(n.join("; "))}</td></tr>`);}
+  return `<table class="dd-gtab-t"><caption>${esc(beh.name||"Untitled behavior")}: every day on the graph${u?" ("+esc(u)+")":""}</caption><thead><tr><th scope="col">Day</th><th scope="col">Date</th><th scope="col">Condition</th><th scope="col">Change in effect</th><th scope="col">Value</th><th scope="col">Notes</th></tr></thead><tbody>${tr.join("")}</tbody></table>`;}
+/* ---------------- what this design can show (informational: it never rates the effect) ---------------- */
+function designHtml(beh,rows,an){const A=an.filter(a=>a.n);if(!A.length)return "";const L=[];let head="";
+  const ioaIn=A.filter(a=>a.rowIdx.some(i=>typeof ddIoaRow==="function"&&ddIoaRow(rows[i],beh)!==null)).length,few=Math.min(...A.map(a=>a.n));
+  const ioaL=`IOA: a second observer in ${ioaIn} of ${A.length} condition${A.length===1?"":"s"} (the standard cited asks for 20% of the days in each, at 80% or more)`;
+  if(ddAltNow){let run=0,best=0,prev=null;const of={};A.forEach((a,k)=>a.pts.forEach(p=>{of[p.x]=k;}));Object.keys(of).map(Number).sort((a,b)=>a-b).forEach(x=>{run=of[x]===prev?run+1:1;prev=of[x];best=Math.max(best,run);});
+    head=`Alternating conditions: can show which condition goes with more or less of the behavior when the paths stay apart, condition by condition. It needs about 5 points in each condition and no condition more than 2 sessions in a row.`;
+    L.push(`Points in each condition: ${A.map(a=>esc(a.name)+" "+a.n).join(", ")} (about 5 each)`,`Longest run of one condition: ${best} (2 or fewer)`,ioaL);}
+  else if(beh.stepAims===true){const steps=A.length-1,lens=A.slice(1).map(a=>a.n);
+    head=`Changing criterion: can show control when the behavior follows each change in the criterion. It needs at least 3 changes of criterion (4 in Ledford & Gast), steps that differ in length and size, and, if the team agrees, a return to an earlier criterion.`;
+    L.push(`Criterion changes: ${steps} (3 or more)`,`Step lengths: ${lens.length?lens.join(", ")+" days":"none yet"}`,`Days in each condition: fewest ${few} (3 to count, 5 preferred)`,ioaL);}
+  else{const names=A.map(a=>String(a.name||"").trim().toLowerCase()),back=names.some((n,k)=>names.indexOf(n)<k),ch=A.length-1;
+    if(A.length===1)head=`One condition so far: shows the level and trend of the behavior, not a change. A second condition (a plan start) is needed to show change.`;
+    else if(!back&&A.length===2)head=`A-B design: can show a change after the plan started. It can't show that the plan caused it (a functional relation). To show that, add a return to baseline and the plan again (A-B-A-B), or a second baseline that starts later: a multiple baseline across behaviors, settings or routines (the stacked view), which never withdraws a working plan.`;
+    else if(!back)head=`Successive conditions (${A.map(a=>esc(a.name)).join(" – ")}): can show change at each phase change. It can't show that a condition caused it until a condition is repeated (A-B-A-B) or the change is replicated in a staggered second baseline.`;
+    else head=`Reversal (a condition repeated): can show a functional relation when the behavior changes at each of 3 phase changes, at 3 different points in time. It needs at least 4 phases (A-B-A-B).`;
+    if(A.length>1)L.push(`Phase changes: ${ch}${back?" (3 or more for a reversal)":""}`);L.push(`Days in each condition: fewest ${few} (3 to count, 5 preferred)`,ioaL);}
+  return `<div class="dd-dcheck noprint no-print" role="note"><h4>What this design can show</h4><p>${head}</p><ul>${L.map(l=>`<li>${l}</li>`).join("")}</ul><p class="hint">This describes the design, not the size or meaning of the change; the readings and the CDC are above.</p></div>`;}
+/* ---------------- the Publication drawing of one behavior ---------------- */
+/* the axis of a Publication graph: from 0, at the same top rule as on screen (aids left out), then rounded to 2 to 6 major ticks at
+   round numbers; a percentage runs 0 to 100, and a top typed for the behavior is kept */
+function pubTop(beh,an,rows){const k=S.settings.showEnv;let a;try{S.settings.showEnv=false;a=ddAxis(beh,an,rows);}finally{S.settings.showEnv=k;}
+  if(a.rule==="own"||a.rule==="pct")return a;const cnt=beh.measure==="count";
+  for(let e=-3;e<=5;e++)for(const m of [1,2,2.5,5]){const s=+(m*Math.pow(10,e)).toPrecision(6);if(cnt&&(s<1||Math.abs(s-Math.round(s))>1e-9))continue;const n=Math.ceil(a.top/s-1e-9);if(n>=2&&n<=6)return Object.assign({},a,{top:+(n*s).toPrecision(10),step:s});}
+  return a;}
+function figNoOf(beh){return G.figNo[beh.id]||(orderedBehaviors().indexOf(beh)+1)||1;}
+function up1(s){s=String(s||"");return s.charAt(0).toUpperCase()+s.slice(1);}
+function who(){const i=P.initials(S.meta&&S.meta.client);return i?"Participant "+i:"the participant";}
+function capOf(beh,rows,an,extra){if(G.cap[beh.id])return G.cap[beh.id];const A=an.filter(a=>a.n),m=MEASURES[beh.measure]||{};
+  const names=A.map(a=>a.name).filter((v,i,s)=>s.indexOf(v)===i);
+  const ios=rows.map(r=>typeof ddIoaRow==="function"?ddIoaRow(r,beh):null).filter(v=>v!==null),nd=A.reduce((s,a)=>s+a.n,0);
+  const note=[];if(ios.length)note.push(`IOA on ${ios.length} of ${nd} days (${Math.round(100*ios.length/Math.max(1,nd))}%), mean ${r1(ios.reduce((s,v)=>s+v,0)/ios.length)}%; ▾ marks those days.`);
+  (extra||[]).forEach(t=>note.push(t));
+  return `Figure ${figNoOf(beh)}. ${m.axis||"Value"} of ${String(beh.name||"the target behavior").toLowerCase()} across school days${names.length?" in "+(names.length>1?names.slice(0,-1).join(", ")+" and "+names[names.length-1]:names[0]):""}, ${who()}.${note.length?" Note. "+note.join(" "):""}`;}
+function pubChart(beh,rows,conds,an){const xEnd=ddPlotEnd(rows),n=xEnd+1,ax=pubTop(beh,an,rows),alt=ddAltNow,extra=[];
+  const ser=[],singles=[],vl=[],labels=[],crit=[],tmarks=[],bmarks=[],events=[];
+  if(alt){an.forEach((a,k)=>{if(!a.n)return;const segs=[];let seg=[];a.pts.forEach(p=>{if(seg.length&&window.ddGapIn(rows,seg[seg.length-1].x,p.x)){segs.push(seg);seg=[];}seg.push({i:p.x,y:p.y});});if(seg.length)segs.push(seg);
+      ser.push({name:a.name,sym:k,dash:k,segs,pts:a.pts.map(p=>({i:p.x,y:p.y,title:`${a.name}, ${fmtDate(p.date)}: ${r1(p.y)}`}))});});}
+  else{const pts=[],segs=[];an.forEach(a=>{let seg=[],ex=null;a.pts.forEach(p=>{if(ex!==null&&(p.x!==ex||gapAt(rows,p.x))){segs.push(seg);seg=[];}seg.push({i:p.x,y:p.y});ex=p.x+1;pts.push({i:p.x,y:p.y,title:`${fmtDate(p.date)}: ${r1(p.y)}`});});if(seg.length)segs.push(seg);});
+    ser.push({name:beh.name,sym:0,dash:0,segs,pts});
+    conds.forEach((c,ci)=>{const s0=c.rowIdx[0];if(s0>xEnd)return;if(ci)vl.push({s:s0-0.5});const nx=conds[ci+1],e=nx&&nx.rowIdx[0]<=xEnd?nx.rowIdx[0]-0.5:n-0.5;labels.push({s0:ci?s0-0.5:-0.5,s1:e,text:String(c.raw||c.name||"").replace(/\|/g," ")});});}
+  an.forEach(a=>(a.samples||[]).forEach(p=>singles.push({i:p.x,y:p.y,title:`${fmtDate(p.date)}: ${r1(p.y)}, a part-day sample`})));
+  if(singles.length)extra.push("Open circles with a broken edge: part-day samples, not joined or counted.");
+  if(S.settings.showCond){conditionalMarks().filter(m=>m.x<=xEnd&&!m.auto).forEach(m=>events.push({s:m.x-0.5,text:m.label}));if(events.length)extra.push("Dashed vertical lines: changes within a condition (not a phase change).");}
+  const aim=num(beh.aim);
+  if(beh.stepAims===true&&!alt){conds.forEach((c,ci)=>{const v=ddAimFor(c,beh);if(v===null)return;const s0=ci?c.rowIdx[0]-0.5:-0.5,nx=conds[ci+1],s1=nx&&nx.rowIdx[0]<=xEnd?nx.rowIdx[0]-0.5:n-0.5;if(s0<n-0.5)crit.push({s0,s1,y:v,label:r1(v)});});if(crit.length)extra.push("Short dashed lines: the criterion in each phase.");}
+  else if(aim!==null&&aim<=ax.top){crit.push({s0:-0.5,s1:n-0.5,y:aim,label:"Criterion"});extra.push(`Dashed line: the criterion (${r1(aim)}).`);}
+  rows.forEach((r,i)=>{if(i>xEnd)return;if(r.absent==="absent"||r.absent==="noschool")bmarks.push({s:i,text:r.absent==="absent"?"A":"N",title:r.absent==="absent"?"Absent":"No school"});
+    const pr=typeof ddPrOk==="function"?ddPrOk(r.probe):"";if(pr)tmarks.push({s:i,kind:pr==="gen"?"G":"M",title:pr==="gen"?"Generalization probe":"Maintenance probe"});
+    const ag=typeof ddIoaRow==="function"?ddIoaRow(r,beh):null;if(ag!==null)tmarks.push({s:i,kind:"ioa",title:"Second observer: agreement "+r1(ag)+"%"});});
+  if(bmarks.length)extra.push("A: absent; N: no school.");if(tmarks.some(t=>t.kind!=="ioa"))extra.push("G, M: generalization and maintenance probes.");
+  const brk=gapsOf(rows,xEnd);if(brk.length)extra.push(`//: more than ${P.breakDays()} school days between two days on the sheet.`);
+  const fig0=()=>P.figure({ratio:P.ratio(),nSlots:n,xTitle:"School days",zero:S.settings.zeroLift===true,breaks:brk.map(g=>g.i-0.5),
+    panels:[{yTitle:(MEASURES[beh.measure]||{}).axis||"",top:ax.top,step:ax.step,tick:v=>ddTick(v,ax.step),series:ser,singles,vlines:vl,labels,crit,tmarks,bmarks,events}],
+    caption:capOf(beh,rows,an,extra),label:"Line graph of "+(beh.name||"the behavior")+" (publication style). "+sentence(beh,rows,an)});
+  let fig=fig0();if(alt&&ser.length>1&&!fig.direct){extra.push("Symbols: "+ser.map(s=>P.symName(s.sym)+", "+s.name).join("; ")+".");fig=fig0();}
+  return fig;}
+/* ---------------- the line graph ---------------- */
+{const bc=buildChart;buildChart=function(beh,rows,conds,analyses){let svg=bc.apply(this,arguments);try{
+  if(!svg||!beh||!Array.isArray(rows))return svg;
+  if(G.rendering&&!G.blind&&!G.args[beh.id])G.args[beh.id]={beh,rows,conds,analyses};
+  if(P.isPub()&&!G.blind){const fig=pubChart(beh,rows,conds,analyses);G.fig=G.fig||{};G.fig[beh.id]=fig;return fig.svg.replace('<svg class="graph ddpub"',`<svg class="graph ddpub" data-dd-b="${esc(beh.id)}"`);}
+  const m=/data-plot="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg);if(!m)return svg;
+  const l=+m[1],t=+m[2],iw=+m[3],ih=+m[4],xEnd=ddPlotEnd(rows),X=i=>l+(xEnd<=0?iw/2:i*iw/xEnd),top=ddDrawn.top||1,Y=v=>t+ih-(Math.min(v,top)/top)*ih,z=S.settings.zeroLift===true?7:0;
+  let add="";
+  /* the breaks: "//" across the axis line between the two days */
+  const brk=gapsOf(rows,xEnd);brk.forEach(gp=>{const bx=(X(gp.i-1)+X(gp.i))/2,by=t+ih+z;
+    add+=`<g class="dd-brk" data-brk="${gp.n}"><rect x="${(bx-4).toFixed(1)}" y="${(by-3).toFixed(1)}" width="8" height="6" fill="#fff"/><line x1="${(bx-6.5).toFixed(1)}" y1="${(by+5).toFixed(1)}" x2="${(bx-1.5).toFixed(1)}" y2="${(by-5).toFixed(1)}" stroke="#16242E" stroke-width="1.3"/><line x1="${(bx+1.5).toFixed(1)}" y1="${(by+5).toFixed(1)}" x2="${(bx+6.5).toFixed(1)}" y2="${(by-5).toFixed(1)}" stroke="#16242E" stroke-width="1.3"/><title>${gp.n} school days between ${esc(fmtDate(gp.a))} and ${esc(fmtDate(gp.b))}<\/title><\/g>`;});
+  /* the days with a second observer */
+  let io=0;if(typeof ddIoaRow==="function")rows.forEach((r,i)=>{if(i>xEnd)return;const ag=ddIoaRow(r,beh);if(ag===null)return;io++;const cx=X(i),y0=t+(typeof ddPrOk==="function"&&ddPrOk(r.probe)?18:1);
+    add+=`<polygon class="dd-ioa-mk" points="${(cx-4).toFixed(1)},${y0.toFixed(1)} ${(cx+4).toFixed(1)},${y0.toFixed(1)} ${cx.toFixed(1)},${(y0+6).toFixed(1)}" fill="#4A5C68"><title>${esc(fmtDate(r.date))}: a second observer, agreement ${r1(ag)}%<\/title><\/polygon>`;});
+  ddDrawn.brk=brk;ddDrawn.ioaN=io;
+  if(add){const k=svg.lastIndexOf("</svg>");svg=svg.slice(0,k)+`<g class="dd-v2570">${add}<\/g>`+svg.slice(k);}
+  /* the points a tap can reach */
+  const L=[];analyses.forEach(a=>{(a.pts||[]).forEach(p=>L.push({cx:X(p.x),cy:Y(p.y),i:p.x,v:p.y,date:p.date,c:a.name}));(a.samples||[]).forEach(p=>L.push({cx:X(p.x),cy:Y(p.y),i:p.x,v:p.y,date:p.date,c:a.name,sample:true}));});
+  if(!G.blind)G.pts[beh.id]=L;
+  /* the sentence is the graph's accessible name */
+  const s=G.blind?"":sentence(beh,rows,analyses);
+  svg=svg.replace(/^<svg class="graph"/,`<svg class="graph" data-dd-b="${esc(beh.id)}"`);
+  if(s)svg=svg.replace(/aria-label="Line graph of ([^"]*)"/,(q,nm)=>`aria-label="Line graph of ${nm}. ${esc(s)}"`);
+  /* (NEXT2 #6) alternating conditions: each path's name at its right end, in a margin added on the right, in place of the
+     legend's lines, when the names stay within 14 units of their paths */
+  if(ddAltNow&&!G.blind){const P2=analyses.map((a,k)=>{if(!a.n)return null;const last=a.pts[a.pts.length-1];return {k,nm:a.name,w:Y(last.y)+4,y:Y(last.y)+4};}).filter(Boolean).sort((p,q)=>p.y-q.y);
+    for(let k=1;k<P2.length;k++)if(P2[k].y<P2[k-1].y+13)P2[k].y=P2[k-1].y+13;
+    if(P2.length>1&&P2.every(p=>Math.abs(p.y-p.w)<=14&&p.y<=t+ih+10)){const sans=ddSans(),gut=Math.ceil(Math.max(...P2.map(p=>ddTextW(p.nm,11.5,600,sans))))+16,vb=/viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svg);
+      if(vb){const W0=+vb[1];svg=svg.replace(vb[0],`viewBox="0 0 ${W0+gut} ${vb[2]}"`);const k2=svg.lastIndexOf("</svg>");
+        svg=svg.slice(0,k2)+`<g class="dd-altdl">${P2.map(p=>{const m=DD_ALT_MK[p.k%DD_ALT_MK.length],dsh=DD_ALT_DASH[p.k%DD_ALT_DASH.length];return `<line x1="${W0-20}" y1="${(p.y-4).toFixed(1)}" x2="${W0-6}" y2="${(p.y-4).toFixed(1)}" stroke="${esc(beh.color)}" stroke-width="2"${dsh?` stroke-dasharray="${dsh}"`:""}/><text x="${W0-2}" y="${p.y.toFixed(1)}" font-size="11.5" font-weight="600" fill="#16242E">${esc(p.nm)}<\/text>`;}).join("")}<\/g>`+svg.slice(k2);G.altdl[beh.id]=true;}}}
+  }catch(e){}return svg;};}
+{const le=ddLegendExtra;ddLegendExtra=function(d){const h=le.apply(this,arguments);if(!d)return h;
+  return h+(d.ioaN?`<span class="dd-ioa-key"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true" style="vertical-align:middle;margin-right:5px"><polygon points="2,1 10,1 6,8" fill="#4A5C68"/></svg>A day with a second observer (IOA)<\/span>`:"")
+    +(d.brk&&d.brk.length?`<span class="dd-brk-key"><b style="font-weight:700;margin-right:5px">//<\/b>A break of more than ${P.breakDays()} school days<\/span>`:"");};}
+{const cl=ddClipHtml;ddClipHtml=function(d){const h=cl.apply(this,arguments);if(!d||!d.brk||!d.brk.length)return h;
+  return h+`<p class="hint dd-brk-h">// on the time axis: ${d.brk.map(g=>`${g.n} school days between ${esc(fmtDate(g.a))} and ${esc(fmtDate(g.b))}`).join("; ")} (more than ${P.breakDays()}). The data path is not joined across ${d.brk.length===1?"it":"them"}.<\/p>`;};}
+if(typeof ddAltLegend==="function"){const al=ddAltLegend;ddAltLegend=function(beh){if(beh&&G.altdl[beh.id])return `<span class="dd-altdl-key">Each condition is named at the right end of its path.<\/span>`;return al.apply(this,arguments);};}
+/* the second reader's blind graph carries no sentence */
+if(typeof ddBlindOpen==="function"){const bo=ddBlindOpen;ddBlindOpen=function(){G.blind=true;try{return bo.apply(this,arguments);}finally{G.blind=false;}};}
+/* ---------------- the paired graph, in Publication: two panels on one time axis ---------------- */
+if(typeof pairChart==="function"){const pc=pairChart;pairChart=function(a1,b1,a2,b2,rows,conds){const svg=pc.apply(this,arguments);if(!svg||!P.isPub())return svg;try{
+  const xEnd=ddPlotEnd(rows),n=xEnd+1,brk=gapsOf(rows,xEnd);const panel=(an,b,sym,first)=>{const ax=pubTop(b,an,rows),segs=[],pts=[];an.forEach(a=>{let seg=[],ex=null;a.pts.forEach(p=>{if(ex!==null&&(p.x!==ex||gapAt(rows,p.x))){segs.push(seg);seg=[];}seg.push({i:p.x,y:p.y});ex=p.x+1;pts.push({i:p.x,y:p.y,title:`${b.name}, ${fmtDate(p.date)}: ${r1(p.y)}`});});if(seg.length)segs.push(seg);});
+    const vl=[],labels=[];conds.forEach((c,ci)=>{const s0=c.rowIdx[0];if(s0>xEnd)return;if(ci)vl.push({s:s0-0.5});const nx=conds[ci+1],e=nx&&nx.rowIdx[0]<=xEnd?nx.rowIdx[0]-0.5:n-0.5;if(first)labels.push({s0:ci?s0-0.5:-0.5,s1:e,text:String(c.raw||c.name||"").replace(/\|/g," ")});});
+    return {yTitle:(MEASURES[b.measure]||{}).axis||"",top:ax.top,step:ax.step,tick:v=>ddTick(v,ax.step),tier:b.name,series:[{name:b.name,sym,dash:0,segs,pts}],vlines:vl,labels};};
+  const fig=P.figure({ratio:P.ratio(),nSlots:n,xTitle:"School days",zero:S.settings.zeroLift===true,breaks:brk.map(g=>g.i-0.5),panels:[panel(a1,b1,0,true),panel(a2,b2,4,false)],
+    caption:`Figure ${figNoOf(b1)}b. ${up1(b1.name)} (top) and ${String(b2.name||"").toLowerCase()} (bottom) across school days, ${who()}. Each panel has its own vertical axis.`,label:`${b1.name} and ${b2.name}, in two panels (publication style)`});
+  return fig.svg;}catch(e){return svg;}};}
+/* ---------------- the stacked view, in Publication: a panel a tier, the stepped phase line ---------------- */
+if(typeof ddStackHtml==="function"){const sh=ddStackHtml;ddStackHtml=function(behs,rows,conds){let h=sh.apply(this,arguments);if(!h)return h;try{
+  const T=behs.filter(b=>rows.some(r=>plotValue(r,b)!==null)).map(b=>{const bc=ddBehConds(b,conds,rows);return {b,bc,an:bc.map(c=>analyzeCondition(c,b,rows))};});
+  if(T.length>=2){const pi=T.map(t=>t.bc[1]&&t.bc[1].rowIdx.length?t.bc[1].rowIdx[0]:null),starts=pi.filter(p=>p!==null),stag=new Set(starts).size,minBl=Math.min(...T.map(t=>t.an[0]?t.an[0].n:0));
+    const ioaT=T.filter(t=>rows.some(r=>typeof ddIoaRow==="function"&&ddIoaRow(r,t.b)!==null)).length;
+    const dc=`<div class="dd-dcheck noprint no-print" role="note"><h4>What this design can show</h4><p>Multiple baseline across behaviors: can show a functional relation when each tier changes only after its own phase line and the tiers still in baseline stay as they were, replicated at 3 different points in time. It needs at least 3 tiers with staggered starts.</p><ul><li>Tiers: ${T.length} (3 or more)</li><li>Different start days: ${stag} of ${T.length} tiers${starts.length<T.length?` (${T.length-starts.length} not started)`:""}</li><li>Baseline days in each tier: fewest ${minBl} (5 or more; WWC 5.0 is reported to ask 6)</li><li>IOA: a second observer in ${ioaT} of ${T.length} tiers</li></ul><p class="hint">This describes the design, not the size or meaning of the change.</p></div>`;
+    h=h.replace(/<\/div>\s*$/,dc+"</div>");}
+  if(!P.isPub()||T.length<2)return h;
+  const xEnd=ddPlotEnd(rows),n=xEnd+1,brk=gapsOf(rows,xEnd);
+  const panels=T.map((t,k)=>{const ax=pubTop(t.b,t.an,rows),segs=[],pts=[];t.an.forEach(a=>{let seg=[],ex=null;a.pts.forEach(p=>{if(ex!==null&&(p.x!==ex||gapAt(rows,p.x))){segs.push(seg);seg=[];}seg.push({i:p.x,y:p.y});ex=p.x+1;pts.push({i:p.x,y:p.y,title:`${t.b.name}, ${fmtDate(p.date)}: ${r1(p.y)}`});});if(seg.length)segs.push(seg);});
+    const c1=t.bc[1],dog=c1&&c1.rowIdx.length&&c1.rowIdx[0]<=xEnd?c1.rowIdx[0]-0.5:null,vl=[];t.bc.forEach((c,ci)=>{if(ci>1&&c.rowIdx[0]<=xEnd)vl.push({s:c.rowIdx[0]-0.5});});
+    const labels=k===0?t.bc.map((c,ci)=>{const nx=t.bc[ci+1];return {s0:ci?c.rowIdx[0]-0.5:-0.5,s1:nx&&nx.rowIdx[0]<=xEnd?nx.rowIdx[0]-0.5:n-0.5,text:String(c.raw||c.name||"").replace(/\|/g," ")};}).filter(l=>l.s0<n-0.5):[];
+    const same=T.every(u=>u.b.measure===t.b.measure);
+    return {yTitle:same?(k===Math.floor((T.length-1)/2)?(MEASURES[t.b.measure]||{}).axis:""):(MEASURES[t.b.measure]||{}).axis,top:ax.top,step:ax.step,tick:v=>ddTick(v,ax.step),tier:t.b.name,series:[{name:t.b.name,sym:0,dash:0,segs,pts}],vlines:vl,labels,dog};});
+  const fig=P.figure({ratio:P.ratio(),nSlots:n,xTitle:"School days",zero:S.settings.zeroLift===true,breaks:brk.map(g=>g.i-0.5),panels,
+    caption:`Figure ${T.length?orderedBehaviors().length+1:1}. ${up1(T.map(t=>String(t.b.name||"").toLowerCase()).join(", "))} across school days in a multiple baseline across behaviors, ${who()}.`,label:`Stacked graphs of ${T.length} behaviors (publication style)`});
+  return h.replace(/<svg class="graph"[\s\S]*?<\/svg>/,fig.svg);}catch(e){return h;}};}
+/* ---------------- the Graphs page ---------------- */
+function brkLine(){return "school days without a row (Monday to Friday)";}
+function paintSwitch(){const out=document.getElementById("resultsOut");if(!out)return;let w=document.getElementById("ddGStyle");
+  if(!w){w=document.createElement("div");w.id="ddGStyle";w.className="nbh-gs noprint no-print";out.parentNode.insertBefore(w,out);}
+  w.innerHTML=P.switchHtml({breaks:brkLine()});document.body.classList.toggle("dd-pubmode",P.isPub());}
+function bar(rep){return rep.querySelector(".dd-graphsave");}
+function decorate(){const out=document.getElementById("resultsOut");if(!out)return;const pub=P.isPub();
+  out.querySelectorAll(".behavior-report").forEach(rep=>{const svg=rep.querySelector(".chartbox svg.graph[data-dd-b]");if(!svg)return;const id=svg.getAttribute("data-dd-b"),A=G.args[id];if(!A)return;
+    const b=bar(rep),box=svg.closest(".chartbox");if(!b||!box)return;
+    if(pub){const fig=G.fig&&G.fig[id];b.insertAdjacentHTML("afterbegin",`<button type="button" class="btn ghost sm" data-g70="svg" data-b="${esc(id)}" title="A vector file: sharp at any size; opens in Word, Google Docs, Keynote and Illustrator">Save as SVG<\/button> <button type="button" class="btn ghost sm" data-g70="print" data-b="${esc(id)}" title="This figure alone, at its size, with its caption">Print figure<\/button> <button type="button" class="btn ghost sm" data-g70="cap" data-b="${esc(id)}" aria-expanded="false">Edit caption<\/button> `);
+      if(fig)b.insertAdjacentHTML("afterend",`<p class="hint dd-pubsize noprint no-print">${esc(P.sizeLine(fig,P.ratio(),"school days"))}.<\/p>`);}
+    let tail="";
+    if(!pub)b.insertAdjacentHTML("beforeend",` <button type="button" class="btn ghost sm" data-g70="table" data-b="${esc(id)}" aria-expanded="false" aria-controls="ddGTab-${esc(id)}">Show as table<\/button>`);
+    /* v25.70 (the BCBA, 11/9): in Publication the sentence prints under its graph; in Colour it stays screen only */
+    const gw=pub&&G.fig&&G.fig[id]&&G.fig[id].W;
+    tail+=`<p class="dd-gsum${pub?" dd-gsum-pub":" noprint no-print"}"${gw?` style="--w:${gw}"`:""}>${esc(sentence(A.beh,A.rows,A.analyses))}${pub?"":"<!--touch-->"}<\/p><div class="dd-gtab" id="ddGTab-${esc(id)}" hidden><\/div>`;
+
+    if(!pub){b.insertAdjacentHTML("beforeend",`<span class="dd-zoomctl" data-b="${esc(id)}" hidden> <button type="button" class="btn ghost sm" data-g70="reset" data-b="${esc(id)}">Reset zoom<\/button> <span class="hint dd-zoomtxt"><\/span><\/span>`);
+      const hint=`<span class="hint dd-touchhint">Tap a point for its date and value; double-tap or pinch the graph to zoom the days.<\/span>`;tail=tail.indexOf("<!--touch-->")>-1?tail.replace("<!--touch-->"," "+hint):`<p class="dd-gsum noprint no-print">${hint}<\/p>`+tail;}
+
+    if(tail)b.insertAdjacentHTML("afterend",tail.replace("<!--touch-->",""));
+    const keep=rep.querySelector(".dd-keep");if(keep)keep.insertAdjacentHTML("beforeend",designHtml(A.beh,A.rows,A.analyses));
+
+    if(G.zoom[id]&&!pub)zoomTo(id,G.zoom[id]);
+  });}
+{const rr=renderResults;renderResults=function(){G.args={};G.fig={};G.altdl={};G.rendering=true;let r;try{r=rr.apply(this,arguments);}finally{G.rendering=false;}try{paintSwitch();decorate();}catch(e){}return r;};}
+/* ---------------- the controls ---------------- */
+function svgOf(id){return document.querySelector(`#resultsOut .behavior-report .chartbox svg.graph[data-dd-b="${CSS.escape(id)}"]`);}
+function fileName(beh,ext){const i=P.initials(S.meta&&S.meta.client)||"participant";return "DD-1_figure_"+i+"_"+String(beh&&beh.name||"behavior").trim().replace(/\s+/g,"_").replace(/[^\w-]+/g,"").slice(0,40)+"_"+localISO(new Date())+"."+ext;}
+document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;
+  const st=t.closest("[data-gs-style],[data-gs-ratio],[data-gs-break]");
+  if(st&&st.closest("#ddGStyle")){if(st.dataset.gsStyle)P.setPref("style",st.dataset.gsStyle==="pub"?"pub":null);if(st.dataset.gsRatio)P.setPref("ratio",st.dataset.gsRatio==="2:3"?null:st.dataset.gsRatio);
+    if(st.dataset.gsBreak)P.setPref("breakDays",+st.dataset.gsBreak===7?null:+st.dataset.gsBreak);
+    const keep=st.dataset.gsStyle?"[data-gs-style=\""+st.dataset.gsStyle+"\"]":st.dataset.gsRatio?"[data-gs-ratio=\""+st.dataset.gsRatio+"\"]":"[data-gs-break=\""+st.dataset.gsBreak+"\"]";
+    renderResults();const f=document.querySelector("#ddGStyle "+keep);if(f)f.focus();return;}
+  const b=t.closest("[data-g70]");if(!b||!b.closest("#resultsOut"))return;const id=b.dataset.b,A=G.args[id],beh=S.behaviors.find(x=>x.id===id);
+  if(b.dataset.g70==="table"&&A){const w=document.getElementById("ddGTab-"+id);if(!w)return;const open=w.hidden;if(open)w.innerHTML=tableHtml(A.beh,A.rows,A.analyses);w.hidden=!open;b.setAttribute("aria-expanded",open?"true":"false");b.textContent=open?"Hide the table":"Show as table";return;}
+  if(b.dataset.g70==="reset"){zoomTo(id,null);return;}
+  const svg=svgOf(id);if(!svg)return;
+  if(b.dataset.g70==="svg"){const nm=P.saveSvg(svg,fileName(beh,"svg"));toast("Figure saved as "+nm+".");return;}
+  if(b.dataset.g70==="print"){P.printFig(svg);return;}
+  if(b.dataset.g70==="cap"&&A){let ed=document.getElementById("ddCapEd-"+id);if(ed){G.cap[id]=ed.textContent.replace(/\s+/g," ").trim()||null;renderResults();return;}
+    const fig=capOf(A.beh,A.rows,A.analyses,[]);const cur=G.cap[id]||(svg.querySelectorAll(".pub-cap").length?[...svg.querySelectorAll(".pub-cap")].map(x=>x.textContent).join(" "):fig);
+    b.insertAdjacentHTML("afterend",`<div class="dd-capedit" id="ddCapEd-${esc(id)}" contenteditable="true" role="textbox" aria-multiline="true" aria-label="The figure's caption">${esc(cur)}<\/div>`);b.textContent="Use this caption";b.setAttribute("aria-expanded","true");
+    const ed2=document.getElementById("ddCapEd-"+id);if(ed2)ed2.focus();return;}});
+/* ---------------- tap a point ---------------- */
+function tip(){let t=document.getElementById("ddPtTip");if(!t){t=document.createElement("div");t.id="ddPtTip";t.className="noprint no-print";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.appendChild(t);}return t;}
+function nearest(svg,ev){const id=svg.getAttribute("data-dd-b"),L=G.pts[id];if(!L||!L.length||!svg.getScreenCTM)return null;const m=svg.getScreenCTM();if(!m)return null;
+  let best=null;L.forEach(p=>{const sx=m.a*p.cx+m.c*p.cy+m.e,sy=m.b*p.cx+m.d*p.cy+m.f,d=Math.hypot(sx-ev.clientX,sy-ev.clientY);if(d<=22&&(!best||d<best.d))best={p,d};});return best&&best.p;}
+function showTip(svg,p,ev){const beh=S.behaviors.find(b=>b.id===svg.getAttribute("data-dd-b"))||{},e=eventAt(p.i),t=tip();
+  const u=U(beh.measure),io=typeof ddIoaRow==="function"?(()=>{const A=G.args[beh.id];return A&&A.rows[p.i]?ddIoaRow(A.rows[p.i],beh):null;})():null;
+  t.innerHTML=`<b>${esc(p.date?ddFullDate(p.date):"Day "+(p.i+1))}<\/b><br>${esc(beh.name||"")}: ${esc(r1(p.v))}${u?" "+esc(u):""}${p.sample?" (a part-day sample)":""}${ddAltNow||(typeof ddAltOn==="function"&&ddAltOn())?`<br>Phase: ${esc(phaseAt(p.i)||"")}<br>Condition: ${esc(p.c||"")}`:`<br>Phase: ${esc(p.c||"")}<br>Condition: ${e?esc(e.label)+(e.x!=null&&G.args[beh.id]&&G.args[beh.id].rows[e.x]?" (since "+esc(fmtDate(G.args[beh.id].rows[e.x].date))+")":""):"no change within the phase"}`}${io!==null?`<br>Second observer: agreement ${esc(r1(io))}%`:""}`;
+  t.style.left=Math.max(8,Math.min(window.innerWidth-260,ev.clientX-110))+"px";t.style.top=Math.max(8,ev.clientY-96)+"px";t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),4000);}
+document.addEventListener("click",e=>{const svg=e.target&&e.target.closest?e.target.closest("#resultsOut .chartbox svg.graph[data-dd-b]:not(.ddpub)"):null;if(!svg)return;const p=nearest(svg,e);if(p)showTip(svg,p,e);});
+/* ---------------- zoom the days: a double tap, a pinch, Reset zoom ---------------- */
+function zoomTo(id,win){const A=G.args[id],svg=svgOf(id);if(!A||!svg)return;
+  if(!win){delete G.zoom[id];const ctl=document.querySelector(`.dd-zoomctl[data-b="${CSS.escape(id)}"]`);if(ctl)ctl.hidden=true;
+    if(svg.getAttribute("data-zoom")){const box=svg.closest(".chartbox");box.innerHTML=buildChart(A.beh,A.rows,A.conds,A.analyses);}return;}
+  const rows=A.rows,i0=Math.max(0,Math.min(win[0],rows.length-1)),i1=Math.max(i0+1,Math.min(win[1],ddPlotEnd(rows)));if(i1-i0<4||(i0===0&&i1>=ddPlotEnd(rows))){zoomTo(id,null);return;}
+  G.zoom[id]=[i0,i1];
+  /* the days in the window, re-indexed; the conditions cut to them, analysed on the days shown */
+  const R=rows.slice(i0,i1+1),C=A.conds.map(c=>Object.assign({},c,{rowIdx:c.rowIdx.filter(i=>i>=i0&&i<=i1).map(i=>i-i0)})).filter(c=>c.rowIdx.length);
+  const keep=ddAltNow,kr=ddRangeOn;let svg2="";ddAltNow=typeof ddAltOn==="function"&&ddAltOn();ddRangeOn=true;
+  const cm=conditionalMarks;try{conditionalMarks=function(){return cm.apply(this,arguments).filter(m=>m.x>=i0&&m.x<=i1).map(m=>Object.assign({},m,{x:m.x-i0}));};
+    const an=C.map(c=>analyzeCondition(c,A.beh,R));svg2=buildChart(A.beh,R,C,an);}finally{conditionalMarks=cm;ddAltNow=keep;ddRangeOn=kr;}
+  const box=svg.closest(".chartbox");if(!svg2)return;box.innerHTML=svg2.replace("<svg class=\"graph\"",`<svg class="graph" data-zoom="${i0}-${i1}"`);
+  /* tapped points read the days shown: put them back on the full sheet's index */
+  (G.pts[id]||[]).forEach(p=>{p.i+=i0;});
+  const ctl=document.querySelector(`.dd-zoomctl[data-b="${CSS.escape(id)}"]`);if(ctl){ctl.hidden=false;const tx=ctl.querySelector(".dd-zoomtxt");if(tx)tx.textContent=`Zoomed: ${fmtDate(rows[i0].date)} to ${fmtDate(rows[i1].date)} (${i1-i0+1} of ${ddPlotEnd(rows)+1} days; the lines are for the days shown)`;}}
+function dayAt(svg,clientX){const A=G.args[svg.getAttribute("data-dd-b")];const m=/([\d.]+) ([\d.]+) ([\d.]+)/.exec(svg.getAttribute("data-plot")||"");if(!A||!m||!svg.getScreenCTM)return 0;
+  const M=svg.getScreenCTM(),vx=(clientX-M.e)/M.a,z=G.zoom[svg.getAttribute("data-dd-b")]||[0,ddPlotEnd(A.rows)],span=z[1]-z[0];return Math.round(z[0]+Math.max(0,Math.min(1,(vx-(+m[1]))/(+m[3])))*span);}
+const T={pts:new Map(),d0:0,last:0,lx:0,ly:0,svg:null,touchAt:0};   /* a double tap on a touch screen also fires dblclick: the tap counts once */
+function zoomBy(svg,clientX,f){const id=svg.getAttribute("data-dd-b"),A=G.args[id];if(!A)return;const end=ddPlotEnd(A.rows),z=G.zoom[id]||[0,end],c=dayAt(svg,clientX),span=Math.max(4,Math.round((z[1]-z[0])/f));
+  if(span>=end){zoomTo(id,null);return;}let i0=Math.round(c-span/2);i0=Math.max(0,Math.min(i0,end-span));zoomTo(id,[i0,i0+span]);}
+document.addEventListener("dblclick",e=>{if(Date.now()-T.touchAt<800)return;const svg=e.target&&e.target.closest?e.target.closest("#resultsOut .chartbox svg.graph[data-dd-b]:not(.ddpub)"):null;if(!svg)return;e.preventDefault();zoomBy(svg,e.clientX,2);});
+
+document.addEventListener("pointerdown",e=>{if(e.pointerType!=="touch")return;T.touchAt=Date.now();const svg=e.target&&e.target.closest?e.target.closest("#resultsOut .chartbox svg.graph[data-dd-b]:not(.ddpub)"):null;if(!svg)return;
+  T.svg=svg;T.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(T.pts.size===2){const [a,b]=[...T.pts.values()];T.d0=Math.hypot(a.x-b.x,a.y-b.y);T.mid=(a.x+b.x)/2;}},{passive:true});
+document.addEventListener("pointermove",e=>{if(!T.pts.has(e.pointerId))return;T.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});},{passive:true});
+function up(e){if(!T.pts.has(e.pointerId))return;const two=T.pts.size===2,svg=T.svg;
+  if(two&&T.d0>20&&svg){const [a,b]=[...T.pts.values()],d=Math.hypot(a.x-b.x,a.y-b.y),f=d/T.d0;T.pts.clear();T.d0=0;if(f>1.15||f<0.87)zoomBy(svg,T.mid,f);return;}
+  T.pts.delete(e.pointerId);if(e.type!=="pointerup"||!svg)return;
+  const now=Date.now();if(now-T.last<320&&Math.hypot(e.clientX-T.lx,e.clientY-T.ly)<30){T.last=0;zoomBy(svg,e.clientX,2);return;}T.last=now;T.lx=e.clientX;T.ly=e.clientY;}
+document.addEventListener("pointerup",up,{passive:true});document.addEventListener("pointercancel",up,{passive:true});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&Object.keys(G.zoom).length&&!document.querySelector("dialog[open]"))Object.keys(G.zoom).forEach(id=>zoomTo(id,null));});
+/* a print shows every day */
+window.addEventListener("beforeprint",()=>{try{Object.keys(G.zoom).forEach(id=>zoomTo(id,null));}catch(e){}});
+window.__dd2570={G,sentence,tableHtml,designHtml,gapAt,pubChart};   /* for the workstation's checks */
+window.__dd2570.zoomTo=zoomTo;
+try{if(document.getElementById("resultsOut")&&document.getElementById("resultsOut").children.length)renderResults();}catch(e){}
+})();
+</script>
 <script id="fx2-v2492-js">
 /* v24.92 Forms DM-1, IC-1 and RR-1 on screen (the 10/28 design review); v24.95 the six forms refined from the BCBA's
    iPad screenshots (boxes in line across a row, an example gone once its box is filled, the toolbar on one row). It arranges what the sheets already hold:
@@ -23468,8 +23955,16 @@ try{stPaint();}catch(e){}
      v25.69 fx2 (group 5):
        paper    a copy of the paper the form draws on screen inside a sheet (a selector: TK-1's book pages, QS-1's quick
                 start as it prints): its words keep the type they print with, not the layout's reading type (TK-1 fits
-                its pages to the type it finds there, and the master print takes them as they stand) */
+                its pages to the type it finds there, and the master print takes them as they stand)
+     v25.70 fx2 (the BCBA, 11/9):
+       narrow   tables that are cards only on a narrow touch screen, an iPad held upright (or a phone), and stay tables on
+                an iPad held sideways and on a laptop (a selector: SA-1's probes, GC-1's record of game days, RM-1's
+                inoculation plan). Upright is the screen taller than it is wide, so the form in the workstation beside
+                its list follows the iPad, not the width; under 640 px they are cards on any screen. Turning the iPad
+                turns them, the boxes and their values as they were */
   var C = window.FX2_CFG || {};
+  /* v25.70 fx2: the narrow screens where the tables of FX2_CFG.narrow are cards */
+  var NARROW = null; try { NARROW = matchMedia('(pointer:coarse) and (orientation:portrait), (max-width:640px)'); } catch (e) {}
   /* what is typed in DM-1's contacts and packet redraws their summaries at once */
   var LIVE = [C.contacts && '#' + C.contacts.wrap, C.packet && '#' + C.packet].filter(Boolean).join(',');
   var $$ = function(s, r){ return Array.prototype.slice.call((r || D).querySelectorAll(s)); };
@@ -23634,11 +24129,14 @@ try{stPaint();}catch(e){}
   function cards(){
     /* which tables are lists of entries: on DM-1, IC-1 and RR-1 every .grid table holding boxes; elsewhere the form names
        them (a table of scores by item, a checklist of criteria by target and a yes/no/sometimes grid stay tables) */
-    var named = C.cards; if (named === '') return;
-    $$(named || '.fx2-sh table.grid').forEach(function(t){
-      if (!named && !t.querySelector('tbody input, tbody select, tbody textarea')) return;
+    var named = C.cards, nar = C.narrow ? $$(C.narrow) : [], up = !!(NARROW && NARROW.matches); if (named === '' && !nar.length) return;
+    (named === '' ? [] : $$(named || '.fx2-sh table.grid')).filter(function(t){ return nar.indexOf(t) < 0; }).concat(nar).forEach(function(t){
+      var isN = nar.indexOf(t) >= 0, on = !isN || up;
+      if (!named && !isN && !t.querySelector('tbody input, tbody select, tbody textarea')) return;
       if (!t.closest('.fx2-sh')) return;
-      tog(t, 'fx2-cards', true);
+      /* v25.70 fx2: a table of FX2_CFG.narrow is laid out for cards either way (each cell's column name and kind), and is a
+         card list only while the screen is narrow (fx2-ncards marks it for the form's own rules) */
+      tog(t, 'fx2-cards', on); if (isN) tog(t, 'fx2-ncards', true);
       var hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1]; if (!hr) return;
       var heads = []; Array.prototype.forEach.call(hr.cells, function(c){ for (var k = 0; k < (c.colSpan || 1); k++) heads.push(headText(c)); });
       var rows = [], fixed = false, ro = !t.querySelector('tbody input, tbody select, tbody textarea');
@@ -23668,7 +24166,7 @@ try{stPaint();}catch(e){}
           if (r) { r.dataset.fx2open = '1'; tog(r, 'fx2-more', false); var f = r.querySelector('input:not([type=checkbox]),select,textarea'); if (f) try { f.focus(); } catch (e) {} return; }
           var cn = COUNT[t.id] && D.getElementById(COUNT[t.id]); if (cn && +cn.value < +cn.max) { cn.value = +cn.value + 1; cn.dispatchEvent(new Event('change', { bubbles: true })); } });
         wrap.after(btn); }
-      var cnt = COUNT[t.id] && D.getElementById(COUNT[t.id]); btn.hidden = !waiting && !(cnt && +cnt.value < +cnt.max);
+      var cnt = COUNT[t.id] && D.getElementById(COUNT[t.id]); btn.hidden = !on || (!waiting && !(cnt && +cnt.value < +cnt.max));
     });
   }
 
@@ -23780,16 +24278,27 @@ try{stPaint();}catch(e){}
   function cols(g){ var t = getComputedStyle(g).gridTemplateColumns.split(' ').filter(function(x){ return /px$/.test(x); }); return { n: t.length, w: parseFloat(t[0]) || 0, gap: parseFloat(getComputedStyle(g).columnGap) || 0 }; }
   /* v25.67 fx2: a box out of sight (in a part Focus folds) keeps what it was given: measured as nothing, it lost its
      width and kept the loss once Focus was off (EA-1) */
+  /* v25.70 fx2: what a box is given while Focus draws its part a size larger holds while Focus is on; once Focus is off a
+     box out of sight gets back what it had with Focus off (VS-1: a field on a sheet visited with Focus on kept fx2-w2
+     after Focus was off, so Focus left something behind); the boxes in sight are measured again at once */
+  var fxWas = false, wSeen = [];
+  function wSet(f, a, b, fx){ if (fx && !f._fx2wb) f._fx2wb = [f.classList.contains('fx2-w2'), f.classList.contains('fx2-wall')];
+    tog(f, 'fx2-w2', a); tog(f, 'fx2-wall', b); if (!fx) f._fx2wb = [a, b]; if (wSeen.indexOf(f) < 0) wSeen.push(f); }
   function long(){
+    var fx = R.hasAttribute('data-nbh-fx');
+    if (fxWas && !fx) { wSeen = wSeen.filter(function(f){ return f.isConnected; });
+      wSeen.forEach(function(f){ var x = f.tagName === 'TD' ? f.querySelector('input,select') : Array.prototype.filter.call(f.children, isBox)[0];
+        if (f._fx2wb && !(x && x.offsetParent)) { tog(f, 'fx2-w2', f._fx2wb[0]); tog(f, 'fx2-wall', f._fx2wb[1]); } }); }
+    fxWas = fx;
     $$('.fx2-sh .ident.fx2-al, .fx2-sh .fx2-fg.fx2-al').forEach(function(g){ var c = cols(g); if (c.n < 2 || !c.w) return;
       Array.prototype.forEach.call(g.children, function(f){ if (g.classList.contains('fx2-fg') && !f.classList.contains('fx2-f')) return; var x = Array.prototype.filter.call(f.children, isBox)[0];
         if (x && x.type !== 'date' && x.type !== 'number' && !x.offsetParent) return;
         var w = x && x.type !== 'date' && x.type !== 'number' ? textW(x) : 0, k = 1;
         while (k < c.n && w > k * c.w + (k - 1) * c.gap) k++;
-        tog(f, 'fx2-w2', k === 2 && c.n > 2); tog(f, 'fx2-wall', k > 1 && (k >= c.n)); }); });
+        wSet(f, k === 2 && c.n > 2, k > 1 && (k >= c.n), fx); }); });
     $$('.fx2-sh table.fx2-cards > tbody > tr').forEach(function(r){ var c = cols(r); if (c.n < 2 || !c.w) return;
       Array.prototype.forEach.call(r.cells, function(td){ if (td.getAttribute('data-fx2k') !== 'f') return; var x = td.querySelector('input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=date]):not([type=number]),select:not(.nbh-seg-src)');
-        tog(td, 'fx2-wall', !!(x && x.offsetParent && textW(x) > c.w)); }); });
+        wSet(td, false, !!(x && x.offsetParent && textW(x) > c.w), fx); }); });
   }
 
   /* 12. v24.95 the form's toolbar on one row on an iPad held sideways: while it wraps, it gives up, a step at a time, the
@@ -23832,6 +24341,8 @@ try{stPaint();}catch(e){}
     st.after(el); R.classList.add('fx2-pp'); }
   function run(){ if (printing) return; try { wrapPlain(); mark(); intro(); heads(); fields(); hints(); rows(); segs(); cards(); contacts(); packet(); nsFold(); parentView(); align(); egAll(); long(); tbFit(); } catch (e) { if (window.console) console.warn('fx2', e); } }
   var timer = 0; function soon(){ clearTimeout(timer); timer = setTimeout(run, 120); }
+  /* v25.70 fx2: the iPad turned (upright or sideways): the tables of FX2_CFG.narrow become cards or tables again */
+  if (C.narrow && NARROW) try { if (NARROW.addEventListener) NARROW.addEventListener('change', soon); else NARROW.addListener(soon); } catch (e) {}
   /* TB-1's chips jump to a target's card; a sheet just shown still grows its boxes to their text, so the jump is aimed
      again once that has settled (a smooth scroll aimed at the first position stopped short of the card) */
   if (C.jump) D.addEventListener('click', function(e){ var a = e.target.closest && e.target.closest(C.jump.split(',').map(function(s){ return s.trim() + ' a[href^="#"]'; }).join(', ')); if (!a) return; var id = a.getAttribute('href').slice(1);
@@ -23847,16 +24358,381 @@ try{stPaint();}catch(e){}
       if (o != null && o !== '1') { tn.nodeValue = on ? o : sentence(o); tn._fx2s = tn.nodeValue; tn._fx2o = o; } });
     $$('[data-fx2-ph]').forEach(function(f){ if (on) f.setAttribute('placeholder', f.getAttribute('data-fx2-ph')); else f.removeAttribute('placeholder'); });
   }
-  window.addEventListener('beforeprint', function(){ paper(true); });
-  window.addEventListener('afterprint', function(){ paper(false); });
-  try { var pm = matchMedia('print'); var pf = function(e){ paper(e.matches); }; if (pm.addEventListener) pm.addEventListener('change', pf); else pm.addListener(pf); } catch (e) {}
+  /* v25.70 fx2 (the packet gate): a box on a part of the page out of sight (a sheet not shown) keeps the height field care
+     gave it while it was on the screen, where this layout draws boxes in larger type with more room; field care measures
+     only the boxes it can see, so the master print took those at the screen's height (HD-1's ABC lists a line taller
+     each, BC-1's, SV-1's and FD-1's notes). As the page goes plain such a box is measured again as field care measures
+     a box, in the paper's type and room: the parts out of sight that hold it are shown for that moment only (in the same
+     task, so nothing is drawn and no observer of sizes hears of it) and the scroll is kept; a box that still cannot be
+     seen gets the same number of lines in the paper's type. The screen's height comes back after. Read before the page
+     goes plain, set once it is: in the master print after nbhPolish.plain(true), on a print after nbh-polish's own
+     beforeprint (a listener put on once the page has loaded, so it runs after it), as the print media starts where there
+     was no beforeprint */
+  var boxes = null, SHOWAS = { TR: 'table-row', TD: 'table-cell', TH: 'table-cell', TBODY: 'table-row-group', THEAD: 'table-header-group', TFOOT: 'table-footer-group', TABLE: 'table', LI: 'list-item', SPAN: 'inline' };
+  function boxM(t){ var cs = getComputedStyle(t), n = function(v){ return parseFloat(v) || 0; }, fs = n(cs.fontSize);
+    return { lh: cs.lineHeight === 'normal' ? fs * 1.2 : n(cs.lineHeight),
+      extra: cs.boxSizing === 'border-box' ? n(cs.paddingTop) + n(cs.paddingBottom) + n(cs.borderTopWidth) + n(cs.borderBottomWidth) : 0 }; }
+  function boxesRead(){ if (boxes || R.classList.contains('nbh-plain')) return; boxes = [];
+    $$('textarea').forEach(function(t){ if (t.offsetParent || !/^[\d.]+px$/.test(t.style.height)) return; var m = boxM(t); if (m.lh > 0) boxes.push({ t: t, h: t.style.height, m: m }); }); }
+  /* field care's measure (nbh-field-care.js grow) */
+  function careH(t){ var cs = getComputedStyle(t); t.style.height = 'auto'; var h = t.scrollHeight;
+    if (cs.boxSizing === 'border-box') h += (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+    else h -= (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    return Math.ceil(h) + 'px'; }
+  function boxesPaper(){
+    var todo = (boxes || []).filter(function(b){ return !b.done && !b.t.offsetParent && b.t.isConnected && b.t.style.height === b.h; }); if (!todo.length) return;
+    var shown = [], sx = scrollX, sy = scrollY;
+    try {
+      todo.forEach(function(b){ for (var a = b.t.parentElement; a && a !== D.body && a !== R; a = a.parentElement) {
+        if (shown.some(function(x){ return x[0] === a; }) || getComputedStyle(a).display !== 'none') continue;
+        shown.push([a, a.style.getPropertyValue('display'), a.style.getPropertyPriority('display'), a.hasAttribute('style')]); a.style.setProperty('display', SHOWAS[a.tagName] || 'block', 'important'); } });
+      todo.forEach(function(b){ var t = b.t; if (t.offsetParent) { b.done = 1; b.set = careH(t); t.style.height = b.set; } });
+    } catch (e) {}
+    finally { shown.reverse().forEach(function(x){ if (x[1]) x[0].style.setProperty('display', x[1], x[2]); else x[0].style.removeProperty('display'); if (!x[3] && !x[0].getAttribute('style')) x[0].removeAttribute('style'); });
+      if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); }
+    todo.forEach(function(b){ var t = b.t, p, n; if (b.done) return; t.style.height = b.h; p = boxM(t); if (!(p.lh > 0) || (p.lh === b.m.lh && p.extra === b.m.extra)) return;
+      n = Math.max(1, Math.round((parseFloat(b.h) - b.m.extra) / b.m.lh)); b.done = 1; b.set = Math.ceil(n * p.lh + p.extra) + 'px'; t.style.height = b.set; });
+  }
+  function boxesBack(){ (boxes || []).forEach(function(b){ if (b.done && b.t.style.height === b.set) b.t.style.height = b.h; }); boxes = null; }
+  window.addEventListener('beforeprint', function(){ ST.plainOn(); boxesRead(); paper(true); });
+  function boxesLate(){ if (boxesLate.on) return; boxesLate.on = 1; addEventListener('beforeprint', boxesPaper); }
+  window.addEventListener('afterprint', function(){ paper(false); boxesBack(); ST.plainOff(); });
+  try { var pm = matchMedia('print'); var pf = function(e){ paper(e.matches); if (e.matches) boxesPaper(); else boxesBack(); }; if (pm.addEventListener) pm.addEventListener('change', pf); else pm.addListener(pf); } catch (e) {}
   /* the workstation's packet collects a form after nbhPolish.plain(true), not on the browser's print: the paper headings
      and the examples in their boxes go into the packet too */
-  function wrapPlain(){ try { var P = window.nbhPolish; if (P && P.plain && !P.plain.fx2) { var pl = P.plain; P.plain = function(on){ if (on) paper(true); var r = pl.apply(this, arguments); if (!on) paper(false); return r; }; P.plain.fx2 = true; } } catch (e) {} }
+  function wrapPlain(){ try { var P = window.nbhPolish; if (P && P.plain && !P.plain.fx2) { var pl = P.plain; P.plain = function(on){ if (on) { ST.plainOn(); boxesRead(); paper(true); } var r = pl.apply(this, arguments); if (on) boxesPaper(); else { paper(false); boxesBack(); ST.plainOff(); } return r; }; P.plain.fx2 = true; } } catch (e) {} }
   /* nbh-polish may load after this script (the release build puts it last): wrapped as soon as it is there */
-  wrapPlain(); D.addEventListener('DOMContentLoaded', wrapPlain); addEventListener('load', wrapPlain);
-  window.fx2Layout = { run: run, paper: paper };
+  wrapPlain(); D.addEventListener('DOMContentLoaded', function(){ wrapPlain(); boxesLate(); }); addEventListener('load', function(){ wrapPlain(); boxesLate(); });
+  /* 13. v25.70 step by step (approved by the BCBA, 11/9: "a mode that presents the questions one, two or three at a time
+     ... like TurboTax", with "Review the blank ones"). A form whose settings ask for it (FX2_CFG.step) has a switch under
+     its toolbar: All at once (as always, the default) or Step by step, with 1, 2 or 3 questions on a screen. Built as Focus
+     is (nbh-ui): nothing is moved, wrapped or renamed; the parts of the sheet not on this screen are marked
+     data-fx2-st="x" and kept out of sight by the screen rules above, so saving, the exports and every print read the same
+     fields as ever. A question is a label with its box, or a whole small table, a whole selector (a list, its buttons, a
+     set of ticks), a row of definitions, a card's field, with the words before it; a heading starts a new screen. A
+     question the form keeps out of sight (asked only on an answer) is skipped while it is out of sight and joins the line
+     once it shows. The bar at the foot: Back, where the person is ("Question 5 of 32 · Sheet 2 of 6", told politely to a
+     screen reader), Next; Next past a sheet's last screen opens the next sheet, past the last sheet the blank ones, each a
+     button that goes to it, then Done: the whole form for now, and Step by step (with its 1, 2 or 3) kept for the next
+     time the form is opened on this device (the BCBA, 11/9); choosing All at once is kept the same way. Enter goes to the
+     next question (Shift+Enter the one before), as Focus has it; the cursor moves to the question. Focus and step by step are one or the other. The marks come off
+     while the page is plain or printed, and off a copy the form makes of a part of itself. The other sheets are counted
+     as nbh-ui counts their fields for its dots: each view's class on the body in turn, in one go, put back at once.
+     FX2_CFG.step: true, or {skip: parts never taken for questions (a selector), one: more parts kept whole (a selector),
+     rows: tables whose items (the rows of the body) are each a question, under the table's head (a questionnaire),
+     views: the sheets stepped through, in order (their data-view), noviews: sheets left out (the Guide always is)}.
+     For the checks: fx2Layout.step (on, set, next, back, state, enable). */
+  var ST = (function(){
+    var CF = C.step === true ? {} : (C.step || null), FID = R.getAttribute('data-fx2') || 'form', KEY = 'nbh.fx2.step.' + FID;
+    var on = false, per = 1, list = [], scr = [], at = 0, key = null, scans = {}, rev = false, seenRev = false;
+    var sw = null, bar = null, live = null, revEl = null, marked = [], focusEl = null, mo = null, rt = 0, scanning = false, aside = 0, built = 0;
+    var SKIP = '.toolbar,.nbh-mast,dialog,#nbhToasts,.nbh-pagenav,nav,#nbhFxBar,#nbhFxRing,.fx2-stsw,.fx2-stbar,.fx2-strev,.fx2-pvexit,.sim-banner,script,style,template,link,noscript';
+    var ATOM = 'table,fieldset,ul,ol,dl,details,[role="radiogroup"],.nbh-seg,.chkrow,.ident > .f,.fx2-fg > .fx2-f,.defs .drow,label,.rl-f,canvas,svg';
+    var HEADQ = 'h1,h2,h3,h4,.nbh-band,legend';
+    var AFTER = '.fx2-hint,.fx2-cellhint,.nbh-hint,.hint,small,.readout,.fx2-addrow,.fx2-conadd,.fx2-pkall,.fx2-btn,.fx2-nsbar,.nbh-xs-bar';
+    function is(e, s){ try { return !!(s && e.matches(s)); } catch (x) { return false; } }
+    function vis(e){ return !!(e.getClientRects && e.getClientRects().length); }
+    function store(v){ try { if (v === undefined) return localStorage.getItem(KEY) || ''; if (v) localStorage.setItem(KEY, v); else localStorage.removeItem(KEY); } catch (e) {} return v; }
+    function sq(t){ return String(t || '').replace(/\s+/g, ' ').trim(); }
+    /* a box to answer: a field on screen (a list drawn as buttons, a tick box drawn as its label count too), not one the
+       form fills itself */
+    function isField(e){ return /^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName) && !/^(hidden|file|button|submit|reset|image)$/i.test(e.type || ''); }
+    function shownF(f){ if (vis(f)) return true; if ((f.type === 'checkbox' || f.type === 'radio')) { var l = f.closest('label') || (f.id && D.querySelector('label[for="' + f.id.replace(/"/g, '') + '"]')); return !!(l && vis(l)); } return false; }
+    function liveF(f){ return isField(f) && !f.disabled && !f.readOnly && shownF(f) && !f.closest('.toolbar,dialog,.nbh-mast'); }
+    function fieldsIn(e){ if (isField(e)) return liveF(e) ? [e] : []; return Array.prototype.filter.call(e.querySelectorAll('input,select,textarea'), liveF); }
+    function choice(f){ return f.type === 'checkbox' || f.type === 'radio'; }
+    function heady(e){ return is(e, HEADQ) || !!(e.firstElementChild && is(e.firstElementChild, 'h1,h2,h3,h4') && sq(e.textContent).length < 140); }
+    function atom(e, f){
+      if (is(e, ATOM) || is(e, CF && CF.one)) return true;
+      if (f.length === 1) return true;
+      if (f.every(function(x){ return x.type === 'radio' && x.name && x.name === f[0].name; })) return true;
+      if (e.querySelector('h1,h2,h3,h4,.nbh-band')) return false;
+      if (f.every(choice) && f.length <= 8) return true;
+      return f.length <= 3 && /^(P|LI|SPAN)$/.test(e.tagName);
+    }
+    function afterish(e){ if (is(e, AFTER) || e.tagName === 'BUTTON') return true; var b = e.querySelectorAll('button'); if (!b.length) return false;
+      var t = sq(e.textContent); Array.prototype.forEach.call(b, function(x){ t = t.replace(sq(x.textContent), ''); }); return sq(t).length < 3; }
+    /* the roots of the sheet on screen, as Focus finds them */
+    function roots(){ var l = $$('main.sheet,.sheet:not(table),main' + (C.sheets ? ',' + C.sheets : '')).filter(function(e){ return !e.closest(SKIP) && vis(e); });
+      l = l.filter(function(e){ return !l.some(function(x){ return x !== e && x.contains(e); }); });
+      for (var c = D.body.firstElementChild; c; c = c.nextElementSibling) {
+        if (is(c, SKIP) || !vis(c) || l.some(function(x){ return x === c || x.contains(c) || c.contains(x); })) continue;
+        var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky' || p === 'absolute') continue;
+        if (fieldsIn(c).length) l.push(c); }
+      l.sort(function(a, b){ return a.compareDocumentPosition(b) & 4 ? -1 : 1; }); return l; }
+    /* the questions of the sheet on screen, in reading order */
+    function questions(rs){
+      var out = [], pend = [], sec = '';
+      function add(e, f, x){ pend.concat([e]).forEach(function(y){ var h = heady(y) ? y : y.querySelector && y.querySelector('h1,h2,h3,h4,.nbh-band'); if (h && h.getClientRects().length) sec = cut(words(h)); });
+        var q = { atom: e, els: pend.concat(x || [], [e]), fields: f, sec: sec }; q.head = pend.some(heady) || heady(e) || !!e.querySelector('h1,h2,h3,h4,.nbh-band');
+        q.heavy = (e.tagName === 'TABLE' || !!e.querySelector('table')) && f.length > 4 || f.length > 8 || is(e, 'canvas,svg'); pend = []; out.push(q); }
+      function text(e){ if (!pend.length && out.length && afterish(e)) out[out.length - 1].els.push(e); else pend.push(e); }
+      function walk(box){
+        for (var c = box.firstElementChild; c; c = c.nextElementSibling) {
+          if (is(c, SKIP) || is(c, CF && CF.skip)) continue;
+          if (!vis(c)) { if (getComputedStyle(c).display === 'contents') walk(c); continue; }
+          var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky') continue;
+          var f = fieldsIn(c);
+          if (!f.length) { text(c); continue; }
+          /* a questionnaire (FX2_CFG.step.rows): each item of its body a question, under the table's head */
+          if (c.tagName === 'TABLE' && is(c, CF && CF.rows)) { Array.prototype.forEach.call(c.tBodies, function(tb){ Array.prototype.forEach.call(tb.rows, function(r){ if (!vis(r)) return; var g = fieldsIn(r); if (g.length) add(r, g, c.tHead && vis(c.tHead) ? [c.tHead] : null); else text(r); }); }); continue; }
+          if (atom(c, f)) add(c, f); else walk(c);
+        } }
+      rs.forEach(walk);
+      if (pend.length && out.length) out[out.length - 1].els = out[out.length - 1].els.concat(pend);
+      out.forEach(function(q){ q.title = title(q); });
+      return out;
+    }
+    function words(e){ var o = []; (function w(n){ for (var c = n.firstChild; c; c = c.nextSibling) { if (c.nodeType === 3) { var t = sq(c.nodeValue); if (t) o.push(t); }
+      else if (c.nodeType === 1 && !/^(BUTTON|SCRIPT|STYLE|SELECT|TEXTAREA|INPUT|OPTION|svg)$/i.test(c.tagName) && !c.classList.contains('fx2-hint') && !c.classList.contains('fx2-cellhint')) w(c); } })(e); return sq(o.join(' ')); }
+    function cut(t){ t = sq(t); return t.length > 90 ? t.slice(0, 88).replace(/\s+\S*$/, '') + '…' : t; }
+    function title(q){ var a = q.atom, t = '', f = q.fields[0]; if (a.tagName === 'TR') return cut(words(a)) || 'An item';
+      var l = is(a, 'label') ? a : a.querySelector('label,.dlab,legend,caption,th,h3,h4,b,strong');
+      if (l) t = words(l);
+      if (!t && f && f.id) { var lf = D.querySelector('label[for="' + f.id.replace(/"/g, '') + '"]'); if (lf) t = words(lf); }
+      for (var i = q.els.length - 2; !t && i >= 0; i--) { var w = words(q.els[i]); if (w && w.length <= 160) t = w; }
+      if (!t && f) t = f.getAttribute('aria-label') || f.getAttribute('data-fx2-ph') || f.getAttribute('placeholder') || f.name || '';
+      return cut(t) || 'A question'; }
+    function blankQ(q){ return q.fields.filter(function(f){ return f.isConnected; }).every(function(f){ return choice(f) ? !f.checked : f.tagName === 'SELECT' ? (f.selectedIndex <= 0 || !f.value) : !String(f.value || '').trim(); }); }
+    /* the screens: n questions each; a heading, a table or a large set of boxes starts one of its own */
+    function chunk(qs){ var out = [], s = null; qs.forEach(function(q){ if (!s || s.length >= per || q.heavy || (s.length && (s[0].heavy || q.head))) { s = []; out.push(s); } s.push(q); }); return out; }
+
+    /* ---- the sheets ---- */
+    function views(){ var b = $$('#viewSeg button[data-view]').filter(function(x){ return !x.disabled && !x.hidden; });
+      var want = CF && CF.views, no = (CF && CF.noviews) || [];
+      b = b.filter(function(x){ var v = x.getAttribute('data-view'); return !/^(guide|refs|references)$/i.test(v) && no.indexOf(v) < 0 && (!want || want.indexOf(v) >= 0); });
+      if (want) b.sort(function(x, y){ return want.indexOf(x.getAttribute('data-view')) - want.indexOf(y.getAttribute('data-view')); });
+      return b; }
+    function pressedV(){ var b = D.querySelector('#viewSeg button[aria-pressed="true"],#viewSeg button[aria-selected="true"]'); return b ? b.getAttribute('data-view') : ''; }
+    function vlabel(v){ var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (!b) return ''; var t = ''; for (var n = b.firstChild; n; n = n.nextSibling) { var s = n.textContent || ''; if (n.nodeType === 1 && (/^\s*\d+\s*$/.test(s) || is(n, '[class*="sr-"],.visually-hidden,.mark'))) continue; t += s; } return sq(t); }
+    /* every sheet's questions, counted with each view's class on the body in turn (nbh-ui's way for its dots) */
+    function scanAll(){
+      var vs = views(); if (!vs.length) { scans = {}; return; }
+      var body = D.body, was = body.className, sx = scrollX, sy = scrollY; scanning = true; hold(true);
+      try { vs.forEach(function(b){ var v = b.getAttribute('data-view'), cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + v); body.className = cls.join(' ');
+        scans[v] = questions(roots()); }); }
+      finally { body.className = was; hold(false); if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); if (mo) mo.takeRecords(); scanning = false; }
+    }
+    function sheetList(){ var vs = views().map(function(b){ return b.getAttribute('data-view'); }); if (!vs.length) return [''];
+      return vs.filter(function(v){ return v === key ? list.length : (scans[v] || []).length; }); }
+
+    /* ---- the marks ---- */
+    function set(e, v){ if (v == null) { if (e.hasAttribute('data-fx2-st')) e.removeAttribute('data-fx2-st'); } else if (e.getAttribute('data-fx2-st') !== v) e.setAttribute('data-fx2-st', v); }
+    function unmarkAll(){ marked.forEach(function(e){ set(e, null); }); marked = []; $$('[data-fx2-st]').forEach(function(e){ set(e, null); }); unfocus(); }
+    function unfocus(){ if (focusEl) { focusEl.removeAttribute('data-fx2-stf'); if (focusEl.getAttribute('data-fx2-sttab') !== null) { focusEl.removeAttribute('tabindex'); focusEl.removeAttribute('data-fx2-sttab'); } focusEl = null; } }
+    /* the page as it is, for a measure: the class off (the marks then hide nothing), and on again after */
+    function hold(v){ if (v) { if (!aside++) R.classList.remove('fx2-st'); } else if (aside && !--aside && on) R.classList.add('fx2-st'); }
+    function paint(){
+      var now = [], rs, show = [], keep = [];
+      hold(true); try { rs = roots(); } finally { hold(false); }   /* the roots as they are, not as the marks leave them */
+      if (rev) rs.forEach(function(r){ now.push(r); set(r, 'x'); });
+      else if (scr[at]) {
+        scr[at].forEach(function(q){ show = show.concat(q.els); });
+        show.forEach(function(e){ for (var a = e.parentElement; a && a !== D.body; a = a.parentElement) { if (keep.indexOf(a) >= 0) break; keep.push(a); } });
+        var hide = function(box){ for (var c = box.firstElementChild; c; c = c.nextElementSibling) {
+          if (show.indexOf(c) >= 0) { set(c, 'q'); now.push(c); continue; }
+          if (keep.indexOf(c) >= 0) { hide(c); continue; }
+          if (is(c, 'script,style,template,link,colgroup,col,caption') || is(c, '.fx2-stsw,.fx2-stbar,.fx2-strev')) continue;
+          var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky') continue;
+          set(c, 'x'); now.push(c); } };
+        rs.forEach(function(r){ if (keep.indexOf(r) >= 0 || show.indexOf(r) >= 0) hide(r); else { set(r, 'x'); now.push(r); } });
+      }
+      marked.forEach(function(e){ if (now.indexOf(e) < 0) set(e, null); }); marked = now;
+      paintBar();
+      try { if (window.nbhFieldCare && nbhFieldCare.grow) setTimeout(function(){ try { nbhFieldCare.grow(); } catch (e) {} }, 30); } catch (e) {}
+    }
+    /* ---- build: the questions of the sheet on screen again, the screen kept by its first question ---- */
+    function build(where){
+      if (!on || printing || scanning) return;
+      built++;
+      var k = pressedV(), changed = k !== key, anchor = !changed && scr[at] && scr[at][0] ? scr[at][0].atom : null;
+      if (changed || where === 'scan') scanAll();
+      key = k; hold(true);
+      try { list = questions(roots()); } finally { hold(false); }
+      if (key) scans[key] = list;
+      scr = chunk(list);
+      var i = -1;
+      if (where === 'last') i = scr.length - 1;
+      else if (where === 'first' || changed) i = 0;
+      else if (anchor) { scr.forEach(function(s, j){ if (i < 0 && s.some(function(q){ return q.atom === anchor || q.atom.contains(anchor) || anchor.contains(q.atom); })) i = j; });
+        if (i < 0) scr.forEach(function(s, j){ if (i < 0 && (anchor.compareDocumentPosition(s[0].atom) & 4)) i = j; }); }
+      at = Math.max(0, Math.min(i < 0 ? at : i, scr.length - 1));
+      paint();
+    }
+    function soon(){ clearTimeout(rt); rt = setTimeout(function(){ build(); }, 160); }
+
+    /* ---- moving ---- */
+    function tbBottom(){ var t = D.querySelector('.toolbar'); if (!t) return 0; var c = getComputedStyle(t); if (c.position !== 'sticky' && c.position !== 'fixed') return 0; return Math.max(0, t.getBoundingClientRect().bottom); }
+    function bring(){ var s = scr[at], e = rev ? revEl : s && s[0] && s[0].els.filter(vis)[0]; if (!e) return; var r = e.getBoundingClientRect(), top = tbBottom() + 12;
+      if (r.top < top || r.top > innerHeight * 0.45) { try { scrollTo({ top: Math.max(0, scrollY + r.top - top), behavior: 'auto' }); } catch (x) { scrollTo(0, Math.max(0, scrollY + r.top - top)); } } }
+    function seat(byKey){
+      unfocus(); var s = scr[at];
+      if (rev) { var h = revEl && revEl.querySelector('h2'); if (h) { focusEl = h; h.setAttribute('tabindex', '-1'); h.setAttribute('data-fx2-sttab', ''); h.setAttribute('data-fx2-stf', ''); try { h.focus({ preventScroll: true }); } catch (e) {} } return; }
+      if (!s) return;
+      if (byKey) { var f = firstF(s[0]); if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} return; } }
+      var e = s[0].els.filter(vis)[0]; if (!e) return; focusEl = e; e.setAttribute('data-fx2-stf', '');
+      if (!e.hasAttribute('tabindex')) { e.setAttribute('tabindex', '-1'); e.setAttribute('data-fx2-sttab', ''); }
+      try { e.focus({ preventScroll: true }); } catch (x) {}
+    }
+    function firstF(q){ var f = q && q.fields.filter(function(x){ return x.isConnected && liveF(x); })[0]; if (f && f.classList.contains('nbh-seg-src') && f.nbhSeg) { var b = f.nbhSeg.querySelector('button'); if (b) return b; } return f; }
+    function moved(byKey){ paint(); bring(); seat(byKey); }
+    function goSheet(v, where, byKey){ var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (!b) return false;
+      b.click(); key = null; build(where); moved(byKey);
+      /* a sheet the form draws as it opens is read again once it has */
+      setTimeout(function(){ if (on && !rev) build(); }, 400); return true; }
+    function next(byKey){
+      if (!on) return false;
+      if (rev) { done(); return true; }
+      if (at < scr.length - 1) { at++; moved(byKey); return true; }
+      var sh = sheetList(), i = sh.indexOf(key);
+      for (var j = i + 1; j < sh.length; j++) if (sh[j] !== key) return goSheet(sh[j], 'first', byKey);
+      review(true); return true;
+    }
+    function back(byKey){
+      if (!on) return false;
+      if (rev) { review(false); var sh0 = sheetList(), last = sh0[sh0.length - 1]; if (last && last !== key) goSheet(last, 'last', byKey); else { build('last'); moved(byKey); } return true; }
+      if (at > 0) { at--; moved(byKey); return true; }
+      var sh = sheetList(), i = sh.indexOf(key);
+      for (var j = (i < 0 ? sh.length : i) - 1; j >= 0; j--) if (sh[j] !== key) return goSheet(sh[j], 'last', byKey);
+      return false;
+    }
+    /* ---- the blank ones ---- */
+    function review(v){
+      rev = !!v;
+      if (revEl && revEl.parentNode) revEl.parentNode.removeChild(revEl); revEl = null;
+      if (!rev) { paint(); return; }
+      seenRev = true; scanAll(); if (key) scans[key] = list;
+      var vs = views().map(function(b){ return b.getAttribute('data-view'); }), groups = [], n = 0;
+      (vs.length ? vs : ['']).forEach(function(v){ var qs = (v === key || !v ? list : scans[v] || []).filter(blankQ); if (qs.length) { groups.push([v, qs]); n += qs.length; } });
+      revEl = el('section', 'fx2-strev noprint'); revEl.setAttribute('aria-labelledby', 'fx2StRevH');
+      var h = el('h2', null, 'Review the blank ones'); h.id = 'fx2StRevH'; revEl.append(h);
+      revEl.append(el('p', null, n ? n + (n === 1 ? ' question has' : ' questions have') + ' no answer yet. Choose one to go to it, or press Done.' : 'Every question has an answer. Press Done to see the whole form.'));
+      groups.forEach(function(g){ if (g[0]) revEl.append(el('h3', null, vlabel(g[0]) || g[0])); var ul = el('ul');
+        g[1].forEach(function(q){ var li = el('li'), b = el('button', null, q.title); b.type = 'button'; b.addEventListener('click', function(){ jump(g[0], q); }); li.append(b); ul.append(li); });
+        revEl.append(ul); });
+      var at0 = sw && sw.parentNode ? sw : null; if (at0) at0.after(revEl); else D.body.prepend(revEl);
+      paint(); bring(); seat(false);
+    }
+    function jump(v, q){
+      review(false);
+      var go = function(){ var i = -1; scr.forEach(function(s, j){ if (i < 0 && s.some(function(x){ return x.atom === q.atom || x.fields.some(function(f){ return q.fields.indexOf(f) >= 0; }); })) i = j; });
+        if (i >= 0) at = i; moved(false); var f = firstF(scr[at] && scr[at].filter(function(x){ return x.atom === q.atom; })[0] || (scr[at] || [])[0]); if (f) try { f.focus({ preventScroll: true }); } catch (e) {} };
+      if (v && v !== key) { var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (b) b.click(); key = null; build('first'); } else build();
+      go();
+    }
+    function done(){ review(false); var m = String(per); stop(); store(m); paintSwitch(); try { scrollTo(0, 0); } catch (e) {} try { if (window.nbhUI && nbhUI.toast) nbhUI.toast('Step by step is finished: the whole form is shown. The form opens in Step by step again next time; All at once is under the toolbar.'); } catch (e) {} }
+
+    /* ---- the bar at the foot, and the switch under the toolbar ---- */
+    function mkBar(){
+      if (bar) return; bar = el('div', 'fx2-stbar noprint'); bar.setAttribute('role', 'region'); bar.setAttribute('aria-label', 'Step by step');
+      var b1 = el('button', 'fx2-stback', 'Back'), w = el('div', 'fx2-stwhere'), b2 = el('button', 'fx2-stnext', 'Next'), b3 = el('button', 'fx2-stblank', 'Blank ones');
+      [b1, b2, b3].forEach(function(b){ b.type = 'button'; });
+      live = el('b'); live.setAttribute('aria-live', 'polite'); live.setAttribute('aria-atomic', 'true'); w.append(live, el('span'));
+      b1.addEventListener('click', function(){ back(false); }); b2.addEventListener('click', function(){ next(false); }); b3.addEventListener('click', function(){ review(true); });
+      b3.title = 'The questions with no answer yet'; bar.append(b1, w, b3, b2);
+    }
+    function paintBar(){
+      if (!bar) return; var b1 = bar.querySelector('.fx2-stback'), b2 = bar.querySelector('.fx2-stnext'), b3 = bar.querySelector('.fx2-stblank'), sp = bar.querySelector('.fx2-stwhere span');
+      var sh = sheetList(), si = sh.indexOf(key), before = 0, total = 0;
+      sh.forEach(function(v, j){ var n = v === key ? list.length : (scans[v] || []).length; total += n; if (j < si) before += n; });
+      if (!views().length) total = list.length;
+      var txt;
+      if (rev) { txt = 'Review the blank ones'; setText(sp, total + ' question' + (total === 1 ? '' : 's') + ' in all'); }
+      else if (!scr.length) { txt = 'Nothing to answer on this sheet'; setText(sp, vlabel(key)); }
+      else { var s = scr[at], a = list.indexOf(s[0]) + 1 + before, z = list.indexOf(s[s.length - 1]) + 1 + before;
+        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + total + (sh.length > 1 || si >= 0 ? ' · Sheet ' + (si + 1) + ' of ' + sh.length : '');
+        setText(sp, [vlabel(key), s[0].sec].filter(Boolean).join(' \u00b7 ') || s[0].title); }
+      setText(live, txt);
+      var last = !rev && at >= scr.length - 1 && sh.indexOf(key) === sh.length - 1;
+      setText(b2, rev ? 'Done' : last ? 'Review the blank ones' : 'Next');
+      b1.disabled = !rev && at <= 0 && sh.indexOf(key) <= 0;
+      b3.hidden = rev || !seenRev;
+    }
+    function mkSwitch(){
+      if (sw || !CF) return; var tb = D.querySelector('div.toolbar'); sw = el('div', 'fx2-stsw noprint'); sw.setAttribute('role', 'group'); sw.setAttribute('aria-label', 'How the questions are shown');
+      var g1 = el('span', 'fx2-stg'), g2 = el('span', 'fx2-stg fx2-stper'), l2 = el('span', 'fx2-stl fx2-stper', 'Per screen');
+      [['', 'All at once'], ['1', 'Step by step']].forEach(function(o){ var b = el('button', null, o[1]); b.type = 'button'; b.setAttribute('data-fx2-stm', o[0]); b.addEventListener('click', function(){ setMode(o[0] ? String(per) : ''); }); g1.append(b); });
+      ['1', '2', '3'].forEach(function(n){ var b = el('button', null, n); b.type = 'button'; b.setAttribute('data-fx2-stn', n); b.setAttribute('aria-label', n + (n === '1' ? ' question' : ' questions') + ' per screen'); b.addEventListener('click', function(){ setMode(n); }); g2.append(b); });
+      sw.append(el('span', 'fx2-stl', 'Questions'), g1, l2, g2);
+      if (tb && tb.parentNode) tb.after(sw); else D.body.prepend(sw);
+      paintSwitch();
+    }
+    function paintSwitch(){ if (!sw) return;
+      $$('[data-fx2-stm]', sw).forEach(function(b){ attr(b, 'aria-pressed', String(b.getAttribute('data-fx2-stm') === '' ? !on : on)); });
+      $$('[data-fx2-stn]', sw).forEach(function(b){ attr(b, 'aria-pressed', String(on && +b.getAttribute('data-fx2-stn') === per)); });
+      $$('.fx2-stper', sw).forEach(function(e){ e.hidden = !on; }); }
+
+    /* ---- on and off ---- */
+    function setMode(m){ m = /^[123]$/.test(m) ? m : ''; store(m); if (m) { per = +m; if (on) { build(); moved(false); } else start(true); } else stop(); paintSwitch(); }
+    function start(user){
+      if (on || !D.body) return;
+      try { if (window.nbhUI && nbhUI.focus && nbhUI.focus.on()) nbhUI.focus.set(false); } catch (e) {}
+      on = true; R.classList.add('fx2-st'); mkBar(); D.body.appendChild(bar); key = null; at = 0; rev = false;
+      build(user ? 'first' : 'scan'); if (user) { bring(); seat(false); }
+      watch(true); paintSwitch();
+    }
+    function stop(){
+      if (!on) return; var s = scr[at], a = s && s[0] && s[0].els.filter(vis)[0], y = a ? a.getBoundingClientRect().top : null;
+      on = false; watch(false); clearTimeout(rt); if (revEl && revEl.parentNode) revEl.parentNode.removeChild(revEl); revEl = null; rev = false;
+      unmarkAll(); R.classList.remove('fx2-st'); if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+      list = []; scr = []; scans = {}; key = null; at = 0;
+      if (a && y != null) { var n = a.getBoundingClientRect().top; scrollTo(scrollX, Math.max(0, scrollY + n - y)); }
+      try { if (window.nbhFieldCare && nbhFieldCare.grow) nbhFieldCare.grow(); } catch (e) {}
+      paintSwitch();
+    }
+    function own(n){ return n && n.nodeType === 1 && !!n.closest && !!n.closest('.fx2-stbar,.fx2-stsw,.fx2-strev'); }
+    function watch(v){
+      if (!v) { if (mo) mo.disconnect(); return; }
+      if (!mo) mo = new MutationObserver(function(recs){ if (!on || scanning || printing) return;
+        if (recs.some(function(m){ var t = m.target; if (t === R) return m.attributeName === 'data-nbh-fx' && R.hasAttribute('data-nbh-fx'); if (own(t)) return false;
+          if (m.type === 'childList') return !(Array.prototype.every.call(m.addedNodes, own) && Array.prototype.every.call(m.removedNodes, own));
+          /* only a change in what shows (as Focus reads it): not a box's own height, which field care sets as it grows */
+          if (/^(INPUT|SELECT|TEXTAREA|OPTION)$/.test(t.tagName)) return false;
+          if (m.attributeName === 'style') return /display|visibility/.test(String(m.oldValue || '') + String(t.getAttribute('style') || ''));
+          return true; })) {
+          if (R.hasAttribute('data-nbh-fx')) { setMode(''); return; } soon(); } });
+      mo.observe(D.body, { childList: true, subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class', 'hidden', 'style', 'open', 'aria-pressed', 'aria-selected', 'disabled'] });
+      mo.observe(R, { attributes: true, attributeFilter: ['data-nbh-fx'] });
+    }
+    D.addEventListener('change', function(e){ if (on && !own(e.target)) soon(); });
+    /* Enter: the next question (on this screen, then the next screen); Shift+Enter the one before. A box of several lines
+       keeps its Enter; a form that answers Enter in a box itself (it marks the key handled) keeps it too */
+    D.addEventListener('keydown', function(e){
+      if (!on || e.key !== 'Enter' || e.defaultPrevented || e.isComposing || e.altKey || e.ctrlKey || e.metaKey) return;
+      var t = e.target; if (!t || !t.tagName || own(t) || t.isContentEditable || t.tagName === 'TEXTAREA' || t.tagName === 'BUTTON' || t.tagName === 'A' || (t.tagName === 'INPUT' && /^(button|submit|reset|file|image)$/i.test(t.type || ''))) return;
+      if (t !== D.body && !t.closest('[data-fx2-st="q"]') && !t.matches('[data-fx2-st="q"]')) return;
+      e.preventDefault();
+      var s = scr[at] || [], qi = -1; s.forEach(function(q, j){ if (q.atom === t || q.atom.contains(t) || q.els.indexOf(t) >= 0) qi = j; });
+      var to = qi < 0 ? -1 : qi + (e.shiftKey ? -1 : 1), f = to >= 0 && to < s.length ? firstF(s[to]) : null;
+      if (f) { try { f.focus(); } catch (x) {} return; }
+      if (e.shiftKey) back(true); else next(true);
+    });
+    /* a copy of a part of the page the form makes while it steps carries no mark */
+    (function(){ var CN = window.Node && Node.prototype.cloneNode; if (!CN) return;
+      Node.prototype.cloneNode = function(){ var c = CN.apply(this, arguments);
+        if (on && marked.length && c && c.nodeType === 1) { try { var l = [c].concat(Array.prototype.slice.call(c.querySelectorAll ? c.querySelectorAll('[data-fx2-st],[data-fx2-stf]') : [])); l.forEach(function(x){ x.removeAttribute('data-fx2-st'); x.removeAttribute('data-fx2-stf'); if (x.hasAttribute('data-fx2-sttab')) { x.removeAttribute('data-fx2-sttab'); x.removeAttribute('tabindex'); } }); } catch (e) {} }
+        return c; }; })();
+    /* the page plain or printed: the marks step aside, and come back after */
+    function plainOn(){ if (!on) return; watch(false); unmarkAll(); R.classList.remove('fx2-st'); if (revEl) revEl.hidden = true; }
+    function plainOff(){ if (!on) return; R.classList.add('fx2-st'); if (revEl) revEl.hidden = false; watch(true); build(); }
+    /* a saved page opened again, or a copy: no stale marks */
+    $$('[data-fx2-st],[data-fx2-stf]').forEach(function(e){ e.removeAttribute('data-fx2-st'); e.removeAttribute('data-fx2-stf'); if (e.hasAttribute('data-fx2-sttab')) { e.removeAttribute('data-fx2-sttab'); e.removeAttribute('tabindex'); } });
+    /* nbh-ui counts each view's fields for its dots with Focus's folds held aside: the marks are held aside with them */
+    try { var U = window.nbhUI; if (U && U.fxHold && !U.fxHold.fx2) { var F0 = U.fxHold; U.fxHold = function(){ var a = F0.apply(this, arguments), b = on;
+      if (b) hold(true); return a || b ? function(){ if (a) a(); if (b) { b = false; hold(false); } } : null; }; U.fxHold.fx2 = 1; } } catch (e) {}
+    function init(){ if (!CF) return; mkSwitch(); var m = store(); if (/^[123]$/.test(m)) { per = +m; start(false); } else paintSwitch(); }
+    return { init: init, plainOn: plainOn, plainOff: plainOff,
+      api: { on: function(){ return on; }, set: function(m){ setMode(m == null || m === false ? '' : String(m)); }, next: function(){ return next(false); }, back: function(){ return back(false); },
+        review: function(){ review(true); }, done: done, build: function(){ build(); },
+        enable: function(o){ if (!CF) { CF = o || {}; mkSwitch(); } return true; },
+        state: function(){ var sh = sheetList(); return { on: on, per: per, key: key, at: at, screens: scr.length, rev: rev, sheets: sh, si: sh.indexOf(key),
+          counts: sh.map(function(v){ return v === key ? list.length : (scans[v] || []).length; }), progress: live ? live.textContent : '', built: built,
+          qs: list.map(function(q){ return { title: q.title, n: q.fields.length, head: q.head, heavy: !!q.heavy, tag: q.atom.tagName.toLowerCase() + (q.atom.className && typeof q.atom.className === 'string' ? '.' + q.atom.className.trim().split(/\s+/).join('.') : ''), blank: blankQ(q) }; }),
+          screen: (scr[at] || []).map(function(q){ return list.indexOf(q); }), blanks: rev && revEl ? revEl.querySelectorAll('li').length : -1 }; } } };
+  })();
+  window.fx2Layout = { run: run, paper: paper, step: ST.api };
   paperCSS(); segs(); run();
+  if (D.readyState === 'complete') setTimeout(ST.init, 0); else addEventListener('load', function(){ setTimeout(ST.init, 300); });
   try { new MutationObserver(function(recs){ segs(); if (recs.some(function(m){ return !(m.target.closest && m.target.closest('.fx2-csum,.fx2-nsbar,.fx2-pkall,.fx2-addrow')); })) soon(); }).observe(D.body, { childList: true, subtree: true }); } catch (e) {}
   D.addEventListener('change', soon); D.addEventListener('input', function(e){ if (e.target._fx2eg) egSync(e.target); if (LIVE && e.target.closest && e.target.closest(LIVE)) soon(); });
   addEventListener('resize', function(){ tbKey = ''; soon(); });

@@ -1646,4 +1646,209 @@ try { if (window.matchMedia) (function(){
       cssIn();
       window.nbhSheets = { run: run, undo: undo, mode: function(){ return mode; }, open: openPop, close: closePop, railOff: railOff };
 })(); } catch (e) {}
+/* ===================== v25.70 Undo after a destructive action, and Watch how (the BCBA, 11/9) =====================
+   Undo. A tap on a button that takes work away (Clear all, Clear …, Remove last, Remove this …, Delete this …, a row's ×
+   named Remove or Delete, Discard, Start over, Reset timer) keeps the form as it was the instant before: the file Save data
+   would write (read at once, as nbh-autosave reads it when a page closes; nothing is downloaded) and the fields (nbhBridge.snapshot), the sheet open and the
+   scroll. Its own question, if it asks one, is asked as before; once the form has changed (Cancel changes nothing, and
+   nothing is offered), a message at the foot says what was done, with Undo for about 8 s (held while it is touched or has
+   the focus; Ctrl or Command Z, outside a text box, does the same). Undo opens that file in the form the way the
+   workstation opens a case (nbhBridge.ownOpen), puts the sheet and the scroll back, and says whether everything came back;
+   a form without a file of its own is put back field by field only when it still has the same fields. A tap by a script
+   (the workstation's own Save, a test's click) is not a person's and is not watched.
+   No question first (the BCBA, 11/9: "drop the are-you-sure wherever Undo now covers the action"): a person's tap on such
+   a button, in a form that has a file of its own (so Undo puts back every value), answers the form's own question for it
+   (nbhUI.confirm or the browser's confirm; the first one asked within 1.5 s): the action happens at once and the message
+   with Undo shows. Only a question that names the same action (Clear, Remove, Delete, Discard, Start over or a new one,
+   Reset, Erase, Empty, Take … off) is answered; one that names something Undo cannot bring back (My pictures, Google
+   Drive, everywhere, other devices, Autosave's copies, a backup, the site, a bank, the directory, the offline copy) is
+   still asked, and so is a second question. A script's tap is asked as before. Nothing here enters a saved file, an
+   export or a print. The workstation uses the same pair for its own actions over the open forms (Fill open forms):
+     nbhUI.undoMark()            the form as it is now (a mark)
+     nbhUI.undoBack(mark)        put it back; resolves true when it is exactly as marked
+     nbhUI.undoOffer(text, fn)   the message with Undo; fn runs on Undo
+   Watch how. A list that chooses a procedure (two or more of its choices name one of the procedures the video library has:
+   DRO, DRA, NCR, RIRD, the high-probability request sequence, FCT), set to one of them, gets a small Watch how button
+   under it: it opens that procedure in the video library (the workstation's Videos, over the workstation; on its own, in a
+   tab), at the procedure's videos (its shelf: v25.70, FCT has four). Nothing is fetched until it is tapped. Form
+   TD-1 has its own (its cards). Screen only: never printed, never saved. A list whose videos are another procedure's is
+   pinned to it (PIN), at one video: DT-1's Delay requirement, whatever requirement is chosen, opens the FCT video of a
+   request met with a wait, then a no (after Fahmie et al., 2016), as delay tolerance is part of FCT schedule thinning (the
+   BCBA, 11/9), not the DRA videos its choices name. */
+try { (function(){
+  var W = window, D = document, U = W.nbhUI || (W.nbhUI = {});
+  if (U.undoMark) return;
+  var CSS = '@media screen{.nbh-toast .nbh-undo{flex:0 0 auto;min-height:44px;min-width:64px;padding:0 14px;margin:-8px 0 -8px 4px;border:1px solid rgba(255,255,255,.55);border-radius:8px;background:transparent;color:#fff;font:600 14px/1 var(--nbh-sans,system-ui,sans-serif);cursor:pointer}'
+    + '.nbh-toast .nbh-undo:focus-visible{outline:2px solid #8fd0ee;outline-offset:2px}.nbh-toast.nbh-undo-t{align-items:center}'
+    + '.nbh-watch{display:inline-flex;align-items:center;gap:6px;min-height:36px;margin:6px 0 2px;padding:0 12px;border:1px solid #b9c6cb;border-radius:8px;background:#fff;color:#182e43;font:600 14px/1.2 var(--nbh-sans,system-ui,sans-serif);cursor:pointer;width:auto!important;max-width:100%}'
+    + '.nbh-watch[hidden]{display:none!important}.nbh-watch svg{width:16px;height:16px;flex:0 0 auto}.nbh-watch:focus-visible{outline:2px solid #2f7fa8;outline-offset:2px}'
+    + '}@media screen and (pointer:coarse){html body button.nbh-watch{min-height:44px!important;height:auto!important}}'
+    + '@media (prefers-reduced-motion:reduce){.nbh-toast{animation:none!important}}'
+    + '@media print{.nbh-watch,.nbh-toast{display:none!important}}';
+  function css(){ if (D.getElementById('nbh-undo-css')) return; var s = D.createElement('style'); s.id = 'nbh-undo-css'; s.setAttribute('data-nbh-screen', ''); s.textContent = CSS; (D.head || D.documentElement).appendChild(s); }
+  if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', css); else css();
+  /* ---- the mark ---- */
+  var TIMES = /"(saved|exported|savedAt|exportedAt|written|stamp)"\s*:\s*"[^"]*"/g;
+  function norm(t){ return String(t == null ? '' : t).replace(TIMES, ''); }
+  function seg(){ return D.getElementById('viewSeg'); }
+  function viewNow(){ var s = seg(); if (!s) return null; var b = s.querySelector('[aria-pressed="true"],[aria-selected="true"],button.active,button.on');
+    return b ? { v: b.getAttribute('data-view') || '', t: (b.textContent || '').replace(/\s+/g, ' ').trim() } : null; }
+  function setView(v){ var s = seg(); if (!v || !s) return; var L = Array.prototype.slice.call(s.querySelectorAll('button,[role="tab"]')), now = viewNow();
+    if (now && now.v === v.v && now.t === v.t) return;
+    var b = L.filter(function(x){ return v.v && x.getAttribute('data-view') === v.v; })[0] || L.filter(function(x){ return (x.textContent || '').replace(/\s+/g, ' ').trim() === v.t; })[0];
+    if (b) try { b.click(); } catch (e) {} }
+  function sig(){ try { return (W.nbhBridge && W.nbhBridge.valueSig ? W.nbhBridge.valueSig() : '') + '.' + D.querySelectorAll('input,select,textarea').length; } catch (e) { return ''; } }
+  /* what Save data would write, this instant (as nbh-autosave reads it when a page closes): the form's Save data pressed with
+     the download, the messages and the questions held; null when the form makes its file some other way */
+  function fileNow(){ var btn = D.querySelector('#saveBtn,#btnSave,#dl-json') || Array.prototype.filter.call(D.querySelectorAll('button'), function(x){ return /^\s*save data\s*$/i.test(x.textContent); })[0];
+    if (!btn || !W.Blob) return null;
+    var RB = W.Blob, mk = URL.createObjectURL, clk = HTMLAnchorElement.prototype.click, al = W.alert, cf = W.confirm, pr = W.prompt, q = W.__nbhQuiet, sl = W.__nbhSilent, parts = null;
+    try { W.Blob = function(ps, o){ if (!parts && ps && /json/i.test((o && o.type) || 'json')) parts = Array.prototype.slice.call(ps); return new RB(ps, o); };
+      W.Blob.prototype = RB.prototype; URL.createObjectURL = function(){ return 'blob:nbh-held'; };
+      HTMLAnchorElement.prototype.click = function(){ if (this.getAttribute('href') === 'blob:nbh-held' || this.hasAttribute('download')) return; return clk.apply(this, arguments); };
+      W.alert = function(){}; W.confirm = function(){ return true; }; W.prompt = function(){ return ''; }; W.__nbhQuiet = true; W.__nbhSilent = true;
+      btn.click(); }
+    catch (e) { parts = null; }
+    finally { W.Blob = RB; URL.createObjectURL = mk; HTMLAnchorElement.prototype.click = clk; W.alert = al; W.confirm = cf; W.prompt = pr; W.__nbhQuiet = q; W.__nbhSilent = sl; }
+    if (!parts) return null; for (var i = 0; i < parts.length; i++) if (typeof parts[i] !== 'string') return null;
+    var t = parts.join(''); return t.length > 2 ? t : null; }
+  function ownNow(){ var t = null; try { t = fileNow(); } catch (e) { t = null; } if (!t) return null;
+    var sn = null; try { sn = W.nbhBridge && W.nbhBridge.snapshot ? W.nbhBridge.snapshot() : null; } catch (e) {}
+    return { own: t, snap: sn }; }
+  U.undoMark = function(){ var o = ownNow(), sn = null; if (!o) try { sn = W.nbhBridge && W.nbhBridge.snapshot ? W.nbhBridge.snapshot() : null; } catch (e) { sn = null; }
+    return { own: o ? o.own : null, snap: o ? o.snap : sn, view: viewNow(), x: W.scrollX || 0, y: W.scrollY || 0, sig: sig(), n: D.querySelectorAll('input,select,textarea').length, at: Date.now() }; };
+  /* the form differs from the mark (what Save data would write; without a file of its own, the fields). Two files are the
+     same when every value is: the save times are left out, and a part one file has and the other does not counts only when
+     it holds something (a form opening its file fills in its empty defaults, such as an unused reply box) */
+  var STAMP = /^(saved|exported|savedAt|exportedAt|written|stamp)$/;
+  function empty(v){ if (v === null || v === undefined || v === '' || v === false || v === 0) return true;
+    if (Array.isArray(v)) return !v.length; if (typeof v === 'object') { for (var k in v) if (!empty(v[k])) return false; return true; } return false; }
+  function same(a, b){ if (a === b) return true;
+    if (Array.isArray(a) || Array.isArray(b)) { if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false; for (var i = 0; i < a.length; i++) if (!same(a[i], b[i])) return false; return true; }
+    if (a && b && typeof a === 'object' && typeof b === 'object') { var k; for (k in a) if (!STAMP.test(k) && (k in b ? !same(a[k], b[k]) : !empty(a[k]))) return false;
+      for (k in b) if (!STAMP.test(k) && !(k in a) && !empty(b[k])) return false; return true; }
+    return false; }
+  function sameFile(x, y){ if (norm(x) === norm(y)) return true; try { return same(JSON.parse(x), JSON.parse(y)); } catch (e) { return false; } }
+  function differs(m){ if (!m) return false; if (m.own) { var o = ownNow(); if (o) return !sameFile(o.own, m.own); } return sig() !== m.sig; }
+  U.undoDiffers = differs; U.undoSame = sameFile;
+  /* ---- no question first, where Undo covers the action ---- */
+  var ASK = { until: 0, prev: null, stub: null };
+  var SAFE = /^\s*(clear|remove|delete|discard|start (over|again|a new)|reset|erase|empty|take .{1,80}? (off|out of)\b|this (will )?(clears?|removes?|erases?|deletes?|resets?)\b)/i;
+  var STILL = /my pictures|google|\bdrive\b|everywhere|other devices?|autosave|safety cop|\bback-?up (file|cop(y|ies))\b|\bback up the|from the site|recogni[sz]er|\bbank\b|directory|offline/i;
+  function unstub(){ if (ASK.stub && W.confirm === ASK.stub) W.confirm = ASK.prev; ASK.stub = null; ASK.prev = null; }
+  function armed(){ if (W.__nbhQuiet || W.__nbhSilent) return false; if (ASK.until && ASK.until <= Date.now()) { ASK.until = 0; unstub(); } return ASK.until > 0; }
+  function take(text){ if (!armed()) return false; ASK.until = 0; unstub(); var t = String(text == null ? '' : text); return SAFE.test(t) && !STILL.test(t); }
+  function arm(){ ASK.until = Date.now() + 1500; if (!ASK.stub) { var nc = W.confirm; ASK.prev = nc;
+      ASK.stub = function(m){ if (take(m)) return true; return nc.apply(W, arguments); }; W.confirm = ASK.stub; }
+    setTimeout(armed, 1600); }
+  var C0 = U.confirm; U.confirm = function(text){ if (take(text)) return Promise.resolve(true); return C0.apply(this, arguments); };
+  U.undoAsks = function(text){ var t = String(text == null ? '' : text); return !(SAFE.test(t) && !STILL.test(t)); };   /* for the checks */
+  U.undoBack = function(m){ return new Promise(function(res){
+    var B = W.nbhBridge; if (!m || !B) return res(false);
+    var fin = function(){ setView(m.view); setTimeout(function(){ try { W.scrollTo(m.x, m.y); } catch (e) {}
+        try { if (W.nbhState && W.nbhState.now) W.nbhState.now(); } catch (e) {}
+        try { if (U.progress) U.progress(); } catch (e) {}
+        res(!differs(m)); }, 120); };
+    var byField = function(){ if (!m.snap || !B.restoreData) return res(false);
+      if (D.querySelectorAll('input,select,textarea').length !== m.n) return res(false);   /* rows came or went: field by field cannot put them back */
+      try { B.restoreData(m.snap); } catch (e) { return res(false); } fin(); };
+    if (m.own && B.ownOpen) { var was = W.__nbhSilent; W.__nbhSilent = true;
+      B.ownOpen(m.own).then(function(ok){ W.__nbhSilent = was; if (ok) fin(); else byField(); }, function(){ W.__nbhSilent = was; byField(); }); }
+    else byField(); }); };
+  /* ---- the message with Undo ---- */
+  var last = null;
+  function host(){ var h = D.getElementById('nbhToasts'); if (!h) { h = D.createElement('div'); h.id = 'nbhToasts'; h.setAttribute('role', 'status'); h.setAttribute('aria-live', 'polite'); D.body.appendChild(h); } return h; }
+  function localToast(text, ms){ var h = host(), t = D.createElement('div'); t.className = 'nbh-toast nbh-undo-t';
+    var s = D.createElement('span'); s.textContent = String(text); t.appendChild(s);
+    var x = D.createElement('button'); x.type = 'button'; x.setAttribute('aria-label', 'Dismiss'); x.innerHTML = '&times;'; t.appendChild(x);
+    var held = false, tm = 0, gone = function(){ clearTimeout(tm); if (t.parentNode) t.parentNode.removeChild(t); };
+    var arm = function(d){ clearTimeout(tm); tm = setTimeout(function(){ if (held) return arm(1500); gone(); }, d); };
+    t.addEventListener('pointerenter', function(){ held = true; }); t.addEventListener('pointerleave', function(){ held = false; });
+    t.addEventListener('focusin', function(){ held = true; }); t.addEventListener('focusout', function(){ held = false; });
+    x.addEventListener('click', gone); h.appendChild(t); while (h.children.length > 3) h.removeChild(h.firstChild); arm(ms); return t; }
+  U.undoOffer = function(text, fn, opt){ opt = opt || {}; css();
+    var t = null; if (U.__sr) { try { t = U.toast(text, { ms: opt.ms || 8000 }); } catch (e) { t = null; } }
+    if (!t || !t.classList || !(t.classList.contains('ws-toast') || t.classList.contains('nbh-toast'))) { if (t && t.parentNode && !t.classList.contains('sr-dmsg')) t.parentNode.removeChild(t); t = localToast(text, opt.ms || 8000); }
+    var d = t.ownerDocument, b = d.createElement('button'); b.type = 'button'; b.className = 'nbh-undo ws-undo-b'; b.textContent = 'Undo'; b.setAttribute('aria-label', 'Undo: ' + text);
+    var used = false, me = { b: b, t: t };
+    b.addEventListener('click', function(){ if (used) return; used = true; b.disabled = true; if (last === me) last = null;
+      Promise.resolve().then(fn).then(function(ok){ if (t.parentNode) t.parentNode.removeChild(t);
+        if (opt.quiet) return;
+        var msg = ok === false ? 'Undo could not put everything back. Check the form before you go on.' : 'Undone: the form is as it was.';
+        try { U.toast(msg, { kind: ok === false ? 'warn' : 'ok', ms: 5000 }); } catch (e) {} }); });
+    t.insertBefore(b, t.lastChild); last = me; return t; };
+  /* ---- which taps are watched ---- */
+  var DEST = /^(clear( all( rows| entries)?| form| sheet for the next session| the (week|run|picks|comparison|answers|signature|day|row))?|remove( last( step| target| log entry| row| entry)?| this [a-z0-9 ]{2,30}| the (photo|last series|last row)| it| from the log| row)?|delete( this [a-z0-9 ]{2,30}| all (samples|incidents|rows|entries))?|discard( this)?|start over|reset( timer| the (sheet|session|count))?|[×✕✖])$/i;
+  var NOT = /recogniser|recognizer|from the site|my bank|filter|directory|offline/i;
+  function lab(b){ return ((b.textContent || '') + '').replace(/\s+/g, ' ').trim(); }
+  function watched(b){ if (!b || b.disabled || !b.closest || b.closest('#nbhToasts,.nbh-toast,.nbh-as-ui,#nbhUiDlg,#nbhCaseDlg,[data-nbh-no-undo]')) return false;
+    var t = lab(b), a = (b.getAttribute('aria-label') || '').trim(); if (NOT.test(t + ' ' + a)) return false;
+    if (/^[×✕✖]$/.test(t)) return /^(remove|delete|clear)\b/i.test(a);   /* a × that says what it does */
+    return DEST.test(t) || (!t && /^(remove|delete|clear)\b/i.test(a)) || (/^(remove|delete)\b/i.test(a) && /^(remove|delete|[×✕✖\-−])/i.test(t)); }
+  function said(b){ var t = lab(b).toLowerCase(), a = (b.getAttribute('aria-label') || '').toLowerCase(), w = t.length > 1 ? t : a;
+    if (/^clear all|^clear form/.test(w)) return 'Form cleared.'; if (/^clear/.test(w)) return 'Cleared.'; if (/^discard/.test(w)) return 'Discarded.';
+    if (/^start over/.test(w)) return 'Started over.'; if (/^reset/.test(w)) return 'Reset.'; if (/^delete/.test(w)) return 'Deleted.'; return 'Removed.'; }
+  function modal(){ try { return D.querySelector('dialog:modal'); } catch (e) { return D.querySelector('dialog[open]'); } }
+  var watching = null;
+  /* a form whose Clear all loads the page again (DD-1, DT-1, AD-1): the mark waits in this tab for the page that comes back */
+  function akey(){ var id = ''; try { id = W.nbhBridge && W.nbhBridge.formId ? W.nbhBridge.formId() : ''; } catch (e) {} return 'nbh.undo.after|' + location.pathname + '|' + id; }
+  function watch(m, what){ var t0 = Date.now(), n = 0, w = { m: m }; watching = w;
+    var quit = function(ev){ if (ev && (!ev.isTrusted || (ev.target && ev.target.closest && ev.target.closest('dialog')))) return; if (watching === w) watching = null; off(); };   /* only the person's own typing ends the watch: a form's own input events (DT-1's session log) do not */
+    var keep = function(){ if (watching !== w || !m.own) return; try { sessionStorage.setItem(akey(), JSON.stringify({ own: m.own, view: m.view, x: m.x, y: m.y, what: what, at: Date.now() })); } catch (e) {} };
+    W.addEventListener('pagehide', keep);
+    var off = function(){ D.removeEventListener('input', quit, true); D.removeEventListener('keydown', quit, true); W.removeEventListener('pagehide', keep); };
+    setTimeout(function(){ if (watching === w) { D.addEventListener('input', quit, true); D.addEventListener('keydown', quit, true); } }, 0);
+    (function look(){ if (watching !== w) return;
+      if (modal()) { if (Date.now() - t0 < 120000) setTimeout(look, 250); else { watching = null; off(); } return; }
+      n++;
+      if (differs(m)) { watching = null; off(); U.undoOffer(what, function(){ return U.undoBack(m); }); return; }
+      if (n < 7) setTimeout(look, n < 3 ? 150 : 350); else { watching = null; off(); } })(); }
+  D.addEventListener('click', function(e){
+    if (e.isTrusted && ASK.until) { ASK.until = 0; unstub(); }   /* the next tap ends the answer the last one left */
+    if (!e.isTrusted || W.__nbhQuiet || W.__nbhSilent || watching) return;
+    var b = e.target && e.target.closest ? e.target.closest('button,[role="button"]') : null; if (!watched(b)) return;
+    var m; try { m = U.undoMark(); } catch (x) { return; } if (!m || (!m.own && !m.snap)) return;
+    if (m.own) arm();   /* Undo puts back every value: the form's question, if it names this action, is answered for it */
+    watch(m, said(b)); }, true);
+  (function(){ var s = null; try { s = sessionStorage.getItem(akey()); if (s) sessionStorage.removeItem(akey()); } catch (e) { s = null; } if (!s) return;
+    var o = null; try { o = JSON.parse(s); } catch (e) { return; } if (!o || !o.own || !(Date.now() - o.at < 30000)) return;
+    var go = function(){ setTimeout(function(){ U.undoOffer(o.what, function(){ return U.undoBack(o); }); }, 1500); };
+    if (D.readyState === 'complete') go(); else W.addEventListener('load', go); })();
+  D.addEventListener('keydown', function(e){ if (!last || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || (e.key !== 'z' && e.key !== 'Z')) return;
+    var a = D.activeElement; if (a && a.matches && a.matches('input,textarea,select,[contenteditable=""],[contenteditable="true"]')) return;
+    if (!last.t.isConnected) { last = null; return; } e.preventDefault(); last.b.click(); }, true);
+  /* ---- Watch how ---- */
+  var FAM = [['dro', /\bDRO\b|differential reinforcement of other/i, 'DRO'], ['dra', /\bDRA\b|differential reinforcement of alternative/i, 'DRA'],
+    ['ncr', /\bNCR\b|noncontingent reinforcement/i, 'NCR'], ['rird', /\bRIRD\b|response interruption and redirection/i, 'RIRD'],
+    ['highp', /\bhigh-?p\b|high-probability (request|instruction)/i, 'high-probability request'], ['fct', /\bFCT\b|functional communication training/i, 'FCT']];
+  /* a list pinned to a procedure: [the list, the procedure, why, the video it opens at] (v25.70: FCT has four videos, so
+     a procedure opens at its shelf; DT-1's wait after a request is the FCT video of "wait", then "no") */
+  var PIN = [['[data-fx2="DT-1"] select[name="req_type"]', 'fct', 'a request met with a wait, then a no: delay tolerance is part of FCT schedule thinning', 'fct_tangible']];
+  function pinOf(s){ for (var i = 0; i < PIN.length; i++) { try { if (s.matches(PIN[i][0])) return PIN[i]; } catch (e) {} } return null; }
+  var ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.3v5.4l4.5-2.7z"/></svg>';
+  function famOf(t){ var h = FAM.filter(function(f){ return f[1].test(t); }); return h.length === 1 ? h[0] : null; }
+  function chooser(s){ var n = 0; for (var i = 0; i < s.options.length; i++) if (famOf(s.options[i].text || '')) n++; return n >= 2; }
+  U.watchHow = function(f, v){ var key = v || '', msg = { nbh: 'videos-open', video: key, family: key ? '' : f };
+    if (W.parent !== W) { try { W.parent.postMessage(msg, '*'); return; } catch (e) {} }
+    try { W.open('videos.html' + (key ? '#video=' + encodeURIComponent(key) : '#family=' + f), '_blank', 'noopener'); } catch (e) {} };
+  function paintWatch(){ if (W.__tdVideo || !D.body) return;
+    var L = D.querySelectorAll('select'); for (var i = 0; i < L.length; i++) { var s = L[i];
+      if (s.__nbhW === undefined) s.__nbhW = !s.closest('.toolbar,dialog,#nbhToasts,[data-nbh-no-watch],.nbh-as-ui') && chooser(s);
+      if (!s.__nbhW) continue;
+      if (s.__nbhWp === undefined) s.__nbhWp = pinOf(s);
+      var o = s.options[s.selectedIndex], pin = s.__nbhWp, f = o && o.value ? (pin ? FAM.filter(function(x){ return x[0] === pin[1]; })[0] : famOf(o.text || '')) : null, a = s.__nbhWa;
+      if (!f) { if (a) a.hidden = true; continue; }
+      if (!a || !a.isConnected) { a = D.createElement('button'); a.type = 'button'; a.className = 'nbh-watch noprint'; a.setAttribute('data-nbh-no-undo', '');
+        a.innerHTML = ICON + '<span>Watch how</span>'; a.addEventListener('click', function(){ U.watchHow(this.getAttribute('data-fam'), this.getAttribute('data-video') || ''); });
+        s.insertAdjacentElement('afterend', a); s.__nbhWa = a; }
+      var one = pin && pin[3] || '';
+      a.hidden = false; if (a.getAttribute('data-fam') !== f[0]) { a.setAttribute('data-fam', f[0]); if (one) a.setAttribute('data-video', one); else a.removeAttribute('data-video'); a.setAttribute('aria-label', 'Watch how: ' + f[2] + (one ? ', the video' : ', the videos') + ' in the video library'); a.title = 'Opens the ' + f[2] + ' video' + (one ? '' : 's') + ' in the video library' + (pin ? ' (' + pin[2] + ')' : ''); } } }
+  var wt = 0; function soonW(){ clearTimeout(wt); wt = setTimeout(function(){ try { paintWatch(); } catch (e) {} }, 300); }
+  D.addEventListener('change', function(e){ if (e.target && e.target.tagName === 'SELECT') soonW(); }, true);
+  try { new MutationObserver(function(r){ for (var i = 0; i < r.length; i++) for (var j = 0; j < r[i].addedNodes.length; j++) { var n = r[i].addedNodes[j]; if (n.nodeType === 1 && (n.tagName === 'SELECT' || (n.querySelector && n.querySelector('select')))) { soonW(); return; } } })
+    .observe(D.documentElement, { childList: true, subtree: true }); } catch (e) {}
+  W.addEventListener('load', function(){ setTimeout(soonW, 400); }); soonW();
+  /* a form filled from its file or the case sets its lists by script, with no change event: looked at again now and then */
+  setInterval(function(){ if (!D.hidden) try { paintWatch(); } catch (e) {} }, 3000);
+})(); } catch (e) {}
 
