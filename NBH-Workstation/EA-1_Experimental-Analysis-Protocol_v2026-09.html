@@ -1464,16 +1464,19 @@ html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .defs .
 /* ---------- v25.70 step by step (the BCBA's approval, 11/9; the script's step 13): the questions one, two or three at a
    time, Back and Next in a bar at the foot, and at the end the blank ones. The form's own switch (FX2_CFG.step) sits under
    its toolbar; while it steps (html.fx2-st) the parts of the sheet not on this screen are marked data-fx2-st="x" and kept
-   out of sight here, with an id's weight over the layout's display rules (#fx2-never is on no page). Screen only, and none
-   of it while the page is plain or measured for paper. ---------- */
+   out of sight here, with an id's weight over the layout's display rules (#fx2-never is on no page; v25.71 three ids'
+   weight, over a form's own layout too: TD-1's Build cards). Screen only, and none of it while the page is plain or
+   measured for paper. ---------- */
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;box-sizing:border-box;max-width:1100px;margin:10px auto 6px;padding:6px 14px;font:400 15px/1.4 var(--fx2-sans);color:var(--fx2-ink)}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stl{font-weight:600}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg{display:inline-flex;flex-wrap:wrap;padding:2px;gap:2px;border-radius:10px;background:#E9EFED}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg button{min-height:44px;min-width:44px;padding:0 14px;margin:0;border:0;border-radius:8px;background:transparent;color:var(--fx2-navy);font:600 15px var(--fx2-sans);cursor:pointer}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg button[aria-pressed="true"]{background:var(--fx2-navy);color:#fff}
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw [hidden]{display:none!important}
-html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) :is([data-fx2-st="x"],#fx2-never){display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) :is([data-fx2-st="x"],#fx2-never#fx2-never#fx2-never){display:none!important}
 html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .nbh-pagenav{display:none!important}
+html.fx2 [data-fx2-scan="1"]:not(#fx2-never#fx2-never#fx2-never){display:block!important}
+html.fx2 [data-fx2-scan="0"]:not(#fx2-never#fx2-never#fx2-never){display:none!important}
 html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .ident > [data-fx2-st="q"]{grid-column:1/-1!important;max-width:640px}
 html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-fg > [data-fx2-st="q"]{grid-column:1/-1!important;max-width:640px}
 html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) [data-fx2-stf]:focus{outline:none}
@@ -1507,6 +1510,9 @@ html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev li butto
 window.FX2_CFG = { cards: '#phaseTbl, #analysis table.ea-acct', heads: '.fx2-sh h3.sb, .fx2-sh h3.nbh-band',
   keep: ['Fergus', 'Bann', 'Morris', 'Hagopian', 'Roane', 'Iwata'],
   noseg: '#sessTbl, #trialTbl, #txTbl, #critTbl, #txStat' };
+/* v25.71 step by step (tools/blocks/fx2.html, step 13): this form offers All at once or Step by step.
+   The session runner (its settings and its event buttons) is one question, on a screen of its own */
+window.FX2_CFG.step = { alone: '#eaRun' };
 </script>
 </head>
 
@@ -7626,6 +7632,10 @@ try{redraw();}catch(e){}
      FX2_CFG.step: true, or {skip: parts never taken for questions (a selector), one: more parts kept whole (a selector),
      rows: tables whose items (the rows of the body) are each a question, under the table's head (a questionnaire),
      views: the sheets stepped through, in order (their data-view), noviews: sheets left out (the Guide always is)}.
+     v25.71, for the eleven forms after the first 37: alone: parts kept whole on a screen of their own (a runner, a timer,
+     a graph with its reading); runs: a part that starts a question taking the parts after it, up to the next or a
+     heading (TV-1's script segments); panes: the sheets' own panes, for a form that shows its sheets itself (a selector
+     with {v} for the view); draw: {view: the form's own drawing of a sheet it draws only as it opens}.
      For the checks: fx2Layout.step (on, set, next, back, state, enable). */
   var ST = (function(){
     var CF = C.step === true ? {} : (C.step || null), FID = R.getAttribute('data-fx2') || 'form', KEY = 'nbh.fx2.step.' + FID;
@@ -7647,8 +7657,9 @@ try{redraw();}catch(e){}
     function fieldsIn(e){ if (isField(e)) return liveF(e) ? [e] : []; return Array.prototype.filter.call(e.querySelectorAll('input,select,textarea'), liveF); }
     function choice(f){ return f.type === 'checkbox' || f.type === 'radio'; }
     function heady(e){ return is(e, HEADQ) || !!(e.firstElementChild && is(e.firstElementChild, 'h1,h2,h3,h4') && sq(e.textContent).length < 140); }
+    function pinQ(e){ return is(e, CF && CF.alone) || is(e, CF && CF.one); }
     function atom(e, f){
-      if (is(e, ATOM) || is(e, CF && CF.one)) return true;
+      if (is(e, ATOM) || is(e, CF && CF.one) || is(e, CF && CF.alone)) return true;
       if (f.length === 1) return true;
       if (f.every(function(x){ return x.type === 'radio' && x.name && x.name === f[0].name; })) return true;
       if (e.querySelector('h1,h2,h3,h4,.nbh-band')) return false;
@@ -7670,17 +7681,24 @@ try{redraw();}catch(e){}
       var out = [], pend = [], sec = '';
       function add(e, f, x){ pend.concat([e]).forEach(function(y){ var h = heady(y) ? y : y.querySelector && y.querySelector('h1,h2,h3,h4,.nbh-band'); if (h && h.getClientRects().length) sec = cut(words(h)); });
         var q = { atom: e, els: pend.concat(x || [], [e]), fields: f, sec: sec }; q.head = pend.some(heady) || heady(e) || !!e.querySelector('h1,h2,h3,h4,.nbh-band');
-        q.heavy = (e.tagName === 'TABLE' || !!e.querySelector('table')) && f.length > 4 || f.length > 8 || is(e, 'canvas,svg'); pend = []; out.push(q); }
+        q.heavy = (e.tagName === 'TABLE' || !!e.querySelector('table')) && f.length > 4 || f.length > 8 || is(e, 'canvas,svg') || is(e, CF && CF.alone); pend = []; out.push(q); }
       function text(e){ if (!pend.length && out.length && afterish(e)) out[out.length - 1].els.push(e); else pend.push(e); }
       function walk(box){
+        /* a part that stays in place as the page scrolls is passed over (it is not the sheet's), but for one named whole
+           (v25.71: TD-1's Recommended margin, its "in the plan" ticks a question of their own) */
         for (var c = box.firstElementChild; c; c = c.nextElementSibling) {
           if (is(c, SKIP) || is(c, CF && CF.skip)) continue;
           if (!vis(c)) { if (getComputedStyle(c).display === 'contents') walk(c); continue; }
-          var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky') continue;
+          var p = getComputedStyle(c).position; if ((p === 'fixed' || p === 'sticky') && !pinQ(c)) continue;
           var f = fieldsIn(c);
           if (!f.length) { text(c); continue; }
           /* a questionnaire (FX2_CFG.step.rows): each item of its body a question, under the table's head */
           if (c.tagName === 'TABLE' && is(c, CF && CF.rows)) { Array.prototype.forEach.call(c.tBodies, function(tb){ Array.prototype.forEach.call(tb.rows, function(r){ if (!vis(r)) return; var g = fieldsIn(r); if (g.length) add(r, g, c.tHead && vis(c.tHead) ? [c.tHead] : null); else text(r); }); }); continue; }
+          /* v25.71 a run (FX2_CFG.step.runs): the part that starts it and the parts after it, up to the next run or a
+             heading, are one question (TV-1's script: a segment's name and its cards) */
+          if (is(c, CF && CF.runs)) { var g = [c]; for (var n = c.nextElementSibling; n && !is(n, CF.runs) && !is(n, SKIP) && !heady(n); n = n.nextElementSibling) g.push(n);
+            var gf = []; g.forEach(function(x){ if (vis(x)) gf = gf.concat(fieldsIn(x)); });
+            add(c, gf); var rq = out[out.length - 1]; rq.run = true; rq.els = rq.els.concat(g.slice(1).filter(vis)); rq.heavy = rq.heavy || g.length > 2; c = g[g.length - 1]; continue; }
           if (atom(c, f)) add(c, f); else walk(c);
         } }
       rs.forEach(walk);
@@ -7692,9 +7710,12 @@ try{redraw();}catch(e){}
       else if (c.nodeType === 1 && !/^(BUTTON|SCRIPT|STYLE|SELECT|TEXTAREA|INPUT|OPTION|svg)$/i.test(c.tagName) && !c.classList.contains('fx2-hint') && !c.classList.contains('fx2-cellhint')) w(c); } })(e); return sq(o.join(' ')); }
     function cut(t){ t = sq(t); return t.length > 90 ? t.slice(0, 88).replace(/\s+\S*$/, '') + '…' : t; }
     function title(q){ var a = q.atom, t = '', f = q.fields[0]; if (a.tagName === 'TR') return cut(words(a)) || 'An item';
+      if (q.run && f && f.tagName === 'INPUT' && String(f.value || '').trim()) return cut(f.value);   /* a run: its name */
       var l = is(a, 'label') ? a : a.querySelector('label,.dlab,legend,caption,th,h3,h4,b,strong');
       if (l) t = words(l);
       if (!t && f && f.id) { var lf = D.querySelector('label[for="' + f.id.replace(/"/g, '') + '"]'); if (lf) t = words(lf); }
+      /* v25.71 a question written in its own words with no label (TD-1's selectors: the question, then Yes, No, Not sure) */
+      if (!t && !is(a, 'table,fieldset,ul,ol,dl,details')) { var ow = words(a); if (ow && ow.length <= 160) t = ow; }
       for (var i = q.els.length - 2; !t && i >= 0; i--) { var w = words(q.els[i]); if (w && w.length <= 160) t = w; }
       if (!t && f) t = f.getAttribute('aria-label') || f.getAttribute('data-fx2-ph') || f.getAttribute('placeholder') || f.name || '';
       return cut(t) || 'A question'; }
@@ -7710,14 +7731,24 @@ try{redraw();}catch(e){}
       return b; }
     function pressedV(){ var b = D.querySelector('#viewSeg button[aria-pressed="true"],#viewSeg button[aria-selected="true"]'); return b ? b.getAttribute('data-view') : ''; }
     function vlabel(v){ var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (!b) return ''; var t = ''; for (var n = b.firstChild; n; n = n.nextSibling) { var s = n.textContent || ''; if (n.nodeType === 1 && (/^\s*\d+\s*$/.test(s) || is(n, '[class*="sr-"],.visually-hidden,.mark'))) continue; t += s; } return sq(t); }
+    /* v25.71 a form whose sheets are panes it shows itself (a class or hidden on the pane, not the body's view-<key>:
+       ABC-1, VI-1, DT-1, AD-1, DD-1) names them (FX2_CFG.step.panes: a selector with {v} for the view): while the other
+       sheets are counted, the pane of each in turn is shown and the others are not (data-fx2-scan, the style above) */
+    function panesOf(v){ var P = CF && CF.panes; if (!P) return []; try { return $$(typeof P === 'function' ? P(v) : String(P).replace(/\{v\}/g, v)); } catch (e) { return []; } }
     /* every sheet's questions, counted with each view's class on the body in turn (nbh-ui's way for its dots) */
     function scanAll(){
       var vs = views(); if (!vs.length) { scans = {}; return; }
-      var body = D.body, was = body.className, sx = scrollX, sy = scrollY; scanning = true; hold(true);
-      try { vs.forEach(function(b){ var v = b.getAttribute('data-view'), cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + v); body.className = cls.join(' ');
+      var body = D.body, was = body.className, sx = scrollX, sy = scrollY, keys = vs.map(function(b){ return b.getAttribute('data-view'); }), panes = {}; scanning = true; hold(true);
+      if (CF.panes) keys.forEach(function(v){ panes[v] = panesOf(v); });
+      try { keys.forEach(function(v){ var cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + v); body.className = cls.join(' ');
+        if (CF.panes) keys.forEach(function(k){ panes[k].forEach(function(e){ e.setAttribute('data-fx2-scan', k === v ? '1' : '0'); }); });
+        /* v25.71 a sheet the form draws only as it opens (FX2_CFG.step.draw: its view -> the form's own drawing) is drawn
+           first, as opening it would */
+        if (v !== key && CF.draw && typeof CF.draw[v] === 'function') { try { CF.draw[v](); } catch (e) {} }
         scans[v] = questions(roots()); }); }
-      finally { body.className = was; hold(false); if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); if (mo) mo.takeRecords(); scanning = false; }
+      finally { body.className = was; if (CF.panes) keys.forEach(function(k){ panes[k].forEach(function(e){ e.removeAttribute('data-fx2-scan'); }); }); hold(false); if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); if (mo) mo.takeRecords(); scanning = false; }
     }
+    function order(){ return views().map(function(b){ return b.getAttribute('data-view'); }); }
     function sheetList(){ var vs = views().map(function(b){ return b.getAttribute('data-view'); }); if (!vs.length) return [''];
       return vs.filter(function(v){ return v === key ? list.length : (scans[v] || []).length; }); }
 
@@ -7738,7 +7769,7 @@ try{redraw();}catch(e){}
           if (show.indexOf(c) >= 0) { set(c, 'q'); now.push(c); continue; }
           if (keep.indexOf(c) >= 0) { hide(c); continue; }
           if (is(c, 'script,style,template,link,colgroup,col,caption') || is(c, '.fx2-stsw,.fx2-stbar,.fx2-strev')) continue;
-          var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky') continue;
+          var p = getComputedStyle(c).position; if ((p === 'fixed' || p === 'sticky') && !pinQ(c)) continue;
           set(c, 'x'); now.push(c); } };
         rs.forEach(function(r){ if (keep.indexOf(r) >= 0 || show.indexOf(r) >= 0) hide(r); else { set(r, 'x'); now.push(r); } });
       }
@@ -7789,16 +7820,17 @@ try{redraw();}catch(e){}
       if (!on) return false;
       if (rev) { done(); return true; }
       if (at < scr.length - 1) { at++; moved(byKey); return true; }
-      var sh = sheetList(), i = sh.indexOf(key);
-      for (var j = i + 1; j < sh.length; j++) if (sh[j] !== key) return goSheet(sh[j], 'first', byKey);
+      /* the sheets in their order (v25.71: from a sheet with nothing to answer too, which is not in the list) */
+      var all = order(), i = all.indexOf(key), sh = sheetList().filter(function(v){ return v !== key && all.indexOf(v) > i; });
+      if (sh.length) return goSheet(sh[0], 'first', byKey);
       review(true); return true;
     }
     function back(byKey){
       if (!on) return false;
       if (rev) { review(false); var sh0 = sheetList(), last = sh0[sh0.length - 1]; if (last && last !== key) goSheet(last, 'last', byKey); else { build('last'); moved(byKey); } return true; }
       if (at > 0) { at--; moved(byKey); return true; }
-      var sh = sheetList(), i = sh.indexOf(key);
-      for (var j = (i < 0 ? sh.length : i) - 1; j >= 0; j--) if (sh[j] !== key) return goSheet(sh[j], 'last', byKey);
+      var all = order(), i = all.indexOf(key), sh = sheetList().filter(function(v){ return v !== key && (i < 0 || all.indexOf(v) < i); });
+      if (sh.length) return goSheet(sh[sh.length - 1], 'last', byKey);
       return false;
     }
     /* ---- the blank ones ---- */
@@ -7873,7 +7905,9 @@ try{redraw();}catch(e){}
       if (on || !D.body) return;
       try { if (window.nbhUI && nbhUI.focus && nbhUI.focus.on()) nbhUI.focus.set(false); } catch (e) {}
       on = true; R.classList.add('fx2-st'); mkBar(); D.body.appendChild(bar); key = null; at = 0; rev = false;
-      build(user ? 'first' : 'scan'); if (user) { bring(); seat(false); }
+      build(user ? 'first' : 'scan');
+      /* v25.71 opened on a sheet with nothing to answer (a graph, a preview): the first sheet that has questions */
+      var sh = sheetList(); if (!scr.length && sh[0] && sh[0] !== key) goSheet(sh[0], 'first', false); else if (user) { bring(); seat(false); }
       watch(true); paintSwitch();
     }
     function stop(){
@@ -7907,7 +7941,7 @@ try{redraw();}catch(e){}
       var t = e.target; if (!t || !t.tagName || own(t) || t.isContentEditable || t.tagName === 'TEXTAREA' || t.tagName === 'BUTTON' || t.tagName === 'A' || (t.tagName === 'INPUT' && /^(button|submit|reset|file|image)$/i.test(t.type || ''))) return;
       if (t !== D.body && !t.closest('[data-fx2-st="q"]') && !t.matches('[data-fx2-st="q"]')) return;
       e.preventDefault();
-      var s = scr[at] || [], qi = -1; s.forEach(function(q, j){ if (q.atom === t || q.atom.contains(t) || q.els.indexOf(t) >= 0) qi = j; });
+      var s = scr[at] || [], qi = -1; s.forEach(function(q, j){ if (q.atom === t || q.atom.contains(t) || q.els.some(function(x){ return x === t || x.contains(t); })) qi = j; });
       var to = qi < 0 ? -1 : qi + (e.shiftKey ? -1 : 1), f = to >= 0 && to < s.length ? firstF(s[to]) : null;
       if (f) { try { f.focus(); } catch (x) {} return; }
       if (e.shiftKey) back(true); else next(true);
