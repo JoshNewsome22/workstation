@@ -43,8 +43,8 @@ const root=ROOT||path.join(__dirname,'..');const rd=(ed,f)=>fs.readFileSync(path
     const must=['Google Sheets API','Gmail API','Google Drive API','spreadsheets.readonly','gmail.send','userinfo.email','drive.file','Authorized JavaScript origins','https://newsomebh.com','Test users','Manage third-party app access'];
     ok('7 '+tag+': HOSTING.md has one Google sign-in checklist: the three APIs, the four scopes, the origin, test users and the IT step',!!sec&&must.every(m=>sec.includes(m)),{missing:must.filter(m=>!sec.includes(m))});
     const se=rd(ed,'SETUP.md');
-    ok('8 '+tag+': SETUP.md opens with a current Start here (47 forms, the shared files, where to find the version and HOSTING.md), the old set-up marked as history',
-      se.startsWith('# Start here\n')&&/47 forms/.test(se.slice(0,1500))&&/nbh-\*\.js/.test(se.slice(0,1500))&&/kept as it was/.test(se.slice(0,2500)),se.slice(0,200));
+    ok('8 '+tag+': SETUP.md opens with a current Start here (48 forms, the shared files, where to find the version and HOSTING.md), the old set-up marked as history',
+      se.startsWith('# Start here\n')&&/48 forms/.test(se.slice(0,1500))/* v25.71: FD-1 made 48 (v25.53) */&&/nbh-\*\.js/.test(se.slice(0,1500))&&/kept as it was/.test(se.slice(0,2500)),se.slice(0,200));
     const rm=rd(ed,'README.txt');
     /* v25.71: 48 forms since v25.66 (SETUP.md: "New Form FD-1, Feeding and Mealtime (the 48th form)"); the count is the shell's */
     const nf=L.forms().length;

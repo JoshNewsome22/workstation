@@ -3045,9 +3045,9 @@ function viewerStatus(v){const name=nk(v.name);if(!name)return null;const f=CASE
 {const v0=tvViewersRender;tvViewersRender=function(){const r=v0.apply(this,arguments);try{const el=E('viewOut');if(!el)return r;const tb=el.querySelector('table');if(!tb)return r;const V=Array.isArray(S.viewers)?S.viewers:[];
   const p=el.querySelector('p.hint');if(p&&!p.querySelector('.tv-v2565'))p.insertAdjacentHTML('beforeend',' <span class="tv-v2565">Watching was enough for some viewers and not for others: after a 13-minute video, 2 of 4 staff ran behavior skills training at 100% and 2 needed brief feedback (Erath et al., 2021), and video modeling raised integrity, which stayed variable until spoken feedback was added (DiGennaro-Reed et al., 2010). So each viewer&rsquo;s training on Form ST-1 is shown beside them, from the case.</span>');
   const rows=tb.querySelectorAll('tr');if(rows[0])rows[0].lastElementChild.insertAdjacentHTML('beforebegin','<th style="width:22%">Training (from the case)</th>');
-  const pv=planIso(),today=new Date().toISOString().slice(0,10);
+  const pv=planIso(),today=(window.nbhDay?nbhDay.today():new Date().toLocaleDateString('en-CA'));   /* v25.71 the device's own day (qa/v2247) */
   V.forEach((v,i)=>{const tr=rows[i+1];if(!tr)return;const s=viewerStatus(v),bits=[];if(s){bits.push(esc(s.t));
-      const d=mdyIso(v.date);if(!s.rec&&d){const dd=new Date(d+'T12:00:00');dd.setDate(dd.getDate()+14);if(dd.toISOString().slice(0,10)<=today)bits.push('<b class="tv-vflag">No Form ST-1 record 2 weeks after watching</b>');}}
+      const d=mdyIso(v.date);if(!s.rec&&d){const dd=new Date(d+'T12:00:00');dd.setDate(dd.getDate()+14);if((window.nbhDay?nbhDay.iso(dd):dd.toLocaleDateString('en-CA'))<=today)bits.push('<b class="tv-vflag">No Form ST-1 record 2 weeks after watching</b>');}}
     const vv=mdyIso(v.ver);if(pv&&vv&&vv<pv)bits.push('<b class="tv-vflag">Watched an older version</b>');
     tr.lastElementChild.insertAdjacentHTML('beforebegin','<td class="tv-vst">'+(bits.join('<br>')||'&mdash;')+'</td>');});}catch(e){console.error('TV-1 viewers v25.65: '+(e&&e.message||e));}return r;};}
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{tvViewersRender();}catch(e){}return r;};}

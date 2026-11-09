@@ -38,7 +38,10 @@ const topAt=(p,x,y)=>p.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y)
 const frameTop=p=>p.evaluate(()=>{const f=state.frames[state.cur],fb=f.getBoundingClientRect(),d=f.contentDocument;
   const sh=[...d.querySelectorAll('main.sheet,.sheet:not(table)')].find(e=>e.getBoundingClientRect().height>0);
   const inp=[...d.querySelectorAll('input:not([type=hidden]),textarea,select')].find(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&r.top>=0&&!e.closest('.toolbar,#nbhRail')&&getComputedStyle(e).visibility!=='hidden';});
-  return {frame:Math.round(fb.top),card:sh?Math.round(fb.top+sh.getBoundingClientRect().top):null,field:inp?Math.round(fb.top+inp.getBoundingClientRect().top):null};});
+  /* v25.71: Step by step's switch row (fx2-stsw, under the toolbar on every form since v25.71) is measured, so the check
+     still holds the bars to their height and not the form's own new row */
+  const sw=d.querySelector('.fx2-stsw');let swh=0;if(sw&&sw.getBoundingClientRect().height>0){const cs=getComputedStyle(sw);swh=Math.round(sw.getBoundingClientRect().height+parseFloat(cs.marginTop)+parseFloat(cs.marginBottom));}
+  return {frame:Math.round(fb.top),card:sh?Math.round(fb.top+sh.getBoundingClientRect().top):null,field:inp?Math.round(fb.top+inp.getBoundingClientRect().top):null,sw:swh};});
 async function scrollForm(p,to){await p.evaluate(to=>{const f=state.frames[state.cur];const w=f.contentWindow;let y=w.scrollY;const st=to>y?60:-60;const t=setInterval(()=>{y+=st;if((st>0&&y>=to)||(st<0&&y<=to)){y=to;clearInterval(t);}w.scrollTo(0,y);},30);},to);await sleep(2600);}
 const dlgTitle=p=>p.evaluate(()=>{const d=document.getElementById('dlg');return d&&d.open?document.getElementById('dlgTitle').textContent.trim():'';});
 async function viewTap(p,id){const v=p.locator('#aView');await v.tap();await sleep(300);const it=p.locator('#wsViewMenu [data-wn-for="'+id+'"]');const vis=await it.isVisible().catch(()=>false);if(vis){await it.tap();await sleep(500);}return vis;}
@@ -49,7 +52,7 @@ async function viewTap(p,id){const v=p.locator('#aView');await v.tap();await sle
   const hd=await box(p,'header.top'),nv=await box(p,'#wsNav'),bar=await box(p,'#bar'),cr=await box(p,'.stagew>.crumb'),ft=await frameTop(p);
   MEAS.topShown=ft.frame;MEAS.cardShown=ft.card;MEAS.fieldShown=ft.field;
   ok('1 three slim rows: the dark row ('+hd.h+' px), the student line ('+bar.h+' px), the form row ('+cr.h+' px); the white heading row is gone',hd.y===0&&hd.h>=50&&hd.h<=58&&nv.y===0&&nv.h===hd.h&&bar.y===hd.h&&bar.h>=40&&bar.h<=52&&cr.y===bar.y+bar.h&&cr.h>=48&&cr.h<=58,{hd,nv,bar,cr});
-  ok('1 the form starts at '+ft.frame+' px, its first card at '+ft.card+' px (at most about 185), its first field at '+ft.field+' px (it was about 400)',ft.frame<=165&&ft.card<=190,ft);
+  ok('1 the form starts at '+ft.frame+' px, its first card at '+ft.card+' px (at most about 185), its first field at '+ft.field+' px (it was about 400)',ft.frame<=165&&ft.card-ft.sw<=190,ft);
   const brand=await p.evaluate(()=>({title:document.title,alt:document.getElementById('logo').alt,inRow:!!document.querySelector('#wsNav #wsMark #logo'),logoW:Math.round(document.getElementById('logo').getBoundingClientRect().width),
     mark:Math.round(document.getElementById('wsMark').getBoundingClientRect().width),h1:document.querySelector('header.top h1').textContent,chipsTop:!!document.querySelector('header.top #wsChips')}));
   ok('2 the logo is a small mark at the left of the dark row; it keeps its name, and the page keeps the workstation\'s name',brand.inRow&&brand.mark<=40&&/Workstation/.test(brand.title)&&brand.alt.length>3&&brand.h1==='FBA and BIP Workstation'&&!brand.chipsTop,brand);

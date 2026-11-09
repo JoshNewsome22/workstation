@@ -7117,7 +7117,7 @@ document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;
   const b=t.closest("[data-e70]");if(!b)return;const id=b.dataset.f,a=G.last[id];if(!a)return;const el=a[0],o=a[2];
   if(b.dataset.e70==="table"){const w=document.getElementById("eaGTab-"+id);if(!w)return;const open=w.hidden;if(open)w.innerHTML=tableHtml(o,ctxOf(id));w.hidden=!open;b.setAttribute("aria-expanded",open?"true":"false");b.textContent=open?"Hide the table":"Show as table";return;}
   const svg=el.querySelector("svg.ddpub");if(!svg)return;
-  if(b.dataset.e70==="svg"){const pi=P.initials(val("m.client"))||"participant",nm=P.saveSvg(svg,`EA-1_figure_${FIG[id]}_${pi}_${new Date().toISOString().slice(0,10)}.svg`);try{toast("Figure saved as "+nm+".");}catch(x){}return;}
+  if(b.dataset.e70==="svg"){const pi=P.initials(val("m.client"))||"participant",nm=P.saveSvg(svg,`EA-1_figure_${FIG[id]}_${pi}_${(window.nbhDay?nbhDay.today():new Date().toLocaleDateString('en-CA'))}.svg`);try{toast("Figure saved as "+nm+".");}catch(x){}return;}
   if(b.dataset.e70==="print"){P.printFig(svg);return;}
   if(b.dataset.e70==="cap"){let ed=document.getElementById("eaCapEd-"+id);if(ed){G.cap[id]=ed.textContent.replace(/\s+/g," ").trim()||null;redraw();return;}
     const cur=G.cap[id]||[...svg.querySelectorAll(".pub-cap")].map(x=>x.textContent).join(" ");
