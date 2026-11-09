@@ -1,5 +1,5 @@
 /* v23.81 Form TB-1's candidate behaviors as cards (the BCBA's iPad: "This looks like it could be better designed"). With the
-   simulated record, on an iPad Pro at Fit 150% (landscape), upright, in the workstation, in a narrow window, on a wide sheet,
+   simulated record, on an iPad Pro at Fit 132% beside the sheets rail (landscape; 150% before v23.88), upright, in the workstation, in a narrow window, on a wide sheet,
    on paper and on a phone:
    1. each candidate is a card of its own (a border all round, rounded corners, a gap between cards); its number in a badge
       beside the top of the behavior box; the behavior box across the card, its edges those of the answers under it;
@@ -41,7 +41,10 @@ const sim=async p=>{await p.evaluate(()=>{window.confirm=()=>true;try{nbhUI.conf
   const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(L.BASE+'/NBH-Workstation/'+encodeURI(F.file));await sleep(1500);await sim(p);
   const z=await p.evaluate(()=>(document.getElementById('nbhFitBtn')||{}).textContent||'');
   const A=await p.evaluate(card);
-  ok('1 iPad ('+z+'): each candidate a card, its number in a badge beside the behavior box, the behavior box across the card',/150%/.test(z)&&A.card.bw&&A.card.rad>=6&&A.card.gap>=8&&
+  /* v25.71: Fit 132%, not 150%: since v23.88 the sheets rail stands beside the sheet on an iPad held sideways and the Fit zoom
+     counts only the width left to it (SETUP.md v23.88: "the sheet's Fit zoom counts the width left to it"); the rail is there */
+  const rail=await p.evaluate(()=>{const r=document.getElementById('nbhRail');return !!r&&r.offsetWidth>0;});
+  ok('1 iPad ('+z+'): each candidate a card, its number in a badge beside the behavior box, the behavior box across the card',/Fit · 132%/.test(z)&&rail&&A.card.bw&&A.card.rad>=6&&A.card.gap>=8&&
     A.badge.t==='1'&&A.badge.left&&Math.abs(A.badge.top)<=2&&A.badge.rad==='50%'&&Math.abs(A.beh.l-A.beh.aL)<=1&&Math.abs(A.beh.r-A.beh.aR)<=1,{z,card:A.card,badge:A.badge,beh:A.beh});
   ok('2 the answers four to a line in the table\'s order, the decision across two places, each label on one line, each line\'s boxes along one foot, every choice whole',
     JSON.stringify(A.lines)==='[[3,4,5,6],[7,8,9]]'&&A.feet&&A.labOne&&A.fit&&(()=>{const d=A.a.find(x=>x.k===9),q=A.a.find(x=>x.k===5);return d.r-d.l>1.8*(q.r-q.l);})(),{lines:A.lines,feet:A.feet,labOne:A.labOne,fit:A.fit,a:A.a});

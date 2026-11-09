@@ -24,9 +24,14 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  await p.evaluate(()=>document.querySelector('#tdCompList button[data-all="fold"]').click());await sleep(200);
  const fd=await p.evaluate(()=>{const cards=[...document.querySelectorAll('#compWrap .card')];return {all:cards.every(c=>c.classList.contains('td-fold')),param:getComputedStyle(cards[0].querySelector('.param')).display,steps:getComputedStyle(cards[0].querySelector('ol.steps')).display,head:getComputedStyle(cards[0].querySelector('.chd')).display,sum:cards[0].querySelector('.td-foldsum').textContent,btn:cards[0].querySelector('.td-cfold').textContent,h:Math.round(document.getElementById('compWrap').getBoundingClientRect().height)};});
  ok('Fold all folds every card to its title and a summary line (steps, who runs it, when, its first parameters)',fd.all&&fd.param==='none'&&fd.steps==='none'&&fd.head!=='none'&&/^\d+ steps · run by Classroom teacher/.test(fd.sum)&&/Mand form/.test(fd.sum)&&fd.btn==='Show steps'&&fd.h<1800,fd);
+ /* v25.71: "under the toolbar" is measured: the shared polish keeps scroll-padding-top at the bars' height + 8 px (nbh-polish.js
+    padTop), and a link's target lands just below it, not past it. The fixed 200 px held the bars of v24.18 (138 px, padding 146);
+    since v25.55 (c62c55a, SETUP.md: "the sheet now takes the column's width up to 1000 px") the toolbar wraps at 1300 px and
+    the bars are 202 px (padding 210), so a card lands at 218. */
+ const under=o=>o.pad>100&&o.top>=o.pad-2&&o.top<=o.pad+40;
  await p.evaluate(()=>{const a=[...document.querySelectorAll('#tdCompList a')][3];a.click();});await sleep(500);
- const jp=await p.evaluate(()=>{const a=[...document.querySelectorAll('#tdCompList a')][3];const c=document.querySelector(a.getAttribute('href'));return {open:!c.classList.contains('td-fold'),top:Math.round(c.getBoundingClientRect().top),y:Math.round(scrollY),btn:c.querySelector('.td-cfold').textContent};});
- ok('a link in the list opens that card and scrolls to it under the toolbar',jp.open&&jp.y>100&&jp.top>=0&&jp.top<=200&&jp.btn==='Hide steps',jp);
+ const jp=await p.evaluate(()=>{const a=[...document.querySelectorAll('#tdCompList a')][3];const c=document.querySelector(a.getAttribute('href'));return {pad:parseFloat(document.documentElement.style.scrollPaddingTop)||0,open:!c.classList.contains('td-fold'),top:Math.round(c.getBoundingClientRect().top),y:Math.round(scrollY),btn:c.querySelector('.td-cfold').textContent};});
+ ok('a link in the list opens that card and scrolls to it under the toolbar',jp.open&&jp.y>100&&under(jp)&&jp.btn==='Hide steps',jp);
  await p.evaluate(()=>document.querySelector('#tdCompList button[data-all="open"]').click());await sleep(200);
  const op=await p.evaluate(()=>[...document.querySelectorAll('#compWrap .card')].every(c=>!c.classList.contains('td-fold')&&!c.querySelector('.td-foldsum')));
  ok('Open all opens them',op);
@@ -45,15 +50,15 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  await p.evaluate(()=>{document.querySelector('#viewSeg [data-view="plan"]').click();});await sleep(500);
  const pk=await p.evaluate(()=>{const links=[...document.querySelectorAll('#planSummary a.td-pkglink')];return {n:links.length,cards:document.querySelectorAll('#compWrap .card').length,href:links[2]&&links[2].getAttribute('href')};});
  await p.evaluate(()=>{document.querySelectorAll('#planSummary a.td-pkglink')[2].click();});await sleep(500);
- const pk2=await p.evaluate(()=>({view:document.body.className,top:Math.round(document.querySelector(document.querySelectorAll('#planSummary a.td-pkglink')[2].getAttribute('href')).getBoundingClientRect().top),y:Math.round(scrollY)}));
- ok('each Package Summary entry links to its card: the third opens Build at that card',pk.n===pk.cards&&/^#tdcard-/.test(pk.href||'')&&pk2.view==='view-build'&&pk2.y>100&&pk2.top>=0&&pk2.top<=200,{pk,pk2});
+ const pk2=await p.evaluate(()=>({pad:parseFloat(document.documentElement.style.scrollPaddingTop)||0,view:document.body.className,top:Math.round(document.querySelector(document.querySelectorAll('#planSummary a.td-pkglink')[2].getAttribute('href')).getBoundingClientRect().top),y:Math.round(scrollY)}));
+ ok('each Package Summary entry links to its card: the third opens Build at that card',pk.n===pk.cards&&/^#tdcard-/.test(pk.href||'')&&pk2.view==='view-build'&&pk2.y>100&&under(pk2),{pk,pk2});
  /* the Final plan's section links */
  await p.evaluate(()=>{document.querySelector('#viewSeg [data-view="final"]').click();});await sleep(800);
  const fn=await p.evaluate(()=>{const nav=document.getElementById('tdFinNav');const links=nav?[...nav.querySelectorAll('a')].map(a=>a.textContent):[];return {n:links.length,links,before:nav&&nav.nextElementSibling&&nav.nextElementSibling.id,navs:document.querySelectorAll('#tdFinNav').length};});
  ok('the Final plan opens with one row of links to its sections, the component groups and the adoption sections among them',fn.navs===1&&fn.n>=6&&fn.links.some(t=>/Teaching the replacement/.test(t))&&fn.links.some(t=>/Adopted by the team/.test(t))&&fn.before==='finalBody',fn);
  await p.evaluate(()=>{[...document.querySelectorAll('#tdFinNav a')].find(a=>/Adopted by the team/.test(a.textContent)).click();});await sleep(500);
- const fj=await p.evaluate(()=>{const g=[...document.querySelectorAll('#final .plan-group')].find(x=>/Adopted by the team/.test(x.textContent));return {top:Math.round(g.getBoundingClientRect().top),y:Math.round(scrollY)};});
- ok('a section link scrolls to its section',fj.y>500&&fj.top>=0&&fj.top<=200,fj);
+ const fj=await p.evaluate(()=>{const g=[...document.querySelectorAll('#final .plan-group')].find(x=>/Adopted by the team/.test(x.textContent));return {pad:parseFloat(document.documentElement.style.scrollPaddingTop)||0,top:Math.round(g.getBoundingClientRect().top),y:Math.round(scrollY)};});
+ ok('a section link scrolls to its section',fj.y>500&&under(fj),fj);
  await p.evaluate(()=>{document.querySelector('#viewSeg [data-view="final"]').click();});await sleep(800);
  ok('reopening the Final plan keeps one row of links',await p.evaluate(()=>document.querySelectorAll('#tdFinNav').length===1));
  /* print: none of it prints, and a folded card prints whole */
