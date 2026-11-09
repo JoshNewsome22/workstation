@@ -19,10 +19,13 @@
       supervisee in RS-1, the bar left empty.
    usage: node qa/v2230-sis-read-test.js */
 const L=require(__dirname+'/lib.js');const {sleep,fs}=L;
+/* v25.71: the pages are drawn in Arial (Liberation Sans on Linux). They asked for Lato, then Helvetica Neue, neither installed
+   here, and this machine's font setup sends both to Inter; the reading was written against the Arial fallback, and with Inter the
+   OCR misread the grey Edit Contact boxes and "Paula" (Arial: all checks pass, unchanged) */
 const OUT=__dirname+'/out/v2230/';fs.mkdirSync(OUT,{recursive:true});
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1400):''));if(!c)fails++;};
 const HEAD=`<!doctype html><html><head><meta charset="utf-8"><style>
-body{margin:0;font-family:Lato,"Helvetica Neue",Arial,sans-serif;color:#333;background:#fff;font-size:15px}
+body{margin:0;font-family:Arial,sans-serif;color:#333;background:#fff;font-size:15px}
 .top{background:#eee;height:92px;display:flex;align-items:flex-start;gap:18px;padding:6px 10px}.stu{background:#2e5c99;color:#fff;padding:6px 14px;font-size:20px}
 .stu small{display:block;margin-top:26px;font-size:13px;color:#2e5c99;background:#fff;padding:2px 4px}.ttl{font-size:24px;margin-top:8px}
 .nav{background:#3a72b8;color:#fff;height:40px;display:flex;gap:26px;align-items:center;padding:0 14px;font-size:17px}
@@ -55,7 +58,7 @@ ${card('Perez, Rosa<br>(No Address)<br><b>Contact Details:</b><table style="bord
 <h3>Linked Users <small style="font-weight:normal">The following users will be able to view data for this student</small></h3></div></div></body></html>`;
 /* the Edit Contact window that cannot be edited: its boxes in pale grey, no labels on the name boxes */
 const box=(v,ph,w)=>`<div style="border:1px solid #e2e2e2;border-radius:3px;padding:12px 14px;width:${w||150}px;color:${v?'#a6a6a6':'#d6d6d6'};font-size:17px">${v||ph}</div>`;
-const EDIT=`<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;font-family:Lato,"Helvetica Neue",Arial,sans-serif;color:#333;background:#555}
+const EDIT=`<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;font-family:Arial,sans-serif;color:#333;background:#555}
 .dlg{background:#fff;margin:40px auto;width:1000px;padding:24px 28px}.row{display:flex;gap:16px;margin:10px 0}.opt{width:250px;border:1px solid #ddd;padding:12px;margin-left:auto}
 table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px 8px;text-align:left;font-size:15px}tr.b td{background:#e3eefb}</style></head><body><div class="dlg">
 <div style="font-size:24px">Edit Contact <span style="font-size:16px;color:#666">You do not have permission to edit this contact</span></div>
