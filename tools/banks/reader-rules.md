@@ -74,7 +74,9 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
     competing stimulus cards for social functions, c_csa-select-by-reduction and c_csa-competing-items-plus-extinction, carry
     theirs too (v25.65, PREF-H2), beside Form PA-1's wait-component method, the default. The BCBA (11/9) kept the four from
     the Behavioral Interventions banks: dnra-food-token-or-break-without-ee, dro-brief-analysis-picks-demand-reinforcer,
-    fct-concurrent-schedules-no-extinction-school and ncr-meal-video-thinned-plus-preferred-bite.
+    fct-concurrent-schedules-no-extinction-school and ncr-meal-video-thinned-plus-preferred-bite. The BCBA's default (11/9):
+    the dental-exam baseline of ta_chain-dental-exam-steps (Abdel-Jalil et al., 2026), a 30-s break with a preferred item
+    after challenging behavior, unmarked until then, is an OPTION step the same way.
 
 ## When each rule started
 
