@@ -165,6 +165,12 @@ async function rename(br){
   ok('rename: the notice lists what it changed, form by form',n1.open&&/Corrected in 5 forms/.test(n1.title)&&ids.every(id=>n1.body.includes('Form '+id+':'))&&/first name Jordon → Jordan/.test(n1.body),n1);
   const snap1={};for(const id of ids)snap1[id]=await snapOf(page,id);
   const d1={};for(const id of ids)d1[id]=diff(snap0[id],snap1[id]);
+  /* v25.71: DM-1 ticks "In file" for each form the case holds work on when the workstation's case next reaches it (v23.09,
+     review F5: "In file is ticked for them (never unticked)"); Fill open forms above sends the case, so those ticks land
+     between the two snapshots. They are set aside here only for the five forms of this case, only as false > true. */
+  const inCase=await frs['DM-1'].evaluate(ids=>[...document.querySelectorAll('#pkTbl tbody tr')].filter(tr=>{const b=tr.querySelector('b');return b&&ids.includes(b.textContent.trim());})
+    .map(tr=>{const c=tr.querySelector('input[type="checkbox"]');return c?'@'+c.name+': false > true':'';}).filter(Boolean),ids);
+  d1['DM-1']=d1['DM-1'].filter(x=>!inCase.includes(x));
   ok('rename: nothing else in the five forms changed (every field compared before and after)',
     ids.every(id=>d1[id].length>=1&&d1[id].every(s=>/: "Jordon( Rivera)?" > "Jordan( Rivera)?"$/.test(s))),d1);
   await closeNotice(page);

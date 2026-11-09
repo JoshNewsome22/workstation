@@ -6,7 +6,7 @@ Most of it is history. **START-HERE.md** is the current guide, for a new or cove
 after the website. What is true now:
 
 - **The folder** (`NBH-Workstation`, or `RPS-Workstation` for the school edition): `index.html` (the workstation), the
-  47 forms, the shared `nbh-*.js` files every form loads (letterhead, Autosave, writing help, dictation and the rest),
+  48 forms, the shared `nbh-*.js` files every form loads (letterhead, Autosave, writing help, dictation and the rest),
   `respond.html` and `staff-data.html` (the pages families and staff answer on), the offline files (`sw.js`,
   `release.json`, `manifest.json`), and START-HERE.md, README.txt, HOSTING.md and this file. Keep them together: a form away from the
   `nbh-*.js` files loses its letterhead and Autosave.

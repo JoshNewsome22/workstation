@@ -12,7 +12,10 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   try{
   const ctx=await br.newContext({viewport:{width:1180,height:820},serviceWorkers:'block'});
   /* ---- DD-1 ---- */
-  const d=await ctx.newPage();d.on('pageerror',e=>errs.push('DD-1: '+e.message));await d.goto(L.BASE+'/NBH-Workstation/Daily_Behavior_Data_and_Visual_Analysis.html');await sleep(900);
+  /* v25.71: DD-1 counts the restraints "within a month" back from today (rsCounts), so after 10/31/2026 the scenario's four
+     October restraints fell out of the month and check 26 failed by the calendar alone; DD-1's clock is held at the afternoon
+     of the last one, 10/16, the day check 12 counts at, as rr1-w3d-test holds RR-1's */
+  const d=await ctx.newPage();d.on('pageerror',e=>errs.push('DD-1: '+e.message));await d.clock.setFixedTime(new Date(2026,9,16,15,0,0));await d.goto(L.BASE+'/NBH-Workstation/Daily_Behavior_Data_and_Visual_Analysis.html');await sleep(900);
   const a=await d.evaluate(()=>{wsUI=window.wsUI||{};
     ddLogIncident({date:'2026-10-16',time:'10:20',beh:'Physical aggression',what:'Hit a peer (simulated)',before:'Math worksheet (simulated)',did:'Prompted the break card (simulated)',ended:'Back at the desk 10:40 (simulated)',hold:'restraint'});
     const i=S.incidents[S.incidents.length-1];rsOpen(i.id);const dl=document.getElementById('dlgRs');

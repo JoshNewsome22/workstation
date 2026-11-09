@@ -33,11 +33,15 @@ const frameOf=(page,file)=>page.frames().find(f=>f.url().indexOf(encodeURI(file)
     const pdf=await pp.pdf({preferCSSPageSize:true,printBackground:true});await pp.close();
     const texts=await page.evaluate(async b64=>{const lib=await pdfjsLoad();const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));const pdf=await lib.getDocument({data:bytes}).promise;const out=[];
       for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();const H=pg.view[3];const it=tc.items.filter(t=>t.str&&t.str.trim()&&Math.hypot(t.transform[2],t.transform[3])>4.5);
-        const body=it.filter(t=>t.transform[5]<H-40&&t.transform[5]>36);out.push({t:it.map(t=>t.str).join(' ').replace(/\s+/g,' '),top:it.filter(t=>t.transform[5]>=H-40).map(t=>t.str.trim()).join(' | '),body:body.map(t=>t.str).join(' ').replace(/\s+/g,' '),minY:body.length?Math.min(...body.map(t=>t.transform[5])):H,H});}
+        const body=it.filter(t=>t.transform[5]<H-40&&t.transform[5]>36),raw=tc.items.filter(t=>t.str&&t.str.trim()&&t.transform[5]<H-40&&t.transform[5]>36).map(t=>t.str).join(' ').replace(/\s+/g,' ');out.push({raw,t:it.map(t=>t.str).join(' ').replace(/\s+/g,' '),top:it.filter(t=>t.transform[5]>=H-40).map(t=>t.str.trim()).join(' | '),body:body.map(t=>t.str).join(' ').replace(/\s+/g,' '),minY:body.length?Math.min(...body.map(t=>t.transform[5])):H,H});}
       return out;},Buffer.from(pdf).toString('base64'));
     return {html,dom,pdf,texts};}
   const A=await build(null);L.fs.writeFileSync(OUT+'/default.pdf',A.pdf);L.fs.writeFileSync(OUT+'/default.html',A.html);
-  const tA=A.texts,N=tA.length;const secStart=tA.map((p,i)=>/SECTION \d+ OF \d+/i.test(p.body)?i+1:0).filter(Boolean);
+  const tA=A.texts,N=tA.length;
+  /* v25.71: Chromium draws the band's capitals here with Type3 fonts (Inter, the workstation's first font, is installed on the
+     test computer), and pdf.js reads some of their digits as private-use characters (U+E079 for the 8 in DD-1's band; PyMuPDF reads "SECTION 8 OF
+     14" on the same page). So the band is found as its words beside its section's NBHSEC marker, in all of the page's text */
+  const secStart=tA.map((p,i)=>/NBHSEC:[\w-]+; SECTION [^A-Za-z]*OF\b/i.test(p.raw)?i+1:0).filter(Boolean);
   ok('1 the packet is built: '+N+' pages, a cover and '+A.dom.secs.length+' sections (the 13 forms and the references), each on a new page with a section line',
     N>100&&A.dom.secs.length===FORMS.length+1&&A.dom.secs[A.dom.secs.length-1].id==='sec-REFS'&&secStart.length===FORMS.length+1&&secStart[0]===2&&A.dom.secs.every(s=>s.bands===1),{N,secs:A.dom.secs.length,secStart});
   ok('2 the cover is one page: student, period from the case, each section with its sheets, the References entry, the confidentiality box',

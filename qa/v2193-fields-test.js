@@ -53,7 +53,10 @@ const pdfText=(shell,buf)=>shell.evaluate(async b64=>{const lib=await pdfjsLoad(
   {const ctx=await br.newContext({viewport:{width:1440,height:900},serviceWorkers:'block'});const page=await ctx.newPage();
     const r={};for(const [id,file] of [['DM-1','DM-1_Student-Demographics-and-Profile_v2026-09.html'],['TB-1','TB-1_Target-Behavior-Development_v2026-09.html'],['FS-1','FS-1_FBA-Summary-Report_v2026-09.html']]){
       await page.goto(BASE+'/NBH-Workstation/'+file);await sleep(700);r[id]=await page.evaluate(measure);}
-    ok('6 DM-1 and TB-1 (lines before) now carry boxed fields marked as lines before; FS-1 (boxes before) carries none',r['DM-1'].was>10&&r['TB-1'].was>3&&r['FS-1'].was===0&&r['FS-1'].box>5,{dm:r['DM-1'].was,tb:r['TB-1'].was,fs:r['FS-1'].was});
+    /* v25.71: v24.92 (DM-1, SETUP.md "Forms DM-1, IC-1 and RR-1 on an iPad") and v24.93 (TB-1) drew these forms' fields as
+       boxes in their own layout, so the polish script no longer has lines to turn into boxes (nbh-was-ul 61 to 0 in DM-1, 6 to 0
+       in TB-1); what stays checked is that they show boxes and not one field drawn as a line */
+    ok('6 DM-1 and TB-1 (lines before) now show boxed fields, none drawn as a line; FS-1 (boxes before) carries none marked as lines before',r['DM-1'].box>20&&r['DM-1'].ul===0&&r['TB-1'].box>20&&r['TB-1'].ul===0&&r['FS-1'].was===0&&r['FS-1'].box>5,{dm:[r['DM-1'].box,r['DM-1'].ul,r['DM-1'].was],tb:[r['TB-1'].box,r['TB-1'].ul,r['TB-1'].was],fs:[r['FS-1'].box,r['FS-1'].was]});
     /* TD-1's Guide: its long paragraphs sit within the cap, narrower than the sheet */
     await page.goto(BASE+'/NBH-Workstation/TD-1_Function-Based-Treatment-Developer_v2026-09.html');await sleep(700);
     await page.evaluate(()=>{const b=[...document.querySelectorAll('#viewSeg button')].find(x=>/Guide/.test(x.textContent));if(b)b.click();});await sleep(400);

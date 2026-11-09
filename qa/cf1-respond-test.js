@@ -12,9 +12,12 @@ const answer=async(rp,who,pick)=>rp.evaluate(([who,pick])=>{const inp=document.q
 (async()=>{const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1300,height:950}});await ctx.grantPermissions(['clipboard-read','clipboard-write'],{origin:BASE});
  const page=await ctx.newPage();wire(page,log);
  /* the blank print, before anything is entered */
- await page.goto(URL);await sleep(700);await page.emulateMedia({media:'print'});const blankNow=pages(await page.pdf({preferCSSPageSize:true,printBackground:true}));await page.emulateMedia({media:null});
+ await page.goto(URL);await sleep(700);await page.emulateMedia({media:'print'});const rpHid=await page.evaluate(()=>['#rpBtn','#rcBtn','#rpDlg','#rcDlg'].every(q=>{const e=document.querySelector(q);return !!e&&!e.getClientRects().length;}));const blankNow=pages(await page.pdf({preferCSSPageSize:true,printBackground:true}));await page.emulateMedia({media:null});
  let blankPre=4;if(fs.existsSync(PRE)){const p2=await ctx.newPage();await p2.goto('file://'+PRE);await sleep(700);await p2.emulateMedia({media:'print'});blankPre=pages(await p2.pdf({preferCSSPageSize:true,printBackground:true}));await p2.close();}
- ok('blank print page count unchanged against the pre-edit file ('+blankPre+')',blankNow===blankPre,{blankNow,blankPre});
+ /* v25.71: CF-1's blank print is 5 pages in every release this history holds (v24.72 on), one fewer than the v21.39 copy, after
+    the form's later redesigns (the "Page 1 of 5" running head, v25.65's staff changes, fx2 in v25.68). As in sv1-respond-test
+    (v21.96), the respondent pages must not lengthen the print, and their two buttons and two dialogs must not print. */
+ ok('blank print: no longer than the pre-edit file ('+blankPre+' pages), and the respondent pages\' buttons and dialogs do not print',blankNow<=blankPre&&rpHid,{blankNow,blankPre,rpHid});
  await page.evaluate(()=>{window.confirm=()=>true;window.alert=m=>{(window.__al=window.__al||[]).push(String(m));};});
  ok('library loaded beside the form',await page.evaluate(()=>!!window.NBH_RESPOND&&!window.NBH_RESPOND_MISSING));
  ok('toolbar has the two buttons; the email field is on Setup',await page.evaluate(()=>!!document.querySelector('#rpBtn')&&!!document.querySelector('#rcBtn')&&!!document.querySelector('[data-m="email"]')));

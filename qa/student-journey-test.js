@@ -53,9 +53,13 @@ async function tapShell(sel){
   if(!(await el.isVisible().catch(()=>false))&&await shell(()=>document.body.classList.contains('bar-folded'))){await page.locator('#barEdit').tap().catch(()=>{});await sleep(200);}
   /* v23.87: on a touch screen the bars fold away while the form is read; the Save beside the form stands in for the bar's, and
      scrolling the form back to the top brings the bars back */
-  if(!(await el.isVisible().catch(()=>false))&&await shell(()=>document.body.classList.contains('ws-fold'))){
+  /* v25.71: since v25.65's top bar A the folded bars slide out of the window rather than hide ("Scrolled down into a form, only
+     the form row stays"), so a heading button can be "visible" and still out of reach: folded, the bars are brought back first */
+  const covered=()=>shell(s=>{const e=document.querySelector(s);if(!e)return false;const r=e.getBoundingClientRect();if(!r.width)return false;if(r.bottom<=1)return true;
+    const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return !(h&&(h===e||e.contains(h)));},sel);
+  if((!(await el.isVisible().catch(()=>false))||await covered())&&await shell(()=>/\bws-(fold|ov|up|push)\b/.test(document.body.className))){
     if(sel==='#saveCase'){const q=page.locator('#saveQuick');if(await q.isVisible().catch(()=>false)){await q.tap();return;}}
-    for(let i=0;i<2&&await shell(()=>document.body.classList.contains('ws-fold'));i++){for(const f of page.frames()){if(f!==page.mainFrame())await f.evaluate(()=>{window.scrollTo(0,0);window.dispatchEvent(new Event('scroll'));}).catch(()=>{});}await sleep(900);}
+    for(let i=0;i<3&&(await covered()||await shell(()=>document.body.classList.contains('ws-fold')));i++){for(const f of page.frames()){if(f!==page.mainFrame())await f.evaluate(()=>{window.scrollTo(0,0);window.dispatchEvent(new Event('scroll'));}).catch(()=>{});}await sleep(900);}
     el=page.locator(sel).first();}
   /* v25.63: the rarer buttons are in the top menus (Packet, Case, Tools) */
   if(!(await el.isVisible().catch(()=>false))&&await navTap(page,sel,true))return;
@@ -77,10 +81,12 @@ async function settleDialogs(){for(let k=0;k<6;k++){
   if(!d)return;DIALOGS.push({step:stepName,unexpected:true,t:d.t,b:(d.b||'').slice(0,300),btns:d.btns});note('(a notice left open: '+d.t.slice(0,120)+' — closed)');
   if(d.k==='cf'){const i=d.btns.findIndex(x=>/^(OK|Close|Not now|Cancel)$/.test(x));await page.locator('#cfFoot button').nth(i>=0?i:d.btns.length-1).tap().catch(()=>{});}
   else await shell(()=>document.getElementById('dlg').close());await sleep(200);}}
+const formList=async()=>{const rt=page.locator('#railToggle');if(await rt.isVisible().catch(()=>false))await rt.tap();else await page.locator('#wnForms').tap();};
 /* open a form from the form list (the Forms button, then the form), and wait until it has answered and, from a case file, been filled */
 async function openF(id){await settleDialogs();
   const inList=await page.locator('#rail [data-open="'+id+'"]').isVisible().catch(()=>false);
-  if(!inList){await page.locator('#railToggle').tap();await sleep(350);}
+  /* v25.71: since v25.65's top bar A the list of forms opens from Forms in the heading (#wnForms) where #railToggle is hidden */
+  if(!inList){await formList();await sleep(350);}
   await page.locator('#rail [data-open="'+id+'"]').tap();
   await page.waitForFunction(id=>!!state.status[id]&&!state.pending[id],id,{timeout:45000});
   /* the case reaches a form 1.1 s after it loads (makeFrame): wait for that before reading it */
@@ -94,14 +100,21 @@ async function reveal(fr,sel){
   if(await loc.isVisible().catch(()=>false))return loc;
   if(!(await loc.count()))throw new Error('no field '+sel);
   /* a button folded away under the toolbar's More controls */
-  if(await loc.evaluate(e=>!!e.closest('.toolbar')&&document.documentElement.classList.contains('nbh-compact'))){await fr.evaluate(()=>window.scrollTo(0,0));await fr.locator('#nbhMoreBtn').tap();await sleep(300);if(await loc.isVisible().catch(()=>false))return loc;}
+  /* v25.71: in the workstation the form's More button is "More form tools" in View since v25.65's top bar A (SETUP.md: View holds
+     "... the form's More menu"); on its own the form keeps its own button */
+  if(await loc.evaluate(e=>!!e.closest('.toolbar')&&document.documentElement.classList.contains('nbh-compact'))){await fr.evaluate(()=>window.scrollTo(0,0));
+    if(await fr.locator('#nbhMoreBtn').isVisible().catch(()=>false))await fr.locator('#nbhMoreBtn').tap();
+    else if(await page.locator('#aView').isVisible().catch(()=>false)){await page.locator('#aView').tap();await sleep(250);await page.locator('#wsViewMenu [data-wn-for="nbhMoreBtn"]').tap();}
+    await sleep(300);if(await loc.isVisible().catch(()=>false))return loc;}
   const sum=await loc.evaluate(e=>{const L=[];let d=e.closest('details');while(d){if(!d.open)L.unshift(d);d=d.parentElement&&d.parentElement.closest('details');}L.forEach((d,i)=>d.setAttribute('data-sj-open',String(i)));return L.length;});
   for(let i=0;i<sum;i++){await fr.locator('details[data-sj-open="'+i+'"] > summary').first().click().catch(()=>{});await sleep(120);}
   if(await loc.isVisible().catch(()=>false))return loc;
   const views=await fr.$$('#viewSeg button[data-view], nav.nbh-tabs [data-tab], .tabs button[data-tab], [role=tablist] [role=tab]');
   /* v25.68 (H2): in the workstation a form of 6 sheets or fewer shows no sheet column; its sheets are chosen from the form row's
      sheet menu, which presses these same buttons (hidden with the toolbar): press them that way */
-  const rowMenu=await fr.evaluate(()=>!!window.__nbhNoSheets&&window.parent!==window).catch(()=>false);
+  /* v25.71: since v25.65's top bar A the form's whole toolbar, its view buttons too, is folded into the workstation's form row
+     (html.ws-a): its sheets are chosen there (the Sheets menu, the arrows), which press these same buttons */
+  const rowMenu=await fr.evaluate(()=>window.parent!==window&&(!!window.__nbhNoSheets||document.documentElement.classList.contains('ws-a'))).catch(()=>false);
   for(const v of views){if(await v.isVisible().catch(()=>false))await v.click().catch(()=>{});
     else if(rowMenu&&await v.evaluate(b=>!b.hidden&&getComputedStyle(b).display!=='none').catch(()=>false))await v.evaluate(b=>b.click()).catch(()=>{});
     else continue;
@@ -694,7 +707,7 @@ PH.H=async()=>{
   await closeDlg();
   /* the master print: every form of the case, printed together */
   await settleDialogs();
-  if(!(await page.locator('#tickUsed').isVisible().catch(()=>false))){await page.locator('#railToggle').tap();await sleep(400);}
+  if(!(await page.locator('#tickUsed').isVisible().catch(()=>false))){await formList();await sleep(400);}
   await page.locator('#tickUsed').tap();await sleep(400);
   const ticked=await shell(()=>Object.keys(state.ticked).filter(k=>state.ticked[k]));const inCaseIds=await shell(()=>[...new Set(Object.keys(state.frames).concat(Object.keys(state.pending)))]);
   ok('H14 Tick the ones I’ve used ticks every form in the case ('+inCaseIds.length+')',inCaseIds.every(id=>ticked.includes(id))&&ticked.length===inCaseIds.length,{ticked,inCaseIds});
@@ -726,7 +739,7 @@ PH.H=async()=>{
   await tapShell('#todayBtn');await page.waitForFunction(()=>document.getElementById('dlg').open,null,{timeout:10000});await fit('Today');
   await tapShell('#todayBtn');await page.waitForFunction(()=>document.getElementById('dlg').open,null,{timeout:10000});await sleep(400);await page.locator('#tdIep').tap();await fit('the IEP meeting packet');
   await tapShell('#caseloadBtn');await page.waitForFunction(()=>document.getElementById('dlg').open,null,{timeout:10000});await fit('Caseload');
-  await page.locator('#railToggle').tap();await sleep(400);await page.locator('#rail [data-open="DD-1"]').tap();await page.waitForFunction(()=>state.cur==='DD-1',null,{timeout:10000});await sleep(1200);
+  await formList();await sleep(400);await page.locator('#rail [data-open="DD-1"]').tap();await page.waitForFunction(()=>state.cur==='DD-1',null,{timeout:10000});await sleep(1200);
   const ddw=await shell(()=>{const f=state.frames['DD-1'],r=f.getBoundingClientRect();return {w:Math.round(r.width),W:document.documentElement.clientWidth,scrollW:document.documentElement.scrollWidth,inner:f.contentDocument.documentElement.scrollWidth,innerW:f.contentDocument.documentElement.clientWidth};});
   ok('H20 upright iPad: DD-1 opens from the form list by touch and fills the width without the page scrolling sideways',ddw.w<=ddw.W&&ddw.scrollW<=ddw.W+1&&ddw.inner<=ddw.innerW+1,ddw);
   await page.setViewportSize({width:1180,height:820});await sleep(800);

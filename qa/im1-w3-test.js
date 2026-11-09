@@ -103,7 +103,9 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
     await q.evaluate(async s=>{nbhUI.confirm=async()=>true;window.print=()=>{};if(s){document.getElementById('simBtn').click();await new Promise(r=>setTimeout(r,900));}},sim);
     await q.emulateMedia({media:'print'});await q.pdf({path:path.join(out,file),format:'Letter',printBackground:true,preferCSSPageSize:true});await q.close();return pages(path.join(out,file));};
   const pb=await pr(false,'blank.pdf'),ps=await pr(true,'sim.pdf');
-  ok('the printed pages: blank 10, the worked example 13 (as before Wave 3)',pb===10&&ps===13,{pb,ps});
+  /* v25.71: v24.72, the oldest release this history holds, already printed 7 and 9, not 10 and 13; v25.66's protective equipment and self-restraint records (SETUP.md v25.66, commit 3620e15) made the blank 8.
+     The count stays pinned so a change to it is seen. */
+  ok('the printed pages: blank 8, the worked example 9',pb===8&&ps===9,{pb,ps});
   ok('no page errors',!errs.length,errs.slice(0,3));
  }catch(e){console.error(e);fails++;}
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

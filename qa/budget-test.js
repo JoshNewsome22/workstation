@@ -2,7 +2,8 @@
    BCBA's iPad in the middle of a school day. Counts and bytes first; the times are generous (a busy machine must not
    fail them), each about four times what it took when the budget was set.
    1. Bytes: the workstation page, each form, the forms together, the shared scripts every form loads, and the folder
-      (without the speech recogniser), each under its budget (qa/budget.json says each and why).
+      (without the speech recogniser and TD-1's procedure videos, which have their own, v25.71), each under its budget
+      (qa/budget.json says each and why).
    2. A form opened loads none of the recorded narrations (some 9 MB) until its walkthrough plays (review F474).
    3. A case of six forms opened from the caseload loads one form (I239): one frame, page elements under the budget.
    4. Times: the workstation opens, a form opens in it, the case opens, each within its limit.
@@ -20,9 +21,12 @@ function folderBytes(d,skip){let t=0;for(const e of fs.readdirSync(d,{withFileTy
   let all=0;for(const f of forms){const n=size(f.file);all+=n;if(n>B.kb.form*1024)over.push(f.id+' '+kb(n)+' KB > '+B.kb.form);}
   if(all>B.kb.forms*1024)over.push('the forms together '+kb(all)+' KB > '+B.kb.forms);
   const shared=B.shared.reduce((t,f)=>t+size(f),0);if(shared>B.kb.shared*1024)over.push('the shared scripts '+kb(shared)+' KB > '+B.kb.shared);
-  const folder=folderBytes(W,['nbh-asr']);if(folder>B.kb.folder*1024)over.push('the folder '+kb(folder)+' KB > '+B.kb.folder);
-  ok('1 bytes: the page '+kb(ix)+' KB, the largest form '+kb(Math.max(...forms.map(f=>size(f.file))))+' KB, the '+forms.length+' forms '+kb(all)+' KB, the shared scripts '+kb(shared)+' KB, the folder '+kb(folder)+' KB: each under its budget',
-    forms.length>40&&B.shared.every(f=>size(f)>0)&&!over.length,over);
+  /* v25.71: TD-1's procedure videos have a budget of their own (budget.json, why.videos); the folder is counted without them */
+  const VID=fs.readdirSync(W).filter(f=>/^nbh-td1-video-.*\.js$/.test(f)),videos=VID.reduce((t,f)=>t+size(f),0);
+  if(videos>B.kb.videos*1024)over.push('the procedure videos '+kb(videos)+' KB > '+B.kb.videos);
+  const folder=folderBytes(W,['nbh-asr'].concat(VID));if(folder>B.kb.folder*1024)over.push('the folder '+kb(folder)+' KB > '+B.kb.folder);
+  ok('1 bytes: the page '+kb(ix)+' KB, the largest form '+kb(Math.max(...forms.map(f=>size(f.file))))+' KB, the '+forms.length+' forms '+kb(all)+' KB, the shared scripts '+kb(shared)+' KB, the folder '+kb(folder)+' KB, the '+VID.length+' procedure videos '+kb(videos)+' KB: each under its budget',
+    forms.length>40&&B.shared.every(f=>size(f)>0)&&VID.length>0&&B.kb.videos>0&&!over.length,over);
   /* 2. the narrations wait for the walkthrough */
   const ctx=await br.newContext({viewport:{width:1366,height:900},serviceWorkers:'block'});ctx.on('dialog',d=>d.accept().catch(()=>{}));
   const got=[];ctx.on('request',r=>{const u=r.url();if(/-narration\.js/.test(u))got.push(u.replace(/.*\//,''));});

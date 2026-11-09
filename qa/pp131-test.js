@@ -24,7 +24,13 @@ const FORMS={'TB-1':'TB-1_Target-Behavior-Development_v2026-09.html','IA-1':'IA-
  'TD-1':'TD-1_Function-Based-Treatment-Developer_v2026-09.html','TK-1':'TK-1_Token-Board-Book_v2026-10.html','RS-1':'RS-1_RBT-Supervision-Log_v2026-10.html'};
 /* the whole-form printouts before v24.31 (the 10/26 survey, each simulation loaded); TD-1 is given 46: its monitor's verdict and criterion note now take a page of their own rather than splitting;
    48 from v24.48, the relapse safeguards the example ticks (on the plan and in the Final plan) */
-const BEFORE={'TB-1':22,'IA-1':33,'PA-1':29,'RA-1':16,'EA-1':22,'DA-1':18,'DD-1':16,'SM-1':30,'SP-1':14,'ABC-1':17,'OB-1':13,'TD-1':48,'TK-1':13,'RS-1':3};
+/* v25.71: the caps follow what deliberate changes added since. ABC-1 printed 18 and RS-1 4 already at v24.72, the oldest release
+   this history holds (its own commit added the checklist average by month to RS-1's printout; nothing older can be printed
+   here); v25.64's approved review
+   changes made DD-1 21 (commit 898a2d8: the dual-criterion check, the effect-size tiles and the layouts) and SP-1 15 (514c4ba:
+   the measurement review), and OB-1's three observations 12 (b929cb2, below); v25.65's approved TD-1 changes made it 51
+   (fdccb89, as in td130-test). Each was found by printing the commit before and the commit itself. */
+const BEFORE={'TB-1':22,'IA-1':33,'PA-1':29,'RA-1':16,'EA-1':22,'DA-1':18,'DD-1':21,'SM-1':30,'SP-1':15,'ABC-1':18,'OB-1':13,'TD-1':51,'TK-1':13,'RS-1':4};
 const GUIDE_SHEETS=['TB-1','IA-1','PA-1','RA-1','EA-1','OB-1'],GUIDE_SECTIONS=['SM-1','DA-1'];
 (async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});const ctx=await b.newContext({viewport:{width:1300,height:950}});
  const open=async(F)=>{const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));await p.goto(BASE+'/NBH-Workstation/'+FORMS[F]);await sleep(1500);
@@ -65,9 +71,11 @@ const GUIDE_SHEETS=['TB-1','IA-1','PA-1','RA-1','EA-1','OB-1'],GUIDE_SECTIONS=['
    ok('PA-1: a method sheet with nothing run is out of the printout (a fresh form prints none of the five)',hasText(U,M)<0&&tb.api&&U.length>=3,{fi:hasText(U,M),pages:U.length,tb});
    await setOpt(q,'blank',true);const U2=pdfPages(await PDF(q),'pp131-PA-1-unrun2.pdf');ok('PA-1: with blank sheets included the unrun sheets print',U2.filter(x=>M.test(x.text)).length>=3&&U2.length>U.length,{pages:[U.length,U2.length]});await setOpt(q,'blank',false);await q.close();}
   if(F==='SP-1'){const study=P.filter(x=>/THE STUDY/.test(x.text)).length,ctl=P.filter(x=>/Control Chart Analysis/.test(x.text)).length;
-   ok('SP-1: the control-chart essay prints once, after the second behavior\'s chart (two Control Chart pages, one essay)',study===1&&ctl>=2&&P.length<BEFORE['SP-1'],{study,ctl,pages:P.length});}
+   /* v25.71: within the cap (it had to be under the 14 pages before v24.31; 14 at v24.72 already, 15 since v25.64, above) */
+   ok('SP-1: the control-chart essay prints once, after the second behavior\'s chart (two Control Chart pages, one essay)',study===1&&ctl>=2&&P.length<=BEFORE['SP-1'],{study,ctl,pages:P.length});}
   if(F==='OB-1'){const obs=P.filter(x=>/Direct Observation Record/.test(x.text)&&/Observation \d|Date/.test(x.text)).length;
-   ok('OB-1: three observations no longer each spill a near-empty page (13 pages before)',P.length<=11,{pages:P.length,ink:brief(P)});}
+   /* v25.71: 11 until v25.64's approved measurement changes (commit b929cb2: observer checks, coverage, agreement blocks) made 12 */
+   ok('OB-1: three observations no longer each spill a near-empty page (13 pages before)',P.length<=12,{pages:P.length,ink:brief(P)});}
   if(F==='DA-1'){const ri=hasText(P,/Recommendations Computed from the ranking/);ok('DA-1: the Recommendations heading shares its page with the first recommendation (it stood alone on page 10)',ri>=0&&/Tasks for the demand condition/.test(P[ri].text),ri>=0&&{n:P[ri].n,text:P[ri].text.slice(0,200)});}
   if(F==='TB-1'){const ii=hasText(P,/Interobserver Agreement Pilot/);ok('TB-1: the IOA pilot heading shares its page with its table (it stood alone on page 19)',ii>=0&&/Observers/.test(P[ii].text)&&P[ii].ink>=15,ii>=0&&{n:P[ii].n,ink:P[ii].ink});}
   if(F==='IA-1'){ok('IA-1: the printout is 28 pages or fewer (33 before, the Guide first and eleven light pages)',P.length<=28,{pages:P.length});}

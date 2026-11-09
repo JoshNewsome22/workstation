@@ -35,7 +35,13 @@ const fits=()=>{const c=document.createElement('canvas').getContext('2d'),out=[]
   ok('2 each candidate is a card: the behavior across (one line here), then its answers four to a line in the table\'s order, each under its label',g.two&&g.lines<=2&&g.label==='"Socially significant?"'&&g.head==='none'&&g.behW>g.wide*0.5,g);
   /* the selected targets and the agreement pilot, with the simulation */
   await f.evaluate(()=>{nbhUI.confirm=async()=>true;document.getElementById('simBtn').click();});await sleep(1500);
-  const sel=await f.evaluate(()=>{const c=document.createElement('canvas').getContext('2d'),out=[];document.querySelectorAll('#selTbl select').forEach(el=>{const cs=getComputedStyle(el);c.font=cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily;
+  const sel=await f.evaluate(()=>{const c=document.createElement('canvas').getContext('2d'),out=[];document.querySelectorAll('#selTbl select').forEach(el=>{
+    /* v25.71: since v24.93 (SETUP.md "Short choices as buttons on a touch screen (Urgency 4/3/2/1 ...)") a short list on a touch
+       screen is a row of buttons (nbh-ui.js; the list itself is kept out of sight for the record and paper): each of its buttons
+       must hold its words */
+    if(el.classList.contains('nbh-seg-src')&&el.nbhSeg){el.nbhSeg.querySelectorAll('button').forEach(b=>{const cs=getComputedStyle(b);c.font=cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily;
+      const room=b.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);out.push({n:el.name+' button',t:b.textContent,w:Math.ceil(c.measureText(b.textContent).width),room:Math.floor(room)});});return;}
+    const cs=getComputedStyle(el);c.font=cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily;
     const t=el.selectedIndex>=0?el.options[el.selectedIndex].text:'';if(!t)return;const room=el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);out.push({n:el.name,t,w:Math.ceil(c.measureText(t).width),room:Math.floor(room)});});return out;});
   ok('3 the selected targets\' Type, Urgency and sheet choices fit their boxes ("Cluster (multiple topographies)", "Replacement / alternative behavior")',sel.length>=10&&!sel.filter(x=>x.w>x.room).length,sel.filter(x=>x.w>x.room));
   await f.evaluate(()=>{const b=document.querySelector('#viewSeg button[data-view="check"]');if(b)b.click();});await sleep(600);
