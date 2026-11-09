@@ -116,7 +116,7 @@ const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Stri
   const g=await p.evaluate(()=>({bands:[...document.querySelectorAll('section.only-guide h2.nbh-band')].map(h=>h.textContent),lab:(document.querySelector('details.bc-lab')||{}).className||'',
     labRows:document.querySelectorAll('details.bc-lab tr').length,school:/In a school/.test(document.querySelector('section.only-guide').textContent)}));
   ok('21 I220 the Guide keeps what a school case uses ("What Matters for a School Case"); the laboratory detail is folded away and does not print',
-    g.bands.includes('What Matters for a School Case')&&!g.bands.includes('What the Early Work Established')&&/noprint/.test(g.lab)&&g.labRows===3&&g.school,g);
+    /* v25.70: the shared layout (fx2) sets the bands in sentence case on screen */g.bands.some(b=>/^what matters for a school case$/i.test(b))&&!g.bands.some(b=>/^what the early work established$/i.test(b))&&/noprint/.test(g.lab)&&g.labRows===3&&g.school,g);
   await p.close();
 
   /* F433 in the workstation: the case, PR-1 and Today */

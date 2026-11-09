@@ -275,7 +275,7 @@ const ago=ms=>new Date(Date.now()-ms).toISOString();
  /* ---------------- W: What's new ---------------- */
  if(want('W'))try{
   const NEXT='v25.70';
-  const routed=async c=>{await c.route('**/NBH-Workstation/index.html',async r=>{const res=await r.fetch();let b=await res.text();b=b.replace("const WS_REL='v25.69';","const WS_REL='"+NEXT+"';");await r.fulfill({response:res,body:b});});};
+  const routed=async c=>{await c.route('**/NBH-Workstation/index.html',async r=>{const res=await r.fetch();let b=await res.text();b=b.replace(/const WS_REL='[^']*';/,"const WS_REL='"+NEXT+"';");await r.fulfill({response:res,body:b});});};
   /* a device that has kept a student, on v25.69 */
   const c=await ctxFor(br,1180,820,true);await c.addInitScript(()=>{try{if(window.top===window&&!sessionStorage.getItem('v2570w')){sessionStorage.setItem('v2570w','1');localStorage.setItem('nbh.ws.rel','v25.69');localStorage.setItem('nbh.caseload.off','1');}}catch(e){}});
   await routed(c);const p=await shell(c,'W',null);
@@ -299,6 +299,8 @@ const ago=ms=>new Date(Date.now()-ms).toISOString();
   ok('W4 a new device (no student ever kept): no card; the version is noted',!w4.card&&w4.rel===NEXT,w4);await c4.close();
   /* the version the list does not describe (v25.69 as shipped now): no card */
   const c5=await ctxFor(br,1180,820,true);await c5.addInitScript(()=>{try{if(window.top===window&&!sessionStorage.getItem('v2570w')){sessionStorage.setItem('v2570w','1');localStorage.setItem('nbh.ws.rel','v25.68');localStorage.setItem('nbh.caseload.off','1');}}catch(e){}});
+  /* v25.70 release: the shipped version is now the list's own, so the page is served as an older one (v25.69) */
+  await c5.route('**/NBH-Workstation/index.html',async r=>{const res=await r.fetch();let b=await res.text();b=b.replace(/const WS_REL='[^']*';/,"const WS_REL='v25.69';");await r.fulfill({response:res,body:b});});
   const p5=await shell(c5,'W5',null);await p5.evaluate(()=>todayOpen());await sleep(800);const w5=await p5.evaluate(()=>({card:!!document.getElementById('wsWhatsNew'),list:__ws2570.wn().v,rel:WS_REL}));
   ok('W5 a version the list does not describe (the list says '+w5.list+', this is '+w5.rel+'): no card',!w5.card,w5);await c5.close();
  }catch(e){ok('W: the run finished without an error',false,String(e.stack||e).slice(0,600));}

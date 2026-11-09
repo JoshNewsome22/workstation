@@ -7825,7 +7825,7 @@ function pvDiff(p,k){const S=VIDS[k].shows,L=String(p.lab||''),D=prm(p,/interrup
  if(S.fn){const f=p.fn||[],I=prm(p,/interval/i);if(f.length&&f.indexOf(S.fn)<0&&FNW[f[0]])return 'This card is for behavior maintained by '+FNW[f[0]]+'.';
   const T=prm(p,/terminal/i);if(!S.cont&&/^(continuous|no interval)/i.test(I)&&!/\bthen\b|at (the )?(first|start)|to start/i.test(I)&&(!T||/^(not|no\b|continuous)/i.test(T)))return 'This card gives the reinforcer throughout, not on a timer.';return '';}
  if(k==='rird_pica')return /pica/i.test(L)?'':'The clip shows pica; this card is for another behavior: '+L.charAt(0).toLowerCase()+L.slice(1)+'.';
- if(k==='rird_motor')return /direction|instruction/i.test(D)?'':'This card redirects to the task or activity at hand, not to one-step directions.';
+ if(k==='rird_motor')return /direction|instruction|motor|nonvocal/i.test(D)&&!/fitting the activity/i.test(D)?'':   /* v25.70: motor demands (touch, clap, do this) are the video's one-step directions */'This card redirects to the task or activity at hand, not to one-step directions.';
  if(k==='rird_vocal')return /imitat|echo/i.test(D)&&!/question/i.test(D)?'This card asks for echoes (vocal imitation), not answers to questions.':'';
  return '';}
 let BID=null;
