@@ -2237,11 +2237,15 @@ ${fx}${e.note?`<div class="cn"><div class="cnh">Clinical note <span>shown on scr
  listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);libGoTo($p('.load')||det,'nearest');});
  det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
   if(b.classList.contains('ld'))load(+b.dataset.t,false);else if(b.classList.contains('add'))load(0,true);
+  else if(b.classList.contains('bdel')&&ev.isTrusted&&nbhUI.undoOffer){const e=libById[cur];if(e&&e.mine)bankUndoable([e.id],'\u201c'+e.lab+'\u201d removed from my bank.').then(()=>{show('');draw();});}   /* v25.71 no question first: Undo puts it back */
   else if(b.classList.contains('bdel')){const e=libById[cur];if(e&&e.mine)nbhUI.confirm('Remove \u201c'+e.lab+'\u201d from my bank?\nA card that loaded it keeps its text.',{ok:'Remove',danger:true}).then(ok=>{if(ok)bankRemove(e.id).then(()=>{show('');draw();});});}
   else if(b.classList.contains('back')){const t=back;libGoTo(document.querySelector(`#tgtWrap .card[data-tgt="${t}"]`));if(libRows[t])libRows[t].focus();}});
  draw();catFill();
  /* v23.17 (review F32) on a shared iPad the bank can be emptied from this browser */
- $p('.bclear').addEventListener('click',async()=>{const n=bank.list.length;if(!n){$p('.bn').textContent='The bank in this browser is empty: nothing to delete.';return;}
+ /* v25.71 (the BCBA, 11/9) a person's tap: no question first; the bank is read before it goes, and Undo puts every definition back
+    exactly as it was kept (bankUndoable). A script's tap is asked as before. */
+ $p('.bclear').addEventListener('click',async ev=>{const n=bank.list.length;if(!n){$p('.bn').textContent='The bank in this browser is empty: nothing to delete.';return;}
+  if(ev.isTrusted&&nbhUI.undoOffer){if(await bankUndoable(bank.list.map(e=>e.id),(n===1?'The one definition':'The '+n+' definitions')+' in my bank deleted from this browser.'))$p('.bn').textContent='Deleted: the bank in this browser is empty.';return;}
   if(!(await nbhUI.confirm('Delete the '+(n===1?'one definition':n+' definitions')+' in my bank from this browser?\nSave the bank to a file first to keep them. A card that loaded one keeps its text.',{ok:'Delete',danger:true})))return;
   for(const e of bank.list.slice())await bankDelete(e.id);await bankLoad();bankTell();$p('.bn').textContent='Deleted: the bank in this browser is empty.';});
  $p('.bsave').addEventListener('click',()=>{const n=bankExport();$p('.bn').textContent=n?'Saved: a file with '+n+' definition'+(n===1?'':'s')+'. Open it on another device with Open a bank file.':'Nothing to save yet.';});
@@ -2986,6 +2990,15 @@ function bankLoad(){return bankReadAll().then(bankApply).catch(()=>{});}
 const bankTell=()=>{try{if(bankChan)bankChan.postMessage({t:'change'});}catch(e){}};
 async function bankPut(e){await bankWrite(e);await bankLoad();bankTell();}
 async function bankRemove(id){await bankDelete(id);await bankLoad();bankTell();}
+/* v25.71 entries of the bank deleted with Undo: what is kept is read first (the records as stored, or localStorage's own text) and
+   put back exactly on Undo; false when it could not be read (nothing deleted) */
+async function bankUndoable(ids,text){let m,raw,ls=null;try{m=await bankReady();raw=await bankReadAll();if(m==='ls')ls=bankLs().getItem(BANK_LS);}catch(e){return false;}
+ const keep=raw.filter(e=>e&&ids.includes(e.id)).map(e=>JSON.parse(JSON.stringify(e)));if(!keep.length)return false;
+ for(const id of ids)await bankDelete(id);await bankLoad();bankTell();
+ nbhUI.undoOffer(text,async()=>{try{if(m==='ls'){const now=bankLsRead(),gone=keep.filter(e=>!now.some(x=>x.id===e.id));if(gone.length===keep.length&&now.length+keep.length===raw.length)bankLs().setItem(BANK_LS,ls);else bankLs().setItem(BANK_LS,JSON.stringify(now.concat(gone)));}
+   else for(const e of keep)await bankWrite(e);}catch(e){return false;}
+  await bankLoad();bankTell();const have=new Set((await bankReadAll()).map(e=>e.id));return keep.every(e=>have.has(e.id));},{back:keep.length===1?'The definition is back in my bank.':'The '+keep.length+' definitions are back in my bank.'});
+ return true;}
 function bankExport(){const o={nbh:'tb1-bank',v:1,saved:new Date().toISOString(),count:bank.list.length,entries:bank.list.map(e=>Object.assign({},e))};
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='TB-1_my-bank_'+nbhDay.today()+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{try{URL.revokeObjectURL(a.href);}catch(e){}a.remove();},3000);return o.count;}
 function bankImport(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{let o=null;try{o=JSON.parse(String(r.result||''));}catch(e){}if(!o||o.nbh!=='tb1-bank'||!Array.isArray(o.entries))return rej(new Error('That is not a bank file of Form TB-1.'));res(o);};r.onerror=()=>rej(new Error('The file could not be read.'));r.readAsText(file);})

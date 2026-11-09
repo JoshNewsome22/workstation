@@ -938,8 +938,11 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       $('#rbBox').addEventListener('input',function(){paintBox();});
       $('#rbBox').addEventListener('change',function(){var v=$('#rbBox').value.trim();rb().addr=/^https?:\/\//i.test(v)?v:'';try{if(/^https?:\/\//i.test(v))localStorage.setItem(DEV,v);}catch(e){}changed();C.ensure().then(function(){paintBox();});});
       $('#rbCollect').addEventListener('click',function(){K.collect(false);});
-      $('#rbPurge').addEventListener('click',function(){var b=rb().box;if(!b||!b.got.length)return;
+      $('#rbPurge').addEventListener('click',function(ev){var b=rb().box;if(!b||!b.got.length)return;
         var go=function(){C.purge().then(function(j){var t=j?j.deleted+' repl'+(j.deleted===1?'y':'ies')+' removed from the site.':'';paintBox();if(t){$('#rbCollectLine').textContent=t;toast(t,'ok');}});};
+        /* v25.71 (the BCBA, 11/9) a person's tap: no question first; the site is asked only when the message with Undo goes
+           (Undo, or the page closed first: nothing is removed from the site) */
+        if(ev&&ev.isTrusted&&window.nbhUI&&nbhUI.undoLater){var n=b.got.length;nbhUI.undoLater('The '+n+' collected repl'+(n===1?'y is':'ies are')+' removed from the site in a few seconds (the answers stay in this file).',go,{back:'Nothing was removed from the site.'});return;}
         if(window.nbhUI&&nbhUI.confirm)nbhUI.confirm('Remove the '+b.got.length+' collected repl'+(b.got.length===1?'y':'ies')+' from the site?\nThe answers stay in this file.',{ok:'Remove'}).then(function(y){if(y)go();});else go();});
       $('#rbHeld').addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button[data-hadd],button[data-hdrop],button[data-hkeep]');var bx=rb().box;if(!b||!bx)return;var i=+(b.getAttribute('data-hadd')!=null?b.getAttribute('data-hadd'):b.getAttribute('data-hkeep')!=null?b.getAttribute('data-hkeep'):b.getAttribute('data-hdrop')),o=bx.held[i];if(!o)return;bx.held.splice(i,1);
         var p=Object.assign({},o);delete p.why;delete p.sentTo;

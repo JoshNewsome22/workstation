@@ -5760,17 +5760,26 @@ async function autoDialog(offer){
   let chose=false;
   $('#dlgBody').querySelectorAll('button[data-as]').forEach(b=>b.addEventListener('click',async()=>{
     const r=rows[+b.dataset.i];if(!r)return;
-    if(b.dataset.as==='d'){
-      if(!(await wsUI.confirm('Delete the copy of '+(r.student||'the unnamed student')+' ('+Object.keys(r.forms).join(', ')+')?\nIt cannot be brought back.',{ok:'Delete',danger:true})))return;
+    if(b.dataset.as==='d'){const U71=window.__ws2571;let mk=null;   /* v25.71 one copy too: no question first, Undo puts it back */
+      if(U71)try{mk=await U71.mark({idb:{'nbh-copies':['copies']},ls:/^nbh\.copies\./});}catch(e){mk=null;}
+      if(!mk&&!(await wsUI.confirm('Delete the copy of '+(r.student||'the unnamed student')+' ('+Object.keys(r.forms).join(', ')+')?\nIt cannot be brought back.',{ok:'Delete',danger:true})))return;
+      const a0={key:A.key,written:A.written,forms:A.forms,sig:state.autoSig};
       await CP.del(r.key);if(mine(r)){A.key=null;A.written='';A.forms={};state.autoSig=caseSig();}
-      chose=true;$('#dlg').close();autoDialog(offer);return;}
+      chose=true;$('#dlg').close();await autoDialog(offer);
+      if(mk)U71.copiesOffer(mk,1,a0,'The copy of '+(r.student||'the unnamed student')+' deleted.',()=>{if($('#dlg').open&&/^(Autosave|Unsaved work found)/.test($('#dlgTitle').textContent)){chose=true;$('#dlg').close();autoDialog(offer);}});
+      return;}
     chose=true;$('#dlg').close();autoRestore(r);
   }));
   const tg=$('#autoToggle');if(tg)tg.addEventListener('click',()=>{autoSet(!on);$('#dlg').close();
     if(on)wsUI.toast('Autosave is off. The copies already kept stay until you delete them or they expire.',{ms:8000});});
-  const cl=$('#autoClear');if(cl)cl.addEventListener('click',async()=>{
-    if(!(await wsUI.confirm('Delete every copy Autosave keeps in this browser ('+rows.length+')?\nThey cannot be brought back.',{ok:'Delete all',danger:true})))return;
-    await CP.clear();A.key=null;A.written='';A.forms={};state.autoSig=caseSig();$('#dlg').close();wsUI.toast('Every copy this workstation kept in this browser was deleted. A form still open in another tab keeps copying until that tab is closed.',{ms:9000});chip();});
+  /* v25.71 (the BCBA, 11/9) no question first: the copies are read before they go, and Undo puts them back (ws-v2571); asked
+     only where they cannot be read first */
+  const cl=$('#autoClear');if(cl)cl.addEventListener('click',async()=>{const n=rows.length,U71=window.__ws2571;let mk=null;
+    if(U71)try{mk=await U71.mark({idb:{'nbh-copies':['copies']},ls:/^nbh\.copies\./});}catch(e){mk=null;}
+    if(!mk&&!(await wsUI.confirm('Delete every copy Autosave keeps in this browser ('+n+')?\nThey cannot be brought back.',{ok:'Delete all',danger:true})))return;
+    const a0={key:A.key,written:A.written,forms:A.forms,sig:state.autoSig};
+    await CP.clear();A.key=null;A.written='';A.forms={};state.autoSig=caseSig();$('#dlg').close();
+    if(!(mk&&U71.copiesOffer(mk,n,a0)))wsUI.toast('Every copy this workstation kept in this browser was deleted. A form still open in another tab keeps copying until that tab is closed.',{ms:9000});chip();});
   $('#dlg').addEventListener('close',function onClose(){$('#dlg').removeEventListener('close',onClose);if(!chose)chip();});
 }
 async function autoRestore(r){
@@ -7338,9 +7347,10 @@ async function clExpire(){const n=clExpireDays();if(!n)return 0;const L=await cl
   const old=L.filter(r=>r.key!==me&&!r.unfiled&&!isStaffRec(r)&&Date.parse(r.saved)<cut);   /* v22.30 the staff record is kept */for(const r of old)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   if(old.length)wsUI.toast(old.length+' student'+(old.length===1?' was':'s were')+' not saved for '+n+' weeks and '+(old.length===1?'is':'are')+' no longer kept on this '+HERE+' (their case files are not touched).',{ms:9000});return old.length;}
 async function clRemoveAll(){const L=await clList()||[];
-  if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, their case history (the earlier saves kept here), every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it. This cannot be undone.',{ok:'Remove everything',danger:true})))return;
+  if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, their case history (the earlier saves kept here), every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it.'+(window.__ws2571?' For a few seconds afterwards, Undo puts it all back.':' This cannot be undone.'),{ok:'Remove everything',danger:true})))return;
   const unf=L.filter(r=>r.unfiled);
   if(unf.length&&!(await wsUI.confirm(unf.length+' of them '+(unf.length===1?'was':'were')+' kept here but never saved to a file: '+unf.map(clName).join(', ')+'\nTheir work is only on this '+HERE+'. Remove anyway?',{ok:'Remove anyway',danger:true})))return;
+  try{if(window.__ws2571)await __ws2571.rmAllMark();}catch(e){}   /* v25.71 what goes is read now, for Undo (ws-v2571) */
   for(const r of L)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   try{if(CP&&CP.clear)await CP.clear();}catch(e){}try{autoWipe();}catch(e){}try{await hxWipe();}catch(e){}   /* v21.91 every point of case history too */
   try{clearTimeout(mediaSweepT);await mediaSweep({all:true});}catch(e){}   /* v22.56 every sound and picture kept in the store, but those the case on screen holds */
@@ -8382,6 +8392,12 @@ document.addEventListener('click',async e=>{const d=e.target.closest&&e.target.c
   const c=await wsUI.choose('Remove '+clName(r)+'?\nEverywhere takes them off this '+drvDev()+', the other devices and your Google Drive: their case file and every replaced copy go to Drive\u2019s trash, which Google empties after 30 days (empty it yourself sooner when a record must be destroyed now). Only here keeps them in Drive and on the other devices. Either way, their case history on this '+drvDev()+' is deleted.',
     [{v:'all',label:'Remove everywhere',kind:'danger'},{v:'here',label:'Only this '+drvDev()},{v:'',label:'Cancel'}]);if(!c)return;
   const h=await drvHash(drvKey(r));
+  /* v25.71 a person's tap: Undo for either answer; Everywhere tells Drive only when the message goes (ws-v2571) */
+  if(e.isTrusted&&window.__ws2571){const fid=r.drv&&r.drv.id||'',all=c==='all';
+    const me=await __ws2571.drvRm({key:r.key,h,name:clName(r),all,remote:all&&fid?async()=>{const g=drvGone().filter(x=>x.id!==fid);g.push({id:fid,h});drvGoneSet(g);drvSoon(true,100);}:null,
+      text:clName(r)+' removed from this '+drvDev()+'.'+(all&&fid?' Google Drive and your other devices follow in a few seconds.':''),
+      back:clName(r)+' is back on this '+drvDev()+(all&&fid?' and stays in Google Drive.':'.'),now:()=>caseloadOpen(),after:()=>drvPaint()});
+    if(me)return;}
   if(c==='all'){if(r.drv&&r.drv.id){const g=drvGone().filter(x=>x.id!==r.drv.id);g.push({id:r.drv.id,h});drvGoneSet(g);}}
   else{const s=drvSkip();s[h]=String(r.drv&&r.drv.ver||'');drvSkipSet(s);}
   try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}clPinSet(r.key,false);delete DRV.conf[r.key];caseloadOpen();if(c==='all')drvSoon(true,100);else drvPaint();},true);
@@ -8651,9 +8667,16 @@ const PWA=(()=>{
     }
     location.reload();
   }
-  async function reset(){
-    const u=unsaved(),off=!navigator.onLine,o=await ask('others',null,4000),n=o&&o.others?o.others.length:0;
-    if(!(await wsUI.confirm('Reset the offline copy?\nThe workstation’s saved files are deleted from this device and the page loads again from the website.'+
+  /* v25.71 (the BCBA, 11/9) a person's Reset with nothing to lose (online, no work outside a case file, no other workstation
+     window): no question first; the message says it is about to happen, with Undo, and nothing is deleted until its time is
+     over (closing the page first resets nothing). Whatever has changed when the time is over is asked about as before. */
+  async function reset(person,timeUp){
+    const u=unsaved(),off=!navigator.onLine,o=await ask('others',null,4000),n=o&&o.others?o.others.length:0,none=!u&&!off&&!n;
+    if(person&&none&&window.__ws2570){try{$('#dlg').close();}catch(e){}
+      const me=__ws2570.offer('The offline copy is reset in a few seconds, and the page loads again from the website.',()=>true,
+        {later:true,back:'The offline copy stays as it is.',end:undone=>{if(!undone)reset(false,true);}});
+      if(me)return;}
+    if(!(timeUp&&none)&&!(await wsUI.confirm('Reset the offline copy?\nThe workstation’s saved files are deleted from this device and the page loads again from the website.'+
       (off?' This device is offline now: until it is online again the workstation will not open here.':'')+
       (u==='typed'?' The open forms hold work that is not in a case file yet; it will be lost.':u?' Anything entered in the open forms since the last Save case will be lost.':'')+
       (n?' Another workstation window is open; it goes on with what it has until it is reloaded.':'')+
@@ -8706,7 +8729,7 @@ const PWA=(()=>{
   }
   $('#dlgBody').addEventListener('click',e=>{
     const b=e.target.closest('#offCheck,#offReload,#offReset,#offSign');if(!b||!$('#offBody'))return;
-    if(b.id==='offCheck')checkNow();else if(b.id==='offReload')reload();else if(b.id==='offReset')reset();else signIn();
+    if(b.id==='offCheck')checkNow();else if(b.id==='offReload')reload();else if(b.id==='offReset')reset(e.isTrusted);else signIn();
   });
   chipEl.addEventListener('click',openDlg);
   $('#pwaReload').addEventListener('click',reload);
@@ -9792,14 +9815,14 @@ const nameOf=f=>T(f.name).replace(/\.json$/i,'');
 const ageDays=f=>Math.floor((Date.now()-Date.parse(f.modifiedTime||0))/864e5);
 const kb=f=>f.size?(+f.size<1048576?Math.max(1,Math.round(+f.size/1024))+' KB':(+f.size/1048576).toFixed(1)+' MB'):'';
 async function trash(id){return drvJson(DAPI+'/'+encodeURIComponent(id)+'?fields=id',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})});}
-let HOLD=null;
+let HOLD=null;const GOING=new Set();   /* v25.71 removed everywhere, waiting for its message to go: not listed */
 async function read(){const fid=await drvFolder(),top=await drvAll("'"+fid+"' in parents and trashed=false");
   const of=top.find(f=>f.mimeType===F&&kind(f)==='old');const old=of?await drvAll("'"+of.id+"' in parents and trashed=false"):[];
   const L=await clList()||[],mine={};for(const r of L){const k=drvKey(r);if(k)mine[await drvHash(k)]=r;}
   return {cases:top.filter(f=>kind(f)==='case'),gone:top.filter(f=>kind(f)==='gone'),people:top.filter(f=>kind(f)==='people'),
     other:top.filter(f=>f.mimeType!==F&&!/^(case|gone|people)$/.test(kind(f))),old:old.filter(f=>f.mimeType!==F),mine};}
 function html(H){const keep=drvKeepDays(),row=(c)=>'<tr>'+c.map(x=>'<td>'+x+'<\/td>').join('')+'<\/tr>';
-  const cases=H.cases.slice().sort((a,b)=>nameOf(a).localeCompare(nameOf(b)));
+  const cases=H.cases.filter(f=>!GOING.has(f.id)).sort((a,b)=>nameOf(a).localeCompare(nameOf(b)));
   const old=H.old.slice().sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)));
   return '<p class="hp-lead">Everything the workstation keeps in your school Google Drive ('+esc(drvAcct())+'), read from Drive just now: the folder <b>'+esc(DRV_FOLDER)+'<\/b> and its <b>'+esc(DRV_OLD)+'<\/b>. Nothing else in your Drive is read.<\/p>'+
     '<h3 class="cl-h">Students’ case files ('+cases.length+')<\/h3>'+(cases.length?'<table class="cl-tbl dh-tbl"><tr><th>Student<\/th><th>Last saved<\/th><th>On this '+esc(drvDev())+'<\/th><th><\/th><\/tr>'+
@@ -9846,6 +9869,17 @@ document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.c
       try{$('#dlg').close();}catch(x){}await openCaseText(j.text,null,{asked:true,quiet:true});
       wsUI.toast('The replaced copy is open. Save case makes it the current copy; closing without saving leaves the current one as it is.',{ms:12000});return;}
     if(t.dataset.dhRm){const f=HOLD.cases.find(x=>x.id===t.dataset.dhRm);if(!f)return;const k=t.dataset.k,here=k&&HOLD.mine[k];
+      /* v25.71 (the BCBA, 11/9) a person's tap: no question first. The row goes and the student leaves this device at once;
+         Drive's trash and the removal marker wait for the message to go (Undo: nothing was sent) (ws-v2571) */
+      if(e.isTrusted&&window.__ws2571){const nm=nameOf(f),paint=()=>{if(HOLD&&$('#dlg').open&&$('#dlgBody').querySelector('.dh-tbl,#dhAgain'))$('#dlgBody').innerHTML=html(HOLD);};
+        GOING.add(f.id);paint();
+        const me=await __ws2571.drvRm({key:here?here.key:'',h:k,name:nm,all:true,
+          remote:async()=>{if(k){const g=drvGone().filter(x=>x.id!==f.id);g.push({id:f.id,h:k});drvGoneSet(g);}else await trash(f.id);GOING.delete(f.id);
+            await drvSync({interactive:true});if($('#dlg').open&&$('#dlgBody').querySelector('#dhAgain'))try{HOLD=await read();$('#dlgBody').innerHTML=html(HOLD);}catch(x){}},
+          text:nm+(here?' removed from this '+drvDev()+'. Drive’s trash and your other devices follow in a few seconds.':' goes to Drive’s trash in a few seconds, and your other devices drop them.'),
+          back:nm+(here?' is back on this '+drvDev()+' and stays in Google Drive.':' stays in Google Drive.'),
+          undo:()=>{GOING.delete(f.id);paint();},after:undone=>{GOING.delete(f.id);if(undone)paint();}});
+        if(me)return;GOING.delete(f.id);paint();}
       if(!(await wsUI.confirm('Remove '+nameOf(f)+' everywhere?\nTheir case file and every replaced copy go to Drive’s trash (Google empties it after 30 days), and every device drops them at its next sync'+(here?', this '+drvDev()+' now':'')+'.',{ok:'Remove everywhere',danger:true})))return;
       if(k){const g=drvGone().filter(x=>x.id!==f.id);g.push({id:f.id,h:k});drvGoneSet(g);}else await trash(f.id);
       if(here){try{await clTx('readwrite',st=>st.delete(here.key));}catch(x){}try{clPinSet(here.key,false);}catch(x){}delete DRV.conf[here.key];}
@@ -11668,13 +11702,13 @@ const dl=force?null:[...document.querySelectorAll('dialog[open]')].pop();
 if(dl&&from===undefined){let ln=dl.querySelector(':scope>.sr-dmsg');if(!ln){ln=mk('p',{class:'sr-dmsg',role:'status','aria-live':'polite'});const ft=dl.querySelector(':scope>.df');dl.insertBefore(ln,ft||null);}
 ln.className='sr-dmsg'+(opt.kind?' '+opt.kind:'');ln.textContent=String(text);clearTimeout(ln.__t);ln.__t=setTimeout(()=>{ln.textContent='';},Math.max(8000,opt.ms||0));
 const tx=String(text),t0=Date.now();dl.addEventListener('close',()=>{if(ln.textContent===tx&&Date.now()-t0<1500){ln.textContent='';showToast(tx,opt,undefined,true);}},{once:true});return ln;}
-[...h.children].forEach(c=>c.remove());
+[...h.children].forEach(c=>{if(!c.__keep)c.remove();});   /* v25.71 a message whose action waits for its time stays */
 const o=oneLine(text),t=mk('div',{class:'ws-toast'+(opt.kind?' '+opt.kind:'')});
 const sp=mk('span',{class:'sr-tt'});sp.textContent=o.t;if(o.more){sp.setAttribute('aria-hidden','true');t.appendChild(mk('span',{class:'sr',text:String(text)}));}t.appendChild(sp);
 if(o.more){const v=mk('button',{type:'button',class:'sr-tv'},'View');v.addEventListener('click',()=>{gone();const b=from?[$('#wsStat'),$('#aStat2')].find(x=>x&&x.offsetParent):null;if(b)b.click();else dialog('Message','<p>'+esc(String(text))+'</p>');});t.appendChild(v);}
 const x=mk('button',{type:'button',class:'sr-tx','aria-label':'Dismiss'},'&times;');t.appendChild(x);
 let tm=0,held=false;const gone=()=>{clearTimeout(tm);if(t.parentNode)t.parentNode.removeChild(t);};
-const arm=ms=>{clearTimeout(tm);tm=setTimeout(()=>{if(held)return arm(2000);const own=t.querySelectorAll('button').length-(o.more?2:1);if(own>0&&!t.__long){t.__long=1;return arm(Math.max(0,(opt.ms||12000)-6000));}gone();},ms);};
+const arm=ms=>{clearTimeout(tm);tm=setTimeout(()=>{if(held)return arm(2000);if(t.__undo&&document.hidden){t.__hid=1;return arm(1000);}if(t.__hid){t.__hid=0;t.__long=1;return arm(Math.max(6000,opt.ms||8000));}const own=t.querySelectorAll('button').length-(o.more?2:1);if(own>0&&!t.__long){t.__long=1;return arm(Math.max(0,(opt.ms||12000)-6000));}gone();},ms);};
 t.addEventListener('pointerenter',()=>{held=true;});t.addEventListener('pointerleave',()=>{held=false;});t.addEventListener('focusin',()=>{held=true;});t.addEventListener('focusout',()=>{held=false;});
 x.addEventListener('click',gone);B.style.setProperty('--sr-tl',stageLeft()+'px');h.appendChild(t);arm(6000);return t;}
 wsUI.toast=(text,opt)=>showToast(text,opt);
@@ -12449,17 +12483,20 @@ const frameWin=id=>{try{const f=state.frames[id];return f&&f.contentWindow||null
 /* ================= 1. Undo ================= */
 const UN={live:[],hold:null,media:0,sweep:false};
 /* the message with Undo: at the foot of the window, or inside the box that is open (a toast would sit under it) */
-function offer(text,fn,opt){opt=opt||{};const dl=topModal();let el,b,done=false,held=false,tm=0;
+/* v25.71 opt.later: what the action does is done only when the time is over (Google Drive, the website, the offline copy):
+   the message is not pushed off by the next message (__keep), and none waits out its time while the page is hidden: on
+   coming back the full time starts again (__undo; also in showToast) */
+function offer(text,fn,opt){opt=opt||{};const dl=topModal();let el,b,done=false,held=false,hid=false,tm=0;
   const end=undone=>{if(done)return;done=true;clearTimeout(tm);if(el&&el.parentNode)el.parentNode.removeChild(el);UN.live=UN.live.filter(x=>x!==me);try{if(opt.end)opt.end(!!undone);}catch(e){}};
-  const arm=ms=>{clearTimeout(tm);tm=setTimeout(()=>{if(held)return arm(1500);end(false);},ms);};
+  const arm=ms=>{clearTimeout(tm);tm=setTimeout(()=>{if(held)return arm(1500);if(document.hidden){hid=true;return arm(1000);}if(hid){hid=false;return arm(opt.ms||8000);}end(false);},ms);};
   b=mk('button',{type:'button',class:'ws-undo-b','aria-label':'Undo: '+text},'Undo');
   if(dl){el=mk('div',{class:'ws-undo-row',role:'status','aria-live':'polite'});el.appendChild(mk('span',{text}));el.appendChild(b);
     const x=mk('button',{type:'button',class:'ws-undo-x','aria-label':'Dismiss'},'&times;');x.addEventListener('click',()=>end(false));el.appendChild(x);
-    dl.insertBefore(el,dl.querySelector(':scope>.df')||null);dl.addEventListener('close',()=>end(false),{once:true});
+    dl.insertBefore(el,dl.querySelector(':scope>.df')||null);{const shut=()=>{if(dl.open)return;dl.removeEventListener('close',shut);end(false);};dl.addEventListener('close',shut);}   /* v25.71 a close queued before the box opened again is not this one's */
     el.addEventListener('pointerenter',()=>{held=true;});el.addEventListener('pointerleave',()=>{held=false;});el.addEventListener('focusin',()=>{held=true;});el.addEventListener('focusout',()=>{held=false;});
     arm(opt.ms||8000);}
   else{let st=null;try{st=window.__wsSR&&__wsSR.showToast?__wsSR.showToast(text,{ms:opt.ms||8000},''):wsUI.toast(text,{ms:opt.ms||8000});}catch(e){st=null;}
-    if(!st)return null;el=st;el.insertBefore(b,el.lastChild);
+    if(!st)return null;el=st;el.__undo=1;if(opt.later)el.__keep=1;el.insertBefore(b,el.lastChild);
     new MutationObserver((r,o)=>{if(!el.isConnected){o.disconnect();end(false);}}).observe(el.parentNode||B,{childList:true});}
   b.addEventListener('click',async()=>{if(done)return;b.disabled=true;let ok=false;try{ok=await fn();}catch(e){ok=false;}end(true);
     const msg=ok===false?'Undo could not put everything back. Check it before you go on.':(opt.back||'Undone.');
@@ -12648,7 +12685,145 @@ async function placeBoot(){try{await kvLoad;}catch(e){}await sleepMs(2600);
   catch(e){}
   PL.decided=true;placeKeep();}
 placeBoot();
-window.__ws2570={offer,undoLive:()=>UN.live.length,phases,stNow,ringsHtml,placeNow,placeRead,placeKeep,wn:()=>WN,wnOk};
+window.__ws2570={offer,undoLive:()=>UN.live.length,backup:backupOf,restore:restoreRec,mediaHold:()=>{UN.media++;},mediaFree,phases,stNow,ringsHtml,placeNow,placeRead,placeKeep,wn:()=>WN,wnOk};
+})();
+</script>
+<script id="ws-v2571">
+/* v25.71 (the BCBA, 11/9: "drop the are you sure questions if undo covers the action") Undo for what v25.70 still only
+   asked about. Two kinds:
+   - On this device (put back exactly): what the action deletes is read first, kept in memory (never written anywhere
+     else), and put back on Undo: every record of the stores it empties (IndexedDB, read record by record, pictures and
+     sounds as their bytes), and every localStorage and sessionStorage entry it removes or changes (an entry changed again
+     since is left as it is now). Delete all copies (Autosave): no question first. Remove all student data: its question
+     is kept (the most destructive: Undo follows the question), and Undo puts back the caseload, the case history, the
+     Autosave copies, the shares' starting points, the settings it clears (Google Drive's, the caseload's times), the
+     pictures and sounds, and this tab's Google sign-in. More than about 400 MB is not held for Undo (the iPad's memory):
+     then the message says so; the question has already been answered.
+   - Not on this device (done only when the time is over): Remove everywhere (Google Drive; from Caseload's Remove and
+     from What Drive holds), Reset the offline copy, and in the forms the reply box's Remove the collected replies from
+     the site (nbh-ui.js, undoLater). Nothing is sent while the message is up, and Undo sends nothing. The message is not
+     pushed off by the next message, and while the page is hidden its time stands still (on coming back it starts again).
+     The page closed before the time is over: the Drive part, the site part and the reset are not done (a removal no one
+     saw the end of is not made). Remove everywhere then leaves the student removed from this device only (as Only this
+     iPad does), and the next start says so (nbh.undo.pending holds the initials until then). Only a person's tap waits:
+     a script's (the checks') is asked and done at once, as before.
+   Reset the offline copy still asks when the page that loads again would lose something (work not in a case file), when
+   the device is offline (the workstation would not open here) and when another workstation window is open. */
+(()=>{
+if(window.__ws2571)return;
+const U70=window.__ws2570;if(!U70)return;
+const $=s=>document.querySelector(s),T=v=>String(v==null?'':v).trim();
+const LS=()=>{try{return window.localStorage;}catch(e){return null;}},SS=()=>{try{return window.sessionStorage;}catch(e){return null;}};
+
+/* ---- the stores, read before and put back ---- */
+const CAP=400*1048576;
+function idbOpen(name){return new Promise(res=>{let r,done=false;const fin=v=>{if(!done){done=true;res(v);}else if(v)try{v.close();}catch(e){}};
+  try{if(!window.indexedDB)return fin(null);r=indexedDB.open(name);}catch(e){return fin(null);}
+  setTimeout(()=>fin(null),5000);
+  r.onupgradeneeded=()=>{try{r.transaction.abort();}catch(e){}};   /* a database that is not there is not made here */
+  r.onsuccess=()=>{const db=r.result;try{db.onversionchange=()=>db.close();}catch(e){}fin(db);};r.onerror=()=>fin(null);r.onblocked=()=>fin(null);});}
+function walk(v,m,par,k){if(v==null)return;const t=typeof v;if(t==='string'){m.bytes+=v.length*2;return;}if(t!=='object')return;
+  if(typeof Blob!=='undefined'&&v instanceof Blob){m.bytes+=v.size;m.blobs.push([par,k,v]);return;}
+  if(v instanceof ArrayBuffer||ArrayBuffer.isView(v)){m.bytes+=v.byteLength;return;}if(v instanceof Date)return;
+  if(Array.isArray(v)){for(let i=0;i<v.length;i++)walk(v[i],m,v,i);return;}for(const x of Object.keys(v))walk(v[x],m,v,x);}
+async function idbSnap(spec){const m={bytes:0,blobs:[]},out=[];
+  for(const name of Object.keys(spec)){const db=await idbOpen(name);if(!db)continue;
+    try{const have=spec[name].filter(s=>db.objectStoreNames.contains(s));if(!have.length)continue;
+      const st=await new Promise((res,rej)=>{const t=db.transaction(have,'readonly'),o={};
+        have.forEach(s=>{const os=t.objectStore(s);o[s]={kp:os.keyPath,rows:[]};const q=os.openCursor();q.onsuccess=()=>{const c=q.result;if(c){o[s].rows.push([c.primaryKey,c.value]);c.continue();}};});
+        t.oncomplete=()=>res(o);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||new Error('aborted'));});
+      have.forEach(s=>st[s].rows.forEach(row=>walk(row[1],m,row,1)));out.push({name,st});}
+    finally{try{db.close();}catch(e){}}
+    if(m.bytes>CAP)return null;}
+  /* a picture or a sound: its bytes, so it outlives its record */
+  for(const [par,k,b] of m.blobs){const buf=await b.arrayBuffer();par[k]=(typeof File!=='undefined'&&b instanceof File)?new File([buf],b.name,{type:b.type,lastModified:b.lastModified}):new Blob([buf],{type:b.type});}
+  return out;}
+/* each record read before that is not there now goes back (one written since under the same key is newer: it stays) */
+async function idbBack(snap){let all=true;
+  for(const d of snap){const db=await idbOpen(d.name);if(!db){all=false;continue;}
+    try{const names=Object.keys(d.st).filter(s=>db.objectStoreNames.contains(s));if(names.length<Object.keys(d.st).length)all=false;if(!names.length)continue;
+      await new Promise((res,rej)=>{const t=db.transaction(names,'readwrite');
+        names.forEach(s=>{const os=t.objectStore(s),inl=d.st[s].kp!=null;d.st[s].rows.forEach(([k,v])=>{const q=os.count(k);q.onsuccess=()=>{if(!q.result){if(inl)os.put(v);else os.put(v,k);}};});});
+        t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||new Error('aborted'));});}
+    catch(e){all=false;}finally{try{db.close();}catch(e){}}}
+  return all;}
+const VOL=/^nbh\.copies\.hb\|/;   /* a tab's heartbeat, written every 5 s: never part of what was removed */
+const reOf=x=>x instanceof RegExp?x:null;
+function stOf(s,re){const o={};if(!s)return o;try{for(let i=0;i<s.length;i++){const k=s.key(i);if(k!=null&&!VOL.test(k)&&(!re||re.test(k)))o[k]=s.getItem(k);}}catch(e){}return o;}
+function stBack(s,before,after){if(!s)return true;let all=true;
+  new Set(Object.keys(before).concat(Object.keys(after))).forEach(k=>{const b=k in before?before[k]:null,a=k in after?after[k]:null;if(b===a)return;
+    let cur=null;try{cur=s.getItem(k);}catch(e){}if(cur!==a)return;   /* changed again since: it stays as it is now */
+    try{if(b===null)s.removeItem(k);else s.setItem(k,b);}catch(e){all=false;}});return all;}
+/* o: {idb: {database: [stores]}, ls: true or a pattern of keys, ss: the same}; null when it could not be read or is too much */
+async function mark(o){let idb=[];if(o.idb){try{idb=await idbSnap(o.idb);}catch(e){idb=null;}if(!idb)return null;}
+  return {o,idb,ls:o.ls?stOf(LS(),reOf(o.ls)):null,ss:o.ss?stOf(SS(),reOf(o.ss)):null};}
+/* what the removal left: the entries it changed are told from those changed later */
+function marked(mk){if(mk.ls)mk.lsA=stOf(LS(),reOf(mk.o.ls));if(mk.ss)mk.ssA=stOf(SS(),reOf(mk.o.ss));}
+async function back(mk){let ok=await idbBack(mk.idb);if(mk.ls&&!stBack(LS(),mk.ls,mk.lsA||{}))ok=false;if(mk.ss&&!stBack(SS(),mk.ss,mk.ssA||{}))ok=false;try{__clCache.drop();}catch(e){}return ok;}
+const dlgIs=t=>{try{return $('#dlg').open&&T($('#dlgTitle').textContent)===t;}catch(e){return false;}};
+
+/* ---- Remove all student data: the question stays; Undo after it ---- */
+const RM={tok:undefined,mark:null};
+const RM_IDB={'nbh-caseload':['cases'],'nbh-history':['points','texts','drive'],'nbh-copies':['copies'],'nbh-share':['shares'],'nbh-settings':['kv'],'nbh-media':['blobs']};   /* the pictures and sounds last: a sweep meanwhile finds the records that hold them already back */
+async function rmAllMark(){let mk=null;try{mk=await mark({idb:RM_IDB,ls:true,ss:true});}catch(e){mk=null;}
+  if(!mk){RM.mark={none:true};return;}
+  if(RM.tok!==undefined){if(RM.tok===null)delete mk.ss['nbh.google.tok'];else mk.ss['nbh.google.tok']=RM.tok;}   /* the Drive part's own probe is not what was there */
+  const A=state.auto;mk.auto={key:A.key,written:A.written,forms:A.forms,continued:A.continued,fileAt:A.fileAt,at:A.at,sig:state.autoSig};
+  mk.kv=Object.assign({},KV.mem);mk.conf=Object.assign({},DRV.conf);mk.drv=!!drvLs('nbh.drive.on');RM.mark=mk;}
+{const ra=clRemoveAll;clRemoveAll=async function(){let tok=null;try{tok=sessionStorage.getItem('nbh.google.tok');}catch(e){}RM.tok=tok;RM.mark=null;
+  let out;try{out=await ra.apply(this,arguments);}finally{RM.tok=undefined;}
+  const mk=RM.mark;RM.mark=null;if(!mk)return out;
+  if(mk.none){wsUI.toast('Every student’s data is removed from this '+HERE+'. It was too much to keep for Undo.',{kind:'warn',ms:9000});return out;}
+  marked(mk);const went=mk.drv&&!drvLs('nbh.drive.on');
+  U70.offer('Every student’s data is removed from this '+HERE+'.'+(went?' Google Drive is no longer used here.':''),async()=>{
+    const ok=await back(mk);
+    Object.keys(mk.kv).forEach(k=>{if(!(k in KV.mem))KV.mem[k]=mk.kv[k];});
+    if(!Object.keys(DRV.conf).length)Object.assign(DRV.conf,mk.conf);
+    const A=state.auto;if(!A.key&&mk.auto.key){A.key=mk.auto.key;A.written=mk.auto.written;A.forms=mk.auto.forms;A.continued=mk.auto.continued;A.fileAt=mk.auto.fileAt;A.at=mk.auto.at;state.autoSig=mk.auto.sig;}
+    try{if(dlgIs('Caseload'))await caseloadOpen();}catch(e){}try{await paintBlank();}catch(e){}try{drvPaint();}catch(e){}try{chip();}catch(e){}
+    return ok;},{back:'Every student’s data is back on this '+HERE+'.'});
+  return out;};}
+
+/* ---- Delete all copies (Autosave): no question first ---- */
+function copiesOffer(mk,n,a0,text,after){marked(mk);const A=state.auto;
+  return U70.offer(text||'The '+n+' Autosave cop'+(n===1?'y':'ies')+' in this browser deleted.',async()=>{const ok=await back(mk);
+    if(!A.key&&a0.key){A.key=a0.key;A.written=a0.written;A.forms=a0.forms;state.autoSig=a0.sig;}try{chip();}catch(e){}try{if(after)after();}catch(e){}return ok;},{back:text?'The copy is back.':'The Autosave copies are back.'});}
+
+/* ---- the parts done only when the time is over, and those the page closed on ---- */
+const P_K='nbh.undo.pending';
+function pendAll(){const s=LS();try{const a=JSON.parse(s&&s.getItem(P_K)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function pendSet(a){const s=LS();try{if(a.length)s.setItem(P_K,JSON.stringify(a));else s.removeItem(P_K);}catch(e){}}
+function pendAdd(o){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,7);pendSet(pendAll().concat([Object.assign({id,at:Date.now(),tab:state.auto.tab},o)]));return id;}
+function pendDel(id){if(id)pendSet(pendAll().filter(x=>x.id!==id));}
+/* the next start: a removal the page closed on (its window is no longer open, or it is more than 2 minutes old) */
+setTimeout(async()=>{let alive={};try{alive=await CP.live();}catch(e){alive={};}const me=state.auto.tab;
+  const old=pendAll().filter(x=>x.tab!==me&&(!alive[x.tab]||Date.now()-(+x.at||0)>120000));if(!old.length)return;pendSet(pendAll().filter(x=>!old.some(y=>y.id===x.id)));
+  old.filter(x=>x.k==='drive').forEach((x,i)=>setTimeout(()=>{const w=x.ini||'A student';
+    wsUI.toast('Remove everywhere ('+w+') was not finished: the workstation closed while its Undo was still offered. '+(x.here?w+' was removed from this '+HERE+' only; Google Drive and your other devices still have them (Caseload, What Drive holds, removes them everywhere).':'Nothing was removed.'),{kind:'warn',ms:15000});},i*600));},3500);
+const iniOf=s=>{const w=String(s||'').replace(/\([^)]*\)/g,' ').trim().split(/\s+/).filter(x=>/^[A-Za-zÀ-ɏ]/.test(x));return w.length?w.map(x=>x.charAt(0).toUpperCase()+'.').join(''):'';};
+/* a student removed while Google Drive is used. o: {key: their record here ('' when this device does not hold them), h: their
+   hashed key, name, all: everywhere, remote(): what Drive is told when the time is over, text, back, now(): after the removal
+   here, after(undone): when the message goes, undo()}. The record here goes at once (read first: Undo brings it back with its
+   case history and pin); meanwhile a sync leaves Drive's copy alone (the skip list, as Only this iPad does). */
+async function drvRm(o){let bk=null;if(o.key){try{bk=await U70.backup(o.key);}catch(e){bk=null;}if(!bk)return null;}
+  if(bk)U70.mediaHold();
+  const s=drvSkip(),had=o.h&&Object.prototype.hasOwnProperty.call(s,o.h)?s[o.h]:undefined;
+  if(bk&&o.h){s[o.h]=String(bk.r.drv&&bk.r.drv.ver||'');drvSkipSet(s);}
+  const later=!!(o.all&&o.remote),pid=later?pendAdd({k:'drive',ini:bk?drvIni(bk.r):iniOf(o.name),here:!!bk}):'';
+  if(bk){try{await clTx('readwrite',st=>st.delete(o.key));}catch(x){}try{clPinSet(o.key,false);}catch(x){}delete DRV.conf[o.key];}
+  try{if(o.now)await o.now();}catch(e){}
+  const fin=async undone=>{if(bk)U70.mediaFree();
+    if(!undone&&later){let p=null;try{p=o.remote();}catch(e){p=Promise.reject(e);}pendDel(pid);   /* Drive's list of removals holds it now (kept on this device) */
+      try{await p;}catch(e){wsUI.toast('Google Drive: '+(e&&e.message||e),{kind:'warn',ms:10000});}}
+    try{if(o.after)await o.after(!!undone);}catch(e){}};
+  const me=U70.offer(o.text,async()=>{let ok=true;if(bk)ok=await U70.restore(bk);
+    if(bk&&o.h){const s2=drvSkip();if(had===undefined)delete s2[o.h];else s2[o.h]=had;drvSkipSet(s2);}
+    pendDel(pid);try{if(o.undo)await o.undo();}catch(e){}try{if(dlgIs('Caseload'))await caseloadOpen();}catch(e){}try{paintBlank();}catch(e){}try{drvPaint();}catch(e){}return ok;},
+    {later,back:o.back,end:undone=>{fin(undone);}});
+  if(!me)fin(false);   /* no message could be shown: done at once, as before */
+  return me||true;}
+
+window.__ws2571={mark,marked,back,rmAllMark,copiesOffer,drvRm,iniOf,pending:pendAll};
 })();
 </script>
 </body>

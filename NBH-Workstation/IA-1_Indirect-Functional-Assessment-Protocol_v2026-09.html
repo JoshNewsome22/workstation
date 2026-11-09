@@ -5425,7 +5425,10 @@ $('#outHeld').addEventListener('click',e=>{const b=e.target.closest('button[data
 async function boxPurge(){if(!BOX||!BOX.got.length||!boxReady())return null;try{const j=await boxPost(BOX.site+'?a=del&b='+encodeURIComponent(BOX.id),{t:BOX.token,ids:BOX.got.slice(-300)});
   const t=j.deleted+' repl'+(j.deleted===1?'y':'ies')+' removed from the site.';boxLast='';boxPaint();const e=$('#outBoxLine');if(e)e.textContent=t;if(window.nbhUI&&nbhUI.toast)nbhUI.toast(t,{kind:'ok'});return j;}catch(e){boxLast=String((e&&e.message)||e);boxPaint();return null;}}
 $('#outCollectBtn').addEventListener('click',()=>boxCollect(false));
-$('#outPurgeBtn').addEventListener('click',async()=>{if(!BOX||!BOX.got.length)return;if(window.nbhUI&&nbhUI.confirm){if(!(await nbhUI.confirm('Remove the '+BOX.got.length+' collected repl'+(BOX.got.length===1?'y':'ies')+' from the site?\nThe answers stay in this file.',{ok:'Remove'})))return;}boxPurge();});
+$('#outPurgeBtn').addEventListener('click',async ev=>{if(!BOX||!BOX.got.length)return;
+  /* v25.71 (the BCBA, 11/9) a person's tap: no question first; the site is asked when the message with Undo goes */
+  if(ev.isTrusted&&window.nbhUI&&nbhUI.undoLater){const n=BOX.got.length;nbhUI.undoLater('The '+n+' collected repl'+(n===1?'y is':'ies are')+' removed from the site in a few seconds (the answers stay in this file).',()=>{boxPurge();},{back:'Nothing was removed from the site.'});return;}
+  if(window.nbhUI&&nbhUI.confirm){if(!(await nbhUI.confirm('Remove the '+BOX.got.length+' collected repl'+(BOX.got.length===1?'y':'ies')+' from the site?\nThe answers stay in this file.',{ok:'Remove'})))return;}boxPurge();});
 /* the Send-outs sheet collects while it is open: once on opening, then every minute */
 window.__ia1BoxOuts=function(){boxHeldPaint();boxPaint();if(boxSite()&&BOX&&BOX.site)boxCollect(true);boxAuto();};
 /* v21.86 the form collects while it is open, whatever sheet is showing: every minute while it is in view, and when it comes back into view */

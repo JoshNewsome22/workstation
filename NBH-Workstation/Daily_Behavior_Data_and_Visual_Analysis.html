@@ -10658,7 +10658,9 @@ function stPanel(){let p=document.getElementById("ddStaff");if(p)return p;const 
     if(r.err){m.textContent=r.err;m.classList.add("gs-bad");return;}m.classList.remove("gs-bad");m.textContent="Made: "+r.link.code+" for "+r.link.who+".";p.querySelector("#stWho").value="";stQr(r.link);});
   p.querySelector("#stCollect").addEventListener("click",()=>stCollect(false));
   p.querySelector("#stPrtOn").addEventListener("change",e=>{const s=stSt();s.noPrintQr=!e.target.checked;gsEdited();});
-  p.querySelector("#stPurge").addEventListener("click",async()=>{const s=stSt();if(!s.got.length)return;
+  p.querySelector("#stPurge").addEventListener("click",async ev=>{const s=stSt();if(!s.got.length)return;
+    /* v25.71 (the BCBA, 11/9) a person's tap: no question first; the site is asked when the message with Undo goes */
+    if(ev.isTrusted&&window.nbhUI&&nbhUI.undoLater){nbhUI.undoLater("The "+stPl(s.got.length,"collected entry is","collected entries are")+" removed from the site in a few seconds (they stay in this file).",()=>{stPurge();},{back:"Nothing was removed from the site."});return;}
     if(window.nbhUI&&nbhUI.confirm){if(!(await nbhUI.confirm("Remove the "+stPl(s.got.length,"collected entry","collected entries")+" from the site?\nThey stay in this file.",{ok:"Remove"})))return;}stPurge();});
   p.addEventListener("click",async e=>{const b=e.target.closest&&e.target.closest("button[data-sta]");if(!b)return;const s=stSt(),a=b.dataset.sta;
     if(a==="drop"||a==="place"){const i=+b.dataset.i,h=s.held[i];if(!h)return;

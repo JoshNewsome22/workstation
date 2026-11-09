@@ -190,6 +190,11 @@ async function confirmDlg(page,ok){
   await page.evaluate(k=>{const bs=Array.from(document.querySelectorAll('#cfFoot button'));(k?bs[bs.length-1]:bs[0]).click();},ok);
   return t;
 }
+/* v25.71 a person's Reset with nothing to lose (online, nothing unsaved, no other window): no question; the message with Undo
+   says it is about to happen, and the copy is reset when its time is over (about 8 s). Otherwise the question, answered */
+async function resetPress(page){await page.click('#offReset');await sleep(900);
+  if(await page.evaluate(()=>{const d=document.querySelector('#cfDlg');return !!(d&&d.open);}))return 'asked: '+await confirmDlg(page,true);
+  const t=await page.evaluate(()=>{const b=document.querySelector('#wsToasts .ws-undo-b');return b?b.parentNode.textContent:'';});await page.mouse.move(2,2);return 'undo: '+t;}
 const swFiles=()=>{const s=fs.readFileSync(path.join(ROOT,'NBH-Workstation','sw.js'),'utf8');const m=/const FILES = \[([\s\S]*?)\];/.exec(s);return m[1].match(/'([^']+)'/g).map(x=>x.slice(1,-1));};
 /* the files of the folder a page names, found here on its own terms (not tools/pwa-sw.py's): any src=, href=, data= or
    poster= of any tag but <a>, url(...), and fetch, loadScript, importScripts, new Worker, import() and .src = in scripts;
@@ -564,9 +569,9 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     const mark=S.st.log.length;
     await page.evaluate(()=>PWA.open());await sleep(200);
     const nav=page.waitForNavigation({timeout:20000}).catch(()=>null);
-    await page.click('#offReset');const q=await confirmDlg(page,true);await nav;await sleep(800);
+    const q=await resetPress(page);await nav;await sleep(800);
     const fromWeb=S.st.log.slice(mark).some(e=>e.path==='/workstation/'&&e.status===200&&!e.inm);
-    check('H Reset asks, then loads the page from the website with its address cleaned',/Reset the offline copy/.test(q)&&fromWeb&&page.url()===NBH,q+' '+page.url());
+    check('H Reset (nothing to lose: v25.71 no question, Undo for a few seconds), then loads the page from the website with its address cleaned',/^undo: The offline copy is reset in a few seconds/.test(q)&&fromWeb&&page.url()===NBH,q+' '+page.url());
     const s2=await waitChip(page,/^Saved for offline use$/,120000);
     const cn3=await names(page,NBH);
     check('H the old copy is gone and a fresh one is saved',s2==='Saved for offline use'&&!cn3.includes(old)&&cn3.length===2,cn3.join(', '));
@@ -588,7 +593,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     check('I each edition has its own worker',rr.includes(NBH)&&rr.includes(RPS),rr.join(', '));
     await pr.evaluate(()=>PWA.open());await sleep(200);
     const nav=pr.waitForNavigation({timeout:20000}).catch(()=>null);
-    await pr.click('#offReset');await confirmDlg(pr,true);await nav;await sleep(600);
+    await resetPress(pr);await nav;await sleep(600);
     const a2=await names(pr,NBH);
     check('I resetting the school edition leaves the practice’s copy',a2.length===2&&a2.join()===a.join(),a2.join(', '));
     await waitChip(pr,/^Saved for offline use$/,120000);
