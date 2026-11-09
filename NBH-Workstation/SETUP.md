@@ -9905,6 +9905,62 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.71: One student's case facts never reach the next, Undo for the last six actions, Step by step on every form, and the test run cleaned up
+(the BCBA, 11/9: "drop the are you sure questions if undo covers the action"; Step by step on the forms v25.70 left out; the
+release run's old failures, each looked at)
+
+- **Case isolation (privacy fix).** Save and close could leave a reading of the closing student's case facts still under
+  way. When it finished, after the case was cleared, it put that student's facts back: the consent, records, evidence and
+  observation statements. The next student's case file, packet, caseload copy and safety copy then carried them. Every
+  reading of the case now notes which case it began in, and writes nothing if the case has changed. A late message from a
+  form that has closed is ignored. Checked by `qa/v2571-case-isolation-test.js`, which closes a case mid-edit and at
+  once, then scans the next student's files for the first student's name, initials, ID and every statement.
+- **Undo for the last six actions.**
+  - **Remove everywhere (Google Drive):** Caseload's three-way choice stays, and both answers have Undo; What Drive holds
+    asks nothing. Drive is told only when the message goes.
+  - **Remove all student data:** still asks, as the most destructive action. Undo puts back everything it removed,
+    checked byte for byte: the caseload and case history, pins and settings, Autosave copies, shares, pictures and sounds.
+  - **Delete all copies (Autosave), and one copy's Delete:** no question; Undo puts the copies back.
+  - **Reset the offline copy:** no question when nothing would be lost (online, no unsaved work, no other window). The
+    reset happens when the message goes. Otherwise it still asks.
+  - **Delete my bank, and Remove from my bank (Form TB-1):** no question; Undo puts the definitions back.
+  - **Remove the collected replies from the site (IN-1, SV-1, CF-1, IA-1, DD-1):** no question. The site is asked only
+    when the message goes, never after Undo.
+  - **How remote actions wait:** nothing is sent to Drive, the site or the offline copy until the Undo message goes. The
+    message's time stands still while the iPad shows another app. If the workstation is closed first, the remote part is
+    not done.
+  - **Recordings:** OB-1's live-recorder Discard asks again, since a recording is not in the form's file and has no Undo.
+- **Step by step on all 48 forms.** The last eleven: ABC-1, VI-1, DT-1, AD-1, TD-1, GB-1, CF-1, TK-1, TV-1, DD-1 and EA-1.
+  - Each sheet of ABC-1, VI-1, DT-1, AD-1 and DD-1 is counted on its own, so "Question N of M · Sheet X of Y" is right.
+  - TD-1's Recommended margin is a screen of its own after each selector's questions.
+  - TV-1's script steps one segment (its name and cards) per screen: 12 questions, not 268 boxes.
+  - DD-1's graphs and EA-1's runner each have a screen of their own.
+  - A form opened on a sheet with nothing to answer starts at the first sheet that has questions.
+- **Fixes found while cleaning up the tests.**
+  - High contrast works again on all 48 forms.
+  - FS-1's and TE-1's Print the guide print the guide (it printed blank, or did nothing).
+  - MS-1's rater brief fits on one page.
+  - QS-1's worked example fits its pages.
+  - IA-1's Cancel on Load simulation writes nothing.
+  - A simulated record reopened from a case keeps its Simulated mark.
+  - DM-1 opened on its own lists FD-1 in Packet Contents.
+  - IA-1's sheets rail stays inside the frame on an iPad held sideways.
+  - SP-1 on a phone no longer adds a line above the grid with every tap.
+  - DT-1's reference list prints with the others in the packet.
+  - Read a document places the room, the dates and the ethnicity answer correctly.
+  - TD-1's example numbers always sit beside narrow boxes.
+- **The test run.** Of the 77 tests that failed in the v25.70 run, 68 now pass. Most were checks older than a deliberate
+  change, and each update names the version that made the change. Still open:
+  - VS-1's 16-rule poster overruns its rows on the iPad, and TK-1's printed board clips letter tails: both need a layout
+    decision.
+  - The packet gate's page-count baseline (from v24.90) awaits a check of each form's change.
+  - IA-1 has two packet pages holding only the Simulated tag, and SM-1 has a 4.49 pt column head.
+  - The student journey test's sheet helpers predate the top bar redesign.
+  - The accessibility test needs axe-core installed (`npm install` in qa/).
+- **Checks.** New tests: v2571-case-isolation, v2571-undo-more and v2571-stepper-more.
+- **Open, for the BCBA.** Should TV-1's script step one segment per screen (as now) or one card per screen? The v25.70
+  questions remain: should Done keep Step by step, and should IA-1 stay at one item per screen?
+
 ### v25.70: Undo and What's new, Step by step, publication graphs, signal cards, the family's plan page, seven procedure videos, and Behavioral Interventions 2015 to 2019 and 2025 to 2026 in the banks
 (the BCBA, 11/8 and 11/9: the shell's next steps, the graph review, the backlog answers, red and green signal cards, the
 approved DRA and FCT videos, and her full Behavioral Interventions folder)

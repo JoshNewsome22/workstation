@@ -652,6 +652,13 @@
     shuffle: function (arr) { for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(window.nbhSim.rnd() * (i + 1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; },
     gauss: function () { var u = 0, v = 0; while (!u) u = window.nbhSim.rnd(); while (!v) v = window.nbhSim.rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); } };
   try { simFlag(); } catch (e) {}
+  /* v25.71 a record put back from the case: the bridge gives most forms their own file back (nbhBridge.ownOpen), which never
+     holds this flag, so a simulated record came back unmarked (no banner, no tags, simulated: false in the case facts) and the
+     next Save case wrote it so. The flag the snapshot carried is set again once a field says SIMULATED (within 15 s). */
+  window.addEventListener('message', function (e) {
+    var d = e && e.data; if (!d || d.nbh !== 'restore' || !d.snap || !d.snap.data || d.snap.data['#nbhSimulated'] !== true) return;
+    var t0 = Date.now(), iv = setInterval(function () { try { if (simState.on || Date.now() - t0 > 15000) clearInterval(iv); else if (simHolds()) { clearInterval(iv); simOn('from the file'); } } catch (x) { clearInterval(iv); } }, 100);
+  });
   setInterval(function () { try { simCheck(); } catch (e) {} }, 1500);
   window.addEventListener('load', function () { setTimeout(function () { try { simCheck(); } catch (e) {} }, 1200); });
   /* the case facts carry the flag (the workstation reads it with the rest) */

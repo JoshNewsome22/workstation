@@ -1431,7 +1431,7 @@ try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) (function
   /* 2 and 3: the hint text */
   function fixHint(el){
     var ph = el.getAttribute('placeholder'); if (ph == null) return; ph = ph.trim(); if (!ph) return;
-    var w = room(el); if (!(w > 20)) return;
+    var w = room(el); if (!(w > 20) && !(w > 0 && /^-?\d+([.,]\d+)?%?$/.test(ph))) return;   /* v25.71 an example number in a box with no room for it still goes beside it (fx2's padding left TD-1's 50 px boxes 20 px: the bare number stayed in them, or not, by which ran first) */
     if (/^-?\d+([.,]\d+)?%?$/.test(ph)) {   /* an example number alone */
       var eg = 'e.g. ' + ph; if (!el.hasAttribute('data-nbh-ph')) el.setAttribute('data-nbh-ph', ph);
       if (width(eg, el) <= w) el.setAttribute('placeholder', eg);
@@ -1632,7 +1632,10 @@ try { if (window.matchMedia) (function(){
   function esc(e){ if (e.key === 'Escape') { closePop(); if (menuBtn) try { menuBtn.focus(); } catch (x) {} } }
   function closePop(){ if (!pop) return; pop.parentNode.removeChild(pop); pop = null; document.removeEventListener('click', outside, true); document.removeEventListener('keydown', esc, true); if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false'); }
   function run(){ if (mode === 'menu' && window.innerWidth < 1000) { var s = seg(); if (s && tabs().length < 8) { undo(); } } apply(want()); fit(); paint(); }
-  var rt = 0, W = window.innerWidth; window.addEventListener('resize', function(){ if (window.innerWidth === W) return; W = window.innerWidth; clearTimeout(rt); rt = setTimeout(run, 120); });
+  /* v25.71 the frame can lose height after the rail was fitted (inside the workstation the bars above it settle once the case and
+     the install line are drawn), and a height-only resize ran nothing, so the rail ran past the frame; it now goes compact then
+     (only that way, so bars that fold and come back while scrolling do not make the rail jump) */
+  var rt = 0, W = window.innerWidth; window.addEventListener('resize', function(){ if (window.innerWidth === W) { if (rail && !rail.classList.contains('nbh-compact') && rail.scrollHeight > rail.clientHeight + 1) rail.classList.add('nbh-compact'); return; } W = window.innerWidth; clearTimeout(rt); rt = setTimeout(run, 120); });
   window.addEventListener('orientationchange', function(){ setTimeout(run, 250); });
   function paper(on){ if (!on) { try { if (matchMedia('print').matches) return; } catch (e) {} } if (on === printing) return; printing = on; if (on) undo(); else setTimeout(run, 60); }
   window.addEventListener('beforeprint', function(){ paper(true); }); window.addEventListener('afterprint', function(){ paper(false); });
@@ -1661,12 +1664,20 @@ try { if (window.matchMedia) (function(){
    (nbhUI.confirm or the browser's confirm; the first one asked within 1.5 s): the action happens at once and the message
    with Undo shows. Only a question that names the same action (Clear, Remove, Delete, Discard, Start over or a new one,
    Reset, Erase, Empty, Take … off) is answered; one that names something Undo cannot bring back (My pictures, Google
-   Drive, everywhere, other devices, Autosave's copies, a backup, the site, a bank, the directory, the offline copy) is
-   still asked, and so is a second question. A script's tap is asked as before. Nothing here enters a saved file, an
+   Drive, everywhere, other devices, Autosave's copies, a backup, the site, a bank, the directory, the offline copy, and since
+   v25.71 a running session or recording whose question says nothing from it is written) is
+   still asked here, and so is a second question (v25.71: Form TB-1's bank and the collected replies on the site have an Undo
+   of their own, below and in the forms, and ask no question when a person taps them). A script's tap is asked as before. Nothing here enters a saved file, an
    export or a print. The workstation uses the same pair for its own actions over the open forms (Fill open forms):
      nbhUI.undoMark()            the form as it is now (a mark)
      nbhUI.undoBack(mark)        put it back; resolves true when it is exactly as marked
      nbhUI.undoOffer(text, fn)   the message with Undo; fn runs on Undo
+                                 (opt: back, the words after Undo; end(undone), when the message goes)
+     nbhUI.undoLater(text, go)   v25.71: an action done only when its time is over (the reply box's Remove the collected
+                                 replies from the site): the message with Undo, go() when it goes without Undo, never after
+                                 Undo, and not at all when the page closes first. The message is not pushed off by the
+                                 next one, and its time stands still while the page is hidden. Over an open box (a
+                                 dialog), the message is inside the box.
    Watch how. A list that chooses a procedure (two or more of its choices name one of the procedures the video library has:
    DRO, DRA, NCR, RIRD, the high-probability request sequence, FCT), set to one of them, gets a small Watch how button
    under it: it opens that procedure in the video library (the workstation's Videos, over the workstation; on its own, in a
@@ -1734,7 +1745,9 @@ try { (function(){
   /* ---- no question first, where Undo covers the action ---- */
   var ASK = { until: 0, prev: null, stub: null };
   var SAFE = /^\s*(clear|remove|delete|discard|start (over|again|a new)|reset|erase|empty|take .{1,80}? (off|out of)\b|this (will )?(clears?|removes?|erases?|deletes?|resets?)\b)/i;
-  var STILL = /my pictures|google|\bdrive\b|everywhere|other devices?|autosave|safety cop|\bback-?up (file|cop(y|ies))\b|\bback up the|from the site|recogni[sz]er|\bbank\b|directory|offline/i;
+  /* v25.71 "Nothing (from it) is written to the record / sheet / log": a running session or a live recording that is not in the
+     form's file, so Undo has nothing to put back (OB-1's Discard this recording went at one tap, with no Undo shown) */
+  var STILL = /my pictures|google|\bdrive\b|everywhere|other devices?|autosave|safety cop|\bback-?up (file|cop(y|ies))\b|\bback up the|from the site|recogni[sz]er|\bbank\b|directory|offline|nothing (from it )?is written/i;
   function unstub(){ if (ASK.stub && W.confirm === ASK.stub) W.confirm = ASK.prev; ASK.stub = null; ASK.prev = null; }
   function armed(){ if (W.__nbhQuiet || W.__nbhSilent) return false; if (ASK.until && ASK.until <= Date.now()) { ASK.until = 0; unstub(); } return ASK.until > 0; }
   function take(text){ if (!armed()) return false; ASK.until = 0; unstub(); var t = String(text == null ? '' : text); return SAFE.test(t) && !STILL.test(t); }
@@ -1758,25 +1771,31 @@ try { (function(){
   /* ---- the message with Undo ---- */
   var last = null;
   function host(){ var h = D.getElementById('nbhToasts'); if (!h) { h = D.createElement('div'); h.id = 'nbhToasts'; h.setAttribute('role', 'status'); h.setAttribute('aria-live', 'polite'); D.body.appendChild(h); } return h; }
-  function localToast(text, ms){ var h = host(), t = D.createElement('div'); t.className = 'nbh-toast nbh-undo-t';
+  function localToast(text, ms){ var h = host(), t = D.createElement('div'), dl = modal(); t.className = 'nbh-toast nbh-undo-t';
+    if (dl) { t.style.cssText = 'position:sticky;bottom:8px;margin:10px 0 0;pointer-events:auto;display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:8px;background:#16242e;color:#f1f6f5;font:14px/1.4 var(--nbh-sans,system-ui,sans-serif)'; h = dl; }   /* v25.71 an open box covers the foot of the page */
     var s = D.createElement('span'); s.textContent = String(text); t.appendChild(s);
     var x = D.createElement('button'); x.type = 'button'; x.setAttribute('aria-label', 'Dismiss'); x.innerHTML = '&times;'; t.appendChild(x);
-    var held = false, tm = 0, gone = function(){ clearTimeout(tm); if (t.parentNode) t.parentNode.removeChild(t); };
-    var arm = function(d){ clearTimeout(tm); tm = setTimeout(function(){ if (held) return arm(1500); gone(); }, d); };
+    var held = false, hid = false, tm = 0, gone = function(){ clearTimeout(tm); if (t.parentNode) t.parentNode.removeChild(t); };
+    var arm = function(d){ clearTimeout(tm); tm = setTimeout(function(){ if (held) return arm(1500); if (D.hidden) { hid = true; return arm(1000); } if (hid) { hid = false; return arm(ms); } gone(); }, d); };
     t.addEventListener('pointerenter', function(){ held = true; }); t.addEventListener('pointerleave', function(){ held = false; });
     t.addEventListener('focusin', function(){ held = true; }); t.addEventListener('focusout', function(){ held = false; });
-    x.addEventListener('click', gone); h.appendChild(t); while (h.children.length > 3) h.removeChild(h.firstChild); arm(ms); return t; }
+    x.addEventListener('click', gone); h.appendChild(t); if (!dl) while (h.children.length > 3) h.removeChild(h.firstChild); arm(ms); return t; }
   U.undoOffer = function(text, fn, opt){ opt = opt || {}; css();
     var t = null; if (U.__sr) { try { t = U.toast(text, { ms: opt.ms || 8000 }); } catch (e) { t = null; } }
     if (!t || !t.classList || !(t.classList.contains('ws-toast') || t.classList.contains('nbh-toast'))) { if (t && t.parentNode && !t.classList.contains('sr-dmsg')) t.parentNode.removeChild(t); t = localToast(text, opt.ms || 8000); }
     var d = t.ownerDocument, b = d.createElement('button'); b.type = 'button'; b.className = 'nbh-undo ws-undo-b'; b.textContent = 'Undo'; b.setAttribute('aria-label', 'Undo: ' + text);
-    var used = false, me = { b: b, t: t };
+    var used = false, me = { b: b, t: t }, ended = false;
+    t.__undo = 1; if (opt.later) t.__keep = 1;   /* v25.71 (the workstation's message reads these too) */
+    var fin = function(){ if (ended) return; ended = true; try { if (mo) mo.disconnect(); } catch (e) {} if (opt.end) try { opt.end(used); } catch (e) {} };
+    var mo = null; if (opt.end) { try { var MO = (d.defaultView && d.defaultView.MutationObserver) || W.MutationObserver; mo = new MO(function(){ if (!t.isConnected) fin(); }); mo.observe(d.body || d.documentElement, { childList: true, subtree: true }); } catch (e) { mo = null; } }
     b.addEventListener('click', function(){ if (used) return; used = true; b.disabled = true; if (last === me) last = null;
-      Promise.resolve().then(fn).then(function(ok){ if (t.parentNode) t.parentNode.removeChild(t);
+      Promise.resolve().then(fn).then(function(ok){ if (t.parentNode) t.parentNode.removeChild(t); fin();
         if (opt.quiet) return;
-        var msg = ok === false ? 'Undo could not put everything back. Check the form before you go on.' : 'Undone: the form is as it was.';
+        var msg = ok === false ? 'Undo could not put everything back. Check the form before you go on.' : (opt.back || 'Undone: the form is as it was.');
         try { U.toast(msg, { kind: ok === false ? 'warn' : 'ok', ms: 5000 }); } catch (e) {} }); });
     t.insertBefore(b, t.lastChild); last = me; return t; };
+  U.undoLater = function(text, go, opt){ opt = opt || {};
+    return U.undoOffer(text, function(){ return true; }, { later: true, back: opt.back, ms: opt.ms, end: function(undone){ if (!undone) try { go(); } catch (e) {} } }); };
   /* ---- which taps are watched ---- */
   var DEST = /^(clear( all( rows| entries)?| form| sheet for the next session| the (week|run|picks|comparison|answers|signature|day|row))?|remove( last( step| target| log entry| row| entry)?| this [a-z0-9 ]{2,30}| the (photo|last series|last row)| it| from the log| row)?|delete( this [a-z0-9 ]{2,30}| all (samples|incidents|rows|entries))?|discard( this)?|start over|reset( timer| the (sheet|session|count))?|[×✕✖])$/i;
   var NOT = /recogniser|recognizer|from the site|my bank|filter|directory|offline/i;

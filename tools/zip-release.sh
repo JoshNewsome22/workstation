@@ -5,6 +5,8 @@
 #
 #   OUTDIR/RPS-Workstation_v<version>.zip   the school edition, files at the top level (HOSTING.md says how to upload it)
 #   OUTDIR/NBH-Workstation_v<version>.zip   the practice edition, the same way
+#   and, when a zip is over 56 MB (v25.71, the procedure videos), the same zip in parts that download in the Claude app:
+#   OUTDIR/<edition>_v<version>_part1.zip, _part2-videos.zip ... (tools/split-zip.py); extract all into one folder
 #   OUTDIR/nbh-reply-box-upload.zip         the reply box (tools/reply-box/README.md), uploaded to the home folder
 #   OUTDIR/nbh-relay-upload.zip             the writing help's rewrite service (tools/relay/README.md); the practice only
 #   with --speech, also OUTDIR/RPS-Workstation_speech.zip and NBH-Workstation_speech.zip: nbh-asr/, the recogniser behind
@@ -19,6 +21,7 @@ for E in RPS NBH; do
   rm -f "$OUT/$E-Workstation_"v*.zip
   (cd "$E-Workstation" && zip -q -X -r "$OUT/$E-Workstation_$V.zip" . -x 'nbh-asr/*' -x '.DS_Store') || exit 1
   if [ "$2" = "--speech" ]; then rm -f "$OUT/$E-Workstation_speech.zip"; (cd "$E-Workstation" && zip -q -X -r "$OUT/$E-Workstation_speech.zip" nbh-asr) || exit 1; fi
+  python3 tools/split-zip.py "$OUT/$E-Workstation_$V.zip" || exit 1   # v25.71 parts under 56 MB, for downloading
 done
 bash tools/reply-box/build-zip.sh "$OUT/nbh-reply-box-upload.zip" >/dev/null || exit 1
 bash tools/relay/build-zip.sh >/dev/null && cp tools/relay/dist/nbh-relay-upload.zip "$OUT/" || exit 1

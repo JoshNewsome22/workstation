@@ -216,7 +216,8 @@ const nbhDocRead=(()=>{
     if(sc&&sc.room)add('room',sc.room,sc.room,'Schedule: the homeroom');
     if(bd&&bd.grade&&!found.grade)add('grade',bd.grade,bd.grade,L[bd.idLine].trim());
     /* v22.30 race and ethnicity asked one question each ("Ethnicity: Hispanic or Latino  No", "Race: White  Yes"), or the
-       one code ("Single Ethnicity  W - White"): the races answered Yes, and whether Hispanic or Latino */
+       one code ("Single Ethnicity  W - White"): the races answered Yes, and whether Hispanic or Latino. v25.71: the text
+       recognizer can read a screenshot's cell border before the code as "~" or "=" ("Single Ethnicity  ~~ W - White") */
     {const RC=[[/^hispanic/,'H'],[/^white/,'White'],[/^black/,'Black or African American'],[/^asian/,'Asian'],[/^american indian/,'American Indian or Alaska Native'],[/^native hawaiian/,'Native Hawaiian or Other Pacific Islander']];
       const yes=[],seen=[];let hisp='';
       for(let i=0;i<end;i++){const re=/\b(?:ethnicity|race)\s*:\s*([A-Za-z][A-Za-z ,]*?)[ ,]*[ \t]+(yes|ves|yos|no|n0)(?![a-z])/gi;let m;
@@ -224,7 +225,7 @@ const nbhDocRead=(()=>{
           if(r[1]==='H')hisp=a?'yes':'no';else if(a&&!yes.includes(r[1]))yes.push(r[1]);}}
       let v='';
       if(yes.length||hisp)v=yes.join(', ')+(hisp==='yes'?(yes.length?'; ':'')+'Hispanic or Latino':hisp==='no'&&yes.length?'; not Hispanic or Latino':'');
-      if(!v){const sl=L.slice(0,end).map(l=>l.match(/single ethnicity[ \t]+(?:[A-Z][ \t]*)?[-\u2013][ \t]*([A-Za-z][A-Za-z ]{2,40}?)(?:[ \t]{2,}|$)/i)).find(Boolean);if(sl){v=cap(sl[1].trim().replace(/\b[a-z]/g,c=>c.toUpperCase()));seen.push(sl[0].trim());}}
+      if(!v){const sl=L.slice(0,end).map(l=>l.match(/single ethnicity[ \t]+(?:[~=|_]+[ \t]*)?(?:[A-Z][ \t]*)?[-\u2013][ \t]*([A-Za-z][A-Za-z ]{2,40}?)(?:[ \t]{2,}|$)/i)).find(Boolean);if(sl){v=cap(sl[1].trim().replace(/\b[a-z]/g,c=>c.toUpperCase()));seen.push(sl[0].trim());}}
       if(v){if(!found.eth)order.push('eth');found.eth={k:'eth',label:BY.eth.label,to:BY.eth.to.slice(),raw:v,value:v,seen:seen.join(' / ').slice(0,160),str:3,ok:true};}}
     /* v22.30 an IEP's sentences (Florida's, as a district's IEP system prints them): the next annual review and
        reevaluation, the eligibilities, where the services are received, ESY, a standard diploma deferred, the bus needs */
@@ -410,8 +411,14 @@ const nbhDocRead=(()=>{
       const before=l.slice(0,m.index),after=l.slice(m.index+m[0].length);
       const segs=before.split(/\s{2,}/).map(x=>x.replace(/(?:\s*[vV~=@|]+)+$/,'').replace(/^[\[\]\s|1Il]+(?=[A-Z])/,'').replace(/^[A-Z]{1,2}\s+(?=(?:period|homeroom|therapy)\b)/i,'').trim()).filter(x=>x&&!/^[\[\]|1Il]+$/.test(x)&&!/^[=~\-_|.,:;—–]+$/.test(x)&&(x.match(/[A-Za-z]/g)||[]).length>=3);
       const course=courseName(segs.length?segs[segs.length-1].replace(/^.*?\b(?:Grade|Courses)\s*[vV]?\s+(?=[A-Z])/,''):''),period=(segs[0]||'').replace(/[vV]+$/,'').trim();
-      const dm=after.match(/(?:^|\s)([MTWHFR]{1,6})[vV]?(?=\s|$)/),rm=after.match(/\b(\d{4,5}[A-Z]{0,2})\b/),
-        span=rm?after.slice(rm.index+rm[0].length).split(/[A-Za-z]/)[0]:'',dt=span.match(/\d{1,2}\/\d{1,2}\/\d{4}/g)||[];
+      /* v25.71 a room is never the year of a date: with the room misread ("OM1O1IN" for 01101N) the year of the enrolled date was
+         taken for the room and the dropped date was lost, so a dropped class came back as a team member. The dates are the ones
+         side by side after the room, or, with no room read, after the days and that one misread word */
+      const DT=/^\d{1,2}\/\d{1,2}\/\d{4}$/;
+      const dm=after.match(/(?:^|\s)([MTWHFR]{1,6})[vV]?(?=\s|$)/),rm=after.match(/(?<![\d\/])\b(\d{4,5}[A-Z]{0,2})\b(?![\/\d])/);
+      let tk=(rm?after.slice(rm.index+rm[0].length):dm?after.slice(dm.index+dm[0].length):'').trim().split(/\s+/);
+      if(!rm&&tk.length&&!DT.test(tk[0])&&/\d/.test(tk[0]))tk=tk.slice(1);
+      const dt=[];for(const t of tk){if(!/[A-Za-z0-9]/.test(t))continue;if(!DT.test(t))break;dt.push(t);}
       rows.push({teacher:cap(m[1]),course,period,days:dm?dm[1]:'',room:rm?rm[1]:'',from:dt[0]||'',dropped:dt[1]||'',seen:l.trim().slice(0,160)});}
     if(!rows.length)return null;
     const live=rows.filter(r=>!r.dropped),byT=[];
