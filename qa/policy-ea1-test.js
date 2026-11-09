@@ -234,8 +234,10 @@ const STUB=()=>{window.confirm=()=>true;window.alert=()=>{};};
  const blank=await printPdf(p,'blank.pdf');
  const pageWith=(pp,re)=>pp?pp.findIndex(t=>re.test(flat(t))):-1;
  if(!blank.text)console.log('NOTE pymupdf is not installed: the print checks read the page in print media instead of the PDF');
- let pt=blank.text?flat(blank.text[pageWith(blank.text,/Alone or no-interaction/)]||''):flat(await printDom(p,'#setup'));
- ok('print, supervised: the safety plan names the arrangement, what it means, the walk-out and stepping in, without the true alone steps',/Supervised \(the default\)\. The door stays open/.test(pt)&&/No social consequences: no adult reacts/.test(pt)&&/If the student walks out: no one keeps the student in/.test(pt)&&/Stepping in: blocking/.test(pt)&&!/Check policy first/.test(pt)&&!/Plan a true alone condition/.test(pt)&&!/True alone stays locked/.test(pt),pt.slice(pt.indexOf('Alone or no-interaction'),pt.indexOf('Alone or no-interaction')+900));
+ /* v25.71: the heading can break at its hyphen on paper ("Alone or no-" / "interaction condition"), as in the release run's
+    PDF; the page is found either way, and what is checked on it is unchanged */
+ let pt=blank.text?flat(blank.text[pageWith(blank.text,/Alone or no- ?interaction/)]||''):flat(await printDom(p,'#setup'));
+ ok('print, supervised: the safety plan names the arrangement, what it means, the walk-out and stepping in, without the true alone steps',/Supervised \(the default\)\. The door stays open/.test(pt)&&/No social consequences: no adult reacts/.test(pt)&&/If the student walks out: no one keeps the student in/.test(pt)&&/Stepping in: blocking/.test(pt)&&!/Check policy first/.test(pt)&&!/Plan a true alone condition/.test(pt)&&!/True alone stays locked/.test(pt),pt.slice(pt.search(/Alone or no-/),pt.search(/Alone or no-/)+900));
  if(blank.text){const mi=pageWith(blank.text,/Measurement and Agreement/);ok('print: the Measurement section is whole on one page',mi>=0&&/Procedural fidelity checks/.test(flat(blank.text[mi]))&&/Wallace and Iwata/.test(flat(blank.text[mi])),mi);}
  /* v24.31 the Guide prints only when the shared print choice asks for it: on for this check, off again after */
  await p.evaluate(()=>window.nbhPrint&&nbhPrint.set('guide',true));const gpdf=await printPdf(p,'guide.pdf');await p.evaluate(()=>window.nbhPrint&&nbhPrint.set('guide',false));
