@@ -3,7 +3,7 @@
    and every DRA card (163). Simulated data only.
    A. the fifteen files: each beside the forms, a header that says what it is (AI-generated, simulated people), MP4 data
       whose size and SHA-256 match the header; each in pwa-test's list of files kept offline; this test in the release list.
-   B. the mapping: every card of DRO (91), NCR (75), NCE (13), A_NCA (11) and RIRD (54) shows the video this test expects
+   B. the mapping: every card of DRO (91), NCR (75), NCE (13), A_NCA (11) and RIRD (55) shows the video this test expects
       (the lists below, read from each card's fields), the counts by video; the 6 RIRD cards none fits have none.
    C. the lines: the card a video was made from says "The video shows this card's steps: ..."; every other card "The video
       shows the closest version, after <its studies>: <what it shows>.", with at most one clause, and the clauses this test
@@ -64,7 +64,7 @@ const WANT={};Object.keys(EXP).forEach(k=>EXP[k].split(' ').forEach(id=>{WANT[id
 /* the rest of each code: DRO resetting, NCE during work, A_NCA and the other NCR attention, RIRD vocal, DRA attention (praise,
    approval, attention, peers, self-monitoring: each read from its fields) */
 CARDS.forEach(p=>{if(p.id in WANT)return;WANT[p.id]=p.code==='DRO'?'dro_resetting':p.code==='NCE'?'ncr_work':p.code==='A_NCA'?'ncr_attention':p.code==='NCR'?'ncr_attention':p.code==='RIRD'?'rird_vocal':p.code==='DRA'?'dra_attention':'?';});
-const COUNTS={dro_resetting:43,dro_tokens:24,dro_class:13,dro_momentary:11,ncr_attention:36,ncr_items:26,ncr_work:32,ncr_between:5,rird_vocal:14,rird_motor:15,rird_pica:19,dra_attention:80,dra_escape:58,dra_tangible:11,dra_automatic:14,'':6};
+const COUNTS={dro_resetting:43,dro_tokens:24,dro_class:13,dro_momentary:11,ncr_attention:36,ncr_items:26,ncr_work:32,ncr_between:5,rird_vocal:15,rird_motor:15,rird_pica:19,dra_attention:80,dra_escape:58,dra_tangible:11,dra_automatic:14,'':6};
 /* the clause this test expects on named cards (every other card: none, or one of these forms) */
 const CLAUSE={'dro-sticker-chart-assault':'This card does not restart the interval after the behavior.','dro-hourly-token-rules':'This card does not restart the interval after the behavior.',
  'ncr-preferred-item-substitute':'This card is for behavior maintained by attention.','a_nca-praise-during-hard-work':'This card is for behavior maintained by escape from tasks.',
@@ -90,7 +90,7 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
   ok('A pwa-test lists each file to be kept offline; the release list runs this test',!miss.length&&/^v2568-td1-procvideos-test$/m.test(rl),miss);}
  {const ids=new Set(BANK.protocols.map(p=>p.id)),miss=[].concat(...Object.values(VID).map(v=>v.src)).concat(Object.keys(WANT)).filter(id=>!ids.has(id));
   const by={};CARDS.forEach(p=>{by[p.code]=(by[p.code]||0)+1;});
-  ok('A the cards: DRO 91, NCR 75, NCE 13, A_NCA 11, RIRD 54, DRA 163; every card a video was made from is in the bank',by.DRO===91&&by.NCR===75&&by.NCE===13&&by.A_NCA===11&&by.RIRD===54&&by.DRA===163&&!miss.length,{by,miss});}
+  ok('A the cards: DRO 91, NCR 75, NCE 13, A_NCA 11, RIRD 55, DRA 163; every card a video was made from is in the bank',by.DRO===91&&by.NCR===75&&by.NCE===13&&by.A_NCA===11&&by.RIRD===55&&by.DRA===163&&!miss.length,{by,miss});}
  const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});
  const errs=[];
  const ctxOf=(w,h)=>b.newContext({viewport:{width:w||1376,height:h||1032},hasTouch:true,isMobile:true,deviceScaleFactor:1,userAgent:IPAD});
@@ -102,8 +102,8 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
  /* ---------------- B. the mapping ---------------- */
  const R=await p.evaluate(C=>TD1_BANK.protocols.filter(x=>C.includes(x.code)).map(x=>({id:x.id,code:x.code,k:window.__tdVideo.key(x.id),has:window.__tdVideo.has(x.id),line:window.__tdVideo.line(x.id)})),CODES);
  {const wrong=R.filter(x=>x.k!==WANT[x.id]),cnt={};R.forEach(x=>{cnt[x.k]=(cnt[x.k]||0)+1;});
-  ok('B every card of the six codes shows the video this test expects',R.length===407&&!wrong.length,wrong.slice(0,6));
-  ok('B the counts: DRO resetting 43, tokens 24, class 13, momentary 11; NCR, NCE and A_NCA attention 36, items 26, during work 32, before and between 5; RIRD vocal 14, motor 15, pica 19, none 6; DRA attention 80, escape 58, items 11, automatic 14',Object.keys(COUNTS).every(k=>cnt[k]===COUNTS[k]),cnt);
+  ok('B every card of the six codes shows the video this test expects',R.length===408&&!wrong.length,wrong.slice(0,6));
+  ok('B the counts: DRO resetting 43, tokens 24, class 13, momentary 11; NCR, NCE and A_NCA attention 36, items 26, during work 32, before and between 5; RIRD vocal 15, motor 15, pica 19, none 6; DRA attention 80, escape 58, items 11, automatic 14',Object.keys(COUNTS).every(k=>cnt[k]===COUNTS[k]),cnt);
   const nv=R.filter(x=>!x.k);ok('B the 6 RIRD cards none fits (overcorrection, the awareness device, exposure and response prevention, the chin cue) have no video and no line',nv.length===6&&nv.every(x=>x.code==='RIRD'&&!x.has&&!x.line),nv);}
  /* ---------------- C. the lines ---------------- */
  {const VS=await p.evaluate(K=>{const o={};K.forEach(k=>{o[k]=window.__tdVideo.line(k);});return o;},Object.keys(VID));
