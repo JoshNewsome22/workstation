@@ -208,7 +208,11 @@ const F=L.forms().find(x=>x.id==='TD-1');
   bk=await bank(p,'effort-lower-food-texture');ok('FEED-M8b the bank panel says so above the steps',/^Texture and bite size come from the SLP or the feeding team/.test(bk.rule),bk);
   const md=B['dra-main-dish-after-new-food'];
   ok('FEED-L6 in school: a small extra portion, the lunch always served; the simultaneous-presentation comparison in the note (Piazza et al., 2002)',md.steps.some(s=>/^In school: the preferred item is a small extra portion beyond the student’s usual lunch, and the lunch itself is always served/.test(s))&&/simultaneous presentation/.test(md.note)&&md.src.includes('piazza2002a'));
-  ok('the bank holds no OPTION step outside the five cards that carry one',Object.values(B).filter(x=>x.steps.some(s=>OPT.test(s))).map(x=>x.id).sort().join(',')==='c_csa-competing-items-plus-extinction,c_csa-select-by-reduction,fct-card-lean-schedule,fct-lean-long-resurgence,fct-resurgence-mitigation-comparison');
+  /* the cards approved to carry an OPTION step (the BCBA, 11/9: the 7 cards from the BI/BAP banks kept; three of them, the Fisher
+     et al. (2018) and Mitteer et al. (2026) cards, were already approved, so four are new); any other card with one fails */
+  const OPT_OK='c_csa-competing-items-plus-extinction,c_csa-select-by-reduction,dnra-food-token-or-break-without-ee,dro-brief-analysis-picks-demand-reinforcer,fct-card-lean-schedule,fct-concurrent-schedules-no-extinction-school,fct-lean-long-resurgence,fct-resurgence-mitigation-comparison,ncr-meal-video-thinned-plus-preferred-bite';
+  const optIds=Object.values(B).filter(x=>x.steps.some(s=>OPT.test(s))).map(x=>x.id).sort().join(',');
+  ok('the bank holds no OPTION step outside the nine cards approved to carry one',optIds===OPT_OK,optIds);
 
   /* ---- a file saved before v25.65 opens and saves as it was ---- */
   await p.close();p=await open();

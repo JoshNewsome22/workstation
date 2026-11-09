@@ -72,7 +72,9 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
     without it unless "Include the optional step" is ticked (the BCBA, 11/2: "add them as an option"). Before 11/2 readers left
     these steps out; Fisher et al. (2018, both cards) and Mitteer et al. (2026) have theirs back as options (v25.64). The two
     competing stimulus cards for social functions, c_csa-select-by-reduction and c_csa-competing-items-plus-extinction, carry
-    theirs too (v25.65, PREF-H2), beside Form PA-1's wait-component method, the default.
+    theirs too (v25.65, PREF-H2), beside Form PA-1's wait-component method, the default. The BCBA (11/9) kept the four from
+    the Behavioral Interventions banks: dnra-food-token-or-break-without-ee, dro-brief-analysis-picks-demand-reinforcer,
+    fct-concurrent-schedules-no-extinction-school and ncr-meal-video-thinned-plus-preferred-bite.
 
 ## When each rule started
 
