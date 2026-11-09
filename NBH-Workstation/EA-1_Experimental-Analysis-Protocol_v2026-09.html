@@ -2377,7 +2377,9 @@ const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 const val=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value).trim():''};
 const num=n=>{const v=parseFloat(val(n));return isNaN(v)?null:v;};
 const setv=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e){if(e.type==='checkbox')e.checked=!!v;else e.value=v;}};
-const COLORS=['#182e43','#76a2a3','#9b4e15','#54676f','#a0c9c3','#8e2a2a'];
+/* v25.70 (research NEXT2 #6) the fourth color lighter: it and the third were the same gray in print (0.4 apart in CIELAB); now no
+   two are closer than 8.9 for normal, protan, deutan or tritan vision or in grayscale (Machado et al., 2009) */
+const COLORS=['#182e43','#76a2a3','#9b4e15','#708088','#a0c9c3','#8e2a2a'];
 const MARK=['circle','square','triangle','diamond','circle','square'];
 
 /* ---------- views ---------- */
@@ -7040,6 +7042,11 @@ window.eaGraphs={draw:function(lg,self,args,h){if(h)H=h;const el=args[0],legendE
   try{const svg=el.querySelector("svg");if(!svg)return r;
     const W=640,L=46,R=14,T=22,ph=208,pw=W-L-R,xmax=Math.max(...o.points.map(p=>p.x),5),ymax=ymaxOf(o),X=x=>L+(x-1)/(Math.max(1,xmax-1))*pw,Y=y=>T+ph-(Math.min(y,ymax)/ymax)*ph;
     let add="",brk=[],io=0,gut=0,labs="";
+    /* direct labels at the right end of each path, in a gutter, when there is more than one series and none collide */
+    const S2=o.seriesNames.map((nm,si)=>{const sp=o.points.filter(p=>p.series===si);if(!sp.length)return null;const last=sp.reduce((a,b)=>b.x>=a.x?b:a);return {nm,si,y:Y(last.y)+3,w:Y(last.y)+3};}).filter(Boolean);
+    if(S2.length>1){S2.sort((a,b)=>a.y-b.y);for(let k=1;k<S2.length;k++)if(S2[k].y<S2[k-1].y+10)S2[k].y=S2[k-1].y+10;const ok=S2.every(s=>Math.abs(s.y-s.w)<=16&&s.y<=T+ph+10);
+      if(ok){const ctx=document.createElement("canvas").getContext("2d");ctx.font="9px sans-serif";gut=Math.ceil(Math.max(...S2.map(s=>ctx.measureText(s.nm).width)))+14;
+        S2.forEach(s=>{labs+=`<text class="ea-dl" x="${W-R+6}" y="${s.y.toFixed(1)}" font-size="9" style="fill:${COL(s.si)};font-weight:600">${esc(s.nm)}</text>`;});}}
     if(add||labs){svg.insertAdjacentHTML("beforeend",`<g class="ea-v2570">${add}${labs}</g>`);}
     if(gut){const vb=(svg.getAttribute("viewBox")||"0 0 640 270").split(/\s+/).map(Number);svg.setAttribute("viewBox",`0 0 ${vb[2]+gut} ${vb[3]}`);if(legendEl)legendEl.hidden=true;}else if(legendEl)legendEl.hidden=false;
 
