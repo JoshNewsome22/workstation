@@ -127,6 +127,8 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
     await q.evaluate(async k=>{nbhUI.confirm=async()=>true;window.print=()=>{};if(k!=='blank'){document.getElementById('simScenario').value=k;document.getElementById('simBtn').click();await new Promise(x=>setTimeout(x,700));}},kind);
     await q.emulateMedia({media:'print'});await q.pdf({path:path.join(out,file),format:'Letter',printBackground:true,preferCSSPageSize:true});await q.close();return pages(path.join(out,file));};
   const pb=await pr('blank','blank.pdf'),ps=await pr('risp','risp.pdf'),ph=await pr('halo_eps','halo.pdf');
-  ok('the printed pages: blank 10, risperidone 11, haloperidol 13 (as before Wave 3)',pb===10&&ps===11&&ph===13,{pb,ps,ph});
+  /* v25.71: the counts written here were already 7, 9 and 10 at v24.72; v25.65's MS-1 changes (commit 3767702: the verified dose row,
+     what raters are told, the BIP target's own data against dose changes) made them 9, 10 and 13, and fx2 (v25.69) left them as they were */
+  ok('the printed pages: blank 9, risperidone 10, haloperidol 13 (as after v25.65)',pb===9&&ps===10&&ph===13,{pb,ps,ph});
   ok('no page errors',!errs.length,errs.slice(0,3));
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);process.exit(1);});

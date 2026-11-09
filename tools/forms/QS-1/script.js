@@ -598,7 +598,7 @@ async function loadSim(){
      kind, and the handover is for trained staff */
   S.tiers=[{name:'0 · Earliest sign',see:'Pushes the paper away, head down, the same question again.',do:'Move closer and keep teaching. Restate the expectation and what he is earning, once. Offer the card or a choice.',say:'“Do you need a break? Two minutes or three?”',kind:'sign',train:''},
     {name:'1 · Refusing',see:'Arguing, “no,” calling out, still in his seat.',do:'Ignore the words; keep teaching the class. One neutral correction, then praise the next right thing within seconds.',say:'“Hands on the desk. Half the page or the computer?”',kind:'tier',train:''},
-    {name:'2 · Throwing',see:'Throws the materials, leaves his seat, slams the desk.',do:'Move the other students’ attention, not him. Keep the task going, smaller (half the page, or the computer), and offer the card once. No break for throwing. Write it up the same day.',say:'“That is not safe. Half the page or the computer? The card is right here.”',kind:'tier',train:''},
+    {name:'2 · Throwing',see:'Throws the materials, leaves his seat, slams the desk.',do:'Move the other students’ attention, not him. Keep the task going, smaller, and offer the card once. No break for throwing. Write it up the same day.',say:'“That is not safe. Half the page or the computer? The card is right here.”',kind:'tier',train:''},
     {name:'3 · Leaving the room',see:'Out of the door without permission.',do:'One adult follows at a distance and keeps him in sight; the other stays with the class and makes the crisis call. Nobody chases or blocks the hallway.',say:'“I’m here when you are ready. The office knows where we are.”',kind:'hand',train:'yes'},
     {name:'Recovery',see:'Calm for a few minutes; often says sorry.',do:'A brief practice of the ask, then a neutral return to the same task. No lecture. Praise the first appropriate thing. Tell the parent the good part of the day too.',say:'“You’re calm. Let’s get back to the reading folder.” An apology gets “Thank you.”',kind:'rec',train:''}];
   S.stop='How he says it: “stop,” “I’m done,” or the red card.\nWhat you do: say “Okay,” stop the task, and offer the two cards (a different task, or a break). If he takes neither within a minute, end the session and tell the BCBA the same day.';
@@ -618,7 +618,7 @@ async function loadSim(){
     {measure:'ABC note',counts:'Each tier 2 or 3 event: what came before, his words, what adults did, how it ended',how:'Written the same day'}];
   S.recnote='The first day with the new team is the next row of his record: same counts, same sheet, no fresh start to the count.';
   S.phases=[{head:'1 · Model',when:'days 1–3',text:'Mr. Ortiz models each step; the new adult gives the praise.',next:'2 days running: no tier 3, 80% of points'},
-    {head:'2 · Hand over',when:'days 3–7',text:'The new adult runs it all; Mr. Ortiz at arrival, dismissal and on call.',next:'3 days, no tier 3, no more than one tier 2 a day'},
+    {head:'2 · Hand over',when:'days 3–7',text:'The new adult runs it; Mr. Ortiz at arrival, dismissal, on call.',next:'3 days, no tier 3, no more than one tier 2 a day'},
     {head:'3 · On their own',when:'weeks 2–4',text:'The team runs the plan; the BCBA observes twice a week.',next:'5 days in a row on the point-sheet goals'},
     {head:'4 · Expand',when:'week 4 on',text:'One new setting or adult at a time, previewed first.',next:'each addition holds two weeks without a tier 3'}];
   S.calls=[{role:'Administrator',name:'',when:'The crisis call; calls the parent the same day'},{role:'Classroom teacher',name:'',when:'Daily lead for the plan'},{role:'Paraeducator (Mr. Ortiz)',name:'',when:'Tier 2, the data, the checks'},{role:'Parent',name:'Ms. Alvarez (simulated)',when:'Daily home note; the same day after a tier 3'},{role:'Case BCBA',name:'Jordan Ellis, BCBA (simulated)',when:'After any tier 3, and for questions'}];
@@ -627,7 +627,7 @@ async function loadSim(){
     {who:'Mr. Ortiz, para (simulated)',part:'Arrival, the job, the breaks, the data sheet; follows at tier 3.',trained:'yes'},
     {who:'Specials teachers',part:'The five things and the rules; honor the card; call the office at tier 3.',trained:''}];
   S.askName='Asking for a break';S.flowHonor='Give it: two minutes at the back table with a visible timer, little talk. While he is learning to wait, the timer starts after the wait the BCBA has set for now.';S.flowThen='“Timer’s done. First the two problems, then your job.” Praise the return.';
-  S.onevoice='During an escalation one adult speaks; the others move the class on and stay quiet. A handover is said out loud: “Mr. Ortiz has it now.”';
+  S.onevoice='During an escalation one adult speaks; the others move the class on. Say a handover out loud: “Mr. Ortiz has it now.”';   /* v25.71 the worked example cut to fit its pages by the form's own measure (qs1-test 1b) */
   S.flowOn='yes';S.checkOn='yes';S.pulled={};S.changed={};S.ok={};
   renderEditor();build();setView('out');
   nbhUI.toast('Simulation loaded: a worked quick start for a simulated student, four pages, the flow sheet and the reading check.',{kind:'ok'});
