@@ -23486,6 +23486,7 @@ svg.graph.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;min-width:0;height:a
   #nbhPubPrint svg{width:calc(var(--w) * 1pt)!important;max-width:100%;height:auto;display:block}}
 .dd-gsum{margin:8px 0 4px;font-size:14px;line-height:1.45;color:var(--ink,#16242E);max-width:72em}
 .dd-gsum .dd-touchhint{display:block;font-size:12.5px;margin-top:2px}
+.dd-gsum.dd-gsum-pub{max-width:calc(var(--w,460) * 1.9px);margin-left:auto;margin-right:auto}
 .dd-gtab{margin:6px 0 10px;overflow-x:auto;max-width:100%}
 .dd-gtab-t{border-collapse:collapse;font-size:13px;min-width:0}
 .dd-gtab-t caption{text-align:left;font-weight:600;font-size:13px;padding:2px 0 6px}
@@ -23505,7 +23506,8 @@ svg.graph.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;min-width:0;height:a
 body.dd-pubmode #resultsOut .legend,body.dd-pubmode #resultsOut [data-act="saveGraph"]{display:none!important}
 body.dd-pubmode #resultsOut .chartbox svg.graph:not(.ddpub){filter:grayscale(1)}
 body.dd-pubmode #resultsOut .chartbox{text-align:center}
-@media print{.dd-gsum,.dd-dcheck,.dd-zoomctl,.dd-pubsize,#ddPtTip,.dd-capedit{display:none!important}}
+@media print{.dd-gsum:not(.dd-gsum-pub),.dd-dcheck,.dd-zoomctl,.dd-pubsize,#ddPtTip,.dd-capedit{display:none!important}
+  .dd-gsum.dd-gsum-pub{display:block;margin:4pt auto 10pt;max-width:calc(var(--w,460) * 1pt);font:9pt/1.35 Arial,Helvetica,sans-serif;color:#000;text-align:left;break-before:avoid;page-break-before:avoid;break-inside:avoid}}
 body.dd-pubmode #resultsOut .chartbox:has(svg.ddpub){border:0;padding:0}
 </style>
 <script id="dd1-v2570">
@@ -23834,7 +23836,9 @@ function decorate(){const out=document.getElementById("resultsOut");if(!out)retu
       if(fig)b.insertAdjacentHTML("afterend",`<p class="hint dd-pubsize noprint no-print">${esc(P.sizeLine(fig,P.ratio(),"school days"))}.<\/p>`);}
     let tail="";
     if(!pub)b.insertAdjacentHTML("beforeend",` <button type="button" class="btn ghost sm" data-g70="table" data-b="${esc(id)}" aria-expanded="false" aria-controls="ddGTab-${esc(id)}">Show as table<\/button>`);
-    tail+=`<p class="dd-gsum noprint no-print">${esc(sentence(A.beh,A.rows,A.analyses))}${pub?"":"<!--touch-->"}<\/p><div class="dd-gtab" id="ddGTab-${esc(id)}" hidden><\/div>`;
+    /* v25.70 (the BCBA, 11/9): in Publication the sentence prints under its graph; in Colour it stays screen only */
+    const gw=pub&&G.fig&&G.fig[id]&&G.fig[id].W;
+    tail+=`<p class="dd-gsum${pub?" dd-gsum-pub":" noprint no-print"}"${gw?` style="--w:${gw}"`:""}>${esc(sentence(A.beh,A.rows,A.analyses))}${pub?"":"<!--touch-->"}<\/p><div class="dd-gtab" id="ddGTab-${esc(id)}" hidden><\/div>`;
 
     if(!pub){b.insertAdjacentHTML("beforeend",`<span class="dd-zoomctl" data-b="${esc(id)}" hidden> <button type="button" class="btn ghost sm" data-g70="reset" data-b="${esc(id)}">Reset zoom<\/button> <span class="hint dd-zoomtxt"><\/span><\/span>`);
       const hint=`<span class="hint dd-touchhint">Tap a point for its date and value; double-tap or pinch the graph to zoom the days.<\/span>`;tail=tail.indexOf("<!--touch-->")>-1?tail.replace("<!--touch-->"," "+hint):`<p class="dd-gsum noprint no-print">${hint}<\/p>`+tail;}
@@ -24396,8 +24400,9 @@ try{if(document.getElementById("resultsOut")&&document.getElementById("resultsOu
      question the form keeps out of sight (asked only on an answer) is skipped while it is out of sight and joins the line
      once it shows. The bar at the foot: Back, where the person is ("Question 5 of 32 · Sheet 2 of 6", told politely to a
      screen reader), Next; Next past a sheet's last screen opens the next sheet, past the last sheet the blank ones, each a
-     button that goes to it, then Done (All at once again). Enter goes to the next question (Shift+Enter the one before),
-     as Focus has it; the cursor moves to the question. Focus and step by step are one or the other. The marks come off
+     button that goes to it, then Done: the whole form for now, and Step by step (with its 1, 2 or 3) kept for the next
+     time the form is opened on this device (the BCBA, 11/9); choosing All at once is kept the same way. Enter goes to the
+     next question (Shift+Enter the one before), as Focus has it; the cursor moves to the question. Focus and step by step are one or the other. The marks come off
      while the page is plain or printed, and off a copy the form makes of a part of itself. The other sheets are counted
      as nbh-ui counts their fields for its dots: each view's class on the body in turn, in one go, put back at once.
      FX2_CFG.step: true, or {skip: parts never taken for questions (a selector), one: more parts kept whole (a selector),
@@ -24602,7 +24607,7 @@ try{if(document.getElementById("resultsOut")&&document.getElementById("resultsOu
       if (v && v !== key) { var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (b) b.click(); key = null; build('first'); } else build();
       go();
     }
-    function done(){ review(false); setMode(''); try { scrollTo(0, 0); } catch (e) {} try { if (window.nbhUI && nbhUI.toast) nbhUI.toast('Step by step is finished: the whole form is shown. Step by step is under the toolbar.'); } catch (e) {} }
+    function done(){ review(false); var m = String(per); stop(); store(m); paintSwitch(); try { scrollTo(0, 0); } catch (e) {} try { if (window.nbhUI && nbhUI.toast) nbhUI.toast('Step by step is finished: the whole form is shown. The form opens in Step by step again next time; All at once is under the toolbar.'); } catch (e) {} }
 
     /* ---- the bar at the foot, and the switch under the toolbar ---- */
     function mkBar(){

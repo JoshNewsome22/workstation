@@ -6830,6 +6830,7 @@ svg.graph.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;min-width:0;height:a
   body.nbh-pubprint #nbhPubPrint{display:block!important;margin:0}
   #nbhPubPrint svg{width:calc(var(--w) * 1pt)!important;max-width:100%;height:auto;display:block}}
 .ea-gsum{margin:8px 0 4px;font-size:13.5px;line-height:1.45;color:var(--ink,#16242E)}
+.ea-gsum.ea-gsum-pub{max-width:calc(var(--w,460) * 1.9px);margin-left:auto;margin-right:auto}
 .ea-gtabbar .tool,.ea-pubbar .tool{min-height:44px}
 .ea-gtab{margin:6px 0 10px;overflow-x:auto;max-width:100%}
 .ea-gtab-t{border-collapse:collapse;font-size:12.5px}
@@ -6841,7 +6842,8 @@ svg.graph.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;min-width:0;height:a
 .figure.ea-pub svg.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;height:auto;overflow:visible}
 .figure.ea-pub svg.ddpub text{font-family:Arial,Helvetica,sans-serif;fill:#000}
 .ea-pubsize{margin:4px 0;font-size:12px}
-@media print{.ea-gsum,.ea-dcheck,.ea-pubbar,.ea-pubsize,.ea-gtabbar,.ea-capedit,.ea-ioa-h{display:none!important}
+@media print{.ea-gsum:not(.ea-gsum-pub),.ea-dcheck,.ea-pubbar,.ea-pubsize,.ea-gtabbar,.ea-capedit,.ea-ioa-h{display:none!important}
+  .ea-gsum.ea-gsum-pub{display:block;margin:4pt auto 10pt;max-width:calc(var(--w,460) * 1pt);font:9pt/1.35 Arial,Helvetica,sans-serif;color:#000;text-align:left;break-before:avoid;page-break-before:avoid;break-inside:avoid}
   .figure.ea-pub svg.ddpub{width:calc(var(--w) * 1pt)!important;max-width:100%!important}}
 </style>
 <script id="ea1-v2570">
@@ -7072,7 +7074,8 @@ window.eaGraphs={draw:function(lg,self,args,h){if(h)H=h;const el=args[0],legendE
   const id=el.id,c=ctxOf(id);G.last[id]=[el,legendEl,o];o.gapIn=(a,b)=>gapIn(c,a,b);
   try{switchFor(el);}catch(e){}
   if(!o.points||!o.points.length){if(legendEl)legendEl.hidden=false;el.classList.remove("ea-pub");return lg.apply(self,args);}
-  if(P.isPub()){try{const fig=pubFig(id,o);el.innerHTML=`<h3>${esc(o.title)}</h3>${fig.svg}<div class="ea-pubbar noprint"><button type="button" class="tool" data-e70="svg" data-f="${id}" title="A vector file: sharp at any size; opens in Word, Google Docs, Keynote and Illustrator">Save as SVG</button> <button type="button" class="tool" data-e70="print" data-f="${id}">Print figure</button> <button type="button" class="tool" data-e70="cap" data-f="${id}">Edit caption</button></div><p class="method ea-pubsize noprint">${esc(P.sizeLine(fig,P.ratio(),"sessions"))}.</p>`+designHtml(id,o);
+  /* v25.70 (the BCBA, 11/9): in Publication the sentence is under the figure and prints with it; in Colour it stays screen only */
+  if(P.isPub()){try{const fig=pubFig(id,o),gs=sentence(o);el.innerHTML=`<h3>${esc(o.title)}</h3>${fig.svg}${gs?`<p class="ea-gsum ea-gsum-pub" style="--w:${fig.W}">${esc(gs)}</p>`:""}<div class="ea-pubbar noprint"><button type="button" class="tool" data-e70="svg" data-f="${id}" title="A vector file: sharp at any size; opens in Word, Google Docs, Keynote and Illustrator">Save as SVG</button> <button type="button" class="tool" data-e70="print" data-f="${id}">Print figure</button> <button type="button" class="tool" data-e70="cap" data-f="${id}">Edit caption</button></div><p class="method ea-pubsize noprint">${esc(P.sizeLine(fig,P.ratio(),"sessions"))}.</p>`+designHtml(id,o);
     if(legendEl)legendEl.hidden=true;el.classList.add("ea-pub");return;}catch(e){}}
   el.classList.remove("ea-pub");
   const r=lg.apply(self,args);
@@ -7599,8 +7602,9 @@ try{redraw();}catch(e){}
      question the form keeps out of sight (asked only on an answer) is skipped while it is out of sight and joins the line
      once it shows. The bar at the foot: Back, where the person is ("Question 5 of 32 · Sheet 2 of 6", told politely to a
      screen reader), Next; Next past a sheet's last screen opens the next sheet, past the last sheet the blank ones, each a
-     button that goes to it, then Done (All at once again). Enter goes to the next question (Shift+Enter the one before),
-     as Focus has it; the cursor moves to the question. Focus and step by step are one or the other. The marks come off
+     button that goes to it, then Done: the whole form for now, and Step by step (with its 1, 2 or 3) kept for the next
+     time the form is opened on this device (the BCBA, 11/9); choosing All at once is kept the same way. Enter goes to the
+     next question (Shift+Enter the one before), as Focus has it; the cursor moves to the question. Focus and step by step are one or the other. The marks come off
      while the page is plain or printed, and off a copy the form makes of a part of itself. The other sheets are counted
      as nbh-ui counts their fields for its dots: each view's class on the body in turn, in one go, put back at once.
      FX2_CFG.step: true, or {skip: parts never taken for questions (a selector), one: more parts kept whole (a selector),
@@ -7805,7 +7809,7 @@ try{redraw();}catch(e){}
       if (v && v !== key) { var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (b) b.click(); key = null; build('first'); } else build();
       go();
     }
-    function done(){ review(false); setMode(''); try { scrollTo(0, 0); } catch (e) {} try { if (window.nbhUI && nbhUI.toast) nbhUI.toast('Step by step is finished: the whole form is shown. Step by step is under the toolbar.'); } catch (e) {} }
+    function done(){ review(false); var m = String(per); stop(); store(m); paintSwitch(); try { scrollTo(0, 0); } catch (e) {} try { if (window.nbhUI && nbhUI.toast) nbhUI.toast('Step by step is finished: the whole form is shown. The form opens in Step by step again next time; All at once is under the toolbar.'); } catch (e) {} }
 
     /* ---- the bar at the foot, and the switch under the toolbar ---- */
     function mkBar(){

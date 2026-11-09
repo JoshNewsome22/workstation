@@ -8441,8 +8441,9 @@ window.addEventListener('afterprint',()=>document.body.classList.remove('ia-pr-s
      question the form keeps out of sight (asked only on an answer) is skipped while it is out of sight and joins the line
      once it shows. The bar at the foot: Back, where the person is ("Question 5 of 32 · Sheet 2 of 6", told politely to a
      screen reader), Next; Next past a sheet's last screen opens the next sheet, past the last sheet the blank ones, each a
-     button that goes to it, then Done (All at once again). Enter goes to the next question (Shift+Enter the one before),
-     as Focus has it; the cursor moves to the question. Focus and step by step are one or the other. The marks come off
+     button that goes to it, then Done: the whole form for now, and Step by step (with its 1, 2 or 3) kept for the next
+     time the form is opened on this device (the BCBA, 11/9); choosing All at once is kept the same way. Enter goes to the
+     next question (Shift+Enter the one before), as Focus has it; the cursor moves to the question. Focus and step by step are one or the other. The marks come off
      while the page is plain or printed, and off a copy the form makes of a part of itself. The other sheets are counted
      as nbh-ui counts their fields for its dots: each view's class on the body in turn, in one go, put back at once.
      FX2_CFG.step: true, or {skip: parts never taken for questions (a selector), one: more parts kept whole (a selector),
@@ -8647,7 +8648,7 @@ window.addEventListener('afterprint',()=>document.body.classList.remove('ia-pr-s
       if (v && v !== key) { var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (b) b.click(); key = null; build('first'); } else build();
       go();
     }
-    function done(){ review(false); setMode(''); try { scrollTo(0, 0); } catch (e) {} try { if (window.nbhUI && nbhUI.toast) nbhUI.toast('Step by step is finished: the whole form is shown. Step by step is under the toolbar.'); } catch (e) {} }
+    function done(){ review(false); var m = String(per); stop(); store(m); paintSwitch(); try { scrollTo(0, 0); } catch (e) {} try { if (window.nbhUI && nbhUI.toast) nbhUI.toast('Step by step is finished: the whole form is shown. The form opens in Step by step again next time; All at once is under the toolbar.'); } catch (e) {} }
 
     /* ---- the bar at the foot, and the switch under the toolbar ---- */
     function mkBar(){

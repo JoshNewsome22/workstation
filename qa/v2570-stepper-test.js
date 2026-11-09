@@ -13,7 +13,9 @@
         number by one) and ends at "Review the blank ones"; Back walks back to the start;
      5. a question the form hides (its part out of sight) is skipped and comes back when the form shows it again;
      6. Review the blank ones: one button per question with no answer, under its sheet's name; a button goes to that
-        question's sheet and screen with the cursor in its box; Done shows the whole form (All at once);
+        question's sheet and screen with the cursor in its box; Done shows the whole form (All at once) and keeps Step by
+        step, with its 1, 2 or 3, for the next time the form is opened on this device (the BCBA, 11/9); All at once
+        chosen is kept the same way;
      7. the keyboard: Enter in a one-line box goes to the next question (from the screen's last, the next screen),
         Shift+Enter back; after Next the cursor is on the screen's first question;
      8. the same fields: every field's name, id and value the same in Step by step as All at once, and a value typed on
@@ -152,7 +154,7 @@ async function pilot(br,f,vp){
     const S1=await snap(p);const d=(()=>{const A=new Map(),B=new Map();S0.forEach(x=>A.set(x,(A.get(x)||0)+1));S1.forEach(x=>B.set(x,(B.get(x)||0)+1));
       const only=(X,Y)=>[...X].filter(([k,n])=>(Y.get(k)||0)<n).map(([k,n])=>k.slice(0,160)+' x'+(n-(Y.get(k)||0)));const a=only(A,B),b=only(B,A);return a.length||b.length?{n:[S0.length,S1.length],before:a.slice(0,5),after:b.slice(0,5)}:null;})();
     const off=await p.evaluate(()=>({marks:document.querySelectorAll('[data-fx2-st],[data-fx2-stf]').length,bar:!!document.querySelector('.fx2-stbar,.fx2-strev'),cls:document.documentElement.classList.contains('fx2-st'),all:document.querySelector('.fx2-stsw [data-fx2-stm=""]').getAttribute('aria-pressed'),kept:localStorage.getItem('nbh.fx2.step.'+document.documentElement.getAttribute('data-fx2'))}));
-    ok('6 '+tag+': Done shows the whole form (All at once) and 10: nothing left behind (every element and attribute as before)',!d&&!off.marks&&!off.bar&&!off.cls&&off.all==='true'&&!off.kept,{d,off});
+    ok('6 '+tag+': Done shows the whole form (All at once), Step by step kept for next time ('+off.kept+'), and 10: nothing left behind (every element and attribute as before)',!d&&!off.marks&&!off.bar&&!off.cls&&off.all==='true'&&off.kept==='1',{d,off});
     await p.evaluate(()=>fx2Layout.step.set(2));await sleep(500);
     const ty=await p.evaluate(()=>{const f=[...document.querySelectorAll('[data-fx2-st="q"] input[type=text], [data-fx2-st="q"] textarea, [data-fx2-st="q"]:is(input[type=text],textarea)')].find(x=>x.getClientRects().length&&!x.readOnly&&!x.disabled);if(!f)return null;f.setAttribute('data-qa-t','1');return {name:f.name||f.id,was:f.value};});
     if(ty){await p.fill('[data-qa-t]','Simulated answer '+vp.width);await sleep(200);const pr2=parse((await ST(p)).progress);
@@ -168,6 +170,17 @@ async function pilot(br,f,vp){
     await p.evaluate(()=>fx2Layout.step.set(1));await sleep(500);
     const fo=await p.evaluate(async()=>{if(!window.nbhUI||!nbhUI.focus)return null;nbhUI.focus.set(true);await new Promise(r=>setTimeout(r,600));const r={step:fx2Layout.step.on(),marks:document.querySelectorAll('[data-fx2-st]').length,focus:nbhUI.focus.on()};nbhUI.focus.set(false);await new Promise(r=>setTimeout(r,300));return r;});
     ok('11 '+tag+': Focus on turns Step by step off',fo&&!fo.step&&!fo.marks&&fo.focus,fo);
+    /* 6: after Done, the form opens again in Step by step with its 1, 2 or 3; All at once chosen is kept the same way */
+    await p.locator('.fx2-stsw [data-fx2-stm="1"]').tap();await sleep(500);await p.locator('.fx2-stsw [data-fx2-stn="3"]').tap();await sleep(500);
+    await p.evaluate(()=>fx2Layout.step.review());await sleep(300);await p.locator('.fx2-stbar .fx2-stnext').tap();await sleep(500);
+    const reopen=async()=>{await p.reload();await p.waitForFunction(()=>window.fx2Layout&&fx2Layout.step&&document.querySelector('.fx2-stsw'),null,{timeout:20000});await sleep(1500);
+      return p.evaluate(()=>{const S=fx2Layout.step.state(),q=s=>document.querySelector(s);return {on:S.on,per:S.per,bar:!!q('.fx2-stbar'),all:q('.fx2-stsw [data-fx2-stm=""]').getAttribute('aria-pressed'),
+        three:q('.fx2-stsw [data-fx2-stn="3"]').getAttribute('aria-pressed'),progress:S.progress,kept:localStorage.getItem('nbh.fx2.step.'+document.documentElement.getAttribute('data-fx2'))};});};
+    const r1=await reopen();const pr1=parse(r1.progress);
+    ok('6 '+tag+': after Done the form opens again in Step by step, 3 a screen ("'+r1.progress+'")',r1.on&&r1.per===3&&r1.bar&&r1.all==='false'&&r1.three==='true'&&r1.kept==='3'&&pr1&&pr1.a===1,r1);
+    await p.locator('.fx2-stsw [data-fx2-stm=""]').tap();await sleep(500);
+    const r2=await reopen();
+    ok('6 '+tag+': All at once chosen, the form opens again All at once',!r2.on&&!r2.bar&&r2.all==='true'&&r2.kept===null,r2);
   }catch(e){ok(tag+': the checks ran',false,String(e&&e.stack||e).slice(0,600));}
   ok('12 '+tag+': no page errors',!errs.length,errs.slice(0,4));
   await ctx.close();}

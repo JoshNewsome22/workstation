@@ -1899,7 +1899,9 @@ try { if (window.matchMedia) (function(){
    DRO, DRA, NCR, RIRD, the high-probability request sequence, FCT), set to one of them, gets a small Watch how button
    under it: it opens that procedure in the video library (the workstation's Videos, over the workstation; on its own, in a
    tab), at the video when there is one only, else at the procedure's videos. Nothing is fetched until it is tapped. Form
-   TD-1 has its own (its cards). Screen only: never printed, never saved. */
+   TD-1 has its own (its cards). Screen only: never printed, never saved. A list whose videos are another procedure's is
+   pinned to it (PIN): DT-1's Delay requirement, whatever requirement is chosen, opens the FCT video, as delay tolerance is
+   part of FCT schedule thinning (the BCBA, 11/9), not the DRA videos its choices name. */
 try { (function(){
   var W = window, D = document, U = W.nbhUI || (W.nbhUI = {});
   if (U.undoMark) return;
@@ -2033,6 +2035,9 @@ try { (function(){
     ['ncr', /\bNCR\b|noncontingent reinforcement/i, 'NCR'], ['rird', /\bRIRD\b|response interruption and redirection/i, 'RIRD'],
     ['highp', /\bhigh-?p\b|high-probability (request|instruction)/i, 'high-probability request'], ['fct', /\bFCT\b|functional communication training/i, 'FCT']];
   var ONE = { fct: 'fct-practical-guide-thinning' };   /* a procedure with one video opens at it */
+  /* a list pinned to a procedure: [the list, the procedure, why] */
+  var PIN = [['[data-fx2="DT-1"] select[name="req_type"]', 'fct', 'delay tolerance is part of FCT schedule thinning']];
+  function pinOf(s){ for (var i = 0; i < PIN.length; i++) { try { if (s.matches(PIN[i][0])) return PIN[i]; } catch (e) {} } return null; }
   var ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.3v5.4l4.5-2.7z"/></svg>';
   function famOf(t){ var h = FAM.filter(function(f){ return f[1].test(t); }); return h.length === 1 ? h[0] : null; }
   function chooser(s){ var n = 0; for (var i = 0; i < s.options.length; i++) if (famOf(s.options[i].text || '')) n++; return n >= 2; }
@@ -2043,12 +2048,13 @@ try { (function(){
     var L = D.querySelectorAll('select'); for (var i = 0; i < L.length; i++) { var s = L[i];
       if (s.__nbhW === undefined) s.__nbhW = !s.closest('.toolbar,dialog,#nbhToasts,[data-nbh-no-watch],.nbh-as-ui') && chooser(s);
       if (!s.__nbhW) continue;
-      var o = s.options[s.selectedIndex], f = o && o.value ? famOf(o.text || '') : null, a = s.__nbhWa;
+      if (s.__nbhWp === undefined) s.__nbhWp = pinOf(s);
+      var o = s.options[s.selectedIndex], pin = s.__nbhWp, f = o && o.value ? (pin ? FAM.filter(function(x){ return x[0] === pin[1]; })[0] : famOf(o.text || '')) : null, a = s.__nbhWa;
       if (!f) { if (a) a.hidden = true; continue; }
       if (!a || !a.isConnected) { a = D.createElement('button'); a.type = 'button'; a.className = 'nbh-watch noprint'; a.setAttribute('data-nbh-no-undo', '');
         a.innerHTML = ICON + '<span>Watch how</span>'; a.addEventListener('click', function(){ U.watchHow(this.getAttribute('data-fam')); });
         s.insertAdjacentElement('afterend', a); s.__nbhWa = a; }
-      a.hidden = false; if (a.getAttribute('data-fam') !== f[0]) { a.setAttribute('data-fam', f[0]); a.setAttribute('aria-label', 'Watch how: ' + f[2] + (ONE[f[0]] ? ', the video' : ', the videos') + ' in the video library'); a.title = 'Opens the ' + f[2] + ' video' + (ONE[f[0]] ? '' : 's') + ' in the video library'; } } }
+      a.hidden = false; if (a.getAttribute('data-fam') !== f[0]) { a.setAttribute('data-fam', f[0]); a.setAttribute('aria-label', 'Watch how: ' + f[2] + (ONE[f[0]] ? ', the video' : ', the videos') + ' in the video library'); a.title = 'Opens the ' + f[2] + ' video' + (ONE[f[0]] ? '' : 's') + ' in the video library' + (pin ? ' (' + pin[2] + ')' : ''); } } }
   var wt = 0; function soonW(){ clearTimeout(wt); wt = setTimeout(function(){ try { paintWatch(); } catch (e) {} }, 300); }
   D.addEventListener('change', function(e){ if (e.target && e.target.tagName === 'SELECT') soonW(); }, true);
   try { new MutationObserver(function(r){ for (var i = 0; i < r.length; i++) for (var j = 0; j < r[i].addedNodes.length; j++) { var n = r[i].addedNodes[j]; if (n.nodeType === 1 && (n.tagName === 'SELECT' || (n.querySelector && n.querySelector('select')))) { soonW(); return; } } })

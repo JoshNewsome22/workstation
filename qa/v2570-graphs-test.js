@@ -6,11 +6,12 @@
       same graphs as before; the choice is on the device, not in the record.
    2  Colour-vision safe: the palettes tested under protan, deutan (and for EA-1 tritan and grayscale) simulation; direct labels
       for alternating conditions and EA-1's conditions in place of the legend.
-   3  A sentence and a table under each graph; the sentence is the graph's accessible name; it never judges.
+   3  A sentence and a table under each graph; the sentence is the graph's accessible name; it never judges. In Publication
+      the sentence prints under each graph (DD-1 and EA-1; the BCBA, 11/9); in Colour it stays screen only.
    4  The iPad: a tap within 22 px shows the date, value, phase and condition; a double tap and a pinch zoom the days; Reset.
    5  What this design can show (A-B, reversal, the multielement FA); // breaks after a gap of more than 7 school days, the
       path not joined across; the days and sessions with a second observer marked.
-   6  Screen only: the new text, controls and zoom are not on paper; no page errors.
+   6  Screen only: the new text, controls and zoom are not on paper (in Colour, the sentence too); no page errors.
    usage: node qa/v2570-graphs-test.js   (WS_URL: the server) */
 const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,700):''));if(!c)fails++;};
@@ -135,6 +136,17 @@ const contrast=h=>{const l=[1,3,5].map(i=>lin(parseInt(h.slice(i,i+2),16)/255)),
   const pr6=await p.evaluate(()=>['#ddGStyle','#resultsOut .dd-gsum','#resultsOut .dd-dcheck','#resultsOut .dd-graphsave'].map(s=>{const e=document.querySelector(s);return e?getComputedStyle(e).display:'absent';}));
   await p.emulateMedia({media:'screen'});
   ok('6 the switch, the sentence, the design check and the buttons are not on paper',pr6.every(d=>d==='none'),pr6);
+  /* in Publication the sentence prints under each graph, in the figure's type; the switch, design check and buttons do not */
+  await tapBtn('#ddGStyle [data-gs-style="pub"]');await p.emulateMedia({media:'print'});
+  const pp6=await p.evaluate(()=>{const R=[...document.querySelectorAll('#resultsOut .behavior-report')].filter(r=>r.querySelector('.chartbox svg.ddpub[data-dd-b]'));
+    return {n:R.length,rows:R.map(r=>{const g=r.querySelector('.chartbox svg.ddpub'),s=r.querySelector('.dd-gsum-pub');if(!s)return {missing:true};const cs=getComputedStyle(s);
+      return {d:cs.display,pt:cs.fontSize,under:!!(g.compareDocumentPosition(s)&Node.DOCUMENT_POSITION_FOLLOWING)&&s.getBoundingClientRect().top>=g.getBoundingClientRect().bottom-1,np:s.classList.contains('noprint')||s.classList.contains('no-print'),t:s.textContent,a:g.getAttribute('aria-label')||''};}),
+      other:['#ddGStyle','#resultsOut .dd-dcheck','#resultsOut .dd-graphsave','#resultsOut .dd-pubsize'].map(q=>{const e=document.querySelector(q);return e?getComputedStyle(e).display:'absent';})};});
+  await p.emulateMedia({media:'screen'});
+  ok('6 Publication: the sentence prints under each of the '+pp6.n+' graphs (9 pt, the words the figure is named by); the switch, design check and buttons still do not',pp6.n>=3&&pp6.rows.every(r=>!r.missing&&r.d==='block'&&r.pt==='12px'&&r.under&&!r.np&&r.t&&r.a.indexOf(r.t)>-1)&&/^Physical aggression: Baseline mean 10 occurrences/.test(pp6.rows[0].t)&&pp6.other.every(d=>d==='none'||d==='absent'),pp6);
+  await tapBtn('#ddGStyle [data-gs-style="colour"]');
+  const cl6=await p.evaluate(()=>[...document.querySelectorAll('#resultsOut .dd-gsum')].map(s=>s.className));
+  ok('6 back in Colour the sentence is screen only again',cl6.length>=3&&cl6.every(c=>/\bnoprint\b/.test(c)&&!/dd-gsum-pub/.test(c)),cl6);
   await ctx.close();
 
   /* ---------------- EA-1 ---------------- */
@@ -164,7 +176,16 @@ const contrast=h=>{const l=[1,3,5].map(i=>lin(parseInt(h.slice(i,i+2),16)/255)),
     return {col:[...col],open:s.querySelectorAll('circle[fill="#fff"]').length,dl:s.querySelectorAll('.pub-dl').length,brk:s.querySelectorAll('.pub-brk').length,cap:[...s.querySelectorAll('.pub-cap')].map(t=>t.textContent).join(' '),
       size:(document.querySelector('#sessFig .ea-pubsize')||{}).textContent||'',legend:document.getElementById('sessLegend').hidden,bar:document.querySelectorAll('#sessFig [data-e70]').length};});
   ok('EA-1 1 Publication: black and white, the control open, the names at the path ends, the // and the caption below',ep&&ep.col.every(c=>/^(#000|#fff|transparent)$/.test(c))&&ep.open===4&&ep.dl===4&&ep.brk===1&&/^Figure 1\. Responses per minute across sessions in the Attention, Demand, Alone \/ No interaction and Play \(control\) conditions, Participant SS\./.test(ep.cap)&&/^Proportions 2:3 \(y:x\) · 16 sessions/.test(ep.size)&&ep.bar===3,ep);
+  await e.emulateMedia({media:'print'});
+  const eq=await e.evaluate(()=>{const s=document.querySelector('#sessFig .ea-gsum-pub'),g=document.querySelector('#sessFig svg.ddpub');if(!s||!g)return null;const cs=getComputedStyle(s);
+    return {d:cs.display,pt:cs.fontSize,under:s.getBoundingClientRect().top>=g.getBoundingClientRect().bottom-1,t:s.textContent,n:document.querySelectorAll('#sessFig .ea-gsum').length,bar:getComputedStyle(document.querySelector('#sessFig .ea-pubbar')).display};});
+  await e.emulateMedia({media:'screen'});
+  ok('EA-1 3 Publication: the sentence is under the figure and prints with it (9 pt); the buttons do not',eq&&eq.n===1&&eq.d==='block'&&eq.pt==='12px'&&eq.under&&/^Experimental analysis: .*Demand mean 2\.35 \(4 sessions\).*; the highest mean is in Demand\.$/.test(eq.t)&&eq.bar==='none',eq);
   await e.evaluate(()=>document.querySelector('.nbh-gs [data-gs-style="colour"]').click());await sleep(400);
+  await e.emulateMedia({media:'print'});
+  const ec=await e.evaluate(()=>{const s=document.querySelector('#sessFig .ea-gsum');return s?{d:getComputedStyle(s).display,pub:s.classList.contains('ea-gsum-pub')}:null;});
+  await e.emulateMedia({media:'screen'});
+  ok('EA-1 6 in Colour the sentence stays screen only',ec&&ec.d==='none'&&!ec.pub,ec);
   ok('EA-1 back to Colour',await e.evaluate(()=>!document.querySelector('#sessFig svg.ddpub')&&!!document.querySelector('#sessFig svg .series')),'');
   await c2.close();
   ok('no page errors',!errs.length,errs.slice(0,5));

@@ -19,7 +19,9 @@
    H  Watch how: Form TD-1's bank card and plan card say Watch how and play in TD-1's own player; Form TI-1's Main
       procedure set to DRO shows Watch how (44 px on the iPad, named), which opens the video library over the workstation at
       the DRO videos (#family=dro), FCT at its one video; no video file is fetched before a video is played; never printed;
-      Save data is the same with it shown.
+      Save data is the same with it shown. Form DT-1's Delay requirement (its choices name DRA and DRO) opens the FCT video,
+      whatever requirement is chosen: delay tolerance is part of FCT schedule thinning (the BCBA, 11/9). Help's data list
+      says what this device remembers for Back where you left off, as it says the pin.
    R  the rings: the case map shows four rings for the student on screen (Assessment, Plan, Implementation, Review), each
       with its words ("3 of 7 assessment forms started, 3 with data"), the numbers from the forms open; the caseload card
       the same four, kept with the student at Save case; nothing printed.
@@ -150,6 +152,22 @@ const ago=ms=>new Date(Date.now()-ms).toISOString();
     await ti.evaluate(()=>{const s=document.querySelector('select[data-m="proc"]');s.value='other';s.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(900);
     const w3=await ti.evaluate(()=>{const a=document.querySelector('.nbh-watch');return a?a.hidden:null;});
     ok('H3 NCR: Watch how follows the choice; Other (no video): it goes',w2&&w2.fam==='ncr'&&!w2.hid&&w3===true,{w2,w3});
+    /* DT-1: the delay requirement's Watch how is FCT's (schedule thinning), not the DRA videos its choices name */
+    const dt=await openIn(p,'DT-1',false);
+    const dw=await dt.evaluate(async()=>{const s=document.querySelector('select[name="req_type"]'),out=[];
+      for(const i of [1,3,4,0]){s.selectedIndex=i;s.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,800));
+        const a=s.nextElementSibling&&s.nextElementSibling.classList.contains('nbh-watch')?s.nextElementSibling:null;out.push({opt:s.options[i].text.slice(0,24),fam:a&&a.dataset.fam,hid:a?a.hidden:null,lab:a&&a.getAttribute('aria-label'),title:a&&a.title});}
+      s.selectedIndex=1;s.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,800));return out;});
+    ok('H5 Form DT-1\'s Delay requirement (DRA, DRO or chained): Watch how opens the FCT video (delay tolerance is part of FCT schedule thinning); no requirement chosen: it goes',dw.length===4&&dw.slice(0,3).every(w=>w.fam==='fct'&&w.hid===false&&w.lab==='Watch how: FCT, the video in the video library'&&/FCT schedule thinning/.test(w.title))&&dw[3].hid===true,dw);
+    await dt.evaluate(()=>{const s=document.querySelector('select[name="req_type"]');s.nextElementSibling.click();});await sleep(2600);
+    const dl=await p.evaluate(()=>{const fr=window.__wsVideos&&__wsVideos.frame();let h='',view='',key='';try{h=fr.contentWindow.location.hash;view=fr.contentWindow.__vl.view();key=fr.contentWindow.__vl.key();}catch(e){}return {open:__wsVideos.isOpen(),h,view,key};});
+    ok('H5 the tap opens the video library over the workstation at the FCT video (#video=fct-practical-guide-thinning), not the DRA videos',dl.open&&dl.h==='#video=fct-practical-guide-thinning'&&!/dra/.test(dl.h),dl);
+    await shot(p,'H5-dt1-watch-how-fct');
+    await p.evaluate(()=>__wsVideos.close());await sleep(500);reqs.length=0;   /* the FCT video, opened on the tap, fetched its file: TD-1's check below starts afresh */
+    /* Help, Where the student's data goes: a line for what Back where you left off remembers, said as the pin is */
+    const hd=await p.evaluate(async()=>{document.getElementById('help').click();await new Promise(r=>setTimeout(r,600));const d=[...document.querySelectorAll('#dlgBody details')].find(x=>/Where the student/.test(x.querySelector('summary').textContent));
+      const r=d?[...d.querySelectorAll('.hp-data tr')].map(t=>t.textContent).find(t=>/Back where you left off/.test(t))||'':'';document.getElementById('dlg').close();return {r,dm:/Back where you left off/.test(dmHtml())};});
+    ok('H6 Help\'s data list (and the printed data map): this device remembers the last student, form and place opened, for Back where you left off, the student by their key as the pin keeps them',/^Back where you left off: the last student, form and place opened/.test(hd.r)&&/remembers the student by their key \(the name and ID, as a caseload card.s pin keeps them\)/.test(hd.r)&&/Start fresh/.test(hd.r)&&hd.dm,hd);
     /* TD-1: the cards say Watch how and play in TD-1's own player */
     const td=await openIn(p,'TD-1',true);
     const t1=await td.evaluate(()=>{const b=[...document.querySelectorAll('.td-vid-btn')];return {n:b.length,txt:[...new Set(b.map(x=>x.textContent.trim()))],old:document.body.innerText.includes('Watch the video')};});
