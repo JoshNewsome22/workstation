@@ -4171,16 +4171,27 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   function cols(g){ var t = getComputedStyle(g).gridTemplateColumns.split(' ').filter(function(x){ return /px$/.test(x); }); return { n: t.length, w: parseFloat(t[0]) || 0, gap: parseFloat(getComputedStyle(g).columnGap) || 0 }; }
   /* v25.67 fx2: a box out of sight (in a part Focus folds) keeps what it was given: measured as nothing, it lost its
      width and kept the loss once Focus was off (EA-1) */
+  /* v25.70 fx2: what a box is given while Focus draws its part a size larger holds while Focus is on; once Focus is off a
+     box out of sight gets back what it had with Focus off (VS-1: a field on a sheet visited with Focus on kept fx2-w2
+     after Focus was off, so Focus left something behind); the boxes in sight are measured again at once */
+  var fxWas = false, wSeen = [];
+  function wSet(f, a, b, fx){ if (fx && !f._fx2wb) f._fx2wb = [f.classList.contains('fx2-w2'), f.classList.contains('fx2-wall')];
+    tog(f, 'fx2-w2', a); tog(f, 'fx2-wall', b); if (!fx) f._fx2wb = [a, b]; if (wSeen.indexOf(f) < 0) wSeen.push(f); }
   function long(){
+    var fx = R.hasAttribute('data-nbh-fx');
+    if (fxWas && !fx) { wSeen = wSeen.filter(function(f){ return f.isConnected; });
+      wSeen.forEach(function(f){ var x = f.tagName === 'TD' ? f.querySelector('input,select') : Array.prototype.filter.call(f.children, isBox)[0];
+        if (f._fx2wb && !(x && x.offsetParent)) { tog(f, 'fx2-w2', f._fx2wb[0]); tog(f, 'fx2-wall', f._fx2wb[1]); } }); }
+    fxWas = fx;
     $$('.fx2-sh .ident.fx2-al, .fx2-sh .fx2-fg.fx2-al').forEach(function(g){ var c = cols(g); if (c.n < 2 || !c.w) return;
       Array.prototype.forEach.call(g.children, function(f){ if (g.classList.contains('fx2-fg') && !f.classList.contains('fx2-f')) return; var x = Array.prototype.filter.call(f.children, isBox)[0];
         if (x && x.type !== 'date' && x.type !== 'number' && !x.offsetParent) return;
         var w = x && x.type !== 'date' && x.type !== 'number' ? textW(x) : 0, k = 1;
         while (k < c.n && w > k * c.w + (k - 1) * c.gap) k++;
-        tog(f, 'fx2-w2', k === 2 && c.n > 2); tog(f, 'fx2-wall', k > 1 && (k >= c.n)); }); });
+        wSet(f, k === 2 && c.n > 2, k > 1 && (k >= c.n), fx); }); });
     $$('.fx2-sh table.fx2-cards > tbody > tr').forEach(function(r){ var c = cols(r); if (c.n < 2 || !c.w) return;
       Array.prototype.forEach.call(r.cells, function(td){ if (td.getAttribute('data-fx2k') !== 'f') return; var x = td.querySelector('input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=date]):not([type=number]),select:not(.nbh-seg-src)');
-        tog(td, 'fx2-wall', !!(x && x.offsetParent && textW(x) > c.w)); }); });
+        wSet(td, false, !!(x && x.offsetParent && textW(x) > c.w), fx); }); });
   }
 
   /* 12. v24.95 the form's toolbar on one row on an iPad held sideways: while it wraps, it gives up, a step at a time, the
@@ -4238,14 +4249,51 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
       if (o != null && o !== '1') { tn.nodeValue = on ? o : sentence(o); tn._fx2s = tn.nodeValue; tn._fx2o = o; } });
     $$('[data-fx2-ph]').forEach(function(f){ if (on) f.setAttribute('placeholder', f.getAttribute('data-fx2-ph')); else f.removeAttribute('placeholder'); });
   }
-  window.addEventListener('beforeprint', function(){ paper(true); });
-  window.addEventListener('afterprint', function(){ paper(false); });
-  try { var pm = matchMedia('print'); var pf = function(e){ paper(e.matches); }; if (pm.addEventListener) pm.addEventListener('change', pf); else pm.addListener(pf); } catch (e) {}
+  /* v25.70 fx2 (the packet gate): a box on a part of the page out of sight (a sheet not shown) keeps the height field care
+     gave it while it was on the screen, where this layout draws boxes in larger type with more room; field care measures
+     only the boxes it can see, so the master print took those at the screen's height (HD-1's ABC lists a line taller
+     each, BC-1's, SV-1's and FD-1's notes). As the page goes plain such a box is measured again as field care measures
+     a box, in the paper's type and room: the parts out of sight that hold it are shown for that moment only (in the same
+     task, so nothing is drawn and no observer of sizes hears of it) and the scroll is kept; a box that still cannot be
+     seen gets the same number of lines in the paper's type. The screen's height comes back after. Read before the page
+     goes plain, set once it is: in the master print after nbhPolish.plain(true), on a print after nbh-polish's own
+     beforeprint (a listener put on once the page has loaded, so it runs after it), as the print media starts where there
+     was no beforeprint */
+  var boxes = null, SHOWAS = { TR: 'table-row', TD: 'table-cell', TH: 'table-cell', TBODY: 'table-row-group', THEAD: 'table-header-group', TFOOT: 'table-footer-group', TABLE: 'table', LI: 'list-item', SPAN: 'inline' };
+  function boxM(t){ var cs = getComputedStyle(t), n = function(v){ return parseFloat(v) || 0; }, fs = n(cs.fontSize);
+    return { lh: cs.lineHeight === 'normal' ? fs * 1.2 : n(cs.lineHeight),
+      extra: cs.boxSizing === 'border-box' ? n(cs.paddingTop) + n(cs.paddingBottom) + n(cs.borderTopWidth) + n(cs.borderBottomWidth) : 0 }; }
+  function boxesRead(){ if (boxes || R.classList.contains('nbh-plain')) return; boxes = [];
+    $$('textarea').forEach(function(t){ if (t.offsetParent || !/^[\d.]+px$/.test(t.style.height)) return; var m = boxM(t); if (m.lh > 0) boxes.push({ t: t, h: t.style.height, m: m }); }); }
+  /* field care's measure (nbh-field-care.js grow) */
+  function careH(t){ var cs = getComputedStyle(t); t.style.height = 'auto'; var h = t.scrollHeight;
+    if (cs.boxSizing === 'border-box') h += (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+    else h -= (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    return Math.ceil(h) + 'px'; }
+  function boxesPaper(){
+    var todo = (boxes || []).filter(function(b){ return !b.done && !b.t.offsetParent && b.t.isConnected && b.t.style.height === b.h; }); if (!todo.length) return;
+    var shown = [], sx = scrollX, sy = scrollY;
+    try {
+      todo.forEach(function(b){ for (var a = b.t.parentElement; a && a !== D.body && a !== R; a = a.parentElement) {
+        if (shown.some(function(x){ return x[0] === a; }) || getComputedStyle(a).display !== 'none') continue;
+        shown.push([a, a.style.getPropertyValue('display'), a.style.getPropertyPriority('display'), a.hasAttribute('style')]); a.style.setProperty('display', SHOWAS[a.tagName] || 'block', 'important'); } });
+      todo.forEach(function(b){ var t = b.t; if (t.offsetParent) { b.done = 1; b.set = careH(t); t.style.height = b.set; } });
+    } catch (e) {}
+    finally { shown.reverse().forEach(function(x){ if (x[1]) x[0].style.setProperty('display', x[1], x[2]); else x[0].style.removeProperty('display'); if (!x[3] && !x[0].getAttribute('style')) x[0].removeAttribute('style'); });
+      if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); }
+    todo.forEach(function(b){ var t = b.t, p, n; if (b.done) return; t.style.height = b.h; p = boxM(t); if (!(p.lh > 0) || (p.lh === b.m.lh && p.extra === b.m.extra)) return;
+      n = Math.max(1, Math.round((parseFloat(b.h) - b.m.extra) / b.m.lh)); b.done = 1; b.set = Math.ceil(n * p.lh + p.extra) + 'px'; t.style.height = b.set; });
+  }
+  function boxesBack(){ (boxes || []).forEach(function(b){ if (b.done && b.t.style.height === b.set) b.t.style.height = b.h; }); boxes = null; }
+  window.addEventListener('beforeprint', function(){ boxesRead(); paper(true); });
+  function boxesLate(){ if (boxesLate.on) return; boxesLate.on = 1; addEventListener('beforeprint', boxesPaper); }
+  window.addEventListener('afterprint', function(){ paper(false); boxesBack(); });
+  try { var pm = matchMedia('print'); var pf = function(e){ paper(e.matches); if (e.matches) boxesPaper(); else boxesBack(); }; if (pm.addEventListener) pm.addEventListener('change', pf); else pm.addListener(pf); } catch (e) {}
   /* the workstation's packet collects a form after nbhPolish.plain(true), not on the browser's print: the paper headings
      and the examples in their boxes go into the packet too */
-  function wrapPlain(){ try { var P = window.nbhPolish; if (P && P.plain && !P.plain.fx2) { var pl = P.plain; P.plain = function(on){ if (on) paper(true); var r = pl.apply(this, arguments); if (!on) paper(false); return r; }; P.plain.fx2 = true; } } catch (e) {} }
+  function wrapPlain(){ try { var P = window.nbhPolish; if (P && P.plain && !P.plain.fx2) { var pl = P.plain; P.plain = function(on){ if (on) { boxesRead(); paper(true); } var r = pl.apply(this, arguments); if (on) boxesPaper(); else { paper(false); boxesBack(); } return r; }; P.plain.fx2 = true; } } catch (e) {} }
   /* nbh-polish may load after this script (the release build puts it last): wrapped as soon as it is there */
-  wrapPlain(); D.addEventListener('DOMContentLoaded', wrapPlain); addEventListener('load', wrapPlain);
+  wrapPlain(); D.addEventListener('DOMContentLoaded', function(){ wrapPlain(); boxesLate(); }); addEventListener('load', function(){ wrapPlain(); boxesLate(); });
   window.fx2Layout = { run: run, paper: paper };
   paperCSS(); segs(); run();
   try { new MutationObserver(function(recs){ segs(); if (recs.some(function(m){ return !(m.target.closest && m.target.closest('.fx2-csum,.fx2-nsbar,.fx2-pkall,.fx2-addrow')); })) soon(); }).observe(D.body, { childList: true, subtree: true }); } catch (e) {}
