@@ -903,9 +903,9 @@ td input,td select{max-width:100%}
    collects the form for the master print), so field care measures every box at its paper height: the master print kept
    the empty boxes at the screen's taller height. :where() adds nothing to a rule's weight, and has no comma, which the
    master print's scoping of the form's styles cannot take inside :not() */
-html.nbh-pr-measure :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit){display:none!important}
+html.nbh-pr-measure :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit,.fx2-stsw,.fx2-stbar,.fx2-strev){display:none!important}
 /* v25.67 fx2: nor while the page is plain (field care measures the boxes then: an example beside a box narrowed it) */
-html.nbh-plain :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit){display:none!important}
+html.nbh-plain :is(.fx2-hint,.fx2-cellhint,.fx2-addrow,.fx2-csum,.fx2-conadd,.fx2-pkall,.fx2-nsbar,.fx2-pvbar,button.fx2-more,.fx2-pvexit,.fx2-stsw,.fx2-stbar,.fx2-strev){display:none!important}
 /* v25.67 fx2: Focus (nbh-ui: one part of a form at a time) keeps out of sight what it folds. The layout's display rules
    carry !important and outweigh Focus's own rule (a head's fields, a row of definitions, a field grid showed in a folded
    part), so these carry an id's weight: #fx2-never is on no page. A folded part's line hides its controls (:enabled,
@@ -1133,7 +1133,44 @@ html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh p,html.
 html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh p,html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh ul{max-width:68ch}
 html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh h3.sub{font-size:22px!important;margin-top:36px!important}
 html.fx2.fx2-parent:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .defs .dlab{font-size:17px!important}
+
+/* ---------- v25.70 step by step (the BCBA's approval, 11/9; the script's step 13): the questions one, two or three at a
+   time, Back and Next in a bar at the foot, and at the end the blank ones. The form's own switch (FX2_CFG.step) sits under
+   its toolbar; while it steps (html.fx2-st) the parts of the sheet not on this screen are marked data-fx2-st="x" and kept
+   out of sight here, with an id's weight over the layout's display rules (#fx2-never is on no page). Screen only, and none
+   of it while the page is plain or measured for paper. ---------- */
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;box-sizing:border-box;max-width:1100px;margin:10px auto 6px;padding:6px 14px;font:400 15px/1.4 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stl{font-weight:600}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg{display:inline-flex;flex-wrap:wrap;padding:2px;gap:2px;border-radius:10px;background:#E9EFED}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg button{min-height:44px;min-width:44px;padding:0 14px;margin:0;border:0;border-radius:8px;background:transparent;color:var(--fx2-navy);font:600 15px var(--fx2-sans);cursor:pointer}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw .fx2-stg button[aria-pressed="true"]{background:var(--fx2-navy);color:#fff}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stsw [hidden]{display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) :is([data-fx2-st="x"],#fx2-never){display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .nbh-pagenav{display:none!important}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .ident > [data-fx2-st="q"]{grid-column:1/-1!important;max-width:640px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-fg > [data-fx2-st="q"]{grid-column:1/-1!important;max-width:640px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) [data-fx2-stf]:focus{outline:none}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) body::after{content:"";display:block;height:120px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar{position:fixed;z-index:61;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(760px,calc(100% - 20px));box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border:1px solid var(--fx2-rule);border-radius:16px;box-shadow:0 16px 40px -16px rgba(24,46,67,.5);font:400 14px/1.3 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;min-width:56px;padding:0 22px;margin:0;border:1px solid var(--fx2-box);border-radius:12px;background:#fff;color:var(--fx2-navy);font:600 17px var(--fx2-sans);cursor:pointer;flex:0 0 auto;white-space:nowrap}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stnext{min-width:150px;background:var(--fx2-navy);border-color:var(--fx2-navy);color:#fff}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stback{min-width:112px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stblank{min-height:44px;padding:0 12px;font-size:14px;border-color:transparent}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button[hidden]{display:none}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button:disabled{opacity:.4;cursor:default}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button:focus-visible{outline:3px solid #9DBAD3;outline-offset:2px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stwhere{flex:1 1 auto;min-width:0;text-align:center}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stwhere b{display:block;font:600 15px/1.3 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stwhere span{display:block;font:400 13px/1.3 var(--fx2-sans);color:var(--fx2-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev{box-sizing:border-box;max-width:760px;margin:20px auto 30px;padding:22px 24px;background:#fff;border:1px solid var(--fx2-rule);border-radius:14px;font:400 16px/1.5 var(--fx2-sans);color:var(--fx2-ink)}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev h2{font:600 26px/1.25 var(--fx2-serif);color:var(--fx2-navy);margin:0 0 8px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev h3{font:600 17px/1.3 var(--fx2-sans);color:var(--fx2-ink);margin:20px 0 8px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev ul{list-style:none;margin:0;padding:0}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev li{margin:0 0 8px}
+html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev li button{display:block;width:100%;min-height:48px;padding:10px 14px;margin:0;text-align:left;border:1px solid var(--fx2-box);border-radius:10px;background:#fff;color:var(--fx2-navy);font:500 16px/1.35 var(--fx2-sans);cursor:pointer}
+@media (max-width:640px){html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar{gap:6px;padding:6px;width:calc(100% - 12px)} html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar button{padding:0 14px;font-size:16px} html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stnext{min-width:96px} html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-stbar .fx2-stback{min-width:80px}}
 }
+@media print{.fx2-stsw,.fx2-stbar,.fx2-strev{display:none!important}}
 </style>
 <script>document.documentElement.classList.add('fx2');document.documentElement.setAttribute('data-fx2','GC-1');addEventListener('beforeprint',function(){if(window.fx2Layout)fx2Layout.paper(true)})</script>
 <script id="fx2-cfg">
@@ -1160,6 +1197,8 @@ window.FX2_CFG = { fields: '.fieldgrid', cards: '#eTbl, #mTbl, #tmTbl, #fadeTbl'
     'touching others or their things': 1, 'not started after 10 seconds': 1, 'name-calling, teasing': 1,
     'Five minutes of free choice': 1, 'Music during independent work': 1, 'Extra recess on Friday': 1, 'class vote; teacher’s choice': 1,
     'Blue Jays': 'Blue Jays', 'Cardinals': 'Cardinals', 'Falcons': 'Falcons', 'Owls': 'Owls', 'rows 1 and 2 (11 students)': 1 } };
+/* v25.70 step by step (tools/blocks/fx2.html, step 13): this form offers All at once or Step by step */
+window.FX2_CFG.step = true;
 </script>
 </head>
 <body class="view-setup">
@@ -4139,16 +4178,27 @@ try{paint();}catch(e){}
   function cols(g){ var t = getComputedStyle(g).gridTemplateColumns.split(' ').filter(function(x){ return /px$/.test(x); }); return { n: t.length, w: parseFloat(t[0]) || 0, gap: parseFloat(getComputedStyle(g).columnGap) || 0 }; }
   /* v25.67 fx2: a box out of sight (in a part Focus folds) keeps what it was given: measured as nothing, it lost its
      width and kept the loss once Focus was off (EA-1) */
+  /* v25.70 fx2: what a box is given while Focus draws its part a size larger holds while Focus is on; once Focus is off a
+     box out of sight gets back what it had with Focus off (VS-1: a field on a sheet visited with Focus on kept fx2-w2
+     after Focus was off, so Focus left something behind); the boxes in sight are measured again at once */
+  var fxWas = false, wSeen = [];
+  function wSet(f, a, b, fx){ if (fx && !f._fx2wb) f._fx2wb = [f.classList.contains('fx2-w2'), f.classList.contains('fx2-wall')];
+    tog(f, 'fx2-w2', a); tog(f, 'fx2-wall', b); if (!fx) f._fx2wb = [a, b]; if (wSeen.indexOf(f) < 0) wSeen.push(f); }
   function long(){
+    var fx = R.hasAttribute('data-nbh-fx');
+    if (fxWas && !fx) { wSeen = wSeen.filter(function(f){ return f.isConnected; });
+      wSeen.forEach(function(f){ var x = f.tagName === 'TD' ? f.querySelector('input,select') : Array.prototype.filter.call(f.children, isBox)[0];
+        if (f._fx2wb && !(x && x.offsetParent)) { tog(f, 'fx2-w2', f._fx2wb[0]); tog(f, 'fx2-wall', f._fx2wb[1]); } }); }
+    fxWas = fx;
     $$('.fx2-sh .ident.fx2-al, .fx2-sh .fx2-fg.fx2-al').forEach(function(g){ var c = cols(g); if (c.n < 2 || !c.w) return;
       Array.prototype.forEach.call(g.children, function(f){ if (g.classList.contains('fx2-fg') && !f.classList.contains('fx2-f')) return; var x = Array.prototype.filter.call(f.children, isBox)[0];
         if (x && x.type !== 'date' && x.type !== 'number' && !x.offsetParent) return;
         var w = x && x.type !== 'date' && x.type !== 'number' ? textW(x) : 0, k = 1;
         while (k < c.n && w > k * c.w + (k - 1) * c.gap) k++;
-        tog(f, 'fx2-w2', k === 2 && c.n > 2); tog(f, 'fx2-wall', k > 1 && (k >= c.n)); }); });
+        wSet(f, k === 2 && c.n > 2, k > 1 && (k >= c.n), fx); }); });
     $$('.fx2-sh table.fx2-cards > tbody > tr').forEach(function(r){ var c = cols(r); if (c.n < 2 || !c.w) return;
       Array.prototype.forEach.call(r.cells, function(td){ if (td.getAttribute('data-fx2k') !== 'f') return; var x = td.querySelector('input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=date]):not([type=number]),select:not(.nbh-seg-src)');
-        tog(td, 'fx2-wall', !!(x && x.offsetParent && textW(x) > c.w)); }); });
+        wSet(td, false, !!(x && x.offsetParent && textW(x) > c.w), fx); }); });
   }
 
   /* 12. v24.95 the form's toolbar on one row on an iPad held sideways: while it wraps, it gives up, a step at a time, the
@@ -4206,16 +4256,380 @@ try{paint();}catch(e){}
       if (o != null && o !== '1') { tn.nodeValue = on ? o : sentence(o); tn._fx2s = tn.nodeValue; tn._fx2o = o; } });
     $$('[data-fx2-ph]').forEach(function(f){ if (on) f.setAttribute('placeholder', f.getAttribute('data-fx2-ph')); else f.removeAttribute('placeholder'); });
   }
-  window.addEventListener('beforeprint', function(){ paper(true); });
-  window.addEventListener('afterprint', function(){ paper(false); });
-  try { var pm = matchMedia('print'); var pf = function(e){ paper(e.matches); }; if (pm.addEventListener) pm.addEventListener('change', pf); else pm.addListener(pf); } catch (e) {}
+  /* v25.70 fx2 (the packet gate): a box on a part of the page out of sight (a sheet not shown) keeps the height field care
+     gave it while it was on the screen, where this layout draws boxes in larger type with more room; field care measures
+     only the boxes it can see, so the master print took those at the screen's height (HD-1's ABC lists a line taller
+     each, BC-1's, SV-1's and FD-1's notes). As the page goes plain such a box is measured again as field care measures
+     a box, in the paper's type and room: the parts out of sight that hold it are shown for that moment only (in the same
+     task, so nothing is drawn and no observer of sizes hears of it) and the scroll is kept; a box that still cannot be
+     seen gets the same number of lines in the paper's type. The screen's height comes back after. Read before the page
+     goes plain, set once it is: in the master print after nbhPolish.plain(true), on a print after nbh-polish's own
+     beforeprint (a listener put on once the page has loaded, so it runs after it), as the print media starts where there
+     was no beforeprint */
+  var boxes = null, SHOWAS = { TR: 'table-row', TD: 'table-cell', TH: 'table-cell', TBODY: 'table-row-group', THEAD: 'table-header-group', TFOOT: 'table-footer-group', TABLE: 'table', LI: 'list-item', SPAN: 'inline' };
+  function boxM(t){ var cs = getComputedStyle(t), n = function(v){ return parseFloat(v) || 0; }, fs = n(cs.fontSize);
+    return { lh: cs.lineHeight === 'normal' ? fs * 1.2 : n(cs.lineHeight),
+      extra: cs.boxSizing === 'border-box' ? n(cs.paddingTop) + n(cs.paddingBottom) + n(cs.borderTopWidth) + n(cs.borderBottomWidth) : 0 }; }
+  function boxesRead(){ if (boxes || R.classList.contains('nbh-plain')) return; boxes = [];
+    $$('textarea').forEach(function(t){ if (t.offsetParent || !/^[\d.]+px$/.test(t.style.height)) return; var m = boxM(t); if (m.lh > 0) boxes.push({ t: t, h: t.style.height, m: m }); }); }
+  /* field care's measure (nbh-field-care.js grow) */
+  function careH(t){ var cs = getComputedStyle(t); t.style.height = 'auto'; var h = t.scrollHeight;
+    if (cs.boxSizing === 'border-box') h += (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
+    else h -= (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    return Math.ceil(h) + 'px'; }
+  function boxesPaper(){
+    var todo = (boxes || []).filter(function(b){ return !b.done && !b.t.offsetParent && b.t.isConnected && b.t.style.height === b.h; }); if (!todo.length) return;
+    var shown = [], sx = scrollX, sy = scrollY;
+    try {
+      todo.forEach(function(b){ for (var a = b.t.parentElement; a && a !== D.body && a !== R; a = a.parentElement) {
+        if (shown.some(function(x){ return x[0] === a; }) || getComputedStyle(a).display !== 'none') continue;
+        shown.push([a, a.style.getPropertyValue('display'), a.style.getPropertyPriority('display'), a.hasAttribute('style')]); a.style.setProperty('display', SHOWAS[a.tagName] || 'block', 'important'); } });
+      todo.forEach(function(b){ var t = b.t; if (t.offsetParent) { b.done = 1; b.set = careH(t); t.style.height = b.set; } });
+    } catch (e) {}
+    finally { shown.reverse().forEach(function(x){ if (x[1]) x[0].style.setProperty('display', x[1], x[2]); else x[0].style.removeProperty('display'); if (!x[3] && !x[0].getAttribute('style')) x[0].removeAttribute('style'); });
+      if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); }
+    todo.forEach(function(b){ var t = b.t, p, n; if (b.done) return; t.style.height = b.h; p = boxM(t); if (!(p.lh > 0) || (p.lh === b.m.lh && p.extra === b.m.extra)) return;
+      n = Math.max(1, Math.round((parseFloat(b.h) - b.m.extra) / b.m.lh)); b.done = 1; b.set = Math.ceil(n * p.lh + p.extra) + 'px'; t.style.height = b.set; });
+  }
+  function boxesBack(){ (boxes || []).forEach(function(b){ if (b.done && b.t.style.height === b.set) b.t.style.height = b.h; }); boxes = null; }
+  window.addEventListener('beforeprint', function(){ ST.plainOn(); boxesRead(); paper(true); });
+  function boxesLate(){ if (boxesLate.on) return; boxesLate.on = 1; addEventListener('beforeprint', boxesPaper); }
+  window.addEventListener('afterprint', function(){ paper(false); boxesBack(); ST.plainOff(); });
+  try { var pm = matchMedia('print'); var pf = function(e){ paper(e.matches); if (e.matches) boxesPaper(); else boxesBack(); }; if (pm.addEventListener) pm.addEventListener('change', pf); else pm.addListener(pf); } catch (e) {}
   /* the workstation's packet collects a form after nbhPolish.plain(true), not on the browser's print: the paper headings
      and the examples in their boxes go into the packet too */
-  function wrapPlain(){ try { var P = window.nbhPolish; if (P && P.plain && !P.plain.fx2) { var pl = P.plain; P.plain = function(on){ if (on) paper(true); var r = pl.apply(this, arguments); if (!on) paper(false); return r; }; P.plain.fx2 = true; } } catch (e) {} }
+  function wrapPlain(){ try { var P = window.nbhPolish; if (P && P.plain && !P.plain.fx2) { var pl = P.plain; P.plain = function(on){ if (on) { ST.plainOn(); boxesRead(); paper(true); } var r = pl.apply(this, arguments); if (on) boxesPaper(); else { paper(false); boxesBack(); ST.plainOff(); } return r; }; P.plain.fx2 = true; } } catch (e) {} }
   /* nbh-polish may load after this script (the release build puts it last): wrapped as soon as it is there */
-  wrapPlain(); D.addEventListener('DOMContentLoaded', wrapPlain); addEventListener('load', wrapPlain);
-  window.fx2Layout = { run: run, paper: paper };
+  wrapPlain(); D.addEventListener('DOMContentLoaded', function(){ wrapPlain(); boxesLate(); }); addEventListener('load', function(){ wrapPlain(); boxesLate(); });
+  /* 13. v25.70 step by step (approved by the BCBA, 11/9: "a mode that presents the questions one, two or three at a time
+     ... like TurboTax", with "Review the blank ones"). A form whose settings ask for it (FX2_CFG.step) has a switch under
+     its toolbar: All at once (as always, the default) or Step by step, with 1, 2 or 3 questions on a screen. Built as Focus
+     is (nbh-ui): nothing is moved, wrapped or renamed; the parts of the sheet not on this screen are marked
+     data-fx2-st="x" and kept out of sight by the screen rules above, so saving, the exports and every print read the same
+     fields as ever. A question is a label with its box, or a whole small table, a whole selector (a list, its buttons, a
+     set of ticks), a row of definitions, a card's field, with the words before it; a heading starts a new screen. A
+     question the form keeps out of sight (asked only on an answer) is skipped while it is out of sight and joins the line
+     once it shows. The bar at the foot: Back, where the person is ("Question 5 of 32 · Sheet 2 of 6", told politely to a
+     screen reader), Next; Next past a sheet's last screen opens the next sheet, past the last sheet the blank ones, each a
+     button that goes to it, then Done (All at once again). Enter goes to the next question (Shift+Enter the one before),
+     as Focus has it; the cursor moves to the question. Focus and step by step are one or the other. The marks come off
+     while the page is plain or printed, and off a copy the form makes of a part of itself. The other sheets are counted
+     as nbh-ui counts their fields for its dots: each view's class on the body in turn, in one go, put back at once.
+     FX2_CFG.step: true, or {skip: parts never taken for questions (a selector), one: more parts kept whole (a selector),
+     rows: tables whose items (the rows of the body) are each a question, under the table's head (a questionnaire),
+     views: the sheets stepped through, in order (their data-view), noviews: sheets left out (the Guide always is)}.
+     For the checks: fx2Layout.step (on, set, next, back, state, enable). */
+  var ST = (function(){
+    var CF = C.step === true ? {} : (C.step || null), FID = R.getAttribute('data-fx2') || 'form', KEY = 'nbh.fx2.step.' + FID;
+    var on = false, per = 1, list = [], scr = [], at = 0, key = null, scans = {}, rev = false, seenRev = false;
+    var sw = null, bar = null, live = null, revEl = null, marked = [], focusEl = null, mo = null, rt = 0, scanning = false, aside = 0, built = 0;
+    var SKIP = '.toolbar,.nbh-mast,dialog,#nbhToasts,.nbh-pagenav,nav,#nbhFxBar,#nbhFxRing,.fx2-stsw,.fx2-stbar,.fx2-strev,.fx2-pvexit,.sim-banner,script,style,template,link,noscript';
+    var ATOM = 'table,fieldset,ul,ol,dl,details,[role="radiogroup"],.nbh-seg,.chkrow,.ident > .f,.fx2-fg > .fx2-f,.defs .drow,label,.rl-f,canvas,svg';
+    var HEADQ = 'h1,h2,h3,h4,.nbh-band,legend';
+    var AFTER = '.fx2-hint,.fx2-cellhint,.nbh-hint,.hint,small,.readout,.fx2-addrow,.fx2-conadd,.fx2-pkall,.fx2-btn,.fx2-nsbar,.nbh-xs-bar';
+    function is(e, s){ try { return !!(s && e.matches(s)); } catch (x) { return false; } }
+    function vis(e){ return !!(e.getClientRects && e.getClientRects().length); }
+    function store(v){ try { if (v === undefined) return localStorage.getItem(KEY) || ''; if (v) localStorage.setItem(KEY, v); else localStorage.removeItem(KEY); } catch (e) {} return v; }
+    function sq(t){ return String(t || '').replace(/\s+/g, ' ').trim(); }
+    /* a box to answer: a field on screen (a list drawn as buttons, a tick box drawn as its label count too), not one the
+       form fills itself */
+    function isField(e){ return /^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName) && !/^(hidden|file|button|submit|reset|image)$/i.test(e.type || ''); }
+    function shownF(f){ if (vis(f)) return true; if ((f.type === 'checkbox' || f.type === 'radio')) { var l = f.closest('label') || (f.id && D.querySelector('label[for="' + f.id.replace(/"/g, '') + '"]')); return !!(l && vis(l)); } return false; }
+    function liveF(f){ return isField(f) && !f.disabled && !f.readOnly && shownF(f) && !f.closest('.toolbar,dialog,.nbh-mast'); }
+    function fieldsIn(e){ if (isField(e)) return liveF(e) ? [e] : []; return Array.prototype.filter.call(e.querySelectorAll('input,select,textarea'), liveF); }
+    function choice(f){ return f.type === 'checkbox' || f.type === 'radio'; }
+    function heady(e){ return is(e, HEADQ) || !!(e.firstElementChild && is(e.firstElementChild, 'h1,h2,h3,h4') && sq(e.textContent).length < 140); }
+    function atom(e, f){
+      if (is(e, ATOM) || is(e, CF && CF.one)) return true;
+      if (f.length === 1) return true;
+      if (f.every(function(x){ return x.type === 'radio' && x.name && x.name === f[0].name; })) return true;
+      if (e.querySelector('h1,h2,h3,h4,.nbh-band')) return false;
+      if (f.every(choice) && f.length <= 8) return true;
+      return f.length <= 3 && /^(P|LI|SPAN)$/.test(e.tagName);
+    }
+    function afterish(e){ if (is(e, AFTER) || e.tagName === 'BUTTON') return true; var b = e.querySelectorAll('button'); if (!b.length) return false;
+      var t = sq(e.textContent); Array.prototype.forEach.call(b, function(x){ t = t.replace(sq(x.textContent), ''); }); return sq(t).length < 3; }
+    /* the roots of the sheet on screen, as Focus finds them */
+    function roots(){ var l = $$('main.sheet,.sheet:not(table),main' + (C.sheets ? ',' + C.sheets : '')).filter(function(e){ return !e.closest(SKIP) && vis(e); });
+      l = l.filter(function(e){ return !l.some(function(x){ return x !== e && x.contains(e); }); });
+      for (var c = D.body.firstElementChild; c; c = c.nextElementSibling) {
+        if (is(c, SKIP) || !vis(c) || l.some(function(x){ return x === c || x.contains(c) || c.contains(x); })) continue;
+        var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky' || p === 'absolute') continue;
+        if (fieldsIn(c).length) l.push(c); }
+      l.sort(function(a, b){ return a.compareDocumentPosition(b) & 4 ? -1 : 1; }); return l; }
+    /* the questions of the sheet on screen, in reading order */
+    function questions(rs){
+      var out = [], pend = [], sec = '';
+      function add(e, f, x){ pend.concat([e]).forEach(function(y){ var h = heady(y) ? y : y.querySelector && y.querySelector('h1,h2,h3,h4,.nbh-band'); if (h && h.getClientRects().length) sec = cut(words(h)); });
+        var q = { atom: e, els: pend.concat(x || [], [e]), fields: f, sec: sec }; q.head = pend.some(heady) || heady(e) || !!e.querySelector('h1,h2,h3,h4,.nbh-band');
+        q.heavy = (e.tagName === 'TABLE' || !!e.querySelector('table')) && f.length > 4 || f.length > 8 || is(e, 'canvas,svg'); pend = []; out.push(q); }
+      function text(e){ if (!pend.length && out.length && afterish(e)) out[out.length - 1].els.push(e); else pend.push(e); }
+      function walk(box){
+        for (var c = box.firstElementChild; c; c = c.nextElementSibling) {
+          if (is(c, SKIP) || is(c, CF && CF.skip)) continue;
+          if (!vis(c)) { if (getComputedStyle(c).display === 'contents') walk(c); continue; }
+          var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky') continue;
+          var f = fieldsIn(c);
+          if (!f.length) { text(c); continue; }
+          /* a questionnaire (FX2_CFG.step.rows): each item of its body a question, under the table's head */
+          if (c.tagName === 'TABLE' && is(c, CF && CF.rows)) { Array.prototype.forEach.call(c.tBodies, function(tb){ Array.prototype.forEach.call(tb.rows, function(r){ if (!vis(r)) return; var g = fieldsIn(r); if (g.length) add(r, g, c.tHead && vis(c.tHead) ? [c.tHead] : null); else text(r); }); }); continue; }
+          if (atom(c, f)) add(c, f); else walk(c);
+        } }
+      rs.forEach(walk);
+      if (pend.length && out.length) out[out.length - 1].els = out[out.length - 1].els.concat(pend);
+      out.forEach(function(q){ q.title = title(q); });
+      return out;
+    }
+    function words(e){ var o = []; (function w(n){ for (var c = n.firstChild; c; c = c.nextSibling) { if (c.nodeType === 3) { var t = sq(c.nodeValue); if (t) o.push(t); }
+      else if (c.nodeType === 1 && !/^(BUTTON|SCRIPT|STYLE|SELECT|TEXTAREA|INPUT|OPTION|svg)$/i.test(c.tagName) && !c.classList.contains('fx2-hint') && !c.classList.contains('fx2-cellhint')) w(c); } })(e); return sq(o.join(' ')); }
+    function cut(t){ t = sq(t); return t.length > 90 ? t.slice(0, 88).replace(/\s+\S*$/, '') + '…' : t; }
+    function title(q){ var a = q.atom, t = '', f = q.fields[0]; if (a.tagName === 'TR') return cut(words(a)) || 'An item';
+      var l = is(a, 'label') ? a : a.querySelector('label,.dlab,legend,caption,th,h3,h4,b,strong');
+      if (l) t = words(l);
+      if (!t && f && f.id) { var lf = D.querySelector('label[for="' + f.id.replace(/"/g, '') + '"]'); if (lf) t = words(lf); }
+      for (var i = q.els.length - 2; !t && i >= 0; i--) { var w = words(q.els[i]); if (w && w.length <= 160) t = w; }
+      if (!t && f) t = f.getAttribute('aria-label') || f.getAttribute('data-fx2-ph') || f.getAttribute('placeholder') || f.name || '';
+      return cut(t) || 'A question'; }
+    function blankQ(q){ return q.fields.filter(function(f){ return f.isConnected; }).every(function(f){ return choice(f) ? !f.checked : f.tagName === 'SELECT' ? (f.selectedIndex <= 0 || !f.value) : !String(f.value || '').trim(); }); }
+    /* the screens: n questions each; a heading, a table or a large set of boxes starts one of its own */
+    function chunk(qs){ var out = [], s = null; qs.forEach(function(q){ if (!s || s.length >= per || q.heavy || (s.length && (s[0].heavy || q.head))) { s = []; out.push(s); } s.push(q); }); return out; }
+
+    /* ---- the sheets ---- */
+    function views(){ var b = $$('#viewSeg button[data-view]').filter(function(x){ return !x.disabled && !x.hidden; });
+      var want = CF && CF.views, no = (CF && CF.noviews) || [];
+      b = b.filter(function(x){ var v = x.getAttribute('data-view'); return !/^(guide|refs|references)$/i.test(v) && no.indexOf(v) < 0 && (!want || want.indexOf(v) >= 0); });
+      if (want) b.sort(function(x, y){ return want.indexOf(x.getAttribute('data-view')) - want.indexOf(y.getAttribute('data-view')); });
+      return b; }
+    function pressedV(){ var b = D.querySelector('#viewSeg button[aria-pressed="true"],#viewSeg button[aria-selected="true"]'); return b ? b.getAttribute('data-view') : ''; }
+    function vlabel(v){ var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (!b) return ''; var t = ''; for (var n = b.firstChild; n; n = n.nextSibling) { var s = n.textContent || ''; if (n.nodeType === 1 && (/^\s*\d+\s*$/.test(s) || is(n, '[class*="sr-"],.visually-hidden,.mark'))) continue; t += s; } return sq(t); }
+    /* every sheet's questions, counted with each view's class on the body in turn (nbh-ui's way for its dots) */
+    function scanAll(){
+      var vs = views(); if (!vs.length) { scans = {}; return; }
+      var body = D.body, was = body.className, sx = scrollX, sy = scrollY; scanning = true; hold(true);
+      try { vs.forEach(function(b){ var v = b.getAttribute('data-view'), cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + v); body.className = cls.join(' ');
+        scans[v] = questions(roots()); }); }
+      finally { body.className = was; hold(false); if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); if (mo) mo.takeRecords(); scanning = false; }
+    }
+    function sheetList(){ var vs = views().map(function(b){ return b.getAttribute('data-view'); }); if (!vs.length) return [''];
+      return vs.filter(function(v){ return v === key ? list.length : (scans[v] || []).length; }); }
+
+    /* ---- the marks ---- */
+    function set(e, v){ if (v == null) { if (e.hasAttribute('data-fx2-st')) e.removeAttribute('data-fx2-st'); } else if (e.getAttribute('data-fx2-st') !== v) e.setAttribute('data-fx2-st', v); }
+    function unmarkAll(){ marked.forEach(function(e){ set(e, null); }); marked = []; $$('[data-fx2-st]').forEach(function(e){ set(e, null); }); unfocus(); }
+    function unfocus(){ if (focusEl) { focusEl.removeAttribute('data-fx2-stf'); if (focusEl.getAttribute('data-fx2-sttab') !== null) { focusEl.removeAttribute('tabindex'); focusEl.removeAttribute('data-fx2-sttab'); } focusEl = null; } }
+    /* the page as it is, for a measure: the class off (the marks then hide nothing), and on again after */
+    function hold(v){ if (v) { if (!aside++) R.classList.remove('fx2-st'); } else if (aside && !--aside && on) R.classList.add('fx2-st'); }
+    function paint(){
+      var now = [], rs, show = [], keep = [];
+      hold(true); try { rs = roots(); } finally { hold(false); }   /* the roots as they are, not as the marks leave them */
+      if (rev) rs.forEach(function(r){ now.push(r); set(r, 'x'); });
+      else if (scr[at]) {
+        scr[at].forEach(function(q){ show = show.concat(q.els); });
+        show.forEach(function(e){ for (var a = e.parentElement; a && a !== D.body; a = a.parentElement) { if (keep.indexOf(a) >= 0) break; keep.push(a); } });
+        var hide = function(box){ for (var c = box.firstElementChild; c; c = c.nextElementSibling) {
+          if (show.indexOf(c) >= 0) { set(c, 'q'); now.push(c); continue; }
+          if (keep.indexOf(c) >= 0) { hide(c); continue; }
+          if (is(c, 'script,style,template,link,colgroup,col,caption') || is(c, '.fx2-stsw,.fx2-stbar,.fx2-strev')) continue;
+          var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky') continue;
+          set(c, 'x'); now.push(c); } };
+        rs.forEach(function(r){ if (keep.indexOf(r) >= 0 || show.indexOf(r) >= 0) hide(r); else { set(r, 'x'); now.push(r); } });
+      }
+      marked.forEach(function(e){ if (now.indexOf(e) < 0) set(e, null); }); marked = now;
+      paintBar();
+      try { if (window.nbhFieldCare && nbhFieldCare.grow) setTimeout(function(){ try { nbhFieldCare.grow(); } catch (e) {} }, 30); } catch (e) {}
+    }
+    /* ---- build: the questions of the sheet on screen again, the screen kept by its first question ---- */
+    function build(where){
+      if (!on || printing || scanning) return;
+      built++;
+      var k = pressedV(), changed = k !== key, anchor = !changed && scr[at] && scr[at][0] ? scr[at][0].atom : null;
+      if (changed || where === 'scan') scanAll();
+      key = k; hold(true);
+      try { list = questions(roots()); } finally { hold(false); }
+      if (key) scans[key] = list;
+      scr = chunk(list);
+      var i = -1;
+      if (where === 'last') i = scr.length - 1;
+      else if (where === 'first' || changed) i = 0;
+      else if (anchor) { scr.forEach(function(s, j){ if (i < 0 && s.some(function(q){ return q.atom === anchor || q.atom.contains(anchor) || anchor.contains(q.atom); })) i = j; });
+        if (i < 0) scr.forEach(function(s, j){ if (i < 0 && (anchor.compareDocumentPosition(s[0].atom) & 4)) i = j; }); }
+      at = Math.max(0, Math.min(i < 0 ? at : i, scr.length - 1));
+      paint();
+    }
+    function soon(){ clearTimeout(rt); rt = setTimeout(function(){ build(); }, 160); }
+
+    /* ---- moving ---- */
+    function tbBottom(){ var t = D.querySelector('.toolbar'); if (!t) return 0; var c = getComputedStyle(t); if (c.position !== 'sticky' && c.position !== 'fixed') return 0; return Math.max(0, t.getBoundingClientRect().bottom); }
+    function bring(){ var s = scr[at], e = rev ? revEl : s && s[0] && s[0].els.filter(vis)[0]; if (!e) return; var r = e.getBoundingClientRect(), top = tbBottom() + 12;
+      if (r.top < top || r.top > innerHeight * 0.45) { try { scrollTo({ top: Math.max(0, scrollY + r.top - top), behavior: 'auto' }); } catch (x) { scrollTo(0, Math.max(0, scrollY + r.top - top)); } } }
+    function seat(byKey){
+      unfocus(); var s = scr[at];
+      if (rev) { var h = revEl && revEl.querySelector('h2'); if (h) { focusEl = h; h.setAttribute('tabindex', '-1'); h.setAttribute('data-fx2-sttab', ''); h.setAttribute('data-fx2-stf', ''); try { h.focus({ preventScroll: true }); } catch (e) {} } return; }
+      if (!s) return;
+      if (byKey) { var f = firstF(s[0]); if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} return; } }
+      var e = s[0].els.filter(vis)[0]; if (!e) return; focusEl = e; e.setAttribute('data-fx2-stf', '');
+      if (!e.hasAttribute('tabindex')) { e.setAttribute('tabindex', '-1'); e.setAttribute('data-fx2-sttab', ''); }
+      try { e.focus({ preventScroll: true }); } catch (x) {}
+    }
+    function firstF(q){ var f = q && q.fields.filter(function(x){ return x.isConnected && liveF(x); })[0]; if (f && f.classList.contains('nbh-seg-src') && f.nbhSeg) { var b = f.nbhSeg.querySelector('button'); if (b) return b; } return f; }
+    function moved(byKey){ paint(); bring(); seat(byKey); }
+    function goSheet(v, where, byKey){ var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (!b) return false;
+      b.click(); key = null; build(where); moved(byKey);
+      /* a sheet the form draws as it opens is read again once it has */
+      setTimeout(function(){ if (on && !rev) build(); }, 400); return true; }
+    function next(byKey){
+      if (!on) return false;
+      if (rev) { done(); return true; }
+      if (at < scr.length - 1) { at++; moved(byKey); return true; }
+      var sh = sheetList(), i = sh.indexOf(key);
+      for (var j = i + 1; j < sh.length; j++) if (sh[j] !== key) return goSheet(sh[j], 'first', byKey);
+      review(true); return true;
+    }
+    function back(byKey){
+      if (!on) return false;
+      if (rev) { review(false); var sh0 = sheetList(), last = sh0[sh0.length - 1]; if (last && last !== key) goSheet(last, 'last', byKey); else { build('last'); moved(byKey); } return true; }
+      if (at > 0) { at--; moved(byKey); return true; }
+      var sh = sheetList(), i = sh.indexOf(key);
+      for (var j = (i < 0 ? sh.length : i) - 1; j >= 0; j--) if (sh[j] !== key) return goSheet(sh[j], 'last', byKey);
+      return false;
+    }
+    /* ---- the blank ones ---- */
+    function review(v){
+      rev = !!v;
+      if (revEl && revEl.parentNode) revEl.parentNode.removeChild(revEl); revEl = null;
+      if (!rev) { paint(); return; }
+      seenRev = true; scanAll(); if (key) scans[key] = list;
+      var vs = views().map(function(b){ return b.getAttribute('data-view'); }), groups = [], n = 0;
+      (vs.length ? vs : ['']).forEach(function(v){ var qs = (v === key || !v ? list : scans[v] || []).filter(blankQ); if (qs.length) { groups.push([v, qs]); n += qs.length; } });
+      revEl = el('section', 'fx2-strev noprint'); revEl.setAttribute('aria-labelledby', 'fx2StRevH');
+      var h = el('h2', null, 'Review the blank ones'); h.id = 'fx2StRevH'; revEl.append(h);
+      revEl.append(el('p', null, n ? n + (n === 1 ? ' question has' : ' questions have') + ' no answer yet. Choose one to go to it, or press Done.' : 'Every question has an answer. Press Done to see the whole form.'));
+      groups.forEach(function(g){ if (g[0]) revEl.append(el('h3', null, vlabel(g[0]) || g[0])); var ul = el('ul');
+        g[1].forEach(function(q){ var li = el('li'), b = el('button', null, q.title); b.type = 'button'; b.addEventListener('click', function(){ jump(g[0], q); }); li.append(b); ul.append(li); });
+        revEl.append(ul); });
+      var at0 = sw && sw.parentNode ? sw : null; if (at0) at0.after(revEl); else D.body.prepend(revEl);
+      paint(); bring(); seat(false);
+    }
+    function jump(v, q){
+      review(false);
+      var go = function(){ var i = -1; scr.forEach(function(s, j){ if (i < 0 && s.some(function(x){ return x.atom === q.atom || x.fields.some(function(f){ return q.fields.indexOf(f) >= 0; }); })) i = j; });
+        if (i >= 0) at = i; moved(false); var f = firstF(scr[at] && scr[at].filter(function(x){ return x.atom === q.atom; })[0] || (scr[at] || [])[0]); if (f) try { f.focus({ preventScroll: true }); } catch (e) {} };
+      if (v && v !== key) { var b = D.querySelector('#viewSeg button[data-view="' + v + '"]'); if (b) b.click(); key = null; build('first'); } else build();
+      go();
+    }
+    function done(){ review(false); setMode(''); try { scrollTo(0, 0); } catch (e) {} try { if (window.nbhUI && nbhUI.toast) nbhUI.toast('Step by step is finished: the whole form is shown. Step by step is under the toolbar.'); } catch (e) {} }
+
+    /* ---- the bar at the foot, and the switch under the toolbar ---- */
+    function mkBar(){
+      if (bar) return; bar = el('div', 'fx2-stbar noprint'); bar.setAttribute('role', 'region'); bar.setAttribute('aria-label', 'Step by step');
+      var b1 = el('button', 'fx2-stback', 'Back'), w = el('div', 'fx2-stwhere'), b2 = el('button', 'fx2-stnext', 'Next'), b3 = el('button', 'fx2-stblank', 'Blank ones');
+      [b1, b2, b3].forEach(function(b){ b.type = 'button'; });
+      live = el('b'); live.setAttribute('aria-live', 'polite'); live.setAttribute('aria-atomic', 'true'); w.append(live, el('span'));
+      b1.addEventListener('click', function(){ back(false); }); b2.addEventListener('click', function(){ next(false); }); b3.addEventListener('click', function(){ review(true); });
+      b3.title = 'The questions with no answer yet'; bar.append(b1, w, b3, b2);
+    }
+    function paintBar(){
+      if (!bar) return; var b1 = bar.querySelector('.fx2-stback'), b2 = bar.querySelector('.fx2-stnext'), b3 = bar.querySelector('.fx2-stblank'), sp = bar.querySelector('.fx2-stwhere span');
+      var sh = sheetList(), si = sh.indexOf(key), before = 0, total = 0;
+      sh.forEach(function(v, j){ var n = v === key ? list.length : (scans[v] || []).length; total += n; if (j < si) before += n; });
+      if (!views().length) total = list.length;
+      var txt;
+      if (rev) { txt = 'Review the blank ones'; setText(sp, total + ' question' + (total === 1 ? '' : 's') + ' in all'); }
+      else if (!scr.length) { txt = 'Nothing to answer on this sheet'; setText(sp, vlabel(key)); }
+      else { var s = scr[at], a = list.indexOf(s[0]) + 1 + before, z = list.indexOf(s[s.length - 1]) + 1 + before;
+        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + total + (sh.length > 1 || si >= 0 ? ' · Sheet ' + (si + 1) + ' of ' + sh.length : '');
+        setText(sp, [vlabel(key), s[0].sec].filter(Boolean).join(' \u00b7 ') || s[0].title); }
+      setText(live, txt);
+      var last = !rev && at >= scr.length - 1 && sh.indexOf(key) === sh.length - 1;
+      setText(b2, rev ? 'Done' : last ? 'Review the blank ones' : 'Next');
+      b1.disabled = !rev && at <= 0 && sh.indexOf(key) <= 0;
+      b3.hidden = rev || !seenRev;
+    }
+    function mkSwitch(){
+      if (sw || !CF) return; var tb = D.querySelector('div.toolbar'); sw = el('div', 'fx2-stsw noprint'); sw.setAttribute('role', 'group'); sw.setAttribute('aria-label', 'How the questions are shown');
+      var g1 = el('span', 'fx2-stg'), g2 = el('span', 'fx2-stg fx2-stper'), l2 = el('span', 'fx2-stl fx2-stper', 'Per screen');
+      [['', 'All at once'], ['1', 'Step by step']].forEach(function(o){ var b = el('button', null, o[1]); b.type = 'button'; b.setAttribute('data-fx2-stm', o[0]); b.addEventListener('click', function(){ setMode(o[0] ? String(per) : ''); }); g1.append(b); });
+      ['1', '2', '3'].forEach(function(n){ var b = el('button', null, n); b.type = 'button'; b.setAttribute('data-fx2-stn', n); b.setAttribute('aria-label', n + (n === '1' ? ' question' : ' questions') + ' per screen'); b.addEventListener('click', function(){ setMode(n); }); g2.append(b); });
+      sw.append(el('span', 'fx2-stl', 'Questions'), g1, l2, g2);
+      if (tb && tb.parentNode) tb.after(sw); else D.body.prepend(sw);
+      paintSwitch();
+    }
+    function paintSwitch(){ if (!sw) return;
+      $$('[data-fx2-stm]', sw).forEach(function(b){ attr(b, 'aria-pressed', String(b.getAttribute('data-fx2-stm') === '' ? !on : on)); });
+      $$('[data-fx2-stn]', sw).forEach(function(b){ attr(b, 'aria-pressed', String(on && +b.getAttribute('data-fx2-stn') === per)); });
+      $$('.fx2-stper', sw).forEach(function(e){ e.hidden = !on; }); }
+
+    /* ---- on and off ---- */
+    function setMode(m){ m = /^[123]$/.test(m) ? m : ''; store(m); if (m) { per = +m; if (on) { build(); moved(false); } else start(true); } else stop(); paintSwitch(); }
+    function start(user){
+      if (on || !D.body) return;
+      try { if (window.nbhUI && nbhUI.focus && nbhUI.focus.on()) nbhUI.focus.set(false); } catch (e) {}
+      on = true; R.classList.add('fx2-st'); mkBar(); D.body.appendChild(bar); key = null; at = 0; rev = false;
+      build(user ? 'first' : 'scan'); if (user) { bring(); seat(false); }
+      watch(true); paintSwitch();
+    }
+    function stop(){
+      if (!on) return; var s = scr[at], a = s && s[0] && s[0].els.filter(vis)[0], y = a ? a.getBoundingClientRect().top : null;
+      on = false; watch(false); clearTimeout(rt); if (revEl && revEl.parentNode) revEl.parentNode.removeChild(revEl); revEl = null; rev = false;
+      unmarkAll(); R.classList.remove('fx2-st'); if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+      list = []; scr = []; scans = {}; key = null; at = 0;
+      if (a && y != null) { var n = a.getBoundingClientRect().top; scrollTo(scrollX, Math.max(0, scrollY + n - y)); }
+      try { if (window.nbhFieldCare && nbhFieldCare.grow) nbhFieldCare.grow(); } catch (e) {}
+      paintSwitch();
+    }
+    function own(n){ return n && n.nodeType === 1 && !!n.closest && !!n.closest('.fx2-stbar,.fx2-stsw,.fx2-strev'); }
+    function watch(v){
+      if (!v) { if (mo) mo.disconnect(); return; }
+      if (!mo) mo = new MutationObserver(function(recs){ if (!on || scanning || printing) return;
+        if (recs.some(function(m){ var t = m.target; if (t === R) return m.attributeName === 'data-nbh-fx' && R.hasAttribute('data-nbh-fx'); if (own(t)) return false;
+          if (m.type === 'childList') return !(Array.prototype.every.call(m.addedNodes, own) && Array.prototype.every.call(m.removedNodes, own));
+          /* only a change in what shows (as Focus reads it): not a box's own height, which field care sets as it grows */
+          if (/^(INPUT|SELECT|TEXTAREA|OPTION)$/.test(t.tagName)) return false;
+          if (m.attributeName === 'style') return /display|visibility/.test(String(m.oldValue || '') + String(t.getAttribute('style') || ''));
+          return true; })) {
+          if (R.hasAttribute('data-nbh-fx')) { setMode(''); return; } soon(); } });
+      mo.observe(D.body, { childList: true, subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class', 'hidden', 'style', 'open', 'aria-pressed', 'aria-selected', 'disabled'] });
+      mo.observe(R, { attributes: true, attributeFilter: ['data-nbh-fx'] });
+    }
+    D.addEventListener('change', function(e){ if (on && !own(e.target)) soon(); });
+    /* Enter: the next question (on this screen, then the next screen); Shift+Enter the one before. A box of several lines
+       keeps its Enter; a form that answers Enter in a box itself (it marks the key handled) keeps it too */
+    D.addEventListener('keydown', function(e){
+      if (!on || e.key !== 'Enter' || e.defaultPrevented || e.isComposing || e.altKey || e.ctrlKey || e.metaKey) return;
+      var t = e.target; if (!t || !t.tagName || own(t) || t.isContentEditable || t.tagName === 'TEXTAREA' || t.tagName === 'BUTTON' || t.tagName === 'A' || (t.tagName === 'INPUT' && /^(button|submit|reset|file|image)$/i.test(t.type || ''))) return;
+      if (t !== D.body && !t.closest('[data-fx2-st="q"]') && !t.matches('[data-fx2-st="q"]')) return;
+      e.preventDefault();
+      var s = scr[at] || [], qi = -1; s.forEach(function(q, j){ if (q.atom === t || q.atom.contains(t) || q.els.indexOf(t) >= 0) qi = j; });
+      var to = qi < 0 ? -1 : qi + (e.shiftKey ? -1 : 1), f = to >= 0 && to < s.length ? firstF(s[to]) : null;
+      if (f) { try { f.focus(); } catch (x) {} return; }
+      if (e.shiftKey) back(true); else next(true);
+    });
+    /* a copy of a part of the page the form makes while it steps carries no mark */
+    (function(){ var CN = window.Node && Node.prototype.cloneNode; if (!CN) return;
+      Node.prototype.cloneNode = function(){ var c = CN.apply(this, arguments);
+        if (on && marked.length && c && c.nodeType === 1) { try { var l = [c].concat(Array.prototype.slice.call(c.querySelectorAll ? c.querySelectorAll('[data-fx2-st],[data-fx2-stf]') : [])); l.forEach(function(x){ x.removeAttribute('data-fx2-st'); x.removeAttribute('data-fx2-stf'); if (x.hasAttribute('data-fx2-sttab')) { x.removeAttribute('data-fx2-sttab'); x.removeAttribute('tabindex'); } }); } catch (e) {} }
+        return c; }; })();
+    /* the page plain or printed: the marks step aside, and come back after */
+    function plainOn(){ if (!on) return; watch(false); unmarkAll(); R.classList.remove('fx2-st'); if (revEl) revEl.hidden = true; }
+    function plainOff(){ if (!on) return; R.classList.add('fx2-st'); if (revEl) revEl.hidden = false; watch(true); build(); }
+    /* a saved page opened again, or a copy: no stale marks */
+    $$('[data-fx2-st],[data-fx2-stf]').forEach(function(e){ e.removeAttribute('data-fx2-st'); e.removeAttribute('data-fx2-stf'); if (e.hasAttribute('data-fx2-sttab')) { e.removeAttribute('data-fx2-sttab'); e.removeAttribute('tabindex'); } });
+    /* nbh-ui counts each view's fields for its dots with Focus's folds held aside: the marks are held aside with them */
+    try { var U = window.nbhUI; if (U && U.fxHold && !U.fxHold.fx2) { var F0 = U.fxHold; U.fxHold = function(){ var a = F0.apply(this, arguments), b = on;
+      if (b) hold(true); return a || b ? function(){ if (a) a(); if (b) { b = false; hold(false); } } : null; }; U.fxHold.fx2 = 1; } } catch (e) {}
+    function init(){ if (!CF) return; mkSwitch(); var m = store(); if (/^[123]$/.test(m)) { per = +m; start(false); } else paintSwitch(); }
+    return { init: init, plainOn: plainOn, plainOff: plainOff,
+      api: { on: function(){ return on; }, set: function(m){ setMode(m == null || m === false ? '' : String(m)); }, next: function(){ return next(false); }, back: function(){ return back(false); },
+        review: function(){ review(true); }, done: done, build: function(){ build(); },
+        enable: function(o){ if (!CF) { CF = o || {}; mkSwitch(); } return true; },
+        state: function(){ var sh = sheetList(); return { on: on, per: per, key: key, at: at, screens: scr.length, rev: rev, sheets: sh, si: sh.indexOf(key),
+          counts: sh.map(function(v){ return v === key ? list.length : (scans[v] || []).length; }), progress: live ? live.textContent : '', built: built,
+          qs: list.map(function(q){ return { title: q.title, n: q.fields.length, head: q.head, heavy: !!q.heavy, tag: q.atom.tagName.toLowerCase() + (q.atom.className && typeof q.atom.className === 'string' ? '.' + q.atom.className.trim().split(/\s+/).join('.') : ''), blank: blankQ(q) }; }),
+          screen: (scr[at] || []).map(function(q){ return list.indexOf(q); }), blanks: rev && revEl ? revEl.querySelectorAll('li').length : -1 }; } } };
+  })();
+  window.fx2Layout = { run: run, paper: paper, step: ST.api };
   paperCSS(); segs(); run();
+  if (D.readyState === 'complete') setTimeout(ST.init, 0); else addEventListener('load', function(){ setTimeout(ST.init, 300); });
   try { new MutationObserver(function(recs){ segs(); if (recs.some(function(m){ return !(m.target.closest && m.target.closest('.fx2-csum,.fx2-nsbar,.fx2-pkall,.fx2-addrow')); })) soon(); }).observe(D.body, { childList: true, subtree: true }); } catch (e) {}
   D.addEventListener('change', soon); D.addEventListener('input', function(e){ if (e.target._fx2eg) egSync(e.target); if (LIVE && e.target.closest && e.target.closest(LIVE)) soon(); });
   addEventListener('resize', function(){ tbKey = ''; soon(); });
