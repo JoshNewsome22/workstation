@@ -26,23 +26,26 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const bsrc=fs.readFileSync(path.join(DIR,'nbh-td1-bank.js'),'utf8');const bctx={};vm.createContext(bctx);vm.runInContext(bsrc.replace('const TD1_BANK=','this.TD1_BANK='),bctx);const BANK=bctx.TD1_BANK;
 const CODES=['DRO','NCR','NCE','A_NCA','RIRD','DRA'];const CARDS=BANK.protocols.filter(p=>CODES.includes(p.code));
-/* the fifteen videos: file, the cards each was made from, its studies, its length (s) */
+/* the fifteen videos: file, the cards each was made from, its studies (its length is read from the list below) */
 const VID={
- dro_resetting:{f:'nbh-td1-video-dro-resetting.js',src:['dro-break-after-calm-interval'],after:'Kodak et al. (2003)',dur:135.3},
- dro_class:{f:'nbh-td1-video-dro-class.js',src:['dro-whole-interval-classroom','dro-whole-then-momentary'],after:'Repp et al. (1983) and Barton et al. (1986)',dur:143.6},
- dro_momentary:{f:'nbh-td1-video-dro-momentary.js',src:['dro-unsignaled-momentary','dro-variable-momentary'],after:'Hammond et al. (2011) and Lindberg et al. (1999)',dur:135.4},
- dro_tokens:{f:'nbh-td1-video-dro-tokens.js',src:['dro-self-monitored-timer','dro-selfmanage-timer-tokens'],after:'Tiger et al. (2009) and Tereshko et al. (2021)',dur:113.0},
- ncr_attention:{f:'nbh-td1-video-ncr-attention.js',src:['ncr-attention-ft1-after-school','ncr-ft-attention-classroom'],after:'Noel & Getch (2016) and Rasmussen & O’Neill (2006)',dur:89.4},
- ncr_items:{f:'nbh-td1-video-ncr-items.js',src:['ncr-latency-based-tangible','ncr-signaled-timer-return','ncr-thin-first-then-requests'],after:'Lalli et al. (1997), Gouboth et al. (2007) and Goh et al. (2000)',dur:98.6},
- ncr_work:{f:'nbh-td1-video-ncr-work.js',src:['ncr-vt-food-praise-demands','nce-fixed-time-breaks-notes'],after:'Lomas et al. (2010) and Waller & Higbee (2010)',dur:87.9},
- ncr_between:{f:'nbh-td1-video-ncr-between.js',src:['ncr-presession-item-access','ncr-signaled-thinning-alternatives'],after:'Rispoli et al. (2011) and Slocum et al. (2018)',dur:88.5},
- rird_vocal:{f:'nbh-td1-video-rird-vocal.js',src:['rird-vocal-stereotypy-demands','rird-vocal-questions','rird-one-question-vocal-stereotypy'],after:'Ahearn et al. (2007), Ahrens et al. (2011) and Toper-Korkmaz et al. (2018)',dur:102.8},
- rird_motor:{f:'nbh-td1-video-rird-motor.js',src:['rird-motor-directions-school','rird-one-motor-demand'],after:'Cassella et al. (2011) and Saini et al. (2015)',dur:91.4},
- rird_pica:{f:'nbh-td1-video-rird-pica.js',src:['rird-block-pica-on-touch','rird-pica-block-redirect-food','rird-pica-block-redirect-discard'],after:'McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025)',dur:83.2},
- dra_attention:{f:'nbh-td1-video-dra-attention.js',src:['dra-teacher-attention-study'],after:'Hall, Lund & Jackson (1968)',dur:138.5},
- dra_escape:{f:'nbh-td1-video-dra-escape.js',src:['dra-break-plus-favorites-no-ext'],after:'Briggs et al. (2019)',dur:142.2},
- dra_tangible:{f:'nbh-td1-video-dra-tangible.js',src:['dra-coupons-end-preferred'],after:'Wilder et al. (2007a)',dur:135.6},
- dra_automatic:{f:'nbh-td1-video-dra-automatic.js',src:['dra-earn-stereotypy-access-leisure','dra-stereotypy-access-play'],after:'Potter et al. (2013) and Hanley et al. (2000)',dur:137.3}};
+ dro_resetting:{f:'nbh-td1-video-dro-resetting.js',src:['dro-break-after-calm-interval'],after:'Kodak et al. (2003)'},
+ dro_class:{f:'nbh-td1-video-dro-class.js',src:['dro-whole-interval-classroom','dro-whole-then-momentary'],after:'Repp et al. (1983) and Barton et al. (1986)'},
+ dro_momentary:{f:'nbh-td1-video-dro-momentary.js',src:['dro-unsignaled-momentary','dro-variable-momentary'],after:'Hammond et al. (2011) and Lindberg et al. (1999)'},
+ dro_tokens:{f:'nbh-td1-video-dro-tokens.js',src:['dro-self-monitored-timer','dro-selfmanage-timer-tokens'],after:'Tiger et al. (2009) and Tereshko et al. (2021)'},
+ ncr_attention:{f:'nbh-td1-video-ncr-attention.js',src:['ncr-attention-ft1-after-school','ncr-ft-attention-classroom'],after:'Noel & Getch (2016) and Rasmussen & O’Neill (2006)'},
+ ncr_items:{f:'nbh-td1-video-ncr-items.js',src:['ncr-latency-based-tangible','ncr-signaled-timer-return','ncr-thin-first-then-requests'],after:'Lalli et al. (1997), Gouboth et al. (2007) and Goh et al. (2000)'},
+ ncr_work:{f:'nbh-td1-video-ncr-work.js',src:['ncr-vt-food-praise-demands','nce-fixed-time-breaks-notes'],after:'Lomas et al. (2010) and Waller & Higbee (2010)'},
+ ncr_between:{f:'nbh-td1-video-ncr-between.js',src:['ncr-presession-item-access','ncr-signaled-thinning-alternatives'],after:'Rispoli et al. (2011) and Slocum et al. (2018)'},
+ rird_vocal:{f:'nbh-td1-video-rird-vocal.js',src:['rird-vocal-stereotypy-demands','rird-vocal-questions','rird-one-question-vocal-stereotypy'],after:'Ahearn et al. (2007), Ahrens et al. (2011) and Toper-Korkmaz et al. (2018)'},
+ rird_motor:{f:'nbh-td1-video-rird-motor.js',src:['rird-motor-directions-school','rird-one-motor-demand'],after:'Cassella et al. (2011) and Saini et al. (2015)'},
+ rird_pica:{f:'nbh-td1-video-rird-pica.js',src:['rird-block-pica-on-touch','rird-pica-block-redirect-food','rird-pica-block-redirect-discard'],after:'McCord et al. (2005), Hagopian & Adelinis (2001) and Frank-Crawford et al. (2025)'},
+ dra_attention:{f:'nbh-td1-video-dra-attention.js',src:['dra-teacher-attention-study'],after:'Hall, Lund & Jackson (1968)'},
+ dra_escape:{f:'nbh-td1-video-dra-escape.js',src:['dra-break-plus-favorites-no-ext'],after:'Briggs et al. (2019)'},
+ dra_tangible:{f:'nbh-td1-video-dra-tangible.js',src:['dra-coupons-end-preferred'],after:'Wilder et al. (2007a)'},
+ dra_automatic:{f:'nbh-td1-video-dra-automatic.js',src:['dra-earn-stereotypy-access-leisure','dra-stereotypy-access-play'],after:'Potter et al. (2013) and Hanley et al. (2000)'}};
+/* each video's length (s), read from the list (nbh-videos.js, written by tools/blocks/patch-videos.py) so a re-cut video needs no edit here */
+{const vctx={window:{}};vm.createContext(vctx);vm.runInContext(fs.readFileSync(path.join(DIR,'nbh-videos.js'),'utf8'),vctx);
+ vctx.window.NBH_VIDEOS.list.forEach(v=>{if(VID[v.key])VID[v.key].dur=v.dur;});}
 /* the closest video for every card, read by hand from its fields (lab, params, steps, fn) */
 const EXP={
  dro_class:'dro-30min-engagement-medication dro-calm-transition dro-classwide-star-board dro-cough-mealtime-praise dro-evening-call dro-free-time-staying-seated dro-injury-check-levels dro-peer-play-prompts-timeout dro-presession-rule dro-recess-safety-prize dro-whole-interval-classroom dro-whole-then-momentary',
