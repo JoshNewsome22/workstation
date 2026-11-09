@@ -110,9 +110,14 @@ async function printPdf(page,file,onlyDefine){
  const eOther=pick(e=>e.type==='Single topography'&&!e.fdef&&e.cat==='Property destruction')||pick(e=>e.type==='Single topography'&&!e.fdef&&e.id!==eSingle.id);
  const ePre=pick(e=>e.type==='Precursor');
  console.log('   using',eSingle.id,eClus.id,eFunc.id,eProd.id,eOther.id,ePre.id);
- check('no control was added to the page by the library (controls '+await page.evaluate(()=>document.querySelectorAll('input,select,textarea').length)+')',
-  /* v23.17 (TB-1 review F35, F34, F39) 13 of the form's own: the pilot's A and B for 4 targets, the hidden sel[].from of 4 rows, the print choice */
-  await page.evaluate(()=>document.querySelectorAll('input,select,textarea').length===356));
+ /* v25.71: the form's own controls grew after v23.17 (356 then; the quality check and later releases added more), so the page
+    is compared with the same page without the library (its data script emptied): the counts must be equal */
+ {const nb=await (async()=>{const c2=await br.newContext({viewport:{width:1180,height:820}});
+    await c2.route(URL,async r=>{const res=await r.fetch();const b=(await res.text()).replace(/<script id="tb1-lib">[\s\S]*?<\/script>/,'<script id="tb1-lib"></script>');await r.fulfill({response:res,body:b});});
+    const p2=await c2.newPage();await p2.goto(URL,{waitUntil:'load'});await sleep(900);
+    const o=await p2.evaluate(()=>({n:document.querySelectorAll('input,select,textarea').length,lib:[...document.querySelectorAll('.tb1lib-host')].filter(h=>h.shadowRoot&&h.shadowRoot.querySelector('button,input,select')).length}));await c2.close();return o;})();
+  const nw=await page.evaluate(()=>({n:document.querySelectorAll('input,select,textarea').length,lib:[...document.querySelectorAll('.tb1lib-host')].filter(h=>h.shadowRoot&&h.shadowRoot.querySelector('button,input,select')).length}));
+  check('no control was added to the page by the library (controls '+nw.n+', without the library '+nb.n+')',nw.lib>0&&nb.lib===0&&nw.n===nb.n,{nw,nb});}
  check('a library row on every card, the panel and the candidate picker are drawn',await page.evaluate(()=>{const n=+document.querySelector('#nTgt').value;
   return document.querySelectorAll('#tgtWrap .card .tb1lib-host').length===n&&[...document.querySelectorAll('.tb1lib-host')].every(h=>h.shadowRoot)&&!!document.querySelector('#tb1LibPanel').shadowRoot&&!!document.querySelector('#tb1LibCand').shadowRoot;}));
  check('the Guide counts come from the library',await page.evaluate(()=>document.querySelector('[data-tb1lib="n"]').textContent===String(TB1_LIB.entries.length)&&document.querySelector('[data-tb1lib="cats"]').textContent==='14'));
@@ -380,7 +385,11 @@ async function printPdf(page,file,onlyDefine){
  const pdfA=OUT+'whole-form.pdf';await printPdf(p3,pdfA,false);const tA=pdfText(pdfA);
  if(tA!==null){const T=norm(tA);const leak=UI_TEXT.filter(s=>T.includes(s));
   check('the whole form on paper carries none of the library UI',leak.length===0,leak);
-  check('the Guide paragraph about the library prints',T.includes('About the behavior library')&&T.includes('starting point to edit'));}
+  /* v25.71: since v24.31 the Guide prints only when "Include the guide and references" is chosen: printed again with it */
+  await p3.emulateMedia({media:'screen'});await p3.evaluate(()=>nbhPrint.set('guide',true));
+  const pdfG=OUT+'whole-form-guide.pdf';await printPdf(p3,pdfG,false);const tG=pdfText(pdfG);await p3.evaluate(()=>nbhPrint.set('guide',false));
+  const TG=norm(tG||'');
+  check('the Guide paragraph about the library prints',!T.includes('About the behavior library')&&TG.includes('About the behavior library')&&TG.includes('starting point to edit')&&UI_TEXT.filter(s=>TG.includes(s)).length===0);}
  await p3.close();await p2.close();
  {const p5=await open(br,{width:1180,height:820},log);await p5.addStyleTag({content:'@media print{.sheet:not(#refs){display:none!important}}'});
   const f=OUT+'references.pdf';await printPdf(p5,f,false);

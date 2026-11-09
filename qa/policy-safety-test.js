@@ -343,7 +343,9 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     /* print: the answer stays off paper; the report record prints on its own */
     await view(page,'map');
     const pr=await printShown(page,['#imRule','#imRepCur','#imRepCurPaper','#imCare','#imCareVerdict','#imGuideSafety','#imCareEdit']);
-    check(pr['#imRule']&&pr['#imCare']&&pr['#imGuideSafety']&&pr['#imRepCurPaper'],'print: the rule, the care log, the Guide table and the report line print',pr);
+    /* v25.71: since v24.31 (one print policy) the Guide prints only when "Include the guide and references" is chosen */
+    await page.evaluate(()=>nbhPrint.set('guide',true));const prG=await printShown(page,['#imGuideSafety']);await page.evaluate(()=>nbhPrint.set('guide',false));
+    check(pr['#imRule']&&pr['#imCare']&&!pr['#imGuideSafety']&&prG['#imGuideSafety']&&pr['#imRepCurPaper'],'print: the rule, the care log, the Guide table and the report line print',{pr,prG});
     check(!pr['#imRepCur']&&!pr['#imCareVerdict']&&!pr['#imCareEdit'],'print: the report question, the care verdicts and the entry panel do not',pr);
     const pt=await printedText(page);
     check(!/Hotline, ref T-1|a rash the nurse has charted|it matches after all/.test(pt),'print: no answer and no report is on paper');
@@ -416,10 +418,16 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     check(/Injury checks are consented to; still to enter: when checks are done; who checks, and the second adult/.test(await text(page,'#statusBox')),'Yes to injury checks asks when, who and the second adult');
     check(await page.evaluate(()=>document.querySelector('#icInjury').classList.contains('dec-yes')),'the card shows the Yes');
     await setVal(page,'[name="ij.when"]','At intake and every 3 weeks');await setVal(page,'[name="ij.who"]','School nurse, with the aide');await setVal(page,'[name="ij.init"]','TP');await setVal(page,'[name="ij.date"]','2026-10-01');await tick(page,'[name="a.conf"]',true);await sleep(100);
+    /* v25.71: since v25.66 IC-1 also asks the decision on injury photos (Specific procedures, E), which Form IM-1 reads */
+    check(/Injury checks are consented to; the decision on photos for the record is not recorded yet/.test(await text(page,'#statusBox'))&&!/still to enter: when checks/.test(await text(page,'#statusBox')),'when, who and the second adult entered: only the photo decision is still asked');
+    await setVal(page,'[name="ij.photo"]','no');await sleep(100);
     check(!/Injury checks/.test(await text(page,'#statusBox')),'filled in: nothing more asked about injury checks');
     await setVal(page,'[name="ij.dec"]','no');await sleep(80);check(await page.evaluate(()=>document.querySelector('#icInjury').classList.contains('dec-no')),'the card shows the No');
     await setVal(page,'[name="ij.dec"]','yes');
-    const pr=await printShown(page,['#icConf','#icInjury','#icGuide6','#icAssentConf']);check(Object.values(pr).every(Boolean),'print: the limits, the injury-check card, the assent line and the Guide section print',pr);
+    const pr=await printShown(page,['#icConf','#icInjury','#icGuide6','#icAssentConf']);
+    /* v25.71: the Guide section prints when the Guide is chosen (v24.31) */
+    await page.evaluate(()=>nbhPrint.set('guide',true));const prG=await printShown(page,['#icGuide6']);await page.evaluate(()=>nbhPrint.set('guide',false));
+    check(pr['#icConf']&&pr['#icInjury']&&pr['#icAssentConf']&&!pr['#icGuide6']&&prG['#icGuide6'],'print: the limits, the injury-check card, the assent line and the Guide section print',{pr,prG});
     const saved=await saveText(page);const d=JSON.parse(saved);
     check(d.rev==='2026-10'&&d.fields['ij.dec']==='yes'&&d.fields['ij.who']==='School nurse, with the aide'&&d.fields['ij.init']==='TP'&&d.fields['c.formrev']==='2026-10'&&d.fields['a.conf']===true,'saved: the revision, the injury-check decision and the assent line');
     await page.evaluate(()=>document.querySelector('#clearBtn').click());await sleep(300);
@@ -444,7 +452,8 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     const pe=await page.evaluate(()=>{const dd=document.querySelector('[name="ij.dec"]').closest('.decide');return dd.classList.contains('ic-dec-empty');});
     check(pe,'an undecided injury check prints its choices as boxes to mark');
     await view(page,'guide');const g=await text(page,'#guide');
-    check(g.includes('6. What Stays Private, and Injury Checks')&&/Standard 3\.10/.test(g)&&/reported right away, to the Florida Abuse Hotline/.test(g)&&/Student Assent sheet/.test(g)&&!/the same day/.test(g),'the Guide explains the limits, telling the student at the outset, and the injury checks');
+    /* v25.71: headings in sentence case since fx2 (v25.68, v25.69) */
+    check(g.includes('6. What stays private, and injury checks')&&/Standard 3\.10/.test(g)&&/reported right away, to the Florida Abuse Hotline/.test(g)&&/Student Assent sheet/.test(g)&&!/the same day/.test(g),'the Guide explains the limits, telling the student at the outset, and the injury checks');
     await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(800);
     check(await page.evaluate(()=>document.querySelector('[name="ij.dec"]').value==='na'&&document.querySelector('#icRevNote').hidden),'the simulation records injury checks as not proposed, on this revision');
     check(log.length===0,'no console errors on IC-1',log);await page.close();}
