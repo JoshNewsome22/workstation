@@ -7,7 +7,7 @@
    button, the master print's copy unchanged by Focus, a tap on an iPad; a phone, an iPad upright and a laptop: no sideways
    scroll and 44 px targets. Chromium with iPad and iPhone user agents and touch. Simulated student only.
    usage: node qa/v2191-focus-test.js [form-id regex]    (WS_URL=http://127.0.0.1:8126 for a worktree's server) */
-const {chromium,BASE,sleep,forms}=require(__dirname+'/lib.js');
+const {chromium,BASE,sleep,forms,navTap}=require(__dirname+'/lib.js');
 let fails=0,checks=0;const ok=(n,c,i)=>{checks++;console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,700):''));if(!c)fails++;};
 const IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 const IPHONE='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
@@ -40,9 +40,14 @@ async function printSig(p){
    page's own element is checked on its own below), the accessible names a form adds as it goes, and the progress dots */
 /* v23.87: on a touch screen the shared block dresses the fields in sight (hints, example numbers, yes/no buttons); Focus
    brings parts into sight, so the dressing is taken off before each snapshot (it is not Focus's trace) */
-const snap=p=>p.evaluate(()=>{try{if(window.nbhUI&&nbhUI.fields)nbhUI.fields.reset();}catch(e){}const out=[];for(const e of document.documentElement.getElementsByTagName('*')){if(e.closest('#nbhToasts')||(e.matches('body > a[download]')))continue;   /* a file being saved: there for a moment */
+/* v25.71: nbh-polish's sideways-scroll hints (v24.36: the nbh-xs classes on a box and the "More columns" bar above it) follow the
+   layout on the next tap, resize or load, and a bar once made is kept, hidden, when its table fits; they are brought up to date
+   before each look (nbhPolish.xscroll, as a tap does), and a hidden bar is not counted. A box that scrolls sideways after Focus
+   when it did not before still shows, by its classes and a bar in sight; a box out of sight (another view) keeps the classes of
+   the last time it was seen, so they are not counted there. */
+const snap=p=>p.evaluate(()=>{try{if(window.nbhUI&&nbhUI.fields)nbhUI.fields.reset();}catch(e){}try{if(window.nbhPolish&&nbhPolish.xscroll)nbhPolish.xscroll();}catch(e){}const out=[];for(const e of document.documentElement.getElementsByTagName('*')){if(e.closest('#nbhToasts')||(e.matches('body > a[download]'))||e.closest('.nbh-xs-bar[hidden]'))continue;   /* a file being saved: there for a moment */
   if(e.ownerSVGElement){out.push(e.tagName);continue;}
-  const a=[...e.attributes].filter(x=>!(e===document.documentElement&&x.name==='class')&&x.name!=='style'&&!(e.closest('#viewSeg')&&/^(data-nbh-fill|title)$/.test(x.name))&&!/^(aria-label|role)$/.test(x.name)).map(x=>x.name+'='+(x.name==='class'?x.value.trim().split(/\s+/).join(' '):x.value)).sort().join(' ');
+  const a=[...e.attributes].filter(x=>!(e===document.documentElement&&x.name==='class')&&x.name!=='style'&&!(e.closest('#viewSeg')&&/^(data-nbh-fill|title)$/.test(x.name))&&!/^(aria-label|role)$/.test(x.name)).map(x=>x.name+'='+(x.name==='class'?x.value.trim().split(/\s+/).filter(c=>!(/^nbh-xs(-[lr])?$/.test(c)&&!e.getClientRects().length)).join(' '):x.value)).sort().join(' ');
   out.push(e.tagName+'['+a+']');}return out;});
 const traces=p=>p.evaluate(()=>({attrs:[...document.querySelectorAll('*')].filter(e=>[...e.attributes].some(a=>/^data-nbh-fx/.test(a.name))).length,
   els:!!document.querySelector('#nbhFxBar,#nbhFxRing,#nbh-fx-css'),html:document.documentElement.hasAttribute('data-nbh-fx')||/--nbh-fx/.test(document.documentElement.getAttribute('style')||'')}));
@@ -161,9 +166,15 @@ async function shellChecks(br){
   const pal=await page.evaluate(()=>{const r=palList('focus');return r.map(x=>x.n);});
   ok('shell: the command box offers “Focus: one part of a form at a time” first for “focus”',pal[0]==='Focus: one part of a form at a time',pal.slice(0,4));
   const fr=await open('BC-1');
-  const b0=await page.evaluate(()=>{const b=document.getElementById('focusBtn'),r=b.getBoundingClientRect(),n=document.getElementById('popOut').getBoundingClientRect();return {p:b.getAttribute('aria-pressed'),w:Math.round(r.width),h:Math.round(r.height),nh:Math.round(n.height),top:Math.round(r.top-n.top),seen:!!b.offsetParent,lbl:b.querySelector('.lbl').textContent,svg:!!b.querySelector('svg')};});
-  ok('shell: the crumb has a Focus button (an icon and “Focus”), off, beside Own tab and as tall, at least 44 px wide on a finger',b0.seen&&b0.p==='false'&&b0.lbl==='Focus'&&b0.svg&&b0.w>=44&&b0.h===b0.nh&&b0.top===0,b0);
-  await page.click('#focusBtn');await sleep(700);
+  /* v25.71: since v25.65 (top bar A, SETUP.md: "View (Fit or Actual size, Focus, Side by side, Fullscreen, its own tab ...)") the
+     switch is an item of the form row's View menu; the crumb's own Focus button stays, hidden, as the item's target. Checked: the
+     item is there, a checkbox item, off, and as tall as a finger, under a View button at least 44 px wide */
+  await page.locator('#aView').tap();await sleep(300);
+  const b0=await page.evaluate(()=>{const v=document.getElementById('aView'),vr=v.getBoundingClientRect(),it=document.querySelector('#wsViewMenu:not([hidden]) [data-wn-for="focusBtn"]'),r=it&&it.getBoundingClientRect();
+    return {view:Math.round(vr.width),vh:Math.round(vr.height),item:!!it,role:it&&it.getAttribute('role'),checked:it&&it.getAttribute('aria-checked'),lbl:it&&it.textContent.trim(),h:r&&Math.round(r.height),p:document.getElementById('focusBtn').getAttribute('aria-pressed')};});
+  await page.locator('#aView').tap();await sleep(250);
+  ok('shell: the form row\'s View menu has Focus (one part at a time), off, a checkbox item as tall as a finger, under a View button at least 44 px wide',b0.item&&b0.role==='menuitemcheckbox'&&b0.checked==='false'&&b0.p==='false'&&/^Focus: one part at a time$/.test(b0.lbl)&&b0.h>=44&&b0.view>=44&&b0.vh>=44,b0);
+  await navTap(page,'#focusBtn',true);await sleep(700);
   const s1=await page.evaluate(()=>({p:document.getElementById('focusBtn').getAttribute('aria-pressed'),ls:localStorage.getItem('nbh.focus')}));
   const f1=await fr.evaluate(()=>({on:nbhUI.focus.on(),bar:!!document.querySelector('#nbhFxBar:not([hidden])'),cur:nbhUI.focus.cur(),units:nbhUI.focus.units().length,own:!!document.getElementById('nbhFocusBtn')}));
   ok('shell: Focus pressed: the button is lit, the choice kept on the device (nbh.focus), the open form shows one part with its bar',s1.p==='true'&&s1.ls==='on'&&f1.on&&f1.bar&&f1.units>1,{s1,f1});
@@ -185,7 +196,13 @@ async function shellChecks(br){
   await page.evaluate(()=>focusSet(true));await sleep(600);await fr.evaluate(()=>nbhUI.focus.go(1));await sleep(300);
   const pay1=await page.evaluate(async()=>{const r=await grab('BC-1','collect');return r&&r.html;});await sleep(300);
   const after=await fr.evaluate(()=>({cur:nbhUI.focus.cur(),open:document.querySelectorAll('[data-nbh-fx="c"],[data-nbh-fx="hc"]').length}));
-  ok('shell: the master print copies the form exactly as with Focus off (no marks in it), and Focus is back after',!!pay0&&pay0===pay1&&!/data-nbh-fx/.test(pay1)&&after.cur===1&&after.open>0,{len:[pay0&&pay0.length,pay1&&pay1.length],after,first:pay0&&pay1&&[...pay0].findIndex((c,i)=>c!==pay1[i])});
+  /* v25.71: the two copies are compared element by element with each element's attributes in name order: an attribute taken off
+     and put back (fx2 moves a box's example between placeholder and data-fx2-ph as the box is seen) comes back last, and the
+     order of attributes means nothing in HTML; the copy with Focus on had BC-1's "Why contrast is expected" box with
+     style="height: 44px" before its placeholder instead of after it, and nothing else different */
+  const norm=await page.evaluate(([a,b])=>[a,b].map(h=>{if(!h)return h;const t=document.createElement('template');t.innerHTML=h;
+    t.content.querySelectorAll('*').forEach(e=>{const at=[...e.attributes].map(x=>[x.name,x.value]).sort((p,q)=>p[0]<q[0]?-1:p[0]>q[0]?1:0);at.forEach(([n])=>e.removeAttribute(n));at.forEach(([n,v])=>e.setAttribute(n,v));});return t.innerHTML;}),[pay0,pay1]);
+  ok('shell: the master print copies the form exactly as with Focus off (no marks in it), and Focus is back after',!!pay0&&norm[0]===norm[1]&&!/data-nbh-fx/.test(pay1)&&after.cur===1&&after.open>0,{len:[pay0&&pay0.length,pay1&&pay1.length],after,first:pay0&&pay1&&[...pay0].findIndex((c,i)=>c!==pay1[i])});
   /* a form opened later picks it up; the form's Whole page button turns it off everywhere */
   const fr2=await open('IC-1');
   const f2=await fr2.evaluate(()=>({on:nbhUI.focus.on(),units:nbhUI.focus.units().length}));
@@ -203,8 +220,9 @@ async function shellChecks(br){
   const s5=await page.evaluate(()=>({p:document.getElementById('focusBtn').getAttribute('aria-pressed')}));
   const fr3=await open('DM-1');const o6=await fr3.evaluate(()=>({on:nbhUI.focus.on(),units:nbhUI.focus.units().length}));
   ok('shell: opened again, the workstation remembers Focus and the form opens in it',s5.p==='true'&&o6.on&&o6.units>1,{s5,o6});
-  const crumb=await page.evaluate(()=>[...document.querySelectorAll('.crumb .acts button')].filter(b=>b.offsetParent).map(b=>[b.id,Math.round(b.getBoundingClientRect().width)]));
-  ok('shell, iPad: every crumb button is at least 44 px wide, the Focus button among them',crumb.every(x=>x[1]>=44)&&crumb.some(x=>x[0]==='focusBtn'),crumb);
+  /* v25.71: Focus is in the View menu since v25.65, so the View button stands for it among the crumb's buttons */
+  const crumb=await page.evaluate(()=>[...document.querySelectorAll('.crumb button')].filter(b=>b.offsetParent).map(b=>[b.id,Math.round(b.getBoundingClientRect().width)]));
+  ok('shell, iPad: every crumb button is at least 44 px wide, the View button (Focus is in its menu) among them',crumb.every(x=>x[1]>=44)&&crumb.some(x=>x[0]==='aView'),crumb);
   await page.evaluate(()=>focusSet(false));
   ok('shell: no page errors',!errs.length,errs.slice(0,3));
   await ctx.close();
