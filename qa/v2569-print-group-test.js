@@ -152,7 +152,9 @@ const samePages=(a,b)=>a.length===b.length&&a.every((pa,i)=>pa.length===b[i].len
   ok('7 Form DD-1 in the packet: the first graph follows the student\'s details on the results\' first page (filled to '+Math.round(100*low/rp.h)+'% of it), the key right after it',
     ri>=0&&/Observationdays/.test(flat(rp))&&low>0.6*rp.h&&(keyAt===ri||keyAt===ri+1)&&dd.filter(pg=>/Howtoreadthesegraphs/.test(flat(pg))).length===1,{ri,keyAt,low,h:rp.h});
   /* ---- 4 the presets ---- */
+  /* v25.70 (the BCBA, 11/9) the Family packet opens with the plan in plain words, which waits for Reviewed (qa/v2570-backlog-test.js) */
   const build=async(aud,file)=>{await page.evaluate(()=>$('#masterPrint').click());await page.waitForSelector('#dlg[open] .pk-card',{timeout:15000});const s=await step2(aud);
+    if(aud==='family')await page.evaluate(()=>{const r=document.getElementById('pkSumRev');if(r&&!r.checked)r.click();});
     const [w]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.evaluate(()=>$('#pkPrint').click())]);w.on('pageerror',e=>errs.push(aud+' window: '+e.message));
     const d=await windowPdf(w,file);await w.close();return {s,d,P:readPdf(file)};};
   const st=await build('staff',OUT+'staff.pdf'),fa=await build('family',OUT+'family.pdf'),rc=await build('records',OUT+'records.pdf');
@@ -161,12 +163,13 @@ const samePages=(a,b)=>a.length===b.length&&a.every((pa,i)=>pa.length===b[i].len
     st.d.secs.join()==='QS-1,EB-1,TD-1,CR-1,DD-1,SM-1'&&/Final Treatment Plan/.test(T['TD-1'])&&!/Setup: What the Assessment Established|Select the Treatment/.test(T['TD-1'])&&
     !/How to read these graphs/.test(T['DD-1'])&&/staff/i.test(st.d.title),{secs:st.d.secs,title:st.d.title,td:(T['TD-1']||'').slice(0,200)});
   const F=fa.d.text,famPages=fa.P.slice(1);
-  /* the first name: Form DM-1's preferred name (its worked example's), else the first word of the bar's name */
-  const pref=await page.evaluate(()=>{const f=state.frames['DM-1'],e=f&&f.contentDocument.querySelector('[name="s.pref"]');return e?e.value.trim():'';}),first=pref||'Mateo';
+  /* the first name (v25.70, the BCBA 11/9): Form HD-1's "Called at home", else Form DM-1's preferred name (the worked examples' are
+     the same), else the first word of the bar's name */
+  const pref=await page.evaluate(()=>{const v=(id,q)=>{const f=state.frames[id],e=f&&f.contentDocument.querySelector(q);return e?e.value.trim():'';};return v('HD-1','[data-m="nick"]')||v('DM-1','[name="s.pref"]');}),first=pref||'Mateo';
   const foot='For '+first+'’s family. Questions: Jordan Ellis, 555-0142.';
   const famHeads=famPages.every(pg=>{const t=flat(pg);return t.includes(sq(foot))&&t.includes(sq(first+'’s plan · for the family'))&&!/Confidentialstudentrecord|Retaininthestudent|4471823/.test(t);});
-  ok('4 Family: IC-1\'s consent pages, CT-1\'s family card and HD-1\'s home sheets (the first under the letterhead); every page headed with the first name ("'+first+'", Form DM-1\'s preferred name) and footed "'+foot+'", no record footer, no student ID ('+fa.P.length+' pages)',
-    fa.d.secs.join()==='IC-1,CT-1,HD-1'&&/Home Tally Sheet/.test(F['HD-1'])&&/HomeTallySheet/.test(flat(fa.P[(sections(fa.P)['HD-1']||[0])[0]]))&&!/Agreement|Entry/.test((F['HD-1']||'').slice(0,4000))&&/Family Card|When .+ happens|Steps/i.test(F['CT-1'])&&(F['CT-1']||'').length>300&&famHeads&&fa.d.title===first+'’s plan, for the family'&&fa.s.home&&/555-0142/.test(fa.s.fam),
+  ok('4 Family: the plan in plain words (v25.70), IC-1\'s consent pages, CT-1\'s family card and HD-1\'s home sheets (the first under the letterhead); every page headed with the first name ("'+first+'", Form DM-1\'s preferred name) and footed "'+foot+'", no record footer, no student ID ('+fa.P.length+' pages)',
+    fa.d.secs.join()==='SUM,IC-1,CT-1,HD-1'&&/Home Tally Sheet/.test(F['HD-1'])&&/HomeTallySheet/.test(flat(fa.P[(sections(fa.P)['HD-1']||[0])[0]]))&&!/Agreement|Entry/.test((F['HD-1']||'').slice(0,4000))&&/Family Card|When .+ happens|Steps/i.test(F['CT-1'])&&(F['CT-1']||'').length>300&&famHeads&&fa.d.title===first+'’s plan, for the family'&&fa.s.home&&/555-0142/.test(fa.s.fam),
     {secs:fa.d.secs,title:fa.d.title,heads:famHeads,hd:/Home Tally Sheet/.test(F['HD-1']),hdOnly:!/Agreement|Entry/.test((F['HD-1']||'').slice(0,4000)),card:(F['CT-1']||'').slice(0,300),home:fa.s.home,fam:fa.s.fam,hd1:(F['HD-1']||'').slice(0,300)});
   const R=rc.d.text;
   ok('4 Records request: the ticked forms in the list\'s order, each with its own references, no References section',
