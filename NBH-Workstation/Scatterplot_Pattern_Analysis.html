@@ -4594,7 +4594,10 @@ function render(){
   const wrap = first.querySelector(".gridwrap");
   if(codes){
     if(state.cfg.codes){
-      if(wrap && codes.nextElementSibling !== wrap) first.insertBefore(codes, wrap);
+      /* v25.71 above the grid's sideways-scroll bar (nbh-polish.js puts it just before the grid): moved between them, the bar
+         was left behind and a new one made, one more "More columns to the side" line after every tap on a phone */
+      const at = wrap && wrap.previousElementSibling && wrap.previousElementSibling.classList.contains("nbh-xs-bar") ? wrap.previousElementSibling : wrap;
+      if(at && codes.nextElementSibling !== at) first.insertBefore(codes, at);
     }else if(foot && codes.parentElement !== foot){
       foot.appendChild(codes);
     }
@@ -4728,10 +4731,13 @@ onGrids("click", e => {
   }
   if(spIOA) spIoaAdd(+b.dataset.c);   /* v23.05 (I48) */
   /* v21.89 a tapped cell is where the finger is: the page stays put while the grid is drawn again, and the cell is not scrolled to */
-  const y = window.scrollY, x = window.scrollX;
+  /* v25.71 and stays there when the readout above the grid (larger since the fx2 layout) takes a line more or less: the grid's
+     top is kept where it was (its rows are fitted again a moment later, so the cell itself is not measured) */
+  const y = window.scrollY, x = window.scrollX, t0 = b.closest("table.scatter").getBoundingClientRect().top;
   render();
   focusCell(+b.dataset.r, +b.dataset.c, true);
-  if(window.scrollY !== y || window.scrollX !== x) window.scrollTo(x, y);
+  const nb = document.querySelector("table.scatter [data-r='"+b.dataset.r+"'][data-c='"+b.dataset.c+"']"), d = nb ? Math.round(nb.closest("table.scatter").getBoundingClientRect().top - t0) : 0;
+  if(window.scrollY !== y + d || window.scrollX !== x) window.scrollTo(x, y + d);
 });
 
 onGrids("change", e => {

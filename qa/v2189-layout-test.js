@@ -21,18 +21,26 @@ const H=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);return e
   try{
   /* the iPad held upright */
   {const {ctx,page,errs}=await shell(br,{width:820,height:1180},true,IPAD);const fr=await open(page,'DM-1');
-    const m=await page.evaluate(()=>({bar:Math.round(document.getElementById('bar').getBoundingClientRect().height),chipsTop:!!document.querySelector('header.top #wsChips'),
+    /* v25.71: since v25.65's top bar A (SETUP.md: one "All saved" indicator, "tap it for Autosave, the offline copy and Drive";
+       commit 8886465) the chips are in that indicator's panel, and the indicator is in the heading. The student line is one
+       row of 44 px buttons (chColBtn, chWho, srLog, barEdit) with the details on one line beside them. */
+    const m=await page.evaluate(()=>({bar:Math.round(document.getElementById('bar').getBoundingClientRect().height),chipsTop:(()=>{const st=document.querySelector('header.top #wsStat'),pn=document.getElementById('wsStatPanel');return !!st&&!!st.offsetParent&&st.getAttribute('aria-controls')==='wsStatPanel'&&!!pn&&!!pn.querySelector('#wsChips');})(),
+      detH:Math.round(document.getElementById('sumDet').getBoundingClientRect().height),detLH:parseFloat(getComputedStyle(document.getElementById('sumDet')).lineHeight)||20,
+      rowTops:[...new Set([...document.getElementById('barSum').children].filter(k=>k.offsetParent&&k.getBoundingClientRect().height>0).map(k=>{const b=k.getBoundingClientRect();return Math.round(b.top+b.height/2);}))],
       sum:Math.round(document.getElementById('barSum').getBoundingClientRect().height),det:document.getElementById('sumDet').textContent,
       crumb:[...document.querySelectorAll('.crumb .acts button')].filter(b=>b.offsetParent).map(b=>Math.round(b.getBoundingClientRect().width))}));
-    ok('1 iPad upright: the chips are in the heading and the folded bar is at most 120 px (it was 191 to 217)',m.chipsTop&&m.bar<=120,m);
-    ok('2 the folded student line stays one line with a long school name',m.sum<=44,m.sum);
+    let chipsShown=false;if(m.chipsTop){await page.click('header.top #wsStat');await sleep(300);chipsShown=await page.evaluate(()=>{const c=document.getElementById('wsChips');return !!c&&!!c.offsetParent;});await page.keyboard.press('Escape');await sleep(200);}
+    ok('1 iPad upright: the chips are a tap away in the heading (the save indicator\'s panel) and the folded bar is at most 120 px (it was 191 to 217)',m.chipsTop&&chipsShown&&m.bar<=120,Object.assign({chipsShown},m));
+    ok('2 the folded student line stays one line with a long school name (one row of 44 px buttons, the details on one line)',m.sum<=48&&m.detH<=m.detLH*1.5&&Math.max(...m.rowTops)-Math.min(...m.rowTops)<=12,{sum:m.sum,detH:m.detH,rowTops:m.rowTops});
     ok('3 “5th grade” is written as it is, not “Grade 5th grade”',/5th grade/.test(m.det)&&!/Grade 5th/.test(m.det),m.det);
     ok('4 a finger: every crumb button is at least 44 px wide',m.crumb.length>0&&m.crumb.every(w=>w>=44),m.crumb);
     ok('5 no page errors (iPad upright)',!errs.length,errs.slice(0,3));await ctx.close();}
   /* the iPad, 1024 wide, and TD-1 with its simulated case */
   {const {ctx,page,errs}=await shell(br,{width:1024,height:768},true,IPAD);const fr=await open(page,'TD-1');
-    const t=await page.evaluate(()=>Math.round(document.getElementById('crumbTitle').getBoundingClientRect().width));
-    ok('6 iPad 1024: the crumb gives the form’s name at least 200 px (it had 98)',t>=200,t);
+    /* v25.71: since v25.68 (design review H6, M1: "each form's short name" in the form row, the full name in the tooltip) the
+       crumb holds "Treatment plan", not the 33-letter full name: it must show whole, not cut short as when it had 98 px */
+    const t=await page.evaluate(()=>{const e=document.getElementById('crumbTitle');return {w:Math.round(e.getBoundingClientRect().width),sw:e.scrollWidth,cw:e.clientWidth,txt:e.textContent.trim(),title:e.getAttribute('title')||'',short:FORM_SHORT['TD-1']};});
+    ok('6 iPad 1024: the crumb gives the form’s short name its whole room (it had 98 px), the full name in its tooltip',t.txt===t.short&&t.sw<=t.cw+1&&t.w>=60&&/Function-Based Treatment Developer/.test(t.title),t);
     await fr.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});try{await loadSim(fr);}catch(e){}await sleep(800);
     const tb=await fr.evaluate(()=>{const t=document.querySelector('.toolbar'),v=document.getElementById('viewSeg');const tops=v?new Set([...v.querySelectorAll('button')].filter(b=>b.offsetParent).map(b=>Math.round(b.getBoundingClientRect().top))).size:0;
       return {h:Math.round(t.getBoundingClientRect().height),rows:tops,rail:!!document.getElementById('nbhRail'),menu:document.documentElement.classList.contains('nbh-menu')};});
@@ -40,8 +48,12 @@ const H=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);return e
     ok('8 no page errors (iPad 1024)',!errs.length,errs.slice(0,3));await ctx.close();}
   /* the iPad sideways: a 12-inch page and DD-1 */
   {const {ctx,page,errs}=await shell(br,{width:1180,height:820},true,IPAD);let fr=await open(page,'SM-1');
-    const w=await fr.evaluate(()=>{const a=document.querySelector('.toolbar').getBoundingClientRect(),b=document.querySelector('.sheet').getBoundingClientRect();return {tb:[Math.round(a.left),Math.round(a.right)],sheet:[Math.round(b.left),Math.round(b.right)]};});
-    ok('9 SM-1 (a 12-inch page): its toolbar is as wide as the page',Math.abs(w.tb[0]-w.sheet[0])<=2&&Math.abs(w.tb[1]-w.sheet[1])<=2,w);
+    /* v25.71: since v25.65's top bar A (SETUP.md: "The form's bar and the form's own tools are one row"; commit 8886465) the
+       form's toolbar is folded into the workstation's form row (html.ws-a), so its width is checked on SM-1 opened on its own */
+    const inWs=await fr.evaluate(()=>({ws:document.documentElement.classList.contains('ws-a'),tb:getComputedStyle(document.querySelector('.toolbar')).display}));
+    const own=await ctx.newPage();await own.goto(fr.url());await sleep(1300);
+    const w=await own.evaluate(()=>{const a=document.querySelector('.toolbar').getBoundingClientRect(),b=document.querySelector('.sheet').getBoundingClientRect();return {tb:[Math.round(a.left),Math.round(a.right)],sheet:[Math.round(b.left),Math.round(b.right)]};});await own.close();
+    ok('9 SM-1 (a 12-inch page): on its own its toolbar is as wide as the page; in the workstation it is the form row',Math.abs(w.tb[0]-w.sheet[0])<=2&&Math.abs(w.tb[1]-w.sheet[1])<=2&&w.tb[1]-w.tb[0]>600&&inWs.ws&&inWs.tb==='none',Object.assign(w,inWs));
     fr=await open(page,'DD-1');const mh=await fr.evaluate(()=>{const m=document.querySelector('.nbh-mast');return m?Math.round(m.getBoundingClientRect().height):0;});
     ok('10 DD-1 inside the workstation: no empty strip above its toolbar',mh===0,mh);
     const pm=await fr.evaluate(()=>{const m=document.querySelector('.nbh-mast');const st=m?getComputedStyle(m).display:'';return st;});
@@ -80,6 +92,9 @@ const H=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);return e
        measured once it has not moved for 1.2 s. What is checked is unchanged. */
     await page.evaluate(async()=>{try{await gatherFacts(true);}catch(e){}});
     {let last=null,same=0;for(let i=0;i<80&&same<8;i++){await sleep(150);const t=await tgt.evaluate(e=>Math.round(e.getBoundingClientRect().top));if(t===last)same++;else{same=0;last=t;}}}
+    /* v25.71: since v25.67 (design review M7, SETUP.md "one toast at a time at the bottom left of the stage for 6 s") the
+       simulation's message is also the workstation's toast, which can sit over the cell; a user would close it first */
+    await page.evaluate(()=>document.querySelectorAll('#wsToasts .ws-toast').forEach(t=>t.remove()));
     const y0=await sp.evaluate(()=>scrollY),rc=await tgt.evaluate(e=>[e.dataset.r,e.dataset.c,e.dataset.state]),cy0=await tgt.evaluate(e=>Math.round(e.getBoundingClientRect().top)),bb=await tgt.boundingBox();
     await page.touchscreen.tap(bb.x+bb.width/2,bb.y+bb.height/2);await sleep(700);
     const a1=await sp.evaluate(([r,c])=>({y:scrollY,cy:Math.round(document.querySelector("table.scatter [data-r='"+r+"'][data-c='"+c+"']").getBoundingClientRect().top),st:document.querySelector("table.scatter [data-r='"+r+"'][data-c='"+c+"']").dataset.state,ta:getComputedStyle(document.documentElement).touchAction,tw:Math.round(document.querySelector('th.timecol').getBoundingClientRect().width)}),rc);
