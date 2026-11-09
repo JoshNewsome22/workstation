@@ -295,7 +295,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **taber2017** [taber2017]: Under her existing behavior plan, staff physically escorted an 18-year-old student after aggression (slapping, biting, pushing, hair pulling), and the study counted escorts per month from incident reports. *Part of a package.* Reported: Escorts fell to about 120 per month after staff were trained to give her preferred kinds of attention, a correlational result. Bank: study skipped.
 - **zencius1990b** [zencius1990b]: Each time the man swore in a therapy class, the clinician marked an X on a sheet headed with the word swearing held in front of him and said nothing else; later he was told his count when class ended. *Main procedure.* Reported: Swearing fell from about 5–6 to under 1 per class in all three classes and stayed low when he was told his count at the end of class. Bank: study skipped.
 
-## Tier B: never used (133)
+## Tier B: never used (134)
 
 ### Shock (13)
 
@@ -383,7 +383,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **nord1991** [nord1991]: Of 654 controlled procedures proposed in 459 Minnesota program plans (October 1987 to January 1989) for aggression, self-injury or property destruction, 42 were room time-out. *Main procedure.* Reported: usage data only; no effects on behavior were reported. Bank: study skipped.
 - **sturmey1994** [sturmey1994]: When the man with moderate intellectual disability would not give a no-harm agreement after a suicide threat or gesture, staff took him to a bare infirmary room with a silent staff member and no contact with peers or other staff until he agreed the next day, a median of 25 hours (15 to 64) about once a week. *Part of a package.* Reported: Admissions to a distant hospital unit stopped for 7 months (against 5 admissions totaling 177 days in the 7 months before), the room was used 13 times, and he said he hated it. Bank: kept out of the steps; note flags it; study skipped.
 
-### Restraint (38)
+### Restraint (39)
 
 - **Azrin et al., 1988** [azrin1988]: After each self-injurious act, the trainer blocked it and guided and held the person’s hands in the lap for 2 minutes, extended until 5 seconds of calm, alone or combined with reinforcement of incompatible activities. *Part of a package.* Reported: Alone it lowered self-injury to about 25% of intervals versus 57% under ignoring, and combined with DRI to about 6%, with near-zero levels for up to 48 months under the combined package. Bank: kept out of the steps; note flags it; study skipped.
 - **Birnbrauer (1968)** [birnbrauer1968]: Restraint was also part of the boy's treatment program, as the GB-1 draft notes. *Part of a package.* Bank: study skipped.
@@ -397,6 +397,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Kohlenberg (1970)** [kohlenberg1970]: The young woman's shock treatment was followed by confinement to a chair. *Part of a package.* Bank: study skipped.
 - **Luiselli, 1991** [luiselli1991]: For about 2 years an 18-year-old wore rigid elbow restraints during waking hours to stop eye-pressing; they were put back on after each 3-hour study period until the final phase. *Part of a package.* Reported: Restraint use was faded out and ended for all waking hours as eye pressing stayed low. Bank: kept out of the steps; note flags it; study skipped.
 - **Montgomery, 1993** [montgomery1993]: Facility staff physically restrained the 28-year-old man after each aggressive episode, the standing consequence in his program for years before and throughout the study (a special chair and table had been built for it). *Part of a package.* Reported: Restraint stayed constant across phases while weekly aggression fell from 12.8 to 4.9 episodes during compliance training, so its effect was not separated from the package. Bank: kept out of the steps; note flags it; left out of the objective; its note flags it.
+- **Morgan et al., 2017** [morgan2017]: For a person with severe self-injury, arm splints with metal stays were faded to three stays a sleeve until self-injury came back; a belt behind the back was then joined to the splints, which kept self-injury at zero while it was on, and its length was faded to allow more movement. *Main procedure.* Reported: self-injury did not occur with the belt on and rose when it was removed. Bank: study skipped.
 - **O'Brien, Azrin & Bugle (1972)** [obrien1972b]: Each crawl was followed by holding the child still at the waist for 5 seconds before standing them up. *Main procedure.* Bank: study skipped.
 - **Paisey et al., 1993** [paisey1993]: In three separate sessions without teaching, custom thumb splints on both hands partly kept her from closing her hands. *Main procedure.* Reported: The splints reduced hand mouthing much less than teaching plus interruption and raised tongue thrusting about as much. Bank: left out of the objective; its note flags it.
 - **Repp & Deitz (1974)** [repp1974]: Some children got a 30-second time-out by physical restraint. *Part of a package.* Bank: study skipped.
@@ -527,6 +528,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - McReynolds, L. V. (1969). Application of timeout from positive reinforcement for increasing the efficiency of speech training. Journal of Applied Behavior Analysis, 2(3), 199–205.
 - Medland, M. B., & Stachnik, T. J. (1972). Good-behavior game: A replication and systematic analysis. Journal of Applied Behavior Analysis, 5(1), 45–51.
 - Montgomery, R. W. (1993). The collateral effect of compliance training on aggression. Behavioral Residential Treatment, 8(1), 9–20.
+- Morgan, A. C., Wilder, D. A., Podlesnik, C. A., & Kelley, M. E. (2017). Evaluation of an arm-splint belt to reduce self-injury. Behavioral Interventions, 32(3), 255–261.
 - Newsom, C. D., & Simon, K. M. (1977). A simultaneous discrimination procedure for the measurement of vision in nonverbal children. Journal of Applied Behavior Analysis, 10(4), 633–644.
 - O'Brien, F., & Azrin, N. H. (1972). Developing proper mealtime behaviors of the institutionalized retarded. Journal of Applied Behavior Analysis, 5(4), 389–399.
 - Osborne, J. G. (1969). Free-time as a reinforcer in the management of classroom behavior. Journal of Applied Behavior Analysis, 2(2), 113–118.
