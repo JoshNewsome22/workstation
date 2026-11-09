@@ -3262,7 +3262,8 @@ function buildChart(beh,rows,conds,analyses){
     };
     let expect=null;
     a.pts.forEach(p=>{
-      if(expect!==null && p.x!==expect && !alt) flush();
+      /* v25.70 (GRAPHS.md gap 4) nor across a break in time (ddGapIn: more school days between two days than the break allows) */
+      if(expect!==null && ((p.x!==expect && !alt) || (typeof ddGapIn==="function" && seg.length && ddGapIn(rows,seg[seg.length-1].x,p.x)))) flush();
       seg.push(p); expect=p.x+1;
     });
     flush();
@@ -4145,7 +4146,7 @@ function pairChart(a1,b1,a2,b2,rows,conds){
       if(!a.n) return;
       let seg=[], expect=null;
       const flush=()=>{ if(seg.length>1) g.push(`<polyline points="${seg.map(p=>X(p.x).toFixed(1)+","+Yf(p.y).toFixed(1)).join(" ")}" fill="none" stroke="${esc(beh.color)}" stroke-width="2" ${dashed?'stroke-dasharray="6 3"':""}/>`); seg=[]; };
-      a.pts.forEach(p=>{ if(expect!==null&&p.x!==expect) flush(); seg.push(p); expect=p.x+1; });
+      a.pts.forEach(p=>{ if(expect!==null&&(p.x!==expect||(typeof ddGapIn==="function"&&ddGapIn(rows,expect-1,p.x)))) flush(); seg.push(p); expect=p.x+1; });
       flush();
       a.pts.forEach(p=>{
         const cy=Yf(p.y);
@@ -5529,7 +5530,7 @@ function ddStackHtml(behs,rows,conds){if(!ddStackWanted(behs))return "";
     g.push(`<text x="${ML+6}" y="${y0+10}" font-size="12" font-weight="700" fill="${esc(t.b.color)}" font-family="${DD_SERIF}">${esc(t.b.name||"Untitled")}<\/text>`);
     t.bc.forEach((c,ci)=>{if(!ci||c.rowIdx[0]>xEnd)return;const x=(X(c.rowIdx[0]-1)+X(c.rowIdx[0]))/2;if(ci===1)step.push({x,y0,yb});else g.push(`<line class="dd-full" x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${yb}" stroke="#16242E" stroke-width="1.6"/>`);});
     t.an.forEach(a=>{if(!a.n)return;let seg=[],ex=null;const fl=()=>{if(seg.length>1)g.push(`<polyline points="${seg.map(p=>X(p.x).toFixed(1)+","+Y(p.y).toFixed(1)).join(" ")}" fill="none" stroke="${esc(t.b.color)}" stroke-width="1.8"/>`);seg=[];};
-      a.pts.forEach(p=>{if(ex!==null&&p.x!==ex)fl();seg.push(p);ex=p.x+1;});fl();
+      a.pts.forEach(p=>{if(ex!==null&&(p.x!==ex||(typeof ddGapIn==="function"&&ddGapIn(rows,ex-1,p.x))))fl();seg.push(p);ex=p.x+1;});fl();
       a.pts.forEach(p=>g.push(`<circle cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="3.2" fill="${esc(t.b.color)}" stroke="#fff" stroke-width="0.8"><title>${esc(t.b.name)} ${esc(fmtDate(p.date))}: ${r1(p.y)}<\/title><\/circle>`));});
     if(!t.bc[1]||t.bc[1].rowIdx[0]>xEnd)step.push({x:null,y0,yb});});
   /* the stepped phase line: down each tier at its own line, across the gap to the next tier's */
@@ -23436,7 +23437,7 @@ try{stPaint();}catch(e){}
 .nbh-gs{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:10px 0 12px}
 .nbh-gs-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .nbh-gs-l{font-size:13px;color:var(--ink-soft,#4A5C68)}
-.nbh-gs-b{min-height:44px;min-width:44px;padding:6px 12px;border:1px solid var(--rule,#c9d3d9);background:#fff;color:var(--ink,#16242E);border-radius:3px;font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation}
+.nbh-gs-b{min-height:44px!important;min-width:44px;padding:6px 12px;border:1px solid var(--rule,#c9d3d9);background:#fff;color:var(--ink,#16242E);border-radius:3px;font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation}
 .nbh-gs-b[aria-pressed="true"]{background:#16242E;color:#fff;border-color:#16242E}
 .nbh-gs-b:focus-visible{outline:3px solid #1F4E8C;outline-offset:2px}
 svg.graph.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;min-width:0;height:auto;display:block;margin:0 auto;background:#fff}
@@ -23453,7 +23454,7 @@ svg.graph.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;min-width:0;height:a
 .dd-gtab-t caption{text-align:left;font-weight:600;font-size:13px;padding:2px 0 6px}
 .dd-gtab-t th,.dd-gtab-t td{border-bottom:1px solid var(--rule-soft,#dce3e7);padding:5px 8px;text-align:left;vertical-align:top}
 .dd-gtab-t thead th{position:static;font-size:12.5px}
-.dd-graphsave [data-g70]{min-height:44px}
+#resultsOut .dd-graphsave button[data-g70]{min-height:44px!important}
 .dd-zoomctl .dd-zoomtxt{font-size:12.5px}
 .dd-dcheck{border:1px solid var(--rule-soft,#dce3e7);border-left:3px solid #4A5C68;border-radius:3px;padding:8px 12px;margin:12px 0 4px;background:#fafbfc;font-size:13.5px;line-height:1.45}
 .dd-dcheck h4{margin:0 0 4px;font-size:14px}.dd-dcheck p{margin:4px 0}.dd-dcheck ul{margin:4px 0 4px 1.3em;padding:0}.dd-dcheck li{margin:2px 0}
@@ -23727,6 +23728,14 @@ function pubChart(beh,rows,conds,an){const xEnd=ddPlotEnd(rows),n=xEnd+1,ax=pubT
   const m=/data-plot="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg);if(!m)return svg;
   const l=+m[1],t=+m[2],iw=+m[3],ih=+m[4],xEnd=ddPlotEnd(rows),X=i=>l+(xEnd<=0?iw/2:i*iw/xEnd),top=ddDrawn.top||1,Y=v=>t+ih-(Math.min(v,top)/top)*ih,z=S.settings.zeroLift===true?7:0;
   let add="";
+  /* the breaks: "//" across the axis line between the two days */
+  const brk=gapsOf(rows,xEnd);brk.forEach(gp=>{const bx=(X(gp.i-1)+X(gp.i))/2,by=t+ih+z;
+    add+=`<g class="dd-brk" data-brk="${gp.n}"><rect x="${(bx-4).toFixed(1)}" y="${(by-3).toFixed(1)}" width="8" height="6" fill="#fff"/><line x1="${(bx-6.5).toFixed(1)}" y1="${(by+5).toFixed(1)}" x2="${(bx-1.5).toFixed(1)}" y2="${(by-5).toFixed(1)}" stroke="#16242E" stroke-width="1.3"/><line x1="${(bx+1.5).toFixed(1)}" y1="${(by+5).toFixed(1)}" x2="${(bx+6.5).toFixed(1)}" y2="${(by-5).toFixed(1)}" stroke="#16242E" stroke-width="1.3"/><title>${gp.n} school days between ${esc(fmtDate(gp.a))} and ${esc(fmtDate(gp.b))}<\/title><\/g>`;});
+  /* the days with a second observer */
+  let io=0;if(typeof ddIoaRow==="function")rows.forEach((r,i)=>{if(i>xEnd)return;const ag=ddIoaRow(r,beh);if(ag===null)return;io++;const cx=X(i),y0=t+(typeof ddPrOk==="function"&&ddPrOk(r.probe)?18:1);
+    add+=`<polygon class="dd-ioa-mk" points="${(cx-4).toFixed(1)},${y0.toFixed(1)} ${(cx+4).toFixed(1)},${y0.toFixed(1)} ${cx.toFixed(1)},${(y0+6).toFixed(1)}" fill="#4A5C68"><title>${esc(fmtDate(r.date))}: a second observer, agreement ${r1(ag)}%<\/title><\/polygon>`;});
+  ddDrawn.brk=brk;ddDrawn.ioaN=io;
+  if(add){const k=svg.lastIndexOf("</svg>");svg=svg.slice(0,k)+`<g class="dd-v2570">${add}<\/g>`+svg.slice(k);}
   /* the points a tap can reach */
   const L=[];analyses.forEach(a=>{(a.pts||[]).forEach(p=>L.push({cx:X(p.x),cy:Y(p.y),i:p.x,v:p.y,date:p.date,c:a.name}));(a.samples||[]).forEach(p=>L.push({cx:X(p.x),cy:Y(p.y),i:p.x,v:p.y,date:p.date,c:a.name,sample:true}));});
   if(!G.blind)G.pts[beh.id]=L;
@@ -23742,6 +23751,12 @@ function pubChart(beh,rows,conds,an){const xEnd=ddPlotEnd(rows),n=xEnd+1,ax=pubT
       if(vb){const W0=+vb[1];svg=svg.replace(vb[0],`viewBox="0 0 ${W0+gut} ${vb[2]}"`);const k2=svg.lastIndexOf("</svg>");
         svg=svg.slice(0,k2)+`<g class="dd-altdl">${P2.map(p=>{const m=DD_ALT_MK[p.k%DD_ALT_MK.length],dsh=DD_ALT_DASH[p.k%DD_ALT_DASH.length];return `<line x1="${W0-20}" y1="${(p.y-4).toFixed(1)}" x2="${W0-6}" y2="${(p.y-4).toFixed(1)}" stroke="${esc(beh.color)}" stroke-width="2"${dsh?` stroke-dasharray="${dsh}"`:""}/><text x="${W0-2}" y="${p.y.toFixed(1)}" font-size="11.5" font-weight="600" fill="#16242E">${esc(p.nm)}<\/text>`;}).join("")}<\/g>`+svg.slice(k2);G.altdl[beh.id]=true;}}}
   }catch(e){}return svg;};}
+{const le=ddLegendExtra;ddLegendExtra=function(d){const h=le.apply(this,arguments);if(!d)return h;
+  return h+(d.ioaN?`<span class="dd-ioa-key"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true" style="vertical-align:middle;margin-right:5px"><polygon points="2,1 10,1 6,8" fill="#4A5C68"/></svg>A day with a second observer (IOA)<\/span>`:"")
+    +(d.brk&&d.brk.length?`<span class="dd-brk-key"><b style="font-weight:700;margin-right:5px">//<\/b>A break of more than ${P.breakDays()} school days<\/span>`:"");};}
+{const cl=ddClipHtml;ddClipHtml=function(d){const h=cl.apply(this,arguments);if(!d||!d.brk||!d.brk.length)return h;
+  return h+`<p class="hint dd-brk-h">// on the time axis: ${d.brk.map(g=>`${g.n} school days between ${esc(fmtDate(g.a))} and ${esc(fmtDate(g.b))}`).join("; ")} (more than ${P.breakDays()}). The data path is not joined across ${d.brk.length===1?"it":"them"}.<\/p>`;};}
+if(typeof ddAltLegend==="function"){const al=ddAltLegend;ddAltLegend=function(beh){if(beh&&G.altdl[beh.id])return `<span class="dd-altdl-key">Each condition is named at the right end of its path.<\/span>`;return al.apply(this,arguments);};}
 /* the second reader's blind graph carries no sentence */
 if(typeof ddBlindOpen==="function"){const bo=ddBlindOpen;ddBlindOpen=function(){G.blind=true;try{return bo.apply(this,arguments);}finally{G.blind=false;}};}
 /* ---------------- the paired graph, in Publication: two panels on one time axis ---------------- */
@@ -23755,6 +23770,10 @@ if(typeof pairChart==="function"){const pc=pairChart;pairChart=function(a1,b1,a2
 /* ---------------- the stacked view, in Publication: a panel a tier, the stepped phase line ---------------- */
 if(typeof ddStackHtml==="function"){const sh=ddStackHtml;ddStackHtml=function(behs,rows,conds){let h=sh.apply(this,arguments);if(!h)return h;try{
   const T=behs.filter(b=>rows.some(r=>plotValue(r,b)!==null)).map(b=>{const bc=ddBehConds(b,conds,rows);return {b,bc,an:bc.map(c=>analyzeCondition(c,b,rows))};});
+  if(T.length>=2){const pi=T.map(t=>t.bc[1]&&t.bc[1].rowIdx.length?t.bc[1].rowIdx[0]:null),starts=pi.filter(p=>p!==null),stag=new Set(starts).size,minBl=Math.min(...T.map(t=>t.an[0]?t.an[0].n:0));
+    const ioaT=T.filter(t=>rows.some(r=>typeof ddIoaRow==="function"&&ddIoaRow(r,t.b)!==null)).length;
+    const dc=`<div class="dd-dcheck noprint no-print" role="note"><h4>What this design can show</h4><p>Multiple baseline across behaviors: can show a functional relation when each tier changes only after its own phase line and the tiers still in baseline stay as they were, replicated at 3 different points in time. It needs at least 3 tiers with staggered starts.</p><ul><li>Tiers: ${T.length} (3 or more)</li><li>Different start days: ${stag} of ${T.length} tiers${starts.length<T.length?` (${T.length-starts.length} not started)`:""}</li><li>Baseline days in each tier: fewest ${minBl} (5 or more; WWC 5.0 is reported to ask 6)</li><li>IOA: a second observer in ${ioaT} of ${T.length} tiers</li></ul><p class="hint">This describes the design, not the size or meaning of the change.</p></div>`;
+    h=h.replace(/<\/div>\s*$/,dc+"</div>");}
   if(!P.isPub()||T.length<2)return h;
   const xEnd=ddPlotEnd(rows),n=xEnd+1,brk=gapsOf(rows,xEnd);
   const panels=T.map((t,k)=>{const ax=pubTop(t.b,t.an,rows),segs=[],pts=[];t.an.forEach(a=>{let seg=[],ex=null;a.pts.forEach(p=>{if(ex!==null&&(p.x!==ex||gapAt(rows,p.x))){segs.push(seg);seg=[];}seg.push({i:p.x,y:p.y});ex=p.x+1;pts.push({i:p.x,y:p.y,title:`${t.b.name}, ${fmtDate(p.date)}: ${r1(p.y)}`});});if(seg.length)segs.push(seg);});
@@ -23769,7 +23788,7 @@ if(typeof ddStackHtml==="function"){const sh=ddStackHtml;ddStackHtml=function(be
 function brkLine(){return "school days without a row (Monday to Friday)";}
 function paintSwitch(){const out=document.getElementById("resultsOut");if(!out)return;let w=document.getElementById("ddGStyle");
   if(!w){w=document.createElement("div");w.id="ddGStyle";w.className="nbh-gs noprint no-print";out.parentNode.insertBefore(w,out);}
-  w.innerHTML=P.switchHtml();document.body.classList.toggle("dd-pubmode",P.isPub());}
+  w.innerHTML=P.switchHtml({breaks:brkLine()});document.body.classList.toggle("dd-pubmode",P.isPub());}
 function bar(rep){return rep.querySelector(".dd-graphsave");}
 function decorate(){const out=document.getElementById("resultsOut");if(!out)return;const pub=P.isPub();
   out.querySelectorAll(".behavior-report").forEach(rep=>{const svg=rep.querySelector(".chartbox svg.graph[data-dd-b]");if(!svg)return;const id=svg.getAttribute("data-dd-b"),A=G.args[id];if(!A)return;
@@ -23784,6 +23803,7 @@ function decorate(){const out=document.getElementById("resultsOut");if(!out)retu
       const hint=`<span class="hint dd-touchhint">Tap a point for its date and value; double-tap or pinch the graph to zoom the days.<\/span>`;tail=tail.indexOf("<!--touch-->")>-1?tail.replace("<!--touch-->"," "+hint):`<p class="dd-gsum noprint no-print">${hint}<\/p>`+tail;}
 
     if(tail)b.insertAdjacentHTML("afterend",tail.replace("<!--touch-->",""));
+    const keep=rep.querySelector(".dd-keep");if(keep)keep.insertAdjacentHTML("beforeend",designHtml(A.beh,A.rows,A.analyses));
 
     if(G.zoom[id]&&!pub)zoomTo(id,G.zoom[id]);
   });}

@@ -2720,7 +2720,7 @@ function lineGraph(el,legendEl,o){ /* o: title, cap, points:[{x,y,series,phase}]
  if(o.phases!==false){let prev=null;pts.forEach(p=>{if(prev!==null&&p.phase!==prev.phase){const xx=(X(p.x)+X(prev.x))/2;s+=`<line class="phase" x1="${xx}" x2="${xx}" y1="${T-6}" y2="${T+ph}"/>`;}prev=p;});
   const ph2={};pts.forEach(p=>{if(!ph2[p.phase])ph2[p.phase]={min:p.x,max:p.x};ph2[p.phase].max=Math.max(ph2[p.phase].max,p.x);});Object.keys(ph2).forEach(k=>{s+=`<text class="lbl" x="${(X(ph2[k].min)+X(ph2[k].max))/2}" y="${T-9}" text-anchor="middle">${esc(k)}</text>`;});}
  o.seriesNames.forEach((nm,si)=>{const sp=pts.filter(p=>p.series===si);if(!sp.length)return;const col=COLORS[si%COLORS.length],fill=si===o.hollow?'#fff':col;
-  let path='';let prev=null;sp.forEach(p=>{if(prev&&p.phase===prev.phase)path+=`L${X(p.x)},${Y(p.y)}`;else path+=`M${X(p.x)},${Y(p.y)}`;prev=p;});
+  let path='';let prev=null;sp.forEach(p=>{if(prev&&p.phase===prev.phase&&!(o.gapIn&&o.gapIn(prev.x,p.x)))path+=`L${X(p.x)},${Y(p.y)}`;else path+=`M${X(p.x)},${Y(p.y)}`;prev=p;});
   s+=`<path class="series" d="${path}" stroke="${col}"/>`+sp.map(p=>marker(MARK[si%MARK.length],X(p.x),Y(p.y),col,fill)+(p.ex?`<text class="ea-exmark" x="${X(p.x)}" y="${Y(p.y)-7}" text-anchor="middle" font-size="11" font-weight="700" fill="#b3261e"><title>${esc(p.ex)}: see under the criterion table</title>×</text>`:'')).join('');});
  s+='</svg>';el.innerHTML=`<h3>${esc(o.title)}</h3>${o.cap?`<p class="cap">${o.cap}</p>`:''}${s}`;
  if(legendEl)legendEl.innerHTML=o.seriesNames.map((nm,si)=>`<span><i style="background:${si===o.hollow?'#fff':COLORS[si%COLORS.length]};border-color:${COLORS[si%COLORS.length]}"></i>${esc(nm)}</span>`).join('');}
@@ -6782,7 +6782,7 @@ if(document.readyState==='complete')setTimeout(()=>{fromHash();paintAll();},300)
 .nbh-gs{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:10px 0 12px}
 .nbh-gs-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .nbh-gs-l{font-size:13px;color:var(--ink-soft,#4A5C68)}
-.nbh-gs-b{min-height:44px;min-width:44px;padding:6px 12px;border:1px solid var(--rule,#c9d3d9);background:#fff;color:var(--ink,#16242E);border-radius:3px;font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation}
+.nbh-gs-b{min-height:44px!important;min-width:44px;padding:6px 12px;border:1px solid var(--rule,#c9d3d9);background:#fff;color:var(--ink,#16242E);border-radius:3px;font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation}
 .nbh-gs-b[aria-pressed="true"]{background:#16242E;color:#fff;border-color:#16242E}
 .nbh-gs-b:focus-visible{outline:3px solid #1F4E8C;outline-offset:2px}
 svg.graph.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;min-width:0;height:auto;display:block;margin:0 auto;background:#fff}
@@ -7030,18 +7030,22 @@ function pubFig(id,o){const c=ctxOf(id),pts=o.points,xmax=Math.max(...pts.map(p=
     panels:[{yTitle:o.yLabel||"",top:ax.top,step:ax.step,tick:v=>r2(v),series:ser,vlines:vl,labels,crit,tmarks}],caption:capOf(id,o,extra),label:"Line graph (publication style). "+sentence(o)});}
 /* ---------------- the wrapper ---------------- */
 function switchFor(el){let w=el.previousElementSibling;if(!w||!w.classList.contains("nbh-gs")){w=document.createElement("div");w.className="nbh-gs noprint";el.parentNode.insertBefore(w,el);}
-  w.innerHTML=P.switchHtml();}
+  w.innerHTML=P.switchHtml({breaks:"school days between two sessions (Monday to Friday)"});}
 window.eaGraphs={draw:function(lg,self,args,h){if(h)H=h;const el=args[0],legendEl=args[1],o=args[2];if(!el||!o||!el.id||!FIG[el.id])return lg.apply(self,args);
   const id=el.id,c=ctxOf(id);G.last[id]=[el,legendEl,o];o.gapIn=(a,b)=>gapIn(c,a,b);
   try{switchFor(el);}catch(e){}
   if(!o.points||!o.points.length){if(legendEl)legendEl.hidden=false;el.classList.remove("ea-pub");return lg.apply(self,args);}
-  if(P.isPub()){try{const fig=pubFig(id,o);el.innerHTML=`<h3>${esc(o.title)}</h3>${fig.svg}<div class="ea-pubbar noprint"><button type="button" class="tool" data-e70="svg" data-f="${id}" title="A vector file: sharp at any size; opens in Word, Google Docs, Keynote and Illustrator">Save as SVG</button> <button type="button" class="tool" data-e70="print" data-f="${id}">Print figure</button> <button type="button" class="tool" data-e70="cap" data-f="${id}">Edit caption</button></div><p class="method ea-pubsize noprint">${esc(P.sizeLine(fig,P.ratio(),"sessions"))}.</p>`;
+  if(P.isPub()){try{const fig=pubFig(id,o);el.innerHTML=`<h3>${esc(o.title)}</h3>${fig.svg}<div class="ea-pubbar noprint"><button type="button" class="tool" data-e70="svg" data-f="${id}" title="A vector file: sharp at any size; opens in Word, Google Docs, Keynote and Illustrator">Save as SVG</button> <button type="button" class="tool" data-e70="print" data-f="${id}">Print figure</button> <button type="button" class="tool" data-e70="cap" data-f="${id}">Edit caption</button></div><p class="method ea-pubsize noprint">${esc(P.sizeLine(fig,P.ratio(),"sessions"))}.</p>`+designHtml(id,o);
     if(legendEl)legendEl.hidden=true;el.classList.add("ea-pub");return;}catch(e){}}
   el.classList.remove("ea-pub");
   const r=lg.apply(self,args);
   try{const svg=el.querySelector("svg");if(!svg)return r;
     const W=640,L=46,R=14,T=22,ph=208,pw=W-L-R,xmax=Math.max(...o.points.map(p=>p.x),5),ymax=ymaxOf(o),X=x=>L+(x-1)/(Math.max(1,xmax-1))*pw,Y=y=>T+ph-(Math.min(y,ymax)/ymax)*ph;
     let add="",brk=[],io=0,gut=0,labs="";
+    /* the breaks and the second observer's sessions */
+    if(c)for(let x=2;x<=xmax;x++){const gN=gapN(c,x-1,x);if(gN>P.breakDays())brk.push({x,n:gN});}
+    brk.forEach(b=>{const bx=(X(b.x-1)+X(b.x))/2,by=T+ph;add+=`<g class="ea-brk"><rect x="${bx-3.5}" y="${by-2.5}" width="7" height="5" fill="#fff"/><line x1="${bx-5.5}" y1="${by+4}" x2="${bx-1.5}" y2="${by-4}" stroke="#16242E" stroke-width="1.1"/><line x1="${bx+1.5}" y1="${by+4}" x2="${bx+5.5}" y2="${by-4}" stroke="#16242E" stroke-width="1.1"/><title>${b.n} school days between sessions ${b.x-1} and ${b.x}</title></g>`;});
+    if(c)o.points.forEach(p=>{const v=c.ioa(p.x);if(v===null)return;io++;const cx=X(p.x);add+=`<polygon class="ea-ioa-mk" points="${cx-3.5},${T+1} ${cx+3.5},${T+1} ${cx},${T+6}" fill="#4A5C68"><title>Session ${p.x}: a second observer, agreement ${r2(v)}%</title></polygon>`;});
     /* direct labels at the right end of each path, in a gutter, when there is more than one series and none collide */
     const S2=o.seriesNames.map((nm,si)=>{const sp=o.points.filter(p=>p.series===si);if(!sp.length)return null;const last=sp.reduce((a,b)=>b.x>=a.x?b:a);return {nm,si,y:Y(last.y)+3,w:Y(last.y)+3};}).filter(Boolean);
     if(S2.length>1){S2.sort((a,b)=>a.y-b.y);for(let k=1;k<S2.length;k++)if(S2[k].y<S2[k-1].y+10)S2[k].y=S2[k-1].y+10;const ok=S2.every(s=>Math.abs(s.y-s.w)<=16&&s.y<=T+ph+10);
@@ -7052,6 +7056,7 @@ window.eaGraphs={draw:function(lg,self,args,h){if(h)H=h;const el=args[0],legendE
     const s=sentence(o);svg.setAttribute("role","img");svg.setAttribute("aria-label","Line graph: "+(s||o.title));
     el.insertAdjacentHTML("beforeend",`<p class="ea-gsum noprint">${esc(s)}</p><div class="ea-gtabbar noprint"><button type="button" class="tool" data-e70="table" data-f="${id}" aria-expanded="false" aria-controls="eaGTab-${id}">Show as table</button></div><div class="ea-gtab" id="eaGTab-${id}" hidden></div>`);
 
+    el.insertAdjacentHTML("beforeend",`${brk.length?`<p class="method ea-brk-h">// on the session axis: ${brk.map(b=>`${b.n} school days between sessions ${b.x-1} and ${b.x}`).join("; ")} (more than ${P.breakDays()}); the path is not joined across ${brk.length===1?"it":"them"}.</p>`:""}${io?`<p class="method ea-ioa-h noprint">▾ over a session: a second observer (IOA), ${io} of ${o.points.length} sessions.</p>`:""}`+designHtml(id,o));
 }catch(e){}
   return r;}};
 function redraw(){const A=window.eaAPI||{};if(!Object.keys(G.last).length){try{A.renderGraph&&A.renderGraph();}catch(e){}try{A.renderTx&&A.renderTx();}catch(e){}return;}Object.keys(G.last).forEach(id=>{const a=G.last[id];if(a&&a[0]&&a[0].isConnected&&A.lineGraph)A.lineGraph(a[0],a[1],a[2]);});}
