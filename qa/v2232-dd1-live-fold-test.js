@@ -1,4 +1,4 @@
-/* v22.32 Form DD-1's Live Recording folds to its title line: Hide / Show, remembered on this device; while a session runs
+/* v22.32 Form DD-1's Live Recording folds to its title line: Hide / Show, remembered on this device (folded at first since v24.23); while a session runs
    or is not yet saved it stays open (the button says why). Simulated data only.
    usage: node qa/v2232-dd1-live-fold-test.js */
 const L=require(__dirname+'/lib.js');const {sleep}=L;
@@ -12,10 +12,14 @@ const IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (
   await p.evaluate(()=>{document.querySelectorAll('section[data-panel]').forEach(s=>s.classList.toggle('hidden',s.dataset.panel!=='data'));});
   const st=()=>p.evaluate(()=>{const b=document.getElementById('ddlFold'),box=document.getElementById('ddLive'),vis=s=>{const e=box.querySelector(s);return !!(e&&e.getClientRects().length);};
     return {t:b.textContent,exp:b.getAttribute('aria-expanded'),dis:b.disabled,top:vis('.ddl-top'),cards:vis('#ddlCards'),title:vis('#ddlTitle'),h:Math.round(box.getBoundingClientRect().height),bh:Math.round(b.getBoundingClientRect().height)};});
-  const a=await st();
-  ok('1 open at first, with a Hide button in the title line (44 px on a touch screen)',a.t==='Hide'&&a.exp==='true'&&a.top&&a.cards&&a.bh>=44,a);
+  /* v25.71: Live Recording starts folded since v24.23 (R-097, SETUP.md: "Live Recording starts folded (a one-line bar with Show)
+     until it is shown, so the sheet comes first"), so it is shown first and then folded with Hide */
+  const a0=await st();
+  ok('1 folded at first to its title line, with a Show button in it (44 px on a touch screen)',a0.t==='Show'&&a0.exp==='false'&&!a0.top&&!a0.cards&&a0.title&&a0.bh>=44,a0);
+  await p.tap('#ddlFold');await sleep(200);const a=await st();
   await p.tap('#ddlFold');await sleep(200);const b=await st();
-  ok('2 Hide folds it to its title line, with Show',b.t==='Show'&&b.exp==='false'&&!b.top&&!b.cards&&b.title&&b.h<a.h/3,{a,b});
+  ok('2 Show opens it with Hide in its title line; Hide folds it to its title line, with Show',a.t==='Hide'&&a.exp==='true'&&a.top&&a.cards&&a.bh>=44&&b.t==='Show'&&b.exp==='false'&&!b.top&&!b.cards&&b.title&&b.h<a.h/3,{a,b});
+
   await p.reload();await sleep(1200);await p.evaluate(()=>{document.querySelectorAll('section[data-panel]').forEach(s=>s.classList.toggle('hidden',s.dataset.panel!=='data'));});
   const c=await st();
   ok('3 remembered on this device: folded after the form opens again',c.t==='Show'&&!c.top,c);

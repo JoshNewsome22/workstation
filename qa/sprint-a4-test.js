@@ -107,7 +107,9 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
     typed.lab3==='Break request (replacement)'&&typed.ttl3==='Break request (replacement)'&&/\(see Forms EA-1 and TD-1\)$/.test(typed.rep4),typed);
   const file=JSON.parse((await caught(p,'Save data'))||'{}');
   const miss=await p.evaluate(fields=>{const m=[];for(const [k,v] of Object.entries(fields||{})){const els=[...document.querySelectorAll('[name="'+CSS.escape(k)+'"]')];if(!els.length)continue;const el=els[0];
-    const now=el.type==='checkbox'?el.checked:el.type==='radio'?((els.find(x=>x.checked)||{}).value||''):el.value;if(typeof v==='boolean'?now!==v:String(now)!==String(v))m.push(k);}return m;},file.fields);
+    /* v25.71: since v24.25 (tb125) checklist rows 4, 13 and 14 are selects of ✓ and n/a that the file keeps as before, a tick as
+       true (qcState: "1" is true, "na" is "na", none is false), so the select is read as the file holds it */
+    const now=el.type==='checkbox'?el.checked:el.type==='radio'?((els.find(x=>x.checked)||{}).value||''):el.tagName==='SELECT'&&el.dataset.qc?(el.value==='na'?'na':el.value==='1'):el.value;if(typeof v==='boolean'?now!==v:String(now)!==String(v))m.push(k);}return m;},file.fields);
   ok('A: TB-1\'s saved file is unchanged: every field as the sheets show it, the notes and "(replacement)" included',!!file.fields&&file.fields['tgt[0].rep']==='Hands a break card and waits (see target 4)'&&
     file.fields['tgt[3].lab']==='Break request (replacement)'&&miss.length===0&&!('behaviors' in file),{miss:miss.slice(0,6),keys:Object.keys(file)});
   /* the other ways of writing a note or a pointer, typed on the cards */

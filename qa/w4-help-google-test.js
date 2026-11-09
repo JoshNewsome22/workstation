@@ -11,9 +11,12 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await p.evaluate(()=>{try{localStorage.removeItem('nbh.google.client');localStorage.removeItem('nbh.google.apikey');}catch(e){}window.__t=[];const t=wsUI.toast;wsUI.toast=(m,o)=>{__t.push(String(m));return t(m,o);};});
   await p.evaluate(()=>document.getElementById('help').click());await sleep(800);
   const h=await p.evaluate(()=>{document.querySelectorAll('#dlgBody details').forEach(d=>d.open=true);return document.getElementById('dlgBody').innerText;});
+  /* v25.71: Diagnostics is in the Tools menu since v25.63 (SETUP.md: "Help now names the Case, Packet and Tools menus ... where
+     it named More"), and Help says "Diagnostics (the Tools menu)" */
   ok('1 Help: the staff directory, @ names, questionnaires and Email it, the caseload backup and Restore, packets, walkthroughs, Diagnostics',
     /Staff directory \(the top bar; also Go to\)/.test(h)&&/@ and the first letters of a name or a role/.test(h)&&/Questionnaires \(Forms IA-1, IN-1, SV-1 and CF-1\)/.test(h)&&/Email it sends it from your school Gmail/.test(h)&&
-    /Back up the caseload \(Caseload\)/.test(h)&&/Restore puts a backup back/.test(h)&&/Save packet and Open packet/.test(h)&&/Walkthrough button/.test(h)&&/Diagnostics \(More\)/.test(h),h.length);
+    /Back up the caseload \(Caseload\)/.test(h)&&/Restore puts a backup back/.test(h)&&/Save packet and Open packet/.test(h)&&/Walkthrough button/.test(h)&&/Diagnostics \(the Tools menu\)/.test(h),h.length);
+
   ok('2 Help, Google, set up once: the project, the four APIs, the sign-in screen, the scopes, the sign-in key, the API key, and what IT does for "Access blocked"',
     /Google, set up once/.test(h)&&/Google Sheets API/.test(h)&&/Gmail API/.test(h)&&/Google Drive API/.test(h)&&/Google Picker API/.test(h)&&/drive\.file/.test(h)&&/gmail\.send/.test(h)&&/Client ID/.test(h)&&/API key/.test(h)&&/Manage third-party app access/.test(h));
   await p.fill('#hpGid','not-a-key');await p.click('#hpKeysSave');await sleep(300);

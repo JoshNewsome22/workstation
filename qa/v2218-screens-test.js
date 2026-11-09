@@ -27,7 +27,12 @@ const tabs=fr=>fr.evaluate(()=>{const seg=document.getElementById('viewSeg'),bar
   try{
   /* F480 */
   const P=await shellForm(br,{width:820,height:1180},'IA-1');const t=await tabs(P.fr);
-  ok('1 an iPad held upright: IA-1\'s '+(t&&t.n)+' sheets are the Sheets menu, every one listed (v23.88)',!!t&&t.menu&&t.items===t.n,t);
+  /* v25.71: inside the workstation the form row's sheet button ("Setup · 1 of 11", #aSheet) is the Sheets menu since v25.65 (top
+     bar A: "the form's bar and the form's own tools are one row: the form, the sheet arrows"); the form's own Sheets button stays
+     hidden there, so its list is read from the workstation's menu */
+  if(t){t.items=await P.page.evaluate(async()=>{const b=document.getElementById('aSheet');if(!b||!b.offsetParent)return 0;b.click();await new Promise(r=>setTimeout(r,300));
+    const n=document.querySelectorAll('#wsSheetMenu:not([hidden]) .wa-mi').length;b.click();return n;});}
+  ok('1 an iPad held upright: IA-1\'s '+(t&&t.n)+' sheets are the Sheets menu, every one listed (v23.88; the form row\'s menu since v25.65)',!!t&&t.menu&&t.items===t.n,t);
   errs.push(...P.errs);await P.ctx.close();
   const W=await shellForm(br,{width:1180,height:820},'IA-1');const tw=await tabs(W.fr);
   /* v23.87: on a touch screen the tabs wrap onto as many rows as they need, so every sheet is in sight; the controls stay in the toolbar beside them */
