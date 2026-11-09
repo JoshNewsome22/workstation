@@ -1146,12 +1146,21 @@ html.fx2.fx2-st:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-strev li butto
 }
 @media print{.fx2-stsw,.fx2-stbar,.fx2-strev{display:none!important}}
 </style>
+<style id="fx2-own">
+/* v25.70 fx2: SA-1's own screen rules for the shared layout. The probes are cards on an iPad held upright (FX2_CFG.narrow),
+   each headed with its number ("Probe 1"); sideways and on a laptop they stay the table */
+@media screen{
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table#prTbl.fx2-cards > tbody > tr > td[data-fx2k="title"]{flex-direction:row!important;gap:0!important}
+html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh table#prTbl.fx2-cards > tbody > tr > td[data-fx2k="title"]::before{content:"Probe\00a0"!important;display:inline!important;font:inherit!important;color:inherit!important}
+}
+</style>
 <script>document.documentElement.classList.add('fx2');document.documentElement.setAttribute('data-fx2','SA-1');addEventListener('beforeprint',function(){if(window.fx2Layout)fx2Layout.paper(true)})</script>
 <script id="fx2-cfg">
 /* v25.68 fx2: SA-1's settings for the shared layout (tools/blocks/fx2.html; the list is at the top of its script).
    Cards: the task analysis's steps (one step to a card). Tables: the trial-by-trial and step-by-step records (they
-   feed the graph), the prompt-level codes, the probes and the blank sheets for the clipboard */
-window.FX2_CFG = { fields: '.fieldgrid', cards: '#stepTbl', heads: '.fx2-sh h3:not(.noprint)',
+   feed the graph), the prompt-level codes, the probes and the blank sheets for the clipboard. v25.70 (the BCBA, 11/9): the
+   probes are cards on an iPad held upright (narrow), a table sideways and on a laptop */
+window.FX2_CFG = { fields: '.fieldgrid', cards: '#stepTbl', narrow: '#prTbl', heads: '.fx2-sh h3:not(.noprint)',
   noseg: '#trTbl, #taTbl, #prTbl, #codeTbl',
   /* the examples the form writes bare (a working convention, "3 to 5 s, a working convention", is an explanation and stays) */
   eg: { 'e.g., Break request (FCT), Program 2': 'break request (FCT), Program 2',
@@ -3563,8 +3572,16 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
      v25.69 fx2 (group 5):
        paper    a copy of the paper the form draws on screen inside a sheet (a selector: TK-1's book pages, QS-1's quick
                 start as it prints): its words keep the type they print with, not the layout's reading type (TK-1 fits
-                its pages to the type it finds there, and the master print takes them as they stand) */
+                its pages to the type it finds there, and the master print takes them as they stand)
+     v25.70 fx2 (the BCBA, 11/9):
+       narrow   tables that are cards only on a narrow touch screen, an iPad held upright (or a phone), and stay tables on
+                an iPad held sideways and on a laptop (a selector: SA-1's probes, GC-1's record of game days, RM-1's
+                inoculation plan). Upright is the screen taller than it is wide, so the form in the workstation beside
+                its list follows the iPad, not the width; under 640 px they are cards on any screen. Turning the iPad
+                turns them, the boxes and their values as they were */
   var C = window.FX2_CFG || {};
+  /* v25.70 fx2: the narrow screens where the tables of FX2_CFG.narrow are cards */
+  var NARROW = null; try { NARROW = matchMedia('(pointer:coarse) and (orientation:portrait), (max-width:640px)'); } catch (e) {}
   /* what is typed in DM-1's contacts and packet redraws their summaries at once */
   var LIVE = [C.contacts && '#' + C.contacts.wrap, C.packet && '#' + C.packet].filter(Boolean).join(',');
   var $$ = function(s, r){ return Array.prototype.slice.call((r || D).querySelectorAll(s)); };
@@ -3729,11 +3746,14 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   function cards(){
     /* which tables are lists of entries: on DM-1, IC-1 and RR-1 every .grid table holding boxes; elsewhere the form names
        them (a table of scores by item, a checklist of criteria by target and a yes/no/sometimes grid stay tables) */
-    var named = C.cards; if (named === '') return;
-    $$(named || '.fx2-sh table.grid').forEach(function(t){
-      if (!named && !t.querySelector('tbody input, tbody select, tbody textarea')) return;
+    var named = C.cards, nar = C.narrow ? $$(C.narrow) : [], up = !!(NARROW && NARROW.matches); if (named === '' && !nar.length) return;
+    (named === '' ? [] : $$(named || '.fx2-sh table.grid')).filter(function(t){ return nar.indexOf(t) < 0; }).concat(nar).forEach(function(t){
+      var isN = nar.indexOf(t) >= 0, on = !isN || up;
+      if (!named && !isN && !t.querySelector('tbody input, tbody select, tbody textarea')) return;
       if (!t.closest('.fx2-sh')) return;
-      tog(t, 'fx2-cards', true);
+      /* v25.70 fx2: a table of FX2_CFG.narrow is laid out for cards either way (each cell's column name and kind), and is a
+         card list only while the screen is narrow (fx2-ncards marks it for the form's own rules) */
+      tog(t, 'fx2-cards', on); if (isN) tog(t, 'fx2-ncards', true);
       var hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1]; if (!hr) return;
       var heads = []; Array.prototype.forEach.call(hr.cells, function(c){ for (var k = 0; k < (c.colSpan || 1); k++) heads.push(headText(c)); });
       var rows = [], fixed = false, ro = !t.querySelector('tbody input, tbody select, tbody textarea');
@@ -3763,7 +3783,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
           if (r) { r.dataset.fx2open = '1'; tog(r, 'fx2-more', false); var f = r.querySelector('input:not([type=checkbox]),select,textarea'); if (f) try { f.focus(); } catch (e) {} return; }
           var cn = COUNT[t.id] && D.getElementById(COUNT[t.id]); if (cn && +cn.value < +cn.max) { cn.value = +cn.value + 1; cn.dispatchEvent(new Event('change', { bubbles: true })); } });
         wrap.after(btn); }
-      var cnt = COUNT[t.id] && D.getElementById(COUNT[t.id]); btn.hidden = !waiting && !(cnt && +cnt.value < +cnt.max);
+      var cnt = COUNT[t.id] && D.getElementById(COUNT[t.id]); btn.hidden = !on || (!waiting && !(cnt && +cnt.value < +cnt.max));
     });
   }
 
@@ -3938,6 +3958,8 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
     st.after(el); R.classList.add('fx2-pp'); }
   function run(){ if (printing) return; try { wrapPlain(); mark(); intro(); heads(); fields(); hints(); rows(); segs(); cards(); contacts(); packet(); nsFold(); parentView(); align(); egAll(); long(); tbFit(); } catch (e) { if (window.console) console.warn('fx2', e); } }
   var timer = 0; function soon(){ clearTimeout(timer); timer = setTimeout(run, 120); }
+  /* v25.70 fx2: the iPad turned (upright or sideways): the tables of FX2_CFG.narrow become cards or tables again */
+  if (C.narrow && NARROW) try { if (NARROW.addEventListener) NARROW.addEventListener('change', soon); else NARROW.addListener(soon); } catch (e) {}
   /* TB-1's chips jump to a target's card; a sheet just shown still grows its boxes to their text, so the jump is aimed
      again once that has settled (a smooth scroll aimed at the first position stopped short of the card) */
   if (C.jump) D.addEventListener('click', function(e){ var a = e.target.closest && e.target.closest(C.jump.split(',').map(function(s){ return s.trim() + ' a[href^="#"]'; }).join(', ')); if (!a) return; var id = a.getAttribute('href').slice(1);
