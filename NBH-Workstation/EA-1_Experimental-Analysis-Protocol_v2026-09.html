@@ -7049,6 +7049,8 @@ window.eaGraphs={draw:function(lg,self,args,h){if(h)H=h;const el=args[0],legendE
         S2.forEach(s=>{labs+=`<text class="ea-dl" x="${W-R+6}" y="${s.y.toFixed(1)}" font-size="9" style="fill:${COL(s.si)};font-weight:600">${esc(s.nm)}</text>`;});}}
     if(add||labs){svg.insertAdjacentHTML("beforeend",`<g class="ea-v2570">${add}${labs}</g>`);}
     if(gut){const vb=(svg.getAttribute("viewBox")||"0 0 640 270").split(/\s+/).map(Number);svg.setAttribute("viewBox",`0 0 ${vb[2]+gut} ${vb[3]}`);if(legendEl)legendEl.hidden=true;}else if(legendEl)legendEl.hidden=false;
+    const s=sentence(o);svg.setAttribute("role","img");svg.setAttribute("aria-label","Line graph: "+(s||o.title));
+    el.insertAdjacentHTML("beforeend",`<p class="ea-gsum noprint">${esc(s)}</p><div class="ea-gtabbar noprint"><button type="button" class="tool" data-e70="table" data-f="${id}" aria-expanded="false" aria-controls="eaGTab-${id}">Show as table</button></div><div class="ea-gtab" id="eaGTab-${id}" hidden></div>`);
 
 }catch(e){}
   return r;}};

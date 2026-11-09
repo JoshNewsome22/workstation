@@ -23727,7 +23727,10 @@ function pubChart(beh,rows,conds,an){const xEnd=ddPlotEnd(rows),n=xEnd+1,ax=pubT
   const m=/data-plot="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg);if(!m)return svg;
   const l=+m[1],t=+m[2],iw=+m[3],ih=+m[4],xEnd=ddPlotEnd(rows),X=i=>l+(xEnd<=0?iw/2:i*iw/xEnd),top=ddDrawn.top||1,Y=v=>t+ih-(Math.min(v,top)/top)*ih,z=S.settings.zeroLift===true?7:0;
   let add="";
+  /* the sentence is the graph's accessible name */
+  const s=G.blind?"":sentence(beh,rows,analyses);
   svg=svg.replace(/^<svg class="graph"/,`<svg class="graph" data-dd-b="${esc(beh.id)}"`);
+  if(s)svg=svg.replace(/aria-label="Line graph of ([^"]*)"/,(q,nm)=>`aria-label="Line graph of ${nm}. ${esc(s)}"`);
   /* (NEXT2 #6) alternating conditions: each path's name at its right end, in a margin added on the right, in place of the
      legend's lines, when the names stay within 14 units of their paths */
   if(ddAltNow&&!G.blind){const P2=analyses.map((a,k)=>{if(!a.n)return null;const last=a.pts[a.pts.length-1];return {k,nm:a.name,w:Y(last.y)+4,y:Y(last.y)+4};}).filter(Boolean).sort((p,q)=>p.y-q.y);
@@ -23771,6 +23774,8 @@ function decorate(){const out=document.getElementById("resultsOut");if(!out)retu
     if(pub){const fig=G.fig&&G.fig[id];b.insertAdjacentHTML("afterbegin",`<button type="button" class="btn ghost sm" data-g70="svg" data-b="${esc(id)}" title="A vector file: sharp at any size; opens in Word, Google Docs, Keynote and Illustrator">Save as SVG<\/button> <button type="button" class="btn ghost sm" data-g70="print" data-b="${esc(id)}" title="This figure alone, at its size, with its caption">Print figure<\/button> <button type="button" class="btn ghost sm" data-g70="cap" data-b="${esc(id)}" aria-expanded="false">Edit caption<\/button> `);
       if(fig)b.insertAdjacentHTML("afterend",`<p class="hint dd-pubsize noprint no-print">${esc(P.sizeLine(fig,P.ratio(),"school days"))}.<\/p>`);}
     let tail="";
+    if(!pub)b.insertAdjacentHTML("beforeend",` <button type="button" class="btn ghost sm" data-g70="table" data-b="${esc(id)}" aria-expanded="false" aria-controls="ddGTab-${esc(id)}">Show as table<\/button>`);
+    tail+=`<p class="dd-gsum noprint no-print">${esc(sentence(A.beh,A.rows,A.analyses))}${pub?"":"<!--touch-->"}<\/p><div class="dd-gtab" id="ddGTab-${esc(id)}" hidden><\/div>`;
 
 
     if(tail)b.insertAdjacentHTML("afterend",tail.replace("<!--touch-->",""));
