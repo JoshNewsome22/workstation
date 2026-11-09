@@ -51,7 +51,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('4 DM-1, TB-1 and CF-1 filled from a saved file say they are done well before 1.2 s, with nothing still arriving after',three.length===3&&three.every(t=>t.ok&&t.same&&t.ms<1000),three);
   const bad=times.filter(t=>!t.ok||!t.same),slow=times.filter(t=>t.ms>=1150),ms=times.map(t=>t.ms).sort((a,b)=>a-b);
   console.log('  open times (ms): median '+ms[Math.floor(ms.length/2)]+', slowest '+ms[ms.length-1]+'; at the 1.2 s limit: '+slow.map(t=>t.id).join(', '));
-  ok('6 every one of the '+times.length+' forms, filled from its saved file, has taken all of the file when it says it is done (nothing changes after); most are done in under 0.6 s',(times.length===47||!!process.env.ONLY)&&!bad.length&&ms[Math.floor(ms.length/2)]<600,{bad,slow:slow.map(t=>t.id+':'+t.ms)});
+  /* v25.71: 48 forms since v25.66 added FD-1 (SETUP.md "New Form FD-1, Feeding and Mealtime (the 48th form)") */
+  ok('6 every one of the '+times.length+' forms, filled from its saved file, has taken all of the file when it says it is done (nothing changes after); most are done in under 0.6 s',(times.length===48||!!process.env.ONLY)&&!bad.length&&ms[Math.floor(ms.length/2)]<600,{bad,slow:slow.map(t=>t.id+':'+t.ms)});
   const errs=log.filter(l=>l.type!=='warning');ok('5 no page errors',!errs.length,errs);
   }catch(e){ok('crashed',false,String(e.stack||e));}
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

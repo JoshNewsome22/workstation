@@ -1896,7 +1896,8 @@ try { if (window.matchMedia) (function(){
    (nbhUI.confirm or the browser's confirm; the first one asked within 1.5 s): the action happens at once and the message
    with Undo shows. Only a question that names the same action (Clear, Remove, Delete, Discard, Start over or a new one,
    Reset, Erase, Empty, Take … off) is answered; one that names something Undo cannot bring back (My pictures, Google
-   Drive, everywhere, other devices, Autosave's copies, a backup, the site, a bank, the directory, the offline copy) is
+   Drive, everywhere, other devices, Autosave's copies, a backup, the site, a bank, the directory, the offline copy, and since
+   v25.71 a running session or recording whose question says nothing from it is written) is
    still asked, and so is a second question. A script's tap is asked as before. Nothing here enters a saved file, an
    export or a print. The workstation uses the same pair for its own actions over the open forms (Fill open forms):
      nbhUI.undoMark()            the form as it is now (a mark)
@@ -1969,7 +1970,9 @@ try { (function(){
   /* ---- no question first, where Undo covers the action ---- */
   var ASK = { until: 0, prev: null, stub: null };
   var SAFE = /^\s*(clear|remove|delete|discard|start (over|again|a new)|reset|erase|empty|take .{1,80}? (off|out of)\b|this (will )?(clears?|removes?|erases?|deletes?|resets?)\b)/i;
-  var STILL = /my pictures|google|\bdrive\b|everywhere|other devices?|autosave|safety cop|\bback-?up (file|cop(y|ies))\b|\bback up the|from the site|recogni[sz]er|\bbank\b|directory|offline/i;
+  /* v25.71 "Nothing (from it) is written to the record / sheet / log": a running session or a live recording that is not in the
+     form's file, so Undo has nothing to put back (OB-1's Discard this recording went at one tap, with no Undo shown) */
+  var STILL = /my pictures|google|\bdrive\b|everywhere|other devices?|autosave|safety cop|\bback-?up (file|cop(y|ies))\b|\bback up the|from the site|recogni[sz]er|\bbank\b|directory|offline|nothing (from it )?is written/i;
   function unstub(){ if (ASK.stub && W.confirm === ASK.stub) W.confirm = ASK.prev; ASK.stub = null; ASK.prev = null; }
   function armed(){ if (W.__nbhQuiet || W.__nbhSilent) return false; if (ASK.until && ASK.until <= Date.now()) { ASK.until = 0; unstub(); } return ASK.until > 0; }
   function take(text){ if (!armed()) return false; ASK.until = 0; unstub(); var t = String(text == null ? '' : text); return SAFE.test(t) && !STILL.test(t); }

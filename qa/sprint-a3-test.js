@@ -339,7 +339,10 @@ async function liveRun(br){
   await page.evaluate(()=>{const b=document.getElementById('barFold');if(b&&!b.hidden)b.click();});
   const open=async id=>{await page.evaluate(i=>openForm(i),id);await page.waitForFunction(i=>!!state.status[i],id,{timeout:20000}).catch(()=>{});await sleep(1800);
     const f=F.find(x=>x.id===id).file;return page.frames().find(x=>x.url().includes(f)||x.url().includes(encodeURIComponent(f)));};
-  let fr=await open('TB-1');await fr.evaluate(()=>{window.confirm=()=>true;document.querySelector('#simBtn').click();});await sleep(6000);
+  /* v25.71: since v24.25 (SETUP.md "Load simulation is blocked while a student is on the form") TB-1's simulation cannot fill a
+     case with a student on the bar, so the target is written on TB-1's first definition card and sent, as a BCBA does */
+  let fr=await open('TB-1');await fr.evaluate(()=>{window.confirm=()=>true;const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
+    set('tgt[0].lab','Pushing work off the desk (simulated)');set('tgt[0].def','Sweeping or pushing a worksheet or materials off the desk with a hand or arm (simulated).');document.querySelector('#sendTgt').click();});await sleep(2500);
   fr=await open('OB-1');
   await fr.evaluate(s=>document.querySelector(s).click(),'#viewSeg [data-view="obs"]')   /* v23.88: a DOM click (in the Sheets menu the button is hidden) */;await sleep(600);
   const y0=await fr.evaluate(()=>scrollY);const where=[];
