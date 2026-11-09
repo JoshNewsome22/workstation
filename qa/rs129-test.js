@@ -21,19 +21,23 @@ const PLAN={src:'TD-1',beh:'Hitting (simulated)',checklist:[{t:'Give the instruc
  const r1=await p.evaluate(async()=>{pickRbt(1);await new Promise(r=>setTimeout(r,200));const k=curKey,[y,mo]=k.split('-').map(Number);const today=todayISO();const day=d=>iso(y,mo,Math.min(d,+today.slice(8)));
    const set=(id,f,v)=>{const e=document.getElementById('c_'+id+'_'+f);e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
    const before=stats(k);
-   addContact(null);const a=month(k).contacts[month(k).contacts.length-1];set(a.id,'date',day(21));set(a.id,'start','09:00');set(a.id,'end','11:30');set(a.id,'obs','yes');set(a.id,'mode','person');
+   /* v25.71: the new contact is found by its id: the list re-sorts by date, and before the 23rd every day() is today, so the last entry was not always the one just added */
+   const add=()=>{const ids=new Set(month(k).contacts.map(c=>c.id));addContact(null);return month(k).contacts.find(c=>!ids.has(c.id));};
+   const a=add();set(a.id,'date',day(21));set(a.id,'start','09:00');set(a.id,'end','11:30');set(a.id,'obs','yes');set(a.id,'mode','person');
    const mid=stats(k);
-   addContact(null);const ph=month(k).contacts[month(k).contacts.length-1];set(ph.id,'date',day(22));set(ph.id,'start','10:00');set(ph.id,'end','10:30');set(ph.id,'mode','phone');set(ph.id,'obs','no');
-   addContact(null);const c3=month(k).contacts[month(k).contacts.length-1];set(c3.id,'date',day(23));set(c3.id,'start','13:00');set(c3.id,'end','13:30');set(c3.id,'obs','no');set(c3.id,'mode','person');
+   const ph=add();set(ph.id,'date',day(22));set(ph.id,'start','10:00');set(ph.id,'end','10:30');set(ph.id,'mode','phone');set(ph.id,'obs','no');
+   const c3=add();set(c3.id,'date',day(23));set(c3.id,'start','13:00');set(c3.id,'end','13:30');set(c3.id,'obs','no');set(c3.id,'mode','person');
    await new Promise(r=>setTimeout(r,200));const s=stats(k);const chk=Object.fromEntries(s.checks.map(c=>[c.k,c]));
    const card=document.querySelector('details.rs-contact[data-cid="'+ph.id+'"]');const box=document.getElementById('compBox');
    const yr=[...document.querySelectorAll('#yearTbl tbody tr[data-open-month="'+k+'"] td')].map(td=>td.textContent.trim());
-   return {k,phId:ph.id,b:{status:before.status,cnt:before.cnt.length},mid:{status:mid.status,cnt:mid.cnt.length,pct:Math.round(mid.pct*10)/10},s:{status:s.status,cnt:s.cnt.length,noted:s.badMode,pct:Math.round(s.pct*10)/10,obs:s.obs},
+   return {k,phId:ph.id,b:{status:before.status,cnt:before.cnt.length,obs:before.obs},mid:{status:mid.status,cnt:mid.cnt.length,pct:Math.round(mid.pct*10)/10},s:{status:s.status,cnt:s.cnt.length,noted:s.badMode,pct:Math.round(s.pct*10)/10,obs:s.obs},
      contactsD:chk.contacts.d,contactsS:chk.contacts.s,modeS:chk.mode.s,modeD:chk.mode.d,boxStatus:box.dataset.status,verdict:document.getElementById('compVerdict').textContent,
      bad:card.classList.contains('bad'),pills:[...card.querySelectorAll('summary .rs-pill')].map(x=>x.textContent),issues:document.getElementById('c_'+ph.id+'_issues').textContent,noted:(document.getElementById('tNoted')||{}).textContent,yrLast:yr[yr.length-1],
      who:[...document.querySelectorAll('#rbtAll tbody tr')].map(tr=>[...tr.querySelectorAll('td')].map(td=>td.textContent.trim()))};});
- ok('a 150-minute in-person observation, a 30-minute phone contact and a 30-minute in-person contact: the month is on track (not Needs attention), the phone contact is noted and not counted',r1.mid.status!=='fail'&&r1.s.status==='ok'&&r1.s.cnt===3&&r1.s.noted===1&&r1.boxStatus==='ok'&&!/Needs attention/.test(r1.verdict),r1);
- ok('the contacts check reads "3 of 2 (1 noted, not counted)" and the mode row is a note, never a red mark; the totals show the noted contact',/^3 of 2 \(1 noted, not counted\)$/.test(r1.contactsD)&&r1.contactsS==='ok'&&r1.modeS==='na'&&/1 noted this month/.test(r1.modeD)&&r1.noted==='1',r1);
+ /* v25.71: the simulation's contacts this month depend on today's date (none yet early in a month), so the counts are read as
+    what was there before plus the two in-person contacts added here; the test wrote "3" when the sample already held one */
+ ok('a 150-minute in-person observation, a 30-minute phone contact and a 30-minute in-person contact: the month is on track (not Needs attention), the phone contact is noted and not counted',r1.mid.status!=='fail'&&r1.s.status==='ok'&&r1.s.cnt===r1.b.cnt+2&&r1.s.noted===1&&r1.boxStatus==='ok'&&!/Needs attention/.test(r1.verdict),r1);
+ ok('the contacts check reads "3 of 2 (1 noted, not counted)" and the mode row is a note, never a red mark; the totals show the noted contact',new RegExp('^'+(r1.b.cnt+2)+' of 2 \\(1 noted, not counted\\)$').test(r1.contactsD)&&r1.contactsS==='ok'&&r1.modeS==='na'&&/1 noted this month/.test(r1.modeD)&&r1.noted==='1',r1);
  ok('the phone contact’s card is not red: a "noted, not counted" pill and line, no ✕',!r1.bad&&r1.pills.includes('noted, not counted')&&/noted, not counted/.test(r1.issues)&&!/✕/.test(r1.issues),r1);
  ok('the Year table does not say No for the month',r1.yrLast!=='No',r1.yrLast);
  /* a month whose only contacts are non-counting still goes red after it ends */
@@ -46,7 +50,7 @@ const PLAN={src:'TD-1',beh:'Hitting (simulated)',checklist:[{t:'Give the instruc
    const opt=[...document.querySelectorAll('#rbtSel option')].map(o=>o.textContent);const bar=document.querySelector('#monthBar button[data-month="'+curKey+'"] small').textContent;
    const head=[...document.querySelectorAll('#rbtAll thead th')].map(th=>th.textContent.trim());
    return {pct:td[1],want:pctTxt(s.pct),cnt:td[2],obs:td[3],st:td[4],need:td[5],head,jSt:jt[4],jStatus:js.status,jEnded:js.ended,opt,bar,curStatus:s.status};});
- ok('without a reload the Every supervisee table shows the edited month: the percent, "3 (2 needed)", the observations, and a Still needed column',r3.pct===r3.want&&r3.cnt==='3 (2 needed)'&&r3.obs==='2'&&r3.head.includes('Still needed this month')&&typeof r3.need==='string',r3);
+ ok('without a reload the Every supervisee table shows the edited month: the percent, "3 (2 needed)", the observations, and a Still needed column',r3.pct===r3.want&&r3.cnt===(r1.b.cnt+2)+' (2 needed)'&&r3.obs===String(r1.b.obs+1)&&r3.head.includes('Still needed this month')&&typeof r3.need==='string',r3);
  ok('an open month that meets every check reads "on track" in the table, the picker and the month bar (met only after the month ends)',r3.jStatus==='ok'&&!r3.jEnded&&r3.jSt==='on track'&&r3.opt.some(t=>/Casey.*on track/.test(t))&&/on track/.test(r3.bar),r3);
  /* ---- R-150 the name cell is a button; R-149 the autosave label ---- */
  const r4=await p.evaluate(async()=>{const btn=document.querySelector('#rbtAll button.rs-who-btn[data-rbt="0"]');const h=btn.getBoundingClientRect().height;btn.click();await new Promise(r=>setTimeout(r,200));
