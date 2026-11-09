@@ -118,8 +118,10 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
  let factsA=null;
 
  /* ---------- A (and F): TB-1 and PA-1 simulated, then a fresh TE-1; then the link with TK-1 ---------- */
- {const {ctx,page}=await shell(br);await bar(page);
-  const tb=await openIn(page,'TB-1');await sim(tb);
+ /* v25.71: since v24.25 (review R-012) TB-1's Load simulation is blocked while a named student is on the form, so the bar's
+    student is entered after TB-1's simulation (here and in C) */
+ {const {ctx,page}=await shell(br);
+  const tb=await openIn(page,'TB-1');await sim(tb);await bar(page);
   const pa=await openIn(page,'PA-1');await sim(pa);
   await factsHave(page,['behaviors','menu']);await sleep(1500);
   const facts=factsA=await page.evaluate(()=>state.facts);
@@ -133,7 +135,7 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   ok('A: TB-1\'s simulation names a defined replacement target ('+(rep&&rep.label)+') and '+probs.length+' problem behaviors',!!rep&&probs.length>0,facts.behaviors.map(b=>b.label));
   /* v22.54 (F422) the case's only replacement is the break request (and GB-1 is not open): it is not placed */
   ok('A: "Behavior the tokens are earned for" does not take the break request (the case\'s only replacement): the field stays empty, its prompt asks for the work',
-    r.beh===''&&r.input===''&&/^Name the work or skill response each token follows/.test(await te.evaluate(()=>document.querySelector('[data-m="beh"]').placeholder)),r);
+    r.beh===''&&r.input===''&&/^Name the work or skill response each token follows/.test(await te.evaluate(()=>(n=>n.placeholder||n.getAttribute('data-fx2-ph')||'')(document.querySelector('[data-m="beh"]'))/* v25.71: fx2 (v25.69) keeps the example in data-fx2-ph on screen */)),r);
   ok('A: ... and never a problem behavior',r.beh===''||(!probs.some(p=>r.beh.toLowerCase().indexOf(p.toLowerCase())>=0||p.toLowerCase().indexOf(r.beh.toLowerCase())>=0)&&!/aggress/i.test(r.beh)),{beh:r.beh,probs});
   const want=expected(facts.menu),got=r.bk.filter(x=>x.n);
   ok('A: the backups are PA-1\'s ranked menu in rank order without its low-preference items: '+got.map(x=>x.n).join(', '),
@@ -263,8 +265,8 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   await ctx.close();}
 
  /* ---------- C: the day lens's path: TB-1, then FS-1 concludes, then TE-1 ---------- */
- {const {ctx,page}=await shell(br);await bar(page);
-  const tb=await openIn(page,'TB-1');await sim(tb);await factsHave(page,['behaviors']);
+ {const {ctx,page}=await shell(br);
+  const tb=await openIn(page,'TB-1');await sim(tb);await bar(page);await factsHave(page,['behaviors']);
   const fs1=await openIn(page,'FS-1');await sleep(800);await sim(fs1);await factsHave(page,['behaviors','fn']);await sleep(1000);
   const te=await openIn(page,'TE-1');
   await te.waitForFunction(()=>!!(window.nbhCase&&nbhCase.last&&nbhCase.facts&&nbhCase.facts.fn),null,{timeout:20000});await sleep(500);
