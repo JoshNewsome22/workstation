@@ -8,7 +8,8 @@
      the bank") the video library: every procedure video of Form TD-1's protocol bank, to browse and to watch. The list is
      nbh-videos.js (the one Form TD-1 reads); each video is a file beside the forms, loaded only when it is watched, and its
      picture a small JPG beside it, so the installed app plays them without the internet. Opened from the workstation's
-     Videos (over the workstation, in a frame) or on its own; videos.html#video=<key> opens a video's page. What was watched
+     Videos (over the workstation, in a frame) or on its own; videos.html#video=<key> opens a video's page, and (v25.70, a form's
+     Watch how) videos.html#family=<procedure> the home page at that procedure's videos. What was watched
      on this device, and where each video stopped, is kept in this browser (localStorage nbh.videos.v1): the video's key,
      the second and the time, nothing about a student. -->
 <script>
@@ -310,6 +311,8 @@ function pauseNow(){var vid=$('vlVideo');if(vid&&cur){try{if(vid.duration>0)setP
 
 /* ---------- the two views, from the address: #video=<key> a video's page, else the home page ---------- */
 function route(focus){var m=/^#video=([^&]+)/.exec(location.hash||''),k=m?decodeURIComponent(m[1]):'',v=BY[k];
+  /* v25.70 #family=<procedure>: a form's Watch how, the home page showing that procedure's videos */
+  var fm=/^#family=([a-z]{2,12})$/.exec(location.hash||'');if(fm&&D.families.some(function(f){return f[0]===fm[1];})){chip='fam:'+fm[1];q='';var qi=$('vlQ');if(qi)qi.value='';}
   if(v){if(view==='home')homeY=window.scrollY||0;pauseNow();cur=v.key;lastKey=v.key;view='watch';B.classList.add('vl-watching');$('vlHome').hidden=true;$('vlWatch').hidden=false;$('vlBack').hidden=false;
     paintWatch(v);openedByTap=false;window.scrollTo(0,0);document.title=v.title+' · Video library';if(focus){var t=$('vlTitle');if(t)t.focus({preventScroll:true});}}
   else{var was=view;pauseNow();cur=null;token++;view='home';B.classList.remove('vl-watching');$('vlWatch').hidden=true;$('vlWatch').innerHTML='';$('vlHome').hidden=false;$('vlBack').hidden=true;

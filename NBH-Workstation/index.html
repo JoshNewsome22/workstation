@@ -12128,7 +12128,7 @@ function hold(on){if(on){held=[...B.children].filter(el=>!el.matches(KEEP)&&!el.
   else{held.forEach(el=>{el.inert=false;});held=[];}}
 const tell=m=>{try{if(fr&&fr.contentWindow)fr.contentWindow.postMessage(m,'*');}catch(e){}};
 function open(key,from){if(typeof EMBED!=='undefined'&&EMBED){try{wsUI.toast('The video library is in the workstation opened from its folder or the website; the one-file edition does not carry the videos.',{kind:'warn',ms:9000});}catch(e){}return;}
-  const hash=key?'#video='+encodeURIComponent(key):'';
+  const fam=/^family:([a-z]{2,12})$/.exec(key||''),hash=fam?'#family='+fam[1]:key?'#video='+encodeURIComponent(key):'';   /* v25.70 Watch how: a procedure's videos */
   if(!fr){fr=document.createElement('iframe');fr.title='Video library';fr.src='videos.html'+hash;layer.appendChild(fr);
     fr.addEventListener('load',()=>{if(isOpen())tell({nbh:'videos-focus'});},{once:true});}
   else if(key!==undefined){try{const w=fr.contentWindow;if(w.location.hash!==hash){if(hash)w.location.hash=hash.slice(1);else w.location.hash='';}}catch(e){}}
@@ -12144,7 +12144,8 @@ function card(id){if(!/^[A-Za-z0-9_-]{1,80}$/.test(String(id||'')))return;close(
   const f=state.frames['TD-1'];if(f&&f.dataset.loaded)go();else if(f)f.addEventListener('load',()=>setTimeout(go,50),{once:true});}
 btn.addEventListener('click',()=>{if(isOpen())close();else open(undefined,btn);});
 window.addEventListener('message',ev=>{const d=ev.data;if(!d||typeof d.nbh!=='string')return;
-  if(d.nbh==='videos-open'){let from='';try{from=relayFrom(ev.source);}catch(e){}if(!from)return;const k=typeof d.video==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(d.video)?d.video:'';open(k,null);return;}
+  if(d.nbh==='videos-open'){let from='';try{from=relayFrom(ev.source);}catch(e){}if(!from)return;const k=typeof d.video==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(d.video)?d.video:'';
+    const f=!k&&typeof d.family==='string'&&/^[a-z]{2,12}$/.test(d.family)?'family:'+d.family:'';open(k||f,null);return;}   /* v25.70 a form's Watch how: a video, or a procedure's videos */
   if(!fr||ev.source!==fr.contentWindow)return;
   if(d.nbh==='videos-close')close();else if(d.nbh==='videos-card')card(d.card);});
 /* anything else chosen in the bar, a form opened, Escape: the library steps aside */
@@ -12158,6 +12159,290 @@ try{new MutationObserver(()=>{if(isOpen())place();}).observe(B,{attributes:true,
 try{CMDS.push({k:'videos video library watch procedure dro ncr rird high-p fct youtube',n:'Videos: watch the procedure videos of the protocol bank',s:'command',go:()=>open(undefined,null)});}catch(e){}
 try{const g=PH_MORE.find(x=>x[0]==='The workstation');if(g&&!(typeof EMBED!=='undefined'&&EMBED))g[1].splice(1,0,['wsVideos','Videos']);}catch(e){}
 window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr};
+})();
+</script>
+<style id="ws-v2570-css">
+/* v25.70 (the BCBA, 11/9) Undo after an action that takes work away, What's new on Today, case progress rings, and Back
+   where you left off. Screen only: none of it prints, and none of it enters a case file. */
+.ws-toast .ws-undo-b,.ws-undo-row .ws-undo-b{flex:0 0 auto;min-height:44px;min-width:64px;padding:0 14px;margin:-6px 4px -6px 6px;border:1px solid rgba(255,255,255,.6)!important;border-radius:8px;background:transparent!important;color:#fff!important;font:600 14px/1 var(--sans,system-ui,sans-serif);cursor:pointer}
+.ws-toast .ws-undo-b:focus-visible,.ws-undo-row .ws-undo-b:focus-visible{outline:2px solid #8fd0ee;outline-offset:2px}
+.ws-undo-row{display:flex;align-items:center;gap:10px;margin:0 16px 10px;padding:10px 12px 10px 16px;border-radius:10px;background:#16242e;color:#f1f6f5;font:14px/1.4 var(--sans,system-ui,sans-serif)}
+.ws-undo-row>span{flex:1 1 auto;min-width:0}
+.ws-undo-row .ws-undo-x{min-width:44px;min-height:44px;border:0;background:transparent;color:#cfe0dd;font-size:20px;cursor:pointer;margin:-8px -8px -8px 0}
+/* What's new: a card at the top of Today, once per version on this device */
+.ws-wn{position:relative;margin:4px 0 14px;padding:14px 56px 12px 16px;border:1px solid #bcd3d9;border-left:4px solid #2f7fa8;border-radius:10px;background:#f3f8fa;color:#1f2d36}
+.ws-wn h3{margin:0 0 6px;font:600 16px/1.3 var(--serif,Georgia,serif);color:#182e43}
+.ws-wn ul{margin:0 0 8px;padding-left:20px}.ws-wn li{margin:3px 0;line-height:1.45}
+.ws-wn .ws-wn-f{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:6px}
+.ws-wn a{display:inline-flex;align-items:center;min-height:44px;color:#1d5f86;font-weight:600}
+.ws-wn .ws-wn-ok{min-height:44px;padding:0 16px;border:1px solid #9fb6bd;border-radius:8px;background:#fff;color:#182e43;font:600 14px var(--sans,system-ui,sans-serif);cursor:pointer}
+.ws-wn .ws-wn-x{position:absolute;right:4px;top:4px;width:44px;height:44px;border:0;background:transparent;color:#55656c;font-size:22px;line-height:1;cursor:pointer;border-radius:8px}
+.ws-wn button:focus-visible,.ws-wn a:focus-visible{outline:2px solid #2f7fa8;outline-offset:2px}
+/* the case's progress: a ring per phase (assessment, plan, implementation, review) */
+.ws-rings{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:flex-start;margin:8px 0 6px;padding:0;list-style:none}
+.ws-ring{display:flex;align-items:center;gap:6px;min-width:0;font:12.5px/1.25 var(--sans,system-ui,sans-serif);color:#3d4f58}
+.ws-ring svg{flex:0 0 auto;display:block}
+.ws-ring .ws-rt{display:flex;flex-direction:column}.ws-ring .ws-rt b{font-weight:600;color:#1f2d36}
+.ws-rings-lg{gap:10px 22px;margin:4px 0 14px;padding:12px 14px;border:1px solid #d9e2e0;border-radius:10px;background:#f7faf9}
+.ws-rings-lg .ws-ring{font-size:13.5px}
+.ws-rings-h{margin:0 0 2px;font:600 13px var(--sans,system-ui,sans-serif);color:#55656c;letter-spacing:.02em}
+.ws-ring-key{flex-basis:100%;margin:2px 0 0;font:12.5px/1.4 var(--sans,system-ui,sans-serif);color:#55656c}
+.ws-ring-key i{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:-1px;margin:0 4px 0 8px}
+/* Back where you left off */
+#wsResume{position:fixed;z-index:8500;left:50%;transform:translateX(-50%);max-width:min(640px,calc(100% - 32px));display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;padding:6px 6px 6px 16px;border-radius:12px;background:#eef5f3;border:1px solid #bcd0cb;color:#1f2d36;box-shadow:0 8px 24px -14px rgba(22,36,46,.55);font:14px/1.35 var(--sans,system-ui,sans-serif)}
+#wsResume[hidden]{display:none!important}
+#wsResume .wr-t{flex:1 1 220px;min-width:0}
+#wsResume .wr-t b{font-weight:600}
+#wsResume button{min-height:44px;padding:0 14px;border:1px solid #9fb6bd;border-radius:8px;background:#fff;color:#182e43;font:600 14px var(--sans,system-ui,sans-serif);cursor:pointer}
+#wsResume .wr-x{min-width:44px;padding:0;border:0;background:transparent;color:#55656c;font-size:20px;font-weight:400}
+#wsResume button:focus-visible{outline:2px solid #2f7fa8;outline-offset:2px}
+@media (max-width:600px){#wsResume{top:auto!important;bottom:76px}}
+@media (prefers-reduced-motion:reduce){.ws-toast,.ws-undo-row,#wsResume,.ws-wn{animation:none!important;transition:none!important}}
+@media print{.ws-undo-row,.ws-wn,.ws-rings,#wsResume{display:none!important}}
+</style>
+<script type="application/json" id="ws-whatsnew">
+{"v":"v25.70","title":"What's new in this version","notes":"SETUP.md","items":[
+"Undo: after you clear a form, remove a row or a student, take a form out of the case or fill the open forms, Undo puts it back for about 8 seconds.",
+"Back where you left off: the workstation opens on the student, form, sheet and place you were at, with Start fresh beside it.",
+"Rings on the caseload and the case map show how many of each phase's forms (assessment, plan, implementation, review) are started.",
+"Watch how: Form TD-1's cards, and a list that names a procedure (Form TI-1's main procedure), open that procedure in the video library.",
+"This card: a few lines after each update, once on this device."]}
+</script>
+<script id="ws-v2570">
+/* v25.70 (the BCBA, 11/9; S/research/NEXT.md and NEXT2.md #2). The release step edits the list above (ws-whatsnew): its v is
+   the version it describes (the card shows only while that is WS_REL), 3 to 6 plain lines, and notes, the full notes.
+   1. Undo. Each of these, once done, says so at the foot of the window (in an open box, at its foot) with Undo for about
+      8 s, held while touched or focused: a student removed from the caseload on this device (the record, its case history
+      and its pin come back; the pictures only it used are kept until the 8 s are over), a form removed from the case (Close,
+      Remove from the case: it comes back with its work, as Close leaves it), Fill open forms (each form that changed is
+      put back as it was), a line removed from the Documents list. Inside the forms, nbh-ui.js does the same for Clear all,
+      the row and entry removals and the rest (its own notes say which).
+   2. What's new: after an update on this device (the version changes; a device that has never kept a student is a new one,
+      not an update), the first Today shows the card, once.
+   3. The rings: on each caseload card and on the case map, a ring per phase: of the forms the case is expected to have in
+      that phase (the shortest defensible path on the case map, plus any other form of that phase the case holds), how many
+      are started (in the case) and how many have data (more than four fields filled, as the form list says "Has data").
+   4. Back where you left off: the student, the form, its sheet and the scroll are kept on this device as you work (the
+      student's key, as Pin keeps it; nothing else). Opening the workstation again (more than 45 s later, so a reload
+      starts as usual; within 3 days; with nothing else open) opens that student from the caseload, at that form, sheet
+      and place, with a quiet strip: Back where you left off · Start fresh. When Autosave offers earlier work instead, the
+      offer is answered first, and that student's work restored from it comes back at the same place. Start fresh with
+      nothing done since closes the case (its caseload copy is as it was); with changes made since, it is Close case,
+      which saves them first. */
+(()=>{
+if(window.__ws2570)return;
+const $=s=>document.querySelector(s),B=document.body;
+const T=v=>String(v==null?'':v).trim(),say0=t=>{try{say(t);}catch(e){}};
+const mk=(tag,props,html)=>{const e=document.createElement(tag);Object.entries(props||{}).forEach(([k,v])=>{if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else e.setAttribute(k,v);});if(html)e.innerHTML=html;return e;};
+const nameOf=id=>((ALL.find(x=>x[0]===id)||[])[1])||id;
+const isModal=d=>{try{return d.matches(':modal');}catch(e){return !!d.open;}};
+const topModal=()=>[...document.querySelectorAll('dialog[open]')].filter(isModal).pop()||null;
+const caseOn=()=>{try{const p=packet();return !!T(p.client)&&!isStaffRec(p);}catch(e){return false;}};
+const frameWin=id=>{try{const f=state.frames[id];return f&&f.contentWindow||null;}catch(e){return null;}};
+
+/* ================= 1. Undo ================= */
+const UN={live:[],hold:null,media:0,sweep:false};
+/* the message with Undo: at the foot of the window, or inside the box that is open (a toast would sit under it) */
+function offer(text,fn,opt){opt=opt||{};const dl=topModal();let el,b,done=false,held=false,tm=0;
+  const end=undone=>{if(done)return;done=true;clearTimeout(tm);if(el&&el.parentNode)el.parentNode.removeChild(el);UN.live=UN.live.filter(x=>x!==me);try{if(opt.end)opt.end(!!undone);}catch(e){}};
+  const arm=ms=>{clearTimeout(tm);tm=setTimeout(()=>{if(held)return arm(1500);end(false);},ms);};
+  b=mk('button',{type:'button',class:'ws-undo-b','aria-label':'Undo: '+text},'Undo');
+  if(dl){el=mk('div',{class:'ws-undo-row',role:'status','aria-live':'polite'});el.appendChild(mk('span',{text}));el.appendChild(b);
+    const x=mk('button',{type:'button',class:'ws-undo-x','aria-label':'Dismiss'},'&times;');x.addEventListener('click',()=>end(false));el.appendChild(x);
+    dl.insertBefore(el,dl.querySelector(':scope>.df')||null);dl.addEventListener('close',()=>end(false),{once:true});
+    el.addEventListener('pointerenter',()=>{held=true;});el.addEventListener('pointerleave',()=>{held=false;});el.addEventListener('focusin',()=>{held=true;});el.addEventListener('focusout',()=>{held=false;});
+    arm(opt.ms||8000);}
+  else{let st=null;try{st=window.__wsSR&&__wsSR.showToast?__wsSR.showToast(text,{ms:opt.ms||8000},''):wsUI.toast(text,{ms:opt.ms||8000});}catch(e){st=null;}
+    if(!st)return null;el=st;el.insertBefore(b,el.lastChild);
+    new MutationObserver((r,o)=>{if(!el.isConnected){o.disconnect();end(false);}}).observe(el.parentNode||B,{childList:true});}
+  b.addEventListener('click',async()=>{if(done)return;b.disabled=true;let ok=false;try{ok=await fn();}catch(e){ok=false;}end(true);
+    const msg=ok===false?'Undo could not put everything back. Check it before you go on.':(opt.back||'Undone.');
+    try{wsUI.toast(msg,{kind:ok===false?'warn':'ok',ms:5000});}catch(e){}say0(msg);});
+  const me={el,b,end};UN.live.push(me);return me;}
+window.wsUndoOffer=offer;
+/* Ctrl or Command Z, outside a text box, while an Undo is offered */
+document.addEventListener('keydown',e=>{if(!(e.metaKey||e.ctrlKey)||e.shiftKey||e.altKey||(e.key!=='z'&&e.key!=='Z'))return;
+  const fb=$('#wsToasts .ws-undo-b:not([disabled])');if(!UN.live.length&&!fb)return;   /* a form's Undo, shown in the workstation's message */
+  const a=document.activeElement;if(a&&a.matches&&a.matches('input,textarea,select,[contenteditable=""],[contenteditable="true"]'))return;
+  e.preventDefault();(UN.live.length?UN.live[UN.live.length-1].b:fb).click();},true);
+
+/* a student removed from the caseload: what goes (the record, its history points, their texts and Drive notes, the pin)
+   is read before it goes; the removal waits for that reading; the pictures only they used are swept only after the Undo */
+{const t0=clTx;clTx=function(mode){if(mode==='readwrite'&&UN.hold){const h=UN.hold,me=this,a=arguments;return h.then(()=>t0.apply(me,a),()=>t0.apply(me,a));}return t0.apply(this,arguments);};}
+{const ms0=mediaSweep;mediaSweep=async function(){if(UN.media>0){UN.sweep=true;return 0;}return ms0.apply(this,arguments);};}
+function mediaFree(){UN.media=Math.max(0,UN.media-1);if(!UN.media&&UN.sweep){UN.sweep=false;try{mediaSweepSoon();}catch(e){}}}
+async function backupOf(key){const r=(await clList()||[]).find(x=>x.key===key);if(!r)return null;const o={r,P:[],T:[],D:[],pin:false};
+  try{o.pin=clPins().includes(key);}catch(e){}
+  try{await hxTx(['points','texts','drive'],'readonly',(P,Tx,D)=>{P.index('key').getAll(key).onsuccess=ev=>{o.P=ev.target.result||[];o.P.forEach(p=>{Tx.get(p.id).onsuccess=e2=>{if(e2.target.result)o.T.push(e2.target.result);};});};
+    D.index('key').getAll(key).onsuccess=ev=>{o.D=ev.target.result||[];};});}catch(e){}
+  return o;}
+async function restoreRec(o){await clTx('readwrite',st=>st.put(o.r));
+  if(o.P.length||o.D.length)try{await hxTx(['points','texts','drive'],'readwrite',(P,Tx,D)=>{o.P.forEach(x=>P.put(x));o.T.forEach(x=>Tx.put(x));o.D.forEach(x=>D.put(x));});}catch(e){}
+  if(o.pin)try{clPinSet(o.r.key,true);}catch(e){}
+  const L=await clList()||[];return L.some(x=>x.key===o.r.key);}
+document.addEventListener('click',e=>{const d=e.target.closest&&e.target.closest('[data-cldel]');if(!d)return;const key=d.dataset.cldel;if(!key)return;
+  const p=backupOf(key).catch(()=>null);UN.hold=p;UN.media++;
+  p.then(o=>{if(UN.hold===p)UN.hold=null;if(!o){mediaFree();return;}
+    const t0=Date.now();let n=0;
+    const look=async()=>{const L=await clList()||[];
+      if(!L.some(x=>x.key===key)){
+        offer(clName(o.r)+' removed from this '+HERE+'.',async()=>{const ok=await restoreRec(o);try{const t=T($('#dlgTitle')&&$('#dlgTitle').textContent);if($('#dlg').open&&t==='Caseload')await caseloadOpen();}catch(x){}try{paintBlank();}catch(x){}return ok;},
+          {back:clName(o.r)+' is back on this '+HERE+'.',end:()=>mediaFree()});return;}
+      if(($('#cfDlg')&&$('#cfDlg').open&&Date.now()-t0<120000)||++n<8){setTimeout(look,300);return;}
+      mediaFree();};   /* Cancel: nothing went */
+    setTimeout(look,200);});},true);
+
+/* Close, Remove from the case: the form's work as it was, kept as Close keeps it; Undo puts it back in the case and opens it */
+{const ch0=wsUI.choose;wsUI.choose=async function(text,btns){const v=await ch0.apply(this,arguments);
+  try{if(v==='remove'&&/^Close Form /.test(String(text))&&(btns||[]).some(b=>b&&b.v==='remove'&&/Remove from the case/.test(b.label||''))){
+    const id=state.cur,w=id&&frameWin(id);let snap=null;
+    if(w){try{const m=w.nbhUI&&w.nbhUI.undoMark?w.nbhUI.undoMark():null;if(m&&m.snap){snap={total:m.snap.total,data:m.snap.data};if(m.own)snap.own=m.own;}}catch(e){}
+      if(!snap)try{snap=w.nbhBridge.snapshot();}catch(e){}}
+    if(id&&snap){const at=state.caseOrder.indexOf(id),title=nameOf(id);
+      setTimeout(()=>{if(state.frames[id]||state.pending[id])return;
+        offer('Form '+id+' removed from the case.',async()=>{if(state.frames[id]||state.pending[id])return false;
+          setPending(id,title,snap,false);state.pending[id].away=true;const o=state.caseOrder.filter(x=>x!==id);o.splice(at<0?o.length:Math.min(at,o.length),0,id);state.caseOrder=o;
+          renderRail();openForm(id);return true;},{back:'Form '+id+' is back in the case, with its work.'});},0);}}}catch(e){}
+  return v;};}
+
+/* Fill open forms: each open form as it was, the instant before; Undo puts back each one that changed */
+document.addEventListener('click',e=>{if(!(e.target.closest&&e.target.closest('#pushPacket')))return;const ids=Object.keys(state.frames).filter(id=>!state.pending[id]);if(!ids.length)return;
+  const M={};ids.forEach(id=>{const w=frameWin(id);try{if(w&&w.nbhUI&&w.nbhUI.undoMark)M[id]=w.nbhUI.undoMark();}catch(x){}});
+  setTimeout(()=>{const ch=Object.keys(M).filter(id=>{const w=frameWin(id);try{return !!w&&w.nbhUI.undoDiffers(M[id]);}catch(x){return false;}});if(!ch.length)return;
+    offer('Details sent to '+ch.length+' open form'+(ch.length===1?'':'s')+' that had empty fields.',async()=>{let all=true;
+      for(const id of ch){const w=frameWin(id);if(!w||!w.nbhUI||!w.nbhUI.undoBack){all=false;continue;}try{if(!(await w.nbhUI.undoBack(M[id])))all=false;}catch(x){all=false;}}
+      setTimeout(()=>{Object.values(state.frames).forEach(fr=>{try{ask(fr,'status');}catch(x){}});try{gatherFacts(true);}catch(x){}},300);return all;},
+      {back:'The open forms are as they were.'});},1600);},true);
+
+/* a line removed from the Documents list */
+window.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-srdocx]');if(!t)return;const L=state.docs;if(!Array.isArray(L))return;
+  const i=L.findIndex(x=>x&&x.at===t.dataset.srdocx);if(i<0)return;const item=L[i],t0=Date.now();let n=0;
+  const look=()=>{if(state.docs!==L)return;if(!L.includes(item)){
+      offer('Line removed from the Documents list.',()=>{const D=Array.isArray(state.docs)?state.docs:(state.docs=[]);if(!D.includes(item))D.splice(Math.min(i,D.length),0,item);
+        try{if($('#dlg').open&&T($('#dlgTitle').textContent)==='Documents')__wsSR.docsOpen();}catch(x){}try{__wsCH.paint();}catch(x){}return true;},{back:'The line is back on the Documents list.'});return;}
+    if(($('#cfDlg')&&$('#cfDlg').open&&Date.now()-t0<120000)||++n<6)setTimeout(look,250);};
+  setTimeout(look,120);},true);
+
+/* ================= 2. What's new ================= */
+let WN=null;try{WN=JSON.parse(($('#ws-whatsnew')||{}).textContent||'null');}catch(e){WN=null;}
+const WN_SEEN='nbh.ws.rel',WN_DUE='nbh.ws.whatsnew';
+const wnOk=()=>!!(WN&&WN.v===WS_REL&&Array.isArray(WN.items)&&WN.items.filter(x=>T(x)).length>=1);
+const wnBoot=kvLoad.then(async()=>{const seen=kvGet(WN_SEEN);if(seen===WS_REL)return;
+  let used=!!seen;if(!used){try{used=localStorage.getItem('nbh.caseload.off')==='1'||((await clList())||[]).length>0;}catch(e){used=false;}}
+  kvSet(WN_SEEN,WS_REL);if(used&&wnOk())kvSet(WN_DUE,WS_REL);}).catch(()=>{});
+function wnCard(){const items=WN.items.map(T).filter(Boolean).slice(0,6);
+  return '<section class="ws-wn" id="wsWhatsNew" aria-labelledby="wsWnH"><h3 id="wsWnH">'+esc(WN.title||'What’s new')+' ('+esc(WS_REL)+')</h3><ul>'+items.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+
+    '<div class="ws-wn-f"><button type="button" class="ws-wn-ok" data-wn-ok>Got it</button>'+(WN.notes&&!(typeof EMBED!=='undefined'&&EMBED)?'<a href="'+esc(WN.notes)+'" target="_blank" rel="noopener">The full release notes</a>':'')+'</div>'+
+    '<button type="button" class="ws-wn-x" data-wn-ok aria-label="Dismiss What’s new">&times;</button></section>';}
+async function wnPaint(){try{await wnBoot;}catch(e){}const b=$('#dlgBody');if(!b||!$('#dlg').open||!/^Today/.test(T($('#dlgTitle').textContent))||b.querySelector('#wsWhatsNew'))return;
+  if(!wnOk()||kvGet(WN_DUE)!==WS_REL)return;
+  const lead=b.querySelector(':scope>.hp-lead');if(lead)lead.insertAdjacentHTML('afterend',wnCard());else b.insertAdjacentHTML('afterbegin',wnCard());
+  kvSet(WN_DUE,WS_REL+' shown');}   /* once: the next Today is as before */
+{const td0=todayOpen;todayOpen=async function(){const r=await td0.apply(this,arguments);try{await wnPaint();}catch(e){}return r;};}
+$('#dlgBody').addEventListener('click',e=>{const b=e.target.closest('[data-wn-ok]');if(!b)return;const c=$('#wsWhatsNew');if(!c)return;
+  const next=c.nextElementSibling;c.remove();say0('What’s new dismissed');const f=next&&next.querySelector('button,a')||$('#dlgClose');if(f)try{f.focus({preventScroll:true});}catch(x){}});
+
+/* ================= 3. The rings ================= */
+const PH=(()=>{const i=k=>CASE_MAP.findIndex(s=>k.test(s[0])),pl=i(/^Plan/),tr=i(/^Train/),rv=i(/^Review/);
+  const span=(a,z)=>CASE_MAP.slice(a,z).flatMap(s=>s[2].map(x=>x[0]));
+  return [{k:'assess',n:'Assessment',s:'Assess',core:['DM-1','IC-1','TB-1','IA-1',['OB-1','ABC-1'],'DD-1','FS-1'],ids:span(0,pl)},
+    {k:'plan',n:'Plan',s:'Plan',core:['TD-1','GB-1','CF-1'],ids:span(pl,tr)},
+    {k:'run',n:'Implementation',s:'Run',core:['ST-1','TI-1','DD-1'],ids:span(tr,rv)},
+    {k:'review',n:'Review',s:'Review',core:['PR-1'],ids:span(rv,CASE_MAP.length)}];})();
+const CORE=new Set(PH.flatMap(p=>p.core.flat()));
+const firstPh=id=>{const p=PH.find(q=>q.ids.includes(id));return p?p.k:'';};
+/* st: {form id: fields filled} for the forms the case holds */
+function phases(st){return PH.map(p=>{const slots=p.core.map(c=>{const ids=[].concat(c),id=ids.find(x=>x in st)||'';return {ids,id,f:id?+st[id]||0:0};});
+  Object.keys(st).forEach(id=>{if(!CORE.has(id)&&firstPh(id)===p.k)slots.push({ids:[id],id,f:+st[id]||0});});
+  const started=slots.filter(s=>s.id).length,data=slots.filter(s=>s.id&&s.f>4).length;return {k:p.k,n:p.n,s:p.s,total:slots.length,started,data};});}
+function stNow(){const st={};Object.keys(state.frames).concat(Object.keys(state.pending)).forEach(id=>{if(!firstPh(id)&&!CORE.has(id))return;const s=state.status[id]||(state.pending[id]&&state.pending[id].status)||{};st[id]=+s.filled||0;});return st;}
+function stOfText(text){const st={};try{const d=parseCase(text);Object.keys((d&&d.forms)||{}).forEach(id=>{if(!firstPh(id)&&!CORE.has(id))return;st[id]=filledOf((d.forms[id]||{}).snap);});}catch(e){}return st;}
+const ringWords=p=>p.n+': '+p.started+' of '+p.total+' '+p.n.toLowerCase()+' form'+(p.total===1?'':'s')+' started'+(p.started?', '+p.data+' with data':'');
+function ringSvg(p,sz){const r=sz/2-3.5,c=2*Math.PI*r,cx=sz/2,a=p.total?p.started/p.total:0,d=p.total?p.data/p.total:0,sw=sz>36?5:4;
+  const arc=(f,col)=>f>0?'<circle cx="'+cx+'" cy="'+cx+'" r="'+r.toFixed(2)+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="'+(f>=1?'butt':'round')+'" stroke-dasharray="'+(c*f).toFixed(2)+' '+c.toFixed(2)+'" transform="rotate(-90 '+cx+' '+cx+')"/>':'';
+  return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 '+sz+' '+sz+'" aria-hidden="true" focusable="false"><circle cx="'+cx+'" cy="'+cx+'" r="'+r.toFixed(2)+'" fill="none" stroke="#dbe4e2" stroke-width="'+sw+'"/>'+arc(a,'#9cc7d4')+arc(d,'#1f5b6e')+
+    '<text x="'+cx+'" y="'+(cx+(sz>36?5:4))+'" text-anchor="middle" font-size="'+(sz>36?13:10.5)+'" font-weight="600" fill="#1f2d36" font-family="system-ui,sans-serif">'+p.started+'</text></svg>';}
+function ringsHtml(P,big){return '<ul class="ws-rings'+(big?' ws-rings-lg':'')+'" aria-label="The case’s progress by phase">'+P.map(p=>'<li class="ws-ring" data-ph="'+p.k+'" role="img" aria-label="'+esc(ringWords(p))+'" title="'+esc(ringWords(p))+'">'+ringSvg(p,big?44:30)+
+  '<span class="ws-rt" aria-hidden="true"><b>'+esc(big?p.n:p.s)+'</b><span>'+p.started+' of '+p.total+(big?' started':'')+'</span></span></li>').join('')+
+  (big?'<li class="ws-ring-key" aria-hidden="true"><i style="background:#9cc7d4"></i>started (in the case) <i style="background:#1f5b6e"></i>has data</li>':'')+'</ul>';}
+const RC=new Map();
+function recSt(r){const s=r&&r.sum||{};if(s.prog&&typeof s.prog==='object')return s.prog;const k=r.key+'|'+r.saved;if(!RC.has(k)){RC.set(k,stOfText(r.text));if(RC.size>60)RC.delete(RC.keys().next().value);}return RC.get(k);}
+window.wsRings={phases,stNow,ringWords,recSt:r=>phases(recSt(r))};
+/* each Save case keeps the forms' counts with the student (in the caseload's summary, beside the trend; never in the file) */
+{const cs0=clSummary;clSummary=function(){const s=cs0.apply(this,arguments);try{s.prog=stNow();}catch(e){}return s;};}
+{const cr0=clResum;clResum=function(r){const s=cr0.apply(this,arguments);try{if(s&&!s.prog)s.prog=(r&&r.sum&&r.sum.prog)||stOfText(r&&r.text);}catch(e){}return s;};}
+{const cc0=clCard;clCard=function(r,w){const h=cc0.apply(this,arguments);try{if(!r||isStaffRec(r))return h;const st=recSt(r);if(!Object.keys(st).length)return h;
+  return h.replace('<p class="cl-saved"',ringsHtml(phases(st),false)+'<p class="cl-saved"');}catch(e){return h;}};}
+{const cm0=caseMapHtml;caseMapHtml=function(){const h=cm0.apply(this,arguments);try{if(!caseOn())return h;const st=stNow();if(!Object.keys(st).length)return h;
+  const nm=T(packet().client).replace(/^SIMULATED\s*[–-]\s*/,'');
+  return h.replace('</p>','</p><p class="ws-rings-h">'+esc(nm)+'’s case: the forms expected in each phase</p>'+ringsHtml(phases(st),true));}catch(e){return h;}};}
+
+/* ================= 4. Back where you left off ================= */
+const PL_K=()=>'nbh.ws.place|'+clScope(),PL_DAYS=3,PL_GAP=45000;
+const PL={decided:false,applied:false,strip:null,last:''};
+const tabsIn=d=>{const s=d&&d.getElementById('viewSeg');if(!s)return [];const w=d.defaultView;return [...s.querySelectorAll('button,[role="tab"]')].filter(b=>!b.hidden&&w.getComputedStyle(b).display!=='none');};
+const tabIsOn=b=>b.getAttribute('aria-pressed')==='true'||b.getAttribute('aria-selected')==='true'||b.classList.contains('active')||b.classList.contains('on');
+const tabText=b=>{const c=b.cloneNode(true);c.querySelectorAll('[aria-hidden="true"],.dot,.st,.mark').forEach(x=>x.remove());return T((c.textContent||'').replace(/\s+/g,' '));};
+function placeNow(){if(!caseOn())return null;const p=packet(),key=clKey(p);if(!key)return null;
+  const split=typeof splitOn==='function'&&splitOn(),id=state.cur&&!split?state.cur:'';const o={key,form:id,sheet:null,y:0,at:new Date().toISOString()};
+  if(id&&state.frames[id]&&!state.pending[id]){try{const d=state.frames[id].contentDocument,L=tabsIn(d),b=L.find(tabIsOn);if(b)o.sheet={v:b.getAttribute('data-view')||'',t:tabText(b),i:L.indexOf(b)};o.y=Math.round(d.defaultView.scrollY||0);}catch(e){}}
+  return o;}
+function placeKeep(){if(!PL.decided)return;const o=placeNow();let s='';
+  if(o){s=JSON.stringify(o);const a=JSON.parse(s);delete a.at;const sig=JSON.stringify(a);if(sig===PL.last)return;PL.last=sig;}
+  else{if(PL.last==='none')return;PL.last='none';}
+  try{if(o)localStorage.setItem(PL_K(),s);else localStorage.removeItem(PL_K());}catch(e){}}
+setInterval(placeKeep,2000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){PL.last='';placeKeep();}});
+addEventListener('pagehide',()=>{PL.last='';placeKeep();});
+function placeRead(){try{const o=JSON.parse(localStorage.getItem(PL_K())||'null');return o&&typeof o==='object'&&o.key?o:null;}catch(e){return null;}}
+const sleepMs=ms=>new Promise(r=>setTimeout(r,ms));
+async function formReady(id,ms){for(let i=0;i<ms/250;i++){if(state.status[id]&&!state.pending[id]&&state.frames[id])return true;await sleepMs(250);}return false;}
+async function placeApply(o){const id=o.form;if(!id||state.cur!==id||!(await formReady(id,30000)))return;await sleepMs(900);
+  const fr=state.frames[id];let d=null,w=null;try{d=fr.contentDocument;w=fr.contentWindow;}catch(e){return;}if(!d||state.cur!==id)return;
+  if(o.sheet){const L=tabsIn(d),b=L.find(x=>o.sheet.v&&x.getAttribute('data-view')===o.sheet.v)||L.find(x=>tabText(x)===o.sheet.t)||L[o.sheet.i];if(b&&!tabIsOn(b))try{b.click();}catch(e){}}
+  const y=+o.y||0;if(y>0){let moved=false;const mine=()=>{moved=true;};['wheel','touchstart','keydown','pointerdown'].forEach(t=>d.addEventListener(t,mine,{once:true,capture:true}));
+    const go=()=>{if(!moved&&state.cur===id)try{w.scrollTo(0,y);}catch(e){}};setTimeout(go,250);setTimeout(go,1300);setTimeout(go,2600);}}
+function stripPlace(){const s=PL.strip;if(!s||s.hidden)return;const fr=state.cur&&state.frames[state.cur];let top=0;
+  if(fr&&fr.offsetParent!==null){const r=fr.getBoundingClientRect();top=Math.max(0,Math.round(r.top))+8;}else{const n=$('#wsNav'),r=n&&n.getBoundingClientRect();top=(r?Math.round(r.bottom):0)+120;}
+  s.style.top=Math.min(top,innerHeight-80)+'px';}
+function stripShow(o,nm){let s=$('#wsResume');if(!s){s=mk('div',{id:'wsResume',role:'status','aria-live':'polite',hidden:''});document.body.appendChild(s);}PL.strip=s;
+  const where=o.form?'Form '+o.form+(o.sheet&&o.sheet.t?', '+o.sheet.t:''):'the case';
+  s.innerHTML='<span class="wr-t">Back where you left off: <b>'+esc(nm)+'</b> · '+esc(where)+'</span><button type="button" class="wr-f">Start fresh</button><button type="button" class="wr-x" aria-label="Dismiss">&times;</button>';
+  s.hidden=false;stripPlace();let held=false,tm=0;const gone=()=>{clearTimeout(tm);s.hidden=true;};const arm=ms=>{clearTimeout(tm);tm=setTimeout(()=>{if(held)return arm(2000);gone();},ms);};
+  s.onpointerenter=()=>{held=true;};s.onpointerleave=()=>{held=false;};s.onfocusin=()=>{held=true;};s.onfocusout=()=>{held=false;};
+  s.querySelector('.wr-x').onclick=gone;
+  /* what the person has done since: a key or an edit, here or in a form */
+  PL.touched=false;const seen=new WeakSet(),mine=e=>{if(e.isTrusted&&!(e.target&&e.target.closest&&e.target.closest('#wsResume')))PL.touched=true;};
+  const hook=d=>{if(!d||seen.has(d))return;seen.add(d);['input','change','keydown'].forEach(t=>d.addEventListener(t,mine,true));};
+  hook(document);const ht=setInterval(()=>{if(s.hidden){clearInterval(ht);return;}Object.values(state.frames).forEach(f=>{try{hook(f.contentDocument);}catch(e){}});},700);
+  s.querySelector('.wr-f').onclick=async()=>{gone();try{localStorage.removeItem(PL_K());}catch(e){}PL.last='none';
+    /* changes made since: Close case saves them first, as always */
+    if(PL.touched&&caseDirty()){$('#closeCase').click();return;}
+    /* nothing done since: the case is its caseload copy with a sheet turned and a scroll; its safety copy goes, nothing is offered next time */
+    try{state.lastSig=caseSig();autoWipe(state.lastSig);}catch(e){}
+    try{await clearCase();}catch(e){}try{await paintBlank();}catch(e){}say0('Started fresh: no student open');const f=$('#blank button,#blank input');if(f)try{f.focus({preventScroll:true});}catch(e){}};
+  arm(20000);}
+addEventListener('resize',()=>stripPlace());
+const placeHere=(o,nm)=>{stripShow(o,nm);say0('Back where you left off: '+nm+(o.form?', Form '+o.form:''));placeApply(o).then(()=>stripPlace());};
+async function placeBoot(){try{await kvLoad;}catch(e){}await sleepMs(2600);
+  try{const o=placeRead(),age=o?Date.now()-Date.parse(o.at):NaN,fresh=o&&isFinite(age)&&age>PL_GAP&&age<PL_DAYS*864e5;
+    const idle=()=>!caseOn()&&!Object.keys(state.frames).length&&!Object.keys(state.pending).length;
+    const plain=!location.hash&&!/[?&](case|share|open)=/.test(location.search);
+    if(fresh&&plain&&idle()&&!topModal()){
+      const r=((await clList())||[]).find(x=>x.key===o.key);
+      if(r&&!isStaffRec(r)){PL.applied=true;try{await caseloadGo(r.key,o.form&&ALL.some(x=>x[0]===o.form)?o.form:'');}catch(e){}
+        if(caseOn()&&clKey(packet())===o.key)placeHere(o,clName(r));}}
+    /* earlier work offered first (Autosave's "Unsaved work found"): that student's work restored from it comes back at the
+       same form, sheet and place */
+    else if(fresh&&plain&&idle()&&topModal()){for(let i=0;i<240&&!PL.applied;i++){await sleepMs(500);
+      if(caseOn()){if(clKey(packet())===o.key&&!topModal()){PL.applied=true;await sleepMs(600);if(o.form&&state.cur!==o.form&&inCase(o.form))try{openForm(o.form);}catch(e){}
+          placeHere(o,T(packet().client).replace(/^SIMULATED\s*[–-]\s*/,''));}
+        if(clKey(packet())!==o.key)break;}
+      else if(!topModal()&&i>6)break;}}}
+  catch(e){}
+  PL.decided=true;placeKeep();}
+placeBoot();
+window.__ws2570={offer,undoLive:()=>UN.live.length,phases,stNow,ringsHtml,placeNow,placeRead,placeKeep,wn:()=>WN,wnOk};
 })();
 </script>
 </body>

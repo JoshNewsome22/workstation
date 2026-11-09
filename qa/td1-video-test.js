@@ -14,7 +14,7 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  const host='[...document.querySelectorAll("*")].find(e=>e.shadowRoot&&e.shadowRoot.querySelector(".detail"))';
  const det=async id=>p.evaluate(([id,host])=>{window.__tdBank.show(id);const hh=eval(host);const d=hh&&hh.shadowRoot.querySelector('.detail');return {vid:!!(d&&d.querySelector('button.vid')),add:!!(d&&d.querySelector('button.add')),text:d?(d.querySelector('button.vid')||{}).textContent:''};},[id,host]);
  const d1=await det(ID),d2=await det(OTHER);
- ok('the panel\'s detail shows Watch the video beside Add to the plan for that card only',d1.vid&&d1.add&&d1.text==='Watch the video'&&!d2.vid&&d2.add,{d1,d2});
+ ok('the panel\'s detail shows Watch how (v25.70; it was Watch the video) beside Add to the plan for that card only',d1.vid&&d1.add&&d1.text==='Watch how'&&!d2.vid&&d2.add,{d1,d2});
  await p.evaluate(([id,host])=>{window.__tdBank.show(id);eval(host).shadowRoot.querySelector('.detail button.vid').click();},[ID,host]);
  await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1;},null,{timeout:20000}).catch(()=>{});
  const o=await p.evaluate(()=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {open:d&&!d.hidden,src:v?v.src.slice(0,5):'',dur:v?v.duration:0,w:v?v.videoWidth:0,title:d?d.querySelector('#tv-title').textContent:'',ai:d?d.querySelector('.tv-ai').textContent:'',note:d?/escape-extinction consent/.test(d.querySelector('.tv-note').textContent):false,err:d?d.querySelector('#tv-msg').classList.contains('tv-err'):true};});
