@@ -24,7 +24,8 @@ const iso=/^\d{4}-\d{2}-\d{2}$/;
     ok('SA-1 a new session has a Delay entry',addS);
     const out=await p.evaluate(()=>window.__nbhFactsOut());const pr=out&&out.skills&&out.skills.programs[0];
     ok('SA-1 out: skills.programs with one program',!!pr&&out.skills.programs.length===1,out);
-    ok('SA-1 out: name, target, criterion',pr&&/Break request/.test(pr.name)&&/break card/.test(pr.target)&&/90% independent across 3/.test(pr.criterion),pr);
+    /* v25.71: the example's criterion is the workstation's standard since v25.64, 100% across 3 sessions (commit d00d3c6, SETUP.md v25.64 "mastery at 100%", the BCBA 11/2) */
+    ok('SA-1 out: name, target, criterion',pr&&/Break request/.test(pr.name)&&/break card/.test(pr.target)&&/100% independent across 3/.test(pr.criterion),pr);
     ok('SA-1 out: current level from the latest session (90), mastered, maintenance phase',pr&&pr.current===90&&pr.mastered===true&&pr.phase==='maintenance',pr);
     ok('SA-1 out: last date ISO, not in the future',pr&&iso.test(pr.last)&&pr.last<=new Date(Date.now()+864e5).toISOString().slice(0,10),pr&&pr.last);
     const notM=await p.evaluate(()=>{S.sess=S.sess.slice(0,6);renderAll();const r=window.__nbhFactsOut().skills.programs[0];return r;});

@@ -14,14 +14,16 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    state.behaviors.push({meta:{behavior:'Elopement',definition:'Leaves the assigned area without permission.',threshold:'1'},cells:{}});render();});
  await sleep(300);
  const before=await p.evaluate(()=>({cells:JSON.stringify(state.cells),cur:state.cur,n:state.behaviors.length,marked:summaryData().marked}));
- const smp=await p.evaluate(()=>{const pages=window.spSamplePages();const q=(el,s)=>[...el.querySelectorAll(s)];
-   return {n:pages.length,sample:pages.every(x=>x.classList.contains('sp-sample')),banner:pages.every(x=>/SAMPLE/.test((x.querySelector('.sp-sambar')||{}).textContent||'')&&/do not count/i.test(x.querySelector('.sp-sambar').textContent)),
+ /* v25.71: since v24.26 (SETUP.md "the sample sheet prints with an answer key per behavior", sp126) each behavior's sample
+    sheet is followed by its answer key page; the data-sheet checks read the sheets, and the keys are counted and marked SAMPLE too */
+ const smp=await p.evaluate(()=>{const all=window.spSamplePages(),pages=all.filter(x=>!x.classList.contains('sp-samplekey')),keys=all.filter(x=>x.classList.contains('sp-samplekey'));const q=(el,s)=>[...el.querySelectorAll(s)];
+   return {all:all.length,keys:keys.length,keysSample:keys.every(x=>x.classList.contains('sp-sample')&&/SAMPLE/.test((x.querySelector('.sp-sambar')||{}).textContent||'')&&/SAMPLE$/.test((x.querySelector('.nbh-print-title')||{}).textContent||'')&&x.querySelector('table.sp-keyt')),n:pages.length,sample:pages.every(x=>x.classList.contains('sp-sample')),banner:pages.every(x=>/SAMPLE/.test((x.querySelector('.sp-sambar')||{}).textContent||'')&&/do not count/i.test(x.querySelector('.sp-sambar').textContent)),
      title:pages.every(x=>/SAMPLE$/.test(x.querySelector('.nbh-print-title').textContent)),
      marks:pages.map(x=>q(x,'td.mark.lvl1,td.mark.lvl2,.cell[data-state="1"],.cell[data-state="2"]').length),x:pages.map(x=>q(x,'td.mark.lvlx,.cell[data-state="x"]').length),
      noSum:pages.every(x=>x.querySelector('table.scatter')&&!x.classList.contains('sp-guide')&&!/Pattern Summary|Control Chart/.test(x.textContent)),
      beh:pages.map(x=>(x.querySelector('.sp-rep')||x.querySelector('.ident')||x).textContent.slice(0,400)),
      hot:q(pages[0],'tbody tr').map(tr=>q(tr,'td.mark.lvl1,td.mark.lvl2,.cell[data-state="1"],.cell[data-state="2"]').length)};});
- ok('a sample page per behavior, each watermarked and bannered SAMPLE with the title marked, no summary, control chart or guide',smp.n===2&&smp.sample&&smp.banner&&smp.title&&smp.noSum,smp);
+ ok('a sample page per behavior (and its answer key), each watermarked and bannered SAMPLE with the title marked, no summary, control chart or guide',smp.n===2&&smp.keys===2&&smp.all===4&&smp.keysSample&&smp.sample&&smp.banner&&smp.title&&smp.noSum,smp);
  ok('each sample page carries marks and one interval not observed',smp.marks.every(m=>m>=12)&&smp.x.every(x=>x===1),{marks:smp.marks,x:smp.x});
  ok('the marks sit mostly in the demand intervals named in the activity column (math, transition, writing, pack up)',(()=>{const h=smp.hot;const hot=[2,3,6,7,9].reduce((a,r)=>a+(h[r]||0),0),all=h.reduce((a,x)=>a+x,0);return all>0&&hot/all>=0.6;})(),smp.hot);
  const after=await p.evaluate(()=>({cells:JSON.stringify(state.cells),cur:state.cur,n:state.behaviors.length,marked:summaryData().marked,b0:Object.keys(state.behaviors[0].cells).length,b1:Object.keys(state.behaviors[1].cells).length,screen:document.querySelectorAll('#sheet td.mark.lvl1,#sheet td.mark.lvl2,#sheet .cell[data-state="1"],#sheet .cell[data-state="2"]').length,printall:document.documentElement.classList.contains('sp-printall')}));

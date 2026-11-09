@@ -61,10 +61,11 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     return {n:evidence().nSrc,conv:document.getElementById('convNote').textContent};});
   ok('9 F173 Unknown on a daily-rate record is listed, not counted',u.n===7&&/Recorded as Unknown, but a descriptive, daily-rate or indirect record cannot show that no function operates, so listed and not counted among the sources that assessed function: DD-1\./.test(u.conv),u);
   /* ---- F172 ---- */
+  /* v25.71: fx2 (v25.69, one screen layout for every form) adds fx2-sh to each section; the five record sections are still the packet's */
   await p.emulateMedia({media:'print'});
   const pr=await p.evaluate(()=>{const g=document.querySelector('section.only-guide'),r=document.querySelector('section.only-rep');const a={guide:getComputedStyle(g).display,rep:getComputedStyle(r).display};
     document.body.classList.add('fs-print-guide');const b={guide:getComputedStyle(g).display,rep:getComputedStyle(r).display};document.body.classList.remove('fs-print-guide');
-    return {a,b,nodes:window.nbhPrintNodes().map(n=>n.className),btn:!!document.getElementById('printGuideBtn')};});
+    return {a,b,nodes:window.nbhPrintNodes().map(n=>n.className.replace(/ fx2-sh$/,'')),btn:!!document.getElementById('printGuideBtn')};});
   await p.emulateMedia({media:'screen'});
   ok('10 F172 the Guide stays off the printed report and the packet, and Print the guide prints it alone',pr.a.guide==='none'&&pr.a.rep==='block'&&pr.b.guide==='block'&&pr.b.rep==='none'&&pr.nodes.join()==='only-setup,only-ev,only-beh,only-path,only-rep'&&pr.btn,pr);
   ok('11 no page errors',errs.length===0,errs);

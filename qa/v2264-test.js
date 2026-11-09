@@ -27,7 +27,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const flags=await p.evaluate(()=>[...document.querySelectorAll('#sumFlags li')].map(li=>li.textContent.replace(/\s+/g,' ')));
   const has=re=>flags.some(f=>re.test(f));
   ok('1 never selected: Blocks, a weak candidate (Glover et al., 2008), while a low-but-selected item may still reinforce alone (Francisco et al., 2008)',has(/^Never selected: Blocks\. .*Glover et al\. \(2008\).*Francisco et al\., 2008/),flags);
-  ok('2 the top two close on paired stimulus (80% and 80%): test both in RA-1 progressive ratio (Roane et al., 2001)',has(/^The top two are close on paired stimulus: Tablet \(video\) 80%, Bubbles 80%\. .*progressive ratio.*Roane et al\., 2001/),flags);
+  /* v25.71: since v24.42 (review R-134) every item within ten points of the leader is named, not the first two; this pool has three at 80% */
+  ok('2 the top three close on paired stimulus (80%, 80% and 80%): test all three in RA-1 progressive ratio (Roane et al., 2001)',has(/^The top three are close on paired stimulus: Tablet \(video\) 80%, Bubbles 80%, Squeeze ball 80%\. .*test all three in Form RA-1 \(progressive ratio\).*Roane et al\., 2001/),flags);
   ok('3 approached alone, rarely chosen in pairs: Musical toy (single stimulus 100%, paired 20%), to RA-1 single operant then progressive ratio',has(/^Approached alone, rarely chosen in pairs: Musical toy \(single stimulus 100%, paired 20%\)\. .*Roscoe et al\., 1999.*Penrod et al\., 2008/),flags);
   ok('4 the middle of the hierarchy named, with Piazza et al. (1996)',has(/^The middle of the hierarchy \([^)]+\): in Piazza et al\. \(1996\)/),flags);
   /* three administrations */
