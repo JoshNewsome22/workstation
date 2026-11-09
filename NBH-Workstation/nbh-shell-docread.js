@@ -216,7 +216,8 @@ const nbhDocRead=(()=>{
     if(sc&&sc.room)add('room',sc.room,sc.room,'Schedule: the homeroom');
     if(bd&&bd.grade&&!found.grade)add('grade',bd.grade,bd.grade,L[bd.idLine].trim());
     /* v22.30 race and ethnicity asked one question each ("Ethnicity: Hispanic or Latino  No", "Race: White  Yes"), or the
-       one code ("Single Ethnicity  W - White"): the races answered Yes, and whether Hispanic or Latino */
+       one code ("Single Ethnicity  W - White"): the races answered Yes, and whether Hispanic or Latino. v25.71: the text
+       recognizer can read a screenshot's cell border before the code as "~" or "=" ("Single Ethnicity  ~~ W - White") */
     {const RC=[[/^hispanic/,'H'],[/^white/,'White'],[/^black/,'Black or African American'],[/^asian/,'Asian'],[/^american indian/,'American Indian or Alaska Native'],[/^native hawaiian/,'Native Hawaiian or Other Pacific Islander']];
       const yes=[],seen=[];let hisp='';
       for(let i=0;i<end;i++){const re=/\b(?:ethnicity|race)\s*:\s*([A-Za-z][A-Za-z ,]*?)[ ,]*[ \t]+(yes|ves|yos|no|n0)(?![a-z])/gi;let m;
@@ -224,7 +225,7 @@ const nbhDocRead=(()=>{
           if(r[1]==='H')hisp=a?'yes':'no';else if(a&&!yes.includes(r[1]))yes.push(r[1]);}}
       let v='';
       if(yes.length||hisp)v=yes.join(', ')+(hisp==='yes'?(yes.length?'; ':'')+'Hispanic or Latino':hisp==='no'&&yes.length?'; not Hispanic or Latino':'');
-      if(!v){const sl=L.slice(0,end).map(l=>l.match(/single ethnicity[ \t]+(?:[A-Z][ \t]*)?[-\u2013][ \t]*([A-Za-z][A-Za-z ]{2,40}?)(?:[ \t]{2,}|$)/i)).find(Boolean);if(sl){v=cap(sl[1].trim().replace(/\b[a-z]/g,c=>c.toUpperCase()));seen.push(sl[0].trim());}}
+      if(!v){const sl=L.slice(0,end).map(l=>l.match(/single ethnicity[ \t]+(?:[~=|_]+[ \t]*)?(?:[A-Z][ \t]*)?[-\u2013][ \t]*([A-Za-z][A-Za-z ]{2,40}?)(?:[ \t]{2,}|$)/i)).find(Boolean);if(sl){v=cap(sl[1].trim().replace(/\b[a-z]/g,c=>c.toUpperCase()));seen.push(sl[0].trim());}}
       if(v){if(!found.eth)order.push('eth');found.eth={k:'eth',label:BY.eth.label,to:BY.eth.to.slice(),raw:v,value:v,seen:seen.join(' / ').slice(0,160),str:3,ok:true};}}
     /* v22.30 an IEP's sentences (Florida's, as a district's IEP system prints them): the next annual review and
        reevaluation, the eligibilities, where the services are received, ESY, a standard diploma deferred, the bus needs */
