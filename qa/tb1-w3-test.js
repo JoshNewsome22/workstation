@@ -91,6 +91,9 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const shown=async(pg,what)=>{await pg.evaluate(w=>{document.getElementById('tbPrintWhat').value=w;},what);await pg.emulateMedia({media:'print'});await pg.evaluate(()=>window.dispatchEvent(new Event('beforeprint')));
     const d=await pg.evaluate(()=>['#rrbTpl','#guide','#refs','#define'].map(q=>getComputedStyle(document.querySelector(q)).display));await pg.evaluate(()=>window.dispatchEvent(new Event('afterprint')));await pg.emulateMedia({media:'screen'});
     return d.concat(await pg.evaluate(()=>document.body.classList.contains('tb-defs-only')));};
+  /* v25.71: since v24.31 the Guide and the References print only with "Include the guide and references" ticked (one print
+     policy for the set, SETUP.md v24.31), so it is ticked here: "all" then prints them and "The definitions only" still does not */
+  await s.evaluate(()=>window.nbhPrint.set('guide',true));
   const blank=await open();const f1=await shown(blank,'all'),f2=await shown(s,'all'),f3=await shown(s,'defs');
   ok('10 F39 a plan with no RRB target leaves the template and the distance table off paper; one that uses them prints them',f1[0]==='none'&&f1[3]!=='none'&&f2[0]!=='none',{f1,f2});
   ok('11 F39 "The definitions only" leaves the Guide and the References off paper, once',f3[1]==='none'&&f3[2]==='none'&&f3[3]!=='none'&&f3[4]===false&&f2[1]!=='none',{f2,f3});

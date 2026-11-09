@@ -70,7 +70,8 @@ const GUIDE=/^(guide|evidence guide|methods & references|statute|references)$/i,
   ok('2a every form ('+withBar+' with a tab bar) opens on its first tab, which is not the Guide; the Guide (and only reference tabs) come last',bad.length===0,bad);
   const g=rows.filter(x=>x.r.tabs.some(t=>MAIN.test(t))).map(x=>x.f.id+':'+x.r.tabs[0]+'…'+x.r.tabs.slice(-2).join('/'));
   console.log('   e.g. '+g.slice(0,8).join('  '));
-  const want={'TD-1':'setup','IA-1':'setup','EA-1':'setup','PA-1':'indirect','DM-1':'student','IC-1':'consent','MS-1':'plan','RR-1':'sources','TB-1':'select','RA-1':'setup','VI-1':'p1'};
+  /* v25.71: EA-1 opens on Plan, its first sheet since v24.13 (SETUP.md: "A Plan sheet, first among EA-1's sheets") */
+  const want={'TD-1':'setup','IA-1':'setup','EA-1':'plan','PA-1':'indirect','DM-1':'student','IC-1':'consent','MS-1':'plan','RR-1':'sources','TB-1':'select','RA-1':'setup','VI-1':'p1'};
   const miss=rows.filter(x=>want[x.f.id]&&(x.r.keys[0]!==want[x.f.id]||!new RegExp('(^|\\s)view-'+want[x.f.id]+'(\\s|$)').test(x.r.body))).map(x=>x.f.id+' '+x.r.keys[0]+' body='+x.r.body);
   ok('2b the eleven forms that opened on the Guide open on their first working tab (key and body class)',miss.length===0,miss);
   await ctx.close();

@@ -949,6 +949,9 @@ html.fx2[data-nbh-fx]:not(.nbh-plain) [data-nbh-fx="hf"] :is(:enabled,:disabled,
 @media screen{
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)){--fx2-ink:#1F2D36;--fx2-navy:#1D3A52;--fx2-wash:#F2F6F5;--fx2-rule:#D9E2E0;--fx2-box:#B9C7C4;--fx2-muted:#5A6A72;--fx2-hint:#55656C;
   --fx2-sans:"Inter","Helvetica Neue","Segoe UI",Arial,system-ui,sans-serif;--fx2-serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+/* v25.71 Help's Contrast: High (v23.63, nbh-ui's html.nbh-hc) darkens the layout's own text, notes and field borders too, to
+   nbh-ui's values; the layout's colours had kept them as at Normal */
+html.fx2.nbh-hc:not(.nbh-pr-measure):where(:not(.nbh-plain)){--fx2-ink:#000;--fx2-muted:#263238;--fx2-hint:#263238;--fx2-box:#4D6562}
 
 /* ---------- the masthead: the description two lines, the rest behind a link ---------- */
 html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) header.nbh-mast p.fx2-intro:not(.open){display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -2252,7 +2255,10 @@ const FORMS=[['DM-1','Student Demographics and Profile'],['IC-1','Informed Conse
 /* v22.11 (review F512). The list stopped at the 31 forms of v21.16, so the cover could not show assent (SI-1) or injury
    monitoring (IM-1). The later forms are added at the end of FORMS, so old files keep their ticks, and the rows follow
    the workstation's order. GC-1 is left out: a class-wide system is kept outside any one student's file. */
-const PKORDER=['DM-1','IC-1','RR-1','TB-1','IA-1','IN-1','SI-1','OB-1','ABC-1','SP-1','DD-1','MT-1','PA-1','RA-1','DA-1','EA-1','VI-1','FS-1','TD-1','GB-1','SA-1','CF-1','SV-1','ST-1','TI-1','PD-1','SM-1','SR-1','VS-1','TK-1','RM-1','PR-1','CN-1','CR-1','CT-1','TV-1','HD-1','EB-1','QS-1','DT-1','AD-1','TE-1','BC-1','MS-1','IM-1'];
+const PKORDER=['DM-1','IC-1','RR-1','TB-1','IA-1','IN-1','SI-1','OB-1','ABC-1','SP-1','DD-1','MT-1','PA-1','RA-1','DA-1','EA-1','VI-1','FS-1','TD-1','GB-1','SA-1','CF-1','SV-1','ST-1','TI-1','PD-1','SM-1','SR-1','VS-1','TK-1','RM-1','PR-1','CN-1','CR-1','CT-1','TV-1','HD-1','EB-1','QS-1','DT-1','AD-1','TE-1','BC-1','MS-1','IM-1','FD-1'];
+/* v25.71 FD-1 (v25.66, the 48th form) has a row when DM-1 is opened on its own too, keyed by its id (pk[FD-1]) as the
+   workstation's own list has keyed it since v25.66, so files saved since keep its tick; FORMS is unchanged. */
+
 const PKST=['','Complete','In progress','Planned','Not needed'];
 /* v23.09 (review F5) inside the workstation the rows follow the workstation's own form list (asked of it with "forms?"), so a
    form added to the set gets a row without a new copy of the list here; GC-1 and RS-1 stay out, as before. The forms above keep

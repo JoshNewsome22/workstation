@@ -365,7 +365,11 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
   console.log('\n=== TD-1: after "no", what still describes extinction');
   /* 11: the simulations' own steps */
   for(const [key,fn] of [['sbt','escape'],['tangible_fct','tangible'],['auto_rrb','automatic']]){
-    p=await open(TD1);await sim(p,key);await view(p,'respond');
+    p=await open(TD1);await sim(p,key);
+    /* v25.71: since v24.17 the worked example loads only as many cards as a plan staff can run (7 components, 60 steps), and the
+       sbt example stops before the tolerance-response card (SBT_TR), so it is added here by hand, as on Build */
+    if(key==='sbt')await p.evaluate(()=>{if(![...document.querySelectorAll('#compWrap .card')].some(c=>c.dataset.code==='SBT_TR'))td117.add('SBT_TR');});
+    await view(p,'respond');
     const before=await v(p,'rb.target');await set(p,'rb.3','no');await sleep(200);
     const after=await v(p,'rb.target');n=await note(p);
     check(/\(simulated\)$/.test(before)&&after===ALT[fn],`11 ${key}: the simulation's own step is the form's words, so "no" gives the alternative`,{before,after});

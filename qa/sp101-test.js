@@ -30,7 +30,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await p.evaluate(()=>{window.__printed=0;window.print=()=>{window.__printed++;window.__s=document.querySelectorAll('#spPrint .sp-sample').length;};document.querySelector('#sampleBtn').click();});await sleep(1000);
   ok('Print a sample sheet still prints the sample pages',await p.evaluate(()=>window.__printed===1&&window.__s>=1));
   const h=await p.evaluate(()=>({bar:document.querySelector('.toolbar').getBoundingClientRect().height,win:innerHeight}));
-  ok('the open panel leaves room for the sheet below it (the toolbar under 75% of the window)',h.bar<h.win*.75,h);
+  /* v25.71: 76%, not 75%. The panel took deliberate controls after v24.01 set the bound: the activity column (v24.02), the
+     student's photo on the sheet (v24.03) and Scan a paper sheet (v24.32); at 1024 x 768 the open toolbar is 576.6 px (75.1%),
+     the same at v24.72 (the oldest commit in this clone) and at every commit since. The bound stays tight: one more row fails. */
+  ok('the open panel leaves room for the sheet below it (the toolbar under 76% of the window)',h.bar<h.win*.76,h);
   ok('no page errors',!errs.length,errs.slice(0,3));await p.close();
  }
  console.log('RESULT: '+(bad?bad+' failed':'all passed'));await b.close();process.exit(bad?1:0);})();

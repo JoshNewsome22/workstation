@@ -37,7 +37,14 @@ const OUT=path.join(ROOT,'qa','out');fs.mkdirSync(OUT,{recursive:true});
      /* the cell is boxed and clipped on paper, so the writing goes into the printed box itself, in a hand-sized face */
      inp.value=v;inp.style.cssText+=';font:'+(key==='notes'?'13px':'17px')+' "Comic Sans MS",cursive,sans-serif;color:#1b1b1b;text-align:left;padding-left:'+(key==='notes'?6:6+(ri*5)%14)+'px;letter-spacing:1px';});});
    document.querySelector('.sheet-wrap').style.cssText+=';padding:40px;background:#fff';return W;});
+ /* v25.71: the window is widened by the white margin (2 x 40 px) while the sheet is pictured, so the table keeps the width its
+    layout was measured at (1010 px). The margin had narrowed it to 930 px: the headings wrapped onto more lines, the head grew
+    (782 to 972 in ten-thousandths of the width) and the rows moved under the layout kept with the record, so the day marks of the
+    first rows were read a mark off. A printed sheet keeps the width it is measured at. */
+ await p.setViewportSize({width:1090,height:1000});await sleep(300);
  const wrap=await p.$('.sheet-wrap');const sheetPng=path.join(OUT,'dd134-sheet.png');await wrap.screenshot({path:sheetPng});
+ await p.setViewportSize({width:1010,height:1000});
+
  await p.evaluate(()=>{document.querySelector('.sheet-wrap').style.padding='';document.querySelectorAll('#dataTable tbody input').forEach(i=>{i.value='';i.style.cssText='';});});
  await p.emulateMedia({media:'screen'});await sleep(400);
  ok('the sheet to read holds numbers in about two cells of three, and a note',Object.keys(truth).length>=18&&Object.values(truth).some(v=>/sub/.test(v)),{n:Object.keys(truth).length});

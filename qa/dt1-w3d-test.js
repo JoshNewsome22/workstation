@@ -44,9 +44,11 @@ const DT='Delay-Tolerance-Protocol-Toolkit.html';
   await p.evaluate(()=>{const s=document.getElementById('ddPick');s.value=s.options[1].value;document.getElementById('btnDdOpen').click();});await sleep(300);const p1=await pr();
   const log=await p.evaluate(()=>[...document.getElementById('tbDDlog').rows].map(tr=>[...tr.querySelectorAll('input')].map(i=>i.value)));
   ok('8 I203 a kept probe opens back into the table; its figures are the ones its log row holds, drawn beside the baseline',p1.date===p0.kept[1]&&p1.auc==='0.588'&&log[1][2]==='0.588'&&log[1][3]==='-2.24'&&/half-value delay 44\.2 s against 171\.8 s here/.test(p1.ov),{p1,log});
-  await p.evaluate(()=>{document.querySelector('[name=dd_date]').value='2026-10-30';document.getElementById('tbDD').rows[4].querySelectorAll('input')[1].value='79';document.getElementById('btnDDlogAdd').click();});await sleep(400);
+  /* v25.71: the new probe is dated today, not a fixed 2026-10-30: the example's re-probe is dated D(4), days back from today, and
+     the probe log is kept in date order (ddPut), so a fixed date fell before the re-probe once the calendar passed it */
+  await p.evaluate(d=>{document.querySelector('[name=dd_date]').value=d;document.getElementById('tbDD').rows[4].querySelectorAll('input')[1].value='79';document.getElementById('btnDDlogAdd').click();},today);await sleep(400);
   const p2=await p.evaluate(()=>{const L=JSON.parse(document.getElementById('dtProbeLog').value);return {n:L.length,base:L[0].points.map(v=>v[1]).join(),re:L[1].points.map(v=>v[1]).join(),last:L[2].date};});
-  ok('9 F403 a new probe logged is kept beside the others: the baseline and the earlier re-probe keep their points',p2.n===3&&p2.base==='117,101,71,49,27,11'&&p2.re==='117,109,101,93,71,41'&&p2.last==='2026-10-30',p2);
+  ok('9 F403 a new probe logged is kept beside the others: the baseline and the earlier re-probe keep their points',p2.n===3&&p2.base==='117,101,71,49,27,11'&&p2.re==='117,109,101,93,71,41'&&p2.last===today,p2);
   await p.evaluate(()=>{const a=document.getElementById('ddA');a.value='100';a.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(200);
   ok('10 I203 a probe with another delayed amount is not drawn against a different one, and the line says why',/used a different delayed amount \(A = 120\), so it is not drawn here: re-probe with the same amount\./.test(await p.evaluate(()=>document.getElementById('ddOverlay').textContent)));
   await p.evaluate(()=>{const a=document.getElementById('ddA');a.value='120';a.dispatchEvent(new Event('input',{bubbles:true}));});

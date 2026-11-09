@@ -80,11 +80,18 @@ async function safariLike(bytes){const d=await P.PDFDocument.load(bytes);const c
   const want=[['Cover and contents',0]].concat(chromeInfo.secs.map(([id,pg])=>[id,pg]));
   ok('6 the bookmarks land where Chrome’s own PDF has each form start (the references section named after what it is)',F.outline.length===want.length&&F.outline.every((o,i)=>o[1]===want[i][1]&&(i===0||o[0].indexOf(want[i][0])===0||(want[i][0]==='REFS'&&/^References and Sources$/.test(o[0])))),{outline:F.outline,want});
   /* the contents numbers: each section's first page, at the right of its entry */
-  const cp=tF[0],nums=chromeInfo.secs.map(([id,pg])=>{const entry=cp.items.find(t=>t.s.indexOf(id==='REFS'?'References and Sources':'Form '+id)>=0);const n=cp.items.find(t=>t.s===String(pg+1)&&entry&&Math.abs(t.y-entry.y)<4&&t.x>entry.x+100);return {id,page:pg+1,entry:!!entry,num:!!n};});
+  /* v25.71: an entry is found on its line, the line's pieces joined: Chromium writes the Inter hyphen of "DM-1" as a glyph run of
+     its own: Inter (installed on this machine, not on an iPad) raises a hyphen between capitals and digits by a contextual
+     alternate, and that glyph comes out of the PDF as a private-use character (U+E048), so pdf.js gives "Form DM", an item of
+     its own and "1", and no one item held "Form DM-1"; the line is compared without hyphens, spaces and private-use characters */
+  const lineOf=(p,y)=>p.items.filter(t=>Math.abs(t.y-y)<2).sort((a,b)=>a.x-b.x),bare=s=>s.replace(/[-\s-]/g,'');
+  const cp=tF[0],nums=chromeInfo.secs.map(([id,pg])=>{const want=id==='REFS'?'References and Sources':'Form '+id;const entry=cp.items.find(t=>bare(t.s)&&bare(want).indexOf(bare(t.s))===0&&bare(lineOf(cp,t.y).map(u=>u.s).join('')).indexOf(bare(want))>=0);const n=cp.items.find(t=>t.s===String(pg+1)&&entry&&Math.abs(t.y-entry.y)<4&&t.x>entry.x+100);return {id,page:pg+1,entry:!!entry,num:!!n};});
   ok('7 the contents page has each form’s page number on its entry’s line',nums.every(n=>n.entry&&n.num),nums);
   /* the header clear of the page's own text */
   /* the header and footer where they belong (not moved or shrunk with the page), and the forms' own text clear of them */
-  const HEADR=/^(Newsome Behavioral Health|Mateo Rivera\s+·\s+ID 4471823|Page \d+ of \d+|Confidential student record — FERPA.*|\d+ · .+)$/;
+  /* v25.71: the running head's section is one of the packet's sections by name; "\d+ · anything" also took the form's own
+     masthead line ("Form DM-1 · Revised September 2026"), read as "Form DM", the hyphen, "1 · Revised ..." (see lineOf above) */
+  const HEADR=/^(Newsome Behavioral Health|Mateo Rivera\s+·\s+ID 4471823|Page \d+ of \d+|Confidential student record — FERPA.*|\d+ · (Student Demographics and Profile|Target Behavior Development|FBA Summary Report|Daily Data and Visual Analysis|References and Sources).*)$/;
   const band=p=>p.items.filter(t=>!HEADR.test(t.s)&&(t.y+t.h*0.85>p.H-34||t.y-t.h*0.25<32));
   const placed=p=>p.items.filter(t=>HEADR.test(t.s)).every(t=>/^(Newsome|Mateo|\d+ · )/.test(t.s)?Math.abs(t.y-(p.H-25.1))<1.5&&(t.s[0]!=='N'||Math.abs(t.x-32.4)<1):Math.abs(t.y-(/^Page/.test(t.s)?19.5:19.7))<1.5)&&[4,5].includes(p.items.filter(t=>HEADR.test(t.s)).length);
   const clash=tF.map(p=>band(p).map(t=>t.s.slice(0,30))).map((l,i)=>l.length?[i+1,l.slice(0,3)]:null).filter(Boolean);

@@ -1867,7 +1867,10 @@ try { if (window.matchMedia) (function(){
   function esc(e){ if (e.key === 'Escape') { closePop(); if (menuBtn) try { menuBtn.focus(); } catch (x) {} } }
   function closePop(){ if (!pop) return; pop.parentNode.removeChild(pop); pop = null; document.removeEventListener('click', outside, true); document.removeEventListener('keydown', esc, true); if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false'); }
   function run(){ if (mode === 'menu' && window.innerWidth < 1000) { var s = seg(); if (s && tabs().length < 8) { undo(); } } apply(want()); fit(); paint(); }
-  var rt = 0, W = window.innerWidth; window.addEventListener('resize', function(){ if (window.innerWidth === W) return; W = window.innerWidth; clearTimeout(rt); rt = setTimeout(run, 120); });
+  /* v25.71 the frame can lose height after the rail was fitted (inside the workstation the bars above it settle once the case and
+     the install line are drawn), and a height-only resize ran nothing, so the rail ran past the frame; it now goes compact then
+     (only that way, so bars that fold and come back while scrolling do not make the rail jump) */
+  var rt = 0, W = window.innerWidth; window.addEventListener('resize', function(){ if (window.innerWidth === W) { if (rail && !rail.classList.contains('nbh-compact') && rail.scrollHeight > rail.clientHeight + 1) rail.classList.add('nbh-compact'); return; } W = window.innerWidth; clearTimeout(rt); rt = setTimeout(run, 120); });
   window.addEventListener('orientationchange', function(){ setTimeout(run, 250); });
   function paper(on){ if (!on) { try { if (matchMedia('print').matches) return; } catch (e) {} } if (on === printing) return; printing = on; if (on) undo(); else setTimeout(run, 60); }
   window.addEventListener('beforeprint', function(){ paper(true); }); window.addEventListener('afterprint', function(){ paper(false); });
