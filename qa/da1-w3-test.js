@@ -132,7 +132,10 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
     await q.evaluate(async s=>{nbhUI.confirm=async()=>true;window.print=()=>{};if(s){document.getElementById('simBtn').click();await new Promise(r=>setTimeout(r,800));}},sim);
     await q.emulateMedia({media:'print'});await q.pdf({path:path.join(out,file),format:'Letter',printBackground:true,preferCSSPageSize:true});await q.close();return pages(path.join(out,file));};
   const pb=await pr(false,'blank.pdf'),ps=await pr(true,'sim.pdf');
-  ok('the printed pages: blank 10, the worked example 18 (as before Wave 3; the agreement prints in the room the Assessment sheet had)',pb===10&&ps===18,{pb,ps});
+  /* v25.71: 10 and 18 were the counts before v24.31's print policy (SETUP.md: "DA-1 18 to 12", the Guide behind a choice);
+     v24.72 printed 5 and 12, and v25.64's DA-1 changes (each consequence option explained, the paired-choice series; commit
+     fa7bc2f) made it 6 and 16. The count stays pinned so a change to it is seen. */
+  ok('the printed pages: blank 6, the worked example 16 (the agreement prints in the room the Assessment sheet had)',pb===6&&ps===16,{pb,ps});
   ok('no page errors',!errs.length,errs.slice(0,3));
  }catch(e){console.error(e);fails++;}
  await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

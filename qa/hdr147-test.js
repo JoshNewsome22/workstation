@@ -53,8 +53,11 @@ const IPAD='Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (
  ok('at the top of the form they come back with the page: the form\'s first line under them, not hidden behind them',S5a.st==='folded'&&S5.st==='shown'&&S5.cls.length===0&&top.sy===0&&top.frameTop>top.hdr,{S5a,S5,top});
  /* 6 the pin keeps them */
  await w.evaluate(()=>document.getElementById('pinBars').click());await sleep(300);await by(150,6,80);await sleep(800);const S6=await st();
- const pin=await w.evaluate(()=>({pressed:document.getElementById('pinBars').getAttribute('aria-pressed'),kept:localStorage.getItem('nbh.ws.pinbars'),shown:getComputedStyle(document.getElementById('pinBars')).display!=='none'}));
- ok('the pin (shown on a touch screen) keeps the bars and the form\'s whole toolbar in place through a long scroll, and is kept on the device',pin.shown&&pin.pressed==='true'&&pin.kept==='1'&&S6.st==='shown'&&!S6.tbFold&&S6.cls.length===0,{pin,S6});
+ /* v25.71: since v25.65's top bar A (SETUP.md: View holds "... Keep the bars in place, the form's More menu"; commit 8886465)
+    the pin is an item of the View menu on a touch screen, its own button hidden in the form row */
+ await w.click('#aView');await sleep(250);const pinItem=await w.evaluate(()=>{const it=document.querySelector('#wsViewMenu [data-wn-for="pinBars"]');return it&&it.offsetParent?it.textContent:'';});await w.keyboard.press('Escape');await sleep(200);
+ const pin=await w.evaluate(()=>({pressed:document.getElementById('pinBars').getAttribute('aria-pressed'),kept:localStorage.getItem('nbh.ws.pinbars')}));pin.shown=/Keep the bars in place/.test(pinItem);pin.item=pinItem;
+ ok('the pin (in the View menu on a touch screen) keeps the bars and the form\'s whole toolbar in place through a long scroll, and is kept on the device',pin.shown&&pin.pressed==='true'&&pin.kept==='1'&&S6.st==='shown'&&!S6.tbFold&&S6.cls.length===0,{pin,S6});
  await w.evaluate(()=>document.getElementById('pinBars').click());await sleep(300);
  /* 7 closing the form while they are folded leaves them out */
  await fr.evaluate(()=>window.scrollTo(0,0));await sleep(400);await by(150,6,80);await sleep(800);const S7a=await st();
@@ -68,12 +71,15 @@ const IPAD='Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (
   /* RS-1: its toolbar folds to "Tools" at this width (TD-1's fits as it is) */
   await u.evaluate(()=>openForm('RS-1'));await u.waitForFunction(()=>!!state.status['RS-1']);await sleep(1800);
   const uf=u.frames().find(f=>f!==u.mainFrame()&&/RS-1/.test(f.url()));
-  const ust=()=>u.evaluate(()=>({st:__wsBars.state(),tb:state.frames[state.cur].contentDocument.documentElement.classList.contains('nbh-fold')}));
+  /* v25.71: since v25.65's top bar A ("The form's bar and the form's own tools are one row"; commit 8886465) RS-1's toolbar has
+     nothing the form row does not carry, so it is not drawn at all (html.ws-a-none) and cannot fold or open on its own; what
+     stays checked is the bars' timing, the toolbar out of sight throughout, and the form row staying while the bars fold */
+  const ust=()=>u.evaluate(()=>{const d=state.frames[state.cur].contentDocument,t=d.querySelector('.toolbar');return {st:__wsBars.state(),tbOut:!t||d.defaultView.getComputedStyle(t).display==='none',row:!!document.querySelector('.crumb')&&document.querySelector('.crumb').getBoundingClientRect().height>=40};});
   await uf.evaluate(()=>window.scrollBy(0,60));await sleep(700);const A=await ust();
   for(let i=0;i<6;i++){await uf.evaluate(()=>window.scrollBy(0,120));await sleep(90);}const Bm=await ust();await sleep(800);const Bf=await ust();
   for(let i=0;i<2;i++){await uf.evaluate(()=>window.scrollBy(0,-60));await sleep(70);}await sleep(900);const C=await ust();
-  ok('upright (RS-1): a short scroll (60 px, past the toolbar\'s own 40) folds neither; the toolbar folds only when the bars fold, after the page rests, and opens when they come back',
-    A.st==='shown'&&!A.tb&&Bm.st==='shown'&&!Bm.tb&&Bf.st==='folded'&&Bf.tb&&C.st==='shown'&&!C.tb,{A,Bm,Bf,C});
+  ok('upright (RS-1): a short scroll (60 px) folds nothing; the bars fold after the page rests and come back on a scroll up; the toolbar is in the form row throughout (never folding on its own), and the form row stays while the bars are folded',
+    A.st==='shown'&&Bm.st==='shown'&&Bf.st==='folded'&&C.st==='shown'&&[A,Bm,Bf,C].every(x=>x.tbOut)&&Bf.row,{A,Bm,Bf,C});
   await up.close();}
  /* 8 a desktop with a mouse never folds, and has no pin */
  const dc=await b.newContext({viewport:{width:1366,height:1024},serviceWorkers:'block'});dc.on('dialog',d=>d.accept().catch(()=>{}));const d=await dc.newPage();d.on('pageerror',e=>errs.push('desk: '+e.message));

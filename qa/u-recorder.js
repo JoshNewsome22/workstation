@@ -32,6 +32,10 @@ const click=(p,sel)=>p.evaluate(s=>{const el=document.querySelector(s);if(!el)th
   await page.evaluate(()=>{const s=document.querySelector('#obrInto');if(s){s.value='0';s.dispatchEvent(new Event('change'));}});await sleep(100);
   const c0=await page.evaluate(()=>state.obs[0].count);
   await click(page,'#obrSave');await sleep(200);
+  /* v25.71: since v24.44 (review R-056, SETUP.md "The Live Recorder asks before saving an observation under one minute") this
+     one-second recording is asked about first; Save it goes on to the Replace question */
+  d=await dlg(page);check(!!d&&/^Save an observation under one minute\?/.test(d.head)&&d.btns.some(b=>/^primary:Save it/.test(b)),'Save under a minute asks first: '+JSON.stringify(d));
+  await press(page,'.primary');await sleep(300);
   d=await dlg(page);check(!!d&&/^Replace what observation 1 holds\?$/.test(d.head)&&d.btns.some(b=>/^danger:Replace/.test(b)),'Save over observation 1 asks: '+JSON.stringify(d));
   await press(page,'.danger');await sleep(400);
   check(await page.evaluate(()=>obRecorder.state())==='ready'&&await page.evaluate(()=>state.obs[0].count)==='1','saved: observation 1 count '+c0+' -> '+await page.evaluate(()=>state.obs[0].count)+', recorder ready');

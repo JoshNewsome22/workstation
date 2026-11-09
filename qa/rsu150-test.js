@@ -14,10 +14,13 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
     const s=r('mStart'),e=r('mEnd'),k=r('mBreak'),a=r('mAct'),sel=document.getElementById('mAct');
     const chips=[...document.querySelectorAll('#mDayChips label.chip')].map(x=>x.getBoundingClientRect()),lab=document.querySelector('#mDayChips .rs-days-lab');
     return {same:Math.abs(s.top-e.top)<1&&Math.abs(s.height-e.height)<1&&Math.abs(s.height-k.height)<1&&Math.abs(s.width-e.width)<1,brkRow:Math.abs(k.top-s.top)<1,brkW:Math.round(k.width),sW:Math.round(s.width),
+      col:s.bottom<=e.top+1&&e.bottom<=k.top+1&&Math.abs(s.height-e.height)<1&&Math.abs(s.height-k.height)<1&&Math.abs(s.width-e.width)<1&&Math.abs(s.width-k.width)<1&&Math.abs(s.width-box.width)<2&&Math.abs(s.left-k.left)<1,
       actFull:Math.abs(a.width-box.width)<2,actWhole:sel.scrollWidth<=sel.clientWidth+1,rows:new Set(chips.map(x=>Math.round(x.top))).size,n:chips.length,minH:Math.round(Math.min(...chips.map(x=>x.height))),
       labAbove:!!lab&&lab.getBoundingClientRect().bottom<=chips[0].top+1,over:chips.some(x=>x.right>box.right+1)};});
-  const phone=w<500;
-  ok(w+': start, end and the time not in services are equal boxes'+(phone?' (start and end on a line, the time not in services under them, full width)':' on one line'),L.same&&(phone?!L.brkRow&&L.brkW>L.sW*1.8:L.brkRow),L);
+  const upright=w<=900;
+  /* v25.71: since v25.62 (SETUP.md "Every form's field grids are one column on an iPad held upright", up to 900 px; commit
+     b8b5736) the three are equal boxes one under another, each the box's full width, upright and on a phone; one line sideways */
+  ok(w+': start, end and the time not in services are equal boxes'+(upright?' in one column (start, end, then the time not in services, each full width)':' on one line'),upright?L.col:L.same&&L.brkRow,L);
   ok(w+': the primary intervention runs the box\'s width and shows its whole name; the days are one row of seven under their label, each 44 px tall or more, none past the box',L.actFull&&L.actWhole&&L.rows===1&&L.n===7&&L.minH>=44&&L.labAbove&&!L.over,L);
   if(w===1180){
    /* a tap on Saturday turns it on (filled) and the Setup page follows; again turns it off */

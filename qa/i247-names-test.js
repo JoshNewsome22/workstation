@@ -16,8 +16,10 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     forms.length===48&&!own.length&&(ui.match(/function nbhNameControls/g)||[]).length===1&&(src===null||(src.match(/function nbhNameControls/g)||[]).length===1),{own:own.slice(0,5)});
   const ctx=await br.newContext({viewport:{width:1366,height:900}});ctx.on('dialog',d=>d.accept().catch(()=>{}));
   const file=pre=>forms.find(f=>f.startsWith(pre));
+  /* v25.71: a field with a label of its own is named too (nbhHasName leaves it as it is): v25.64 put TB-1's five cusp criteria,
+     each a checkbox inside its label, in every candidate's row (commit fa7bc2f, SETUP.md v25.64 "the published cusp criteria") */
   const named=async(p,root)=>p.evaluate(r=>{const d=r?document.querySelector(r).contentDocument:document;const cells=[...d.querySelectorAll('td input:not([type=hidden]),td select,td textarea')].filter(e=>e.offsetParent);
-    return {cells:cells.length,named:cells.filter(e=>(e.getAttribute('aria-label')||'').trim()).length,soc:[...d.querySelectorAll('select[aria-label]')].map(e=>e.getAttribute('aria-label')).filter(a=>/Socially significant/i.test(a)).slice(0,2)};},root);
+    return {cells:cells.length,named:cells.filter(e=>(e.getAttribute('aria-label')||'').trim()||[...(e.labels||[])].some(l=>l.textContent.trim())).length,soc:[...d.querySelectorAll('select[aria-label]')].map(e=>e.getAttribute('aria-label')).filter(a=>/Socially significant/i.test(a)).slice(0,2)};},root);
   const p=await ctx.newPage();p.on('pageerror',e=>errs.push('TB-1: '+e.message));
   await p.goto(L.BASE+'/NBH-Workstation/'+encodeURI(file('TB-1_')));await sleep(1300);await L.loadSim(p);await sleep(2000);
   const tb=await named(p);

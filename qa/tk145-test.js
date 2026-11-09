@@ -68,7 +68,10 @@ print(json.dumps(out))`,pdf]).toString());}catch(e){meas={err:String(e).slice(0,
   ok('R-108 in the printed PDF the token cards (their yellow frames) measure 1.0 in by 1.0 in, every one',Array.isArray(meas)&&meas.length>=5&&meas.every(r=>Math.abs(r[0]-1)<0.02&&Math.abs(r[1]-1)<0.02),meas);
   /* ---- E-39: the sheet index ---- */
   const ix=await p.evaluate(async()=>{setView('preview');renderAll();await new Promise(r=>setTimeout(r,300));const b=[...document.querySelectorAll('#tkIndex button[data-tkix]')],ls=document.querySelectorAll('#book .pglabel');
-    const tgt=b[10];const before=ls[10].getBoundingClientRect().top;tgt.click();await new Promise(r=>setTimeout(r,900));const after=ls[10].getBoundingClientRect().top;
+    const tgt=b[10];const before=ls[10].getBoundingClientRect().top;tgt.click();
+    /* v25.71: the smooth scroll runs about 1.6 s over the 9,500 px above sheet 11, longer than the 900 ms this waited; wait until it rests */
+    let last=NaN,still=0;for(let t=0;t<60&&still<3;t++){await new Promise(r=>setTimeout(r,100));const y=Math.round(ls[10].getBoundingClientRect().top);still=y===last?still+1:0;last=y;}
+    const after=ls[10].getBoundingClientRect().top;
     return {nb:b.length,nl:ls.length,t10:b[9]&&b[9].textContent,before:Math.round(before),after:Math.round(after)};});
   await p.emulateMedia({media:'print'});const ixPrint=await p.evaluate(()=>getComputedStyle(document.getElementById('tkIndex')).display);await p.emulateMedia({media:'screen'});
   ok('E-39 the Preview has a sheet index: a button for each sheet (the insert\'s second page named), each brings its sheet into view; it does not print',ix.nb===ix.nl&&ix.nb===13&&/^10\. How to use, Step 3$/.test(ix.t10)&&Math.abs(ix.after)<80&&ix.before>300&&ixPrint==='none',Object.assign(ix,{ixPrint}));

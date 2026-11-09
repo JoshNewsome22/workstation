@@ -51,7 +51,9 @@ const OUT=__dirname+'/out/split/';
  await page.evaluate(()=>document.querySelector('#paneBar [data-pane="MT-1"]').click());await sleep(200);console.log('click pane MT-1',JSON.stringify(await vis()));
  await page.evaluate(()=>document.querySelector('#closeForm').click());await sleep(300);await page.evaluate(()=>document.querySelector('#cfFoot button.danger').click());await sleep(400);console.log('close MT-1',JSON.stringify(await vis()));
  await page.evaluate(()=>setSplit([]));await sleep(300);console.log('one form',JSON.stringify(await vis()));
- await page.click('#splitBtn');await sleep(300);console.log('chooser',await page.evaluate(()=>({open:document.querySelector('#dlg').open,rows:document.querySelectorAll('.sb-row').length,note:document.querySelector('#sbNote').textContent})));
+ /* v25.71: since v25.65's top bar A (SETUP.md: View holds "Fit or Actual size, Focus, Side by side, Fullscreen ..."; commit 8886465)
+    the Side by side button is reached through the View menu; it is hidden in the form row */
+ await page.click('#aView');await sleep(200);await page.click('#wsViewMenu [data-wn-for="splitBtn"]');await sleep(300);console.log('chooser',await page.evaluate(()=>({open:document.querySelector('#dlg').open,rows:document.querySelectorAll('.sb-row').length,note:document.querySelector('#sbNote').textContent})));
  await page.screenshot({path:OUT+'chooser.png'});
  await page.evaluate(()=>{document.querySelectorAll('.sb-row input').forEach(c=>c.checked=true);document.querySelectorAll('.sb-row input')[0].dispatchEvent(new Event('change'));document.querySelector('#sbGo').click();});await sleep(400);
  console.log('chooser go',JSON.stringify(await vis()));

@@ -71,10 +71,15 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     await setBar(page);const fr=await open(page,'DM-1');await page.evaluate(()=>{try{foldBar(true);}catch(e){}});await sleep(400);
     const d=await railState(page),bar=await page.evaluate(()=>{const B=document.getElementById('bar'),s=document.getElementById('barSum'),a=document.querySelector('.bar .grp.acts');
       return {h:Math.round(B.getBoundingClientRect().height),sumTop:Math.round(s.getBoundingClientRect().top),actsTop:Math.round(a.getBoundingClientRect().top),sumCase:getComputedStyle(document.getElementById('sumCase')).display,
-        name:document.getElementById('sumName').textContent,minH:Math.min(...[...a.querySelectorAll('button')].filter(b=>b.offsetParent).map(b=>Math.round(b.getBoundingClientRect().height)))};});
+        name:document.getElementById('sumName').textContent,minH:Math.min(...[...a.querySelectorAll('button')].filter(b=>b.offsetParent).map(b=>Math.round(b.getBoundingClientRect().height))),
+        /* v25.71: since v25.65's top bar A (SETUP.md: one dark row holds the logo, the places, the save indicator "and Save case,
+           Build master print and Finish PDF"; commit 8886465) the case buttons are in the heading, not in the student line's
+           .grp.acts (hidden), so they are found there, and the student line's own buttons are measured with them */
+        caseTop:['saveCase','masterPrint'].every(id=>{const e=document.querySelector('header.top #'+id);return !!e&&!!e.offsetParent;}),sumRows:new Set([...s.querySelectorAll('button')].filter(b=>b.offsetParent).map(b=>Math.round(b.getBoundingClientRect().top))).size,
+        fingers:[...document.querySelectorAll('header.top #saveCase,header.top #masterPrint,#barSum button')].filter(b=>b.offsetParent).map(b=>Math.round(b.getBoundingClientRect().height))};});
     ok('5 with a form open the list is the drawer again, closed, and the start screen is gone',!d.open&&d.pos==='absolute'&&d.vis==='hidden',d);
-    ok('6 the folded student line and the case buttons share one row (the bar at most 64 px; it was 107), the case line stepping aside under 1300 px',bar.h<=64&&Math.abs(bar.sumTop-bar.actsTop)<=4&&bar.sumCase==='none'&&/Mateo Rivera/.test(bar.name),bar);
-    ok('7 a finger: the bar’s buttons are 44 px tall',bar.minH>=44,bar.minH);
+    ok('6 the folded student line is one row with the case buttons in the heading above it (the bar at most 64 px; it was 107), the case line stepping aside under 1300 px',bar.h<=64&&bar.caseTop&&bar.sumRows===1&&bar.sumCase==='none'&&/Mateo Rivera/.test(bar.name),bar);
+    ok('7 a finger: the bar’s buttons and the case buttons are 44 px tall',bar.fingers.length>=4&&Math.min(...bar.fingers)>=44,bar.fingers);
     /* the form's toolbar on a touch screen: one row, "More" */
     const tb=await toolbar(fr);
     /* v23.87: on a touch screen the view tabs wrap so every sheet is in sight; the toolbar is as tall as the rows the tabs need */
@@ -187,10 +192,14 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
   {const {ctx,page,errs}=await shell(br,{width:1180,height:820},UA.ipad,true,true);
     await page.evaluate(()=>caseloadOpen());await sleep(800);
     const x=await page.evaluate(()=>{const lead=document.querySelector('#dlgBody .hp-lead'),r=lead.getBoundingClientRect(),box=document.getElementById('dlgBody').getBoundingClientRect();
-      return {leadW:Math.round(r.width),boxW:Math.round(box.width),maxW:getComputedStyle(lead).maxWidth,kbd:[...document.querySelectorAll('.railhead .find kbd')].every(k=>getComputedStyle(k).display==='none'),
+      const cv=document.createElement('canvas').getContext('2d');cv.font=getComputedStyle(lead).fontSize+' '+getComputedStyle(lead).fontFamily;
+      return {leadW:Math.round(r.width),boxW:Math.round(box.width),maxW:getComputedStyle(lead).maxWidth,ch76:Math.round(76*cv.measureText('0').width),font:getComputedStyle(lead).fontFamily.split(',')[0],kbd:[...document.querySelectorAll('.railhead .find kbd')].every(k=>getComputedStyle(k).display==='none'),
         lbl:getComputedStyle(document.querySelector('.bar .det label')).fontSize,opt:getComputedStyle(document.querySelector('#dlgBody .cl-opt')).fontSize,start:parseFloat(getComputedStyle(document.querySelector('.blank .card > p')).maxWidth),
         ac:['pClient','pSid','pGrade','pSite','pBcba'].map(id=>document.getElementById(id).getAttribute('autocomplete'))};});
-    ok('38 a line of reading text in a dialog or on the start card is no longer than about 76 characters (the lead at 1180 ran the width of the box)',x.leadW<x.boxW-120&&x.leadW>=480&&x.leadW<=700&&x.start>=480&&x.start<=700,x);
+    /* v25.71: the lead's cap is 76ch in its own font; 700 px was 76ch in Arial. Where Inter, the first font the workstation
+       names, is installed (as on the test computer now), its wide "0" makes 76ch 719 px at 15 px, so the cap is measured in
+       the font the lead is drawn in */
+    ok('38 a line of reading text in a dialog or on the start card is no longer than about 76 characters (the lead at 1180 ran the width of the box)',x.leadW<x.boxW-120&&x.leadW>=480&&x.leadW<=x.ch76+2&&x.ch76<=760&&x.start>=480&&x.start<=700,x);
     ok('39 on a touch screen the keyboard hint \u2318K is not shown',x.kbd,x.kbd);
     ok('40 the bar\u2019s labels at 12.5 px, the caseload options at 13; the browser is asked not to remember what is typed in the student bar',x.lbl==='12.5px'&&x.opt==='13px'&&x.ac.every(a=>a==='off'),{lbl:x.lbl,opt:x.opt,ac:x.ac});
     await page.evaluate(()=>{try{$('#dlg').close();}catch(e){}});await setBar(page);
