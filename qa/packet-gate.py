@@ -23,6 +23,18 @@ TOL = 3.0                                   # a glyph box may stand a little pro
 FLOOR = float(meta.get('floor', 6))
 norm = lambda s: re.sub(r'\s+', ' ', s or '').strip()
 secs = {s['k']: s for s in meta['sections']}
+# v25.71: Chromium can draw a line's text with several Type3 subset fonts (it does with Inter, the workstation's first font,
+# installed on the test computer), and PyMuPDF then gives each run of glyphs its own span ("N" "e" "wsom" "e" ...). Runs that
+# follow one another on a line in the same size, style and colour are one span again, as one font would have given them.
+def joined(spans):
+    out = []
+    for s in spans:
+        p = out[-1] if out else None
+        if p and p['color'] == s['color'] and abs(p['size'] - s['size']) < 0.01 and p['flags'] == s['flags'] and -1.5 < s['bbox'][0] - p['bbox'][2] < 1.5:
+            p['text'] += s['text']; p['bbox'] = (p['bbox'][0], min(p['bbox'][1], s['bbox'][1]), s['bbox'][2], max(p['bbox'][3], s['bbox'][3]))
+        else:
+            out.append(dict(s))
+    return out
 doc = pymupdf.open(pdf)
 N = len(doc)
 out = {'pages': N, 'odd': [], 'heads': [], 'margins': [], 'rotated': [], 'blank': [], 'heading': [], 'stray': [],
@@ -43,7 +55,7 @@ for pn in range(N):
             continue
         for l in b['lines']:
             rot = abs(l['dir'][1]) > 0.01
-            for s in l['spans']:
+            for s in joined(l['spans']):
                 t = s['text'].strip()
                 if not t: continue
                 x0, y0, x1, y1 = s['bbox']
