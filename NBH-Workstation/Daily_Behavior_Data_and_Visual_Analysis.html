@@ -23727,6 +23727,9 @@ function pubChart(beh,rows,conds,an){const xEnd=ddPlotEnd(rows),n=xEnd+1,ax=pubT
   const m=/data-plot="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg);if(!m)return svg;
   const l=+m[1],t=+m[2],iw=+m[3],ih=+m[4],xEnd=ddPlotEnd(rows),X=i=>l+(xEnd<=0?iw/2:i*iw/xEnd),top=ddDrawn.top||1,Y=v=>t+ih-(Math.min(v,top)/top)*ih,z=S.settings.zeroLift===true?7:0;
   let add="";
+  /* the points a tap can reach */
+  const L=[];analyses.forEach(a=>{(a.pts||[]).forEach(p=>L.push({cx:X(p.x),cy:Y(p.y),i:p.x,v:p.y,date:p.date,c:a.name}));(a.samples||[]).forEach(p=>L.push({cx:X(p.x),cy:Y(p.y),i:p.x,v:p.y,date:p.date,c:a.name,sample:true}));});
+  if(!G.blind)G.pts[beh.id]=L;
   /* the sentence is the graph's accessible name */
   const s=G.blind?"":sentence(beh,rows,analyses);
   svg=svg.replace(/^<svg class="graph"/,`<svg class="graph" data-dd-b="${esc(beh.id)}"`);
@@ -23777,9 +23780,12 @@ function decorate(){const out=document.getElementById("resultsOut");if(!out)retu
     if(!pub)b.insertAdjacentHTML("beforeend",` <button type="button" class="btn ghost sm" data-g70="table" data-b="${esc(id)}" aria-expanded="false" aria-controls="ddGTab-${esc(id)}">Show as table<\/button>`);
     tail+=`<p class="dd-gsum noprint no-print">${esc(sentence(A.beh,A.rows,A.analyses))}${pub?"":"<!--touch-->"}<\/p><div class="dd-gtab" id="ddGTab-${esc(id)}" hidden><\/div>`;
 
+    if(!pub){b.insertAdjacentHTML("beforeend",`<span class="dd-zoomctl" data-b="${esc(id)}" hidden> <button type="button" class="btn ghost sm" data-g70="reset" data-b="${esc(id)}">Reset zoom<\/button> <span class="hint dd-zoomtxt"><\/span><\/span>`);
+      const hint=`<span class="hint dd-touchhint">Tap a point for its date and value; double-tap or pinch the graph to zoom the days.<\/span>`;tail=tail.indexOf("<!--touch-->")>-1?tail.replace("<!--touch-->"," "+hint):`<p class="dd-gsum noprint no-print">${hint}<\/p>`+tail;}
 
     if(tail)b.insertAdjacentHTML("afterend",tail.replace("<!--touch-->",""));
 
+    if(G.zoom[id]&&!pub)zoomTo(id,G.zoom[id]);
   });}
 {const rr=renderResults;renderResults=function(){G.args={};G.fig={};G.altdl={};G.rendering=true;let r;try{r=rr.apply(this,arguments);}finally{G.rendering=false;}try{paintSwitch();decorate();}catch(e){}return r;};}
 /* ---------------- the controls ---------------- */
@@ -23801,8 +23807,50 @@ document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;
     const fig=capOf(A.beh,A.rows,A.analyses,[]);const cur=G.cap[id]||(svg.querySelectorAll(".pub-cap").length?[...svg.querySelectorAll(".pub-cap")].map(x=>x.textContent).join(" "):fig);
     b.insertAdjacentHTML("afterend",`<div class="dd-capedit" id="ddCapEd-${esc(id)}" contenteditable="true" role="textbox" aria-multiline="true" aria-label="The figure's caption">${esc(cur)}<\/div>`);b.textContent="Use this caption";b.setAttribute("aria-expanded","true");
     const ed2=document.getElementById("ddCapEd-"+id);if(ed2)ed2.focus();return;}});
-window.__dd2570={G,sentence,tableHtml,designHtml,gapAt,pubChart};   /* for the workstation's checks */
+/* ---------------- tap a point ---------------- */
+function tip(){let t=document.getElementById("ddPtTip");if(!t){t=document.createElement("div");t.id="ddPtTip";t.className="noprint no-print";t.setAttribute("role","status");t.setAttribute("aria-live","polite");document.body.appendChild(t);}return t;}
+function nearest(svg,ev){const id=svg.getAttribute("data-dd-b"),L=G.pts[id];if(!L||!L.length||!svg.getScreenCTM)return null;const m=svg.getScreenCTM();if(!m)return null;
+  let best=null;L.forEach(p=>{const sx=m.a*p.cx+m.c*p.cy+m.e,sy=m.b*p.cx+m.d*p.cy+m.f,d=Math.hypot(sx-ev.clientX,sy-ev.clientY);if(d<=22&&(!best||d<best.d))best={p,d};});return best&&best.p;}
+function showTip(svg,p,ev){const beh=S.behaviors.find(b=>b.id===svg.getAttribute("data-dd-b"))||{},e=eventAt(p.i),t=tip();
+  const u=U(beh.measure),io=typeof ddIoaRow==="function"?(()=>{const A=G.args[beh.id];return A&&A.rows[p.i]?ddIoaRow(A.rows[p.i],beh):null;})():null;
+  t.innerHTML=`<b>${esc(p.date?ddFullDate(p.date):"Day "+(p.i+1))}<\/b><br>${esc(beh.name||"")}: ${esc(r1(p.v))}${u?" "+esc(u):""}${p.sample?" (a part-day sample)":""}${ddAltNow||(typeof ddAltOn==="function"&&ddAltOn())?`<br>Phase: ${esc(phaseAt(p.i)||"")}<br>Condition: ${esc(p.c||"")}`:`<br>Phase: ${esc(p.c||"")}<br>Condition: ${e?esc(e.label)+(e.x!=null&&G.args[beh.id]&&G.args[beh.id].rows[e.x]?" (since "+esc(fmtDate(G.args[beh.id].rows[e.x].date))+")":""):"no change within the phase"}`}${io!==null?`<br>Second observer: agreement ${esc(r1(io))}%`:""}`;
+  t.style.left=Math.max(8,Math.min(window.innerWidth-260,ev.clientX-110))+"px";t.style.top=Math.max(8,ev.clientY-96)+"px";t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),4000);}
+document.addEventListener("click",e=>{const svg=e.target&&e.target.closest?e.target.closest("#resultsOut .chartbox svg.graph[data-dd-b]:not(.ddpub)"):null;if(!svg)return;const p=nearest(svg,e);if(p)showTip(svg,p,e);});
+/* ---------------- zoom the days: a double tap, a pinch, Reset zoom ---------------- */
+function zoomTo(id,win){const A=G.args[id],svg=svgOf(id);if(!A||!svg)return;
+  if(!win){delete G.zoom[id];const ctl=document.querySelector(`.dd-zoomctl[data-b="${CSS.escape(id)}"]`);if(ctl)ctl.hidden=true;
+    if(svg.getAttribute("data-zoom")){const box=svg.closest(".chartbox");box.innerHTML=buildChart(A.beh,A.rows,A.conds,A.analyses);}return;}
+  const rows=A.rows,i0=Math.max(0,Math.min(win[0],rows.length-1)),i1=Math.max(i0+1,Math.min(win[1],ddPlotEnd(rows)));if(i1-i0<4||(i0===0&&i1>=ddPlotEnd(rows))){zoomTo(id,null);return;}
+  G.zoom[id]=[i0,i1];
+  /* the days in the window, re-indexed; the conditions cut to them, analysed on the days shown */
+  const R=rows.slice(i0,i1+1),C=A.conds.map(c=>Object.assign({},c,{rowIdx:c.rowIdx.filter(i=>i>=i0&&i<=i1).map(i=>i-i0)})).filter(c=>c.rowIdx.length);
+  const keep=ddAltNow,kr=ddRangeOn;let svg2="";ddAltNow=typeof ddAltOn==="function"&&ddAltOn();ddRangeOn=true;
+  const cm=conditionalMarks;try{conditionalMarks=function(){return cm.apply(this,arguments).filter(m=>m.x>=i0&&m.x<=i1).map(m=>Object.assign({},m,{x:m.x-i0}));};
+    const an=C.map(c=>analyzeCondition(c,A.beh,R));svg2=buildChart(A.beh,R,C,an);}finally{conditionalMarks=cm;ddAltNow=keep;ddRangeOn=kr;}
+  const box=svg.closest(".chartbox");if(!svg2)return;box.innerHTML=svg2.replace("<svg class=\"graph\"",`<svg class="graph" data-zoom="${i0}-${i1}"`);
+  /* tapped points read the days shown: put them back on the full sheet's index */
+  (G.pts[id]||[]).forEach(p=>{p.i+=i0;});
+  const ctl=document.querySelector(`.dd-zoomctl[data-b="${CSS.escape(id)}"]`);if(ctl){ctl.hidden=false;const tx=ctl.querySelector(".dd-zoomtxt");if(tx)tx.textContent=`Zoomed: ${fmtDate(rows[i0].date)} to ${fmtDate(rows[i1].date)} (${i1-i0+1} of ${ddPlotEnd(rows)+1} days; the lines are for the days shown)`;}}
+function dayAt(svg,clientX){const A=G.args[svg.getAttribute("data-dd-b")];const m=/([\d.]+) ([\d.]+) ([\d.]+)/.exec(svg.getAttribute("data-plot")||"");if(!A||!m||!svg.getScreenCTM)return 0;
+  const M=svg.getScreenCTM(),vx=(clientX-M.e)/M.a,z=G.zoom[svg.getAttribute("data-dd-b")]||[0,ddPlotEnd(A.rows)],span=z[1]-z[0];return Math.round(z[0]+Math.max(0,Math.min(1,(vx-(+m[1]))/(+m[3])))*span);}
+const T={pts:new Map(),d0:0,last:0,lx:0,ly:0,svg:null,touchAt:0};   /* a double tap on a touch screen also fires dblclick: the tap counts once */
+function zoomBy(svg,clientX,f){const id=svg.getAttribute("data-dd-b"),A=G.args[id];if(!A)return;const end=ddPlotEnd(A.rows),z=G.zoom[id]||[0,end],c=dayAt(svg,clientX),span=Math.max(4,Math.round((z[1]-z[0])/f));
+  if(span>=end){zoomTo(id,null);return;}let i0=Math.round(c-span/2);i0=Math.max(0,Math.min(i0,end-span));zoomTo(id,[i0,i0+span]);}
+document.addEventListener("dblclick",e=>{if(Date.now()-T.touchAt<800)return;const svg=e.target&&e.target.closest?e.target.closest("#resultsOut .chartbox svg.graph[data-dd-b]:not(.ddpub)"):null;if(!svg)return;e.preventDefault();zoomBy(svg,e.clientX,2);});
 
+document.addEventListener("pointerdown",e=>{if(e.pointerType!=="touch")return;T.touchAt=Date.now();const svg=e.target&&e.target.closest?e.target.closest("#resultsOut .chartbox svg.graph[data-dd-b]:not(.ddpub)"):null;if(!svg)return;
+  T.svg=svg;T.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(T.pts.size===2){const [a,b]=[...T.pts.values()];T.d0=Math.hypot(a.x-b.x,a.y-b.y);T.mid=(a.x+b.x)/2;}},{passive:true});
+document.addEventListener("pointermove",e=>{if(!T.pts.has(e.pointerId))return;T.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});},{passive:true});
+function up(e){if(!T.pts.has(e.pointerId))return;const two=T.pts.size===2,svg=T.svg;
+  if(two&&T.d0>20&&svg){const [a,b]=[...T.pts.values()],d=Math.hypot(a.x-b.x,a.y-b.y),f=d/T.d0;T.pts.clear();T.d0=0;if(f>1.15||f<0.87)zoomBy(svg,T.mid,f);return;}
+  T.pts.delete(e.pointerId);if(e.type!=="pointerup"||!svg)return;
+  const now=Date.now();if(now-T.last<320&&Math.hypot(e.clientX-T.lx,e.clientY-T.ly)<30){T.last=0;zoomBy(svg,e.clientX,2);return;}T.last=now;T.lx=e.clientX;T.ly=e.clientY;}
+document.addEventListener("pointerup",up,{passive:true});document.addEventListener("pointercancel",up,{passive:true});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&Object.keys(G.zoom).length&&!document.querySelector("dialog[open]"))Object.keys(G.zoom).forEach(id=>zoomTo(id,null));});
+/* a print shows every day */
+window.addEventListener("beforeprint",()=>{try{Object.keys(G.zoom).forEach(id=>zoomTo(id,null));}catch(e){}});
+window.__dd2570={G,sentence,tableHtml,designHtml,gapAt,pubChart};   /* for the workstation's checks */
+window.__dd2570.zoomTo=zoomTo;
 try{if(document.getElementById("resultsOut")&&document.getElementById("resultsOut").children.length)renderResults();}catch(e){}
 })();
 </script>
