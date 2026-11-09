@@ -1899,6 +1899,7 @@ window.FX2_CFG.step = true;
       <h2 class="nbh-band" id="trBacbH">The BACB&rsquo;s own form</h2>
       <p class="hint">The BACB accepts only its own current forms (BCBA Handbook, p. 22). Download the current Monthly Fieldwork Verification Form from bacb.com and pick it here: RS-1 fills in this month&rsquo;s figures and saves a filled copy, leaving the signatures for the supervisor and the trainee to add in a PDF app. The PDF is read and filled on this device only. RS-1&rsquo;s printed form stays the signed record.</p>
       <div class="tools"><button class="tool" type="button" data-trbacb="month">Fill the BACB&rsquo;s form</button><input type="file" id="trBacbFile" accept="application/pdf,.pdf" hidden style="display:none" tabindex="-1" aria-hidden="true"></div>
+      <details class="tr-bacb-how"><summary>How to sign the filled form (Apple Markup or Adobe Acrobat)</summary><p>The saved copy keeps the BACB&rsquo;s own boxes: the figures are filled in, and the signatures and their dates are left empty. It is not locked or password-protected, so either app can sign it. Sign the copy RS-1 saved, without retyping a figure.</p><ol><li><b>Apple Markup</b> (Files on the iPad): open the PDF, tap the Markup button (the pen), then <b>+</b> and <b>Add Signature</b>. Draw or choose the signature, drag it onto the signature line and size it to fit. Tap the date box beside it and type the date. Tap <b>Done</b>: the signed PDF is kept in Files.</li><li><b>Adobe Acrobat Reader, Fill &amp; Sign</b>: open the PDF in Acrobat, tap <b>Fill &amp; Sign</b>, then the pen and <b>Create signature</b> (or your saved one), and tap where it goes on the signature line. Tap the date box and type the date. Do not tap into the empty signature box itself: in Acrobat that asks for a digital ID (a certificate), which the BACB&rsquo;s form does not need.</li><li>The supervisor and the trainee sign the same copy, one after the other, each with the date they sign.</li><li>Once signed, keep the PDF as it is: a change after signing is a reason the BACB can reject it. File it with RS-1&rsquo;s printed form for the month.</li></ol></details>
       <p class="hint" id="trBacbOn"></p>
       <div id="trBacbOut" aria-live="polite"></div>
     </div>
@@ -1930,6 +1931,7 @@ window.FX2_CFG.step = true;
       <h3 id="trBacbFinH">The BACB&rsquo;s own final form</h3>
       <p class="hint">Download the current Final Fieldwork Verification Form from bacb.com and pick it here: RS-1 fills in the totals of the final verification and saves a filled copy, leaving the supervisor&rsquo;s signature to add in a PDF app. The PDF is read and filled on this device only.</p>
       <div class="tools"><button class="tool" type="button" data-trbacb="fin">Fill the BACB&rsquo;s final form</button></div>
+      <details class="tr-bacb-how"><summary>How to sign the filled form (Apple Markup or Adobe Acrobat)</summary><p>The saved copy keeps the BACB&rsquo;s own boxes: the figures are filled in, and the signature and its date are left empty. It is not locked or password-protected, so either app can sign it. Sign the copy RS-1 saved, without retyping a figure.</p><ol><li><b>Apple Markup</b> (Files on the iPad): open the PDF, tap the Markup button (the pen), then <b>+</b> and <b>Add Signature</b>. Draw or choose the signature, drag it onto the signature line and size it to fit. Tap the date box beside it and type the date. Tap <b>Done</b>: the signed PDF is kept in Files.</li><li><b>Adobe Acrobat Reader, Fill &amp; Sign</b>: open the PDF in Acrobat, tap <b>Fill &amp; Sign</b>, then the pen and <b>Create signature</b> (or your saved one), and tap where it goes on the signature line. Tap the date box and type the date. Do not tap into the empty signature box itself: in Acrobat that asks for a digital ID (a certificate), which the BACB&rsquo;s form does not need.</li><li>Once signed, keep the PDF as it is: a change after signing is a reason the BACB can reject it. File it with RS-1&rsquo;s printed form for the month.</li></ol></details>
       <div id="trBacbFinOut" aria-live="polite"></div>
     </div>
     <div class="rs-paper tr-paper" id="trFinalOut"></div>
@@ -3417,6 +3419,10 @@ table.tr-rules td small,table.tr-rules th small{display:block;color:var(--ink-so
 .tr-bacb-decides{font-weight:400}
 .tr-bacb-act{align-items:center}
 .tr-bacb-saved{margin:4px 0;color:#1d4a2c}
+/* v25.70 (the BCBA, 11/9) how to sign the filled form, in Apple Markup or Adobe Acrobat's Fill & Sign */
+.tr-bacb-how{margin:6px 0 2px;font-family:var(--sans);font-size:13.5px;line-height:1.45;color:var(--ink)}
+.tr-bacb-how summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600;color:var(--nbh-navy,#182e43)}
+.tr-bacb-how p{margin:2px 0 6px}.tr-bacb-how ol{margin:0 0 6px;padding-left:1.3em}.tr-bacb-how li{margin:3px 0}
 @media print{.tr-bacb{display:none!important}}
 </style>
 <script id="rs1-v2568-trainee">
@@ -4155,6 +4161,17 @@ async function bacbFill(P,bytes,F,vals){const doc=await P.PDFDocument.load(bytes
       else{left.push({n,role,why:'none'});continue;}
       filled.push({n,role,v:val.v,show:val.show});}
     catch(e){left.push({n,role,why:/encode/i.test(String(e&&e.message))?'font':'error'});}}
+  /* v25.70 (the BCBA, 11/9: she signs the filled form in Apple Markup and in Adobe Acrobat's Fill & Sign) the copy both apps
+     sign cleanly. The fields stay fields, not flattened: the signature dates are typed into the BACB's own boxes and the
+     signature field stays empty and where the BACB drew it; every field RS-1 filled carries its own drawing of its value
+     (written above), so both apps show it as it is without drawing it again, and the request to draw them again
+     (NeedAppearances) is taken off. Taken out as well: an XFA copy of the form (Acrobat would show its empty values over the
+     filled ones), the form's extended-rights stamp (Reader's usage rights, which any change makes Acrobat report as broken)
+     and the request to render the form from XFA. No password or encryption is ever written: pdf-lib saves without either,
+     and a password-protected PDF is not filled at all. */
+  try{if(form.hasXFA())form.deleteXFA();}catch(e){}
+  {const cat=doc.catalog,af=cat.lookup(NM.of('AcroForm'));['Perms','NeedsRendering'].forEach(k=>{try{cat.delete(NM.of(k));}catch(e){}});
+   if(af&&typeof af.delete==='function'){try{af.delete(NM.of('NeedAppearances'));af.delete(NM.of('XFA'));}catch(e){}}}
   const out=await doc.save({useObjectStreams:false,updateFieldAppearances:false});
   /* read back: every field filled holds what was written, every signature is still empty */
   const back=await P.PDFDocument.load(out,{updateMetadata:false}),bf=back.getForm();
@@ -4163,6 +4180,7 @@ async function bacbFill(P,bytes,F,vals){const doc=await P.PDFDocument.load(bytes
     else{const V=fld.acroField.dict.get(NM.of('V')),s=V?nmTxt(V):'Off';got=x.v===true||x.v===false?s!=='Off':s;}
     if(String(got)!==String(x.v))throw new Error('The filled copy did not read back as written ('+x.n+').');}
   for(const x of F.f)if(x[1]==='s'&&bf.getField(x[0]).acroField.dict.get(NM.of('V')))throw new Error('A signature field is not empty.');
+  if(bf.hasXFA()||back.catalog.get(NM.of('Perms')))throw new Error('The filled copy still carries the form’s XFA or its extended rights.');   /* v25.70 */
   return {bytes:out,filled,left};}
 /* ---------------- loading pdf-lib, only when a form is picked ----------------
    As the workstation loads it for Finish PDF: the copy beside the forms (the folder, and the installed app offline, whose
@@ -4292,7 +4310,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([S.bytes],{type:'application/pdf'}));a.download=S.name;document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},60000);
   if(S.kind==='M'&&S.k){X.tMonth(S.k,X.cur()).bacb=todayISO();changed();paint();}
-  const act=b.closest('.tr-bacb-act');if(act)act.innerHTML='<p class="tr-bacb-saved" role="status"><b>Saved as '+esc(S.name)+'.</b> Open it in a PDF app to sign and date it'+(S.kind==='M'?' (the supervisor and the trainee)':' (the supervisor)')+'.</p>';});
+  const act=b.closest('.tr-bacb-act');if(act)act.innerHTML='<p class="tr-bacb-saved" role="status"><b>Saved as '+esc(S.name)+'.</b> Open it in a PDF app to sign and date it'+(S.kind==='M'?' (the supervisor and the trainee)':' (the supervisor)')+': Apple Markup or Adobe Acrobat&rsquo;s Fill &amp; Sign (How to sign the filled form, above).</p>';});
 /* the month's line: when the BACB's form was filled for it (the one thing the file keeps of this) */
 function paint(){const n=document.getElementById('trBacbOn');if(!n||!X.isTr())return;const k=X.key();if(!k){n.textContent='';return;}const d=X.tPeek(k,X.cur()).bacb;
   n.textContent=d?'The BACB’s form for '+keyLabel(k)+' was filled here on '+mdy(d)+'. Fill it again if the month’s figures change.':'The BACB’s form for '+keyLabel(k)+' has not been filled here yet.';
