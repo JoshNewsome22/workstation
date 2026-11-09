@@ -41,7 +41,8 @@ const ESC={fn:'Escape / avoidance (social negative)',fnKey:'escape'};
   let p=await open(TE);await sim(p);
   await setM(p,'loss','Yes — described below');await setM(p,'lossRule','');
   let f=await p.evaluate(()=>({on:document.querySelector('#lossTbl').classList.contains('on'),rows:[...document.querySelectorAll('#lossTbl tr.lossYes')].map(r=>getComputedStyle(r).display),note:document.querySelector('#lossNote').textContent}));
-  ok('1 F418 token loss marked in use: its safeguard rows show, and the note names everything the plan does not record',f.on&&f.rows.length===7&&f.rows.every(d=>d!=='none')&&
+  /* v25.71: v25.65 (TOKEN-M9, commit 4960c75) added two safeguard rows, side effects watched and the student's view: nine */
+  ok('1 F418 token loss marked in use: its safeguard rows show, and the note names everything the plan does not record',f.on&&f.rows.length===9&&f.rows.every(d=>d!=='none')&&
     /the plan does not record the rule, the behavior that loses a token, how many tokens are lost, the floor, what was tried first and its data, the parent’s consent, who reviewed it and when, how its effect is measured and when it stops\./.test(f.note)&&/Standard 2\.15/.test(f.note)&&/Standard 2\.11/.test(f.note)&&/300\.324/.test(f.note),f);
   await tick(p,all15);let v=await V(p,'#audVerdict');
   ok('2 F418 ... with every audit point ticked, the audit is not in order (red) and names token loss first',/v-no/.test(v.cls)&&/^Not in order yet: token loss is in use, and the plan does not record the rule/.test(v.text),v);
@@ -67,8 +68,9 @@ const ESC={fn:'Escape / avoidance (social negative)',fnKey:'escape'};
   await tick(p,all15.filter(i=>i!==1));v=await V(p,'#audVerdict');
   ok('6 F420 the token untested alone: amber, never green (14 of 15)',/v-mid/.test(v.cls)&&/^Not in order yet: the token has not been tested/.test(v.text)&&/14 of 15 confirmed/.test(v.text),v);
   f=await p.evaluate(()=>[...document.querySelectorAll('#auditWrap label.chk')].map(l=>({t:l.childNodes[1].textContent,tag:l.querySelector('.te-tag').textContent,gate:l.querySelector('.te-tag').classList.contains('te-gate')})));
+  /* v25.71: the delivery point reads "within a few seconds of the behavior" since v25.65 (commit 4960c75, the token review) */
   ok('7 F420 each point says research (with a source and year), rights or practice; three must hold; the delivery and request points are reworded',f.length===15&&f.filter(x=>x.gate).length===3&&
-    f.every(x=>/^(must hold · )?(research: .*\(.*\d{4}.*\)|rights|practice)/.test(x.tag))&&f[2].t==='Tokens are delivered immediately (the plan states the window)'&&f[10].t==='Once an exchange is earned, the student can ask for it'&&
+    f.every(x=>/^(must hold · )?(research: .*\(.*\d{4}.*\)|rights|practice)/.test(x.tag))&&f[2].t==='Tokens are delivered within a few seconds of the behavior (the plan states the window)'&&f[10].t==='Once an exchange is earned, the student can ask for it'&&
     [1,11,12].every(i=>f[i].gate)&&f.filter(x=>/^research/.test(x.tag.replace('must hold · ',''))).every(x=>/\d{4}/.test(x.tag)),f.map(x=>x.tag));
   await tick(p,all15);v=await V(p,'#audVerdict');
   ok('8 F420 every point confirmed and nothing open: in order (green), the count alone',/v-ok/.test(v.cls)&&v.text==='15 of 15 confirmed.',v);
