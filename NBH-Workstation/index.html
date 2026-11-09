@@ -3213,7 +3213,7 @@ function openFor(ev,d){
 }
 /* v22.83 the partner opened by OPEN_ALSO takes the asker's part of the case as it is now: read from the asker alone (a full read
    waits on the partner, which is still loading) and handed to the partner as it loads, or at once if it is open */
-async function openAlsoFacts(from,want){const k=FACT_SRC[from];if(!k)return;const r=await grab(from,'facts?',null,3000);const out=r&&r.facts;
+async function openAlsoFacts(from,want){const k=FACT_SRC[from];if(!k)return;const gen=state.caseGen,r=await grab(from,'facts?',null,3000);const out=r&&r.facts;if(gen!==state.caseGen)return;   /* v25.71 (case isolation) */
   if(out&&out[k]){const f=Object.assign({},state.facts||{});f.src=Object.assign({},f.src||{});f[k]=out[k];f.src[k]=from;state.facts=f;}
   const fr=state.frames[want];if(fr&&fr.dataset.loaded)pushFactsTo(fr);}
 
@@ -3270,6 +3270,16 @@ FACT_SRC['VS-1']='visuals';FACT_GEN.push('VS-1');
 /* ---- end of the VS-1 block ---- */
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false,factsAgainPush=false,factsOwed=false;   /* v21.87 a send asked while a read runs is kept; a change read without sending is still owed to the forms */
+/* v25.71 (case isolation) one student's case ends and another's begins (Close case, Open case, a student from Caseload):
+   state.caseGen counts these turns. A read of the forms still running when the forms were closed (the caseload's copy reads
+   the case after the file is written, and its question to a form already closed waits its 4 s) started from the case as it
+   was and, finishing, put that case's facts back: the next student's case file, packet file, caseload copy and safety copy
+   then carried the earlier student's consent, records review, assessments and observation statement. A read, Autosave's
+   copy or the caseload's copy that began before the turn now leaves the next case alone; and the answers still on their way
+   from the closed forms count no more (CASE_GONE) */
+state.caseGen=0;const CASE_GONE=new WeakSet();
+function caseTurn(){state.caseGen++;clearTimeout(factsTimer);factsTimer=null;factsOwed=false;state.factSrcSig={};
+  Object.values(state.frames).forEach(fr=>{try{if(fr.contentWindow)CASE_GONE.add(fr.contentWindow);}catch(e){}});}
 function noteFactSource(id,st){
   const sig=(st&&st.sig)||'';
   if(state.factSrcSig[id]===sig)return;
@@ -3302,7 +3312,7 @@ FACT_SRC['FD-1']='feeding';FACT_GEN.push('FD-1');
 {const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.classroom);};factsSig=function(f){return fsg(f)+(f&&f.classroom?'|cls'+JSON.stringify(f.classroom):'');};}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
-  factsBusy=true;
+  factsBusy=true;const gen=state.caseGen;   /* v25.71 (case isolation) */
   try{
     const f=Object.assign({},state.facts||{});f.src=Object.assign({},f.src||{});
     const drop=k=>{delete f[k];delete f.src[k];};
@@ -3310,7 +3320,7 @@ async function gatherFacts(push){
       /* v21.87 a form still being filled from the file (pending), or one that does not answer, keeps what the case last had from
          it: until now its part was dropped, so a Save case at that moment wrote the file without it */
       if(!state.frames[id]||state.pending[id])continue;
-      const r=await grab(id,'facts?',null,4000);if(!r)continue;const out=r.facts||null;
+      const r=await grab(id,'facts?',null,4000);if(gen!==state.caseGen)return;if(!r)continue;const out=r.facts||null;
       if(id==='TB-1'){if(out&&out.behaviors){f.behaviors=out.behaviors;f.src.behaviors='TB-1';}else if(f.src.behaviors==='TB-1')drop('behaviors');}
       if(id==='FS-1'){
         if(out&&out.fn){f.fn=out.fn;f.src.fn='FS-1';}else if(f.src.fn==='FS-1')drop('fn');
@@ -3331,6 +3341,7 @@ async function gatherFacts(push){
       if(FACT_SRC[id]==='evidence'){const ev=Object.assign({},f.evidence||{});if(out&&out.evidence)ev[id]=out.evidence;else delete ev[id];if(Object.keys(ev).length){f.evidence=ev;f.src.evidence=Object.keys(ev).join(', ');}else drop('evidence');}
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
+    if(gen!==state.caseGen)return;   /* v25.71 (case isolation) begun in the case before: nothing of it goes into this one */
     const now=state.facts;if(now&&(now.src||{}).behaviors==='document'&&(now.behaviors||[]).length&&!(f.behaviors&&f.src.behaviors&&f.src.behaviors!=='document')){f.behaviors=now.behaviors;f.src.behaviors='document';}
     /* v24.27 (E-15) the student the packet or a form names goes with the facts, so a form whose own student box is empty can offer it */
     {const st=whoStudentFacts();if(st){f.student=Object.assign({},f.student||{},st);f.src.student=st.src;}
@@ -3429,6 +3440,9 @@ window.addEventListener('message',ev=>{
   if(d.id){const F=state.frames[d.id];if(F&&F.__heard===false){try{if(F.contentWindow===ev.source)F.__heard=true;}catch(e){}}}
   /* v21.80 the caseload's Form DD-1 out of sight (Read every linked sheet): its answers go only to what asked for them */
   if(window.__clRfWin&&ev.source===window.__clRfWin){if(d.id){const q=pending[d.id+'|'+d.nbh];if(q&&q.length){const i=q.findIndex(f=>f.src===ev.source);if(i>=0)q[i](d);}}return;}
+  /* v25.71 (case isolation) a form of the case closed (Close case, Open case): what it was still saying (its status, its student's
+     name and details) is not taken as the next case's */
+  if(ev.source&&CASE_GONE.has(ev.source))return;
   /* v21.22 relay: a form asking for another open form's data; the protocol is at relay() above. It comes
      first because an ask carries no form id, and the file check's filter below would drop it. */
   if(d.nbh==='ask'){relay(ev,d);return;}
@@ -5595,12 +5609,12 @@ async function autoSave(force){
   if(!ids.length&&!kept.length)return;
   const sig=caseSig();
   if(!force&&(sig===state.autoSig||Date.now()-A.last<AUTO.every/2))return;   // nothing new, or written in the last ten seconds
-  A.busy=true;A.last=Date.now();
+  A.busy=true;A.last=Date.now();const gen=state.caseGen;   /* v25.71 (case isolation) a copy begun in the case before is not finished in this one */
   let missed=false;   /* v22.24 an edited form that did not answer in time: asked again in a moment, not at the next turn */
   try{
     let work=!!A.key;
     for(const id of ids){
-      const r=await grab(id,'snapshot',null,force?2500:5000);
+      const r=await grab(id,'snapshot',null,force?2500:5000);if(gen!==state.caseGen)return;
       if(r&&r.snap)A.forms[id]={title:r.title,total:r.snap.total,data:r.snap.data,own:r.snap.own||''};
       if((r&&r.edited)||(state.status[id]||{}).edited){work=true;if(!(r&&r.snap))missed=true;}
     }
@@ -5614,6 +5628,7 @@ async function autoSave(force){
     if(h===A.written){state.autoSig=sig;return;}
     const rec={key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
       packet:packet(),photoSrc:state.photoSrc||undefined,facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms,docs:docsOut(),famSum:famSumOut()};
+    if(gen!==state.caseGen)return;
     const r=await CP.put(rec);
     if(r.ok){state.autoSig=sig;A.written=h;A.at=new Date();autoOver();}
     autoWarn(r);
@@ -5828,6 +5843,7 @@ async function autoOffer(){
 async function loadCase(d,how){
   warmStop();
   if(mediaHas(d))d=await mediaIn(d,how);   /* only a case with TV-1's media inside waits for the store */
+  caseTurn();   /* v25.71 (case isolation) */
   Object.values(state.frames).forEach(fr=>fr.remove());
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.pending={};state.caseOrder=[];
   state.whoIs={};state.details={};   /* v21.44 (A8) the closed forms' names count no more */
@@ -6507,6 +6523,7 @@ $('#saveCase').addEventListener('click',()=>{saveCase();});
    loads a file. Nothing is closed unless the file is written with every form in it. */
 async function clearCase(){
   await autoSeal();   /* the copy of what was open is written and left alone; the next case gets a copy of its own */
+  caseTurn();   /* v25.71 (case isolation) */
   Object.values(state.frames).forEach(fr=>fr.remove());
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.docs=[];state.famSum=null;
   state.whoIs={};state.details={};state.split=[];
@@ -6816,11 +6833,16 @@ const clStrip=h=>String(h||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').repl
 function clSummary(){let items=[];try{items=todayItems().map(x=>Object.assign({k:x.k,t:clStrip(x.t),open:x.open||''},x.at?{at:x.at}:{}));}catch(e){}const f=state.facts||{};
   return {items,lastData:f.data&&f.data.to||'',forms:Object.keys(state.frames).concat(Object.keys(state.pending)).filter((v,i,a)=>a.indexOf(v)===i).length};}
 async function caseloadKeep(p,forms,late){if(clOff())return;const key=clKey(p);if(!key)return;
+  /* v25.71 (case isolation) this copy is of the case saved: what it holds of the workstation (the facts, the summary, the papers)
+     is read as the save left it, and again after the read below only if the same case is still open (Save and close goes on
+     to close the case while this copy is being written; Open case or Caseload may have opened another) */
+  const gen=state.caseGen,mine=()=>({facts:state.facts||undefined,sum:clSummary(),photoSrc:state.photoSrc||undefined,cur:state.cur||undefined,docs:docsOut(),famSum:famSumOut()});let C=mine();
   try{await gatherFacts(false);}catch(e){}   /* the summary from the case as it is now */
+  if(gen===state.caseGen)C=mine();
   if(late&&late.length){try{const old=(await clList()||[]).find(r=>r.key===key),od=old&&parseCase(old.text);forms=Object.assign({},forms);late.forEach(id=>{if(od&&od.forms&&od.forms[id]&&!forms[id]&&!STAFF_SIDE[id])forms[id]=od.forms[id];});}catch(e){}}
-  let mp={forms,photoSrc:state.photoSrc||undefined};try{mp=await mediaPackParts(forms,state.photoSrc||undefined);}catch(e){}   /* v22.57 the pictures in the store, references here */
-  const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:mp.photoSrc,forms:mp.forms,facts:state.facts||undefined,cur:state.cur||undefined,docs:docsOut(),famSum:famSumOut()});
-  const rec={key,scope:clScope(),client:String(p.client||(!String(p.sid||'').trim()&&staffOnlyName())||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:clSummary(),text};
+  let mp={forms,photoSrc:C.photoSrc};try{mp=await mediaPackParts(forms,C.photoSrc);}catch(e){}   /* v22.57 the pictures in the store, references here */
+  const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:mp.photoSrc,forms:mp.forms,facts:C.facts,cur:C.cur,docs:C.docs,famSum:C.famSum});
+  const rec={key,scope:clScope(),client:String(p.client||(!String(p.sid||'').trim()&&staffOnlyName())||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:C.sum,text};
   try{const old=(await clList()||[]).find(r=>r.key===key);if(typeof drvStamp==='function')drvStamp(rec,old);}catch(e){}   /* v21.89 the device, and the Drive version it stands on */
   try{await clTx('readwrite',st=>st.put(rec));}catch(e){try{wsUI.toast('The caseload copy could not be kept on this device ('+(e&&e.message||e)+'). The case file is saved as usual.',{kind:'warn'});}catch(x){}}}
 async function clList(){try{const all=await clTx('readonly',st=>st.getAll());return (all||[]).filter(r=>r&&r.scope===clScope());}catch(e){return null;}}
