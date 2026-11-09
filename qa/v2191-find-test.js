@@ -30,7 +30,10 @@ const OUT=__dirname+'/out/v2191-find/';
   /* Mateo Rivera: DD-1 and TB-1 simulated, FS-1 with words of its own on its Report page */
   await student('Mateo Rivera','4471823','Royal Palm School','5');
   await sim(await open('DD-1'));
-  await sim(await open('TB-1'));
+  /* v25.71: since v24.25 (review R-012) TB-1's Load simulation is blocked while a real-looking student is on the form, so Mateo's
+     target behavior is typed into TB-1's first target card instead */
+  const tb1=await open('TB-1');
+  const okT=await setF(tb1,'[name="tgt[0].lab"]','Elopement')&&await setF(tb1,'[name="tgt[0].def"]','Leaves the assigned area without permission (simulated).');
   const fs1=await open('FS-1');
   const okA=await setF(fs1,'textarea[data-m="limits"]','Mateo’s data were not taken on the bus or in the bus loop at dismissal (simulated).');
   await setF(fs1,'textarea[data-m="referral"]','Why does he leave the classroom during writing? (simulated)');
@@ -47,7 +50,7 @@ const OUT=__dirname+'/out/v2191-find/';
   await setF(fs3,'input[data-m="review"]','2026-11-03');
   const k3=await keep();
   const kept=await page.evaluate(async()=>(await clList()).map(r=>({c:r.client,forms:Object.keys(JSON.parse(r.text).forms||{}),beh:((JSON.parse(r.text).facts||{}).behaviors||[]).map(b=>b.label)})));
-  ok('0 three simulated students kept on this device, with their forms and Mateo’s target behaviors from Form TB-1',okA&&okB&&k1&&k2&&k3&&kept.length===3&&kept.some(r=>r.c==='Mateo Rivera'&&r.forms.includes('FS-1')&&r.beh.some(b=>/Elopement/.test(b))),{okA,okB,k1,k2,k3,kept});
+  ok('0 three simulated students kept on this device, with their forms and Mateo’s target behaviors from Form TB-1',okT&&okA&&okB&&k1&&k2&&k3&&kept.length===3&&kept.some(r=>r.c==='Mateo Rivera'&&r.forms.includes('FS-1')&&r.beh.some(b=>/Elopement/.test(b))),{okT,okA,okB,k1,k2,k3,kept});
   const run=q=>page.evaluate(async q=>{const L=await clList();return findRun(q,L,{}).map(x=>({c:x.r.client,hits:x.hits.map(h=>({k:h.e.kind,f:h.e.form,l:h.e.label,t:h.e.text.slice(0,120),ws:h.ws}))}));},q);
   /* 1 facts: who has elopement as a target */
   let r=await run('elopement');

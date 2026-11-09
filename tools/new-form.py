@@ -47,6 +47,9 @@ mast = re.sub(r'<h1>.*?</h1>', '<h1>' + meta['title'] + '</h1>', mast, count=1)
 mast = re.sub(r'<p class="nbh-sub">.*?</p>', '<p class="nbh-sub">' + meta['sub'] + '</p>', mast, count=1, flags=re.S)
 printhead = '\n'.join(L[i_main:i_head_end + 1]).replace('Contextual Fit Assessment and Enhancement', meta['title']).replace('Form CF-1', f'Form {meta["id"]}')
 tail = '\n'.join(L[i_packet:])
+# v25.71 the template's own script blocks after the packet map (CF-1's v25.65 and v25.67 blocks, <script id="cf1-v2565">) are
+# CF-1's, not shared: the new form does not take them
+tail = re.sub(r'<script id="cf1?-v\d+">.*?</script>\n?', '', tail, flags=re.S)
 # v22.28 a form that is not a student's record (RS-1, a staff member's supervision) names its own kind of record in
 # meta.json ("record": {"label": ..., "page": ...}): the print head's line and the page's foot say it instead
 if meta.get('record'):

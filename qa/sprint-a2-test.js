@@ -35,7 +35,7 @@ const SIMBTN={'IA-1':'#simBtn','PA-1':'#simBtn','MS-1':'#simBtn','AD-1':'#btnSim
 let fails=0;const ok=(n,c,d)=>{console.log((c?'PASS ':'FAIL ')+n+(c||d===undefined?'':' '+JSON.stringify(d).slice(0,700)));if(!c)fails++;};
 const log=[];
 /* the two hypothesis fields and the behavior fields */
-const readIA=fr=>fr.evaluate(()=>({fn:document.querySelector('#mFn').value,beh:document.querySelector('[name="m.beh"]').value,last:window.nbhCase&&nbhCase.last,tg:window.__rp&&__rp.targets?__rp.targets().list.map(r=>r.label):[]}));
+const readIA=fr=>fr.evaluate(()=>({applied:(window.__nbhApplied||[]).map(r=>r&&r.filled),fn:document.querySelector('#mFn').value,beh:document.querySelector('[name="m.beh"]').value,last:window.nbhCase&&nbhCase.last,tg:window.__rp&&__rp.targets?__rp.targets().list.map(r=>r.label):[]}));
 /* v21.78 since v21.64 IA-1 keeps several targets: each behavior from the case becomes a target of its own (its own worksheets), not one field */
 const FOOT={'IN-1':'The first ticked behavior goes into this form’s Problem behavior field; the function stays off this form.','IA-1':'Each ticked behavior becomes a target of this file, with worksheets of its own; the function stays off this form.'};
 const hasTg=(r,l)=>(r.tg||[]).some(x=>{const a=String(x||'').toLowerCase(),b=String(l||'').toLowerCase();return !!a&&!!b&&(a.startsWith(b)||b.startsWith(a));});
@@ -44,6 +44,9 @@ const hasFn=fr=>fr.waitForFunction(()=>!!(window.nbhCase&&nbhCase.facts&&nbhCase
 
 async function shell(br){
   const ctx=await br.newContext({viewport:{width:1366,height:1000},acceptDownloads:true});
+  /* v25.71: every report of the case's fill is kept (window.__nbhApplied): the workstation sends the case again after the form
+     answers, and that second fill finds nothing left to fill ({filled:0}), so nbhCase.last alone no longer shows the first fill */
+  await ctx.addInitScript(()=>{const h=window.__nbhApplied=[];const iv=setInterval(()=>{const C=window.nbhCase;if(C&&C.apply&&!C.__kept){C.__kept=1;const a=C.apply;C.apply=function(){const r=a.apply(this,arguments);h.push(r);return r;};clearInterval(iv);}},2);setTimeout(()=>clearInterval(iv),30000);});
   const page=await ctx.newPage();wire(page,log);
   await page.goto(BASE+'/'+ED+'/index.html');await sleep(900);
   return {ctx,page};
@@ -109,7 +112,7 @@ async function openCase(page,file){
   const ia=await openIn(page,'IA-1');await hasFn(ia);await sleep(500);
   const a=await readIA(ia);
   ok('A: IA-1 opened after FS-1 concluded: its indirect hypothesis stays "not yet"',a.fn==='',a);
-  ok('A: IA-1 still takes the target behavior from the case (each behavior a target of its own, v21.64)',behStart(a.beh,facts.beh[0])&&a.last&&a.last.filled>=1&&hasTg(a,facts.beh[0]),a);
+  ok('A: IA-1 still takes the target behavior from the case (each behavior a target of its own, v21.64)',behStart(a.beh,facts.beh[0])&&a.last&&a.applied.some(n=>n>=1)&&hasTg(a,facts.beh[0]),a);
   const inn=await openIn(page,'IN-1');await hasFn(inn);await sleep(500);
   const b=await readIN(inn);
   ok('A: IN-1 opened after FS-1 concluded: its interview hypothesis stays "not yet"',b.fn===''&&!b.meta,b);

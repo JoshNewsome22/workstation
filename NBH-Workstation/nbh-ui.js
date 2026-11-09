@@ -1431,7 +1431,7 @@ try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) (function
   /* 2 and 3: the hint text */
   function fixHint(el){
     var ph = el.getAttribute('placeholder'); if (ph == null) return; ph = ph.trim(); if (!ph) return;
-    var w = room(el); if (!(w > 20)) return;
+    var w = room(el); if (!(w > 20) && !(w > 0 && /^-?\d+([.,]\d+)?%?$/.test(ph))) return;   /* v25.71 an example number in a box with no room for it still goes beside it (fx2's padding left TD-1's 50 px boxes 20 px: the bare number stayed in them, or not, by which ran first) */
     if (/^-?\d+([.,]\d+)?%?$/.test(ph)) {   /* an example number alone */
       var eg = 'e.g. ' + ph; if (!el.hasAttribute('data-nbh-ph')) el.setAttribute('data-nbh-ph', ph);
       if (width(eg, el) <= w) el.setAttribute('placeholder', eg);

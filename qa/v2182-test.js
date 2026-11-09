@@ -14,8 +14,10 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     try{const w=fr.contentWindow;w.confirm=()=>true;w.alert=()=>{};if(w.nbhUI)w.nbhUI.confirm=async()=>true;const b=w.document.querySelector('#simBtn,#btnSim,#load-demo,#btnLoadExample');if(b){b.click();await new Promise(r=>setTimeout(r,2000));}}catch(e){}},id);
   for(const id of ['SV-1','CF-1','SI-1','ST-1'])await sim(id);
   await page.evaluate(async()=>{await gatherFacts(false);});
-  const f1=await page.evaluate(()=>{const f=state.facts||{};return {sv:!!(f.sv&&(f.sv.pre||f.sv.post)),fit:!!(f.fit&&f.fit.mean!=null),student:!!f.student,staff:!!(f.staff&&(f.staff.people||[]).length),src:f.src};});
-  ok('1 SV-1, CF-1, SI-1 and ST-1 give the case their facts (sv, fit, student, staff)',f1.sv&&f1.fit&&f1.student&&f1.staff&&f1.src.sv==='SV-1'&&f1.src.fit==='CF-1'&&f1.src.student==='SI-1'&&f1.src.staff==='ST-1',f1);
+  const f1=await page.evaluate(()=>{const f=state.facts||{};return {sv:!!(f.sv&&(f.sv.pre||f.sv.post)),fit:!!(f.fit&&f.fit.mean!=null),student:!!(f.student&&(f.student.assent||f.student.hypothesis||f.student.assentPlan)),stName:(f.student||{}).name,staff:!!(f.staff&&(f.staff.people||[]).length),src:f.src};});
+  /* v25.71: since v24.27 (E-15, "the student the packet or a form names goes with the facts") src.student names where the
+     student's name came from, the packet here; SI-1's own facts (assent, hypothesis, assent plan) are still in f.student */
+  ok('1 SV-1, CF-1, SI-1 and ST-1 give the case their facts (sv, fit, student, staff)',f1.sv&&f1.fit&&f1.student&&f1.stName==='Mateo Rivera'&&f1.staff&&f1.src.sv==='SV-1'&&f1.src.fit==='CF-1'&&f1.src.student==='packet'&&f1.src.staff==='ST-1',f1);
   await page.evaluate(()=>clearCase());await sleep(500);
   /* 2. Today and the hand-over check */
   const iso=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};

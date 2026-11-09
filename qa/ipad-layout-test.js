@@ -40,7 +40,8 @@ const tabs=()=>{const seg=document.querySelector('#viewSeg');if(!seg)return {n:0
   const ctx=await br.newContext({viewport:{width:1180,height:820},hasTouch:true,userAgent:IPAD,serviceWorkers:'block'});ctx.on('dialog',d=>d.accept().catch(()=>{}));
   const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(L.BASE+'/NBH-Workstation/'+encodeURI(TD.file));await sleep(1200);
   /* 2. the Setup fields (v25.69: the case-fill note is written into the empty box after fx2 settles; wait for it) */
-  await p.waitForFunction(()=>{const b=document.querySelector('[name="m.beh"]');return b&&/^From Form/.test(b.placeholder||'');},null,{timeout:6000}).catch(()=>{});
+  /* v25.71: and for the example number to be set beside or in its box (data-nbh-ph kept), which comes a moment later: read at once, the box still held the bare "10" */
+  await p.waitForFunction(()=>{const b=document.querySelector('[name="m.beh"]'),s=document.querySelector('[name="m.sessmin"]');return b&&/^From Form/.test(b.placeholder||'')&&s&&!!s.dataset.nbhPh;},null,{timeout:8000}).catch(()=>{});
   const A=await p.evaluate(()=>{const s=document.querySelector('[name="m.sessmin"]'),b=document.querySelector('[name="m.beh"]');const eg=s&&s.nextElementSibling&&s.nextElementSibling.classList.contains('nbh-eg')?s.nextElementSibling.textContent:'';
     const ident=document.querySelector('.ident:not(.c1)');return {ph:s&&s.placeholder,eg,orig:s&&s.dataset.nbhPh,from:b&&b.placeholder,gap:ident?getComputedStyle(ident).rowGap:'',fx2:document.documentElement.classList.contains('fx2')};});
   ok('2 TD-1 Setup: the example number reads "e.g. 10" in the box where it fits, else beside it (the number kept for the record); the target behavior says it comes from Form TB-1; the details grid has its row gap',
@@ -78,7 +79,7 @@ const tabs=()=>{const seg=document.querySelector('#viewSeg');if(!seg)return {n:0
   await fr.evaluate(()=>window.scrollBy(0,500));await sleep(800);F.down2=await st();
   await w.evaluate(()=>document.querySelector('#closeForm').click());await sleep(400);await w.evaluate(()=>{const b=document.querySelector('#cfFoot button.danger');if(b)b.click();});await sleep(600);F.closed=await st();
   ok('5 the bars fold while the form is read and come back when it is scrolled up or closed; one Save case at a time',
-    !F.start.fold&&F.start.hdr!=='none'&&F.start.quick==='none'&&F.start.save!=='none'&&F.down.fold&&F.down.hdr==='none'&&F.down.quick!=='none'&&!F.up.fold&&F.up.hdr!=='none'&&F.up.quick==='none'&&F.down2.fold&&!F.closed.fold&&F.closed.hdr!=='none',F);
+    !F.start.fold&&F.start.hdr!=='none'&&F.start.quick==='none'&&F.start.save!=='none'&&F.down.fold&&F.down.hdr==='none'&&F.down.quick==='none'/* v25.71: since v25.65's top bar A only the form row stays while writing (Save form in it); the quick Save case stays hidden */&&!F.up.fold&&F.up.hdr!=='none'&&F.up.quick==='none'&&F.down2.fold&&!F.closed.fold&&F.closed.hdr!=='none',F);
   await c2.close();
   ok('6 no page errors',!errs.length,errs.slice(0,4));
   }catch(e){fails++;console.log('FAIL exception',e&&e.stack||e);}

@@ -55,7 +55,15 @@ for pn in range(N):
                     if row + col in slots: slots[row + col].append(s); heads.append(s); continue
                 body.append(s)
     # the running heads: in place, and nearer no edge than EDGE
-    got = {k: norm(' '.join(s['text'] for s in v)) for k, v in slots.items()}
+    # v25.71 the spans of a head are joined by where they stand: Chromium writes a line set in Inter (a system font on some
+    # machines) as a run of pieces ("N", "e", "wsom", ...), so a space goes in only where there is a gap between two pieces
+    def joined(v):
+        t, last = '', None
+        for s in v:
+            if last is not None and (s['bbox'][0] - last > 0.15 * s['size'] or s['bbox'][0] < last - s['size']): t += ' '
+            t += s['text']; last = s['bbox'][2]
+        return t
+    got = {k: norm(joined(v)) for k, v in slots.items()}
     m = re.match(r'^(\d+) · (.*)$', got['tc'])
     k = int(m.group(1)) if m else 0
     seq.append(k)

@@ -38,7 +38,9 @@ const ABC='ABC_Recording_Conditional_Probability_Analysis.html';
   p=await open();await sim(p);
   let dem=await campRow(p,'Demand removed/avoided');
   ok('5 F80 with the minutes observed (1060) the unconditional probability is over every 10-second span: demand removed meets the criterion',dem&&parseFloat(dem[3])<10&&parseFloat(dem[4])>1.23&&dem[5]==='met'&&/Weighted by time observed/.test(await out(p)),dem);
-  await p.evaluate(()=>{state.samples=state.samples.slice(0,10);renderAnalysis();});
+  /* v25.71: since v24.28 (review R-059) an event never seen in a no-behavior check has no base rate ("undefined", no verdict); the
+     first ten checks of the example never saw the demand removed, so the ten kept are nine of them and one that saw it */
+  await p.evaluate(()=>{const has=s=>(s.events||[]).includes('c_dem_rem');state.samples=state.samples.filter(s=>!has(s)).slice(0,9).concat(state.samples.filter(has).slice(0,1));renderAnalysis();});
   dem=await campRow(p,'Demand removed/avoided');
   ok('6 F80 with only 10 checks a consequence can still meet the criterion (the old count-based ratio was capped below 1.23)',dem&&parseFloat(dem[4])>1.23,dem);
   await p.evaluate(()=>{document.getElementById('h-minutes').value='';document.getElementById('h-minutes').dispatchEvent(new Event('change'));});await sleep(150);
@@ -77,9 +79,10 @@ const ABC='ABC_Recording_Conditional_Probability_Analysis.html';
   const CASE={behaviors:[{name:'Hitting staff (simulated)',def:'Open-hand contact with an adult (simulated)'}],consent:{state:'Pending',on:false},student:{assent:'partial',stop:{signs:'says stop (simulated)'}},evidence:{'EA-1':{form:'EA-1',fnKey:'escape',dates:'10/1/2026'}},function:'attention'};
   const c1=await p.evaluate(async c=>{window.__nbhFactsIn(c);await new Promise(r=>setTimeout(r,200));window.__yes=false;document.getElementById('obsStart').click();await new Promise(r=>setTimeout(r,300));
     const row=document.querySelector('[data-opt="b-tb_hitting_staff_simulated"]');
-    return {row:row&&row.textContent.replace(/\s+/g,' ').trim(),title:row&&row.title,first:(Array.from(document.querySelectorAll('#abc-grid .group')).find(g=>/^Target behavior/.test(g.querySelector('.glabel').textContent)).querySelector('.opt')||{dataset:{}}).dataset.opt,consent:document.getElementById('abcConsent').textContent,bad:document.getElementById('abcConsent').classList.contains('bad'),
+    return {row:row&&row.textContent.replace(/\s+/g,' ').trim(),rowDef:row&&(row.querySelector('.abc-tbdef')||{}).textContent,title:row&&row.title,first:(Array.from(document.querySelectorAll('#abc-grid .group')).find(g=>/^Target behavior/.test(g.querySelector('.glabel').textContent)).querySelector('.opt')||{dataset:{}}).dataset.opt,consent:document.getElementById('abcConsent').textContent,bad:document.getElementById('abcConsent').classList.contains('bad'),
       asked:window.__asked.slice(-1)[0],timer:abcTimer.state(),fa:document.getElementById('a-function').value,faNote:document.getElementById('abcFaFrom').textContent};},CASE);
-  ok('17 F84 the case\'s target behavior is the first row of the Behavior column, marked TB-1, with its definition',c1.row==='Hitting staff (simulated) TB-1'&&c1.first==='b-tb_hitting_staff_simulated'&&c1.title==='Open-hand contact with an adult (simulated)',c1);
+  /* v25.71: since v24.14 (abc114, "the TB-1 definition on the Record tab") the definition is also written under the name */
+  ok('17 F84 the case\'s target behavior is the first row of the Behavior column, marked TB-1, with its definition',c1.row==='Hitting staff (simulated) TB-1Open-hand contact with an adult (simulated)'&&c1.rowDef==='Open-hand contact with an adult (simulated)'&&c1.first==='b-tb_hitting_staff_simulated'&&c1.title==='Open-hand contact with an adult (simulated)',c1);
   ok('18 I44 the header says consent is pending and that observation needs it, and gives the assent and stop signal',c1.bad&&/^Consent pending: no response from the parent yet \(Form IC-1\): direct observation for an individual FBA needs the parent’s consent first · Assent \(Form SI-1\): partial; the student says stop by: says stop \(simulated\)$/.test(c1.consent),c1.consent);
   ok('19 I44 Start observation asks first, and answered no, the observation does not start',/^Consent pending: no response from the parent yet \(Form IC-1\)\.\nDirect observation for an individual FBA needs the parent’s consent first\. Start the observation anyway\?$/.test(c1.asked||'')&&c1.timer==='ready',c1);
   ok('20 I45 the FA function is EA-1\'s (escape), not FS-1\'s conclusion (attention), and says where it came from',c1.fa==='escape'&&/^Form EA-1’s experimental analysis \(10\/1\/2026\): Escape \/ avoidance\.$/.test(c1.faNote),c1);
@@ -94,7 +97,8 @@ const ABC='ABC_Recording_Conditional_Probability_Analysis.html';
   await p.close();
   /* ---- F86, I43 the Activity filter ---- */
   p=await open();await sim(p);
-  const f86=await p.evaluate(()=>{const lab=document.getElementById('a-activity').closest('label').textContent.trim();document.getElementById('a-activity').value='math';document.getElementById('a-activity').dispatchEvent(new Event('input'));const S=analysisSet();
+  /* v25.71: since v24.28 the analysis opens on one topography (pooling is the analyst's choice); this check pools, as it did */
+  const f86=await p.evaluate(()=>{const ab=document.getElementById('a-behavior');ab.value='';ab.dispatchEvent(new Event('change'));const lab=document.getElementById('a-activity').closest('label').textContent.trim();document.getElementById('a-activity').value='math';document.getElementById('a-activity').dispatchEvent(new Event('input'));const S=analysisSet();
     return {lab,N:S.coded.length,M:S.samples.length,all:state.samples.length,txt:document.getElementById('analysis-out').textContent.replace(/\s+/g,' ')};});
   ok('23 F86, I43 Activity contains narrows the incidents and the background samples alike, and says so',/^Activity contains/.test(f86.lab)&&f86.N===6&&f86.M>0&&f86.M<f86.all&&/Both sides are narrowed/.test(f86.txt)&&/not with a date or activity filter/.test(f86.txt),{lab:f86.lab,N:f86.N,M:f86.M,all:f86.all});
   await p.close();

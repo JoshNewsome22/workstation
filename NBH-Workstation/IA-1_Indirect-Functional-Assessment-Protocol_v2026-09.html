@@ -4676,7 +4676,7 @@ function simPBQ(mode,c,reliab){const noise=(1-reliab)*2;const hi=5,lo=1.3,mid=3;
 async function loadSim(){
  /* the enhancement sprint (A2): asks first, with the question the other forms use; Cancel changes nothing. The sheets'
     reset keeps the pasted item wording, the respondent terms and the video link, so the question says so */
- if(!(await nbhUI.confirm('Load the simulated case?\nScenario: '+$('#simScenario option:checked').textContent+'. Every sheet is filled with a worked example. Anything already entered will be replaced; the pasted item wording, the respondent terms and the video link stay.',{ok:'Load'})))return;
+ if(!(await nbhUI.confirm('Load the simulated case?\nScenario: '+$('#simScenario option:checked').textContent+'. Every sheet is filled with a worked example. Anything already entered will be replaced; the pasted item wording, the respondent terms and the video link stay.',{ok:'Load'})))return false;   /* v25.71 false: cancelled, so nothing after it runs */
  const sc=SIM[$('#simScenario').value];restore({counts:{inf:3,int:2}});
  const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e){if(e.type==='checkbox')e.checked=!!v;else e.value=v;}};
  const T=sc.target;const label={attention:'adult attention',tangible:'access to preferred items',escape:'escape from academic demands',automatic:'automatic (sensory) reinforcement',physical:'pain attenuation / physical discomfort'}[T]||'undetermined';
@@ -4743,7 +4743,7 @@ async function loadSim(){
  setView('summary');}
 /* v24.39 (review R-121, R-122, E-02) the simulation seeded and marked: the same example at every load, New example for another */
 {const sim0=loadSim;loadSim=async function(){if(window.nbhSim)nbhSim.begin();let r;try{r=await sim0.apply(this,arguments);}finally{try{if(window.nbhSim)nbhSim.after(loadSim);}catch(e){}}return r;};}
-{const sim1=loadSim;loadSim=async function(){const r=await sim1.apply(this,arguments);try{tgtPaint();if(window.__iaDefSim)window.__iaDefSim();}catch(e){}return r;};}   /* v24.43 (review R-044, E-36) the target list repainted and the definition answers recorded after the simulation */
+{const sim1=loadSim;loadSim=async function(){const r=await sim1.apply(this,arguments);if(r===false)return r;try{tgtPaint();if(window.__iaDefSim)window.__iaDefSim();}catch(e){}return r;};}   /* v24.43 (review R-044, E-36) the target list repainted and the definition answers recorded after the simulation */
 $('#simBtn').addEventListener('click',loadSim);
 
 /* ---------- toolbar counts ---------- */

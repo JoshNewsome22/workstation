@@ -95,11 +95,18 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
       const sc=await snapOf(C);delete sc.own;const dc=Object.assign({},sc.data);delete dc['#teLink'];
       ok('1 field path: every field holds the snapshot\'s value, the student too',JSON.stringify(dc)===JSON.stringify(sa.data)&&
         await C.evaluate(()=>document.querySelector('[data-m="client"]').value)==='SIMULATED \u2013 Sample Student',{now:sc.total,was:sa.total});
-      ok('1 field path: the record is the committed one again',(await sOf(A))===(await sOf(C)));
+      /* v25.71: the fields v25.65 added to TE-1 (the token test, how the backup is given, the token's worth, the side effects and
+         the student's view of token loss) are not in the simulation, so the record lacks them; the field path writes every box
+         back and they come back as empty text. An empty text and a missing field are the same record here */
+      const noEmpty=j=>{const o=JSON.parse(j);Object.keys(o.meta||{}).forEach(k=>{if(o.meta[k]==='')delete o.meta[k];});return JSON.stringify(o);};
+      ok('1 field path: the record is the committed one again',noEmpty(await sOf(A))===noEmpty(await sOf(C)));
       const off=JSON.parse(JSON.stringify(sa));off.total+=2;off.data={};
       Object.keys(sa.data).forEach(k=>{off.data[k.charAt(0)==='~'?'~'+(+k.slice(1)+1):k]=k==='~0'?'(one place off)':sa.data[k];});
       const before=await sOf(C),rep2=await restoreIn(C,off);await sleep(300);
-      ok('1 field path: a snapshot one place off is not placed',rep2&&rep2.placed===0&&rep2.positionalSkipped>0&&rep2.sameShape===false&&(await sOf(C))===before,rep2);
+      /* v25.71: since v24.39 (review R-122) the simulation flag (#nbhSimulated, a box with an id) travels in the snapshot and is placed
+         by its id; none of the fields kept by place is */
+      const byId=Object.keys(off.data).filter(k=>k.charAt(0)!=='~').length;
+      ok('1 field path: a snapshot one place off is not placed',rep2&&byId===1&&rep2.placed===byId&&rep2.positionalSkipped>0&&rep2.sameShape===false&&(await sOf(C))===before,rep2);
       await C.close();}
     for(const [nm,fn] of [['simulation',async()=>{}],['blank',async p=>{await p.evaluate(()=>{S=blank();renderAll();});}]]){
       await fn(A);await fn(B);
@@ -178,7 +185,12 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
     /* 14. print */
     await p.emulateMedia({media:'print'});
     const pr=await printVis(p);
-    ok('14 linked: #lkPrint prints, with the heading, not the panel',pr.print&&pr.head&&!pr.panel&&pr.guide,pr);
+    /* v25.71: since v24.31 the Guide prints only when it is chosen (here TE-1's "Print the Guide with the plan"), so the link's Guide
+       paragraph prints with it, and not without it */
+    await p.emulateMedia({media:'screen'});await p.evaluate(()=>{const c=document.querySelector('[data-te="print-guide"]');c.checked=true;c.dispatchEvent(new Event('change',{bubbles:true}));});
+    await p.emulateMedia({media:'print'});const prG=await printVis(p);
+    await p.emulateMedia({media:'screen'});await p.evaluate(()=>{const c=document.querySelector('[data-te="print-guide"]');c.checked=false;c.dispatchEvent(new Event('change',{bubbles:true}));});await p.emulateMedia({media:'print'});
+    ok('14 linked: #lkPrint prints, with the heading, not the panel',pr.print&&pr.head&&!pr.panel&&!pr.guide&&prG.guide&&prG.print&&!prG.panel,{pr,prG});
     ok('14 linked: the print line states what the book holds',/^Compared with this plan on .+ 2026: 5 slots of stars; choice cards Tablet, Puzzle, Ball, Bubbles, Lego\.$/.test(pr.printText),pr.printText);
     await p.emulateMedia({media:'screen'});
     await p.close();}
