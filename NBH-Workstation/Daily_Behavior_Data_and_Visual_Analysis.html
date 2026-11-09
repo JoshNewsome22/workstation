@@ -23428,6 +23428,369 @@ if(window.__ddStaff)window.__ddStaff.selfQs=selfQs;
 try{stPaint();}catch(e){}
 })();
 </script>
+<style id="dd1-v2570-css">
+/* v25.70 the graphs: the style switch, the Publication figures, the sentence and the table, the design check */
+.nbh-gs{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:10px 0 12px}
+.nbh-gs-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.nbh-gs-l{font-size:13px;color:var(--ink-soft,#4A5C68)}
+.nbh-gs-b{min-height:44px;min-width:44px;padding:6px 12px;border:1px solid var(--rule,#c9d3d9);background:#fff;color:var(--ink,#16242E);border-radius:3px;font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation}
+.nbh-gs-b[aria-pressed="true"]{background:#16242E;color:#fff;border-color:#16242E}
+.nbh-gs-b:focus-visible{outline:3px solid #1F4E8C;outline-offset:2px}
+svg.graph.ddpub{width:calc(var(--w) * 1.9px);max-width:100%;min-width:0;height:auto;display:block;margin:0 auto;background:#fff}
+@media screen{#nbhPubPrint{display:none}}
+@media print{.nbh-gs{display:none!important}
+  svg.graph.ddpub{width:calc(var(--w) * 1pt)!important;max-width:100%!important;height:auto!important}
+  body.nbh-pubprint > *:not(#nbhPubPrint){display:none!important}
+  body.nbh-pubprint #nbhPubPrint{display:block!important;margin:0}
+  #nbhPubPrint svg{width:calc(var(--w) * 1pt)!important;max-width:100%;height:auto;display:block}}
+.dd-gsum{margin:8px 0 4px;font-size:14px;line-height:1.45;color:var(--ink,#16242E);max-width:72em}
+.dd-gsum .dd-touchhint{display:block;font-size:12.5px;margin-top:2px}
+.dd-gtab{margin:6px 0 10px;overflow-x:auto;max-width:100%}
+.dd-gtab-t{border-collapse:collapse;font-size:13px;min-width:0}
+.dd-gtab-t caption{text-align:left;font-weight:600;font-size:13px;padding:2px 0 6px}
+.dd-gtab-t th,.dd-gtab-t td{border-bottom:1px solid var(--rule-soft,#dce3e7);padding:5px 8px;text-align:left;vertical-align:top}
+.dd-gtab-t thead th{position:static;font-size:12.5px}
+.dd-graphsave [data-g70]{min-height:44px}
+.dd-zoomctl .dd-zoomtxt{font-size:12.5px}
+.dd-dcheck{border:1px solid var(--rule-soft,#dce3e7);border-left:3px solid #4A5C68;border-radius:3px;padding:8px 12px;margin:12px 0 4px;background:#fafbfc;font-size:13.5px;line-height:1.45}
+.dd-dcheck h4{margin:0 0 4px;font-size:14px}.dd-dcheck p{margin:4px 0}.dd-dcheck ul{margin:4px 0 4px 1.3em;padding:0}.dd-dcheck li{margin:2px 0}
+.dd-capedit{border:1px solid #1F4E8C;border-radius:3px;padding:8px 10px;margin:6px 0;font-size:14px;line-height:1.45;background:#fff;min-height:44px}
+.dd-pubsize{margin:4px 0;font-size:12.5px}
+#ddPtTip{position:fixed;z-index:60;background:#16242E;color:#fff;font-size:13.5px;line-height:1.4;padding:8px 10px;border-radius:4px;max-width:250px;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none;opacity:0;transition:opacity .15s}
+#ddPtTip.on{opacity:1}
+#resultsOut .chartbox svg.graph[data-dd-b]:not(.ddpub){touch-action:pan-x pan-y}
+.dd-ioa-key,.dd-brk-key{white-space:nowrap}
+/* Publication: the colour keys and the colour image button step aside; the other graphs are drawn in gray */
+body.dd-pubmode #resultsOut .legend,body.dd-pubmode #resultsOut [data-act="saveGraph"]{display:none!important}
+body.dd-pubmode #resultsOut .chartbox svg.graph:not(.ddpub){filter:grayscale(1)}
+body.dd-pubmode #resultsOut .chartbox{text-align:center}
+@media print{.dd-gsum,.dd-dcheck,.dd-zoomctl,.dd-pubsize,#ddPtTip,.dd-capedit{display:none!important}}
+body.dd-pubmode #resultsOut .chartbox:has(svg.ddpub){border:0;padding:0}
+</style>
+<script id="dd1-v2570">
+/* ---- v25.70 the publication figure (GRAPHS.md, "Publication-ready mode: the specification"). One drawing for every graph
+   this form shows in the Publication style: black ink on white, a symbol and a line style for each series, no gridlines,
+   shading or aids, ticks outside, sans-serif type set in points at the final size, condition labels at the top, the
+   caption below. The plot keeps the chosen y:x proportion (2:3, 5:8 or 3:4) and its width follows the number of sessions
+   (12 pt a session, 150 to 340 pt), so a few points are not stretched across a page and a double column (14.6 cm) holds
+   the widest. The SVG is in points: saved, it opens at that size, and it prints at it. */
+var nbhPub=(function(){
+"use strict";
+var FONT="Arial, Helvetica, sans-serif";
+/* the series, in order: filled circle, open circle, filled triangle, open square, filled square, open triangle, filled
+   diamond, open diamond; the paths solid, dashed, dotted, dash-dot */
+var SYM=[["circle",1],["circle",0],["triangle",1],["square",0],["square",1],["triangle",0],["diamond",1],["diamond",0]];
+var DASH=["","3 1.6","0.9 1.6","3.2 1.4 0.9 1.4"];
+var SYMW={circle:"circles",triangle:"triangles",square:"squares",diamond:"diamonds"};
+var ctx=null;
+function tw(s,pt,bold){if(ctx===null){try{ctx=document.createElement("canvas").getContext("2d")||false;}catch(e){ctx=false;}}
+  if(!ctx)return String(s).length*pt*0.55;ctx.font=(bold?"700 ":"400 ")+pt+"px "+FONT;return ctx.measureText(String(s)).width;}
+function x(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function f(n){return (Math.round(n*100)/100).toString();}
+function wrap(t,w,pt,max){var out=[],cur="";String(t||"").split(/\s+/).filter(Boolean).forEach(function(word){var s=cur?cur+" "+word:word;if(!cur||tw(s,pt)<=w)cur=s;else{out.push(cur);cur=word;}});if(cur)out.push(cur);return max&&out.length>max?null:out;}
+function marker(sym,cx,cy,r,title){var k=SYM[sym%SYM.length],fill=k[1]?"#000":"#fff",a=' fill="'+fill+'" stroke="#000" stroke-width="0.8"',t=title?"<title>"+x(title)+"</title>":"",s;
+  if(k[0]==="circle")s='<circle cx="'+f(cx)+'" cy="'+f(cy)+'" r="'+f(r)+'"'+a+">";
+  else if(k[0]==="square"){var h=r*0.9;s='<rect x="'+f(cx-h)+'" y="'+f(cy-h)+'" width="'+f(2*h)+'" height="'+f(2*h)+'"'+a+">";}
+  else if(k[0]==="triangle"){var q=r*1.2;s='<polygon points="'+f(cx)+","+f(cy-q)+" "+f(cx+q)+","+f(cy+q*0.75)+" "+f(cx-q)+","+f(cy+q*0.75)+'"'+a+">";}
+  else{var d=r*1.25;s='<polygon points="'+f(cx)+","+f(cy-d)+" "+f(cx+d)+","+f(cy)+" "+f(cx)+","+f(cy+d)+" "+f(cx-d)+","+f(cy)+'"'+a+">";}
+  return s+t+(k[0]==="circle"?"</circle>":k[0]==="square"?"</rect>":"</polygon>");}
+function symName(sym){var k=SYM[sym%SYM.length];return (k[1]?"filled ":"open ")+SYMW[k[0]];}
+function ratioOf(r){return r==="5:8"?0.625:r==="3:4"?0.75:2/3;}
+/* spec: {ratio:"2:3", nSlots, xTitle, xLabel(i)->text|"" , panels:[{yTitle, top, step, tier, series:[{name, sym, dash,
+   segs:[[{i,y}]], pts:[{i,y,title}]}], singles:[{i,y,title}] (open, unjoined), vlines:[{s, dash}], labels:[{s0,s1,text}],
+   crit:[{s0,s1,y,label}], tmarks:[{s,kind,title}], bmarks:[{s,text,title}], events:[{s,text}], dog:s|null}], breaks:[s], zero:true,
+   caption, label (accessible name), figNo} */
+function figure(sp){
+  var n=Math.max(1,sp.nSlots|0),ratio=ratioOf(sp.ratio),P=sp.panels||[],k=P.length||1;
+  var pw=Math.max(150,Math.min(340,n*12)),ph=k===1?pw*ratio:Math.max(52,pw*ratio*1.2/k),gapP=12,z=sp.zero?3:0;
+  var T={tick:7.5,title:9,lab:8.5,small:6.5,cap:8.5,dl:8};
+  /* the left margin holds the widest tick label and the rotated title */
+  var tickW=0;P.forEach(function(p){for(var v=0;v<=p.top*(1+1e-9);v+=p.step){tickW=Math.max(tickW,tw(p.tick?p.tick(v):f(v),T.tick));}});
+  var ML=Math.ceil(5+T.title+5+tickW+5+3.5);
+  /* direct labels: at the right end of each path, in a gutter, when a panel has more than one series and they fit */
+  var dl=[],gut=0;P.forEach(function(p,pi){if((p.series||[]).length<2)return;var w=0;p.series.forEach(function(s){w=Math.max(w,tw(s.name,T.dl));});gut=Math.max(gut,w+8);});
+  /* a panel's name (a tier, or one of two behaviors) at the right of its panel, wrapped to 80 pt */
+  P.forEach(function(p){if(!p.tier)return;p.tierL=wrap(p.tier,80,T.dl)||[p.tier];var w=0;p.tierL.forEach(function(l){w=Math.max(w,tw(l,T.dl));});gut=Math.max(gut,Math.min(84,w)+8);});
+  var MR=8+gut;
+  var left=ML,X=function(s){return left+(s+0.5)*pw/n;};
+  /* the condition labels at the top, over the first panel's sections */
+  var L0=(P[0]&&P[0].labels)||[],notes=[],lines1=1;
+  L0.forEach(function(l){var w=Math.max(10,X(l.s1)-X(l.s0)-4);var ls=wrap(l.text,w,T.lab,2),pt=T.lab;if(!ls){ls=wrap(l.text,w,7,2);pt=7;}
+    if(!ls){notes.push(l.text);ls=["["+notes.length+"]"];pt=7;}l.lines=ls;l.pt=pt;lines1=Math.max(lines1,ls.length);});
+  var ev0=(P[0]&&P[0].events||[]).length?9:0,MT=(L0.length?Math.ceil(4+lines1*10+4):8)+ev0;
+  var g=[],H0=MT,py=[];P.forEach(function(p,pi){py.push(H0+pi*(ph+z+gapP));});
+  var plotB=py[k-1]+ph+z,MB=3.5+2+T.tick+5+T.title+4;
+  var W=Math.ceil(ML+pw+MR),cw=W-10,cap=sp.caption?wrap(sp.caption,cw,T.cap):[],capH=cap.length?6+cap.length*10.5:0,H=Math.ceil(plotB+MB+capH+4);
+  g.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>');
+  P.forEach(function(p,pi){
+    var y0=py[pi],yb=y0+ph,top=p.top>0?p.top:1,Y=function(v){return yb-Math.max(0,Math.min(v,top))/top*ph;};
+    /* axes: left and bottom only, meeting at the origin */
+    g.push('<line x1="'+f(left)+'" y1="'+f(y0)+'" x2="'+f(left)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.8"/>');
+    g.push('<line x1="'+f(left)+'" y1="'+f(yb+z)+'" x2="'+f(left+pw)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.8"/>');
+    /* y ticks outside, at round numbers; every other one labelled when there are more than six */
+    var nt=Math.round(top/p.step),every=nt>6?2:1;
+    for(var q=0;q<=nt;q++){var v=q*p.step,yy=Y(v);g.push('<line x1="'+f(left-3.5)+'" y1="'+f(yy)+'" x2="'+f(left)+'" y2="'+f(yy)+'" stroke="#000" stroke-width="0.6"/>');
+      if(q%every===0)g.push('<text x="'+f(left-5)+'" y="'+f(yy+2.6)+'" font-size="'+T.tick+'" text-anchor="end">'+x(p.tick?p.tick(v):f(v))+"</text>");}
+    /* x ticks outside: each session while they are few, else a minor tick each and a major one every 5 */
+    var major=n<=12?1:n<=60?5:10,minor=n<=60?1:5;
+    for(var i=0;i<n;i++){if(i%minor&&(i+1)%major)continue;var mj=n<=12||(i+1)%major===0||i===0,xx=X(i);
+      g.push('<line x1="'+f(xx)+'" y1="'+f(yb+z)+'" x2="'+f(xx)+'" y2="'+f(yb+z+(mj?3.5:2))+'" stroke="#000" stroke-width="0.6"/>');
+      if(pi===k-1&&mj){var t=sp.xLabel?sp.xLabel(i):String(i+1);if(t)g.push('<text x="'+f(xx)+'" y="'+f(yb+z+3.5+2+T.tick)+'" font-size="'+T.tick+'" text-anchor="middle">'+x(t)+"</text>");}}
+    /* a break in time: "//" across the x-axis, and no path across it */
+    (sp.breaks||[]).forEach(function(s){var bx=X(s),by=yb+z;g.push('<g class="pub-brk"><rect x="'+f(bx-2.2)+'" y="'+f(by-1.5)+'" width="4.4" height="3" fill="#fff"/><line x1="'+f(bx-3.6)+'" y1="'+f(by+3)+'" x2="'+f(bx-0.6)+'" y2="'+f(by-3)+'" stroke="#000" stroke-width="0.7"/><line x1="'+f(bx+0.6)+'" y1="'+f(by+3)+'" x2="'+f(bx+3.6)+'" y2="'+f(by-3)+'" stroke="#000" stroke-width="0.7"/></g>');});
+    /* the y title, rotated, centred on the panel (once on the figure when every panel shares it) */
+    if(p.yTitle){var cy=y0+ph/2,yt=T.title,yl=[p.yTitle];while(yt>6.5&&tw(p.yTitle,yt)>ph+z+8)yt-=0.5;if(tw(p.yTitle,yt)>ph+z+8){yl=wrap(p.yTitle,ph+z+8,yt,2)||[p.yTitle];}
+      yl.forEach(function(l,m){var tx=5+yt*0.8+(m-(yl.length-1))*yt*1.05+(yl.length-1)*yt*0.5;g.push('<text class="pub-yt" x="'+f(tx)+'" y="'+f(cy)+'" font-size="'+yt+'" text-anchor="middle" transform="rotate(-90 '+f(tx)+" "+f(cy)+')">'+x(l)+"</text>");});}
+    if(p.tierL){var ty=y0+ph/2-(p.tierL.length-1)*4.75+2.8;p.tierL.forEach(function(l,m){g.push('<text class="pub-tier" x="'+f(left+pw+5)+'" y="'+f(ty+m*9.5)+'" font-size="'+T.dl+'">'+x(l)+"</text>");});}
+    /* phase-change lines: solid, the full height; a minor change or event dashed */
+    (p.vlines||[]).forEach(function(l){var vx=X(l.s);g.push('<line class="pub-ph" x1="'+f(vx)+'" y1="'+f(pi===0&&L0.length?y0-2:y0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.8"'+(l.dash?' stroke-dasharray="2.4 1.6"':"")+"/>");});
+    (p.events||[]).forEach(function(l){var vx=X(l.s),e0=pi===0&&ev0?y0-ev0+1:y0;g.push('<line class="pub-ev" x1="'+f(vx)+'" y1="'+f(e0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="2.4 1.6"/>');
+      if(l.text&&pi===0&&ev0){var ew=tw(l.text,T.small),ex=Math.min(vx+2,left+pw+MR-ew-2);g.push('<text class="pub-evl" x="'+f(ex)+'" y="'+f(y0-3)+'" font-size="'+T.small+'">'+x(l.text)+"</text>");}});
+    /* criterion: a thin dashed line across its conditions */
+    (p.crit||[]).forEach(function(c){var cy2=Y(c.y);g.push('<line class="pub-crit" x1="'+f(c.s0<=-0.5?left:X(c.s0))+'" y1="'+f(cy2)+'" x2="'+f(c.s1>=n-0.5?left+pw:X(c.s1))+'" y2="'+f(cy2)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="3 2"/>');
+      if(c.label)g.push('<text x="'+f(c.s1>=n-0.5?left+pw:X(c.s1))+'" y="'+f(cy2-2)+'" font-size="'+T.small+'" text-anchor="end">'+x(c.label)+"</text>");});
+    /* the stepped (dogleg) phase line of a multiple baseline: down this panel, across the gap to the next one's */
+    if(p.dog!=null){var dx=X(p.dog),nx=P[pi+1]&&P[pi+1].dog!=null?X(P[pi+1].dog):null;var d="M"+f(dx)+" "+f(y0)+"V"+f(yb+z);if(nx!==null)d+="V"+f(yb+z+gapP/2)+"H"+f(nx)+"V"+f(py[pi+1]);g.push('<path class="pub-dog" d="'+d+'" fill="none" stroke="#000" stroke-width="0.8"/>');}
+    /* the data: each segment joined, points drawn over the paths; an open point is filled white */
+    (p.series||[]).forEach(function(s){(s.segs||[]).forEach(function(seg){if(seg.length<2)return;g.push('<polyline points="'+seg.map(function(o){return f(X(o.i))+","+f(Y(o.y));}).join(" ")+'" fill="none" stroke="#000" stroke-width="0.9"'+(DASH[s.dash%DASH.length]?' stroke-dasharray="'+DASH[s.dash%DASH.length]+'"':"")+"/>");});});
+    (p.singles||[]).forEach(function(o){g.push('<circle cx="'+f(X(o.i))+'" cy="'+f(Y(o.y))+'" r="2.4" fill="#fff" stroke="#000" stroke-width="0.7" stroke-dasharray="1 0.8"><title>'+x(o.title||"")+"</title></circle>");});
+    (p.series||[]).forEach(function(s){(s.pts||[]).forEach(function(o){g.push(marker(s.sym,X(o.i),Y(o.y),2.5,o.title));if(o.mark)g.push('<text x="'+f(X(o.i))+'" y="'+f(Y(o.y)-4.5)+'" font-size="'+T.small+'" text-anchor="middle">'+x(o.mark)+"</text>");});});
+    /* marks: a second observer's day (an open inverted triangle) and probes at the top; absences above the axis */
+    (p.tmarks||[]).forEach(function(m){var mx=X(m.s);if(m.kind==="ioa")g.push('<polygon class="pub-ioa" points="'+f(mx-2)+","+f(y0+0.5)+" "+f(mx+2)+","+f(y0+0.5)+" "+f(mx)+","+f(y0+3.8)+'" fill="#000"><title>'+x(m.title||"")+"</title></polygon>");
+      else g.push('<text x="'+f(mx)+'" y="'+f(y0+T.small+5)+'" font-size="'+T.small+'" text-anchor="middle">'+x(m.kind)+"<title>"+x(m.title||"")+"</title></text>");});
+    (p.bmarks||[]).forEach(function(m){g.push('<text x="'+f(X(m.s))+'" y="'+f(yb-1.5)+'" font-size="'+T.small+'" text-anchor="middle">'+x(m.text)+"<title>"+x(m.title||"")+"</title></text>");});
+    /* direct labels at the right end of each path, kept 8.5 pt apart; given up (for the caption's key) when one would
+       sit too far from its path */
+    if((p.series||[]).length>1){var want=p.series.map(function(s,si){var last=null;(s.pts||[]).forEach(function(o){if(!last||o.i>=last.i)last=o;});return last?{si:si,y:Y(last.y)+2.8,w:Y(last.y)+2.8,s:s}:null;}).filter(Boolean).sort(function(a,b){return a.y-b.y;});
+      for(var j=1;j<want.length;j++)if(want[j].y<want[j-1].y+8.5)want[j].y=want[j-1].y+8.5;
+      var over=want.length?want[want.length-1].y-(yb+z+4):0;if(over>0)want.forEach(function(o){o.y-=over;});for(var j2=want.length-2;j2>=0;j2--)if(want[j2].y>want[j2+1].y-8.5)want[j2].y=want[j2+1].y-8.5;
+      var ok=want.every(function(o){return Math.abs(o.y-o.w)<=14&&o.y>=y0;});
+      if(ok)want.forEach(function(o){g.push('<text class="pub-dl" x="'+f(left+pw+5)+'" y="'+f(o.y)+'" font-size="'+T.dl+'">'+x(o.s.name)+"</text>");});
+      dl.push(ok);}
+  });
+  /* the condition labels: centred over each condition, above the data, horizontal, no boxes */
+  L0.forEach(function(l){var cx=(X(l.s0)+X(l.s1))/2;l.lines.forEach(function(ln,m){g.push('<text class="pub-lab" x="'+f(cx)+'" y="'+f(MT-ev0-4-(l.lines.length-1-m)*10)+'" font-size="'+l.pt+'" text-anchor="middle">'+x(ln)+"</text>");});});
+  if(sp.xTitle)g.push('<text x="'+f(left+pw/2)+'" y="'+f(plotB+MB-4)+'" font-size="'+T.title+'" text-anchor="middle">'+x(sp.xTitle)+"</text>");
+  cap.forEach(function(ln,m){g.push('<text class="pub-cap" x="5" y="'+f(plotB+MB+6+8+m*10.5)+'" font-size="'+T.cap+'">'+x(ln)+"</text>");});
+  return {svg:'<svg class="graph ddpub" viewBox="0 0 '+W+" "+H+'" width="'+W+'pt" height="'+H+'pt" style="--w:'+W+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+x(sp.label||"Graph")+'" font-family="'+FONT+'" fill="#000">'+g.join("")+"</svg>",
+    W:W,H:H,pw:pw,ph:ph,notes:notes,direct:dl.every(Boolean)&&dl.length>0,nSlots:n};
+}
+/* the proportions line and the size at print */
+function sizeLine(fig,ratio,unit){var cm=function(pt){return (pt/72*2.54).toFixed(1);};
+  return "Proportions "+(ratio==="5:8"||ratio==="3:4"?ratio:"2:3")+" (y:x) · "+fig.nSlots+" "+unit+" · plot "+cm(fig.pw)+" × "+cm(fig.ph)+" cm · figure "+cm(fig.W)+" cm wide ("+(fig.W<=199?"a single column, 7.0 cm":fig.W<=414?"a double column, 14.6 cm":"wider than a double column")+")";}
+/* the figure saved as an SVG file: vector, sharp at any size, opens in Word, Google Docs, Keynote and Illustrator */
+function saveSvg(svgEl,name){var s=svgEl.cloneNode(true);s.removeAttribute("class");s.removeAttribute("style");s.setAttribute("xmlns","http://www.w3.org/2000/svg");
+  var src='<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(s);var url=URL.createObjectURL(new Blob([src],{type:"image/svg+xml"})),a=document.createElement("a");
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove();},400);return name;}
+/* print one figure alone, at its size: everything else on the page is set aside for that print */
+function printFig(svgEl){var w=document.getElementById("nbhPubPrint");if(!w){w=document.createElement("div");w.id="nbhPubPrint";document.body.appendChild(w);}
+  w.innerHTML="";w.appendChild(svgEl.cloneNode(true));document.body.classList.add("nbh-pubprint");
+  var off=function(){document.body.classList.remove("nbh-pubprint");w.innerHTML="";window.removeEventListener("afterprint",off);};window.addEventListener("afterprint",off);
+  try{window.print();}finally{setTimeout(function(){if(!window.matchMedia||!window.matchMedia("print").matches)off();},1500);}}
+/* the view preference: Colour (the default) or Publication, the proportions, the break after a gap. Kept on this device
+   (localStorage), never in the record, so a saved file, an export and the case are the same whichever is chosen. */
+var PK="nbh.graphs.v1";
+function prefs(){try{var o=JSON.parse(localStorage.getItem(PK)||"{}");return o&&typeof o==="object"?o:{};}catch(e){return {};}}
+function setPref(k,v){var o=prefs();if(v==null||v==="")delete o[k];else o[k]=v;try{if(Object.keys(o).length)localStorage.setItem(PK,JSON.stringify(o));else localStorage.removeItem(PK);}catch(e){}return o;}
+function isPub(){return prefs().style==="pub";}
+function ratio(){var r=prefs().ratio;return r==="5:8"||r==="3:4"?r:"2:3";}
+function breakDays(){var v=+prefs().breakDays;return [3,5,7,10,15].indexOf(v)>-1?v:7;}
+/* school days (Monday to Friday) strictly between two dates */
+function schoolDaysBetween(a,b){if(!/^\d{4}-\d\d-\d\d$/.test(a||"")||!/^\d{4}-\d\d-\d\d$/.test(b||""))return 0;var d0=new Date(a+"T12:00:00"),d1=new Date(b+"T12:00:00");if(!(d1>d0))return 0;
+  var n=0,d=new Date(d0.getTime());for(var k=0;k<4000;k++){d=new Date(d.getTime()+86400000);if(d>=d1)break;var w=d.getDay();if(w!==0&&w!==6)n++;}return n;}
+function initials(name){var c=String(name||"").replace(/^\s*SIMULATED\b\s*[–—-]?\s*/i,"").trim();var m=/^([^,]+),\s*(.+)$/.exec(c);if(m)c=m[2]+" "+m[1];
+  var p=c.split(/\s+/).filter(function(w){return /^[A-Za-zÀ-ɏ]/.test(w);});return p.length?p.map(function(w){return w.charAt(0).toUpperCase();}).join("").slice(0,3):"";}
+/* the style switch: buttons, not form controls, so the form's saved fields and the case's snapshot do not change */
+function switchHtml(o){var p=prefs(),pub=p.style==="pub",r=ratio(),bd=breakDays(),b=function(attr,val,on,t,tip){return '<button type="button" class="nbh-gs-b" '+attr+'="'+val+'" aria-pressed="'+(on?"true":"false")+'"'+(tip?' title="'+x(tip)+'"':"")+">"+t+"</button>";};
+  return '<div class="nbh-gs-row" role="group" aria-label="Graph style"><span class="nbh-gs-l">Graphs</span>'+b("data-gs-style","colour",!pub,"Colour (default)","The graphs as they are: colour, the reading aids, the screen layout")+b("data-gs-style","pub",pub,"Publication","Journal style: black and white, a symbol and line for each series, no gridlines or shading, the caption below; saves as SVG")+"</div>"+
+    (pub?'<div class="nbh-gs-row" role="group" aria-label="Proportions, y to x"><span class="nbh-gs-l">Proportions (y:x)</span>'+["2:3","5:8","3:4"].map(function(v){return b("data-gs-ratio",v,r===v,v+(v==="2:3"?" (default)":""),v==="2:3"?"The vertical axis two-thirds the horizontal (Cooper, Heron, & Heward)":v==="5:8"?"Johnston & Pennypacker; Tufte":"The tall end of the range taught");}).join("")+"</div>":"")+
+    (o&&o.breaks?'<div class="nbh-gs-row" role="group" aria-label="Break the time axis"><span class="nbh-gs-l">Break the time axis (//) after more than</span>'+[3,5,7,10,15].map(function(v){return b("data-gs-break",v,bd===v,String(v)+(v===7?" (default)":""));}).join("")+'<span class="nbh-gs-l">'+x(o.breaks)+"</span></div>":"");}
+return {SYM:SYM,DASH:DASH,figure:figure,sizeLine:sizeLine,saveSvg:saveSvg,printFig:printFig,prefs:prefs,setPref:setPref,isPub:isPub,ratio:ratio,breakDays:breakDays,schoolDaysBetween:schoolDaysBetween,initials:initials,symName:symName,switchHtml:switchHtml,esc:x,wrap:wrap,tw:tw};
+})();
+/* v25.70 the graphs (research GRAPHS.md gaps 1, 2, 4, 7 and 8; NEXT2 #5 and #6; the BCBA's approval of 11/8). Built on the
+   line graph (buildChart), the paired graph (pairChart), the stacked view (ddStackHtml) and the Graphs page
+   (renderResults), by wrapping them:
+   - Publication: a switch beside the graphs, "Colour (default)" or "Publication" (nbhPub above). In Publication every line
+     graph is drawn by nbhPub.figure: black and white, a symbol and line for each series, no gridlines, shading or aids,
+     journal ticks and type, condition labels at the top and the caption below, at y:x 2:3 (or 5:8, 3:4) with a frame that
+     follows the number of school days; the paired graph as two panels on one time axis; the stacked view as one panel a
+     tier with its stepped phase line; the other graphs in gray. Save as SVG, and Print figure, under each. Colour is the
+     default and draws exactly as before.
+   - A sentence and a table: under each line graph a one-sentence description computed from the same analysis (it is the
+     graph's accessible name too), and Show as table: every day plotted, with its condition, the change in effect, the value
+     and its notes. Screen only, and the table prints when it is open.
+   - Tap and zoom (the iPad): a tap within 22 px of a point (a 44 px target) shows its date, value, condition and the change
+     in effect; a double tap or a pinch zooms the days shown, and Reset zoom (or Escape) puts them back. Screen only: a print
+     shows every day.
+   - What this design can show: a neutral list beside each graph (A-B, reversal, alternating, changing criterion) and under
+     the stacked view (multiple baseline) of what the design can show and what it has. It never rates the effect.
+   - Breaks in time: where more than 7 school days (Monday to Friday; 3, 5, 10 or 15 by choice) pass between two days on the
+     sheet, "//" across the time axis, and no data path across it.
+   - IOA days: a small triangle at the top of each day with a second observer's count (or Form OB-1's agreement).
+   Nothing new is written to the record: the switch, the proportions and the break are kept on this device. */
+(function(){
+"use strict";
+if(typeof buildChart!=="function"||typeof renderResults!=="function"||typeof nbhPub!=="object")return;
+const P=nbhPub, G={args:{},pts:{},cap:{},zoom:{},altdl:{},rendering:false,blind:false,stackPass:false,figNo:{}};
+const U=m=>(MEASURES[m]||{}).unit||"";
+/* ---------------- breaks in time ---------------- */
+function gapAt(rows,i){if(!rows||i<=0||i>=rows.length)return null;const a=(rows[i-1]||{}).date,b=(rows[i]||{}).date;const n=P.schoolDaysBetween(a,b);return n>P.breakDays()?{i,n,a,b}:null;}
+function gapsOf(rows,xEnd){const out=[];for(let i=1;i<=Math.min(xEnd,rows.length-1);i++){const g=gapAt(rows,i);if(g)out.push(g);}return out;}
+/* the line graph's own data path asks this (v25.70): a path is not joined from day a to day b across a break */
+window.ddGapIn=function(rows,a,b){if(a===null||a===undefined)return false;for(let i=a+1;i<=b;i++)if(gapAt(rows,i))return true;return false;};
+/* ---------------- what each graph shows, in a sentence ---------------- */
+function condAt(an,i){return an.find(a=>a.rowIdx&&a.rowIdx.indexOf(i)>-1)||null;}
+function eventAt(i){let e=null;const k=ddRangeOn;try{if(!G.rendering)ddRangeOn=true;conditionalMarks().forEach(m=>{if(m.x<=i&&!m.auto)e=m;});}catch(x){}finally{ddRangeOn=k;}return e;}
+function phaseAt(i){const k=ddRangeOn;try{ddRangeOn=true;const c=buildConditions().find(c=>c.rowIdx.indexOf(i)>-1);return c?c.name:"";}catch(x){return "";}finally{ddRangeOn=k;}}
+function sentence(beh,rows,an){const A=an.filter(a=>a.n);if(!A.length)return "";const u=U(beh.measure),alt=ddAltNow;
+  const parts=A.map((a,k)=>`${a.name} mean ${r1(a.mean)}${k===0&&u?" "+u:""} (${a.n} day${a.n===1?"":"s"})`);
+  let cmp="";if(A.length>1&&!alt){const f=A[0],L=A[A.length-1],k=Math.min(5,L.n),last=L.vals.slice(-k),lo=Math.min(...f.vals),hi=Math.max(...f.vals),bl=last.filter(v=>v<lo).length,ab=last.filter(v=>v>hi).length;
+    cmp=bl===k?`the last ${k} day${k===1?" is":"s are all"} below the ${f.name} range (${r1(lo)} to ${r1(hi)})`:ab===k?`the last ${k} day${k===1?" is":"s are all"} above the ${f.name} range (${r1(lo)} to ${r1(hi)})`
+      :`${k-bl-ab} of the last ${k} day${k===1?"":"s"} ${k-bl-ab===1?"is":"are"} within the ${f.name} range (${r1(lo)} to ${r1(hi)})`;}
+  const xEnd=ddPlotEnd(rows);let miss=0,abs=0;for(let i=0;i<=xEnd&&i<rows.length;i++){const r=rows[i];if(r.absent==="absent"||r.absent==="noschool")abs++;else if(plotValue(r,beh)===null)miss++;}
+  const tail=[cmp,miss?`${miss} day${miss===1?"":"s"} without data`:"",abs?`${abs} day${abs===1?"":"s"} absent or no school`:""].filter(Boolean);
+  return `${beh.name||"Untitled behavior"}: ${parts.join("; ")}${tail.length?"; "+tail.join("; "):""}.`;}
+/* ---------------- the table of the days plotted ---------------- */
+function tableHtml(beh,rows,an){const xEnd=ddPlotEnd(rows),u=U(beh.measure),io=typeof ddIoaRow==="function";
+  const tr=[];for(let i=0;i<=xEnd&&i<rows.length;i++){const r=rows[i]||{},v=plotValue(r,beh),c=condAt(an,i),e=eventAt(i),n=[];
+    if(r.absent==="absent")n.push("absent");if(r.absent==="noschool")n.push("no school");
+    if(c&&(c.samples||[]).some(s=>s.x===i))n.push("part-day sample, left out of the figures");
+    const pr=typeof ddPrOk==="function"?ddPrOk(r.probe):"";if(pr)n.push(pr==="gen"?"generalization probe":"maintenance probe");
+    const ag=io?ddIoaRow(r,beh):null;if(ag!==null)n.push("second observer, agreement "+r1(ag)+"%");
+    const g=gapAt(rows,i);if(g)n.push(`after a break of ${g.n} school days`);
+    tr.push(`<tr><td>${i+1}</td><td>${esc(r.date?fmtDate(r.date):"")}</td><td>${esc(c?c.name:"")}</td><td>${esc(e?e.label:"")}</td><td>${v===null?"—":esc(r1(v))}</td><td>${esc(n.join("; "))}</td></tr>`);}
+  return `<table class="dd-gtab-t"><caption>${esc(beh.name||"Untitled behavior")}: every day on the graph${u?" ("+esc(u)+")":""}</caption><thead><tr><th scope="col">Day</th><th scope="col">Date</th><th scope="col">Condition</th><th scope="col">Change in effect</th><th scope="col">Value</th><th scope="col">Notes</th></tr></thead><tbody>${tr.join("")}</tbody></table>`;}
+/* ---------------- what this design can show (informational: it never rates the effect) ---------------- */
+function designHtml(beh,rows,an){const A=an.filter(a=>a.n);if(!A.length)return "";const L=[];let head="";
+  const ioaIn=A.filter(a=>a.rowIdx.some(i=>typeof ddIoaRow==="function"&&ddIoaRow(rows[i],beh)!==null)).length,few=Math.min(...A.map(a=>a.n));
+  const ioaL=`IOA: a second observer in ${ioaIn} of ${A.length} condition${A.length===1?"":"s"} (the standard cited asks for 20% of the days in each, at 80% or more)`;
+  if(ddAltNow){let run=0,best=0,prev=null;const of={};A.forEach((a,k)=>a.pts.forEach(p=>{of[p.x]=k;}));Object.keys(of).map(Number).sort((a,b)=>a-b).forEach(x=>{run=of[x]===prev?run+1:1;prev=of[x];best=Math.max(best,run);});
+    head=`Alternating conditions: can show which condition goes with more or less of the behavior when the paths stay apart, condition by condition. It needs about 5 points in each condition and no condition more than 2 sessions in a row.`;
+    L.push(`Points in each condition: ${A.map(a=>esc(a.name)+" "+a.n).join(", ")} (about 5 each)`,`Longest run of one condition: ${best} (2 or fewer)`,ioaL);}
+  else if(beh.stepAims===true){const steps=A.length-1,lens=A.slice(1).map(a=>a.n);
+    head=`Changing criterion: can show control when the behavior follows each change in the criterion. It needs at least 3 changes of criterion (4 in Ledford & Gast), steps that differ in length and size, and, if the team agrees, a return to an earlier criterion.`;
+    L.push(`Criterion changes: ${steps} (3 or more)`,`Step lengths: ${lens.length?lens.join(", ")+" days":"none yet"}`,`Days in each condition: fewest ${few} (3 to count, 5 preferred)`,ioaL);}
+  else{const names=A.map(a=>String(a.name||"").trim().toLowerCase()),back=names.some((n,k)=>names.indexOf(n)<k),ch=A.length-1;
+    if(A.length===1)head=`One condition so far: shows the level and trend of the behavior, not a change. A second condition (a plan start) is needed to show change.`;
+    else if(!back&&A.length===2)head=`A-B design: can show a change after the plan started. It can't show that the plan caused it (a functional relation). To show that, add a return to baseline and the plan again (A-B-A-B), or a second baseline that starts later: a multiple baseline across behaviors, settings or routines (the stacked view), which never withdraws a working plan.`;
+    else if(!back)head=`Successive conditions (${A.map(a=>esc(a.name)).join(" – ")}): can show change at each phase change. It can't show that a condition caused it until a condition is repeated (A-B-A-B) or the change is replicated in a staggered second baseline.`;
+    else head=`Reversal (a condition repeated): can show a functional relation when the behavior changes at each of 3 phase changes, at 3 different points in time. It needs at least 4 phases (A-B-A-B).`;
+    if(A.length>1)L.push(`Phase changes: ${ch}${back?" (3 or more for a reversal)":""}`);L.push(`Days in each condition: fewest ${few} (3 to count, 5 preferred)`,ioaL);}
+  return `<div class="dd-dcheck noprint no-print" role="note"><h4>What this design can show</h4><p>${head}</p><ul>${L.map(l=>`<li>${l}</li>`).join("")}</ul><p class="hint">This describes the design, not the size or meaning of the change; the readings and the CDC are above.</p></div>`;}
+/* ---------------- the Publication drawing of one behavior ---------------- */
+/* the axis of a Publication graph: from 0, at the same top rule as on screen (aids left out), then rounded to 2 to 6 major ticks at
+   round numbers; a percentage runs 0 to 100, and a top typed for the behavior is kept */
+function pubTop(beh,an,rows){const k=S.settings.showEnv;let a;try{S.settings.showEnv=false;a=ddAxis(beh,an,rows);}finally{S.settings.showEnv=k;}
+  if(a.rule==="own"||a.rule==="pct")return a;const cnt=beh.measure==="count";
+  for(let e=-3;e<=5;e++)for(const m of [1,2,2.5,5]){const s=+(m*Math.pow(10,e)).toPrecision(6);if(cnt&&(s<1||Math.abs(s-Math.round(s))>1e-9))continue;const n=Math.ceil(a.top/s-1e-9);if(n>=2&&n<=6)return Object.assign({},a,{top:+(n*s).toPrecision(10),step:s});}
+  return a;}
+function figNoOf(beh){return G.figNo[beh.id]||(orderedBehaviors().indexOf(beh)+1)||1;}
+function up1(s){s=String(s||"");return s.charAt(0).toUpperCase()+s.slice(1);}
+function who(){const i=P.initials(S.meta&&S.meta.client);return i?"Participant "+i:"the participant";}
+function capOf(beh,rows,an,extra){if(G.cap[beh.id])return G.cap[beh.id];const A=an.filter(a=>a.n),m=MEASURES[beh.measure]||{};
+  const names=A.map(a=>a.name).filter((v,i,s)=>s.indexOf(v)===i);
+  const ios=rows.map(r=>typeof ddIoaRow==="function"?ddIoaRow(r,beh):null).filter(v=>v!==null),nd=A.reduce((s,a)=>s+a.n,0);
+  const note=[];if(ios.length)note.push(`IOA on ${ios.length} of ${nd} days (${Math.round(100*ios.length/Math.max(1,nd))}%), mean ${r1(ios.reduce((s,v)=>s+v,0)/ios.length)}%; ▾ marks those days.`);
+  (extra||[]).forEach(t=>note.push(t));
+  return `Figure ${figNoOf(beh)}. ${m.axis||"Value"} of ${String(beh.name||"the target behavior").toLowerCase()} across school days${names.length?" in "+(names.length>1?names.slice(0,-1).join(", ")+" and "+names[names.length-1]:names[0]):""}, ${who()}.${note.length?" Note. "+note.join(" "):""}`;}
+function pubChart(beh,rows,conds,an){const xEnd=ddPlotEnd(rows),n=xEnd+1,ax=pubTop(beh,an,rows),alt=ddAltNow,extra=[];
+  const ser=[],singles=[],vl=[],labels=[],crit=[],tmarks=[],bmarks=[],events=[];
+  if(alt){an.forEach((a,k)=>{if(!a.n)return;const segs=[];let seg=[];a.pts.forEach(p=>{if(seg.length&&window.ddGapIn(rows,seg[seg.length-1].x,p.x)){segs.push(seg);seg=[];}seg.push({i:p.x,y:p.y});});if(seg.length)segs.push(seg);
+      ser.push({name:a.name,sym:k,dash:k,segs,pts:a.pts.map(p=>({i:p.x,y:p.y,title:`${a.name}, ${fmtDate(p.date)}: ${r1(p.y)}`}))});});}
+  else{const pts=[],segs=[];an.forEach(a=>{let seg=[],ex=null;a.pts.forEach(p=>{if(ex!==null&&(p.x!==ex||gapAt(rows,p.x))){segs.push(seg);seg=[];}seg.push({i:p.x,y:p.y});ex=p.x+1;pts.push({i:p.x,y:p.y,title:`${fmtDate(p.date)}: ${r1(p.y)}`});});if(seg.length)segs.push(seg);});
+    ser.push({name:beh.name,sym:0,dash:0,segs,pts});
+    conds.forEach((c,ci)=>{const s0=c.rowIdx[0];if(s0>xEnd)return;if(ci)vl.push({s:s0-0.5});const nx=conds[ci+1],e=nx&&nx.rowIdx[0]<=xEnd?nx.rowIdx[0]-0.5:n-0.5;labels.push({s0:ci?s0-0.5:-0.5,s1:e,text:String(c.raw||c.name||"").replace(/\|/g," ")});});}
+  an.forEach(a=>(a.samples||[]).forEach(p=>singles.push({i:p.x,y:p.y,title:`${fmtDate(p.date)}: ${r1(p.y)}, a part-day sample`})));
+  if(singles.length)extra.push("Open circles with a broken edge: part-day samples, not joined or counted.");
+  if(S.settings.showCond){conditionalMarks().filter(m=>m.x<=xEnd&&!m.auto).forEach(m=>events.push({s:m.x-0.5,text:m.label}));if(events.length)extra.push("Dashed vertical lines: changes within a condition (not a phase change).");}
+  const aim=num(beh.aim);
+  if(beh.stepAims===true&&!alt){conds.forEach((c,ci)=>{const v=ddAimFor(c,beh);if(v===null)return;const s0=ci?c.rowIdx[0]-0.5:-0.5,nx=conds[ci+1],s1=nx&&nx.rowIdx[0]<=xEnd?nx.rowIdx[0]-0.5:n-0.5;if(s0<n-0.5)crit.push({s0,s1,y:v,label:r1(v)});});if(crit.length)extra.push("Short dashed lines: the criterion in each phase.");}
+  else if(aim!==null&&aim<=ax.top){crit.push({s0:-0.5,s1:n-0.5,y:aim,label:"Criterion"});extra.push(`Dashed line: the criterion (${r1(aim)}).`);}
+  rows.forEach((r,i)=>{if(i>xEnd)return;if(r.absent==="absent"||r.absent==="noschool")bmarks.push({s:i,text:r.absent==="absent"?"A":"N",title:r.absent==="absent"?"Absent":"No school"});
+    const pr=typeof ddPrOk==="function"?ddPrOk(r.probe):"";if(pr)tmarks.push({s:i,kind:pr==="gen"?"G":"M",title:pr==="gen"?"Generalization probe":"Maintenance probe"});
+    const ag=typeof ddIoaRow==="function"?ddIoaRow(r,beh):null;if(ag!==null)tmarks.push({s:i,kind:"ioa",title:"Second observer: agreement "+r1(ag)+"%"});});
+  if(bmarks.length)extra.push("A: absent; N: no school.");if(tmarks.some(t=>t.kind!=="ioa"))extra.push("G, M: generalization and maintenance probes.");
+  const brk=gapsOf(rows,xEnd);if(brk.length)extra.push(`//: more than ${P.breakDays()} school days between two days on the sheet.`);
+  const fig0=()=>P.figure({ratio:P.ratio(),nSlots:n,xTitle:"School days",zero:S.settings.zeroLift===true,breaks:brk.map(g=>g.i-0.5),
+    panels:[{yTitle:(MEASURES[beh.measure]||{}).axis||"",top:ax.top,step:ax.step,tick:v=>ddTick(v,ax.step),series:ser,singles,vlines:vl,labels,crit,tmarks,bmarks,events}],
+    caption:capOf(beh,rows,an,extra),label:"Line graph of "+(beh.name||"the behavior")+" (publication style). "+sentence(beh,rows,an)});
+  let fig=fig0();if(alt&&ser.length>1&&!fig.direct){extra.push("Symbols: "+ser.map(s=>P.symName(s.sym)+", "+s.name).join("; ")+".");fig=fig0();}
+  return fig;}
+/* ---------------- the line graph ---------------- */
+{const bc=buildChart;buildChart=function(beh,rows,conds,analyses){let svg=bc.apply(this,arguments);try{
+  if(!svg||!beh||!Array.isArray(rows))return svg;
+  if(G.rendering&&!G.blind&&!G.args[beh.id])G.args[beh.id]={beh,rows,conds,analyses};
+  if(P.isPub()&&!G.blind){const fig=pubChart(beh,rows,conds,analyses);G.fig=G.fig||{};G.fig[beh.id]=fig;return fig.svg.replace('<svg class="graph ddpub"',`<svg class="graph ddpub" data-dd-b="${esc(beh.id)}"`);}
+  const m=/data-plot="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg);if(!m)return svg;
+  const l=+m[1],t=+m[2],iw=+m[3],ih=+m[4],xEnd=ddPlotEnd(rows),X=i=>l+(xEnd<=0?iw/2:i*iw/xEnd),top=ddDrawn.top||1,Y=v=>t+ih-(Math.min(v,top)/top)*ih,z=S.settings.zeroLift===true?7:0;
+  let add="";
+  svg=svg.replace(/^<svg class="graph"/,`<svg class="graph" data-dd-b="${esc(beh.id)}"`);
+  }catch(e){}return svg;};}
+/* the second reader's blind graph carries no sentence */
+if(typeof ddBlindOpen==="function"){const bo=ddBlindOpen;ddBlindOpen=function(){G.blind=true;try{return bo.apply(this,arguments);}finally{G.blind=false;}};}
+/* ---------------- the paired graph, in Publication: two panels on one time axis ---------------- */
+if(typeof pairChart==="function"){const pc=pairChart;pairChart=function(a1,b1,a2,b2,rows,conds){const svg=pc.apply(this,arguments);if(!svg||!P.isPub())return svg;try{
+  const xEnd=ddPlotEnd(rows),n=xEnd+1,brk=gapsOf(rows,xEnd);const panel=(an,b,sym,first)=>{const ax=pubTop(b,an,rows),segs=[],pts=[];an.forEach(a=>{let seg=[],ex=null;a.pts.forEach(p=>{if(ex!==null&&(p.x!==ex||gapAt(rows,p.x))){segs.push(seg);seg=[];}seg.push({i:p.x,y:p.y});ex=p.x+1;pts.push({i:p.x,y:p.y,title:`${b.name}, ${fmtDate(p.date)}: ${r1(p.y)}`});});if(seg.length)segs.push(seg);});
+    const vl=[],labels=[];conds.forEach((c,ci)=>{const s0=c.rowIdx[0];if(s0>xEnd)return;if(ci)vl.push({s:s0-0.5});const nx=conds[ci+1],e=nx&&nx.rowIdx[0]<=xEnd?nx.rowIdx[0]-0.5:n-0.5;if(first)labels.push({s0:ci?s0-0.5:-0.5,s1:e,text:String(c.raw||c.name||"").replace(/\|/g," ")});});
+    return {yTitle:(MEASURES[b.measure]||{}).axis||"",top:ax.top,step:ax.step,tick:v=>ddTick(v,ax.step),tier:b.name,series:[{name:b.name,sym,dash:0,segs,pts}],vlines:vl,labels};};
+  const fig=P.figure({ratio:P.ratio(),nSlots:n,xTitle:"School days",zero:S.settings.zeroLift===true,breaks:brk.map(g=>g.i-0.5),panels:[panel(a1,b1,0,true),panel(a2,b2,4,false)],
+    caption:`Figure ${figNoOf(b1)}b. ${up1(b1.name)} (top) and ${String(b2.name||"").toLowerCase()} (bottom) across school days, ${who()}. Each panel has its own vertical axis.`,label:`${b1.name} and ${b2.name}, in two panels (publication style)`});
+  return fig.svg;}catch(e){return svg;}};}
+/* ---------------- the stacked view, in Publication: a panel a tier, the stepped phase line ---------------- */
+if(typeof ddStackHtml==="function"){const sh=ddStackHtml;ddStackHtml=function(behs,rows,conds){let h=sh.apply(this,arguments);if(!h)return h;try{
+  const T=behs.filter(b=>rows.some(r=>plotValue(r,b)!==null)).map(b=>{const bc=ddBehConds(b,conds,rows);return {b,bc,an:bc.map(c=>analyzeCondition(c,b,rows))};});
+  if(!P.isPub()||T.length<2)return h;
+  const xEnd=ddPlotEnd(rows),n=xEnd+1,brk=gapsOf(rows,xEnd);
+  const panels=T.map((t,k)=>{const ax=pubTop(t.b,t.an,rows),segs=[],pts=[];t.an.forEach(a=>{let seg=[],ex=null;a.pts.forEach(p=>{if(ex!==null&&(p.x!==ex||gapAt(rows,p.x))){segs.push(seg);seg=[];}seg.push({i:p.x,y:p.y});ex=p.x+1;pts.push({i:p.x,y:p.y,title:`${t.b.name}, ${fmtDate(p.date)}: ${r1(p.y)}`});});if(seg.length)segs.push(seg);});
+    const c1=t.bc[1],dog=c1&&c1.rowIdx.length&&c1.rowIdx[0]<=xEnd?c1.rowIdx[0]-0.5:null,vl=[];t.bc.forEach((c,ci)=>{if(ci>1&&c.rowIdx[0]<=xEnd)vl.push({s:c.rowIdx[0]-0.5});});
+    const labels=k===0?t.bc.map((c,ci)=>{const nx=t.bc[ci+1];return {s0:ci?c.rowIdx[0]-0.5:-0.5,s1:nx&&nx.rowIdx[0]<=xEnd?nx.rowIdx[0]-0.5:n-0.5,text:String(c.raw||c.name||"").replace(/\|/g," ")};}).filter(l=>l.s0<n-0.5):[];
+    const same=T.every(u=>u.b.measure===t.b.measure);
+    return {yTitle:same?(k===Math.floor((T.length-1)/2)?(MEASURES[t.b.measure]||{}).axis:""):(MEASURES[t.b.measure]||{}).axis,top:ax.top,step:ax.step,tick:v=>ddTick(v,ax.step),tier:t.b.name,series:[{name:t.b.name,sym:0,dash:0,segs,pts}],vlines:vl,labels,dog};});
+  const fig=P.figure({ratio:P.ratio(),nSlots:n,xTitle:"School days",zero:S.settings.zeroLift===true,breaks:brk.map(g=>g.i-0.5),panels,
+    caption:`Figure ${T.length?orderedBehaviors().length+1:1}. ${up1(T.map(t=>String(t.b.name||"").toLowerCase()).join(", "))} across school days in a multiple baseline across behaviors, ${who()}.`,label:`Stacked graphs of ${T.length} behaviors (publication style)`});
+  return h.replace(/<svg class="graph"[\s\S]*?<\/svg>/,fig.svg);}catch(e){return h;}};}
+/* ---------------- the Graphs page ---------------- */
+function brkLine(){return "school days without a row (Monday to Friday)";}
+function paintSwitch(){const out=document.getElementById("resultsOut");if(!out)return;let w=document.getElementById("ddGStyle");
+  if(!w){w=document.createElement("div");w.id="ddGStyle";w.className="nbh-gs noprint no-print";out.parentNode.insertBefore(w,out);}
+  w.innerHTML=P.switchHtml();document.body.classList.toggle("dd-pubmode",P.isPub());}
+function bar(rep){return rep.querySelector(".dd-graphsave");}
+function decorate(){const out=document.getElementById("resultsOut");if(!out)return;const pub=P.isPub();
+  out.querySelectorAll(".behavior-report").forEach(rep=>{const svg=rep.querySelector(".chartbox svg.graph[data-dd-b]");if(!svg)return;const id=svg.getAttribute("data-dd-b"),A=G.args[id];if(!A)return;
+    const b=bar(rep),box=svg.closest(".chartbox");if(!b||!box)return;
+    if(pub){const fig=G.fig&&G.fig[id];b.insertAdjacentHTML("afterbegin",`<button type="button" class="btn ghost sm" data-g70="svg" data-b="${esc(id)}" title="A vector file: sharp at any size; opens in Word, Google Docs, Keynote and Illustrator">Save as SVG<\/button> <button type="button" class="btn ghost sm" data-g70="print" data-b="${esc(id)}" title="This figure alone, at its size, with its caption">Print figure<\/button> <button type="button" class="btn ghost sm" data-g70="cap" data-b="${esc(id)}" aria-expanded="false">Edit caption<\/button> `);
+      if(fig)b.insertAdjacentHTML("afterend",`<p class="hint dd-pubsize noprint no-print">${esc(P.sizeLine(fig,P.ratio(),"school days"))}.<\/p>`);}
+    let tail="";
+
+
+    if(tail)b.insertAdjacentHTML("afterend",tail.replace("<!--touch-->",""));
+
+  });}
+{const rr=renderResults;renderResults=function(){G.args={};G.fig={};G.altdl={};G.rendering=true;let r;try{r=rr.apply(this,arguments);}finally{G.rendering=false;}try{paintSwitch();decorate();}catch(e){}return r;};}
+/* ---------------- the controls ---------------- */
+function svgOf(id){return document.querySelector(`#resultsOut .behavior-report .chartbox svg.graph[data-dd-b="${CSS.escape(id)}"]`);}
+function fileName(beh,ext){const i=P.initials(S.meta&&S.meta.client)||"participant";return "DD-1_figure_"+i+"_"+String(beh&&beh.name||"behavior").trim().replace(/\s+/g,"_").replace(/[^\w-]+/g,"").slice(0,40)+"_"+localISO(new Date())+"."+ext;}
+document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;
+  const st=t.closest("[data-gs-style],[data-gs-ratio],[data-gs-break]");
+  if(st&&st.closest("#ddGStyle")){if(st.dataset.gsStyle)P.setPref("style",st.dataset.gsStyle==="pub"?"pub":null);if(st.dataset.gsRatio)P.setPref("ratio",st.dataset.gsRatio==="2:3"?null:st.dataset.gsRatio);
+    if(st.dataset.gsBreak)P.setPref("breakDays",+st.dataset.gsBreak===7?null:+st.dataset.gsBreak);
+    const keep=st.dataset.gsStyle?"[data-gs-style=\""+st.dataset.gsStyle+"\"]":st.dataset.gsRatio?"[data-gs-ratio=\""+st.dataset.gsRatio+"\"]":"[data-gs-break=\""+st.dataset.gsBreak+"\"]";
+    renderResults();const f=document.querySelector("#ddGStyle "+keep);if(f)f.focus();return;}
+  const b=t.closest("[data-g70]");if(!b||!b.closest("#resultsOut"))return;const id=b.dataset.b,A=G.args[id],beh=S.behaviors.find(x=>x.id===id);
+  if(b.dataset.g70==="table"&&A){const w=document.getElementById("ddGTab-"+id);if(!w)return;const open=w.hidden;if(open)w.innerHTML=tableHtml(A.beh,A.rows,A.analyses);w.hidden=!open;b.setAttribute("aria-expanded",open?"true":"false");b.textContent=open?"Hide the table":"Show as table";return;}
+  if(b.dataset.g70==="reset"){zoomTo(id,null);return;}
+  const svg=svgOf(id);if(!svg)return;
+  if(b.dataset.g70==="svg"){const nm=P.saveSvg(svg,fileName(beh,"svg"));toast("Figure saved as "+nm+".");return;}
+  if(b.dataset.g70==="print"){P.printFig(svg);return;}
+  if(b.dataset.g70==="cap"&&A){let ed=document.getElementById("ddCapEd-"+id);if(ed){G.cap[id]=ed.textContent.replace(/\s+/g," ").trim()||null;renderResults();return;}
+    const fig=capOf(A.beh,A.rows,A.analyses,[]);const cur=G.cap[id]||(svg.querySelectorAll(".pub-cap").length?[...svg.querySelectorAll(".pub-cap")].map(x=>x.textContent).join(" "):fig);
+    b.insertAdjacentHTML("afterend",`<div class="dd-capedit" id="ddCapEd-${esc(id)}" contenteditable="true" role="textbox" aria-multiline="true" aria-label="The figure's caption">${esc(cur)}<\/div>`);b.textContent="Use this caption";b.setAttribute("aria-expanded","true");
+    const ed2=document.getElementById("ddCapEd-"+id);if(ed2)ed2.focus();return;}});
+window.__dd2570={G,sentence,tableHtml,designHtml,gapAt,pubChart};   /* for the workstation's checks */
+
+try{if(document.getElementById("resultsOut")&&document.getElementById("resultsOut").children.length)renderResults();}catch(e){}
+})();
+</script>
 <script id="fx2-v2492-js">
 /* v24.92 Forms DM-1, IC-1 and RR-1 on screen (the 10/28 design review); v24.95 the six forms refined from the BCBA's
    iPad screenshots (boxes in line across a row, an example gone once its box is filled, the toolbar on one row). It arranges what the sheets already hold:
