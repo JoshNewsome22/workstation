@@ -306,6 +306,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     'nbh-td1-video-dro-resetting.js','nbh-td1-video-dro-class.js','nbh-td1-video-dro-momentary.js','nbh-td1-video-dro-tokens.js','nbh-td1-video-ncr-attention.js','nbh-td1-video-ncr-items.js',
     'nbh-td1-video-ncr-work.js','nbh-td1-video-ncr-between.js','nbh-td1-video-rird-vocal.js','nbh-td1-video-rird-motor.js','nbh-td1-video-rird-pica.js' /* v25.68 (the BCBA, 11/7) TD-1's DRO, NCR and RIRD videos, loaded when asked */,
     'nbh-td1-video-dra-attention.js','nbh-td1-video-dra-escape.js','nbh-td1-video-dra-tangible.js','nbh-td1-video-dra-automatic.js' /* v25.69 (the BCBA, 11/8) TD-1's DRA videos, loaded when asked */,
+    'nbh-td1-video-fct-attention.js','nbh-td1-video-fct-tangible.js','nbh-td1-video-fct-thinning.js' /* v25.70 (the BCBA, 11/9) TD-1's three more FCT videos, loaded when asked */,
     'nbh-shell-docread.js' /* v25.68 the workstation's Read a document, loaded by the shell (its page's size budget) */,
     'videos.html','nbh-videos.js' /* v25.69 the video library and the videos' one list */,
     ...fs.readdirSync(path.join(ROOT,'NBH-Workstation')).filter(f=>/^nbh-td1-poster-[a-z0-9-]+\.jpg$/.test(f)) /* v25.69 each video's picture */];

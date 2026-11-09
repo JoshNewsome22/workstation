@@ -21,9 +21,10 @@
       none; a version the list does not describe has none.
    H  Watch how: Form TD-1's bank card and plan card say Watch how and play in TD-1's own player; Form TI-1's Main
       procedure set to DRO shows Watch how (44 px on the iPad, named), which opens the video library over the workstation at
-      the DRO videos (#family=dro), FCT at its one video; no video file is fetched before a video is played; never printed;
-      Save data is the same with it shown. Form DT-1's Delay requirement (its choices name DRA and DRO) opens the FCT video,
-      whatever requirement is chosen: delay tolerance is part of FCT schedule thinning (the BCBA, 11/9). Help's data list
+      the DRO videos (#family=dro), each procedure at its videos; no video file is fetched before a video is played; never
+      printed; Save data is the same with it shown. Form DT-1's Delay requirement (its choices name DRA and DRO) opens the FCT
+      video of a request met with a wait, then a no (v25.70: FCT has four videos), whatever requirement is chosen: delay
+      tolerance is part of FCT schedule thinning (the BCBA, 11/9). Help's data list
       says what this device remembers for Back where you left off, as it says the pin.
    R  the rings: the case map shows four rings for the student on screen (Assessment, Plan, Implementation, Review), each
       with its words ("3 of 7 assessment forms started, 3 with data"), the numbers from the forms open; the caseload card
@@ -179,7 +180,7 @@ const ago=ms=>new Date(Date.now()-ms).toISOString();
     ok('H5 Form DT-1\'s Delay requirement (DRA, DRO or chained): Watch how opens the FCT video (delay tolerance is part of FCT schedule thinning); no requirement chosen: it goes',dw.length===4&&dw.slice(0,3).every(w=>w.fam==='fct'&&w.hid===false&&w.lab==='Watch how: FCT, the video in the video library'&&/FCT schedule thinning/.test(w.title))&&dw[3].hid===true,dw);
     await dt.evaluate(()=>{const s=document.querySelector('select[name="req_type"]');s.nextElementSibling.click();});await sleep(2600);
     const dl=await p.evaluate(()=>{const fr=window.__wsVideos&&__wsVideos.frame();let h='',view='',key='';try{h=fr.contentWindow.location.hash;view=fr.contentWindow.__vl.view();key=fr.contentWindow.__vl.key();}catch(e){}return {open:__wsVideos.isOpen(),h,view,key};});
-    ok('H5 the tap opens the video library over the workstation at the FCT video (#video=fct-practical-guide-thinning), not the DRA videos',dl.open&&dl.h==='#video=fct-practical-guide-thinning'&&!/dra/.test(dl.h),dl);
+    ok('H5 the tap opens the video library over the workstation at the FCT video of a wait, then a no (#video=fct_tangible, v25.70), not the DRA videos',dl.open&&dl.h==='#video=fct_tangible'&&dl.view==='watch'&&dl.key==='fct_tangible'&&!/dra/.test(dl.h),dl);
     await shot(p,'H5-dt1-watch-how-fct');
     await p.evaluate(()=>__wsVideos.close());await sleep(500);reqs.length=0;   /* the FCT video, opened on the tap, fetched its file: TD-1's check below starts afresh */
     /* Help, Where the student's data goes: a line for what Back where you left off remembers, said as the pin is */
