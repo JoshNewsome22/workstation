@@ -22,8 +22,10 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     {const t2=performance.now();await new Promise(r=>setTimeout(r,800));while(((state.status[id]||{}).filled||0)<=20&&performance.now()-t2<10000)await new Promise(r=>setTimeout(r,250));}
     return (state.status[id]||{}).filled||0;},id);
   /* a case: Mateo with TB-1, CN-1 and DD-1 */
-  await page.fill('#pClient','Mateo Rivera');await page.dispatchEvent('#pClient','input');await page.fill('#pSid','4471823');
+  /* v25.71: the examples go in before the student is named: since v24.25 (tb125, R-012) TB-1 refuses its simulation while a
+     student who is not the simulated one is on the form, so its five targets never go into a real student's case */
   const f0={};for(const id of ['TB-1','CN-1','DD-1'])f0[id]=await sim(id);
+  await page.fill('#pClient','Mateo Rivera');await page.dispatchEvent('#pClient','input');await page.fill('#pSid','4471823');await page.dispatchEvent('#pSid','input');await sleep(1500);
   const fs=require('fs');
   const sv=async()=>{const dl=page.waitForEvent('download',{timeout:60000}).catch(()=>null);const s=await page.evaluate(()=>saveCase());const d=await dl;let j=null;if(d){try{j=JSON.parse(fs.readFileSync(await d.path(),'utf8'));}catch(e){}}return {s,j};};
   const s0=await sv();

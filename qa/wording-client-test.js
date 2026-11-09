@@ -101,8 +101,12 @@ const mock = async (route, body) => (await fetch(RELAY + route, {method: body ? 
 
 /* the form as served with the block (v21.84: its loader) cut back out; or the writing help (v21.84: nbh-wording.js)
    with the relay address and/or the rule set swapped in */
+/* v25.71: nbh-wording.js also carries Florida's restraint and seclusion words (window.nbhLaw, v24.44 review R-053), which OB-1
+   reads for its seclusion and restraint boxes; "without the block" keeps that part inline, so the baseline lacks only the
+   writing help (before, it printed OB-1's fallback words without the statute citations, and the print could never match) */
+const LAW = (() => { const w = fs.readFileSync(path.join(ROOT, 'NBH-Workstation', 'nbh-wording.js'), 'utf8'), i = w.indexOf('/* v24.44 (review R-053)'); return i < 0 ? '' : w.slice(i); })();
 function variant(html, opt){
-  if (opt.without) return html.replace(/\n<script id="nbh-wording"[^>]*>[\s\S]*?<\/script>\n\n/, '\n');
+  if (opt.without) return html.replace(/\n<script id="nbh-wording"[^>]*>[\s\S]*?<\/script>\n\n/, () => '\n' + (LAW ? '<script>\n' + LAW + '\n</script>\n' : ''));
   if (opt.relay !== undefined) html = html.replace(/window\.nbhWordingConfig=\n\{[^\n]*\}/, () => 'window.nbhWordingConfig=\n' + J({relay:opt.relay}));
   if (opt.rules) html = html.replace(/window\.nbhWordingRules=\n[\s\S]*?\n;\nwindow\.nbhWordingConfig=/, () => 'window.nbhWordingRules=\n' + opt.rules + '\n;\nwindow.nbhWordingConfig=');
   return html;
@@ -755,7 +759,11 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       const t = await fr.evaluate(() => __w.tab2());
       ok(/opened from a file on this device/.test(t), '9 ... and Rewrite with Claude says a file cannot reach the relay', t.slice(0, 160));
       const snap = await page.evaluate(async () => { const r = await grab('OB-1', 'snapshot', null, 8000); return r && r.snap && r.snap.total; });
-      ok(snap === 193, '9 ... the snapshot there has the same 193 controls (v22.41: OB-1 asks about a seclusion apart; v22.99: attention and an item told apart on each of the 3 sheets, observer 2\'s rows scored, conditions on every observation; v23.20: the other target behaviors on Setup and their rows on each observation)', snap);
+      /* v25.71: 232. 195 at v24.72 (e2d5919, the oldest commit in this clone); v25.64 205 (b929cb2, parcel MTOB: OB-1's observer
+         checks, coverage and pairings) and 206 (5e5cc0f, agreement blocks of 10 s or 1 minute); v25.68 232 (7dd44b4, the
+         classroom practices check, a mode of OB-1). Counted with the simulation in, through the workstation's snapshot. */
+      ok(snap === 232, '9 ... the snapshot there has the same 232 controls (v22.41: OB-1 asks about a seclusion apart; v22.99: attention and an item told apart on each of the 3 sheets, observer 2\'s rows scored, conditions on every observation; v23.20: the other target behaviors on Setup and their rows on each observation; v25.64 the observer checks and agreement blocks; v25.68 the classroom practices check)', snap);
+
       ok(errorsIn(lg).length === 0, '9 no console errors', errorsIn(lg));
       await ctx.close(); fs.rmSync(tmp, {recursive:true, force:true});
     });

@@ -8,7 +8,7 @@
    F113  a sheet already logged is asked about before it is logged again.   F114  Print blank sheet clears nothing.
    F115  the measure above the graph, a dotted line where it changes, and in the CSV.   F116  observer 2's own file into Obs 2.
    I56 chance agreement under each figure.  I58 GB-1's interval criterion on the graph.  I59 marks typed in one line.
-   I60 each condition's sessions, dates, level and agreement.  The printed pages: blank 5, simulation 6, as before.
+   I60 each condition's sessions, dates, level and agreement.  The printed pages: blank 3, simulation 5 (v25.64; 5 and 6 at v23.07).
    usage: node qa/mt1-w3-test.js */
 const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
 const fs=require('fs'),path=require('path'),os=require('os'),cp=require('child_process');
@@ -115,6 +115,12 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
     await q.evaluate(async k=>{nbhUI.confirm=async()=>true;window.print=()=>{};if(k!=='blank')await loadSim();if(k==='paper')document.getElementById('blankBtn').click();},kind);await sleep(500);
     await q.emulateMedia({media:'print'});await q.pdf({path:path.join(out,file),format:'Letter',printBackground:true,preferCSSPageSize:true});await q.close();return pages(path.join(out,file));};
   const pb=await pr('blank','blank.pdf'),ps=await pr('sim','sim.pdf'),pp=await pr('paper','paper.pdf');
-  ok('the printed pages: the blank form 5 and the simulation 6, as before; Print blank sheet prints the sheet alone (2 pages for the simulation\'s 30 intervals)',pb===5&&ps===6&&pp===2,{pb,ps,pp});
+  /* v25.71: the blank form 3 and the simulation 5. v25.64 (b929cb2, parcel MTOB: the episode chooser, the scored-example check,
+     the two observer ticks, the missed-effect caution; SETUP.md "MT-1 and OB-1 (9)") added a page to each (2 and 4 at v25.62,
+     b8b5736); 2 and 4 already at v24.72, the oldest commit in this clone, so the drop from v23.07's 5 and 6 came earlier. The
+     blank print read back in full: the head, the chooser, all 60 intervals, the totals, the condition, the session log and the
+     agreement note. */
+  ok('the printed pages: the blank form 3 and the simulation 5, as at v25.64; Print blank sheet prints the sheet alone (2 pages for the simulation\'s 30 intervals)',pb===3&&ps===5&&pp===2,{pb,ps,pp});
+
   ok('no page errors',!errs.length,errs.slice(0,3));
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);process.exit(1);});

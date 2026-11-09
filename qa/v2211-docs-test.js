@@ -46,7 +46,10 @@ const root=ROOT||path.join(__dirname,'..');const rd=(ed,f)=>fs.readFileSync(path
     ok('8 '+tag+': SETUP.md opens with a current Start here (47 forms, the shared files, where to find the version and HOSTING.md), the old set-up marked as history',
       se.startsWith('# Start here\n')&&/47 forms/.test(se.slice(0,1500))&&/nbh-\*\.js/.test(se.slice(0,1500))&&/kept as it was/.test(se.slice(0,2500)),se.slice(0,200));
     const rm=rd(ed,'README.txt');
-    ok('9 '+tag+': README.txt says 47 forms, and that a form away from the shared files loses its letterhead and Autosave',!/\b4[456] forms/.test(rm)&&/47 forms/.test(rm)&&!/exactly as it does inside/.test(rm)&&/without its letterhead/.test(rm));
+    /* v25.71: 48 forms since v25.66 (SETUP.md: "New Form FD-1, Feeding and Mealtime (the 48th form)"); the count is the shell's */
+    const nf=L.forms().length;
+    ok('9 '+tag+': README.txt says '+nf+' forms, and that a form away from the shared files loses its letterhead and Autosave',!/\b4[4-7] forms/.test(rm)&&new RegExp('\\b'+nf+' forms').test(rm)&&!/exactly as it does inside/.test(rm)&&/without its letterhead/.test(rm));
+
     if(ed==='RPS-Workstation')ok('10 school: README.txt says nothing of Rewrite with Claude (off in this edition)',!/Rewrite with Claude|nbh-relay-upload/.test(rm),rm.match(/.{0,80}Rewrite with Claude.{0,40}/));
     await pg.close();}
   ok('11 no page errors',!errs.length,errs);

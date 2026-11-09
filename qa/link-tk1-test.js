@@ -33,6 +33,10 @@ const BANNER='/* ===== nbh-link (tools/blocks/nbh-link.js) ===== */\n';
    hold the link already, so comparing with HEAD could compare the file with itself) */
 const G=c=>execSync('git -C "'+ROOT+'" '+c,{maxBuffer:512<<20}).toString('utf8');
 const FIRST=G("log --format=%H -S 'nbh-link (tools/blocks/nbh-link.js)' -- NBH-Workstation/"+TKF).trim().split('\n').filter(Boolean).pop();
+/* v25.71: in a shallow clone the earliest commit -S finds can be the shallow boundary, whose parent is not in the repository:
+   say so plainly (the baseline needs the full history: git fetch --unshallow) instead of failing inside git */
+if(FIRST&&G('rev-parse --is-shallow-repository').trim()==='true'){let has=true;try{execSync('git -C "'+ROOT+'" rev-parse -q --verify '+FIRST+'^',{stdio:'ignore'});}catch(e){has=false;}
+  if(!has){console.log('RESULT: cannot run: the repository is a shallow clone and the TK-1 baseline (the parent of '+FIRST.slice(0,7)+') is not in it; fetch the full history (git fetch --unshallow)');process.exit(1);}}
 const PRE=FIRST?G('rev-parse '+FIRST+'^').trim():'HEAD';
 const BEFORE=G('show '+PRE+':NBH-Workstation/'+TKF);
 if(BEFORE.includes('nbh-link (tools/blocks/nbh-link.js)'))throw new Error('the baseline TK-1 ('+PRE+') already holds the link');

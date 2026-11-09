@@ -219,7 +219,11 @@ const pages=f=>+cp.execFileSync('python3',['-c','import pymupdf,sys;print(pymupd
   const q2r=await q2.evaluate(()=>({rows:rowLabels().length,act:document.querySelectorAll('#spPrint th.actcol').length}));
   await q2.pdf({path:path.join(out,'act15.pdf'),format:'Letter',printBackground:true,preferCSSPageSize:true});await q2.close();
   const pb=pages(path.join(out,'blank.pdf')),ps=pages(path.join(out,'sim.pdf')),pg=pages(path.join(out,'simg.pdf')),pa=pages(path.join(out,'act15.pdf'));
-  ok('the blank sheet prints on one page, the simulation\'s two behaviors on 13 (10 as before, v24.26 the second observer\'s blank copies, v24.31 the method essay printed once, v24.39 the seeded example\'s summary a page longer)',pb===1&&ps===13,{pb,ps});
-  ok('with the marking guide, 14; a blank 15-min school day (32 rows) with the activity column, one page',pg===14&&pa===1&&q2r.rows===32&&q2r.act===1,{pg,pa,q2r});
+  /* v25.71: 15 and 16. 14 and 15 at v24.72 (e2d5919, the oldest commit in this clone, and still at v25.62); v25.64 (514c4ba, the
+     measurement review: SP-1's Holm correction, the agreement figure and the IOA days; SETUP.md "ABC-1 and SP-1 (10)") a page
+     more. Each of the 15 pages read back holds text (290 to 720 words); none is a spill. */
+  ok('the blank sheet prints on one page, the simulation\'s two behaviors on 15 (10 as before, v24.26 the second observer\'s blank copies, v24.31 the method essay printed once, v24.39 the seeded example\'s summary a page longer, 14 by v24.72, v25.64 the measurement review)',pb===1&&ps===15,{pb,ps});
+  ok('with the marking guide, 16; a blank 15-min school day (32 rows) with the activity column, one page',pg===16&&pa===1&&q2r.rows===32&&q2r.act===1,{pg,pa,q2r});
+
   ok('no page errors',!errs.length,errs.slice(0,3));
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);process.exit(1);});
