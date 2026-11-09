@@ -172,8 +172,9 @@ const dirty=page=>page.evaluate(()=>caseDirty());
   /* Remove: the confirm names the history; the student's points go */
   await P.evaluate(()=>{window.__cf=[];caseloadOpen();});await sleep(600);
   await P.evaluate(()=>{const tr=[...document.querySelectorAll('[data-cldel]')].find(b=>/mateo rivera/.test(b.dataset.cldel));tr.click();});await sleep(1200);
-  const rm=await P.evaluate(async()=>({cf:window.__cf.slice(),n:(await hxPoints(clKey({client:'Mateo Rivera',sid:'4471823'}))).length,on:(await clList()).map(r=>r.client)}));
-  ok('25 Remove names the case history in its question, and Mateo Rivera’s history is deleted with them',rm.cf.some(t=>/^Take Mateo Rivera off the caseload on this iPad\?/.test(t)&&/case history on this iPad/.test(t))&&rm.n===0&&!rm.on.includes('Mateo Rivera'),rm);
+  const rm=await P.evaluate(async()=>({cf:window.__cf.slice(),n:(await hxPoints(clKey({client:'Mateo Rivera',sid:'4471823'}))).length,on:(await clList()).map(r=>r.client),undo:document.querySelectorAll('#dlg .ws-undo-row .ws-undo-b').length}));
+  /* v25.70 (the BCBA, 11/9): no question first; Undo (in the box) brings the student and their history back */
+  ok('25 Remove takes Mateo Rivera off at once (no question; Undo is offered), and their history is deleted with them',!rm.cf.length&&rm.n===0&&!rm.on.includes('Mateo Rivera')&&rm.undo===1,rm);
   /* nothing kept with the caseload turned off */
   await P.evaluate(()=>{document.getElementById('dlg').close();localStorage.setItem('nbh.caseload.off','1');});const n0=(await pts(P,SAMPLE)).length;
   dm=frameOf(P,'DM-1');await setField(dm,'pr.notes','Sample notes, changed with the caseload off (simulated).');await sleep(500);await save(P);

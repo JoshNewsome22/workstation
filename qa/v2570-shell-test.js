@@ -5,12 +5,15 @@
    U  Undo. U1 every form, opened on its own with its simulation: Clear all (as a person taps it: More controls, Clear all,
       the form's question answered Clear all) offers Undo at the foot of the form, and Undo puts back exactly what Save data
       wrote before (every value; the save times left out); DD-1, DT-1 and AD-1, whose Clear all loads the page again, too.
-      U2 Cancel at the question offers nothing and changes nothing. U3 a row removed (Form OB-1's Remove last, Form CN-1's
+      U2 no question first where Undo covers it (the BCBA, 11/9): Clear all tapped goes at once (no box, no browser
+      question) with Undo; a question that names what Undo cannot bring back (My pictures), and a second question, are still
+      asked. U3 a row removed (Form OB-1's Remove last, Form CN-1's
       note) comes back. U4 a tap by a script (the workstation's own Save, a test's click) is not watched. U5 in the
       workstation on the iPad: the form's Undo is in the workstation's message (44 px, named "Undo: …", role status); it goes
-      after about 8 s; Ctrl Z does it. U6 a student removed from the caseload comes back with their case history and pin;
+      after about 8 s; Ctrl Z does it. U6 a student removed from the caseload (no question first) comes back with their case history and pin;
       left alone, the removal stands. U7 Close, Remove from the case: Undo puts the form back in the case with its work.
-      U8 Fill open forms: Undo puts back each form it changed. U9 a line removed from the Documents list comes back.
+      U8 Fill open forms: Undo puts back each form it changed. U9 a line removed from the Documents list (no question
+      first, even the first time) comes back. U11 what Undo does not cover still asks: Remove all student data.
       U10 reduced motion: no toast animation.
    W  What's new: after an update on a device that has kept a student (its version changed: v25.69 to v25.70, the release
       simulated by serving index.html with WS_REL v25.70), the first Today shows the card with the release's lines (3 to 6)
@@ -83,14 +86,29 @@ const ago=ms=>new Date(Date.now()-ms).toISOString();
  /* U2 Cancel; U3 a row; U4 a script's tap */
  if(want('U2')||want('U3'))try{
   if(want('U2')){const c=await ctxFor(br,1440,900,false),q=watchPage(await c.newPage(),'U2');await q.goto(L.BASE+'/NBH-Workstation/'+FILE['OB-1']);await sleep(2000);await L.loadSim(q);await sleep(1100);await answerAll(q);await sleep(800);
-    const before=await fileOf(q);const btn=await reach(q,CLEAR,false);await btn.click();await sleep(450);await q.locator('#nbhUiDlg .u-f button:first-child').click();await sleep(2600);
-    const r2={undo:await q.locator('#nbhToasts .nbh-undo').count(),same:await sameAs(q,before)};
-    ok('U2 Cancel at the form\'s question: nothing changes and no Undo is offered',r2.undo===0&&r2.same,r2);
+    const nat=[];q.on('dialog',d=>nat.push(d.message()));
+    const before=await fileOf(q);const btn=await reach(q,CLEAR,false);await btn.click();await sleep(450);
+    const r2={box:await q.evaluate(()=>{const d=document.getElementById('nbhUiDlg');return !!(d&&d.open);}),nat:nat.length};await sleep(2400);
+    r2.cleared=!(await sameAs(q,before));r2.undo=await q.locator('#nbhToasts .nbh-undo').count();
+    ok('U2 Clear all, tapped: no question first (no box, no browser question); the form is cleared at once and Undo is offered',!r2.box&&!r2.nat&&r2.cleared&&r2.undo===1,r2);
+    if(r2.undo){await q.locator('#nbhToasts .nbh-undo').first().click();await sleep(3200);}
+    ok('U2 ... and Undo puts it back exactly',await sameAs(q,before),'');
+    /* what Undo cannot bring back is still asked: a question naming My pictures; and a second question after the first */
+    await q.evaluate(()=>{document.querySelectorAll('#nbhToasts .nbh-toast').forEach(t=>t.remove());const host=document.querySelector('#viewSeg')||document.body;
+      const mk=(id,fn)=>{const b=document.createElement('button');b.type='button';b.id=id;b.textContent='Remove it';b.addEventListener('click',fn);host.after(b);};
+      window.__qa=[];mk('qaKeep',async()=>{window.__qa.push(await nbhUI.confirm('Remove it, and take its picture off this device\u2019s My pictures?\nThe picture is gone from the chooser of every form.'));});
+      mk('qaTwo',async()=>{window.__qa.push(await nbhUI.confirm('Remove this simulated note?'));window.__qa.push(await nbhUI.confirm('Also take its sound track off this device?'));});});
+    const askOf=async id=>{await q.locator('#'+id).click();await sleep(500);const open=await q.evaluate(()=>{const d=document.getElementById('nbhUiDlg');return d&&d.open?document.getElementById('nbhUiH').textContent:'';});
+      if(open)await q.locator('#nbhUiDlg .u-f button:first-child').click();await sleep(400);const a=await q.evaluate(()=>window.__qa.slice());await q.evaluate(()=>{window.__qa=[];});
+      await sleep(3500);return {open,a};};   /* the tap's watch (about 2.5 s after the question) is over before the next tap */
+    const k1=await askOf('qaKeep'),k2=await askOf('qaTwo');
+    ok('U2 a question that names what Undo cannot bring back (My pictures) is still asked; after a first question answered for the person, a second one is asked',/My pictures/.test(k1.open)&&k1.a.join()==='false'&&/^Also take its sound track/.test(k2.open)&&k2.a.join()==='true,false',{k1,k2});
+    await q.evaluate(()=>{['qaKeep','qaTwo'].forEach(i=>{const b=document.getElementById(i);if(b)b.remove();});});
     /* U4: a script's click on Clear all (answered) is not watched */
     await q.evaluate(()=>{document.querySelectorAll('#nbhToasts .nbh-toast').forEach(t=>t.remove());});
-    await q.evaluate(sel=>{document.querySelector(sel).click();},CLEAR);await sleep(400);await answerAll(q);await sleep(2500);
-    const r4={undo:await q.locator('#nbhToasts .nbh-undo').count(),cleared:!(await sameAs(q,before))};
-    ok('U4 a tap made by a script (not a person) is not watched: no Undo',r4.undo===0&&r4.cleared,r4);await c.close();}
+    await q.evaluate(sel=>{document.querySelector(sel).click();},CLEAR);await sleep(400);const asked4=await q.evaluate(()=>{const d=document.getElementById('nbhUiDlg');return !!(d&&d.open);});await answerAll(q);await sleep(2500);
+    const r4={asked:asked4,undo:await q.locator('#nbhToasts .nbh-undo').count(),cleared:!(await sameAs(q,before))};
+    ok('U4 a tap made by a script (not a person) is not watched: the form\'s question is asked as before, and no Undo',r4.asked&&r4.undo===0&&r4.cleared,r4);await c.close();}
   if(want('U3')){const res3=[];for(const id of ['CF-1','MT-1','SA-1']){const c=await ctxFor(br,1440,900,false),q=watchPage(await c.newPage(),'U3 '+id);await q.goto(L.BASE+'/NBH-Workstation/'+FILE[id]);await sleep(2000);await L.loadSim(q);await sleep(1100);await answerAll(q);await sleep(800);
     /* the first sheet with a Remove last in sight */
     const views=await q.evaluate(()=>[...document.querySelectorAll('#viewSeg button[data-view]')].map(b=>b.dataset.view));let rm=null;
@@ -187,11 +205,11 @@ const ago=ms=>new Date(Date.now()-ms).toISOString();
     await p.evaluate(()=>{const v=document.getElementById('aView');if(v)v.click();});await sleep(300);
     const more=await p.evaluate(()=>{const it=document.querySelector('#wsViewMenu [data-wn-for="nbhMoreBtn"]');if(it&&it.offsetParent){it.click();return true;}return false;});await sleep(600);
     let btn=await reach(ic,CLEAR,true);let r5={more,reached:!!btn};
-    if(btn){await btn.tap();await sleep(500);await ic.locator('#nbhUiDlg .u-f button:last-child').tap().catch(()=>{});await sleep(2400);
+    if(btn){await btn.tap();await sleep(500);r5.asked=await ic.evaluate(()=>{const d=document.getElementById('nbhUiDlg');return !!(d&&d.open);});if(r5.asked)await ic.locator('#nbhUiDlg .u-f button:last-child').tap().catch(()=>{});await sleep(2400);
       const u=p.locator('#wsToasts .ws-undo-b');r5.n=await u.count();if(r5.n){r5.box=await u.first().boundingBox();r5.lab=await u.first().getAttribute('aria-label');r5.role=await p.evaluate(()=>document.getElementById('wsToasts').getAttribute('role')||document.getElementById('wsToasts').getAttribute('aria-live'));
         await shot(p,'U5-form-undo-in-workstation');
         await p.keyboard.press('Control+z');await sleep(3200);r5.same=await sameAs(ic,before);r5.msg=await p.evaluate(()=>document.getElementById('wsToasts').textContent);}}
-    ok('U5 in the workstation: IC-1\'s Clear all shows Undo in the workstation\'s message (44 px, named), and Ctrl Z puts the form back exactly',r5.reached&&r5.n===1&&r5.box.height>=44&&r5.lab==='Undo: Form cleared.'&&r5.same&&/Undone/.test(r5.msg||''),r5);
+    ok('U5 in the workstation: IC-1\'s Clear all goes at once (no question) and shows Undo in the workstation\'s message (44 px, named), and Ctrl Z puts the form back exactly',r5.reached&&!r5.asked&&r5.n===1&&r5.box.height>=44&&r5.lab==='Undo: Form cleared.'&&r5.same&&/Undone/.test(r5.msg||''),r5);
     /* U5b: it goes by itself after about 8 s */
     await p.evaluate(()=>__ws2570.offer('Test message for the timer.',()=>true));const t0=Date.now();let gone=0;
     for(let i=0;i<40;i++){await sleep(500);if(!(await p.evaluate(()=>__ws2570.undoLive()))){gone=Date.now()-t0;break;}}
@@ -218,28 +236,33 @@ const ago=ms=>new Date(Date.now()-ms).toISOString();
     if(r8.undo){await shot(p,'U8-fill-open-forms-undo');await p.locator('.ws-undo-b').first().tap();await sleep(3500);const still=[];for(const id of ids){const fr=frameOf(p,id);if(fr&&!(await sameAs(fr,B1[id])))still.push(id);}r8.still=still;}
     ok('U8 Fill open forms: Undo puts back each form it changed, exactly as it was ('+changed.join(', ')+')',r8.undo===1&&changed.length>=1&&r8.still&&!r8.still.length&&/Details sent to \d+ open form/.test(r8.text),r8);
     /* U9 a line of the Documents list */
-    await p.evaluate(()=>{state.docs=[{form:'packet',title:'Sample packet (simulated)',at:new Date(Date.now()-60000).toISOString(),how:'print'},{form:'DD-1',title:'Sample week (simulated)',at:new Date().toISOString(),how:'pdf'}];kvSet('nbh.ws.docsRemoveAsked','1');__wsSR.docsOpen();});await sleep(700);
+    await p.evaluate(()=>{state.docs=[{form:'packet',title:'Sample packet (simulated)',at:new Date(Date.now()-60000).toISOString(),how:'print'},{form:'DD-1',title:'Sample week (simulated)',at:new Date().toISOString(),how:'pdf'}];kvDel('nbh.ws.docsRemoveAsked');
+      window.__asked=[];window.__cf0=window.__cf0||wsUI.confirm;wsUI.confirm=async t=>{window.__asked.push(String(t));return true;};__wsSR.docsOpen();});await sleep(700);
     const at0=await p.evaluate(()=>state.docs[0].at);
     await p.locator('#dlgBody [data-srdocx="'+at0+'"]').tap();await sleep(900);
-    const r9={n:await p.evaluate(()=>state.docs.length),row:await p.locator('#dlg .ws-undo-row .ws-undo-b').count()};
+    const r9={n:await p.evaluate(()=>state.docs.length),row:await p.locator('#dlg .ws-undo-row .ws-undo-b').count(),asked:await p.evaluate(()=>window.__asked.length)};
     if(r9.row){await shot(p,'U9-documents-undo');await p.locator('#dlg .ws-undo-row .ws-undo-b').tap();await sleep(900);r9.back=await p.evaluate(()=>({n:state.docs.length,first:state.docs[0].title,lines:document.querySelectorAll('#dlgBody [data-srdocx]').length}));}
-    ok('U9 a line removed from the Documents list: Undo, inside the open box, puts it back in its place',r9.n===1&&r9.row===1&&r9.back&&r9.back.n===2&&r9.back.first==='Sample packet (simulated)'&&r9.back.lines===2,r9);
+    ok('U9 a line removed from the Documents list: no question first (even the first time); Undo, inside the open box, puts it back in its place',r9.asked===0&&r9.n===1&&r9.row===1&&r9.back&&r9.back.n===2&&r9.back.first==='Sample packet (simulated)'&&r9.back.lines===2,r9);
     await p.evaluate(()=>document.getElementById('dlg').close());
     /* U6 a student removed from the caseload */
     await p.evaluate(async()=>{await saveCase();});await sleep(1500);
     const key=await p.evaluate(()=>clKey(packet()));await p.evaluate(k=>clPinSet(k,true),key);
     const h0=await p.evaluate(async k=>(await hxPoints(k)).length,key);
-    await p.evaluate(()=>caseloadOpen());await sleep(900);
+    await p.evaluate(()=>{window.__asked=[];wsUI.confirm=async t=>{window.__asked.push(String(t));return true;};caseloadOpen();});await sleep(900);
     await p.locator('#dlgBody [data-cldel]').first().evaluate(b=>b.click());await sleep(1800);
-    const r6={h0,gone:await p.evaluate(async k=>!(await clList()).some(r=>r.key===k),key),hGone:await p.evaluate(async k=>(await hxPoints(k)).length,key),row:await p.locator('#dlg .ws-undo-row .ws-undo-b').count(),txt:await p.evaluate(()=>(document.querySelector('#dlg .ws-undo-row')||{}).textContent||'')};
+    const r6={asked:await p.evaluate(()=>window.__asked.length),h0,gone:await p.evaluate(async k=>!(await clList()).some(r=>r.key===k),key),hGone:await p.evaluate(async k=>(await hxPoints(k)).length,key),row:await p.locator('#dlg .ws-undo-row .ws-undo-b').count(),txt:await p.evaluate(()=>(document.querySelector('#dlg .ws-undo-row')||{}).textContent||'')};
     if(r6.row){await shot(p,'U6-caseload-undo');await p.locator('#dlg .ws-undo-row .ws-undo-b').tap();await sleep(1500);
       r6.back=await p.evaluate(async k=>({rec:(await clList()).some(r=>r.key===k),h:(await hxPoints(k)).length,pin:clPins().includes(k),card:[...document.querySelectorAll('#dlgBody .cl-card')].some(c=>c.dataset.clrow===k)}),key);}
-    ok('U6 a student removed from the caseload: "Sample Student removed from this iPad." with Undo in the box; Undo brings back the record, its case history ('+h0+' points) and its pin',
-      r6.gone&&r6.hGone===0&&r6.row===1&&/^Sample Student removed from this iPad\./.test(r6.txt)&&r6.back&&r6.back.rec&&r6.back.h===h0&&h0>=1&&r6.back.pin&&r6.back.card,r6);
+    ok('U6 a student removed from the caseload: no question first; "Sample Student removed from this iPad." with Undo in the box; Undo brings back the record, its case history ('+h0+' points) and its pin',
+      r6.asked===0&&r6.gone&&r6.hGone===0&&r6.row===1&&/^Sample Student removed from this iPad\./.test(r6.txt)&&r6.back&&r6.back.rec&&r6.back.h===h0&&h0>=1&&r6.back.pin&&r6.back.card,r6);
     /* left alone, the removal stands */
     await p.locator('#dlgBody [data-cldel]').first().evaluate(b=>b.click());await sleep(10500);
     const r6b=await p.evaluate(async k=>({rec:(await clList()).some(r=>r.key===k),row:!!document.querySelector('#dlg .ws-undo-row')}),key);
     ok('U6 left alone for 8 s, the removal stands and the Undo goes',!r6b.rec&&!r6b.row,r6b);
+    /* U11 what Undo does not cover still asks first: Remove all student data (answered Cancel: nothing goes) */
+    await p.evaluate(async()=>{await saveCase();});await sleep(1200);
+    const r11=await p.evaluate(async()=>{window.__asked=[];wsUI.confirm=async t=>{window.__asked.push(String(t));return false;};const n0=(await clList()).length;await clRemoveAll();return {q:window.__asked.slice(0,1).map(t=>t.slice(0,60)),n0,n1:(await clList()).length};});
+    ok('U11 Remove all student data, which Undo does not cover, still asks first (Cancel removes nothing)',r11.q.length===1&&/^Remove every student/.test(r11.q[0])&&r11.n0>=1&&r11.n1===r11.n0,r11);
     /* U10 reduced motion */
     const c2=await ctxFor(br,1180,820,true,{reducedMotion:'reduce'}),p2=await shell(c2,'U10',null);
     const an=await p2.evaluate(()=>{const t=document.createElement('div');t.className='ws-toast';document.getElementById('wsToasts').appendChild(t);const a=getComputedStyle(t).animationName;t.remove();return a;});

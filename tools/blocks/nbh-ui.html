@@ -1890,7 +1890,14 @@ try { if (window.matchMedia) (function(){
    the focus; Ctrl or Command Z, outside a text box, does the same). Undo opens that file in the form the way the
    workstation opens a case (nbhBridge.ownOpen), puts the sheet and the scroll back, and says whether everything came back;
    a form without a file of its own is put back field by field only when it still has the same fields. A tap by a script
-   (the workstation's own Save, a test's click) is not a person's and is not watched. Nothing here enters a saved file, an
+   (the workstation's own Save, a test's click) is not a person's and is not watched.
+   No question first (the BCBA, 11/9: "drop the are-you-sure wherever Undo now covers the action"): a person's tap on such
+   a button, in a form that has a file of its own (so Undo puts back every value), answers the form's own question for it
+   (nbhUI.confirm or the browser's confirm; the first one asked within 1.5 s): the action happens at once and the message
+   with Undo shows. Only a question that names the same action (Clear, Remove, Delete, Discard, Start over or a new one,
+   Reset, Erase, Empty, Take … off) is answered; one that names something Undo cannot bring back (My pictures, Google
+   Drive, everywhere, other devices, Autosave's copies, a backup, the site, a bank, the directory, the offline copy) is
+   still asked, and so is a second question. A script's tap is asked as before. Nothing here enters a saved file, an
    export or a print. The workstation uses the same pair for its own actions over the open forms (Fill open forms):
      nbhUI.undoMark()            the form as it is now (a mark)
      nbhUI.undoBack(mark)        put it back; resolves true when it is exactly as marked
@@ -1958,6 +1965,18 @@ try { (function(){
   function sameFile(x, y){ if (norm(x) === norm(y)) return true; try { return same(JSON.parse(x), JSON.parse(y)); } catch (e) { return false; } }
   function differs(m){ if (!m) return false; if (m.own) { var o = ownNow(); if (o) return !sameFile(o.own, m.own); } return sig() !== m.sig; }
   U.undoDiffers = differs; U.undoSame = sameFile;
+  /* ---- no question first, where Undo covers the action ---- */
+  var ASK = { until: 0, prev: null, stub: null };
+  var SAFE = /^\s*(clear|remove|delete|discard|start (over|again|a new)|reset|erase|empty|take .{1,80}? (off|out of)\b|this (will )?(clears?|removes?|erases?|deletes?|resets?)\b)/i;
+  var STILL = /my pictures|google|\bdrive\b|everywhere|other devices?|autosave|safety cop|\bback-?up (file|cop(y|ies))\b|\bback up the|from the site|recogni[sz]er|\bbank\b|directory|offline/i;
+  function unstub(){ if (ASK.stub && W.confirm === ASK.stub) W.confirm = ASK.prev; ASK.stub = null; ASK.prev = null; }
+  function armed(){ if (W.__nbhQuiet || W.__nbhSilent) return false; if (ASK.until && ASK.until <= Date.now()) { ASK.until = 0; unstub(); } return ASK.until > 0; }
+  function take(text){ if (!armed()) return false; ASK.until = 0; unstub(); var t = String(text == null ? '' : text); return SAFE.test(t) && !STILL.test(t); }
+  function arm(){ ASK.until = Date.now() + 1500; if (!ASK.stub) { var nc = W.confirm; ASK.prev = nc;
+      ASK.stub = function(m){ if (take(m)) return true; return nc.apply(W, arguments); }; W.confirm = ASK.stub; }
+    setTimeout(armed, 1600); }
+  var C0 = U.confirm; U.confirm = function(text){ if (take(text)) return Promise.resolve(true); return C0.apply(this, arguments); };
+  U.undoAsks = function(text){ var t = String(text == null ? '' : text); return !(SAFE.test(t) && !STILL.test(t)); };   /* for the checks */
   U.undoBack = function(m){ return new Promise(function(res){
     var B = W.nbhBridge; if (!m || !B) return res(false);
     var fin = function(){ setView(m.view); setTimeout(function(){ try { W.scrollTo(m.x, m.y); } catch (e) {}
@@ -2008,7 +2027,7 @@ try { (function(){
   /* a form whose Clear all loads the page again (DD-1, DT-1, AD-1): the mark waits in this tab for the page that comes back */
   function akey(){ var id = ''; try { id = W.nbhBridge && W.nbhBridge.formId ? W.nbhBridge.formId() : ''; } catch (e) {} return 'nbh.undo.after|' + location.pathname + '|' + id; }
   function watch(m, what){ var t0 = Date.now(), n = 0, w = { m: m }; watching = w;
-    var quit = function(ev){ if (ev && ev.target && ev.target.closest && ev.target.closest('dialog')) return; if (watching === w) watching = null; off(); };
+    var quit = function(ev){ if (ev && (!ev.isTrusted || (ev.target && ev.target.closest && ev.target.closest('dialog')))) return; if (watching === w) watching = null; off(); };   /* only the person's own typing ends the watch: a form's own input events (DT-1's session log) do not */
     var keep = function(){ if (watching !== w || !m.own) return; try { sessionStorage.setItem(akey(), JSON.stringify({ own: m.own, view: m.view, x: m.x, y: m.y, what: what, at: Date.now() })); } catch (e) {} };
     W.addEventListener('pagehide', keep);
     var off = function(){ D.removeEventListener('input', quit, true); D.removeEventListener('keydown', quit, true); W.removeEventListener('pagehide', keep); };
@@ -2019,9 +2038,11 @@ try { (function(){
       if (differs(m)) { watching = null; off(); U.undoOffer(what, function(){ return U.undoBack(m); }); return; }
       if (n < 7) setTimeout(look, n < 3 ? 150 : 350); else { watching = null; off(); } })(); }
   D.addEventListener('click', function(e){
+    if (e.isTrusted && ASK.until) { ASK.until = 0; unstub(); }   /* the next tap ends the answer the last one left */
     if (!e.isTrusted || W.__nbhQuiet || W.__nbhSilent || watching) return;
     var b = e.target && e.target.closest ? e.target.closest('button,[role="button"]') : null; if (!watched(b)) return;
     var m; try { m = U.undoMark(); } catch (x) { return; } if (!m || (!m.own && !m.snap)) return;
+    if (m.own) arm();   /* Undo puts back every value: the form's question, if it names this action, is answered for it */
     watch(m, said(b)); }, true);
   (function(){ var s = null; try { s = sessionStorage.getItem(akey()); if (s) sessionStorage.removeItem(akey()); } catch (e) { s = null; } if (!s) return;
     var o = null; try { o = JSON.parse(s); } catch (e) { return; } if (!o || !o.own || !(Date.now() - o.at < 30000)) return;

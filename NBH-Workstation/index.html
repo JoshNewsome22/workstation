@@ -6658,7 +6658,8 @@ $('#dlgBody').addEventListener('click',async e=>{const o=e.target.closest('[data
   if(e.target.closest('#clStaffStart')){staffStart();return;}
   if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
   if(d){const L=await clList()||[],r=L.find(x=>x.key===d.dataset.cldel);if(!r)return;
-    if(!(await wsUI.confirm('Take '+clName(r)+' off the caseload on this '+HERE+'?\nTheir case history on this '+HERE+' (the earlier saves kept here) is deleted with them. Their case files are not touched; the next Save case of their case lists them again.',{ok:'Remove',danger:true})))return;   /* v21.91 the history named (it goes in clTx's delete, nbh-history) */
+    /* v25.70 (the BCBA, 11/9) no question first: Undo brings the student back with their case history and pin (nbh-v2570).
+       With Google Drive on, or a case shared with you, Remove still asks (their handlers, above, come first). */
     try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}clPinSet(r.key,false);caseloadOpen();}});
 $('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clIni'){try{localStorage.setItem('nbh.caseload.ini',e.target.checked?'1':'0');}catch(x){}caseloadOpen();}
   if(e.target.id==='clOff'){try{localStorage.setItem('nbh.caseload.off',e.target.checked?'1':'0');}catch(x){}}
@@ -11730,8 +11731,7 @@ dialog('Documents','<p class="hp-lead">'+esc(T(packet().client)||'This case')+(L
 '<p class="hint">Listed: what the workstation makes itself, when its print dialog opens (Build packet and the other papers it writes in its own window) and the PDFs Finish PDF saves; a form’s own print is not listed. Each line is the paper, when and how; the paper itself is not kept. Remove takes only the line off this list: no file is deleted.</p>'+
 '<p class="td-more"><button type="button" id="srDocRead">Read a document</button></p>');}
 /* v25.68 (the BCBA, 11/6) a line comes off the list: asked the first time on this device, the line only, never a file */
-async function docRemove(at){const L=Array.isArray(state.docs)?state.docs:[],i=L.findIndex(x=>x&&x.at===at);if(i<0)return;const x=L[i],K='nbh.ws.docsRemoveAsked';let asked=false;try{asked=kvGet(K)==='1';}catch(e){}
-if(!asked){if(!(await wsUI.confirm('Remove this line from the Documents list?\n'+docName(x)+' ('+(x.how==='pdf'?'saved as PDF':'print dialog opened')+', '+docWhenL(x)+'). Only the line goes: no file is deleted, and nothing printed or saved is touched. This is not asked again on this '+HERE+'.',{ok:'Remove the line'})))return;try{kvSet(K,'1');}catch(e){}}
+async function docRemove(at){const L=Array.isArray(state.docs)?state.docs:[],i=L.findIndex(x=>x&&x.at===at);if(i<0)return;   /* v25.70 no question first: Undo puts the line back (nbh-v2570) */
 const j=L.findIndex(y=>y&&y.at===at);if(j>=0)L.splice(j,1);docsOpen();say0('Line removed from the Documents list');try{__wsCH.paint();}catch(e){}
 setTimeout(()=>{const n=$('#dlgBody [data-srdocx]')||$('#dlgBody .hp-lead');if(n){if(!n.matches('button'))n.tabIndex=-1;try{n.focus({preventScroll:true});}catch(e){}}},30);}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-srdocs],[data-clopen-form],#srDocRead,[data-srdocx]');if(!t)return;

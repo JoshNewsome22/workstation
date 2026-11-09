@@ -168,16 +168,17 @@ const lastAn=(p,sel)=>p.evaluate(sel=>(window.__an||[]).filter(x=>x.a&&x.a.id===
   await p.evaluate(()=>__wsSR.docsOpen());await sleep(500);
   const ds=await p.evaluate(()=>[...document.querySelectorAll('#dlgBody .sr-docl [data-srdocx]')].map(b=>({l:b.getAttribute('aria-label'),h:Math.round(b.getBoundingClientRect().height),t:b.textContent})));
   ok('D1 each line of the Documents sheet has Remove (44 px), named for the line it removes',ds.length===d2.length&&ds.every(x=>x.t==='Remove'&&x.h>=44&&/^Remove .+, \d+\/\d+.*, from this list$/.test(x.l)),ds);
-  await p.evaluate(()=>{window.__asked=[];window.__ok=false;});await p.locator('#dlgBody [data-srdocx]').first().tap();await sleep(500);
-  const dc=await p.evaluate(()=>({n:state.docs.length,q:window.__asked.slice()}));
-  ok('D1 the first Remove asks (only the line goes, no file is deleted, asked once); Cancel keeps the line',dc.n===d2.length&&dc.q.length===1&&/Remove this line from the Documents list\?/.test(dc.q[0])&&/Only the line goes: no file is deleted/.test(dc.q[0])&&/not asked again/.test(dc.q[0]),dc);
-  await p.evaluate(()=>{window.__asked=[];window.__ok=true;});const top=await p.evaluate(()=>document.querySelector('#dlgBody [data-srdocx]').dataset.srdocx);
-  await p.locator('#dlgBody [data-srdocx]').first().tap();await sleep(500);
-  const dr=await p.evaluate(at=>({n:state.docs.length,gone:!state.docs.some(x=>x.at===at),rows:document.querySelectorAll('#dlgBody .sr-docl [data-srdocx]').length,q:window.__asked.length,file:(caseData(packet(),{}).docs||[]).length}),top);
-  ok('D1 after OK only that line is gone (the sheet and the case file hold the rest)',dr.n===d2.length-1&&dr.gone&&dr.rows===dr.n&&dr.file===dr.n&&dr.q===1,dr);
+  /* v25.70 (the BCBA, 11/9): no question first; the line goes at once and Undo, in the box, puts it back */
+  await p.evaluate(()=>{window.__asked=[];window.__ok=false;});const top=await p.evaluate(()=>document.querySelector('#dlgBody [data-srdocx]').dataset.srdocx);
+  await p.locator('#dlgBody [data-srdocx]').first().tap();await sleep(700);
+  const dr=await p.evaluate(at=>({n:state.docs.length,gone:!state.docs.some(x=>x.at===at),rows:document.querySelectorAll('#dlgBody .sr-docl [data-srdocx]').length,q:window.__asked.length,file:(caseData(packet(),{}).docs||[]).length,undo:document.querySelectorAll('#dlg .ws-undo-row .ws-undo-b').length}),top);
+  ok('D1 Remove takes only that line, at once, with no question (Undo offered in the box); the sheet and the case file hold the rest',dr.n===d2.length-1&&dr.gone&&dr.rows===dr.n&&dr.file===dr.n&&dr.q===0&&dr.undo===1,dr);
+  await p.locator('#dlg .ws-undo-row .ws-undo-b').tap();await sleep(700);
+  const du=await p.evaluate(at=>({n:state.docs.length,back:state.docs.some(x=>x.at===at)}),top);
+  ok('D1 Undo puts the line back',du.n===d2.length&&du.back,du);
   await p.locator('#dlgBody [data-srdocx]').first().tap();await sleep(500);
   const dr2=await p.evaluate(()=>({n:state.docs.length,q:window.__asked.length}));
-  ok('D1 a later Remove is not asked again',dr2.n===d2.length-2&&dr2.q===1,dr2);
+  ok('D1 the next Remove is not asked either',dr2.n===d2.length-1&&dr2.q===0,dr2);
   await p.screenshot({path:OUT+'documents-1376.png'});await shut(p);
   /* ---------- 8 motion: a menu grows from its button, a tap ends it ---------- */
   await p.evaluate(()=>{window.__an=[];});await p.locator('#wsNav [data-wn-menu="case"]').tap();await sleep(30);
