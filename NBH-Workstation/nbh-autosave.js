@@ -137,6 +137,7 @@
   function unpack(rec) {
     var ids = Object.keys(rec.forms || {}), out = { packet: rec.packet || null, facts: rec.facts || null, forms: {}, notes: [], picsLost: {}, continued: {} };
     if (Array.isArray(rec.docs)) out.docs = rec.docs;   /* v25.68 the papers made for the case */
+    if (rec.famSum && typeof rec.famSum === 'object') out.famSum = rec.famSum;   /* v25.70 the family's plan summary, as edited */
     return Promise.all(ids.map(function (id) { return unpackForm(rec.forms[id]).then(function (f) { out.forms[id] = { title: f.title, snap: f.snap }; if (f.picsLost) out.picsLost[id] = f.picsLost; if (f.continued) out.continued[id] = f.continued; }); }))
       .then(function () {
         Object.keys(out.picsLost).forEach(function (id) { var n = out.picsLost[id]; out.notes.push('Form ' + id + ': ' + n + (n === 1 ? ' picture' : ' pictures') + ' could not be kept in the safety copy (no room in this browser); add ' + (n === 1 ? 'it' : 'them') + ' again.'); });

@@ -1252,7 +1252,7 @@ window.FX2_CFG.step = true;
       <div><label>Student</label><input data-m="client"></div>
       <div><label>Student ID</label><input data-m="sid"></div>
       <div><label>Grade</label><input data-m="grade"></div>
-      <div><label>Child&rsquo;s name as the family uses it (on the sheets)</label><input data-m="nick" placeholder="first name or nickname"></div>
+      <div><label>Called at home (the child&rsquo;s name on the family&rsquo;s pages)</label><input data-m="nick" placeholder="first name or nickname"></div>
       <div><label>Caregiver(s) who will keep the sheets</label><input data-m="cg" placeholder="names and relationship; who fills it in on which days"></div>
       <div><label>Caregiver phone or email</label><input data-m="cg_contact"></div>
       <div><label>Language at home</label><input data-m="lang" placeholder="English; note if the sheets need translating"></div>
@@ -3647,6 +3647,23 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
    row.innerHTML='<button type="button" class="nbh-btn nbh-btn-primary" id="hdHomePrintBtn">Print the home sheets</button><span class="hint">These pages alone, numbered on their own, headed with the child&rsquo;s first name and the week, and with when to bring them back and whom to call at the foot of each page.</span>';
    at.parentNode.insertBefore(row,at);row.querySelector('button').addEventListener('click',()=>hdHomePrint());}
  try{renderSheets();}catch(e){}
+})();
+</script>
+<script id="hd1-v2570">
+/* v25.70 (the BCBA, 11/9) one name for the child on every page that goes home: the home sheets and their head here, and the
+   workstation's Family packet and its plan summary (its pkFirst reads the same rule). "Called at home" (the name the family
+   uses) when it is filled, else Form DM-1's preferred name (through the case's facts, profile.who), else the first word of
+   the student's name. hdFamily gives the workstation that name and the family's steps (the routine checklist's Adult steps),
+   for the plan summary; nothing is saved by it. */
+(function(){
+ const T=s=>String(s==null?'':s).trim();
+ const pref=()=>{try{const w=typeof nbhHdCase!=='undefined'&&nbhHdCase&&nbhHdCase.profile&&nbhHdCase.profile.who;return T(w&&w.pref).split(/\s+/)[0]||'';}catch(e){return '';}};
+ window.hdFirst=function(){const n=T(S.meta.nick);if(n)return n;const p=pref();if(p)return p;const c=T(S.meta.client).replace(/^simulated\s*[\u2013\u2014-]\s*/i,'');
+   return /,/.test(c)?T(c.split(',')[1]).split(/\s+/)[0]:(c.split(/\s+/)[0]||'');};
+ window.hdFamily=function(){return {called:T(S.meta.nick),first:window.hdFirst(),steps:(S.sk||[]).filter(x=>x&&x.who==='Adult'&&T(x.label)).map(x=>T(x.label))};};
+ /* a preferred name that comes with the case redraws the sheets while "Called at home" is empty */
+ {const was=window.__nbhFactsIn;let last=pref();window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;
+   try{const p=pref();if(p!==last){last=p;if(!T(S.meta.nick))renderSheets();}}catch(e){}return r;};}
 })();
 </script>
 <style id="v2565-hd1-css">

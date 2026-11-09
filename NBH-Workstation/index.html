@@ -1492,6 +1492,24 @@ body:not(.has-form) #focusBtn{display:none}
 .pk-fam,.pk-note{font-size:12.5px;line-height:1.45;color:var(--ink);margin:6px 0}
 .pk-adv{margin:8px 0;border:1px solid var(--rule);border-radius:6px;padding:4px 10px}
 .pk-adv summary{min-height:36px;display:flex;align-items:center;cursor:pointer;font-weight:600;color:var(--navy)}
+/* v25.70 (the BCBA, 11/9) the family's one-page plan summary in plain words: an editable preview of the page, checked before it prints */
+.pk-sum{margin:12px 0 6px;border:1px solid var(--rule);border-radius:8px;padding:10px 12px;background:var(--mist,#eef3f2)}
+.pk-sum h3{margin:0 0 4px;font-size:15px;color:var(--navy)}
+.pk-sum .pk-note{margin:0 0 8px}
+.pk-sumpg{background:#fff;color:#1f2d36;border:1px solid #cfdad8;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:18px 22px 14px;max-width:640px;margin:0 auto}
+.pk-sumpg .pk-sumt{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:20px;line-height:1.25;color:#182e43;margin:0 0 2px}
+.pk-sumpg .pk-sums{font-size:12.5px;color:#54676f;margin:0 0 6px}
+.pk-sumpg label{display:block;font-weight:700;font-size:14px;color:#182e43;margin:10px 0 2px}
+.pk-sumpg label span{font-weight:400;font-size:12px;color:#54676f}
+.pk-sumpg textarea{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:16px;line-height:1.45;color:#1f2d36;background:#fff;border:1px dashed #b9c7c4;border-radius:6px;padding:6px 8px;min-height:44px;resize:vertical;overflow:hidden}
+.pk-sumpg textarea:focus{border-style:solid;border-color:var(--navy);outline:2px solid var(--mist,#dbe6e3)}
+.pk-sumchk{font-size:12.5px;line-height:1.45;margin:8px 0 4px;color:var(--ink)}
+.pk-sumchk .pk-warn{display:block;color:#8e2a2a;font-weight:600}
+.pk-sumrow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:6px 0 0}
+.pk-sumrev{display:flex;gap:8px;align-items:center;min-height:44px;font-size:14px;cursor:pointer}
+.pk-sumrev input{width:22px;height:22px;margin:0}
+.pk-sumreset{min-height:44px}
+.pk-sumnew{font-size:12.5px;color:#7a4a10;background:#fbeedb;border-left:4px solid #9b4e15;padding:5px 9px;margin:6px 0}
 /* v21.94 Log it now: the sheet in the dialog */
 #dlg .ln{display:flex;flex-direction:column;gap:10px;margin-top:4px}
 #dlg .ln .ln-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px}
@@ -3756,8 +3774,17 @@ const PK_PARTS={'TD-1:final':{q:['#final'],n:'Final treatment plan: step by step
 /* each reader's forms, in the order they print: [form, part ('' for the whole form)] */
 const PK_TAKES={staff:[['QS-1',''],['EB-1','brief'],['TD-1','final'],['CR-1','plan'],['DD-1','sheet'],['SM-1','sheet']],
   family:[['IC-1','family'],['CT-1','card'],['HD-1','sheets']]};
-/* a first name for the family's pages: Form DM-1's preferred name when it is open, else the first word of the bar's name */
-function pkFirst(name){let pref='';try{const f=state.frames['DM-1'],e=f&&f.contentDocument&&f.contentDocument.querySelector('[name="s.pref"]');pref=e?String(e.value||'').trim():'';}catch(e){}
+/* a first name for the family's pages. v25.70 (the BCBA, 11/9) one rule for every page that goes home (the Family packet, Form
+   HD-1's home sheets, the plan summary): Form HD-1's "Called at home" (the child's name as the family uses it) when it is
+   filled, else Form DM-1's preferred name, else the first word of the bar's name. Each is read from the form when it is open,
+   from the case file's copy of it while it waits to be loaded, else from the case's facts (DM-1's profile.who) */
+function pkOwn(id){try{const P=state.pending[id],t=P&&P.snap&&P.snap.own;return t?JSON.parse(t):null;}catch(e){return null;}}
+function pkCalled(){let v='';try{if(state.pending['HD-1']){const o=pkOwn('HD-1');v=o&&o.S&&o.S.meta?o.S.meta.nick:'';}
+    else{const f=state.frames['HD-1'],e=f&&f.contentDocument&&f.contentDocument.querySelector('[data-m="nick"]');v=e?e.value:'';}}catch(e){}
+  return String(v||'').trim();}
+function pkPref(){let v=null;try{const f=!state.pending['DM-1']&&state.frames['DM-1'],e=f&&f.contentDocument&&f.contentDocument.querySelector('[name="s.pref"]');if(e)v=e.value;}catch(e){}
+  if(v==null){const w=(((state.facts||{}).profile)||{}).who||{};v=w.pref||'';}return String(v||'').trim();}
+function pkFirst(name){const called=pkCalled();if(called)return called;const pref=pkPref();
   if(pref)return pref.split(/\s+/)[0];
   const n=String(name||'').replace(/^\s*simulated\s*[–—-]\s*/i,'').trim();if(/,/.test(n))return (n.split(',')[1]||'').trim().split(/\s+/)[0]||n;return n.split(/\s+/)[0]||'';}
 /* the BCBA the family calls: the bar's name (before its credentials) and the phone the staff directory holds for that name */
@@ -3776,7 +3803,8 @@ function pkForms(aud){const caseHas=id=>inCase(id)||!!state.ticked[id]||!!state.
 function pkEstLoad(){try{return JSON.parse(localStorage.getItem('nbh.packet.est')||'{}')||{};}catch(e){return {};}}
 function pkEst(id,part,cache){const k=id+(part?':'+part:'');if(cache[k])return cache[k];const P=part&&PK_PARTS[id+':'+part];let n=P?P.pg:(MP_PAGES[id]||8);
   const st=state.status[id]||(state.pending[id]||{}).status;if(!P&&st&&!(st.filled>4))n=Math.max(1,Math.round(n/2));return n;}
-function pkTotal(aud,list,cache){if(!list.length)return 0;let n=list.reduce((t,[id,part])=>t+pkEst(id,part,cache),0);n+=list.length>16?2:1;   /* the cover */
+function pkTotal(aud,list,cache,noSum){if(!list.length)return 0;let n=list.reduce((t,[id,part])=>t+pkEst(id,part,cache),0);n+=list.length>16?2:1;   /* the cover */
+  if(aud==='family'&&!noSum)n+=1;   /* v25.70 the plan in plain words, one page */
   const refs=aud==='iep'?packetOpts().refs:'';if(refs==='end')n+=Math.max(1,Math.round(list.length/3));return n;}
 function pkEstSave(est,parts){const c=pkEstLoad();Object.keys(est||{}).forEach(id=>{if(id==='REFS')return;const k=id+(parts&&parts[id]?':'+parts[id]:'');c[k]=est[id];});try{localStorage.setItem('nbh.packet.est',JSON.stringify(c));}catch(e){}}
 const pkName=(id,part)=>part&&PK_PARTS[id+':'+part]?PK_PARTS[id+':'+part].n:((ALL.find(f=>f[0]===id)||[])[1]||id);
@@ -3784,43 +3812,212 @@ const pkName=(id,part)=>part&&PK_PARTS[id+':'+part]?PK_PARTS[id+':'+part].n:((AL
 async function pkSheet(){
   if(!ALL.some(([id])=>state.ticked[id])){if(typeof srChoose==='function'){srChoose(true,true);return;}alert('Choose at least one form in the list first.');return;}
   dialog('Build packet: who is this for?','');
-  const contact=await pkBcba(),cache=pkEstLoad();let aud=null,off={};
+  const contact=await pkBcba(),cache=pkEstLoad();let aud=null,off={},sumOn=true,sumOk=()=>true;
   const pages=n=>'about '+n+' page'+(n===1?'':'s');
-  const step1=()=>{aud=null;off={};const b=$('#dlgBody');$('#dlgTitle').textContent='Build packet: who is this for?';
+  const step1=()=>{aud=null;off={};sumOn=true;sumOk=()=>true;const b=$('#dlgBody');$('#dlgTitle').textContent='Build packet: who is this for?';
     b.innerHTML='<p class="hp-lead">Each choice takes the forms it needs from this case. You can switch any of them off in the next step.</p><div class="pk-cards">'+
       PK_AUD.map(([k,t,d])=>{const L=pkForms(k),n=pkTotal(k,L,cache);return '<button type="button" class="pk-card" data-aud="'+k+'"'+(L.length?'':' disabled')+'><b>'+esc(t)+'</b><span class="pk-d">'+esc(d)+'</span>'+
         '<span class="pk-f">'+(L.length?esc(L.map(([id])=>id).join(', ')):'None of its forms is in this case')+'</span><span class="pk-n">'+(L.length?pages(n):'')+'</span></button>';}).join('')+'</div>';
     b.querySelectorAll('.pk-card').forEach(c=>c.addEventListener('click',()=>step2(c.dataset.aud)));};
   const list=()=>pkForms(aud).filter(([id])=>!off[id]);
-  const total=()=>{const t=$('#pkTotal');if(t){const L=list();t.textContent=L.length?'About '+pkTotal(aud,L,cache)+' pages in all: '+L.length+' section'+(L.length===1?'':'s')+' and the cover.':'Nothing switched on: switch on at least one section.';}const pr=$('#pkPrint');if(pr)pr.disabled=!list().length;};
+  const total=()=>{const t=$('#pkTotal'),S=aud==='family'&&sumOn?1:0;if(t){const L=list(),n=L.length+S;t.textContent=L.length?'About '+pkTotal(aud,L,cache,!S)+' pages in all: '+n+' section'+(n===1?'':'s')+' and the cover.':'Nothing switched on: switch on at least one section.';}
+    const pr=$('#pkPrint'),ok=!S||sumOk();if(pr){pr.disabled=!list().length||!ok;pr.title=ok?'':'Tick Reviewed under the plan in plain words first';}const w=$('#pkSumWait');if(w)w.hidden=ok;};
   const step2=k=>{aud=k;off={};const A=PK_AUD.find(a=>a[0]===k),L=pkForms(k),b=$('#dlgBody'),o=packetOpts(),ticked=L.map(([id])=>ALL.find(f=>f[0]===id)).filter(Boolean);
     $('#dlgTitle').textContent='Build packet: '+A[1];
-    const lang=pkLang(),hd=L.some(([id])=>id==='HD-1'),first=pkFirst(packet().client);
+    const lang=pkLang(),hd=L.some(([id])=>id==='HD-1'),first=pkFirst(packet().client),fam=k==='family'&&L.length>0;
     b.innerHTML='<p class="pk-top"><button type="button" class="pk-back">‹ Who it is for</button> <span>'+esc(A[2])+'</span></p>'+
-      '<ul class="pk-secs">'+L.map(([id,part])=>'<li><label><input type="checkbox" checked data-pk-id="'+esc(id)+'"> <b>Form '+esc(id)+'</b> <span class="pk-sn">'+esc(pkName(id,part))+'</span><span class="pk-sp">'+pages(pkEst(id,part,cache))+'</span></label></li>').join('')+'</ul>'+
+      '<ul class="pk-secs">'+(fam?'<li><label><input type="checkbox" checked data-pk-sum> <b>First page</b> <span class="pk-sn">'+PK_SUM_T+': the plan on one page (check it below)</span><span class="pk-sp">'+pages(1)+'</span></label></li>':'')+L.map(([id,part])=>'<li><label><input type="checkbox" checked data-pk-id="'+esc(id)+'"> <b>Form '+esc(id)+'</b> <span class="pk-sn">'+esc(pkName(id,part))+'</span><span class="pk-sp">'+pages(pkEst(id,part,cache))+'</span></label></li>').join('')+'</ul>'+
       '<p class="pk-total" id="pkTotal" aria-live="polite"></p>'+
       (k==='family'?'<p class="pk-fam">The family’s pages carry the child’s first name'+(first?' ('+esc(first)+')':'')+' and, at the foot of each page, “'+esc(pkHomeFoot(first,contact))+'”'+(contact.phone?'':' (add the BCBA’s phone in the Staff directory to print it here)')+'. '+
         (lang.english?'Home language: English'+(lang.home?'':' (none recorded in Form DM-1)')+'.':'Home language (Form DM-1): <b>'+esc(lang.home)+'</b>. '+(/creole|krey|haitian/i.test(lang.home)?'Form HD-1’s home sheets carry the Haitian Creole beside the English (a draft translation). ':'')+'Have the pages translated or explained by an interpreter before they go home.')+'</p>':'')+
+      (fam?famPanelHtml():'')+
       (k==='iep'?'':'<p class="pk-note">The packet’s cover says who it is for'+(k==='records'?'; each form keeps its own references, as it prints on its own':'; the references are left out')+'.</p>')+
       (k==='iep'?'<details class="pk-adv"><summary>Advanced settings (Packet options)</summary><div class="pk-advb">'+packetOptsHtml(o,ticked)+'</div></details>':'')+
-      '<div class="bm-act"><button class="primary" id="pkPrint" type="button">Print / Save PDF</button>'+(k==='family'&&hd?'<button type="button" id="pkHome">Print the home sheets</button>':'')+'<span>The print window opens; save it as PDF from there.</span></div>';
+      '<div class="bm-act"><button class="primary" id="pkPrint" type="button">Print / Save PDF</button>'+(k==='family'&&hd?'<button type="button" id="pkHome">Print the home sheets</button>':'')+'<span>The print window opens; save it as PDF from there.'+(fam?' <b id="pkSumWait" hidden>Tick Reviewed under '+PK_SUM_T.toLowerCase()+' first.</b>':'')+'</span></div>';
     b.querySelector('.pk-back').addEventListener('click',step1);
     b.querySelectorAll('[data-pk-id]').forEach(c=>c.addEventListener('change',()=>{off[c.dataset.pkId]=!c.checked;total();}));
     if(k==='iep')packetOptsBind(b.querySelector('.pk-advb'),o,ticked);
+    if(fam){const sw=b.querySelector('[data-pk-sum]'),box=b.querySelector('.pk-sum');sumOk=famPanelBind(box,first,contact,total);
+      sw.addEventListener('change',()=>{sumOn=sw.checked;box.hidden=!sumOn;total();});}
     total();
-    $('#pkPrint').addEventListener('click',()=>{const L=list();if(!L.length)return;try{$('#dlg').close();}catch(e){}pkRun(aud,L,contact);});
+    $('#pkPrint').addEventListener('click',()=>{const L=list();if(!L.length)return;if(aud==='family'&&sumOn&&!sumOk())return;try{$('#dlg').close();}catch(e){}pkRun(aud,L,contact,aud==='family'&&sumOn);});
     if($('#pkHome'))$('#pkHome').addEventListener('click',()=>{try{$('#dlg').close();}catch(e){}pkHomeSheets();});};
   step1();}
 /* the packet for a reader. IEP team and file: exactly what Build packet built before (masterRun with the forms alone) */
-function pkRun(aud,L,contact){const F=L.map(([id])=>ALL.find(f=>f[0]===id)).filter(Boolean);
+function pkRun(aud,L,contact,withSum){const F=L.map(([id])=>ALL.find(f=>f[0]===id)).filter(Boolean);
   if(aud==='iep'){masterRun(packetOpts().order==='list'?F:mpCaseOrder(F));return;}
   const parts={};L.forEach(([id,part])=>{if(part)parts[id]=part;});const first=pkFirst(packet().client);
   const T={staff:'Behavior plan for staff',family:(first?first+'’s':'Your child’s')+' plan, for the family',records:'Copy of education records, as requested'};
-  masterRun(F,{aud,parts,title:T[aud],packet:aud==='records'?{refs:'form',order:'list'}:{refs:'none'},homeFoot:aud==='family'?pkHomeFoot(first,contact):'',first,contact});}
+  const summary=withSum?famHtml(first,famNow(first,contact).text,packet()):'';   /* v25.70 the plan in plain words, as reviewed */
+  masterRun(F,{aud,parts,title:T[aud],packet:aud==='records'?{refs:'form',order:'list'}:{refs:'none'},homeFoot:aud==='family'?pkHomeFoot(first,contact):'',first,contact,summary});}
 /* Form HD-1's home sheets, printed on their own from the form (its own page numbers and home footer) */
 async function pkHomeSheets(){openForm('HD-1');const t0=Date.now();let fr=null;
   while(Date.now()-t0<15000){fr=state.frames['HD-1'];try{if(fr&&fr.contentWindow&&typeof fr.contentWindow.hdHomePrint==='function')break;}catch(e){}await new Promise(r=>setTimeout(r,200));}
   try{fr.contentWindow.hdHomePrint();}catch(e){wsUI.toast('Open Form HD-1’s Home sheets and press Print the home sheets there.');}}
+/* ---- v25.70 (the BCBA, 11/9) the family's plan on one page, in plain words ----
+   The Family packet opens with a one-page summary of the plan: what we are working on (the target behaviors in plain words,
+   from Form TB-1 or the case), what we are teaching and how school will help (Form TD-1's chosen plan), what home can do (two
+   to four of Form HD-1's family steps or Form CT-1's steps, where there are any) and who to call (the BCBA and the phone the
+   Staff directory holds, as the home footer has them). It names the child as every family page does (pkFirst). It is
+   written short, about a grade-6 reading level, without the field's words, and leaves out safety events, restraints, the
+   crisis plan and record numbers. The BCBA reads it in step 2 of Build packet, where it is an editable preview, and ticks
+   Reviewed before the packet prints. The edits are kept with the case (state.famSum: in the case file, the caseload's copy
+   and the safety copy, as the Documents list is), never in a form: no form's saved fields change. */
+const PK_SUM_T='The plan in plain words';
+const FS_KEYS=['work','teach','home','call'];
+const FS_HEAD={work:'What we are working on',teach:'How we will help at school',home:'What you can do at home',call:'Who to call'};
+const fsT=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+/* the words of a form made plain: notes in brackets, form names and the field's shorthand out */
+function fsPlain(s){return fsT(String(s||'').replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ').replace(/\bForms? [A-Z]{2,3}-\d\b/g,' ')
+  .replace(/\s*(→|->)\s*/g,', then ').replace(/\bmands?\b/gi,'request').replace(/\bprogrammed delay\b/gi,'short wait').replace(/\bSGD\b/g,'talking device')
+  .replace(/\s+([,.;:])/g,'$1').replace(/[;:,]\s*$/,'')).replace(/^[a-z]/,c=>c.toUpperCase());}
+/* he, she or they, from Form DM-1 (pronouns, else sex) */
+function fsPron(){const w=(((state.facts||{}).profile)||{}).who||{},p=String(w.pron||'').toLowerCase(),s=String(w.sex||'').toLowerCase();
+  if(/^she|her\b/.test(p)||(!p&&/^f/.test(s)))return {he:'she',his:'her',him:'her',self:'herself'};
+  if(/^he\b|him\b|^he\//.test(p)||(!p&&/^m/.test(s)))return {he:'he',his:'his',him:'him',self:'himself'};
+  return {he:'they',his:'their',him:'them',self:'themselves'};}
+/* a target behavior in everyday words */
+function fsBeh(label,P){const l=String(label||'').toLowerCase(),adult=/staff|adult|teacher/.test(l),peer=/peer|student|classmate/.test(l);
+  if(/self[\s-]*injur|\bsib\b|head[\s-]*(hit|bang)/.test(l))return 'hurting '+P.self+(/head/.test(l)?', like hitting '+P.his+' own head':'');
+  if(/aggress|hit|kick|punch/.test(l))return 'hurting '+(adult?'adults at school':peer?'other children':'others')+', like hitting or kicking';
+  if(/elop|run(ning)?\s*(off|away)|bolt|leav/.test(l))return 'leaving the room or the group without an adult';
+  if(/propert|destru|throw/.test(l))return 'throwing or breaking things';
+  if(/disrupt|yell|scream|call(ing)?[\s-]*out|tantrum|outburst/.test(l))return 'yelling or loud outbursts that stop the class';
+  if(/non[\s-]*compl|refus/.test(l))return 'not starting work when asked';
+  if(/off[\s-]*task/.test(l))return 'getting off task';
+  if(/spit/.test(l))return 'spitting';if(/\bbit(e|es|ing)\b/.test(l))return 'biting';
+  if(/pica/.test(l))return 'putting things that are not food in '+P.his+' mouth';
+  if(/verbal|swear|curs|threat/.test(l))return 'unkind or rude words';
+  const t=fsPlain(label).toLowerCase();return t;}
+/* why it happens, from the function the assessment found */
+function fsWhy(fn,N,P,many){const f=String(fn||'').toLowerCase(),It=many?'They happen':'It happens',it=many?'they feel':'it feels';
+  if(/escape|avoid|demand/.test(f))return It+' most when work is hard or long, and '+(many?'they have':'it has')+' been a way for '+N+' to get out of the work.';
+  if(/attention/.test(f))return It+' most when '+N+' wants an adult to notice '+P.him+'.';
+  if(/tangible|access|item/.test(f))return It+' most when '+N+' wants something '+P.he+' likes, like a toy or a turn.';
+  if(/automatic|sensory|self-stim/.test(f))return It+' because of how '+it+' to '+N+', even when no one is near.';
+  return '';}
+/* what the new skill is for */
+function fsWant(fn,P){const f=String(fn||'').toLowerCase();
+  return /escape|avoid|demand/.test(f)?'ask for a break':/attention/.test(f)?'ask for an adult’s attention':/tangible|access|item/.test(f)?'ask for what '+P.he+' wants':'ask for help';}
+/* the plan's parts (Form TD-1's cards) said as what school does; a part not listed here is left for the BCBA to add */
+function fsHelp(name,N,P,fn){const l=String(name||'').toLowerCase(),want=fsWant(fn,P);
+  if(/protect|crisis|restrain|safety|medical/.test(l))return '';
+  if(/functional communication|\bfct\b/.test(l))return 'When '+N+' asks the new way, adults answer right away. That way, asking works better than the old behavior.';
+  if(/delay|denial|tolerance|wait/.test(l))return 'Little by little, '+N+' practices waiting a short time after '+P.he+' asks.';
+  if(/high[\s-]*prob|momentum|high-p/.test(l))return 'Before harder work, adults start with a few quick, easy tasks so '+N+' gets off to a good start.';
+  if(/setting[\s-]*event|neutraliz/.test(l))return 'Each morning, adults check how '+N+' slept and feels, and make the day easier when '+P.he+' is tired or unwell.';
+  if(/choice/.test(l))return N+' gets to make choices during the day, like which task to do first.';
+  if(/visual|schedule|first[\s-/]*then/.test(l))return 'A picture schedule shows '+N+' what comes next.';
+  if(/token|point|star/.test(l))return N+' earns points for good work and trades them for something '+P.he+' likes.';
+  if(/self[\s-]*monitor/.test(l))return N+' learns to check and mark '+P.his+' own behavior.';
+  if(/noncontingent|attention|ncr|rapport|pairing/.test(l))return 'Adults give '+N+' friendly attention often, not only when there is a problem.';
+  if(/social skill|social story|video model/.test(l))return N+' practices the new skill with adults first, then with classmates.';
+  if(/instruction|curricul|task|demand|work/.test(l))return 'Adults make work the right size for '+N+', with short tasks and help nearby.';
+  return '';}
+/* Form HD-1's family steps (the routine checklist's Adult steps), from the form or the case file's copy of it */
+function fsHomeSteps(){let L=[];try{if(state.pending['HD-1']){const o=pkOwn('HD-1');L=((o&&o.S&&o.S.sk)||[]).filter(x=>x&&x.who==='Adult').map(x=>x.label);}
+    else{const f=state.frames['HD-1'],w=f&&f.contentWindow;if(w&&typeof w.hdFamily==='function')L=w.hdFamily().steps||[];}}catch(e){}
+  return L.map(fsT).filter(Boolean);}
+/* the draft, from the case as it stands */
+function famDraft(first,contact){const F=state.facts||{},P=fsPron(),N=first||'your child',plan=F.plan&&typeof F.plan==='object'?F.plan:{};
+  const B=(F.behaviors||[]).filter(b=>b&&b.label&&!b.isRep);
+  let names=B.map(b=>fsBeh(b.label,P));if(!names.length&&plan.beh)names=[fsBeh(plan.beh,P)];
+  names=names.filter((x,i,a)=>x&&a.indexOf(x)===i).slice(0,3);
+  const fn=(B[0]&&(B[0].fnKey||B[0].fn))||plan.fn||'';
+  const many=names.length>1,sep=names.some(x=>/,/.test(x))?'; ':', ';
+  const and=L=>L.length<2?L.join(''):L.slice(0,-1).join(sep)+(L.length>2||sep==='; '?sep.trim()+' ':' ')+'and '+L[L.length-1];
+  const work=names.length?['At school, we are helping '+N+' with '+(many?(names.length===2?'two':'three')+' behaviors that get':'a behavior that gets')+' in the way of learning: '+and(names)+'.',
+    fsWhy(fn,N,P,many),'Our goal is for '+(many?'them':'it')+' to happen less, so '+N+' can learn and enjoy the school day.'].filter(Boolean).join(' '):
+    'At school, we are helping '+N+' with a behavior that gets in the way of learning.';
+  const rep=fsPlain(plan.rep||(plan.request||{}).name||(B.find(b=>b.rep||b.alt)||{}).rep||(B.find(b=>b.alt)||{}).alt||(F.behaviors||[]).filter(b=>b&&b.isRep).map(b=>b.label)[0]||'');
+  const teach=[];
+  if(rep)teach.push('We are teaching '+N+' a better way to '+fsWant(fn,P)+': '+rep.charAt(0).toLowerCase()+rep.slice(1)+'.');
+  (plan.teach||[]).concat(plan.antCards||[]).forEach(c=>{const s=fsHelp(c,N,P,fn);if(s&&!teach.includes(s)&&teach.length<4)teach.push(s);});
+  if(/praise/i.test(String(plan.prompted||''))&&teach.length<4)teach.push('Adults praise '+N+' each time '+P.he+' uses the new skill.');
+  if(!teach.length)teach.push('We are teaching '+N+' a better way to '+fsWant(fn,P)+'.');
+  /* home: Form HD-1's family steps, then Form CT-1's (not a step that holds back what was earned, nor a restrictive one) */
+  const cg=F.caregiver&&Array.isArray(F.caregiver.steps)?F.caregiver.steps:[];
+  const home=[];fsHomeSteps().concat(cg.filter(x=>x&&!x.ext&&!x.restr).map(x=>x.d)).forEach(s=>{const t=fsPlain(s);if(t&&!home.some(h=>h.toLowerCase()===t.toLowerCase())&&home.length<4)home.push(/[.!?]$/.test(t)?t:t+'.');});
+  if(home.length<2)home.push(rep?'When '+N+' asks the new way at home, answer kindly and give what '+P.he+' asked for when you can.':'Notice and praise the things '+N+' does well at home.');
+  if(home.length<2)home.push('Tell us what you see at home: what helps, and what makes things harder.');
+  const lang=pkLang();
+  const call=[contact&&contact.name?(contact.phone?'Call '+contact.name+' at '+contact.phone+' with any questions, or to tell us how things are going at home.':'Call the school and ask for '+contact.name+' with any questions, or to tell us how things are going at home.'):'Call the school with any questions, or to tell us how things are going at home.',
+    lang.english?'':'If you would like this page explained in your own language, ask us for an interpreter.'].filter(Boolean).join(' ');
+  return {work,teach:teach.join('\n'),home:home.join('\n'),call};}
+const fsSig=d=>{let h=0;const s=FS_KEYS.map(k=>d[k]||'').join('\u0001');for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return (h>>>0).toString(36);};
+/* the summary as it stands for this case: the BCBA's edits when there are any (on the plan they were made from), else the draft */
+/* the child's name follows the family-name rule (pkFirst): the plan's fingerprint is taken without it, so a name that changes
+   (Form HD-1's "Called at home" filled later) changes the page's words, the BCBA's edits too, without asking for a new review */
+const fsRe=s=>new RegExp('(^|[^\\p{L}])'+String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?=$|[^\\p{L}])','gu');
+const fsName=(d,from,to)=>{if(!from||from===to)return d;const o={};FS_KEYS.forEach(k=>{o[k]=String(d[k]||'').replace(fsRe(from),(m,a)=>a+to);});return o;};
+function famNow(first,contact){const d=famDraft(first,contact),N=first||'your child',base=fsSig(famDraft('\u0002',contact)),S=state.famSum;
+  if(S&&S.text&&typeof S.text==='object'){let t={};FS_KEYS.forEach(k=>{t[k]=typeof S.text[k]==='string'?S.text[k]:d[k];});if(S.first)t=fsName(t,S.first,N);
+    return {text:t,draft:d,base,first:N,edited:true,moved:S.base!==base,reviewed:S.base===base&&!!S.reviewed};}
+  return {text:d,draft:d,base,first:N,edited:false,moved:false,reviewed:!!(S&&S.reviewed&&S.base===base)};}
+/* what the page must not hold, and how plain it reads */
+const FS_SAFE=/\b(restrain\w*|seclu\w*|physical(ly)? (hold|holds|management|restraint)|incident|safety event\w*|crisis|police|911|injur\w*|emergency)\b/i;
+const FS_JARGON=/\b(mands?|extinction|reinforc\w*|contingen\w*|antecedents?|functional|function|FCT|BIP|FBA|DRA|DRO|NCR|baseline|criterion|operant|prompt hierarchy|escape|tangible|CRF|VR ?\d+|FR ?\d+|S\+|S-?Delta)\b/i;
+function fsSyl(w){w=w.toLowerCase().replace(/[^a-z]/g,'');if(!w)return 0;if(w.length<=3)return 1;w=w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/,'').replace(/^y/,'');const m=w.match(/[aeiouy]{1,2}/g);return Math.max(1,m?m.length:1);}
+/* the Flesch-Kincaid grade of the page's words (an estimate) */
+function fsGrade(t){const S=String(t||'').split(/[.!?]+(?:\s|$)|\n+/).map(s=>s.trim()).filter(s=>/[a-z]/i.test(s)),W=String(t||'').match(/[A-Za-z’']+/g)||[];
+  if(!S.length||!W.length)return 0;const syl=W.reduce((n,w)=>n+fsSyl(w),0);return Math.round((0.39*W.length/S.length+11.8*syl/W.length-15.59)*10)/10;}
+function famCheck(text){const all=FS_KEYS.map(k=>text[k]||'').join('\n'),sid=fsT(packet().sid),out={block:[],note:[]};
+  const m=FS_SAFE.exec(all);if(m)out.block.push('It names “'+m[0]+'”: the family’s summary leaves out safety events, restraints and the crisis plan.');
+  if((sid&&all.includes(sid))||/\b\d{6,}\b/.test(all.replace(/\(?\d{3}\)?[\s.-]?\d{3}[\s.-]\d{4}/g,''))||/\bForms? [A-Z]{2,3}-\d\b/.test(all))out.block.push('It holds a record number or a form’s name: take it out.');
+  const J=[];const re=new RegExp(FS_JARGON.source,'gi');let j;while((j=re.exec(all)))if(!J.some(x=>x.toLowerCase()===j[0].toLowerCase()))J.push(j[0]);
+  if(J.length)out.note.push('Words a family may not know: '+J.map(x=>'“'+x+'”').join(', ')+'.');
+  const g=fsGrade(all);out.grade=g;out.note.unshift('Reads at about grade '+Math.max(1,Math.round(g))+(g>7.5?': shorter sentences and everyday words make it easier.':'.'));
+  return out;}
+/* the page as it prints */
+function famHtml(first,text,p){const N=first||'Your child',P=s=>'<p>'+esc(s)+'</p>',lines=k=>String(text[k]||'').split(/\n+/).map(fsT).filter(Boolean);
+  const list=k=>{const L=lines(k);return L.length?'<ul>'+L.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'';};
+  const d=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+  return '<div class="fam-sum"><h1>'+esc((first?first+'’s':'Your child’s')+' plan at school')+'</h1>'+
+    '<p class="fam-sub">A one-page summary for '+esc(first?first+'’s':'the')+' family'+(fsT(p.site)?', from '+esc(fsT(p.site).replace(/\s*\(simulated\)\s*$/i,'')):'')+'. '+esc(d)+'.</p>'+
+    '<h2>'+FS_HEAD.work+'</h2>'+lines('work').map(P).join('')+'<h2>'+FS_HEAD.teach+'</h2>'+list('teach')+
+    '<h2>'+FS_HEAD.home+'</h2>'+list('home')+'<h2>'+FS_HEAD.call+'</h2>'+lines('call').map(P).join('')+'</div>';}
+const FS_CSS='.fam-sum{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#1f2d36;font-size:13.5pt;line-height:1.45;padding:4px 10px 0;break-inside:avoid;page-break-inside:avoid}'+
+  '.fam-sum h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:22pt;line-height:1.2;color:#182e43;margin:0 0 4px}'+
+  '.fam-sum .fam-sub{font-size:11pt;color:#54676f;margin:0 0 10px}'+
+  '.fam-sum h2{font-size:14.5pt;color:#182e43;margin:14px 0 4px;border-bottom:1px solid #cfdad8;padding-bottom:2px}'+
+  '.fam-sum p{margin:0 0 6px}.fam-sum ul{margin:0 0 6px;padding-left:1.2em}.fam-sum li{margin:0 0 4px}';
+
+/* step 2's editable preview: the page's four parts in boxes on a page, the check of what it holds, Reviewed */
+function famPanelHtml(){return '<section class="pk-sum" aria-labelledby="pkSumH"><h3 id="pkSumH">'+PK_SUM_T+': check it before it prints</h3>'+
+  '<p class="pk-note">The first page of the family’s packet, written from the plan in everyday words. Change anything on it: your changes are kept with this case, and no form is changed. It leaves out safety events, restraints and record numbers.</p>'+
+  '<p class="pk-sumnew" id="pkSumNew" hidden></p>'+
+  '<div class="pk-sumpg"><p class="pk-sumt" id="pkSumT"></p><p class="pk-sums">One page, at the front of the family’s packet</p>'+
+  FS_KEYS.map(k=>'<label for="pkSum_'+k+'">'+FS_HEAD[k]+(k==='teach'||k==='home'?' <span>(one point a line)</span>':'')+'</label><textarea id="pkSum_'+k+'" data-fs="'+k+'" rows="3" spellcheck="true"></textarea>').join('')+'</div>'+
+  '<p class="pk-sumchk" id="pkSumChk" aria-live="polite"></p>'+
+  '<div class="pk-sumrow"><label class="pk-sumrev"><input type="checkbox" id="pkSumRev"> <span><b>Reviewed</b>: I have read this page and it is ready for the family</span></label>'+
+  '<button type="button" class="pk-sumreset" id="pkSumReset">Start again from the plan</button></div></section>';}
+/* the preview's boxes: each change kept with the case at once; returns whether the page may print (reviewed, and holding
+   nothing it must leave out) */
+function famPanelBind(box,first,contact,changed){const q=s=>box.querySelector(s),ta={};FS_KEYS.forEach(k=>{ta[k]=q('[data-fs="'+k+'"]');});
+  let now=famNow(first,contact),bad=false;
+  const grow=t=>{t.style.height='auto';t.style.height=Math.max(44,t.scrollHeight+2)+'px';};
+  const read=()=>{const t={};FS_KEYS.forEach(k=>{t[k]=ta[k].value;});return t;};
+  const note=()=>{const nw=q('#pkSumNew');nw.hidden=!now.moved;nw.textContent=now.moved?'The plan has changed since this page was edited or reviewed: read it again (your changes are kept), or start again from the plan.':'';};
+  const keep=()=>{const t=read(),same=FS_KEYS.every(k=>t[k]===now.draft[k]),rev=q('#pkSumRev').checked&&!bad;
+    state.famSum=same&&!rev?null:Object.assign({v:1,base:now.base,first:now.first,reviewed:rev?new Date().toISOString():'',at:new Date().toISOString()},same?{}:{text:t});
+    now=famNow(first,contact);try{paintSave();}catch(e){}};
+  const check=()=>{const c=famCheck(read()),r=q('#pkSumRev');bad=c.block.length>0;
+    q('#pkSumChk').innerHTML=c.block.map(x=>'<span class="pk-warn">'+esc(x)+'</span>').join('')+esc(c.note.join(' '));
+    r.disabled=bad;if(bad&&r.checked){r.checked=false;keep();}changed();};
+  const fill=()=>{FS_KEYS.forEach(k=>{ta[k].value=now.text[k]||'';grow(ta[k]);});q('#pkSumT').textContent=(first?first+'’s':'Your child’s')+' plan at school';
+    q('#pkSumRev').checked=now.reviewed;note();check();};
+  FS_KEYS.forEach(k=>ta[k].addEventListener('input',()=>{grow(ta[k]);keep();check();}));
+  q('#pkSumRev').addEventListener('change',()=>{keep();note();changed();});
+  q('#pkSumReset').addEventListener('click',()=>{const was=state.famSum?JSON.parse(JSON.stringify(state.famSum)):null;state.famSum=null;now=famNow(first,contact);fill();try{paintSave();}catch(e){}
+    if(was&&typeof window.wsUndoOffer==='function')window.wsUndoOffer('The page is written again from the plan.',()=>{state.famSum=was;now=famNow(first,contact);fill();try{paintSave();}catch(e){}return true;});});
+  fill();
+  return ()=>!bad&&q('#pkSumRev').checked;}
+/* kept with the case: written beside the Documents list wherever the case is written */
+function famSumOut(){const S=state.famSum;return S&&typeof S==='object'&&(S.text||S.reviewed)?S:undefined;}
+function famSumIn(d){const S=d&&d.famSum;state.famSum=S&&typeof S==='object'&&!Array.isArray(S)&&typeof S.base==='string'?{v:1,base:S.base,first:typeof S.first==='string'?S.first.slice(0,80):'',reviewed:typeof S.reviewed==='string'?S.reviewed:'',at:typeof S.at==='string'?S.at:'',
+  text:S.text&&typeof S.text==='object'?Object.fromEntries(FS_KEYS.map(k=>[k,typeof S.text[k]==='string'?S.text[k].slice(0,4000):''])):undefined}:null;
+  if(state.famSum&&!state.famSum.text)delete state.famSum.text;}
+const famSumSig=()=>{const S=famSumOut();return S?'|SUM:'+fsSig(S.text||{})+':'+S.base+':'+(S.reviewed?1:0):'';};
 /* the sheets of a form that are documents of their own: they keep a page of their own in the packet */
 const MP_KEEP={'IC-1':['#consent','#proc','#assent','#record'],'TD-1':['#final','#monitor']};
 const MP_KEEP_TITLE={'OB-1':/^Direct Observation Record/};
@@ -4115,7 +4312,7 @@ async function masterRun(chosen,opt){opt=opt||{};
       information from a student&rsquo;s education record and is protected under FERPA. It is released only to
       individuals authorised under the student&rsquo;s IEP team or by written parental consent. If you have
       received this in error, return it to the case BCBA and destroy any copy.</div>`}
-    <h2 id="mp-contents">Contents</h2><ol>${shaped.map(s=>`<li data-mk="NBHTOC:${esc(s.id)};"><a class="mp-jump" href="#sec-${esc(s.id)}" data-mk="NBHTOC:${esc(s.id)};">Form ${esc(s.id)} &mdash; ${esc(s.title)}</a>${s.sheets.length?`<div class="mp-sub">${esc(s.sheets.join('  \u00b7  '))}${s.guide?'  \u00b7  Guide':''}</div>`:''}</li>`).join('')}${refsHtml?`<li data-mk="NBHTOC:REFS;"><a class="mp-jump" href="#sec-REFS" data-mk="NBHTOC:REFS;">References and Sources</a><div class="mp-sub">Every form’s citations, gathered once</div></li>`:''}</ol>
+    <h2 id="mp-contents">Contents</h2><ol>${opt.summary?`<li data-mk="NBHTOC:SUM;"><a class="mp-jump" href="#sec-SUM" data-mk="NBHTOC:SUM;">${esc(PK_SUM_T)}</a><div class="mp-sub">One page: what we are working on, how school will help, what you can do at home, who to call</div></li>`:''}${shaped.map(s=>`<li data-mk="NBHTOC:${esc(s.id)};"><a class="mp-jump" href="#sec-${esc(s.id)}" data-mk="NBHTOC:${esc(s.id)};">Form ${esc(s.id)} &mdash; ${esc(s.title)}</a>${s.sheets.length?`<div class="mp-sub">${esc(s.sheets.join('  \u00b7  '))}${s.guide?'  \u00b7  Guide':''}</div>`:''}</li>`).join('')}${refsHtml?`<li data-mk="NBHTOC:REFS;"><a class="mp-jump" href="#sec-REFS" data-mk="NBHTOC:REFS;">References and Sources</a><div class="mp-sub">Every form’s citations, gathered once</div></li>`:''}</ol>
     <p class="mp-note">${opt.aud&&opt.aud!=='iep'?esc({staff:'For the teachers and staff who carry out the plan.',family:'For the family.',records:'A copy of these education records, as requested.'}[opt.aud]||'')+' ':''}Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Newsome Behavioral Health packet. Each section is that form as it stood when this was built${refsHtml?', with the forms’ references gathered in the last section':''}${mo.refs==='none'?', its references left out':''}${kept.length?'; the Guide of '+esc(kept.join(', '))+' is included':''}. The forms’ guides and on-screen notes are not printed.</p>
   </div>`;
 
@@ -4125,11 +4322,12 @@ async function masterRun(chosen,opt){opt=opt||{};
   /* v21.96 A section opens with a thin section line and the form's own letterhead, once; its sheets follow. Every page of a
      section carries the section's name in the running head, through a named page: Chromium 141 breaks the page between a
      caption or footer and its table under a named page, which is why packetShape makes them ordinary rows. */
-  const body=shaped.map((s,i)=>
+  const body=(opt.summary?`<section id="sec-SUM" class="mp-sec mp-sum" data-mk="NBHSEC:SUM;" data-title="${esc(PK_SUM_T)}">${opt.summary}</section>`:'')+shaped.map((s,i)=>
     `<section id="sec-${esc(s.id)}" class="mp-sec mp-${i}" data-mk="NBHSEC:${esc(s.id)};" data-title="Form ${esc(s.id)} &mdash; ${esc(s.title)}"${mo.abc==='compact'&&s.id==='ABC-1'?' data-mp-abc="compact"':''}>${s.html}</section>`).join('')+refsHtml;
   /* the running head names the section as the list of forms does (short, and the same words Finish PDF writes) */
   const shortName=id=>(ALL.find(f=>f[0]===id)||[])[1]||id;
   const pageCss=shaped.map((s,i)=>`@page pg${i}{@top-center{content:${cssStr((i+1)+'  \u00b7  '+shortName(s.id))};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}}\n.mp-${i}{page:pg${i}}`).join('\n')+
+    (opt.summary?`\n@page pgS{@top-center{content:${cssStr(PK_SUM_T)};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}}\n.mp-sum{page:pgS}\n${FS_CSS}`:'')+
     (refsHtml?`\n@page pgA{@top-center{content:${cssStr(total+'  \u00b7  References and Sources')};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}}\n.mp-app{page:pgA}`:'');
 
   const doc=`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>FBA and BIP packet \u2014 ${esc(p.client)||'student'}</title>
@@ -4867,7 +5065,7 @@ function pdfTools(){
   return pdfReady;
 }
 /* the bookmark reads as the form list does: short enough for a side panel */
-function formTitle(id){if(id==='REFS')return 'References and Sources';const r=ALL.find(f=>f[0]===id);return r?id+' — '+r[1]:'Form '+id;}
+function formTitle(id){if(id==='REFS')return 'References and Sources';if(id==='SUM')return PK_SUM_T;const r=ALL.find(f=>f[0]===id);return r?id+' — '+r[1]:'Form '+id;}
 function pageSpan(a,b){return a===b?String(a+1):(a+1)+'–'+(b+1);}
 
 $('#bookmarkPdf').addEventListener('click',()=>{
@@ -4954,7 +5152,7 @@ async function bmLoad(file){
     const nums=$('#bmNums')?$('#bmNums').checked:false,heads=$('#bmHeads')?$('#bmHeads').checked:false;
     try{
       /* v21.96 the section's name for the running head Finish PDF writes: the sections in page order, numbered */
-      if(marks){const secs=(marks.sections||[]).slice().sort((a,b)=>a.page-b.page);marks.titles={};secs.forEach((s,i)=>{const t=s.id==='REFS'?'References and Sources':((ALL.find(f=>f[0]===s.id)||[])[1]||('Form '+s.id));marks.titles[s.id]=(i+1)+'  \u00b7  '+t;});}
+      if(marks){const secs=(marks.sections||[]).slice().sort((a,b)=>a.page-b.page);marks.titles={};secs.forEach((s,i)=>{const t=s.id==='REFS'?'References and Sources':s.id==='SUM'?PK_SUM_T:((ALL.find(f=>f[0]===s.id)||[])[1]||('Form '+s.id));marks.titles[s.id]=(i+1)+'  \u00b7  '+t;});}
       const r=await tools.bookmark(bytes,formTitle,{numbers:nums,marks,heads});
       const name=file.name.replace(/\.pdf$/i,'')+' (finished).pdf';
       const a=document.createElement('a');
@@ -5134,6 +5332,7 @@ const AUTO={key:'nbh.ws.autosave.v1',pref:'nbh.ws.autosave.on',pref2:'nbh.ws.aut
   function unpack(rec) {
     var ids = Object.keys(rec.forms || {}), out = { packet: rec.packet || null, facts: rec.facts || null, forms: {}, notes: [], picsLost: {}, continued: {} };
     if (Array.isArray(rec.docs)) out.docs = rec.docs;   /* v25.68 the papers made for the case */
+    if (rec.famSum && typeof rec.famSum === 'object') out.famSum = rec.famSum;   /* v25.70 the family's plan summary, as edited */
     return Promise.all(ids.map(function (id) { return unpackForm(rec.forms[id]).then(function (f) { out.forms[id] = { title: f.title, snap: f.snap }; if (f.picsLost) out.picsLost[id] = f.picsLost; if (f.continued) out.continued[id] = f.continued; }); }))
       .then(function () {
         Object.keys(out.picsLost).forEach(function (id) { var n = out.picsLost[id]; out.notes.push('Form ' + id + ': ' + n + (n === 1 ? ' picture' : ' pictures') + ' could not be kept in the safety copy (no room in this browser); add ' + (n === 1 ? 'it' : 'them') + ' again.'); });
@@ -5411,10 +5610,10 @@ async function autoSave(force){
     const forms={};
     Object.keys(A.forms).forEach(id=>{forms[id]=Object.assign({},A.forms[id],{continued:A.continued[id]||null});});
     if(!Object.keys(forms).length)return;
-    const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'');
+    const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'')+famSumSig();
     if(h===A.written){state.autoSig=sig;return;}
     const rec={key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
-      packet:packet(),photoSrc:state.photoSrc||undefined,facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms,docs:docsOut()};
+      packet:packet(),photoSrc:state.photoSrc||undefined,facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms,docs:docsOut(),famSum:famSumOut()};
     const r=await CP.put(rec);
     if(r.ok){state.autoSig=sig;A.written=h;A.at=new Date();autoOver();}
     autoWarn(r);
@@ -5485,10 +5684,10 @@ function autoLast(){
     }
     Object.keys(state.pending).forEach(id=>{const P=state.pending[id],sn=P.snap||{};forms[id]={title:P.title,total:sn.total,data:sn.data||{},own:sn.own||'',continued:A.continued[id]||null};});   /* v21.61 */
     if(!work||!Object.keys(forms).length)return;
-    const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'');
+    const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'')+famSumSig();
     if(h===A.written)return;
     const stashed=CP.stash({key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
-      packet:packet(),photoSrc:state.photoSrc||undefined,facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms});
+      packet:packet(),photoSrc:state.photoSrc||undefined,facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms,famSum:famSumOut()});
     if(stashed===false){try{localStorage.setItem('nbh.stash.fail',new Date().toISOString());}catch(e){}}   /* v21.85 said when the workstation next opens */
   }catch(e){}
 }
@@ -5633,6 +5832,7 @@ async function loadCase(d,how){
   commitBar(true);   /* v21.44 (A8) another case: the earlier values on the bar are not corrections of this one */
   if(d.facts)setFacts(d.facts,false); else setFacts(null,false);   /* v21.31 the case */
   state.docs=Array.isArray(d.docs)?d.docs.filter(x=>x&&typeof x==='object'&&x.at).slice(-50):[];   /* v25.68 the papers made for it (none in an older case) */
+  famSumIn(d);   /* v25.70 the family's plan summary as the BCBA edited it (none in an older case) */
   barAutoFold();
   const ids=Object.keys(d.forms),notes=[];
   /* v21.61 the case's forms are listed at once, each kept as the file holds it; one is loaded now (the form that was open
@@ -6021,7 +6221,7 @@ function caseSig(over){
   Object.keys(state.pending||{}).forEach(k=>{if(!(over&&over[k]))delete S[k];});   /* v21.81 a form still waiting for its saved work counts as the file holds it */
   const a=Object.keys(S).sort().map(k=>k+':'+S[k].filled+':'+(S[k].sig||''));
   const b=Object.keys(state.pending||{}).filter(k=>!S[k]).sort().map(k=>k+':'+state.pending[k].status.filled+':'+state.pending[k].status.sig+':file');
-  return a.concat(b).join('|');
+  return a.concat(b).join('|')+famSumSig();   /* v25.70 the family's plan summary, kept with the case */
 }
 /* Ask one form for something and wait for its answer. Requests used to be
    filed under the form's name alone, so an autosave asking a form for a
@@ -6123,7 +6323,7 @@ async function mediaSweep(o){o=o||{};const M=window.nbhMedia;if(!M)return 0;
 function mediaSweepSoon(){clearTimeout(mediaSweepT);mediaSweepT=setTimeout(()=>{mediaSweep().catch(()=>{});},4000);}
 /* once a week, a while after the workstation opens */
 setTimeout(()=>{let t=0;try{t=+localStorage.getItem('nbh.media.swept')||0;}catch(e){}if(Date.now()-t>7*864e5)mediaSweep().catch(()=>{});},30000);
-function caseData(p,forms,id){return {form:'CASE',rev:'2026-09',id:id||undefined,saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined,docs:docsOut()};}
+function caseData(p,forms,id){return {form:'CASE',rev:'2026-09',id:id||undefined,saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined,docs:docsOut(),famSum:famSumOut()};}
 /* v25.68 the papers made for this case (state.docs: the form or "packet", the title, when, print or pdf; the last 50), in the
    case file beside the facts; a case without any writes none, so its file is as before */
 function docsOut(){const L=Array.isArray(state.docs)?state.docs:[];return L.length?L.slice(-50):undefined;}
@@ -6135,7 +6335,7 @@ async function caseHtml(p,forms){
   const shell=await EMBED.shell();
   if(!shell)throw new Error('This file does not carry a copy of the workstation page, so it cannot write a case file.');
   const id=state.caseId||(state.caseId=caseUid());
-  const data={form:'CASE',rev:'2026-09',id,saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined,docs:docsOut()};   /* v21.61 cur: the form to open first */
+  const data={form:'CASE',rev:'2026-09',id,saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined,docs:docsOut(),famSum:famSumOut()};   /* v21.61 cur: the form to open first */
   const block=(bid,text)=>'<script type="text/plain" id="'+bid+'">'+text+'<\/script>\n';
   let blocks='';
   /* v21.43: the writing help, and the respondent pages' library (left out of case files before), go with the forms */
@@ -6299,7 +6499,7 @@ $('#saveCase').addEventListener('click',()=>{saveCase();});
 async function clearCase(){
   await autoSeal();   /* the copy of what was open is written and left alone; the next case gets a copy of its own */
   Object.values(state.frames).forEach(fr=>fr.remove());
-  state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.docs=[];
+  state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.docs=[];state.famSum=null;
   state.whoIs={};state.details={};state.split=[];
   if(state.seenKey){(state.seenBy=state.seenBy||{})[state.seenKey]=state.seen||[];}state.seen=[];state.seenKey='';   /* v25.67 kept for this student (loadCase) */
   warmStop();state.pending={};state.caseOrder=[];   /* v21.61 */
@@ -6610,7 +6810,7 @@ async function caseloadKeep(p,forms,late){if(clOff())return;const key=clKey(p);i
   try{await gatherFacts(false);}catch(e){}   /* the summary from the case as it is now */
   if(late&&late.length){try{const old=(await clList()||[]).find(r=>r.key===key),od=old&&parseCase(old.text);forms=Object.assign({},forms);late.forEach(id=>{if(od&&od.forms&&od.forms[id]&&!forms[id]&&!STAFF_SIDE[id])forms[id]=od.forms[id];});}catch(e){}}
   let mp={forms,photoSrc:state.photoSrc||undefined};try{mp=await mediaPackParts(forms,state.photoSrc||undefined);}catch(e){}   /* v22.57 the pictures in the store, references here */
-  const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:mp.photoSrc,forms:mp.forms,facts:state.facts||undefined,cur:state.cur||undefined,docs:docsOut()});
+  const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:mp.photoSrc,forms:mp.forms,facts:state.facts||undefined,cur:state.cur||undefined,docs:docsOut(),famSum:famSumOut()});
   const rec={key,scope:clScope(),client:String(p.client||(!String(p.sid||'').trim()&&staffOnlyName())||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:clSummary(),text};
   try{const old=(await clList()||[]).find(r=>r.key===key);if(typeof drvStamp==='function')drvStamp(rec,old);}catch(e){}   /* v21.89 the device, and the Drive version it stands on */
   try{await clTx('readwrite',st=>st.put(rec));}catch(e){try{wsUI.toast('The caseload copy could not be kept on this device ('+(e&&e.message||e)+'). The case file is saved as usual.',{kind:'warn'});}catch(x){}}}
@@ -8986,7 +9186,7 @@ async function hxScreenText(){const p=packet(),k=clKey(p);if(!k||!hxOpenNow())re
   if(late.length){try{const r=await hxRecOf(k),od=r&&parseCase(r.text);late.forEach(id=>{if(od&&od.forms&&od.forms[id])forms[id]=od.forms[id];});}catch(e){}}
   forms=orderCase(forms);if(!Object.keys(forms).length)return '';
   try{await gatherFacts(false);}catch(e){}
-  return JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined,docs:docsOut()});}
+  return JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined,docs:docsOut(),famSum:famSumOut()});}
 async function hxKeepScreen(why){if(clOff()||!hxOpenNow())return null;const t=await hxScreenText();if(!t)return null;const k=clKey(packet());
   return hxQueue(()=>hxKeep({key:k,text:t,at:new Date().toISOString(),dev:drvDev(),why}));}
 /* ---- where the points come from ---- */
