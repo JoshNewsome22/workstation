@@ -188,7 +188,8 @@ const samePages=(a,b)=>a.length===b.length&&a.every((pa,i)=>pa.length===b[i].len
     /* the References section lists the forms' citations in the order they stand: Form IC-1's say-it-back citation now follows its
        signatures, so the list may run in another order; it must hold the same lines */
     const sameRefs=iep.refs.length>0&&iep.refs.slice().sort().join('\n')===prev.refs.slice().sort().join('\n')&&(ap.REFS||[]).length===(bp.REFS||[]).length;
-    const MEANT=['IC-1','FS-1','DD-1'].concat(sameRefs?['REFS']:[]);
+    /* v25.70: Form HD-1's "Called at home" label (the BCBA, 11/9) prints on its Setup page */
+    const MEANT=['IC-1','FS-1','DD-1','HD-1'].concat(sameRefs?['REFS']:[]);
     ok('2 against the tree before ('+PREV+'): the same sections, and every one prints the same pages, line for line, but the forms changed on purpose; the References hold the same entries on as many pages ('+(diff.join(', ')||'none differ')+')',
       prev.secs.join()===iep.secs.join()&&diff.every(d=>MEANT.includes(d.split(' ')[0])),{diff,prev:prev.secs,now:iep.secs});}
   /* ---- 6 HD-1: the home sheets on their own ---- */
