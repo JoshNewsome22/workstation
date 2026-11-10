@@ -12101,18 +12101,26 @@ function railAway(){if(!ovWide()||srKeep())return;B.classList.add('rail-hidden')
 document.addEventListener('click',e=>{if(!B.classList.contains('sr-ov')||B.classList.contains('rail-hidden'))return;const t=e.target;
 if(t.closest&&t.closest('nav.rail,#railToggle,#railEdge,#wnForms,#chColBtn,#fsForms,dialog,.wn-menu,#chSwPop,#pal'))return;railAway();},true);
 {const of=openForm;openForm=function(id){const r=of.apply(this,arguments);try{if(ovWide()&&state.frames[id])railAway();srRow();}catch(e){}setTimeout(()=>{try{srRow();frameSync();paintTree();}catch(e){}},400);return r;};}
-let treeSig='';
+let treeSig='',treeShut='';   /* v25.75 treeShut: the open form whose sheets were folded by a second tap on its row */
 function paintTree(){const rail=$('#rail');if(!rail)return;const id=single()?state.cur:'',d=id&&docOf(state.frames[id]),t=d?tabsOf(d):[];
 const li=id&&rail.querySelector('.item[data-id="'+id+'"]'),cur=t.findIndex(tabOn);
 const sig=id+'|'+t.map((b,k)=>tabLabel(b)+'.'+(b.dataset.nbhFill||'')+(k===cur?'*':'')).join(',');
 const old=rail.querySelector('.sr-shli');
 if(!li||t.length<2){if(old)old.remove();treeSig='';return;}
+if(treeShut&&treeShut!==id)treeShut='';
+{const hb=li.querySelector('button,a')||li;hb.setAttribute('aria-expanded',String(treeShut!==id));}
+if(treeShut===id){if(old)old.remove();treeSig='';return;}
 if(old&&old.previousElementSibling===li&&sig===treeSig)return;treeSig=sig;if(old)old.remove();
 const x=mk('li',{class:'sr-shli'});const ul=mk('ul',{class:'sr-sheets','aria-label':'Sheets of Form '+id});
 t.forEach((b,k)=>{const f=b.dataset.nbhFill||'',w=FILLW[f]&&f!=='empty'?FILLW[f]:'',bt=mk('button',{type:'button','data-srsheet':String(k)});if(k===cur)bt.setAttribute('aria-current','true');
 bt.innerHTML='<span>'+(k+1)+'. '+esc(tabLabel(b))+'</span>'+(w?'<span class="sr-sw'+(f==='done'?' ok':'')+'">'+w+'</span>':'');bt.setAttribute('aria-label',(k+1)+'. '+tabLabel(b)+(w?', '+w.toLowerCase():'')+(b.title?' ('+b.title+')':''));
 const l=mk('li');l.appendChild(bt);ul.appendChild(l);});
 x.appendChild(ul);li.insertAdjacentElement('afterend',x);}
+/* v25.75 (the BCBA, 11/10) a tap on the open form's own row folds its sheets away, and the next tap brings them back */
+$('#rail').addEventListener('click',e=>{const it=e.target.closest&&e.target.closest('.item[data-id]');if(!it||e.target.closest('input,label,[data-srsheet],.sr-shli'))return;
+const id=it.dataset.id;if(!single()||id!==state.cur||!state.frames[id])return;try{if(CHOOSE)return;}catch(x){}
+const d=docOf(state.frames[id]);if(!d||tabsOf(d).length<2)return;
+e.stopPropagation();e.preventDefault();treeShut=treeShut===id?'':id;treeSig='';paintTree();say0(treeShut?'Sheets hidden':'Sheets shown');},true);
 $('#rail').addEventListener('click',e=>{const b=e.target.closest('[data-srsheet]');if(!b)return;e.stopPropagation();const d=docOf(curFrame()),t=tabsOf(d),k=+b.dataset.srsheet;if(!t[k])return;
 t[k].click();try{cw(curFrame()).scrollTo(0,0);}catch(x){}if(NARROW.matches)setRail(false,false);else railAway();setTimeout(()=>{paintTree();try{__wsA.paint();}catch(x){}say0('Sheet '+(k+1)+' of '+t.length+': '+tabLabel(t[k]));},80);},true);
 /* M5, M10 */
