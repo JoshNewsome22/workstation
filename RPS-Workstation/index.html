@@ -3278,6 +3278,13 @@ let factsTimer=null,factsBusy=false,factsAgain=false,factsAgainPush=false,factsO
    copy or the caseload's copy that began before the turn now leaves the next case alone; and the answers still on their way
    from the closed forms count no more (CASE_GONE) */
 state.caseGen=0;const CASE_GONE=new WeakSet();
+/* v25.72 (privacy) a form's Undo keeps the form's whole file for the page that comes back after a Clear all that loads the page
+   again (sessionStorage, nbh.undo.after|..., written by nbh-ui as the page goes): one student's record. The frames go at a
+   case turn, which is when it is written, so it is removed straight after they are removed (and once more a moment later),
+   and the turn gets a new name (nbh.case.turn) that a kept record must match to be offered. Remove all student data
+   removes the records too. */
+function undoAfterOff(turn){const go=()=>{try{for(let i=sessionStorage.length-1;i>=0;i--){const k=sessionStorage.key(i);if(k&&k.indexOf('nbh.undo.after|')===0)sessionStorage.removeItem(k);}}catch(e){}};
+  if(turn){try{sessionStorage.setItem('nbh.case.turn',Date.now().toString(36)+Math.random().toString(36).slice(2,8));}catch(e){}setTimeout(go,0);}go();}
 function caseTurn(){state.caseGen++;clearTimeout(factsTimer);factsTimer=null;factsOwed=false;state.factSrcSig={};
   Object.values(state.frames).forEach(fr=>{try{if(fr.contentWindow)CASE_GONE.add(fr.contentWindow);}catch(e){}});}
 function noteFactSource(id,st){
@@ -5863,7 +5870,7 @@ async function loadCase(d,how,T){
   if(mediaHas(d))d=await mediaIn(d,how);   /* only a case with TV-1's media inside waits for the store */
   caseTurn();   /* v25.71 (case isolation) */
   if(T)T.gen=state.caseGen;   /* v25.72 what the caller goes on to do (the saved mark, the file later saves go into, the case id) is for this case: it stops if another has been opened by then */
-  Object.values(state.frames).forEach(fr=>fr.remove());
+  Object.values(state.frames).forEach(fr=>fr.remove());undoAfterOff(1);   /* v25.72 (privacy) a form's kept Undo record goes with its case */
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.pending={};state.caseOrder=[];
   state.whoIs={};state.details={};   /* v21.44 (A8) the closed forms' names count no more */
   $('#blank').style.display='';document.body.classList.remove('has-form');
@@ -5878,7 +5885,7 @@ async function loadCase(d,how,T){
      opened, and Save case then wrote those forms into a file and a caseload copy under that student's name. */
   else{['#pClient','#pSid','#pGrade','#pSite','#pBcba'].forEach(sel=>{const e=$(sel);if(e)e.value='';});setPhoto('',true);who();}
   commitBar(true);   /* v21.44 (A8) another case: the earlier values on the bar are not corrections of this one */
-  state.openAs=caseAs();state.staffAsked=false;   /* v25.72 the student this case was opened as (clOtherAsk); a staff record beside it is asked about for this case */
+  state.openAs=caseAs();state.staffAsked=false;state.oddOk='';   /* v25.72 the student this case was opened as (clOtherAsk); a staff record beside it is asked about for this case */
   if(d.facts)setFacts(d.facts,false); else setFacts(null,false);   /* v21.31 the case */
   state.docs=Array.isArray(d.docs)?d.docs.filter(x=>x&&typeof x==='object'&&x.at).slice(-50):[];   /* v25.68 the papers made for it (none in an older case) */
   famSumIn(d);   /* v25.70 the family's plan summary as the BCBA edited it (none in an older case) */
@@ -6434,6 +6441,8 @@ async function saveCase(o){o=o&&(o.file||o.whole)?o:{};   /* v21.89 {file:true}:
   const gen=state.caseGen,turned=()=>gen!==state.caseGen,gone=w=>caseSaveLeft(p,w);
   /* the name and ID at the top now match another student kept here: asked before anything is read or written (clOtherAsk) */
   const rep=await clOtherAsk(p);if(turned())return gone();if(!rep)return false;
+  /* a form of the case holds another student's name: asked before it is saved (caseOddAsk) */
+  const odd=await caseOddAsk(p,'Save');if(turned())return gone();if(!odd)return false;
   /* v22.31 a staff record (Form RS-1) open beside a student's case. Nothing entered in it: it is left out of the case and
      closed, without a question. Something entered: Leave it out (the case is saved without it and it is closed), Keep it in
      this case, or Cancel. Before, the one question had only Keep and Cancel, and Cancel stopped the save, and with it Close
@@ -6586,7 +6595,7 @@ $('#saveCase').addEventListener('click',()=>{saveCase();});
 async function clearCase(){
   await autoSeal();   /* the copy of what was open is written and left alone; the next case gets a copy of its own */
   caseTurn();   /* v25.71 (case isolation) */
-  Object.values(state.frames).forEach(fr=>fr.remove());
+  Object.values(state.frames).forEach(fr=>fr.remove());undoAfterOff(1);   /* v25.72 (privacy) a form's kept Undo record goes with its case */
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.docs=[];state.famSum=null;
   state.whoIs={};state.details={};state.split=[];
   if(state.seenKey){(state.seenBy=state.seenBy||{})[state.seenKey]=state.seen||[];}state.seen=[];state.seenKey='';   /* v25.67 kept for this student (loadCase) */
@@ -6601,7 +6610,7 @@ async function clearCase(){
   setFacts(null,false);
   state.due=[];state.dueAll={};state.dueSig={};clearTimeout(dueTimer);paintDue();
   state.caseId=null;state.caseHandle=null;state.lastSig='';state.savedAt=null;state.autoSig=caseSig();
-  state.dirtySince=null;state.nudged=false;state.barAuto=false;state.openAs=null;state.staffAsked=false;   /* v25.72 the next case is asked for itself */
+  state.dirtySince=null;state.nudged=false;state.barAuto=false;state.openAs=null;state.staffAsked=false;state.oddOk='';   /* v25.72 the next case is asked for itself */
   clearTimeout(state.watch);
   $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';$('#crumbFile').textContent='';
   railAtStart();renderRail();foldBar(false);paintSave();chip();
@@ -6921,6 +6930,23 @@ async function clList(){try{const all=await clTx('readonly',st=>st.getAll());ret
    student's place without a word, on this device and, with Google Drive, over that student's file there (with the first
    student's forms, reply links and all). It asks first, naming both. A case typed from blank is not asked about: it has
    been no one else's. Resolves true to go on. */
+/* v25.72 (the BCBA, 11/10) the last check before a case is written. A form of the case holds a name other than the student's
+   at the top: the strip says "Different student" and Build packet asks, but Save case saved without a word, so a form that
+   reached the wrong case by any route went into that student's file. It asks, naming the forms and the names as the strip
+   does. "Save anyway" is remembered for the same forms and names in this case (state.oddOk), so each later save is not
+   asked again; a change in them, or another case, asks afresh. Resolves true to go on. */
+async function caseOddAsk(p,verb){let c=null;try{c=corrections();}catch(e){return true;}
+  const now=clean(p.client),W=state.whoIs||{};if(!now||!c)return true;
+  /* the workstation's own sample ("SIMULATED \u2013 Sample Student", what Load simulation puts in a form) is no one's name: the strip
+     says it is there, and it is not asked about */
+  const warn=c.odd.concat(c.fix.filter(f=>f.warn).map(f=>f.id)).filter((id,i,a)=>a.indexOf(id)===i&&inCase(id)&&!/^SIMULATED\b/i.test(clean(W[id])));if(!warn.length)return true;
+  const sig=now+'>'+warn.map(id=>id+'='+clean(W[id])).join('|');if(state.oddOk===sig)return true;
+  const by=new Map();warn.forEach(id=>{const n=clean(W[id]);if(!by.has(n))by.set(n,[]);by.get(n).push(id);});
+  const one=warn.length===1,said=[...by].map(([n,ids])=>'\u201c'+n+'\u201d in '+andList(ids)).join('; ');
+  const y=await wsUI.confirm(verb+' '+now+'\u2019s case with another student\u2019s name in it?\n'+(one?'Form '+warn[0]+' holds':warn.length+' forms hold')+' a name other than '+now+': '+said+
+    '. The case is '+(verb==='Keep'?'kept':'saved')+' with '+(one?'that form':'those forms')+' in it, as '+(one?'it is':'they are')+'.\n\nIf the name in the form is a slip, press Cancel and correct it. If the form is another student\u2019s, press Cancel, keep its work with its own Save data, and close it.',
+    {ok:verb+' anyway',danger:true});
+  if(y)state.oddOk=sig;return !!y;}
 async function clOtherAsk(p){const key=clKey(p),as=state.openAs;if(!key||!as||!as.key||as.key===key||clOff())return true;
   const old=(await clList()||[]).find(r=>r.key===key);if(!old)return true;
   /* each is named with the ID, so two cases of one name (the ID added or corrected since) read apart */
@@ -7465,8 +7491,23 @@ clBackup=async function(){const L=await clList();if(!L||!L.length){alert('No stu
 async function clExpire(){const n=clExpireDays();if(!n)return 0;const L=await clList()||[],cut=Date.now()-n*7*864e5,me=clKey(packet());
   const old=L.filter(r=>r.key!==me&&!r.unfiled&&!isStaffRec(r)&&Date.parse(r.saved)<cut);   /* v22.30 the staff record is kept */for(const r of old)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   if(old.length)wsUI.toast(old.length+' student'+(old.length===1?' was':'s were')+' not saved for '+n+' weeks and '+(old.length===1?'is':'are')+' no longer kept on this '+HERE+' (their case files are not touched).',{ms:9000});return old.length;}
-async function clRemoveAll(){const L=await clList()||[];
-  if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, their case history (the earlier saves kept here), every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it.'+(window.__ws2571?' For a few seconds afterwards, Undo puts it all back.':' This cannot be undone.'),{ok:'Remove everything',danger:true})))return;
+/* v25.72 (the BCBA, 11/10) Form TB-1's bank (My definitions) is the BCBA's own work and stays when students are removed. The
+   question says so, and names the entries whose kept words hold a name or an ID of a student kept here, to look at and
+   delete in Form TB-1. Read as TB-1 keeps it (the same store, made the same way if it is not there yet). */
+async function clBankNamed(L){let list=[];
+  try{list=await new Promise(res=>{let r,done=false;const fin=v=>{if(!done){done=true;res(v);}};try{if(!window.indexedDB)return fin([]);r=indexedDB.open('nbh-tb1-bank',1);}catch(e){return fin([]);}setTimeout(()=>fin([]),3000);
+    r.onupgradeneeded=()=>{try{const db=r.result;if(!db.objectStoreNames.contains('defs'))db.createObjectStore('defs',{keyPath:'id'});}catch(e){}};
+    r.onerror=()=>fin([]);r.onblocked=()=>fin([]);
+    r.onsuccess=()=>{const db=r.result;try{const q=db.transaction('defs','readonly').objectStore('defs').getAll();q.onsuccess=()=>{try{db.close();}catch(e){}fin(q.result||[]);};q.onerror=()=>{try{db.close();}catch(e){}fin([]);};}catch(e){try{db.close();}catch(x){}fin([]);}};});}catch(e){list=[];}
+  try{const a=JSON.parse(localStorage.getItem('nbh.tb1.bank.v1')||'[]');if(Array.isArray(a))list=list.concat(a);}catch(e){}
+  list=list.filter(e=>e&&typeof e==='object'&&String(e.lab||'').trim());
+  const words=[];(L||[]).forEach(r=>{if(isStaffRec(r))return;nameWords(String(r.client||'').replace(/^SIMULATED\s*[\u2013-]\s*/,'')).filter(w=>w.length>=3).forEach(w=>words.push(w));
+    const id=nameWords(r.sid).join('');if(id.length>=4)words.push(id);});
+  const hit=e=>{const t=' '+nameWords([e.lab,e.def,e.tops,e.excl,e.on,e.off,e.unit,e.note].map(x=>Array.isArray(x)?x.join(' '):String(x==null?'':x)).join(' ')).join(' ')+' ';return words.some(w=>t.includes(' '+w+' '));};
+  return {n:list.length,named:list.filter(hit).map(e=>String(e.lab).trim())};}
+async function clRemoveAll(){const L=await clList()||[];let B={n:0,named:[]};try{B=await clBankNamed(L);}catch(e){}
+  const bank=B.n?'\n\nYour '+B.n+' saved definition'+(B.n===1?'':'s')+' in Form TB-1’s bank (My definitions) '+(B.n===1?'stays':'stay')+': '+(B.named.length?B.named.length+' of them may name a student kept here ('+B.named.slice(0,6).map(x=>'\u201c'+x+'\u201d').join(', ')+(B.named.length>6?' and '+(B.named.length-6)+' more':'')+'). Look at '+(B.named.length===1?'it':'them')+' in Form TB-1 and delete what names a student.':'none holds the name or ID of a student kept here.'):'';
+  if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, their case history (the earlier saves kept here), every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it.'+(window.__ws2571?' For a few seconds afterwards, Undo puts it all back.':' This cannot be undone.')+bank,{ok:'Remove everything',danger:true})))return;
   const unf=L.filter(r=>r.unfiled);
   if(unf.length&&!(await wsUI.confirm(unf.length+' of them '+(unf.length===1?'was':'were')+' kept here but never saved to a file: '+unf.map(clName).join(', ')+'\nTheir work is only on this '+HERE+'. Remove anyway?',{ok:'Remove anyway',danger:true})))return;
   try{if(window.__ws2571)await __ws2571.rmAllMark();}catch(e){}   /* v25.71 what goes is read now, for Undo (ws-v2571) */
@@ -7476,6 +7517,7 @@ async function clRemoveAll(){const L=await clList()||[];
   try{if(typeof shWipe==='function')await shWipe();}catch(e){}   /* v23.52 what each share last had in common */
   try{['nbh.caseload.backup','nbh.caseload.read','nbh.stash.fail'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.tok');sessionStorage.removeItem('nbh.google.mail');}catch(e){}
   try{kvForgetStudents();}catch(e){}   /* v25.72 the recent and pinned lists (names and IDs); Undo puts them back with the rest */
+  undoAfterOff();   /* v25.72 (privacy) a form's kept Undo record is a student's whole form */
   wsUI.toast('Every student’s data is removed from this '+HERE+'. The case files you saved are where you kept them.',{kind:'ok',ms:9000});
   if($('#dlg').open)caseloadOpen();paintBlank();}
 /* the last safety copy before the page closed could not be kept (storage full): said when the workstation next opens */
@@ -7485,6 +7527,7 @@ setTimeout(()=>{try{const t=localStorage.getItem('nbh.stash.fail');if(t){localSt
 async function caseKeepOnly(){const p=packet();if(!clKey(p)||clOff())return false;
   const gen=state.caseGen,turned=()=>gen!==state.caseGen;   /* v25.72 (case isolation) of the case it began with, as Save case is */
   if(!(await clOtherAsk(p))||turned())return false;
+  if(!(await caseOddAsk(p,'Keep'))||turned())return false;
   const open=Object.keys(state.frames).filter(id=>!state.pending[id]),kept=Object.keys(state.pending);let forms={};const late=[];
   for(const id of open){const r=await grab(id,'snapshot',null,8000);if(turned())return false;if(r&&r.snap)forms[id]={title:r.title,snap:r.snap};else late.push(id);}
   kept.forEach(id=>{const P=state.pending[id];if(P)forms[id]={title:P.title,snap:P.snap};});forms=orderCase(forms);

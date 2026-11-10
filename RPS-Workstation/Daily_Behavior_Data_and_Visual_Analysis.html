@@ -5491,6 +5491,11 @@ $("#btnClearAll").addEventListener("click",async ()=>{
 });
 $("#btnSave").addEventListener("click",saveFile);
 $("#btnCsv").addEventListener("click",exportCsv);
+/* v25.72 (privacy) a staff link being made (who it is for, and the settings to choose from, which the form fills from the
+     record when the box is empty) belongs to the record that was open. Open by the person empties both before the file is
+     read, so the settings are filled again from the file's own; a restore by the workstation or by Undo (window.__nbhQuiet)
+     leaves them. Clear all loads the page again. The reply box and staff page addresses are this device's, and stay. */
+$("#fileImport").addEventListener("change",e=>{ if(e.target.files[0]&&!window.__nbhQuiet){ const p=document.getElementById("ddStaff"); if(p) ["#stWho","#stSets"].forEach(q=>{ const el=p.querySelector(q); if(el) el.value=""; }); } });
 $("#fileImport").addEventListener("change",e=>{ if(e.target.files[0]) openFile(e.target.files[0]); e.target.value=""; });
 $("#btnLoad").addEventListener("click",()=>$("#fileImport").click());
 /* v24.39 (review R-121, R-122, E-02) the simulation seeded and marked: the same example at every load, New example for another */

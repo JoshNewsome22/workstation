@@ -828,7 +828,24 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     var bx={id:id,token:token,pub:{x:pub.x,y:pub.y},priv:{d:priv.d,x:priv.x,y:priv.y},site:/^https?:\/\//i.test(String(b.site||''))?String(b.site):'',got:(Array.isArray(b.got)?b.got:[]).map(String).slice(-2000),
       held:(Array.isArray(b.held)?b.held:[]).filter(function(x){return x&&typeof x==='object';}).slice(-300),made:String(b.made||'')};
     if(b.stu)bx.stu=String(b.stu).slice(0,80);   /* v25.72 the student the box was made for, as the links name them (U.sameStudent) */
+    if(Array.isArray(b.aka)&&b.aka.length)bx.aka=b.aka.map(function(x){return String(x||'').slice(0,80);}).filter(Boolean).slice(-8);   /* v25.72 earlier names of this same student (U.boxQuestion, Same student) */
     return bx;};
+  /* v25.72 (the BCBA, 11/10) the question asked before a link is made, when the reply box in the form was made for what reads
+     as another student and links from it have gone out: the form does not change boxes by itself. It is the form's own
+     question box (nbh-ui's #nbhUiDlg, its looks), with three answers, and names both names as the form has them: was, the
+     name kept with the box; now, the student's name on the form.
+       U.boxQuestion(was, now) -> a promise of 'keep' (the same student), 'new' (a different student) or '' (Cancel) */
+  U.boxQuestion=function(was,now){return new Promise(function(res){var d=document,g=d.getElementById('nbhUiDlg');
+    if(!g){g=d.createElement('dialog');g.id='nbhUiDlg';g.className='noprint';g.setAttribute('aria-labelledby','nbhUiH');g.setAttribute('aria-describedby','nbhUiB');
+      g.innerHTML='<div class="u-h" id="nbhUiH"></div><div class="u-b" id="nbhUiB"></div><div class="u-f" id="nbhUiF"></div>';d.body.appendChild(g);}
+    d.getElementById('nbhUiH').textContent='Is '+now+' the same student as '+was+'?';
+    var b=d.getElementById('nbhUiB');b.style.display='';
+    b.textContent='This form’s reply box was made for '+was+', and links from it have gone out.\nSame student: the box stays. Links already sent keep working, and their answers come to this form.\nDifferent student: this form starts a new reply box. Answers to links already sent no longer come to this form.\nCancel: no link is made, and nothing changes.';
+    var f=d.getElementById('nbhUiF');f.innerHTML='';f.style.flexWrap='wrap';var done=function(v){try{g.close();}catch(e){}res(v);};
+    [['','Cancel'],['keep','Same student: keep the reply box'],['new','Different student: start a new one']].forEach(function(o){var x=d.createElement('button');x.type='button';x.textContent=o[1];x.addEventListener('click',function(){done(o[0]);});f.appendChild(x);});
+    g.oncancel=function(ev){ev.preventDefault();done('');};
+    try{if(g.open)g.close();g.showModal();}catch(e){g.setAttribute('open','');}
+    try{f.firstChild.focus();}catch(e){}});};
   /* v25.72 (privacy audit R1) is the student a reply or a reply box names plainly another than the form's? The names in play
      are short on purpose: a link carries the first name and last initial ("Mateo R."), a page the initials ("M.R.") or
      words the BCBA typed. Only a plain difference counts: a corrected spelling, a second surname, the names the other way
@@ -946,19 +963,34 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     function ping(){try{var n=$('#rbNote');if(n)n.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}}
     function changed(){try{cfg.changed();}catch(e){}ping();}
     function toast(t,kind){try{if(window.nbhUI&&nbhUI.toast)nbhUI.toast(t,kind?{kind:kind}:{});}catch(e){}}
-    /* v25.72 (privacy audit R1) the reply box belongs to the student it was made for (box.stu). The box travels with the form's
-       data, so a form whose student is now plainly another (a case used to start another student's, a name typed over)
-       still held the first student's box: a link made from it sent the second student's answers to the first student's
-       box, and the first's answers came into this form. Before a link is made such a box is let go, with its keys, the
-       ids it had taken and the replies it held, and the form starts one of its own; the note and a message say so.
-       A box from before v25.72, or one made before the form had a name, takes the form's student as its own.
-       Returns the words said, or ''. */
+    /* v25.72 (privacy audit R1; the BCBA, 11/10) the reply box belongs to the student it was made for (box.stu). The box travels
+       with the form's data, so a form whose student is now plainly another (a case used to start another student's, a name
+       typed over) still held the first student's box: a link made from it sent the second student's answers to the first
+       student's box, and the first's answers came into this form. A box from before v25.72, or one made before the form
+       had a name, takes the form's student as its own.
+       boxMine(), before a link is made: '' when the box is this student's, or there is none; the words said when a box
+       that no link has gone out from was let go (boxSent: no one on the list was sent a link, no answer has come, so
+       nothing is lost) and the form starts one of its own; 'ask' when links have gone out: the form does not change
+       boxes by itself. boxAsk() then asks (U.boxQuestion). Same student: the box and its links stay, the name kept with
+       the box becomes this one, and the earlier name is kept beside it (aka), so an answer to a link already sent is
+       placed, not held. Different student: the box is let go, with its keys, the ids it had taken and the replies it
+       held, and the note and a message say so. Cancel: nothing changes. boxAsk() resolves false on Cancel: no link is made. */
+    var said='',asking=null;
+    function boxSent(){var r=rb(),b=r.box;return !!(b&&(b.got.length||b.held.length||r.placed||r.sends.some(function(s){return s.sent||s.back;})));}
+    function boxDrop(was){var sh=shortNow();rb().box=null;
+      var t='This form’s reply box was made for '+was+', and the form is now about '+(sh||'another student')+', so it starts a reply box of its own. Links made from now on use the new box; answers to links sent for '+was+' do not come to this form.';
+      var n=$('#rbNote');if(n)n.textContent=t;toast(t,'warn');changed();paintHeld();said=t;return t;}
     function boxMine(){var r=rb(),b=r.box;if(!b)return '';var sh=shortNow();
       if(!b.stu){if(sh)b.stu=sh;return '';}
       if(U.sameStudent(b.stu,fullNow()))return '';
-      var was=b.stu;r.box=null;
-      var t='This form’s reply box was made for '+was+', and the form is now about '+(sh||'another student')+', so it starts a reply box of its own. Links made from now on use the new box; answers to links sent for '+was+' do not come to this form.';
-      var n=$('#rbNote');if(n)n.textContent=t;toast(t,'warn');changed();paintHeld();return t;}
+      return boxSent()?'ask':boxDrop(b.stu);}
+    function boxAsk(){if(boxMine()!=='ask')return Promise.resolve(true);if(asking)return asking;var r0=rb(),b0=r0.box,was=b0.stu;
+      asking=U.boxQuestion(was,fullNow()).then(function(v){asking=null;if(rb()!==r0||r0.box!==b0)return false;
+        if(v==='new'){boxDrop(was);return true;}
+        if(v!=='keep')return false;
+        b0.aka=(b0.aka||[]).filter(function(x){return x!==was;}).concat([was]).slice(-8);b0.stu=shortNow()||was;
+        var t='The reply box is kept: it is '+b0.stu+'’s now, and the links already sent keep working.',n=$('#rbNote');if(n)n.textContent=t;changed();return true;});
+      return asking;}
     /* the student label on a page (the form fills it once, with the initials): one left from the form's earlier student is
        written again from this student's name */
     function labelMine(){var e=$('#rpStudent'),full=fullNow();if(!e||!e.value||!full||U.sameStudent(e.value,full))return;
@@ -1002,7 +1034,8 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
         paintHeld();paintBox();changed();});
       /* the dialog opens: the box is registered (when a site is known) so the links carry it; the list is drawn while it is open */
       dl.addEventListener('close',function(){var tb=$('#rbRows');if(tb)tb.innerHTML='';});
-      var rpb=$('#rpBtn');if(rpb)rpb.addEventListener('click',function(){setTimeout(function(){var e=$('#rbBox');if(e&&!e.value)e.value=rb().addr||devAddr()||'';labelMine();boxMine();paintRows();paintBox();if(C.site())C.ensure();},0);});   /* v25.72 labelMine, boxMine */
+      var rpb=$('#rpBtn');if(rpb)rpb.addEventListener('click',function(){setTimeout(function(){var e=$('#rbBox');if(e&&!e.value)e.value=rb().addr||devAddr()||'';labelMine();paintRows();paintBox();
+        boxAsk().then(function(ok){if(!ok){try{dl.close();}catch(er){}return;}paintRows();paintBox();paintHeld();if(C.site())C.ensure();});},0);});   /* v25.72 labelMine; boxAsk: the box is this student's before a link is made here, and Cancel closes the box of links */
       ['#rpRound','#rpRole','#rpInst'].forEach(function(q){var e=$(q);if(e)e.addEventListener('change',function(){if(dl.open)paintRows();});});
       var em=$('#rpEmail');if(em)em.addEventListener('input',paintBtns);
       var rcbtn=$('#rcBtn');if(rcbtn)rcbtn.addEventListener('click',function(){setTimeout(function(){paintBox();paintHeld();},0);});
@@ -1031,7 +1064,8 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
         r.sends.push({id:newId(),name:nm,role:String(p.role||'').trim(),email:old?old.email:'',pg:p.pg||cfg.pageOf(p.role)||(cfg.pages()[0]||[''])[0],round:rd,sent:'',how:'',due:'',rem:'',back:'',from:''});n++;});
       if(n){paintRows();changed();}return n;}
     /* ---- the pages ---- */
-    K.withBox=function(p){if(boxMine()&&C.site())C.ensure();   /* v25.72 never another student's box in a link: this one goes without, the next carries the new box */
+    K.withBox=function(p){var st=boxMine();if(st==='ask')return p;   /* v25.72 the question is not answered yet: this link goes without a box, never with another student's */
+      if(st&&C.site())C.ensure();   /* a box was let go: the next link carries the new one */
       var l=C.link();if(!p||!l)return p;p.box=l;var who=p.bcba||'the BCBA';
       if(p.instructions)p.instructions=String(p.instructions).replace(/When you have finished, press Send:[\s\S]*$/,'When you have finished, press Send: your answers go straight to '+who+'.');return p;};
     K.base=function(){return location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';};
@@ -1044,10 +1078,11 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       var list=rows().filter(function(s){return remind?s.sent&&!s.back:!s.sent;}),skip=[];
       var go=list.filter(function(s){if(!s.name.trim()){skip.push('a person with no name');return false;}if(!EMAIL_RE.test(s.email)){skip.push(s.name.trim()+' (no email)');return false;}return true;});
       if(!go.length){say(skip.length?'Nothing sent: '+skip.join(', ')+'.':remind?'No one to remind: everyone sent is back.':'Everyone on the list has been sent the page.');return Promise.resolve(null);}
-      /* v25.72 (privacy audit R1, R2) the box is this student's before any link is made (boxMine); and the people chosen are of
+      /* v25.72 (privacy audit R1, R2) the box is this student's before any link is made (boxAsk); and the people chosen are of
          the record on the form now: if the form holds another by the time the box is registered, nothing is sent */
-      var moved=boxMine(),r0=rb();
-      return (C.site()?C.ensure():Promise.resolve(false)).then(function(){
+      var moved='',r0=rb(),stop={};
+      return boxAsk().then(function(ok){if(!ok)return stop;moved=said;said='';return C.site()?C.ensure():false;}).then(function(x){
+        if(x===stop){say('Nothing was sent.');return null;}
         if(rb()!==r0){say('Nothing was sent: the form holds another record now.');return null;}
         var due=($('#rpDue')&&$('#rpDue').value.trim())||'';go.forEach(function(s){if(due&&!remind)s.due=due;});
         var msgs=go.map(function(s){var p=K.personPayload(s);return U.personMail({to:s.email,name:s.name.trim(),items:[{title:p.title||'Questionnaire',label:p.title||'Questionnaire',url:K.base()+U.payloadToHash(p),due:p.due||'',boxed:!!p.box}],student:p.student,bcba:cfg.bcba?cfg.bcba():p.bcba,remind:remind});});
@@ -1068,9 +1103,9 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       return A.some(function(w){return w.length>1&&B.indexOf(w)>=0;});}
     /* v25.72 (privacy audit R1) and a reply that names plainly another student than this form's (U.sameStudent: its page was
        made for that student, and the box it came through travelled here with the form's data) is held the same way. */
-    function screen(list){var r=rb(),seen={},keep=[],flag=[],full=fullNow();
+    function screen(list){var r=rb(),seen={},keep=[],flag=[],full=fullNow(),aka=(r.box&&r.box.aka)||[];   /* aka: earlier names the BCBA said are this same student */
       list.forEach(function(o){var s=o.sid?r.sends.find(function(x){return x.id===o.sid;})||null:null,why='';
-        if(o.student&&full&&!U.sameStudent(o.student,full))why='student';
+        if(o.student&&full&&!U.sameStudent(o.student,full)&&!aka.some(function(a){return U.sameStudent(o.student,a);}))why='student';
         else if(s){if(s.back||seen[o.sid])why='again';else if(!sameName(o.name,s.name))why='name';}
         if(o.sid)seen[o.sid]=1;if(why)flag.push({o:o,why:why,to:s?s.name.trim():''});else keep.push(o);});
       return {keep:keep,flag:flag};}

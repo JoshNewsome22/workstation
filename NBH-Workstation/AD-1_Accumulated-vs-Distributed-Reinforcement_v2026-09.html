@@ -2721,7 +2721,8 @@ function restore(o){
 }
 $('#btnSave').addEventListener('click',()=>{const name=(val('s_name')||'student').replace(/[^\w-]+/g,'_');const blob=new Blob([JSON.stringify(serialize(),null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='AD1_'+name+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
 $('#btnLoad').addEventListener('click',()=>$('#fileIn').click());
-$('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{restore(JSON.parse(r.result))}catch(err){alert('Could not open that file: '+err.message)}};r.readAsText(f);e.target.value=''});
+$('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{restore(JSON.parse(r.result));if(!window.__nbhQuiet){const p=document.getElementById('adrPhase');if(p&&!p.disabled)p.value='';}   /* v25.72 (privacy) the recorder's phase label was the last record's */
+    }catch(err){alert('Could not open that file: '+err.message)}};r.readAsText(f);e.target.value=''});
 $('#btnPrint').addEventListener('click',()=>{refresh();window.print()});
 window.addEventListener('beforeprint',refresh);
 $('#btnClear').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every field on this form?\nUnsaved entries will be lost.',{ok:'Clear all',danger:true}))location.reload()});

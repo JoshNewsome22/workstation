@@ -3593,7 +3593,13 @@ $("#clearBtn").addEventListener("click", async () => {
   state.obs = [];
   state.meta.carry = "";          /* v21.17: it described the observations just cleared */
   render();
+  obrDraftOff();
 });
+/* v25.72 (privacy) the note being typed in the recorder, and the line that repeats the last note added, belong to the
+   observations that were open: they go when those go (Clear all, and Open by the person; a restore by the workstation or
+   by Undo, window.__nbhQuiet, leaves a note being typed alone) */
+function obrDraftOff(){ const w = document.getElementById("obrNoteW"), last = document.getElementById("obrNoteLast");
+  if(w) w.value = ""; if(last){ last.hidden = true; last.textContent = ""; } }
 
 /* v21.44 (A3): the saved file and the CSV are named OB-1_<Student>_<YYYY-MM-DD>_<HHMM> from the local date and time of the
    save, the other forms' pattern with the time added, so two observation files for one student no longer share a name */
@@ -3630,6 +3636,7 @@ $("#fileIn").addEventListener("change", e => {
       $("#ivMethod").value = state.cfg.ivMethod;
       $("#ivN").value = state.cfg.ivN;
       render();
+      if(!window.__nbhQuiet) obrDraftOff();   /* v25.72 (privacy) */
     }catch(err){ alert("That file could not be read as a saved observation record."); }
   };
   rd.readAsText(file); e.target.value = "";

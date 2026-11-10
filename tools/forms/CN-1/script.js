@@ -431,7 +431,7 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     const next=other?null:fromFile(d);
     if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved CN-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form CN-1. Nothing was changed.':'That file could not be read as a saved CN-1 form. Nothing was changed.');return;}
     /* v21.87 a file opens on its last note (the newest; new notes are added at the end), not the first */
-    const prev=S;S=next;cur=Math.max(0,((next&&next.notes)||[]).length-1);try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved CN-1 form. Nothing was changed.');}};
+    const prev=S;S=next;cur=Math.max(0,((next&&next.notes)||[]).length-1);try{renderAll();if(!window.__nbhQuiet)cnDraftsOff();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved CN-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
@@ -440,7 +440,11 @@ $('#csvBtn').addEventListener('click',()=>{
   const out=[head];noteRows().reverse().forEach(r=>{const n=r.n;out.push([r.i+1,n.date,n.start,n.end,r.dur==null?'':r.dur,n.type,n.setting,n.present,n.plan,n.purpose,n.data_forms,n.data_rate,n.data_goal,n.data_unit,n.data_dir==='up'?'higher is better':'lower is better',n.observed,n.integ,n.integ_date,n.integ_note,n.problems,n.recs,n.changes,authText(n),n.training,n.materials,n.next.filter(s=>s.what).map(s=>s.what+' ('+s.who+(s.when?', by '+s.when:'')+(s.done?', done':'')+')').join('; '),n.t_obs,n.t_cons,n.t_train,n.t_direct,n.t_meet,n.t_doc,n.t_travel,n.sig_date?n.sig:'',n.sig_date,n.written].concat((e=>isMissed(n)?['0','Not held','',e.note]:[e.min==null?'':e.min,kindLab(e.kind),e.with,e.note])(svcOf(n,r.i)),
     [isMissed(n)?'':(e=>countsIep(e,IEPK[S.meta.iep_kind]?S.meta.iep_kind:'')?'yes':'no')(svcOf(n,r.i)),n.data_beh,n.data_week,n.data_phase,n.data_run,n.data_need,n.integ_crit,n.integ_criterion,n.integ_ptype,n.integ_by,n.integ_how,[n.fb_who,n.fb_data,n.fb_change].filter(Boolean).join('; '),CHG_LAB[n.chg_kind]||'',n.safety,n.as_given,n.as_how,n.as_withdraw,n.as_part,n.miss_reason,n.miss_min,n.miss_madeup,n.sig_time,(n.add||[]).map(a=>a.date+' '+a.time+' '+a.by+': '+a.text).join(' | ')]));});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='CN-1_log.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();cur=0;renderAll();setView('note');}});
+/* v25.72 (privacy) an addendum being written, its reason and the search of the log belong to the record that was open: they go
+   when it goes (Clear all, and Open by the person; a restore by the workstation or by Undo, window.__nbhQuiet, leaves them) */
+function cnDraftsOff(){const b=document.getElementById('addBox');if(b)b.hidden=true;['addText','addWhy'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const q=document.getElementById('logSearch');if(q&&q.value){q.value='';try{renderLog();}catch(e){}}}
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();cur=0;renderAll();setView('note');cnDraftsOff();}});
 
 /* ---------------- simulation ---------------- */
 async function loadSim(){

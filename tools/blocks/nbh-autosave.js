@@ -210,7 +210,8 @@
       (function look() { if (stop) return; compute().then(function (s) { if (stop) return; if (was === null) was = s; else if (s !== was) { quit(); seal(); return; } if (++n < 100) setTimeout(look, 300); else quit(); }); })();
     }
   }, true);
-  function seal() { clearTimeout(timer); seq++; key = 'f-' + tab + '-' + seq; lastSig = ''; replaces = ''; }
+  /* v25.72 (privacy) the next copy is the next record's: it carries the name the form has then, not the last student's */
+  function seal() { clearTimeout(timer); seq++; key = 'f-' + tab + '-' + seq; lastSig = ''; replaces = ''; student = ''; }
   D.addEventListener('change', function (e) {
     var t = e.target; if (W.__nbhQuiet || !t || t.type !== 'file' || !t.matches('#fileIn,#fileImport,#file-input')) return;
     lastWord(); flush(); seal();

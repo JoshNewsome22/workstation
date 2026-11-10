@@ -1946,7 +1946,7 @@ $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.S)throw 0;S=Object.assign(blank(),d.S);S.meta=Object.assign(blank().meta,d.S.meta);
       if(!d.S.meta||!String(d.S.meta.iv||'').trim())delete S.meta.iv;   /* v23.07 (F111) a file from before keeps the interval its ratio gave */
-      renderAll();resetTimer();}
+      renderAll();resetTimer();if(!window.__nbhQuiet)$('#typeMarks').value='';}   /* v25.72 (privacy) marks typed and not yet applied were the last record's */
     catch(err){alert('That file could not be read as a saved MT-1 form.');}};r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
   const p=params();const rows=[['Interval','Time','Observer 1','Observer 2']];
@@ -1961,7 +1961,7 @@ $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).r
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='MT-1_intervals.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form, including the session log?\nUnsaved work will be lost. To start the next session and keep the log, use "Clear sheet for the next session" on the data sheet instead.',{ok:'Clear all',danger:true})){S=blank();renderAll();resetTimer();setView('sheet');}});
+$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form, including the session log?\nUnsaved work will be lost. To start the next session and keep the log, use "Clear sheet for the next session" on the data sheet instead.',{ok:'Clear all',danger:true})){S=blank();renderAll();resetTimer();setView('sheet');$('#typeMarks').value='';}});   /* v25.72 (privacy) */
 
 /* ===================== v25.64 (H4, M4, L6, L7, H7) =====================
    H4 the chooser: from the typical episode length, about how many episodes, and whether how often or how long matters most,
