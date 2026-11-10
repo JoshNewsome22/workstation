@@ -15,7 +15,9 @@
    F  Caseload, Read every linked sheet: the student on screen changes between two sheets; a sheet read for one student is
       not put into the next student's Form DD-1 (the sheet reader is stood in for; no Google here).
    X  a case history point begun for one student is not written from, or filed under, the student opened meanwhile.
-   usage: WS_URL=http://127.0.0.1:8171 node qa/v2572-save-isolation-test.js [S C K R P F X]   results in qa/out/v2572-save-isolation/ */
+   O  a form of the case holds another student's name (the strip says so): Save case asks before it saves, as Build packet
+      does before it prints (the BCBA, 11/10). Cancel writes nothing; Save anyway is not asked again for the same forms.
+   usage: WS_URL=http://127.0.0.1:8171 node qa/v2572-save-isolation-test.js [S C K R P F X O]   results in qa/out/v2572-save-isolation/ */
 const L=require(__dirname+'/lib.js');const {sleep,fs,path}=L;
 const FILE=Object.fromEntries(L.forms().map(f=>[f.id,f.file]));
 const A={client:'Mateo Rivera',sid:'4471823',grade:'4',site:'Royal Palm School',bcba:'J. Ellis, BCBA'};
@@ -271,6 +273,30 @@ async function firstOnScreen(p,forms){await setBar(p,A);for(const id of (forms||
     fs.writeFileSync(path.join(OUT,'X-after.json'),JSON.stringify({history:Array.isArray(after.history)?after.history.map(h=>({key:h.key,client:h.client,why:h.why,forms:h.forms})):after.history,bad,t},null,1));
     ok('X the switch went ahead while the point was being read',t&&(await onScreen(p)).client===B.client);
     ok('X no case history point of one student holds the other, or is filed under the other',!bad.length,bad);
+    await c.close();}
+
+  /* ---- O  a form of the case holds another student's name (as a form that reached the wrong case would): Save case asks first ---- */
+  if(want('O')){const {c,p}=await newPage('O',OUT);await toasts(p);
+    await makeKept(p,A,['DM-1','IN-1']);   /* his case, saved, on screen */
+    /* the interview form's own record now names her, as a form that reached the wrong case by any route would */
+    await frameOf(p,'IN-1').evaluate(nm=>{const e=document.querySelector('[data-m="client"]');e.value=nm;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},B.client);await sleep(5500);
+    const strip=await p.evaluate(()=>({on:document.getElementById('alertbar').classList.contains('on'),t:document.getElementById('alertbar').innerText.slice(0,200)}));
+    ok('O (setup) the strip says a form holds a different student’s name',strip.on&&/Different student/.test(strip.t),strip);
+    const before=keyOf((await stores(p)).caseload,/Mateo/),nDl=p.__dl.length;
+    await p.evaluate(()=>{$('#saveCase').click();});
+    await p.waitForFunction(()=>document.getElementById('cfDlg').open&&/another student/.test(document.getElementById('cfTitle').textContent),null,{timeout:8000}).catch(()=>{});
+    const body=await p.evaluate(()=>document.getElementById('cfDlg').open?document.getElementById('cfTitle').textContent+' | '+document.getElementById('cfBody').textContent:'no question');
+    ok('O Save case asks before it saves the case with that form in it, naming the form and the name it holds',/with another student’s name in it\?/.test(body)&&/Form IN-1 holds/.test(body)&&/Priya Nandakumar/.test(body),body.slice(0,300));
+    await answer(p,/with another student’s name in it\?/,/^Cancel/,3000);await sleep(2500);await closeBoxes(p);
+    const mid=keyOf((await stores(p)).caseload,/Mateo/);
+    ok('O Cancel: no file is written and his kept case is as it was',p.__dl.length===nDl&&!!mid&&!!before&&mid.text===before.text&&!marks(mid.text,B_MARKS).length,{files:p.__dl.length-nDl,same:!!mid&&!!before&&mid.text===before.text});
+    await p.evaluate(()=>{$('#saveCase').click();});
+    const q2=await answer(p,/with another student’s name in it\?/,/^Save anyway/,8000);
+    await waitDl(p,nDl+1,60000).catch(()=>{});await answer(p,/Case file written|Case saved|Case written/,/It is in Files|^OK$/,8000);await closeBoxes(p);await sleep(1200);
+    ok('O Save anyway saves it',!!q2&&p.__dl.length===nDl+1,{q2,files:p.__dl.length-nDl});
+    await p.evaluate(()=>{$('#saveCase').click();});
+    const q3=await answer(p,/with another student’s name in it\?/,/^Cancel/,3500);await waitDl(p,nDl+2,30000).catch(()=>{});await answer(p,/Case file written|Case saved|Case written/,/It is in Files|^OK$/,6000);await closeBoxes(p);
+    ok('O the same form and name are not asked about again in this case',!q3,q3);
     await c.close();}
 
   ok('no page errors',!errs.length,errs.slice(0,6));
