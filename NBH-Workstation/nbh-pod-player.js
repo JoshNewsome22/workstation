@@ -147,7 +147,7 @@ function build() {
   audio.addEventListener('pause', function () { save(true); emit('pause'); });
   audio.addEventListener('seeked', function () { save(true); pos(); });
   audio.addEventListener('ended', function () { save(true, true); emit('ended'); });
-  audio.addEventListener('play', function () { if (audio.getAttribute('src') === SILENT) return; quiet(); emit('play'); });
+  audio.addEventListener('play', function () { if (audio.getAttribute('src') === SILENT) return; emit('play'); });   /* other sound is paused when the episode is started (go), not here: a video started a moment later keeps playing */
   audio.addEventListener('loadedmetadata', function () {
     if (!cur || audio.getAttribute('src') === SILENT) return; audio.playbackRate = rate();
     var p = prog(cur), t = seekTo;
