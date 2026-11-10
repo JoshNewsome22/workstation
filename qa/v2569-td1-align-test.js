@@ -186,8 +186,8 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
           const h1=tall(),t1=b.textContent;b.click();await new Promise(r=>setTimeout(r,120));
           /* the link is drawn 32 px tall and takes a tap 44 px tall: a point 5 px above it and 5 px below it reach it */
           const r=b.getBoundingClientRect(),hit=y=>{const e=document.elementFromPoint(r.left+r.width/2,y);return !!e&&(e===b||b.contains(e));},tap=hit(r.top-5)&&hit(r.bottom+5);
-          return {ok:p0<=(parseFloat(getComputedStyle(s).lineHeight)||20)*2.2&&h1>h0*1.2&&t==='Show the full introduction'&&t1==='Hide the full introduction'&&tall()===h0&&tap,p0,h0,h1,t,tap};});
-        ok(`9 ${id}: the description is two lines with "Show the full introduction" (a tap 44 px tall)`,it.ok,it);
+          return {ok:p0<=(parseFloat(getComputedStyle(s).lineHeight)||20)*2.2&&h1>h0*1.2&&t==='Show the form\u2019s full introduction'&&t1==='Hide the form\u2019s full introduction'/* v25.72 (the BCBA, 11/10) TD-1's link says it opens the form's introduction; each sheet's says it opens the sheet's */&&tall()===h0&&tap,p0,h0,h1,t,tap};});
+        ok(`9 ${id}: the description is two lines with "Show the form’s full introduction" (a tap 44 px tall)`,it.ok,it);
         /* 4 an example goes once its box is filled */
         let eg=null;for(const v of V){await view(p,v);eg=await p.evaluate(async()=>{const f=[...document.querySelectorAll('input,textarea')].find(x=>x._fx2eg&&x.offsetParent&&!x.readOnly&&!x.disabled&&!x.closest('table'));if(!f)return null;
           const h=f._fx2eg,v0=f.value,set=async v=>{f.value=v;f.dispatchEvent(new Event('input',{bubbles:true}));await new Promise(r=>setTimeout(r,150));return !!h.offsetParent;};

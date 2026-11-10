@@ -132,6 +132,16 @@ const SMALL=()=>{const out=[];const look=root=>root.querySelectorAll('*').forEac
   ok('T8 the counter is there from the start and its total stays as answers come',Object.values(t8).every(x=>/^0 of (\d+) answered$/.test(x.a.prog)&&x.b.prog===('1 of '+x.a.n.length+' answered')&&x.a.prog===('0 of '+x.a.n.length+' answered')),t8);
   await view(p,'setup');const t9=await p.evaluate(()=>{const f=[...document.querySelectorAll('#setup input:not([type=hidden]),#setup select,#setup textarea')].filter(e=>e.name);const i=f.findIndex(e=>e.name==='m.client');return {after:f[i+1]&&f[i+1].name,under:document.querySelector('[name="m.fn"]').getBoundingClientRect().top>document.querySelector('[name="m.client"]').getBoundingClientRect().top};});
   ok('T9 on Setup, Function comes directly after the student\'s name (and under it)',t9.after==='m.fn'&&t9.under,t9);
+  /* T8 the BCBA's wording (11/10): plain headings with the source on its own line under them, the plain questions, two links named */
+  const w8={};for(const fn of ['escape','automatic']){await setAll(p,{'m.fn':fn});await view(p,'select');
+    w8[fn]=await p.evaluate(()=>{const h=document.querySelector('#modelWrap h3.sub');const s=h&&h.nextElementSibling;return {h:h&&h.getAttribute('data-fx2-orig')||(h&&h.textContent),src:s&&s.classList.contains('td-hsrc')?s.textContent:'',q:[...document.querySelectorAll('#modelWrap .qrow .qt')].map(x=>x.firstChild&&x.firstChild.textContent).filter(t=>/component functional analysis|arranging or ordering/.test(t||'')),
+      sheetLink:(document.querySelector('#select .td9-more')||{}).textContent||'',formLink:(document.querySelector('.nbh-mast .fx2-more')||{}).textContent||''};});}
+  await view(p,'reinf');const w9=await p.evaluate(()=>[...document.querySelectorAll('#reinf h3.sub')].map(h=>(h.getAttribute('data-fx2-orig')||h.textContent)+' | '+((h.nextElementSibling&&h.nextElementSibling.classList.contains('td-hsrc'))?h.nextElementSibling.textContent:'')));
+  ok('T8 the approved wording: plain headings, each source on its own line under its heading, the plain questions, and each introduction link says what it opens',
+    /^Questions for behavior maintained by escape$/i.test(w8.escape.h)&&w8.escape.src==='Geiger, Carr, and LeBlanc (2010)'&&/^Questions for behavior maintained by automatic reinforcement$/i.test(w8.automatic.h)&&/Hagopian/.test(w8.automatic.src)
+    &&w8.escape.q.includes('Was the function found with a component functional analysis, which tests the establishing operation and the consequence one at a time (Bann & Morris, 2026)?')&&w8.automatic.q.some(t=>/^Is the behavior arranging or ordering things/.test(t))
+    &&w9.some(x=>/^A\. Choosing the reinforcer \| DeLeon et al\., 2014, Fig\. 11\.3$/i.test(x))&&w9.some(x=>/^The schedules, defined \| Catania, 2007; Ferster & Skinner, 1957$/i.test(x))
+    &&w8.escape.sheetLink==='Show this sheet\u2019s full introduction'&&w8.escape.formLink==='Show the form\u2019s full introduction',{w8,w9});
   await ctx.close();}
  /* ---------- T10 Step by step counts the sheet on screen (TD-1 and FS-1) ---------- */
  {const ctx=await ctxOf('side');const t10={};

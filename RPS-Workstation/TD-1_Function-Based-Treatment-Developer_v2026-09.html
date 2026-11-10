@@ -1248,6 +1248,7 @@ html.td9:not(.nbh-pr-measure) .qrow .nbh-segb[data-v="not sure"]{min-width:88px!
 /* v25.72 (TD-1 review T12) 12 px is the smallest text on screen: what a sheet or the compare dialog draws under 12 px is raised to
    12 (the layout marks it, td9-min12); the paper keeps its sizes */
 html.td9:not(.nbh-pr-measure) .td9-min12{font-size:12px!important}
+html.td9:not(.nbh-pr-measure) .sheet h3.sub + p.td-hsrc{margin:-6px 0 10px!important;font:400 14px/1.45 var(--td9-sans)!important;color:var(--td9-muted)!important}
 html.td9:not(.nbh-pr-measure) #setup .td-id1{margin-bottom:0!important}
 html.td9:not(.nbh-pr-measure) #setup .td-fndefs{margin:8px 0 12px!important}
 /* the compare table in the form's own boxes, corners and sizes */
@@ -1608,13 +1609,15 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .td9-more::after{content:'
    TD-1 keeps its own v24.89 layout beside it (html.td9: the selectors' questions beside the Recommended margin, the
    Build cards and their steps, Not sure, the Final plan at a glance). Cards: the high-p instruction pool, the staff
    trained, the acceptability ratings. Tables: the progress log (it draws the graph), the high-p trial sheet and its
-   summary, the integrity checklist, the high-p integrity steps, the schedules and thinning references, the targets */
+   summary, the integrity checklist, the high-p integrity steps, the schedules and thinning references, the targets.
+   v25.72 (the BCBA, 11/10) intro: the masthead's link opens the form's introduction (each sheet has its own link) */
 window.FX2_CFG = {
+  intro: ['Show the form’s full introduction', 'Hide the form’s full introduction'],
   cards: '#antecedent table.hp:has(input[name^="ant.hp.i["]), #plan table:has(input[name^="tr["]), #plan table:has(input[name^="sv["])',
   /* the selectors' answers keep TD-1's own buttons (Yes, No, Not sure) and lists; the Build cards' settings and the
      tables keep their lists */
   noseg: '.qrow, table, #compWrap',
-  /* names in headings: the models' authors ("Escape-maintained behavior: Geiger, Carr, and LeBlanc (2010)") */
+  /* names in headings and their source lines: the models' authors ("Geiger, Carr, and LeBlanc (2010)") */
   keep: ['Geiger', 'Carr', 'Hagopian', 'Lemons', 'Wilder', 'Fergus', 'Catania', 'Ferster', 'Skinner', 'Fig'],
   /* the acceptability rows' raters name the row (each row is a rater and a time), so they stay in their boxes; and the
      box another form fills through the case says so in the box, as before ("From Form PA-1 (the case fills it where it
@@ -1862,7 +1865,7 @@ window.FX2_CFG.step = { alone: '.td9-recs' };
   <div id="selOthers" hidden></div>
   <!-- v25.65 (FCT-SR-M8) an existing request or a new one, and why -->
   <div class="ident td-reqch" style="margin-top:12px"><div class="f"><label for="selReq">Request chosen</label><select id="selReq" name="sel.req"><option value=""></option><option value="existing">The existing request</option><option value="new">A new request</option></select></div><div class="f"><label for="selReqWhy">Why (problem behavior per request in the comparison; which the student prefers)</label><input id="selReqWhy" name="sel.reqwhy" placeholder="e.g., 0.1 problem behaviors per request with the card against 0.6 with the old shout; the student chose the card 8 of 10 times"></div></div>
-  <div class="ident" style="margin-top:12px"><div class="f"><label for="selChosen">Components chosen (codes)</label><input id="selChosen" name="sel.chosen" placeholder="e.g., FCT, EXT, CHOICE"></div><div class="f"><label for="selWhy">Rationale</label><input id="selWhy" name="sel.why"></div><div class="f"><label>&nbsp;</label><button class="tool noprint" id="sendBuild" style="margin:0">Add to Build</button></div></div>
+  <div class="ident" style="margin-top:12px"><div class="f"><label for="selChosen">Components chosen (their codes)</label><input id="selChosen" name="sel.chosen" placeholder="e.g., FCT, EXT, CHOICE"></div><div class="f"><label for="selWhy">Rationale</label><input id="selWhy" name="sel.why"></div><div class="f"><label>&nbsp;</label><button class="tool noprint" id="sendBuild" style="margin:0">Add to Build</button></div></div>
   <div class="cite">Escape questions and options after Geiger, Carr, and LeBlanc (2010, Figure). Attention/tangible and automatic frameworks are practice rules assembled from Tiger et al. (2008), Hagopian et al. (1998), Vollmer et al. (1993), Athens and Vollmer (2010), Hagopian et al. (2015), and Piazza et al. (2000); see the guide for the evidence behind each branch.</div>
 </div>
 
@@ -1902,7 +1905,7 @@ window.FX2_CFG.step = { alone: '.td9-recs' };
   <div class="ident" style="margin-top:12px"><div class="f"><label for="antChosen">Components chosen</label><input id="antChosen" name="ant.chosen"></div><div class="f"><label for="antWhy">Rationale</label><input id="antWhy" name="ant.why"></div><div class="f"><label>&nbsp;</label><button class="tool noprint" id="sendAnt" style="margin:0">Add to Build</button></div></div>
   <!-- v23.10 (review F187) each planner prints only when it holds an entry or its card is in the plan -->
   <div class="td-planner" id="hpPlanWrap" data-empty="1">
-  <h3 class="sub" id="hpPlanner">High-Probability Sequence Planner (Lemons &amp; Wilder, 2026)</h3>
+  <h3 class="sub" id="hpPlanner">High-probability request sequence planner: easy requests before a hard one</h3><p class="method td-hsrc">Lemons &amp; Wilder, 2026</p>
   <p class="method" style="margin-top:0">The high-probability instructional sequence (HPIS) is an antecedent-based intervention used to increase cooperation with low-probability tasks: a series of instructions with a high probability of cooperation is delivered immediately before an instruction with a low probability of cooperation (Lemons &amp; Wilder, 2026; Mace et al., 1988). In Lemons and Wilder (2026), high-p instructions were those with at least 80% cooperation and low-p instructions those with less than 40% cooperation across 10 randomly ordered probe trials, and cooperation was defined as initiating the task within 10 s of the instruction. Three single-step high-p instructions were delivered 1&ndash;3 s apart with brief praise for each; the low-p instruction was delivered within 3 s of cooperation with the third high-p instruction and only after cooperation with three consecutive high-p instructions, and noncooperation with a high-p instruction led to a 30-s pause and a new high-p sequence. Both varied-order and constant-order sequences increased cooperation with the low-p instruction for all three children with autism in that study; a varied order was more effective than a constant order for one of the three participants and equally effective for the other two, and across Lemons and Wilder (2026) and Davis and Reichle (1996), 5 of 7 participants cooperated more under varied than constant high-p sequences. The authors recommend either using varied high-p instructions or assessing varied versus constant formats with each learner, for example with a brief probe-trial preassessment. Longer intervals between the high-p instructions and the low-p instruction may reduce HPIS effectiveness (Pitts &amp; Dymond, 2012, as cited in Lemons &amp; Wilder, 2026). This planner therefore defaults to a varied order, and the study's timing values are offered as starting values, not as tested optima. The trial sheet under the planner records each session's five trials (high-p 1 to 3 and the low-p, cooperated or not, and the order used) and computes the low-p cooperation per session against the 40% identification figure and each high-p instruction's cooperation against the 80% re-verify rule.</p>
   <div class="warn"><b>Scope of the evidence</b>Lemons and Wilder (2026) studied three clinic-based children with autism under age 7 with an adult experimenter and one brief motor or transition low-p instruction per child (jump, touch yogurt, get lunchbox); no functional assessment was conducted, noncooperation with the low-p instruction ended the trial, and maintenance, generalization, and social validity were not assessed. The HPIS has been reported to be ineffective in some cases (Rortvedt &amp; Miltenberger, 1994; Silbaugh &amp; Swinnea, 2019; Wilder et al., 2007, as cited in Lemons &amp; Wilder, 2026). The 80% / 40% criteria are that study's operational definitions, and the consequence for low-p noncooperation in this plan is set from the function and the Responding sheet, not from the study.</div>
   <p class="method" style="margin:0 0 4px"><b>Target (low-p) instruction.</b> One instruction, held constant across trials, with less than 40% cooperation on at least 10 probe trials presented in random order.</p>
@@ -1983,7 +1986,7 @@ window.FX2_CFG.step = { alone: '.td9-recs' };
   </div>
   </div>
   <div class="td-planner" id="ecsPlanWrap" data-empty="1">
-  <h3 class="sub" id="ecsPlanner">Competing-Stimulus Package Planner for Arranging and Ordering (Fergus et al., 2026)</h3>
+  <h3 class="sub" id="ecsPlanner">Planner: competing items for arranging and ordering</h3><p class="method td-hsrc">Fergus et al., 2026</p>
   <p class="method" style="margin-top:0">For higher-level restricted and repetitive behavior (arranging and ordering) with an automatic function from the EA-1 arranging/ordering variant. The package is three effective competing stimuli (ECS) continuously available, with prompted engagement and response blocking added only when the A-CSA showed they were needed. An ECS is defined as an item associated with at least an 80% reduction in RRB relative to a no-stimulus control (Hagopian et al., 2020). In Fergus et al. (2026), providing three ECS identified via an A-CSA reduced arranging/ordering to zero or near-zero for all four participants, with the required support level (none, prompting, or prompting + blocking) determined by the A-CSA phase in which the stimuli competed.</p>
   <div class="warn"><b>Scope of the evidence</b>Fergus et al. (2026) treated four males with autism, 13&ndash;22 years, in a private residential school, all with automatically maintained arranging/ordering; three other referrals showed escape or attention functions on the FA and were not candidates for this package (route those to the social-function branches). Rates are reported in figures only, so this form uses &ldquo;zero or near-zero&rdquo; and the per-session counts of prompts, blocks, and emotional responses. Not shown by that study: maintenance over time, generalization across therapists (probed for one participant), social validity, procedural fidelity, or any effect on bolting, pica, or other collateral behavior (not measured). Students with dangerous behavior during interruption were excluded, so the blocking component has not been tested with them. One participant was concurrently receiving FCT with schedule thinning for RRB.</div>
   <p class="method" style="margin:0 0 4px"><b>Treatment level.</b> Prescribed by the A-CSA phase in which at least three ECS emerged (Setup sheet): free access &rarr; ECS only; prompted engagement &rarr; ECS + prompts; prompted engagement + blocking &rarr; ECS + prompts + blocking. <button class="tool noprint" id="ecsStudyBtn" style="margin-left:8px">Fill empty fields with the Fergus et al. (2026) arrangement</button></p>
@@ -2058,17 +2061,17 @@ window.FX2_CFG.step = { alone: '.td9-recs' };
   <div class="bar nbh-band">Reinforcer Selection and Schedules of Reinforcement</div>
   <p class="method" style="margin:0 0 8px">Two selectors. The first chooses the reinforcer and the preference-assessment method from the flowchart and recommendations of DeLeon, Graff, Frank-Crawford, Rooker, and Bullock (2014). The second chooses the schedule from the goal of the arrangement, using the schedule definitions of Catania (2007, as adapted in DeLeon, Bullock, &amp; Catania, 2013). Recommendations can be sent to the build sheet as cards.</p>
 
-  <h3 class="sub" style="margin-top:0">A. Reinforcer Selection (DeLeon et al., 2014, Fig. 11.3)</h3>
+  <h3 class="sub" style="margin-top:0">A. Choosing the reinforcer</h3><p class="method td-hsrc">DeLeon et al., 2014, Fig. 11.3</p>
   <div id="rfModel"></div>
   <div id="rfRec"></div>
 
-  <h3 class="sub">B. Preference-Assessment Method (DeLeon et al., 2014, Recommendations 1–9)</h3>
+  <h3 class="sub">B. How to find what the student prefers</h3><p class="method td-hsrc">DeLeon et al., 2014, recommendations 1 to 9</p>
   <div id="paModel"></div>
   <div id="paRec"></div>
   <!-- v24.42 (review E-24) -->
   <p class="noprint" style="margin:4px 0 10px;font-size:13px"><a class="ra-quick" href="PA-1_Preference-Assessment-Protocol_v2026-09.html#quick-mswo" target="_blank" rel="noopener">Run a brief MSWO now (Form PA-1, three sessions)</a> <span style="color:var(--ink-soft,#54676f)">when the selector asks for a current preference check; the result goes to PA-1&rsquo;s Monitoring log</span></p>
 
-  <h3 class="sub">C. Reinforcement Parameters to Set (DeLeon et al., 2014)</h3>
+  <h3 class="sub">C. How the reinforcer is given</h3><p class="method td-hsrc">DeLeon et al., 2014</p>
   <div class="chkrow" style="display:block">
     <label><input type="checkbox" name="rp.delay"> Delay: reinforcer follows the response immediately during acquisition; delays weaken effects and discount value (Neef et al., 1993; Fisher et al., 2000)</label>
     <label><input type="checkbox" name="rp.rate"> Rate: the alternative response earns reinforcement more often than the problem behavior does (Herrnstein, 1961; Mace et al., 1994)</label>
@@ -2087,7 +2090,7 @@ window.FX2_CFG.step = { alone: '.td9-recs' };
   <div id="schRec"></div>
   <div class="ident" style="margin-top:12px"><div class="f"><label for="schChosen">Schedules chosen</label><input id="schChosen" name="sch.chosen"></div><div class="f"><label for="schWhy">Rationale</label><input id="schWhy" name="sch.why"></div><div class="f"><label>&nbsp;</label><button class="tool noprint" id="sendReinf" style="margin:0">Add to Build</button></div></div>
 
-  <h3 class="sub">Schedule Reference (Catania, 2007; Ferster &amp; Skinner, 1957)</h3>
+  <h3 class="sub">The schedules, defined</h3><p class="method td-hsrc">Catania, 2007; Ferster &amp; Skinner, 1957</p>
   <table class="rank cmp" id="schRef"></table>
   <div class="cite">Reinforcer selection flowchart and preference-assessment recommendations after DeLeon et al. (2014); schedule definitions paraphrased from Catania (2007, Table 11-1, as adapted in DeLeon, Bullock, &amp; Catania, 2013, Table 3.2) and Ferster and Skinner (1957); token systems as second-order schedules after Kelleher (1966) and Hackenberg (2009); lag schedules after Page and Neuringer (1985) and Lee, McComas, and Jawor (2002); progressive-ratio assessment after Hodos (1961) and Roane, Lerman, and Vorndran (2001). Selector rankings are practice rules of this form.</div>
 </div>
@@ -2930,13 +2933,13 @@ document.addEventListener('input',e=>{if(e.target.dataset.calc){$('#irtOut').tex
 /* ---------- selection models ---------- */
 const CFA_REC=t=>['FCT_CFA','Function identified by a component FA ('+t.replace('yes, ','')+'): FCT then DRA keyed to the confirmed reinforcer'+(/synth/.test(t)?', both reinforcers delivered together for the response':'')+'. The component-FA probabilities are initial support only; the function must be confirmed by an extended multielement FA (Bann & Morris, 2026), where FCT + DRA built on the identified function reduced behavior by 95–100% relative to the MEFA test condition.'];
 const MODELS={
- escape:{title:'Escape-maintained behavior: Geiger, Carr, and LeBlanc (2010)',q:[
+ escape:{title:'Questions for behavior maintained by escape',src:'Geiger, Carr, and LeBlanc (2010)',q:[
   ['Is the curriculum appropriate and is instruction optimal?','yes','no'],
   ['Can the environment tolerate any level of problem behavior?','yes','no'],
   ['Are there any demands to which the student already complies?','yes','no'],
   ['Is time away from instruction tolerable?','yes','no'],
   ['Which is the most important clinical or educational goal?','Communication','Other curricular targets','Tolerance of a necessary aversive event'],
-  ['Was the function identified by a component FA (sequential EO / sequential consequence; Bann & Morris, 2026)?','no','yes, isolated function','yes, synthesized function']],
+  ['Was the function found with a component functional analysis, which tests the establishing operation and the consequence one at a time (Bann & Morris, 2026)?','no','yes, isolated function','yes, synthesized function']],
   route:a=>{const r=(a=>{
    if(a[0]==='no')return [['CURR','Curriculum or instruction is not appropriate: revise first (ethical priority; Winett & Winkler, 1972, as cited by Geiger et al.). Return to question 2 if behavior remains.']];
    if(a[0]!=='yes')return [];
@@ -2953,7 +2956,7 @@ const MODELS={
    /* v25.64 (H2, H3) escape extinction is offered, never ticked for you; where it is offered, so is a route without it */
    if(r.some(x=>x[0]==='EXT')&&!r.some(x=>x[0]==='PRC'))r.push(['PRC','If extinction is not chosen: positive reinforcement for compliance gives the plan its consequence logic without it; an edible for compliance worked for all 5 participants in one study, a break for 2 of the 5 (Slocum & Vollmer, 2015).']);
    return r;}},
- attention:{title:'Attention-maintained behavior: practice framework (see guide, section 3)',
+ attention:{title:'Questions for behavior maintained by attention',src:'A practice framework; see the guide, section 3',
   /* v25.64 (L4) whose attention: asked first, kept under its own name (q.attention.who) so the numbered answers keep theirs */
   pre:['Whose attention maintains the behavior: adults, peers, or both?','adults','peers','both'],
   route(a,who){return tdPeerRecs(this.route0(a),who);},q:[
@@ -2961,7 +2964,7 @@ const MODELS={
   ['Must the behavior be suppressed immediately (danger, setting tolerance)?','yes','no'],
   ['Does the student already have a recognizable request for attention?','yes','no'],
   ['Is delivering attention on every request tolerable in the setting during acquisition?','yes','no'],
-  ['Was the function identified by a component FA (sequential EO / sequential consequence; Bann & Morris, 2026)?','no','yes, isolated function','yes, synthesized function']],
+  ['Was the function found with a component functional analysis, which tests the establishing operation and the consequence one at a time (Bann & Morris, 2026)?','no','yes, isolated function','yes, synthesized function']],
   route0:a=>{const out=a[4]&&a[4]!=='no'?[CFA_REC(a[4])]:[];
    if(a[0]==='no'){out.push(['DRA','Extinction not feasible: DRA/FCT with reinforcement parameters (rate, duration, quality, immediacy) favoring the alternative (Athens & Vollmer, 2010; Kelley et al., 2002).'],['NCR','Extinction not feasible: NCR without extinction has support (Lalli et al., 1997).']);return out;}
    if(a[0]!=='yes')return out;
@@ -2972,12 +2975,12 @@ const MODELS={
    else return out;
    if(a[3]==='no')out.push(['NCR','Contingent delivery on every request not tolerable: begin thinning immediately with a signaled schedule, or use NCR while staff capacity is built.']);
    return out;}},
- tangible:{title:'Tangible-maintained behavior: practice framework (see guide, section 3)',q:[
+ tangible:{title:'Questions for behavior maintained by access to items or activities',src:'A practice framework; see the guide, section 3',q:[
   ['Can the item or activity be withheld following the behavior (is extinction feasible)?','yes','no'],
   ['Must the behavior be suppressed immediately?','yes','no'],
   ['Does the student already have a recognizable request for the item?','yes','no'],
   ['Is providing the item on every request tolerable during acquisition?','yes','no'],
-  ['Was the function identified by a component FA (sequential EO / sequential consequence; Bann & Morris, 2026)?','no','yes, isolated function','yes, synthesized function']],
+  ['Was the function found with a component functional analysis, which tests the establishing operation and the consequence one at a time (Bann & Morris, 2026)?','no','yes, isolated function','yes, synthesized function']],
   route:a=>{const out=a[4]&&a[4]!=='no'?[CFA_REC(a[4])]:[];
    if(a[0]==='no'){out.push(['DRA','Extinction not feasible: DRA/FCT with the request producing longer, more immediate access than problem behavior (Athens & Vollmer, 2010).'],['NCR','NCR access to the item without extinction (Lalli et al., 1997).']);return out;}
    if(a[0]!=='yes')return out;
@@ -2988,14 +2991,14 @@ const MODELS={
    else return out;
    if(a[3]==='no')out.push(['NCR','Every-request access not tolerable: signaled availability from the start, or NCR during acquisition.']);
    return out;}},
- automatic:{title:'Automatically maintained behavior: Hagopian subtypes (2015, 2023) and practice framework (guide, section 4)',q:[
+ automatic:{title:'Questions for behavior maintained by automatic reinforcement',src:'Hagopian\u2019s subtypes, 2015 and 2023, and a practice framework; guide, section 4',q:[
   ['Subtype (computed above from the EA-1 means; confirm against the graph)','Subtype 1','Subtype 2','Subtype 3'],
   ['Was the behavior high across every condition including play (undifferentiated pattern that could also hide a social function)?','no','yes'],
   ['Is the sensory product identifiable (what the behavior produces)?','yes','no'],
   ['Does the behavior cause injury or require protection?','yes','no'],
   ['Did a standard competing-stimulus assessment identify items that reduce the behavior?','yes','no','not yet run'],
   ['Can an appropriate alternative response that produces similar stimulation be taught?','yes','no'],
-  ['Is the target higher-level RRB (arranging and ordering) assessed with the EA-1 arranging/ordering variant? (If yes, the self-injury subtype branches are not applied; the Fergus et al., 2026, pathway is used.)','no','yes']],
+  ['Is the behavior arranging or ordering things, assessed with Form EA-1\u2019s arranging and ordering version? (If yes, the form uses the Fergus et al., 2026, steps in place of the self-injury subtypes.)','no','yes']],
   route:a=>{const out=[];const rrb=a[6]==='yes';const st=rrb?'':a[0];
    if(rrb){const lv=val('m.acsa.level');const L={free:'ECS only',pe:'ECS + prompted engagement',perb:'ECS + prompted engagement + response blocking'}[lv];
     out.push(['RRB_ECS','Arranging/ordering with an automatic function: three effective competing stimuli continuously available, selected from the A-CSA (at least an 80% reduction vs the no-stimulus control) and preference (Fergus et al., 2026; Hagopian et al., 2020)'+(L?'; the A-CSA phase on the Setup sheet prescribes the level: '+L+'.':'; enter the A-CSA phase on the Setup sheet to set the level.')]);
@@ -3041,12 +3044,12 @@ function renderModel(){const fn=val('m.fn');const w=$('#modelWrap');if(!fn||!MOD
  if(fn==='multiple'){const keep=tdKeepIn(w);
   w.innerHTML=`<h3 class="sub" style="margin-top:0">${esc(m.title)}</h3><input type="hidden" name="q.multiple.0">`+tdQRow(1,TD_MTOPO,'q.multiple.topo')
    +`<div class="warn td-multi-note" id="tdMultiTopo" hidden></div><div class="qrow"><div class="qn">2</div><div class="qt">Which functions did the analysis show? Tick each one: each gets its own questions below, and the function on Setup stays &ldquo;Multiple control&rdquo;.<div class="chkrow td-multi-ticks">${TD_MFN.map(f=>`<label><input type="checkbox" name="multi.${f}" data-q="1"> ${TD_MFNL[f]}</label>`).join('')}</div></div></div>`
-   +TD_MFN.map(f=>{const M=MODELS[f];return `<div class="td-multi-p" data-mf="${f}" hidden><h3 class="sub">${TD_MFNL[f]}: ${esc(M.title)}</h3>${M.pre?tdQRow('',M.pre,'q.multi.'+f+'.who'):''}${M.q.map((q,i)=>tdQRow(i+1,q,'q.multi.'+f+'.'+i)).join('')}</div>`;}).join('')+tdDrlRow();
+   +TD_MFN.map(f=>{const M=MODELS[f];return `<div class="td-multi-p" data-mf="${f}" hidden><h3 class="sub">${TD_MFNL[f]}: questions for this function</h3>${M.src?`<p class="method td-hsrc">${esc(M.src)}</p>`:''}${M.pre?tdQRow('',M.pre,'q.multi.'+f+'.who'):''}${M.q.map((q,i)=>tdQRow(i+1,q,'q.multi.'+f+'.'+i)).join('')}</div>`;}).join('')+tdDrlRow();
   tdPutIn(w,keep);renderRec();return;}
  const cur=m.q.map((q,i)=>val(`q.${fn}.${i}`)),keep2=tdKeepIn(w);
  const keepAuto=['play','alone','sr','series'].map(k=>val('auto.'+k));
  const lod=fn==='automatic'?`<div class="ident" style="margin-bottom:8px"><div class="f"><label>Mean rate: play (EA-1)</label><input name="auto.play" data-lod="1" placeholder="per min or % intervals"></div><div class="f"><label>Mean rate: no-interaction / alone</label><input name="auto.alone" data-lod="1"></div><div class="f"><label>Self-restraint, % of intervals (no-interaction)</label><input name="auto.sr" data-lod="1"></div><div class="f"><label>Series in the analysis</label><input name="auto.series" data-lod="1" placeholder="≥ 3 required"></div></div><div class="warn verdict" id="lodOut"><b>Level of differentiation</b>Enter the EA-1 means.</div>`:'';
- w.innerHTML=lod+`<h3 class="sub" style="margin-top:0">${esc(m.title)}</h3>`+(m.pre?tdQRow('',m.pre,`q.${fn}.who`):'')+m.q.map((q,i)=>`<div class="qrow"><div class="qn">${i+1}</div><div class="qt">${esc(q[0])}<br><select name="q.${fn}.${i}" class="inline" data-q="1"><option value=""></option>${(q.length===3&&q[1]==='yes'&&q[2]==='no'?['yes','no','not sure']:q.slice(1)).map(o=>`<option value="${esc(o)}">${esc(o.charAt(0).toUpperCase()+o.slice(1))}</option>`).join('')}</select></div></div>`).join('');
+ w.innerHTML=lod+`<h3 class="sub" style="margin-top:0">${esc(m.title)}</h3>${m.src?`<p class="method td-hsrc">${esc(m.src)}</p>`:''}`+(m.pre?tdQRow('',m.pre,`q.${fn}.who`):'')+m.q.map((q,i)=>`<div class="qrow"><div class="qn">${i+1}</div><div class="qt">${esc(q[0])}<br><select name="q.${fn}.${i}" class="inline" data-q="1"><option value=""></option>${(q.length===3&&q[1]==='yes'&&q[2]==='no'?['yes','no','not sure']:q.slice(1)).map(o=>`<option value="${esc(o)}">${esc(o.charAt(0).toUpperCase()+o.slice(1))}</option>`).join('')}</select></div></div>`).join('');
  /* v25.64 (M1) beside escape question 1: what Form DA-1 found, and the date to ask questions 2 to 5 again after a revision */
  if(fn==='escape'){const q1=w.querySelector('.qrow');if(q1)q1.insertAdjacentHTML('afterend','<div class="td-da1q noprint" id="tdDa1Q" hidden></div><div class="td-recheck" hidden><label>Re-check after curricular revision <input type="date" name="esc.recheck"></label><small>On that date, answer questions 2 to 5 again; sooner if behavior is still above baseline after the revision.</small></div>');}
  w.insertAdjacentHTML('beforeend',tdDrlRow());tdPutIn(w,keep2);
@@ -8384,8 +8387,9 @@ window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+
   function intros(){
     $$('.sheet > .bar.nbh-band + p.method').forEach(p => {
       if (p.classList.contains('td9-intro')) return; p.classList.add('td9-intro');
-      const m = el('button', 'td9-more noprint', 'Show the full introduction'); m.type = 'button'; m.setAttribute('aria-expanded', 'false');
-      m.addEventListener('click', () => { const o = p.classList.toggle('open'); m.textContent = o ? 'Hide the full introduction' : 'Show the full introduction'; m.setAttribute('aria-expanded', String(o)); });
+      /* v25.72 (the BCBA, 11/10) the masthead's link opens the form's introduction, this one the sheet's: each says which */
+      const m = el('button', 'td9-more noprint', 'Show this sheet\u2019s full introduction'); m.type = 'button'; m.setAttribute('aria-expanded', 'false');
+      m.addEventListener('click', () => { const o = p.classList.toggle('open'); m.textContent = o ? 'Hide this sheet\u2019s full introduction' : 'Show this sheet\u2019s full introduction'; m.setAttribute('aria-expanded', String(o)); });
       p.after(m);
     });
   }
@@ -9246,8 +9250,10 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
   function intro(){
     var p = D.querySelector('header.nbh-mast p.nbh-sub'); if (!p || p.dataset.fx2) return; p.dataset.fx2 = '1'; p.classList.add('fx2-intro');
     var n = D.querySelector('header.nbh-mast p.nbh-savenote'); if (n) n.classList.add('fx2-introx');
-    var b = el('button', 'fx2-more noprint', 'Show the full introduction'); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
-    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? 'Hide the full introduction' : 'Show the full introduction'); });
+    /* v25.72 FX2_CFG.intro: [show, hide], the link's words for a form whose sheets have an introduction of their own (TD-1) */
+    var W = Array.isArray(C.intro) && C.intro.length === 2 ? C.intro : ['Show the full introduction', 'Hide the full introduction'];
+    var b = el('button', 'fx2-more noprint', W[0]); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? W[1] : W[0]); });
     (n || p).after(b);
   }
 

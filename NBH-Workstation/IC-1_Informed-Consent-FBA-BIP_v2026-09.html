@@ -4381,8 +4381,10 @@ window.nbhAddenda=window.nbhAddenda||function(cfg){
   function intro(){
     var p = D.querySelector('header.nbh-mast p.nbh-sub'); if (!p || p.dataset.fx2) return; p.dataset.fx2 = '1'; p.classList.add('fx2-intro');
     var n = D.querySelector('header.nbh-mast p.nbh-savenote'); if (n) n.classList.add('fx2-introx');
-    var b = el('button', 'fx2-more noprint', 'Show the full introduction'); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
-    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? 'Hide the full introduction' : 'Show the full introduction'); });
+    /* v25.72 FX2_CFG.intro: [show, hide], the link's words for a form whose sheets have an introduction of their own (TD-1) */
+    var W = Array.isArray(C.intro) && C.intro.length === 2 ? C.intro : ['Show the full introduction', 'Hide the full introduction'];
+    var b = el('button', 'fx2-more noprint', W[0]); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? W[1] : W[0]); });
     (n || p).after(b);
   }
 
