@@ -97,7 +97,7 @@ const errs=[];
     if(!(c2.t>=s[ci][1]-0.05&&c2.t<s[ci][1]+1.5)||c2.on.some(Boolean))badCard.push([k,s[ci],c2]);}}
   /* v25.75 the videos re-drawn in the full-picture frame: marked in the list, their opening line says "a simulated example" */
   {const full=LIST.filter(v=>v.frame==='full'),bad=full.filter(v=>{const n=(TR[v.key]||[]).filter(l=>l[1]==='N')[0];return !n||!/: a simulated example of /.test(n[2])||/AI-generated/.test(n[2]);}).map(v=>v.key);
-   ok('A v25.75 '+full.length+' videos are marked as re-drawn (frame: full); the first narrated line of each says "a simulated example", not "AI-generated"',full.length===24&&!bad.length,{n:full.length,bad});}
+   ok('A v25.75 '+full.length+' videos are marked as re-drawn (frame: full); the first narrated line of each says "a simulated example", not "AI-generated"',full.length===25&&!bad.length,{n:full.length,bad});}
   ok('B for all '+LIST.length+' videos the transcript’s step headings equal the Steps list (same steps, order, words and card notes)',!badH.length,badH.slice(0,5));
   ok('B the Steps tab shows every step at once, a step only on a card says so',!badV.length,badV.slice(0,3));
   ok('C the line heard is marked (aria-current, one line) at three times in each of the '+LIST.length+' videos ('+marks+' checks); no card-only step marked',!badM.length,badM.slice(0,5));
