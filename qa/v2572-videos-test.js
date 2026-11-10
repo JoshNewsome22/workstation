@@ -243,6 +243,12 @@ let AXE=null;try{AXE=fs.readFileSync(require.resolve('axe-core/axe.min.js',{path
    await p.keyboard.press('Shift+Tab');trail.push(await p.evaluate(()=>!!document.activeElement.closest('#tdVideo')));
    ok('L TD-1’s player keeps the focus inside while it is open (Tab and Shift+Tab)',trail.every(Boolean),trail);
    await p.locator('#tv-close').click();await sleep(300);
+   /* Open in the video library: that video's page (on its own the form opens the library in a tab; in the workstation the
+      shell opens it at the key, as v2569-video-library-test checks) */
+   await p.evaluate(()=>{window.__opened=[];window.open=u=>{window.__opened.push(u);return null;};window.__tdVideo.play('dro_class');});await sleep(800);
+   await p.locator('#tv-lib').click();await sleep(300);
+   const lib=await p.evaluate(()=>({opened:window.__opened,hidden:document.getElementById('tdVideo').hidden}));
+   ok('L “Open in the video library” goes to that video’s own page (videos.html#video=dro_class) and closes the player',lib.opened.length===1&&lib.opened[0]==='videos.html#video=dro_class'&&lib.hidden,lib);
    const cl=await p.evaluate(()=>{const v=document.getElementById('tv-video');return {src:v?v.getAttribute('src'):null,hidden:document.getElementById('tdVideo').hidden};});
    ok('L Close lets the video go (no source left in the player)',cl.hidden&&!cl.src,cl);
    await ctx.close();
