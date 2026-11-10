@@ -138,7 +138,7 @@ let fails=0,oks=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL '
   await press(p,'Go to Responding');await sleep(200);check(await p.evaluate(()=>window.__prints)===0,'1 ... Go to Responding: nothing is printed');
   await view(p,'final');await click(p,'#printFinalBtn');await press(p,'Print anyway');await sleep(300);check(await p.evaluate(()=>window.__prints)===1,'1 ... Print anyway prints');
   let F=await final(p);
-  check(/Escape extinction: guidance, stopping, assent, and consent/i.test(F.text)&&F.text.includes('Not in place yet: '+NOCONSENT)&&F.sign&&F.sign.includes('when the behavior happens, the task stays in place, so the behavior does not end the work. Staff do not guide my child\'s hands.')&&F.sign.endsWith(SIGN_TAIL),'1 F11 the final plan: the group, what is not in place, and the initials line saying what was explained',F.sign);
+  check(/Escape extinction: guidance, stopping, assent, and consent/i.test(F.text)&&/Not in place yet/.test(F.text)&&F.text.includes(NOCONSENT)/* v25.72 (TD-1 review T6) the item under its own heading "Not in place yet", unnumbered */&&F.sign&&F.sign.includes('when the behavior happens, the task stays in place, so the behavior does not end the work. Staff do not guide my child\'s hands.')&&F.sign.endsWith(SIGN_TAIL),'1 F11 the final plan: the group, what is not in place, and the initials line saying what was explained',F.sign);
   let I=await fid(p);
   check(I.length===4&&I[0]==='Gave the instruction, a gesture and a model; did not guide the student\'s hands.'&&I.includes('Used no force and did not hold the student.')&&I.includes('When the student said no, followed the assent plan.'),'1 F8 the integrity checklist has the safety items (no guidance yet)',I);
   await p.close();
