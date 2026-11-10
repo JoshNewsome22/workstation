@@ -4,7 +4,7 @@
       a step's start the start of one of its captions; the offline list holds it; this test in the release list.
    B. V1 the home page on an iPad sideways (1180 x 820), upright (820 x 1180) and a phone (390 x 844): four columns on both
       iPads, list rows with the picture at the left on the phone; whole cards in view (4, 8, 4) and the page's length in
-      screens (3.0, 2.0, 4.0 at most); in a procedure's section no badge and no repeated procedure; every title whole (up to
+      screens (3.0, 2.0, 4.0 at most; v25.73 3.4, 2.2, 4.0 with the seventh shelf); in a procedure's section no badge and no repeated procedure; every title whole (up to
       3 lines, 4 upright); nothing wider than the screen; every control 44 px.
    C. V2 the filters: on an iPad two labelled rows (Procedure, Function), Any first in each, one choice in each, and they
       combine; Watched a menu, the count at the right; the counts follow the search; DRO in class only under Any. On the
@@ -66,7 +66,8 @@ let AXE=null;try{AXE=fs.readFileSync(require.resolve('axe-core/axe.min.js',{path
  const small=p=>p.evaluate(()=>[...document.querySelectorAll('button,a[href],input,select,video,[tabindex="0"]')].filter(e=>e.offsetParent!==null&&!e.classList.contains('vl-skip')).map(e=>{const t=e.closest('.vl-sel')||e;const r=t.getBoundingClientRect();return {e:e.id||e.className||e.tagName,w:Math.round(r.width),h:Math.round(r.height)};}).filter(x=>x.h<44||x.w<44));
 
  /* ---------------- B. V1 the home page at three sizes ---------------- */
- const WANT={ipadL:{cols:4,cards:4,screens:3.0,lines:3},ipadP:{cols:4,cards:8,screens:2.0,lines:4},phone:{cols:1,cards:4,screens:4.0,lines:3}};
+ /* v25.73 a seventh shelf (Choice, one video) adds a row of cards: 3.4 and 2.2 screens at most (were 3.0 and 2.0) */
+ const WANT={ipadL:{cols:4,cards:4,screens:3.4,lines:3},ipadP:{cols:4,cards:8,screens:2.2,lines:4},phone:{cols:1,cards:4,screens:4.0,lines:3}};
  for(const size of Object.keys(SZ)){const {ctx,p}=await mk(size);await home(p);
   await p.waitForFunction(()=>[...document.querySelectorAll('#vlList .vl-card img')].every(i=>i.complete),null,{timeout:20000}).catch(()=>{});
   const r=await p.evaluate(()=>{const g=document.querySelector('#vlList .vl-fam .vl-grid'),cards=[...document.querySelectorAll('#vlList .vl-card')];
@@ -89,11 +90,11 @@ let AXE=null;try{AXE=fs.readFileSync(require.resolve('axe-core/axe.min.js',{path
    const cnt=document.getElementById('vlCount').getBoundingClientRect(),row=document.querySelector('.vl-frow[data-row=fam] .vl-chips').getBoundingClientRect(),seen=document.querySelector('.vl-sel-seen');
    return {fam:lab('vlChips'),fn:lab('vlFns'),r1:g('vlChips').map(b=>b.textContent.replace(/[\d,].*$/,'')),r2:g('vlFns').map(b=>b.textContent.replace(/[\d,].*$/,'')),role:document.getElementById('vlChips').getAttribute('role'),
     countRight:cnt.left>=row.right&&cnt.right>innerWidth-80,seenVis:!!seen.offsetParent&&seen.querySelector('select').options.length===3,seenRight:seen.getBoundingClientRect().right>innerWidth-80};});
-  ok('C iPad: two labelled rows, Procedure (Any, DRO, DRA, NCR, RIRD, High-p, FCT) and Function (Any, Attention, Escape, Tangible, Automatic), Watched a menu, the count at the right',
-   f.fam==='Procedure'&&f.fn==='Function'&&f.r1.join()==='Any,DRO,DRA,NCR,RIRD,High-p,FCT'&&f.r2.join()==='Any,Attention,Escape,Tangible,Automatic'&&f.role==='radiogroup'&&f.countRight&&f.seenVis&&f.seenRight,f);
+  ok('C iPad: two labelled rows, Procedure (Any, DRO, DRA, NCR, RIRD, High-p, FCT, Choice) and Function (Any, Attention, Escape, Tangible, Automatic), Watched a menu, the count at the right',
+   f.fam==='Procedure'&&f.fn==='Function'&&f.r1.join()==='Any,DRO,DRA,NCR,RIRD,High-p,FCT,Choice'&&f.r2.join()==='Any,Attention,Escape,Tangible,Automatic'&&f.role==='radiogroup'&&f.countRight&&f.seenVis&&f.seenRight,f);
   await p.locator('#vlChips [data-chip="fam:dro"]').tap();await sleep(150);await p.locator('#vlFns [data-chip="fn:escape"]').tap();await sleep(150);
   const c1=await shown(p),t1=await p.textContent('#vlCount'),pr=await p.evaluate(()=>[...document.querySelectorAll('#vlFilt [aria-checked=true]')].map(b=>b.dataset.chip).join());
-  ok('C iPad: DRO and Escape combine (one choice in each row): '+c1,c1===exp(v=>v.family==='dro'&&v.fn.includes('escape'))&&c1.length>0&&/^\d+ of 24 videos · DRO · Escape$/.test(t1)&&pr==='fam:dro,fn:escape',{c1,t1,pr});
+  ok('C iPad: DRO and Escape combine (one choice in each row): '+c1,c1===exp(v=>v.family==='dro'&&v.fn.includes('escape'))&&c1.length>0&&/^\d+ of 25 videos · DRO · Escape$/.test(t1)&&pr==='fam:dro,fn:escape',{c1,t1,pr});
   await p.locator('#vlChips [data-chip="fam:any"]').tap();await p.locator('#vlFns [data-chip="fn:any"]').tap();await sleep(150);
   /* the counts follow the search */
   await p.fill('#vlQ','token');await sleep(350);
