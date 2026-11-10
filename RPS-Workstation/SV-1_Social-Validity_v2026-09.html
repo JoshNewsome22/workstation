@@ -3736,7 +3736,8 @@ function place(objs,force){const res={placed:[],held:[],done:[],cells:0},taken={
 const kit=NBH_RESPOND.replyKit({form:'SV-1',rec:()=>S,inst:(pg,round)=>pg+'-'+(round||'pre'),pages:()=>RP_ROLES.map(r=>[r[0],r[1]]),pageOf,
   round:()=>$('#rpRound').value,roundName:r=>(RNAME[r]||r).toLowerCase()+' round',people:()=>S.resp.filter(r=>String(r.name||'').trim()).map(r=>({name:r.name,role:r.role})),
   payload:(pg,round)=>withPage(pg,round,()=>rpPayload()),place:objs=>place(objs,false),force:o=>place([o],true),changed:()=>{try{renderAll();}catch(e){}},
-  short:()=>NBH_RESPOND.shortName(S.meta.client||''),bcba:()=>String(S.meta.bcba||'').trim()||'the BCBA',
+  short:()=>NBH_RESPOND.shortName(S.meta.client||''),full:()=>String(S.meta.client||''),   /* v25.72 full: whose replies and reply box these are (nbh-respond.js, sameStudent) */
+  bcba:()=>String(S.meta.bcba||'').trim()||'the BCBA',
   why:()=>window.NBH_RESPOND_MISSING?'The file nbh-respond.js is not beside this form, so no page can be built.':!$('#rpEmail').value.trim()?'Enter your email above first: the answers come to it when the reply box cannot be reached.':''});
 const rp0=rpPayload;rpPayload=function(){return kit.withBox(rp0.apply(this,arguments));};   /* the dialog's pages and links carry the box */
 window.__rp.payload=rpPayload;window.__rp.kit=kit;

@@ -6,10 +6,11 @@
       640 x 360 JPEG under 40 KB beside the forms; the offline list (tools/pwa-sw.py) finds the page, the list and every
       picture; this test in the release list.
    B. the home page, on an iPad sideways and upright, a laptop and a phone: every card of the list with their pictures (loaded) and
-      lengths, in a shelf per procedure; 3 columns sideways and on the laptop, 2 upright, 1 on a phone; nothing wider than
-      the screen (390 px too); every control 44 px; the search box 16 px.
-   C. the chips and the search: each procedure, each function (from the cards' functions), Watched and Not watched, words
-      of a title, a study, a card; a chip with a search; nothing found, and Show all videos.
+      lengths, in a shelf per procedure; (v25.72, the design review's V1) 4 columns sideways, upright and on the laptop, 1
+      on a phone; nothing wider than the screen (390 px too); every control 44 px; the search box 16 px.
+   C. the filters (v25.72: Procedure and Function rows, Watched a menu) and the search: each procedure, each function (from
+      the cards' functions), Watched and Not watched, words of a title, a study, a card; a procedure with a search; nothing
+      found, and Show all videos.
    D. a video's page: the player plays it from the file beside the forms (its time moves on), with its title, its study, the
       AI label, its note and what it shows; Up next the same procedure first, then the same function; a tap there opens
       that video; All videos goes back, to the card it came from.
@@ -82,9 +83,9 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
      shelves:[...document.querySelectorAll('#vlList .vl-fam')].map(s=>s.dataset.fam+':'+s.querySelectorAll('.vl-card').length).join(' '),cols,
      fct:[...document.querySelectorAll('#vlList .vl-fam[data-fam="fct"] .vl-card')].map(c=>c.dataset.key).join(' '),
      wide:document.documentElement.scrollWidth-innerWidth,small,q:getComputedStyle(document.getElementById('vlQ')).fontSize,meta:(cards[0].querySelector('.vl-m')||{}).textContent};});
-   const want=size==='phone'?1:size==='up'?2:3;
+   const want=size==='phone'?1:4;
    ok('B '+E+' '+size+': all '+N+' cards with their pictures loaded, titles and lengths ('+r.dur.slice(0,2).map(x=>x[1]).join(', ')+'…), a shelf per procedure (FCT’s four on its shelf), '+want+' column'+(want>1?'s':'')+', nothing wider than the screen',
-    r.n===N&&new Set(r.keys).size===N&&loaded&&r.poster&&r.title&&r.dur.every(([k,d])=>d===mmss(BY[k].dur))&&r.shelves===SHELVES&&r.fct==='fct-practical-guide-thinning fct_attention fct_tangible fct_thinning_mult'&&r.cols===want&&r.wide<=0&&/Kodak et al\. \(2003\) · DRO/.test(r.meta),r);
+    r.n===N&&new Set(r.keys).size===N&&loaded&&r.poster&&r.title&&r.dur.every(([k,d])=>d===mmss(BY[k].dur))&&r.shelves===SHELVES&&r.fct==='fct-practical-guide-thinning fct_attention fct_tangible fct_thinning_mult'&&r.cols===want&&r.wide<=0&&/^Kodak et al\. \(2003\)/.test(r.meta)&&!/· DRO/.test(r.meta),r);
    ok('B '+E+' '+size+': every control 44 px or more, the search box 16 px',!r.small.length&&r.q==='16px',r.small.slice(0,6).concat([r.q]));
    await ctx.close();}
 
@@ -92,27 +93,27 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
   {const {ctx,p}=await mk('side');await home(p);
    const shown=()=>p.evaluate(()=>[...document.querySelectorAll('#vlList .vl-card')].map(c=>c.dataset.key).sort().join(' '));
    const exp=f=>LIST.filter(f).map(v=>v.key).sort().join(' ');
-   const chips=await p.evaluate(()=>[...document.querySelectorAll('#vlChips .vl-chip')].map(c=>c.dataset.chip));
-   ok('C '+E+' the chips: All, DRO, DRA, NCR, RIRD, High-p, FCT, Attention, Escape, Tangible, Automatic, Watched, Not watched',chips.join(' ')==='all fam:dro fam:dra fam:ncr fam:rird fam:highp fam:fct fn:attention fn:escape fn:tangible fn:automatic seen unseen',chips);
+   const chips=await p.evaluate(()=>[...document.querySelectorAll('#vlFilt .vl-chip')].map(c=>c.dataset.chip).concat([...document.getElementById('vlSeen').options].map(o=>'seen:'+o.value)));
+   ok('C '+E+' the filters: Procedure (Any, DRO, DRA, NCR, RIRD, High-p, FCT), Function (Any, Attention, Escape, Tangible, Automatic), Watched (All, Watched, Not watched)',chips.join(' ')==='fam:any fam:dro fam:dra fam:ncr fam:rird fam:highp fam:fct fn:any fn:attention fn:escape fn:tangible fn:automatic seen:all seen:seen seen:unseen',chips);
    const wrong=[];
-   for(const c of chips.filter(c=>c!=='all')){await tap(p,'#vlChips [data-chip="'+c+'"]');await sleep(120);const got=await shown();
-    const e=c.startsWith('fam:')?exp(v=>v.family===c.slice(4)):c.startsWith('fn:')?exp(v=>v.fn.includes(c.slice(3))):c==='seen'?'':exp(()=>true);
-    const pressed=await p.evaluate(c=>document.querySelector('#vlChips [data-chip="'+c+'"]').getAttribute('aria-pressed'),c);
-    if(got!==e||pressed!=='true')wrong.push([c,got,e,pressed]);}
-   ok('C '+E+' each chip shows its videos (a procedure, a function from the cards, Watched none yet, Not watched all) and is pressed',!wrong.length,wrong);
-   await tap(p,'#vlChips [data-chip="all"]');
+   for(const c of chips.filter(c=>!/:any$|^seen:all$/.test(c))){if(c.startsWith('seen:'))await p.selectOption('#vlSeen',c.slice(5));else await tap(p,'#vlFilt [data-chip="'+c+'"]');await sleep(120);const got=await shown();
+    const e=c.startsWith('fam:')?exp(v=>v.family===c.slice(4)):c.startsWith('fn:')?exp(v=>v.fn.includes(c.slice(3))):c==='seen:seen'?'':exp(()=>true);
+    const pressed=c.startsWith('seen:')?String(await p.inputValue('#vlSeen')===c.slice(5)):await p.evaluate(c=>document.querySelector('#vlFilt [data-chip="'+c+'"]').getAttribute('aria-checked'),c);
+    if(got!==e||pressed!=='true')wrong.push([c,got,e,pressed]);
+    if(c.startsWith('seen:'))await p.selectOption('#vlSeen','all');else await tap(p,'#vlFilt [data-chip="'+c.split(':')[0]+':any"]');await sleep(80);}
+   ok('C '+E+' each choice shows its videos (a procedure, a function from the cards, Watched none yet, Not watched all) and is chosen',!wrong.length,wrong);
    const search=async t=>{await p.fill('#vlQ',t);await sleep(300);return shown();};
    const s1=await search('pica'),s2=await search('Kodak'),s3=await search('peer'),s4=await search('momentary'),s5=await search('zzz no such');
    const none=await p.evaluate(()=>({t:(document.querySelector('.vl-none')||{}).textContent||'',c:document.getElementById('vlCount').textContent}));
    ok('C '+E+' the search: a word of a title (pica), a study (Kodak), a card’s words (peer), words of several (momentary); nothing found says so',
     s1==='rird_pica'&&s2==='dro_resetting'&&s3==='a_highp_peer'&&s4.split(' ').includes('dro_momentary')&&s4.split(' ').includes('dro_class')&&s5===''&&/No video matches “zzz no such”/.test(none.t)&&new RegExp('^0 of '+N+' videos').test(none.c),{s1,s2,s3,s4,none});
-   await tap(p,'.vl-none [data-chip="all"]');await sleep(200);
-   ok('C '+E+' Show all videos clears the search and the chip',await shown()===exp(()=>true)&&await p.inputValue('#vlQ')==='');
+   await tap(p,'.vl-none [data-set="all"]');await sleep(200);
+   ok('C '+E+' Show all videos clears the search and the filters',await shown()===exp(()=>true)&&await p.inputValue('#vlQ')==='');
    await p.fill('#vlQ','transition');await sleep(250);await tap(p,'#vlChips [data-chip="fam:highp"]');await sleep(150);
-   ok('C '+E+' a chip with a search: High-p and “transition”',await shown()==='a_highp_class',await shown());
-   await p.fill('#vlQ','');await tap(p,'#vlChips [data-chip="all"]');await sleep(150);
-   await tap(p,'#vlList .vl-fam[data-fam="ncr"] [data-chip="fam:ncr"]');await sleep(150);
-   ok('C '+E+' a shelf’s Only button chooses its chip',await shown()===exp(v=>v.family==='ncr')&&await p.evaluate(()=>document.querySelector('#vlChips [data-chip="fam:ncr"]').getAttribute('aria-pressed'))==='true');
+   ok('C '+E+' a procedure with a search: High-p and “transition”',await shown()==='a_highp_class',await shown());
+   await p.fill('#vlQ','');await tap(p,'#vlChips [data-chip="fam:any"]');await sleep(150);
+   await tap(p,'#vlList .vl-fam[data-fam="ncr"] [data-set="fam:ncr"]');await sleep(150);
+   ok('C '+E+' a shelf’s Only button chooses its procedure',await shown()===exp(v=>v.family==='ncr')&&await p.evaluate(()=>document.querySelector('#vlChips [data-chip="fam:ncr"]').getAttribute('aria-checked'))==='true');
    await ctx.close();}
 
   /* ---------------- D. a video's page ---------------- */
@@ -122,7 +123,7 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
    const w=await p.evaluate(()=>({view:__vl.view(),key:__vl.key(),hash:location.hash,title:(document.getElementById('vlTitle')||{}).textContent,meta:(document.querySelector('.vl-wm')||{}).textContent,
      note:(document.querySelector('.vl-note')||{}).textContent,src:(document.getElementById('vlVideo')||{}).src||'',dur:(document.getElementById('vlVideo')||{}).duration,
      opens:[...document.querySelectorAll('.vl-open')].map(b=>b.dataset.card),next:[...document.querySelectorAll('.vl-next .vl-ni')].map(a=>a.dataset.key),
-     heads:[...document.querySelectorAll('.vl-next h3')].map(h=>h.textContent),home:document.getElementById('vlHome').hidden,back:!document.getElementById('vlBack').hidden,
+     heads:[...document.querySelectorAll('.vl-next h3:not(#vlStepsH)')].map(h=>h.textContent),home:document.getElementById('vlHome').hidden,back:!document.getElementById('vlBack').hidden,
      wide:document.documentElement.scrollWidth-innerWidth,tracks:document.querySelectorAll('#vlVideo track').length}));
    const v=BY.ncr_items;
    ok('D '+E+' a card opens its page (#video=ncr_items): the title, After its studies, the length, the AI label, its note; the home page hidden, All videos shown',
@@ -165,9 +166,9 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
    await p.evaluate(async()=>{const x=document.getElementById('vlVideo');x.muted=true;x.pause();x.currentTime=x.duration-0.6;await new Promise(r=>x.addEventListener('seeked',r,{once:true}));await x.play().catch(()=>{});await new Promise(r=>{x.addEventListener('ended',r,{once:true});setTimeout(r,5000);});});
    await sleep(300);await p.goto(U+'videos.html');await p.waitForSelector('.vl-card');await sleep(300);
    const wd=await p.evaluate(()=>({cont:!!document.getElementById('vlCont'),badge:!!document.querySelector('#vlList .vl-card[data-key="dro_tokens"] .vl-seen'),st:(document.querySelector('#vlList .vl-card[data-key="dro_tokens"] .vl-st')||{}).textContent}));
-   await tap(p,'#vlChips [data-chip="seen"]');await sleep(150);const seen=await p.evaluate(()=>[...document.querySelectorAll('#vlList .vl-card')].map(c=>c.dataset.key).join());
-   await tap(p,'#vlChips [data-chip="unseen"]');await sleep(150);const unseen=await p.evaluate(()=>document.querySelectorAll('#vlList .vl-card').length);
-   ok('E '+E+' played to its end: Watched (the card’s mark and words, the Watched chip), not in Continue watching; Not watched the other '+(N-1),!wd.cont&&wd.badge&&wd.st==='Watched'&&seen==='dro_tokens'&&unseen===N-1,{wd,seen,unseen});
+   await p.selectOption('#vlSeen','seen');await sleep(150);const seen=await p.evaluate(()=>[...document.querySelectorAll('#vlList .vl-card')].map(c=>c.dataset.key).join());
+   await p.selectOption('#vlSeen','unseen');await sleep(150);const unseen=await p.evaluate(()=>document.querySelectorAll('#vlList .vl-card').length);
+   ok('E '+E+' played to its end: Watched (the card’s mark and words, Watched in the menu), not in Continue watching; Not watched the other '+(N-1),!wd.cont&&wd.badge&&wd.st==='Watched'&&seen==='dro_tokens'&&unseen===N-1,{wd,seen,unseen});
    await ctx.close();}
 
   /* ---------------- F. the address ---------------- */
@@ -194,15 +195,16 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
   /* ---------------- G. by keyboard alone ---------------- */
   if(engine==='chromium'){const {ctx,p}=await mk('laptop');await home(p);
    const focus=()=>p.evaluate(()=>{const a=document.activeElement;return {id:a.id,cls:a.className,chip:a.dataset&&a.dataset.chip,key:a.dataset&&a.dataset.key,card:a.dataset&&a.dataset.card};});
-   let f,guard=0;do{await p.keyboard.press('Tab');f=await focus();}while(f.chip!=='fam:rird'&&++guard<20);
-   await p.keyboard.press('Enter');await sleep(150);const c1=await p.evaluate(()=>({n:document.querySelectorAll('#vlList .vl-card').length,chip:__vl.chip(),focus:document.activeElement.dataset.chip}));
+   /* v25.72 (V10) a filter row is one Tab stop, the arrow keys inside it */
+   let f,guard=0;do{await p.keyboard.press('Tab');f=await focus();}while(f.chip!=='fam:any'&&++guard<20);
+   for(let i=0;i<4;i++){await p.keyboard.press('ArrowRight');await sleep(120);}const c1=await p.evaluate(()=>({n:document.querySelectorAll('#vlList .vl-card').length,chip:__vl.chip(),focus:document.activeElement.dataset.chip}));
    guard=0;do{await p.keyboard.press('Tab');f=await focus();}while(!f.key&&++guard<30);
    const cardKey=f.key;await p.keyboard.press('Enter');await p.waitForFunction(()=>__vl.view()==='watch',null,{timeout:5000}).catch(()=>{});await sleep(400);
    const f2=await focus();
    guard=0;do{await p.keyboard.press('Tab');f=await focus();}while(!f.card&&++guard<40);
    const openCard=f.card;
    await p.keyboard.press('Escape');await p.waitForFunction(()=>__vl.view()==='home',null,{timeout:5000}).catch(()=>{});await sleep(300);const f3=await focus();
-   ok('G Chromium by keyboard: Tab to the RIRD chip, Enter (3 videos, the chip keeps the focus); Tab to a card, Enter (its page, the title has the focus); Tab to Open the TD-1 card; Escape back home, the focus on that card',
+   ok('G Chromium by keyboard: Tab to the Procedure row, the arrows to RIRD (3 videos, RIRD keeps the focus); Tab to a card, Enter (its page, the title has the focus); Tab to Open the TD-1 card; Escape back home, the focus on that card',
     c1.n===3&&c1.chip==='fam:rird'&&c1.focus==='fam:rird'&&cardKey==='rird_vocal'&&f2.id==='vlTitle'&&openCard==='rird-vocal-stereotypy-demands'&&f3.key===cardKey,{c1,cardKey,f2,openCard,f3});
    await ctx.close();}
 
