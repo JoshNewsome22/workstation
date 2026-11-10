@@ -16,7 +16,14 @@
      Procedure and Function filters that combine, with Watched; on a video's page its Steps (nbh-video-steps.js: each
      step's start and title and the captions, word for word as the video shows them) and Open the TD-1 card first; a
      message over the picture when a video cannot be loaded; at most two videos kept decoded; the load's progress from
-     the website; a search that forgives spelling; the keys of a player; the poster and Play under reduced motion. -->
+     the website; a search that forgives spelling; the keys of a player; the poster and Play under reduced motion.
+     v25.72 (captions and transcript, the BCBA's choice of the plan's Option 1): the Steps list every step the picture's
+     panel shows (a step only on a card says so), and a Transcript tab beside them (nbh-video-transcripts.js, drawn by
+     nbh-transcript.js: the narration, the people's lines by role, the on-screen notes the narration does not say; the line
+     heard marked and kept in view, a line tapped plays from it, a search); captions of what is said as a real text track,
+     off until CC is turned on (kept in localStorage nbh.videos.pref with the tab last chosen: no student, nothing typed);
+     on an iPad the browser's control bar in a band below the picture, clear of its caption strip; on a phone the picture
+     cropped to its scene, with the page's own bar, and the Steps and Transcript right under it. -->
 <script>
 /* the workstation's text size, contrast and low light (localStorage nbh.view, as the forms read it), before the page draws */
 (function(){var R=document.documentElement;try{if(window.parent!==window)R.classList.add('nbh-framed');}catch(e){}
@@ -221,6 +228,42 @@ body.vl-watching #vlClose{margin-left:auto}
 .vl-scap{margin:0;padding:0 12px 10px calc(3.1em + 50px);font-size:.875rem;line-height:1.45;color:var(--ink)}
 .vl-scap[hidden]{display:none}
 .vl-next .vl-steps{margin:0 0 22px}
+/* v25.72 captions and transcript: the Steps and the Transcript as two tabs; every step listed, a step only on a card says so */
+.vl-tabs{padding:6px 8px 8px}
+.vl-next .vl-tabs{margin:0 0 22px}
+.vl-tabl{display:flex;align-items:flex-end;gap:2px;margin:0 2px 8px;border-bottom:1px solid var(--rule)}
+.vl-tab{min-height:44px;min-width:44px;padding:0 14px;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;background:none;font:600 1rem/1.2 var(--sans);color:var(--muted);cursor:pointer;border-radius:8px 8px 0 0}
+.vl-tab[aria-selected=true]{color:var(--navy);border-bottom-color:var(--navy)}
+.vl-tab:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.vl-cc{margin:0 0 4px auto;min-height:44px;padding:0 12px;font-size:.9375rem;font-weight:700;gap:6px}
+.vl-cc svg{width:20px;height:20px}
+.vl-cc[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.vl-tabs .vl-steps{padding:0}
+.vl-tabs .vl-stepsh{margin:2px 10px 4px}
+.vl-tabs .vl-stepsh h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.vl-steps[hidden],.vl-trans[hidden]{display:none}
+.vl-snote{display:block;font-size:.8125rem;font-weight:500;color:var(--muted);margin-top:1px}
+.vl-steps li[data-where] .vl-sn{border-style:dashed}
+.vl-trans{padding:0 4px}
+.vl-trans .nt{--nt-h:min(60vh,560px)}
+.vl-next .vl-trans .nt{--nt-h:max(280px,calc(100vh - 330px))}
+/* the picture: on an iPad the browser's control bar in a band below the picture, clear of its caption strip */
+.vl-player.vl-band{aspect-ratio:auto;height:0;padding-top:calc(56.25% + 92px)}
+.vl-player.vl-band video{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:50% 0}
+/* on a phone: the picture cropped to its scene (896 x 504 of the 1280 x 720 frame, from 64 px down), cards shown whole */
+.vl-player.vl-crop video{position:absolute;left:0;top:-12.698%;width:142.857%;height:142.857%;max-width:none;object-fit:fill}
+.vl-player.vl-crop.vl-full video{top:0;width:100%;height:100%;object-fit:contain}
+.vl-player video::cue{font-family:var(--sans);line-height:1.35;background:rgba(15,26,34,.86);color:#fff}
+.vl-bar{display:flex;align-items:center;gap:2px;padding:2px 6px;background:#0f1a22;color:#fff;margin:0 calc(-1*var(--gut))}
+.vl-bar[hidden]{display:none}
+.vl-bb{width:44px;height:44px;min-width:44px;border:0;border-radius:8px;background:none;color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;flex:0 0 auto}
+.vl-bb svg{width:24px;height:24px}
+.vl-bb .vl-pz,.vl-bb.vl-on svg:first-child{display:none}.vl-bb.vl-on .vl-pz{display:block}
+.vl-bb[aria-pressed=true]{background:rgba(255,255,255,.2)}
+.vl-bb:focus-visible,.vl-bseek:focus-visible{outline:3px solid #8fd0f0;outline-offset:-3px}
+.vl-btime{font:500 .8125rem var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap;margin:0 6px}
+.vl-bseek{flex:1 1 auto;min-width:60px;height:44px;margin:0 4px;accent-color:#fff;background:none;cursor:pointer}
+@media (max-width:699px){#vlStepsTop .vl-tabs{margin:12px 0 0}#vlStepsTop .vl-cc{display:none}}
 /* Up next */
 .vl-next h2{margin:0 0 12px;font:600 1.25rem/1.2 var(--serif);color:var(--navy)}
 .vl-next h3.vl-nh{margin:16px 0 8px;font:700 .75rem/1.2 var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
@@ -239,6 +282,8 @@ body.vl-watching #vlClose{margin-left:auto}
 </style>
 <script src="nbh-videos.js"></script>
 <script src="nbh-video-steps.js"></script>
+<script src="nbh-video-transcripts.js"></script>
+<script src="nbh-transcript.js"></script>
 </head>
 <body>
 <a class="vl-skip" href="#vlMain">Skip to the videos</a>
@@ -273,7 +318,12 @@ body.vl-watching #vlClose{margin-left:auto}
 var D=window.NBH_VIDEOS,R=document.documentElement,B=document.body,STEPS={};
 /* nbh-video-steps.js: steps [number, start, title], caps [start, caption, step number] */
 (function(){var S=window.NBH_VIDEO_STEPS||{};Object.keys(S).forEach(function(k){var x=S[k];if(!x||!x.steps||!x.caps)return;
-  STEPS[k]={steps:x.steps.map(function(s){return {n:s[0],t:s[1],title:s[2]};}),caps:x.caps};});})();
+  STEPS[k]={steps:x.steps.map(function(s){return {n:s[0],t:s[1],title:s[2],where:s[3]||'',with:s[4]};}),caps:x.caps};});})();
+/* nbh-video-transcripts.js: [start, who, text] per line ('N' the narrator, 'O' on screen, else the role of the person) */
+var TRANS=window.NBH_VIDEO_TRANSCRIPTS||{};
+/* the viewer's choices on this device (localStorage nbh.videos.pref): captions on or off, the Steps or Transcript tab */
+var PREF='nbh.videos.pref';function pref(){try{var o=JSON.parse(localStorage.getItem(PREF)||'{}');return o&&typeof o==='object'?o:{};}catch(e){return {};}}
+function setPref(k,val){var o=pref();o[k]=val;try{localStorage.setItem(PREF,JSON.stringify(o));}catch(e){}}
 var $=function(id){return document.getElementById(id);};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
 if(!D||!D.list||!D.list.length){$('vlList').innerHTML='<div class="vl-none"><p>The list of videos (nbh-videos.js) could not be loaded. Open the workstation from its folder or from the website.</p></div>';return;}
@@ -284,6 +334,8 @@ var WS=false;try{WS=window.parent!==window&&!!window.parent.__wsVideos;}catch(e)
 var tell=function(m){try{window.parent.postMessage(m,'*');}catch(e){}};
 var REDUCE=function(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
 var WIDE=function(){try{return matchMedia('(min-width: 1180px)').matches;}catch(e){return false;}};
+var PHONE=function(){try{return matchMedia('(max-width: 699px)').matches;}catch(e){return false;}};
+var isFull=function(){return !!(document.fullscreenElement||document.webkitFullscreenElement);};
 
 /* ---------- what was watched on this device: localStorage nbh.videos.v1, {v:1, items:{key:{t,d,w,at}}} — the second a
    video stopped at (t), its length (d), watched to the end once (w), when (at). No student, nothing typed. ---------- */
@@ -429,11 +481,28 @@ function nextOf(v){var fam1=LIST.filter(function(x){return x.family===v.family&&
   return {fam:fam1,fn:fn1};}
 var OPEN_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>';
 var PLAY_ICO='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
+var PAUSE_ICO='<svg class="vl-pz" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>';
+var CC_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10.5 10.2a2.4 2.4 0 1 0 0 3.6M17 10.2a2.4 2.4 0 1 0 0 3.6" stroke-linecap="round"/></svg>';
+var FULL_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+/* the captions file (WebVTT) from a transcript: each spoken line in sentences, the people's lines with their role */
+function vttOf(lines,dur){var sp=lines.filter(function(l){return l[1]!=='O';}),out='WEBVTT\n',n=0;
+  var ts=function(x){x=Math.max(0,x);var h=Math.floor(x/3600),m=Math.floor(x%3600/60),sec=x%60;return (h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(sec<10?'0':'')+sec.toFixed(3);};
+  sp.forEach(function(l,i){var nx=i+1<sp.length?sp[i+1][0]:(dur||l[0]+30),who=l[1]==='N'?'':'['+l[1]+'] ',parts=l[2].match(/[^.!?]+[.!?]+["”’)]*\s*|[^.!?]+$/g)||[l[2]];
+    var total=parts.join('').length,end=Math.min(nx-0.05,l[0]+total/14+0.8),t=l[0];if(end<=t+0.6)end=Math.min(Math.max(t+1,nx),t+3);
+    parts.forEach(function(p,j){var d=(end-l[0])*p.length/total,e=j===parts.length-1?end:t+d;out+='\n'+(++n)+'\n'+ts(t)+' --> '+ts(e)+'\n'+(j?'':who)+p.trim()+'\n';t=e;});});
+  return out;}
 function nextItem(x){var f=fam(x);return '<li><a class="vl-ni" href="#video='+encodeURIComponent(x.key)+'" data-key="'+esc(x.key)+'">'+thumb(x)+
   '<span class="vl-txt"><span class="vl-t">'+esc(x.title)+'</span><span class="vl-m">'+esc(citeOf(x))+' · '+esc(f.short)+'</span><span class="vl-st">'+status(x)+'</span></span></a></li>';}
 /* the Steps: each step's start and its title as the video shows them; the step playing is marked, with its caption */
-function stepsHtml(S){return '<section class="vl-panel vl-steps" id="vlSteps" aria-labelledby="vlStepsH"><div class="vl-stepsh"><h3 id="vlStepsH">Steps</h3><small>Tap a step to jump to it</small></div><ol>'+
-  S.steps.map(function(s,i){return '<li data-i="'+i+'"><button type="button" class="vl-sbtn" data-t="'+s.t+'"><span class="vl-stm">'+mmss(s.t)+'</span><span class="vl-sn'+(s.n?'':' vl-sn0')+'" aria-hidden="true">'+(s.n||'')+'</span><span>'+(s.n?'<span class="vl-sr">Step '+s.n+': </span>':'')+esc(s.title)+'</span></button><p class="vl-scap" hidden></p></li>';}).join('')+'</ol></section>';}
+function stepsHtml(S,hasT){var WH={open:'On the opening card',close:'On the closing card'};
+  return '<section class="vl-panel vl-tabs" id="vlTabs" aria-label="Steps and transcript"><div class="vl-tabl" role="tablist" aria-label="Steps and transcript">'+
+    '<button type="button" role="tab" id="vlTabS" class="vl-tab" aria-controls="vlSteps" aria-selected="true">Steps</button>'+
+    (hasT?'<button type="button" role="tab" id="vlTabT" class="vl-tab" aria-controls="vlTrans" aria-selected="false" tabindex="-1">Transcript</button>'+
+      '<button type="button" class="vl-btn vl-cc" id="vlCC" aria-pressed="false" title="Captions of what is said">'+CC_ICO+'<span>CC</span><span class="vl-sr"> captions</span></button>':'')+'</div>'+
+    '<div class="vl-steps" id="vlSteps" role="tabpanel" aria-labelledby="vlTabS"><div class="vl-stepsh"><h3 id="vlStepsH">Steps</h3><small>Tap a step to jump to it</small></div><ol>'+
+    S.steps.map(function(s,i){var note=WH[s.where]||(s.where==='with'?'Shown with step '+s.with:'');
+      return '<li data-i="'+i+'"'+(s.where?' data-where="'+s.where+'"':'')+'><button type="button" class="vl-sbtn" data-t="'+s.t+'"><span class="vl-stm">'+mmss(s.t)+'</span><span class="vl-sn'+(s.n?'':' vl-sn0')+'" aria-hidden="true">'+(s.n||'')+'</span><span>'+(s.n?'<span class="vl-sr">Step '+s.n+': </span>':'')+esc(s.title)+(note?'<span class="vl-snote">'+note+'</span>':'')+'</span></button><p class="vl-scap" hidden></p></li>';}).join('')+'</ol></div>'+
+    (hasT?'<div class="vl-trans" id="vlTrans" role="tabpanel" aria-labelledby="vlTabT" hidden></div>':'')+'</section>';}
 function stepAt(S,t){var c=null;for(var i=0;i<S.caps.length;i++){if(S.caps[i][0]<=t+0.05)c=S.caps[i];else break;}return c;}
 function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){return FN[x]||x;}),S=STEPS[v.key];
   var acts=v.cards.map(function(id,i){var c=D.cards[id]||{},c1=(c.cite||'').split('; ')[0];
@@ -445,6 +514,10 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
       '<div class="vl-load" id="vlLoad" role="status"><span id="vlLoadT">Loading the video…</span><span class="vl-lmb" id="vlLoadMb"></span><div class="vl-lbar" id="vlLoadBar" hidden><i></i></div></div>'+
       '<div class="vl-fail" id="vlFail" hidden><p>This video is not saved on this device. Connect to the internet, then try again.</p><button type="button" class="vl-btn" id="vlRetry">Try again</button></div>'+
       '<div class="vl-play" id="vlPlay" hidden><button type="button" class="vl-btn" id="vlPlayBtn">'+PLAY_ICO+'Play</button></div></div>'+
+    '<div class="vl-bar" id="vlBar" hidden><button type="button" class="vl-bb" id="vlBPlay" aria-label="Play">'+PLAY_ICO+PAUSE_ICO+'</button><span class="vl-btime" id="vlBTime" aria-hidden="true">0:00 / 0:00</span>'+
+      '<input type="range" class="vl-bseek" id="vlBSeek" min="0" max="1" step="0.1" value="0" aria-label="Position in the video">'+
+      '<button type="button" class="vl-bb vl-bcc" id="vlBCC" aria-pressed="false" aria-label="Captions">'+CC_ICO+'</button><button type="button" class="vl-bb" id="vlBFull" aria-label="Full screen">'+FULL_ICO+'</button></div>'+
+    '<div id="vlStepsTop"></div>'+
     '<p class="vl-kick"><span class="vl-av vl-f-'+esc(f.key)+'" aria-hidden="true">'+esc(f.short)+'</span>'+esc(f.name)+'</p>'+
     '<h2 class="vl-wt" id="vlTitle" tabindex="-1">'+esc(v.title)+'</h2>'+
     '<p class="vl-wm"><span>'+(v.after?'After '+esc(v.after):esc(citeOf(v)))+'</span>'+(v.dur?'<span aria-hidden="true">·</span><span><span class="vl-sr">Length </span>'+mmss(v.dur)+'</span>':'')+'<span class="vl-ai">AI-generated · simulated people</span></p>'+
@@ -452,22 +525,66 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
     '<div class="vl-act">'+acts+'</div><div id="vlStepsHere"></div>'+
     '<div class="vl-panel">'+(sum?'<h3>What the video shows</h3><p>'+esc(cap(sum))+'.</p>':'')+
       (fnw.length?'<p class="vl-fns"><b>Function'+(fnw.length>1?'s':'')+' of the behavior in its card'+(v.cards.length>1?'s':'')+':</b> '+fnw.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</p>':'')+
-      '<h3 style="margin-top:14px">About this video</h3><p class="vl-note">'+esc(v.note)+' Captions are part of the picture.</p></div>'+
+      '<h3 style="margin-top:14px">About this video</h3><p class="vl-note">'+esc(v.note)+' Captions are part of the picture. The Transcript beside the Steps has every word as text, and CC adds captions of what is said.</p></div>'+
     '</div><aside class="vl-next" aria-labelledby="vlNextH"><div id="vlStepsSide"></div><h2 id="vlNextH">Up next</h2>'+
       (N.fam.length?'<h3 class="vl-nh" id="vlNextF">More '+esc(f.short)+'</h3><ol class="vl-nl" aria-labelledby="vlNextF">'+N.fam.map(nextItem).join('')+'</ol>':'')+
       (N.fn.length?'<h3 class="vl-nh" id="vlNextN">Also for '+esc(fnw.join(', ').toLowerCase())+'</h3><ol class="vl-nl" aria-labelledby="vlNextN">'+N.fn.map(nextItem).join('')+'</ol>':'')+
       (!N.fam.length&&!N.fn.length?'<p class="vl-note">No other video of this procedure yet.</p>':'')+
     '</aside></div>';
   var vid=$('vlVideo'),my=++token,ld=$('vlLoad'),tap=openedByTap,seekTo=null,curCap=null;
-  /* the Steps beside the video (iPad sideways) or under the button */
-  if(S&&S.steps&&S.steps.length){var sw=document.createElement('div');sw.innerHTML=stepsHtml(S);var sEl=sw.firstChild;
-    var place=function(){var to=WIDE()?$('vlStepsSide'):$('vlStepsHere');if(to&&sEl.parentNode!==to)to.appendChild(sEl);};place();watchWide(place);
-    var mark=function(){var c=stepAt(S,vid.currentTime||0);if(c===curCap)return;curCap=c;
-      [].forEach.call(sEl.querySelectorAll('li'),function(li){var i=+li.dataset.i,s=S.steps[i],on=!!c&&s.n===c[2]&&(s.n||s.title===c[1]),p=li.querySelector('.vl-scap'),b=li.querySelector('.vl-sbtn');
+  var pl=vid.parentNode,bar=$('vlBar'),tw=TRANS[v.key],hasT=!!(tw&&tw.length&&window.NBHTranscript),track=null,tr=null;
+  var playFrom=function(t){if(vid.readyState>=1){try{vid.currentTime=t;}catch(x){}var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});$('vlPlay').hidden=true;}else seekTo=t;};
+  /* the picture: on an iPad the browser's control bar sits in a band below it, clear of the caption strip; on a phone the
+     picture is cropped to its scene (the header, the step panel and the caption strip are text on the page) and the page's
+     own bar plays it; the opening and closing cards are shown whole */
+  var layout=function(){var ph=PHONE();pl.classList.toggle('vl-band',!ph);pl.classList.toggle('vl-crop',ph);
+    if(vid.getAttribute('src'))vid.controls=!ph||isFull();bar.hidden=!ph;};
+  /* the Steps and the Transcript, two tabs: beside the video (iPad sideways), right under the video and its bar (phone),
+     under Open the TD-1 card (iPad upright). Every step is listed; a step with no moment of its own says where it is. */
+  var sEl=null,mark=function(){};
+  if(S&&S.steps&&S.steps.length){var sw=document.createElement('div');sw.innerHTML=stepsHtml(S,hasT);sEl=sw.firstChild;
+    var place=function(){var to=WIDE()?$('vlStepsSide'):PHONE()?$('vlStepsTop'):$('vlStepsHere');if(to&&sEl.parentNode!==to)to.appendChild(sEl);};
+    place();watchWide(function(){place();layout();});
+    mark=function(){var c=stepAt(S,vid.currentTime||0);pl.classList.toggle('vl-full',!c||c[2]==null||c[2]===0);if(c===curCap)return;curCap=c;
+      [].forEach.call(sEl.querySelectorAll('.vl-steps li'),function(li){var i=+li.dataset.i,s=S.steps[i],on=!!c&&!s.where&&s.n===c[2]&&(s.n||s.title===c[1]),p=li.querySelector('.vl-scap'),b=li.querySelector('.vl-sbtn');
         li.classList.toggle('vl-on',on);if(on){b.setAttribute('aria-current','step');p.textContent=c[1]&&s.n?c[1]:'';p.hidden=!(c[1]&&s.n);}else{b.removeAttribute('aria-current');p.hidden=true;p.textContent='';}});};
-    sEl.addEventListener('click',function(e){var b=e.target.closest('.vl-sbtn');if(!b)return;var t=+b.dataset.t;
-      if(vid.readyState>=1){try{vid.currentTime=t;}catch(x){}mark();var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});$('vlPlay').hidden=true;}else seekTo=t;});
-    vid.addEventListener('timeupdate',mark);vid.addEventListener('seeked',mark);}
+    $('vlSteps').addEventListener('click',function(e){var b=e.target.closest('.vl-sbtn');if(!b)return;var t=+b.dataset.t;if(vid.readyState>=1){try{vid.currentTime=t;}catch(x){}mark();}playFrom(t);});
+    vid.addEventListener('timeupdate',mark);vid.addEventListener('seeked',mark);mark();
+    /* the tabs: a tap or the arrow keys; the choice is kept on this device */
+    var tabs=[].slice.call(sEl.querySelectorAll('[role=tab]'));
+    var pick=function(which,focus){tabs.forEach(function(b){var on=b.id===(which==='transcript'?'vlTabT':'vlTabS');b.setAttribute('aria-selected',String(on));b.tabIndex=on?0:-1;if(on&&focus)b.focus();});
+      $('vlSteps').hidden=which==='transcript';if($('vlTrans'))$('vlTrans').hidden=which!=='transcript';if(which==='transcript'&&tr)tr.update(vid.currentTime||0);};
+    sEl.querySelector('.vl-tabl').addEventListener('click',function(e){var b=e.target.closest('[role=tab]');if(!b)return;var w=b.id==='vlTabT'?'transcript':'steps';pick(w);setPref('tab',w);});
+    sEl.querySelector('.vl-tabl').addEventListener('keydown',function(e){if(!e.target.matches('[role=tab]')||!/^(ArrowLeft|ArrowRight|Home|End)$/.test(e.key)||tabs.length<2)return;e.preventDefault();
+      var w=e.target.id==='vlTabS'?'transcript':'steps';if(e.key==='Home')w='steps';if(e.key==='End')w='transcript';pick(w,true);setPref('tab',w);});
+    /* the transcript: narration, the people's lines by role, the on-screen notes the narration does not say */
+    if(hasT){var WHO={N:'Narrator',O:'On screen'};
+      tr=window.NBHTranscript.create({media:vid,name:'Transcript of '+v.title,lead:'Opening card',
+        lines:tw.map(function(l){return {t:l[0],who:WHO[l[1]]||l[1],text:l[2]};}),
+        heads:S.steps.map(function(s){return {t:s.t,label:s.title,num:s.n,own:!s.where,note:s.where==='open'?'On the opening card':s.where==='close'?'On the closing card':s.where==='with'?'Shown with step '+s.with:''};}),
+        key:'Every word heard, with what the picture shows in <i>italics</i>. Tap a line to play from it.',seek:playFrom});
+      $('vlTrans').appendChild(tr.el);}
+    var want=/[&#]tab=transcript\b/.test(location.hash)?'transcript':pref().tab;pick(hasT&&want==='transcript'?'transcript':'steps');}
+  /* captions of what is said (the narration and the people's lines), a real text track: off unless CC was turned on here */
+  if(hasT){var cues=vttOf(tw,v.dur||0);track=document.createElement('track');track.kind='captions';track.label='English';track.srclang='en';
+    track.src=URL.createObjectURL(new Blob([cues],{type:'text/vtt'}));vid.appendChild(track);
+    var ccOn=function(on){if(track.track)track.track.mode=on?'showing':'hidden';[$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.setAttribute('aria-pressed',String(!!on));});};
+    ccOn(!!pref().cc);
+    [$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.addEventListener('click',function(){var on=b.getAttribute('aria-pressed')!=='true';ccOn(on);setPref('cc',on);});});
+    /* the browser's own captions menu changes it too */
+    vid.textTracks.addEventListener('change',function(){var on=!!track.track&&track.track.mode==='showing';[$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.setAttribute('aria-pressed',String(on));});});}
+  else{var bc=$('vlBCC');if(bc)bc.hidden=true;}
+  /* the phone's bar: play and pause, the time, the position, captions, full screen (the browser's own player there) */
+  var BP=$('vlBPlay'),BT=$('vlBTime'),BS=$('vlBSeek');
+  var paintBar=function(){var d=vid.duration>0?vid.duration:(v.dur||0),t=vid.currentTime||0;BP.setAttribute('aria-label',vid.paused?'Play':'Pause');BP.classList.toggle('vl-on',!vid.paused);
+    BT.textContent=mmss(t)+' / '+mmss(d);BS.max=String(Math.max(1,Math.round(d*10)/10));if(!BS.dragging)BS.value=String(Math.round(t*10)/10);BS.setAttribute('aria-valuetext',spoken(t)+' of '+spoken(d));};
+  ['play','pause','timeupdate','loadedmetadata','seeked'].forEach(function(n){vid.addEventListener(n,paintBar);});paintBar();
+  BP.addEventListener('click',function(){if(vid.paused){var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});$('vlPlay').hidden=true;}else vid.pause();});
+  BS.addEventListener('input',function(){BS.dragging=true;try{vid.currentTime=+BS.value;}catch(e){}});BS.addEventListener('change',function(){BS.dragging=false;});
+  vid.addEventListener('click',function(){if(!vid.controls&&vid.getAttribute('src')){if(vid.paused){var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});}else vid.pause();}});
+  $('vlBFull').addEventListener('click',function(){try{if(vid.requestFullscreen)vid.requestFullscreen().catch(function(){if(vid.webkitEnterFullscreen)vid.webkitEnterFullscreen();});else if(vid.webkitEnterFullscreen)vid.webkitEnterFullscreen();}catch(e){}});
+  fullFns=[layout];
+  layout();
   $('vlRestart').addEventListener('click',function(){try{vid.currentTime=0;}catch(e){}$('vlResume').hidden=true;try{vid.play();}catch(e){}});
   vid.addEventListener('loadedmetadata',function(){if(seekTo!=null){try{vid.currentTime=seekTo;}catch(e){}seekTo=null;var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});return;}
     var p=prog(v.key);if(p&&inProgress(v.key)&&p.t<vid.duration-2){try{vid.currentTime=p.t;}catch(e){}$('vlResumeT').textContent='Picks up where it stopped on this device, at '+mmss(p.t)+'.';$('vlResume').hidden=false;}});
@@ -487,16 +604,17 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
     if(L.total){var pc=Math.min(100,Math.round(L.loaded/L.total*100));$('vlLoadT').textContent='Loading the video… '+pc+'%';$('vlLoadMb').textContent=(L.loaded/1048576).toFixed(1)+' of '+(L.total/1048576).toFixed(1)+' MB';
       var bar=$('vlLoadBar');bar.hidden=false;bar.firstChild.style.width=pc+'%';}
     else if(L.loaded){$('vlLoadMb').textContent=(L.loaded/1048576).toFixed(1)+' MB';}};
-  var go=function(){ld.hidden=false;$('vlFail').hidden=true;vid.controls=!!urls[v.key];vid.tabIndex=0;$('vlLoadT').textContent='Loading the video…';$('vlLoadMb').textContent='';$('vlLoadBar').hidden=true;
+  var go=function(){ld.hidden=false;$('vlFail').hidden=true;vid.controls=!!urls[v.key]&&!PHONE();vid.tabIndex=0;$('vlLoadT').textContent='Loading the video…';$('vlLoadMb').textContent='';$('vlLoadBar').hidden=true;
     var pr=videoUrl(v);if(loads[v.key]){loads[v.key].fns.push(function(L){if(my===token)showProg(L);});showProg(loads[v.key]);}
-    pr.then(function(u){if(my!==token)return;vid.src=u;vid.controls=true;ld.hidden=true;
+    pr.then(function(u){if(my!==token)return;vid.src=u;vid.controls=!PHONE();ld.hidden=true;
         if(tap){if(REDUCE())$('vlPlay').hidden=false;else{var p2=vid.play();if(p2&&p2.catch)p2.catch(function(){});}}})
       .catch(function(){if(my!==token)return;ld.hidden=true;vid.controls=false;vid.tabIndex=-1;vid.removeAttribute('src');$('vlFail').hidden=false;$('vlFail').setAttribute('role','alert');});};
   $('vlRetry').addEventListener('click',function(){$('vlFail').removeAttribute('role');go();try{$('vlTitle').focus({preventScroll:true});}catch(x){}});
   go();}
-var wideFns=[],vidKeys=null;function watchWide(f){wideFns=[f];}
+var wideFns=[],vidKeys=null,fullFns=[];function watchWide(f){wideFns=[f];}
+['fullscreenchange','webkitfullscreenchange'].forEach(function(n){document.addEventListener(n,function(){fullFns.forEach(function(f){f();});});});
 addEventListener('keydown',function(e){if(vidKeys)vidKeys(e);},true);
-try{matchMedia('(min-width: 1180px)').addEventListener('change',function(){wideFns.forEach(function(f){f();});});}catch(e){}
+try{matchMedia('(min-width: 1180px)').addEventListener('change',function(){wideFns.forEach(function(f){f();});});matchMedia('(max-width: 699px)').addEventListener('change',function(){wideFns.forEach(function(f){f();});});}catch(e){}
 $('vlWatch').addEventListener('click',function(e){var b=e.target.closest('[data-card]');if(!b)return;openCard(b.dataset.card);});
 function openCard(id){pauseNow();
   if(WS){tell({nbh:'videos-card',card:id});return;}
@@ -509,7 +627,7 @@ function route(focus){var m=/^#video=([^&]+)/.exec(location.hash||''),k=m?decode
   var fm=/^#family=([a-z]{2,12})$/.exec(location.hash||'');if(fm&&D.families.some(function(f){return f[0]===fm[1];})){flt={fam:fm[1],fn:'',seen:'all'};q='';var qi=$('vlQ');if(qi)qi.value='';}
   if(v){if(view==='home')homeY=window.scrollY||0;pauseNow();releasePlayer();cur=v.key;lastKey=v.key;view='watch';B.classList.add('vl-watching');$('vlHome').hidden=true;$('vlWatch').hidden=false;$('vlBack').hidden=false;
     paintWatch(v);openedByTap=false;window.scrollTo(0,0);document.title=v.title+' · Video library';if(focus){var t=$('vlTitle');if(t)t.focus({preventScroll:true});}}
-  else{var was=view;pauseNow();releasePlayer();cur=null;token++;view='home';wideFns=[];B.classList.remove('vl-watching');$('vlWatch').hidden=true;$('vlWatch').innerHTML='';$('vlHome').hidden=false;$('vlBack').hidden=true;
+  else{var was=view;pauseNow();releasePlayer();cur=null;token++;view='home';wideFns=[];fullFns=[];B.classList.remove('vl-watching');$('vlWatch').hidden=true;$('vlWatch').innerHTML='';$('vlHome').hidden=false;$('vlBack').hidden=true;
     document.title='Video library · FBA and BIP Workstation';paintHome();if(was==='watch'){window.scrollTo(0,homeY);if(focus&&lastKey){var c=document.querySelector('#vlList .vl-card[data-key="'+lastKey+'"]');if(c)c.focus({preventScroll:true});}}}}
 /* a video opened from the home page sits one step after it in the history (Back, and All videos, go back to it); a video
    opened from Up next takes the place of the one before, so All videos is always one step */

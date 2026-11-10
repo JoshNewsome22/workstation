@@ -46,7 +46,9 @@ let AXE=null;try{AXE=fs.readFileSync(require.resolve('axe-core/axe.min.js',{path
  /* ---------------- A. the files ---------------- */
  {const keys=Object.keys(ST);const wrong=keys.filter(k=>{const s=ST[k];if(!BY[k]||!Array.isArray(s.steps)||!Array.isArray(s.caps)||!s.steps.length)return true;
     if(s.caps.some((c,i)=>i&&c[0]<=s.caps[i-1][0]))return true;
-    return s.steps.some(x=>!s.caps.some(c=>c[0]===x[1]&&c[2]===x[0])||!(x[1]>=0&&x[1]<BY[k].dur)||!x[2]);});
+    /* v25.72 (captions and transcript) a step with no moment of its own starts with its card, or with the step it is shown with */
+    const close=(s.caps.find(c=>c[2]===0)||[])[0];
+    return s.steps.some(x=>!(x[3]==='open'?x[1]===0:x[3]==='close'?x[1]===close:x[3]==='with'?s.steps.some(y=>y[0]===x[4]&&!y[3]&&y[1]===x[1]):s.caps.some(c=>c[0]===x[1]&&c[2]===x[0]))||!(x[1]>=0&&x[1]<BY[k].dur)||!x[2]);});
   ok('A nbh-video-steps.js: '+keys.length+' videos, each named in the list, each step starting with one of its captions, inside the video, the captions in order',keys.length>=1&&!wrong.length,wrong);
   const py='import importlib.util,json,sys\nsp=importlib.util.spec_from_file_location("pw",sys.argv[1]);m=importlib.util.module_from_spec(sp);sp.loader.exec_module(m)\nprint(json.dumps(m.files_of(sys.argv[2])))';
   const fl=spawnSync('python3',['-c',py,path.join(ROOT,'tools','pwa-sw.py'),DIR],{encoding:'utf8'});let files=[];try{files=JSON.parse(fl.stdout);}catch(e){}
@@ -117,12 +119,13 @@ let AXE=null;try{AXE=fs.readFileSync(require.resolve('axe-core/axe.min.js',{path
  const S0=ST.dro_resetting;
  for(const size of Object.keys(SZ)){const {ctx,p}=await mk(size);await home(p,'#video=dro_resetting');await loaded(p);
   const r=await p.evaluate(()=>{const g=s=>{const e=document.querySelector(s);return e?e.getBoundingClientRect().toJSON():null;};const o=document.querySelector('.vl-open');
-   return {player:g('.vl-player'),title:g('#vlTitle'),open:g('.vl-open'),steps:g('#vlSteps'),panel:g('.vl-wmain .vl-panel:not(.vl-steps)'),pri:o.classList.contains('vl-pri'),txt:o.textContent.trim(),
+   return {player:g('.vl-player'),title:g('#vlTitle'),open:g('.vl-open'),steps:g('#vlSteps'),panel:g('.vl-wmain .vl-panel:not(.vl-tabs)'),pri:o.classList.contains('vl-pri'),txt:o.textContent.trim(),
     name:document.getElementById(o.getAttribute('aria-describedby')).textContent,n:document.querySelectorAll('#vlSteps li').length};});
   const lab=(V.cards[BY.dro_resetting.cards[0]]||{}).lab||'';
   ok('D '+size+': Open the TD-1 card is the filled main button under the title, before the panels, with the card’s name ('+lab.slice(0,40)+'…)',
    r.pri&&r.txt==='Open the TD-1 card'&&r.open.top>r.title.bottom&&r.open.top<r.panel.top&&r.name.toLowerCase().includes(lab.toLowerCase().slice(0,30)),r);
-  ok('D '+size+': the Steps ('+r.n+') '+(size==='ipadL'?'beside the video':'under it, after the button'),r.n===S0.steps.length&&(size==='ipadL'?r.steps.left>=r.player.right&&r.steps.top<r.player.bottom:r.steps.top>=r.open.bottom),r);
+  /* v25.72 (captions and transcript) on a phone the Steps sit right under the video and its bar, before the title */
+  ok('D '+size+': the Steps ('+r.n+') '+(size==='ipadL'?'beside the video':size==='phone'?'right under the video, before the title':'under it, after the button'),r.n===S0.steps.length&&(size==='ipadL'?r.steps.left>=r.player.right&&r.steps.top<r.player.bottom:size==='phone'?r.steps.top>=r.player.bottom&&r.steps.bottom<=r.title.top:r.steps.top>=r.open.bottom),r);
   if(size==='ipadL'){const st=S0.steps[2];
    await p.locator('#vlSteps .vl-sbtn').nth(2).tap();await sleep(700);
    const j=await p.evaluate(()=>{const v=document.getElementById('vlVideo');v.pause();const on=document.querySelector('#vlSteps li.vl-on');return {t:v.currentTime,i:on?+on.dataset.i:-1,cur:on&&on.querySelector('[aria-current=step]')?1:0,cap:on?on.querySelector('.vl-scap').textContent:''};});
