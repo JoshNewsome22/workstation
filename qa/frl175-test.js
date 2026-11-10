@@ -24,8 +24,11 @@ const IPAD='Mozilla/5.0 (iPad; CPU OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (
  await fr.evaluate(()=>{let k=0;for(const el of document.querySelectorAll('textarea,input[type="text"],input:not([type])')){if(k>=8)break;if(el.offsetParent===null||el.readOnly||el.disabled)continue;el.value='Shared entry '+(++k);['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));}});
  const times=[];
  for(let i=0;i<3;i++){await sleep(i?1200:4500);
-   const t=await p.evaluate(async()=>{window.__shared=[];const t0=performance.now();$('#saveCase').click();
-     for(let k=0;k<200&&!(window.__shared||[]).length;k++)await new Promise(r=>setTimeout(r,50));
+   const t=await p.evaluate(async()=>{window.__shared=[];let t0=performance.now();$('#saveCase').click();
+     /* v25.72 the note typed into the form's first boxes went into its name box too, so the first save asks ("Save …'s case with
+        another student's name in it?"): answered Save anyway as soon as it shows, and that save is timed from the answer */
+     for(let k=0;k<200&&!(window.__shared||[]).length;k++){await new Promise(r=>setTimeout(r,50));
+       const q=document.querySelector('#cfDlg');if(q&&q.open&&/another student’s name in it\?$/.test(document.querySelector('#cfTitle').textContent)){const yes=[...q.querySelectorAll('#cfFoot button')].find(x=>/^Save anyway/.test(x.textContent.trim()));if(yes){yes.click();t0=performance.now();}}}
      const d=document.querySelector('#cfDlg');if(d&&d.open){const bs=d.querySelectorAll('#cfFoot button');if(bs.length)bs[bs.length-1].click();}
      return (window.__shared||[]).length?Math.round(window.__shared[0].at-t0):-1;});times.push(t);await sleep(300);}
  ok('Save case reaches the share sheet within a second, every time (three saves)',times.every(t=>t>=0&&t<1000),times);

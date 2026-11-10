@@ -9905,6 +9905,99 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.72: One student's information never reaches another's files, a transcript for every video, and Form TD-1's review
+(the BCBA, 11/9 and 11/10: "Find every path where one student's information could reach another student's files"; the
+video library's and Form TD-1's design reviews, then "Start making the improvements"; "On the page is enough")
+
+- **Privacy audit.** Every path was checked where one student's information could reach another student's files. Each
+  real one is fixed and held by a test that fails on v25.71.
+  - **A save overtaken by a switch.** Save case, Save and close, and Keep it on this device and switch read the forms
+    over several waits. If another case was opened meanwhile, the first student's case file, caseload copy and case
+    history point were written with the second student's forms. Each now notes the case it began in and writes nothing
+    once the case has changed. The workstation says so: the case was not saved to a file, and its work is in the safety
+    copy (Autosave), where Open case offers it.
+  - **A retyped name.** Typing another kept student's name and ID over the open case and saving replaced that student's
+    kept case, and with Google Drive their file, without a word. Save case now asks "Replace the case already kept for
+    …?", naming both students.
+  - **A form that names someone else.** Save case and Keep ask before a case is saved while one of its forms holds
+    another student's name (the BCBA, 11/10), naming the forms and the names. The sample name on a simulated record
+    does not count.
+  - **A restored safety copy** no longer leaves the next save pointed at the previous student's file or case.
+  - **Papers.** A packet is not built when the case changes while its forms are collected. A packet window printed later
+    is not listed in the next student's Documents. Form 2547 empties every box before each fill and asks before it
+    reuses a copy that already has answers.
+  - **Caseload.** Read every linked sheet takes each student's own summary, and a case history point is filed only
+    under the student it was read from.
+  - **Links and replies.** An incident, a day's numbers, a shared copy, a read document, collected replies and a Drive
+    file go only into the case they were asked from. The reply box asks "Is … the same student as …?" before it is
+    reused or changed (the BCBA, 11/10). A status message counts only from the form's own window.
+  - **Forms.** A form's kept Undo record goes with its case and is never offered to another student, or to the
+    Caseload's hidden copies. Clear all and Open leave nothing of the last record in EA-1, ABC-1 and SP-1, or in the
+    draft boxes of ABC-1, CN-1, PA-1, OB-1, DD-1, MT-1, EA-1 and AD-1. A safety copy made after Clear all carries no
+    name. TB-1 asks before a definition that names the student goes into My definitions. The staff directory is not
+    offered a family member.
+  - **Remove all student data** also clears the recent and pinned lists. It says that TB-1's My definitions stay (the
+    BCBA, 11/10), and names any that may name a kept student.
+  - **Not changed.** Two cases opened in very quick succession; a second question that replaces the first on screen; a
+    reply box whose only link was copied by hand in CF-1, IN-1 or SV-1; RS-1's typed supervisor and RBT names after
+    Open and Clear all (staff names).
+  - **Not checked.** Safari (every test ran in Chromium), a real Google Drive, and the school and one-file editions.
+- **Video library** (its design review: V1 to V7 and V9 to V11. V8, the offline copy in two stages, is not in this
+  version).
+  - More of the library fits on one screen. Procedure, Function and Watched filters combine. Search forgives spelling.
+    Each filter row is one Tab stop; Space plays and pauses, and the arrows skip 5 seconds.
+  - The watch page has the steps beside the video and the TD-1 card one tap away. A video that cannot be loaded says
+    "This video is not saved on this device. Connect to the internet, then try again." Loading shows its progress, and
+    memory is released after a video.
+  - **Every step is listed** (the BCBA, 11/10: all the steps must show at once on the page). A step a video covers
+    only on its opening or closing card is marked "On the opening card" or "On the closing card".
+  - **Transcript**, a second tab beside Steps: the narrator, the people's words by role, and the on-screen notes that
+    add something. The line being spoken is marked and kept in view while Follow is on. Tap a line to play from it.
+    Search finds a word. It was checked against the sound of all 24 videos: 14 spoken lines the captions never showed
+    were added, and two the captions had that are not said were removed.
+  - The control bar sits in a band below the picture, clear of the caption. On a phone the picture is cropped to the
+    scene, with the page's own control bar. CC shows the narration as captions; it starts switched off.
+  - Form TD-1's player is larger on the phone, has the band and a Transcript button, and opens the same video in the
+    library.
+- **Form TD-1** (its design review, T1 to T12, and the faults it noted).
+  - Each sheet has one Add button that works ("Add N to Build"), and the margin's button presses it.
+  - Restrictive and optional steps carry their marks on Build, in the printed plan and in the staff packet. A proposed
+    card prints with its banner (the BCBA, 11/10).
+  - The bank shows each card's tags in words and has "Leave out protocols with a punishment step". The bank loads after
+    the first paint, so the form opens sooner.
+  - The printed plan numbers only the staff's steps. Thinning levels print as a table.
+  - Every question on a question sheet is numbered, and the counter shows from the start. Fifteen headings and
+    questions are in plain words, each source on the line under its heading (the BCBA, 11/10).
+  - Function sits on Setup, under the student's name. Step by step reads "Question 3 of 7 · Sheet 2 of 13" on all 48
+    forms.
+  - The 13-inch iPad held upright gets the upright layout. No text is under 12 px on screen. High contrast reaches the
+    toolbar on every form.
+  - Faults fixed: "This plan so far" lagging behind the cards; the extinction tag on the wrong step; a proposed
+    punishment card listed as "Not used"; a step repeated in the attention plan; one tap that added two cards.
+- **Bank.** Two new high-probability request cards (Planer et al., 2018; Trejo et al., 2018, for feeding). Optional
+  steps from Della Rosa et al. (2015) and Ghaemmaghami et al. (2016). The Pritchard et al. (2018) card is rewritten:
+  ages 14 to 22, its review status marked RESTRICTIVE, and escape extinction as its own RESTRICTIVE step. 3,183 cards.
+- **The test run.** 505 tests on the merged copy; 486 passed at the first run. Of the 19 that did not:
+  - **Two were faults of this version, found by the run and fixed.** Remove all student data looks into TB-1's My
+    definitions to say what stays, and by looking it made an empty bank on a device that had none, so Undo no longer
+    put the device back exactly. And Save case asked about Form AD-1's own sample name, "Sim Student (example)"; a
+    form's sample name is now no one's name.
+  - **One test was older than the Save question** (frl175, which types into a form's name box) and now answers it, as
+    pwa-test and the retyped-name scenario do.
+  - **Four passed when run alone** (lazy-clean, link-te1, i236-numbers, v2569-td1-align); the machine was running other
+    builds beside the run.
+  - **Twelve fail on v25.71 too:** packet-gate, tk1-bus, tk1-audit, link-tk1, v2570-shell (What's new), v2191-focus,
+    student-journey, wording-rollout, sprint-a7, sprint-a8, a11y-release (it needs axe-core), and v2571-stepper-more
+    (TD-1 does not skip a question it hides).
+  - Four that failed in the v25.71 run pass now: v2247-dates, v2211-docs, ipad-layout and v2565-topbar.
+- **Checks.** New tests: v2572-save-isolation, v2572-papers-isolation, v2572-privacy-remote,
+  v2572-undo-case-isolation, v2572-form-residue, v2572-forms-privacy, v2572-videos, v2572-transcript and
+  v2572-td1-layout.
+- **Open, for the BCBA.** In TD-1: should the thinning table print once per card; should the bank mark extinction
+  steps the way it marks RESTRICTIVE and OPTION steps; should a library card leave out a step written for another
+  function (an attention plan still prints FCT's "For escape" step); should Responding's button add the other cards
+  ticked in its margin.
+
 ### v25.71: One student's case facts never reach the next, Undo for the last six actions, Step by step on every form, and the test run cleaned up
 (the BCBA, 11/9: "drop the are you sure questions if undo covers the action"; Step by step on the forms v25.70 left out; the
 release run's old failures, each looked at)

@@ -300,6 +300,12 @@ async function firstOnScreen(p,forms){await setBar(p,A);for(const id of (forms||
     await p.evaluate(()=>{$('#saveCase').click();});
     const q3=await answer(p,/with another student’s name in it\?/,/^Cancel/,3500);await waitDl(p,nDl+2,30000).catch(()=>{});await answer(p,/Case file written|Case saved|Case written/,/It is in Files|^OK$/,6000);await closeBoxes(p);
     ok('O the same form and name are not asked about again in this case',!q3,q3);
+    /* a form's own sample name is no one's name: Form AD-1's simulation carries "Sim Student (example)", and a case made of
+       simulations must save without the question (qa/master33.js saves one) */
+    await frameOf(p,'IN-1').evaluate(nm=>{const e=document.querySelector('[data-m="client"]');e.value=nm;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},'Sim Student (example)');await sleep(5500);
+    await p.evaluate(()=>{$('#saveCase').click();});
+    const q4=await answer(p,/with another student’s name in it\?/,/^Cancel/,3500);await waitDl(p,nDl+3,30000).catch(()=>{});await answer(p,/Case file written|Case saved|Case written/,/It is in Files|^OK$/,6000);await closeBoxes(p);
+    ok('O a form’s own sample name (“Sim Student (example)”) is not asked about',!q4&&p.__dl.length===nDl+3,{q4,files:p.__dl.length-nDl});
     await c.close();}
 
   ok('no page errors',!errs.length,errs.slice(0,6));
