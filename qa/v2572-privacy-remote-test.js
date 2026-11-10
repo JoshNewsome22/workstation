@@ -25,7 +25,13 @@
    R  A reply that names another student than the form's is held, and said so; a reply for the same student under a
       corrected spelling, by initials, or for a form with no name yet is placed as before. A link made after the form's
       student changed carries a new reply box, not the first student's.
-   usage: WS_URL=http://127.0.0.1:8171 node qa/v2572-privacy-remote-test.js [L N S M D E C R]   results in qa/out/v2572-privacy-remote/ */
+   Q  (the BCBA, 11/10) The form does not change reply boxes by itself once links have gone out. Opening Respondent pages
+      with a box made for what reads as another student asks first, naming both: Cancel (no link, nothing changes), Same
+      student (the box and its links stay, the name kept with the box becomes this one, it is not asked again, and an
+      answer to a link sent before is placed, not held), Different student (a new box, the first student's gone from the
+      form). No question when nothing was sent or received: the new box is made as before. Forms CF-1 and IA-1; in IA-1
+      also from the Send-outs sheet.
+   usage: WS_URL=http://127.0.0.1:8171 node qa/v2572-privacy-remote-test.js [L N S M D E C R Q]   results in qa/out/v2572-privacy-remote/ */
 const L=require(__dirname+'/lib.js');const {sleep,fs,path}=L;const {spawn}=require('child_process');
 let fails=0,n=0;const ok=(k,c,i)=>{n++;console.log((c?'PASS ':'FAIL ')+k+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1500):''));if(!c)fails++;return !!c;};
 const FILE=Object.fromEntries(L.forms().map(f=>[f.id,f.file]));
@@ -330,7 +336,8 @@ async function scenR(bx){
     ok('R: the held reply says which student it is about and which this form is about, and can be kept or discarded',/it is about Mateo R\., and this form is about SIMULATED S\./.test(shown)&&/Keep and place it/.test(shown)&&/Discard/.test(shown),shown.slice(0,400));
     await pg.evaluate(()=>{const d=document.querySelector('#rcDlg');if(d&&d.open)d.close();});
     /* 3. a page or link made now: the label is the second student's, and the box is a new one */
-    await pg.evaluate(()=>document.querySelector('#rpBtn').click());await pg.waitForFunction(b=>{const x=__rp.kit.rb().box;return !!(x&&x.site&&x.id!==b);},a.box,{timeout:8000}).catch(()=>{});
+    await pg.evaluate(()=>document.querySelector('#rpBtn').click());if(await qBox(pg,2500))await qAnswer(pg,/^Different student/);   /* a reply has come, so the form asks (scenario Q) */
+    await pg.waitForFunction(b=>{const x=__rp.kit.rb().box;return !!(x&&x.site&&x.id!==b);},a.box,{timeout:8000}).catch(()=>{});
     const l=await pg.evaluate(()=>{const k=__rp.kit,b=k.rb().box,p=k.personPayload(k.rb().sends[0]);return {box:b&&b.id||'',stu:b&&b.stu||'',link:p&&p.box&&p.box.b||'',student:p&&p.student,label:document.querySelector('#rpStudent').value,note:document.querySelector('#rbNote').textContent,all:JSON.stringify(S)};});
     ok('R: a link made after the form’s student changed carries a new reply box, and the first student’s (id, token, private key) is gone from the form',!!l.box&&l.box!==a.box&&l.link===l.box&&l.stu==='SIMULATED S.'&&!l.all.includes(a.box)&&!l.all.includes(a.priv),{newBox:l.box!==a.box,link:l.link===l.box,stu:l.stu,stillHasFirst:l.all.includes(a.box)});
     ok('R: the page’s student label is the second student’s initials, and the note says the form started a box of its own',l.label==='S.S.S.'&&/reply box was made for Mateo R\., and the form is now about SIMULATED S\./.test(l.note),{label:l.label,note:l.note});
@@ -355,6 +362,90 @@ async function scenR(bx){
     ok('R Form IA-1: the first student’s box is not put in a link for the second, and the form starts a box of its own (the label and the note follow)',!!l.box&&l.box!==a.box&&l.link===l.box&&l.label==='S.S.S.'&&/reply box was made for Mateo R\./.test(l.note),{newBox:l.box!==a.box,l});
     await c.close();}}
 
+/* ---- Q: the question before a link, when the box was made for what reads as another student and links have gone out ---- */
+/* the form's question box, when it is open: its words and its buttons */
+async function qBox(pg,ms){const t=Date.now();while(Date.now()-t<(ms||2500)){
+  const q=await pg.evaluate(()=>{const d=document.getElementById('nbhUiDlg');if(!d||!d.open)return null;return {head:document.getElementById('nbhUiH').textContent,body:document.getElementById('nbhUiB').textContent,btns:[...document.querySelectorAll('#nbhUiF button')].map(b=>b.textContent)};}).catch(()=>null);
+  if(q)return q;await sleep(80);}return null;}
+const qAnswer=async(pg,re)=>{const r=await pg.evaluate(src=>{const b=[...document.querySelectorAll('#nbhUiF button')].find(x=>new RegExp(src).test(x.textContent));if(b)b.click();return !!b;},re.source);await sleep(300);return r;};
+const Q_HEAD=/^Is SIMULATED – Sample Student the same student as Mateo R\.\?$/;
+const qWords=q=>!!q&&Q_HEAD.test(q.head)&&/reply box was made for Mateo R\., and links from it have gone out/.test(q.body)&&/Same student: the box stays\. Links already sent keep working/.test(q.body)&&/Different student: this form starts a new reply box\. Answers to links already sent no longer come to this form/.test(q.body)&&/Cancel: no link is made, and nothing changes/.test(q.body)
+  &&q.btns.join(' | ')==='Cancel | Same student: keep the reply box | Different student: start a new one';
+/* Form CF-1 for the first student: two raters on the sheet, each with a link of their own; the first answers and is collected */
+async function cfOut(pg,bx){await cfFill(pg,A);await pg.evaluate(()=>{S.raters[0].name='Ms. Lopez';S.raters[0].role='Classroom teacher';S.raters[1].name='Mr. Ortiz';S.raters[1].role='Paraprofessional';renderAll();});
+  await pg.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(300);
+  await pg.evaluate(u=>{const e=document.querySelector('#rbBox');e.value=u;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},bx.url);
+  await pg.waitForFunction(()=>{const b=__rp.kit.rb().box;return !!(b&&b.site);},null,{timeout:10000});await pg.evaluate(()=>document.querySelector('#rbFromSheet').click());await sleep(200);
+  const a=await pg.evaluate(()=>{const k=__rp.kit,b=k.rb().box,u=s=>{const l=k.personLink(s);return l&&l.url||l;},S2=k.rb().sends;return {box:b.id,priv:b.priv.d,stu:b.stu||'',links:S2.map(u),names:S2.map(s=>s.name)};});
+  await pg.evaluate(()=>document.querySelector('#rpDlg').close());
+  a.sent=await respond(a.links[a.names.indexOf('Ms. Lopez')],'Simulated comment');
+  a.first=await pg.evaluate(()=>__rp.kit.collect(false).then(r=>r&&r.placed||0));await sleep(400);return a;}
+const cfBox=pg=>pg.evaluate(()=>{const k=__rp.kit,r=k.rb(),b=r.box,p=k.personPayload(r.sends.find(s=>s.name==='Mr. Ortiz')||r.sends[0]);
+  return {box:b&&b.id||'',stu:b&&b.stu||'',aka:b&&b.aka||[],link:p&&p.box&&p.box.b||'',dlg:document.querySelector('#rpDlg').open,note:(document.querySelector('#rbNote')||{}).textContent||'',placed:r.placed,held:b?b.held.length:0,all:JSON.stringify(S)};});
+async function scenQ(bx){
+  /* 1. Cancel, then Same student */
+  {const {c,pg}=await formPage('CF-1');const a=await cfOut(pg,bx);
+    ok('Q: set-up: the first student’s Form CF-1 has a reply box, two raters have links, and the first rater’s answer is collected (links have gone out)',!!a.box&&a.links.length===2&&a.sent&&a.first===1,{box:!!a.box,links:a.links.length,sent:a.sent,first:a.first});
+    await cfFill(pg,B);await sleep(300);
+    await pg.evaluate(()=>document.querySelector('#rpBtn').click());const q=await qBox(pg,3000);
+    ok('Q: opening Respondent pages asks first, naming both names as the form has them, and says what each choice does to the links already sent',qWords(q),q||'no question');
+    const mid=await cfBox(pg);
+    ok('Q: while the question is open the box is as it was, and a link made meanwhile carries no box',mid.box===a.box&&mid.stu==='Mateo R.'&&!mid.link,{sameBox:mid.box===a.box,stu:mid.stu,link:mid.link});
+    await qAnswer(pg,/^Cancel$/);const can=await cfBox(pg);
+    ok('Q: Cancel: Respondent pages is closed (no link is made) and nothing changes: the same box, kept for the first student',!!q&&!can.dlg&&can.box===a.box&&can.stu==='Mateo R.'&&can.all.includes(a.priv),{dlg:can.dlg,sameBox:can.box===a.box,stu:can.stu});
+    await pg.evaluate(()=>document.querySelector('#rpBtn').click());const q2=await qBox(pg,3000);
+    ok('Q: it is asked again the next time',qWords(q2),q2||'no question');
+    await qAnswer(pg,/^Same student/);await sleep(600);const keep=await cfBox(pg);
+    ok('Q: Same student: the box and its links stay, the name kept with the box becomes this student’s, and Respondent pages is open',!!q2&&keep.dlg&&keep.box===a.box&&keep.stu==='SIMULATED S.'&&keep.aka.includes('Mateo R.')&&keep.link===a.box&&/reply box is kept/.test(keep.note),{dlg:keep.dlg,sameBox:keep.box===a.box,stu:keep.stu,aka:keep.aka,link:keep.link===a.box,note:keep.note});
+    await pg.evaluate(()=>document.querySelector('#rpDlg').close());await pg.evaluate(()=>document.querySelector('#rpBtn').click());const q3=await qBox(pg,1800);
+    ok('Q: after Same student it is not asked again',!!q2&&!q3,q3);await pg.evaluate(()=>{const d=document.querySelector('#rpDlg');if(d.open)d.close();});
+    /* the second rater answers the link sent before the name changed (it says Mateo R.): placed, not held */
+    const sent2=await respond(a.links[a.names.indexOf('Mr. Ortiz')],'Simulated comment');await pg.evaluate(()=>__rp.kit.collect(false).then(r=>r||'nothing'));await sleep(500);const aft=await cfBox(pg);
+    ok('Q: after Same student, an answer to a link sent before is placed in this form, not held',!!q2&&sent2&&aft.placed===2&&aft.held===0,{sent2,placed:aft.placed,held:aft.held});
+    await c.close();}
+  /* 2. Different student */
+  {const {c,pg}=await formPage('CF-1');const a=await cfOut(pg,bx);await cfFill(pg,B);await sleep(300);
+    await pg.evaluate(()=>document.querySelector('#rpBtn').click());const q=await qBox(pg,3000);
+    await qAnswer(pg,/^Different student/);await pg.waitForFunction(b=>{const x=__rp.kit.rb().box;return !!(x&&x.site&&x.id!==b);},a.box,{timeout:8000}).catch(()=>{});const nw=await cfBox(pg);
+    ok('Q: Different student: asked first, then the form starts a new reply box; the first student’s (id, private key) is gone from the form, and the note says so',qWords(q)&&nw.dlg&&!!nw.box&&nw.box!==a.box&&nw.link===nw.box&&nw.stu==='SIMULATED S.'&&!nw.all.includes(a.box)&&!nw.all.includes(a.priv)&&/reply box was made for Mateo R\., and the form is now about SIMULATED S\./.test(nw.note),{asked:!!q,dlg:nw.dlg,newBox:nw.box!==a.box,link:nw.link===nw.box,stu:nw.stu,note:nw.note});
+    await pg.evaluate(()=>document.querySelector('#rpDlg').close());await pg.evaluate(()=>document.querySelector('#rpBtn').click());
+    ok('Q: after Different student it is not asked again',!!q&&!(await qBox(pg,1800)));await c.close();}
+  /* 3. nothing sent, nothing received: no question, the new box as before */
+  {const {c,pg}=await formPage('CF-1');await cfFill(pg,A);await pg.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(300);
+    await pg.evaluate(u=>{const e=document.querySelector('#rbBox');e.value=u;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},bx.url);
+    await pg.waitForFunction(()=>{const b=__rp.kit.rb().box;return !!(b&&b.site);},null,{timeout:10000});const a=await pg.evaluate(()=>__rp.kit.rb().box.id);await pg.evaluate(()=>document.querySelector('#rpDlg').close());
+    await cfFill(pg,B);await sleep(300);await pg.evaluate(()=>document.querySelector('#rpBtn').click());const q=await qBox(pg,1800);
+    await pg.waitForFunction(b=>{const x=__rp.kit.rb().box;return !!(x&&x.site&&x.id!==b);},a,{timeout:8000}).catch(()=>{});
+    const r=await pg.evaluate(()=>{const b=__rp.kit.rb().box;return {box:b&&b.id||'',stu:b&&b.stu||'',dlg:document.querySelector('#rpDlg').open,note:document.querySelector('#rbNote').textContent};});
+    ok('Q: with no link sent and no answer received there is nothing to lose: no question, and the form starts its own box as before',!q&&r.dlg&&!!r.box&&r.box!==a&&r.stu==='SIMULATED S.'&&/starts a reply box of its own/.test(r.note),{asked:!!q,r});await c.close();}
+  /* 4. Form IA-1 (its own code): the same question, from Respondent pages and from the Send-outs sheet */
+  const ia=async()=>{const {c,pg}=await formPage('IA-1');const set=(n,v)=>pg.evaluate(([n,v])=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},[n,v]);
+    await set('m.client',A.client);await set('m.beh','Aggression toward staff (simulated)');await pg.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(300);
+    await pg.evaluate(u=>{const e=document.querySelector('#rpBox');e.value=u;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},bx.url);await pg.waitForFunction(()=>{const b=__rp.box();return !!(b&&b.site);},null,{timeout:10000});
+    return {c,pg,set,now:()=>pg.evaluate(()=>{const b=__rp.box(),p=__rp.payload()||{};return {box:b&&b.id||'',stu:b&&b.stu||'',aka:b&&b.aka||[],link:(p.box||{}).b||'',dlg:document.querySelector('#rpDlg').open};})};};
+  {const f=await ia(),{pg}=f;const a=await pg.evaluate(()=>{const l=__rp.links(),b=__rp.box();return {box:b.id,link:l[0]&&l[0].url};});await pg.evaluate(()=>document.querySelector('#rpDlg').close());
+    const sent=a.link?await respond(a.link,'Simulated comment'):false;await pg.evaluate(()=>__rp.collect(true).then(()=>1,()=>0));await sleep(500);const got=await pg.evaluate(()=>__rp.box().got.length);
+    ok('Q Form IA-1: set-up: the first student’s form has a reply box, and an answer to its link has come',!!a.box&&sent&&got===1,{box:!!a.box,sent,got});
+    await f.set('m.client',B.client);
+    await pg.evaluate(()=>document.querySelector('#outPagesBtn').click());const q0=await qBox(pg,3000);await qAnswer(pg,/^Cancel$/);const s0=await f.now();
+    ok('Q Form IA-1: the Send-outs sheet’s pages ask the same question before any is made; Cancel changes nothing',qWords(q0)&&s0.box===a.box&&s0.stu==='Mateo R.',{q:q0||'no question',sameBox:s0.box===a.box,stu:s0.stu});
+    await pg.evaluate(()=>document.querySelector('#rpBtn').click());const q=await qBox(pg,3000);const mid=await f.now();await qAnswer(pg,/^Cancel$/);const can=await f.now();
+    ok('Q Form IA-1: Respondent pages asks before it opens; Cancel leaves it closed and the box as it was',qWords(q)&&!mid.dlg&&!mid.link&&!can.dlg&&can.box===a.box&&can.stu==='Mateo R.',{q:q||'no question',mid,can:{dlg:can.dlg,sameBox:can.box===a.box,stu:can.stu}});
+    await pg.evaluate(()=>document.querySelector('#rpBtn').click());const q2=await qBox(pg,3000);await qAnswer(pg,/^Same student/);await sleep(500);const keep=await f.now();
+    ok('Q Form IA-1: Same student: the box stays and is this student’s now, Respondent pages opens, and a link carries the box',!!q2&&keep.dlg&&keep.box===a.box&&keep.stu==='SIMULATED S.'&&keep.aka.includes('Mateo R.')&&keep.link===a.box,{asked:!!q2,keep});
+    const held=await pg.evaluate(()=>{if(!__rp.screen)return ['no such check'];const r=__rp.screen([{form:'IA-1',inst:'fast',student:'M.R.',name:'Ms. Lopez',beh:'',ans:[]}]);return r.flag.map(o=>o.why);});
+    ok('Q Form IA-1: after Same student, an answer to a page made before (it says M.R.) is not held as another student’s',!!q2&&!held.length,held);
+    await pg.evaluate(()=>document.querySelector('#rpDlg').close());await pg.evaluate(()=>document.querySelector('#rpBtn').click());
+    ok('Q Form IA-1: after Same student it is not asked again',!!q2&&!(await qBox(pg,1800)));await f.c.close();}
+  {const f=await ia(),{pg}=f;const a=await pg.evaluate(()=>{const l=__rp.links(),b=__rp.box();return {box:b.id,link:l[0]&&l[0].url};});await pg.evaluate(()=>document.querySelector('#rpDlg').close());
+    if(a.link)await respond(a.link,'Simulated comment');await pg.evaluate(()=>__rp.collect(true).then(()=>1,()=>0));await sleep(500);await f.set('m.client',B.client);
+    await pg.evaluate(()=>document.querySelector('#rpBtn').click());const q=await qBox(pg,3000);await qAnswer(pg,/^Different student/);
+    await pg.waitForFunction(b=>{const x=__rp.box();return !!(x&&x.site&&x.id!==b);},a.box,{timeout:8000}).catch(()=>{});const nw=await f.now();
+    ok('Q Form IA-1: Different student: asked first, then a new reply box, which the link carries; Respondent pages opens',qWords(q)&&nw.dlg&&!!nw.box&&nw.box!==a.box&&nw.link===nw.box&&nw.stu==='SIMULATED S.',{asked:!!q,nw,newBox:nw.box!==a.box});await f.c.close();}
+  {const f=await ia(),{pg}=f;const a=await pg.evaluate(()=>__rp.box().id);await pg.evaluate(()=>document.querySelector('#rpDlg').close());await f.set('m.client',B.client);
+    await pg.evaluate(()=>document.querySelector('#rpBtn').click());const q=await qBox(pg,1800);await pg.waitForFunction(b=>{const x=__rp.box();return !!(x&&x.site&&x.id!==b);},a,{timeout:8000}).catch(()=>{});const r=await f.now();
+    ok('Q Form IA-1: with nothing sent and nothing received: no question, and the form starts its own box as before',!q&&r.dlg&&!!r.box&&r.box!==a&&r.stu==='SIMULATED S.',{asked:!!q,r,newBox:r.box!==a});await f.c.close();}}
+
 (async()=>{
   br=await L.chromium.launch();
   try{
@@ -364,7 +455,7 @@ async function scenR(bx){
     if(want('M'))await scenM();
     if(want('D')){await scenD('before');await scenD('during');}
     if(want('E'))await scenE();
-    if(want('C')||want('R')){const bx=await box(8976);try{if(want('C'))await scenC(bx);if(want('R'))await scenR(bx);}finally{bx.php.kill();}}
+    if(want('C')||want('R')||want('Q')){const bx=await box(8976);try{if(want('C'))await scenC(bx);if(want('R'))await scenR(bx);if(want('Q'))await scenQ(bx);}finally{bx.php.kill();}}
   }catch(e){ok('the run reached its end',false,String(e&&e.stack||e).slice(0,900));}
   finally{await br.close();}
   ok('no page errors',!errs.length,errs.slice(0,6));
