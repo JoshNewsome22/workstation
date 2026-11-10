@@ -2438,16 +2438,29 @@ const wsUI=(()=>{
     while(h.children.length>3)h.removeChild(h.firstChild);setTimeout(gone,opt.ms||Math.min(12000,3500+String(text).length*35));return t;};
   const split=text=>{const s=String(text==null?'':text).trim();const i=s.indexOf('\n');let head=i>=0?s.slice(0,i).trim():s,body=i>=0?s.slice(i+1).trim():'';
     if(i<0&&head.length>120){const j=head.indexOf('. ');if(j>20&&j<110){body=head.slice(j+2);head=head.slice(0,j+1);}}return {head,body};};
-  const ask=(text,opt,question)=>new Promise(res=>{const d=$('#cfDlg'),p=split(text);$('#cfTitle').textContent=p.head;$('#cfBody').textContent=p.body;$('#cfBody').style.display=p.body?'':'none';
-    const f=$('#cfFoot');f.innerHTML='';const done=v=>{try{d.close();}catch(e){}res(v);};
+  /* v25.73 (privacy audit) one question at a time. Every question is put in the one box (#cfDlg). A second question raised
+     while one was on screen used to take the box over: the first was never answered (whoever asked it waited for ever) and
+     the tap meant for it answered the second. Now each waits its turn and is shown when the one before it is answered.
+     A box closed by any other route counts as its Cancel, so nobody is left waiting. A question that had to wait takes
+     no answer for its first 400 ms, so a second tap meant for the one before it cannot answer it.
+     hold(none, build): none is what Cancel answers; build(d, done) fills the box, shows it and calls done(answer). */
+  let line=Promise.resolve(),asked=0;
+  U.hold=(none,build)=>{const waited=asked>0;asked++;const before=line;let free;line=new Promise(r=>{free=r;});
+    return before.then(()=>new Promise(res=>{const d=$('#cfDlg');let over=false;const from=waited?performance.now()+400:0;
+      const end=v=>{if(over)return;over=true;d.removeEventListener('close',shut);try{if(d.open)d.close();}catch(e){}asked--;free();res(v);};
+      const shut=()=>{if(!d.open)end(none);};   /* the close of the question before this one arrives late, with this one open: not ours */
+      const done=v=>{if(performance.now()<from)return;end(v);};
+      try{$('#cfFoot').style.flexWrap='';build(d,done);d.addEventListener('close',shut);}catch(e){end(none);}}));};
+  const ask=(text,opt,question)=>U.hold(false,(d,done)=>{const p=split(text);$('#cfTitle').textContent=p.head;$('#cfBody').textContent=p.body;$('#cfBody').style.display=p.body?'':'none';
+    const f=$('#cfFoot');f.innerHTML='';
     if(question){const c=document.createElement('button');c.type='button';c.textContent=opt.cancel||'Cancel';c.addEventListener('click',()=>done(false));f.appendChild(c);}
     const ok=document.createElement('button');ok.type='button';ok.className=opt.danger?'danger':'primary';ok.textContent=opt.ok||'OK';ok.addEventListener('click',()=>done(true));f.appendChild(ok);
     d.oncancel=ev=>{ev.preventDefault();done(false);};d.showModal();ok.focus();});
   U.alert=text=>{const s=String(text==null?'':text);if(s.length<=160&&s.indexOf('\n')<0){U.toast(s);return Promise.resolve();}return ask(s,{ok:'OK'},false);};
   U.confirm=(text,opt)=>ask(text,opt||{},true);
   /* v21.81 a question with its own buttons: [{v,label,kind:'primary'|'danger'}]; resolves the chosen v ('' or Escape: none) */
-  U.choose=(text,btns,note)=>new Promise(res=>{const d=$('#cfDlg'),p=split(text);$('#cfTitle').textContent=p.head;const body=[p.body,note||''].filter(Boolean).join('\n\n');$('#cfBody').textContent=body;$('#cfBody').style.display=body?'':'none';
-    const f=$('#cfFoot');f.innerHTML='';const done=v=>{try{d.close();}catch(e){}res(v);};let first=null;
+  U.choose=(text,btns,note)=>U.hold('',(d,done)=>{const p=split(text);$('#cfTitle').textContent=p.head;const body=[p.body,note||''].filter(Boolean).join('\n\n');$('#cfBody').textContent=body;$('#cfBody').style.display=body?'':'none';
+    const f=$('#cfFoot');f.innerHTML='';let first=null;
     (btns||[]).forEach(b=>{const x=document.createElement('button');x.type='button';x.textContent=b.label;if(b.kind)x.className=b.kind;x.addEventListener('click',()=>done(b.v));f.appendChild(x);if(b.kind==='primary'&&!first)first=x;});
     d.oncancel=ev=>{ev.preventDefault();done('');};d.showModal();(first||f.lastChild).focus();});
   return U;})();
@@ -3285,6 +3298,14 @@ state.caseGen=0;const CASE_GONE=new WeakSet();
    removes the records too. */
 function undoAfterOff(turn){const go=()=>{try{for(let i=sessionStorage.length-1;i>=0;i--){const k=sessionStorage.key(i);if(k&&k.indexOf('nbh.undo.after|')===0)sessionStorage.removeItem(k);}}catch(e){}};
   if(turn){try{sessionStorage.setItem('nbh.case.turn',Date.now().toString(36)+Math.random().toString(36).slice(2,8));}catch(e){}setTimeout(go,0);}go();}
+/* v25.73 (privacy audit) the newest request to open or close a case is the one that takes the screen. Each request takes a
+   number here as it is made, and stands down if a newer one has been made by the time its waits are over. So the case
+   tapped last is the one left open, whichever finished reading first (a case with TV-1's pictures and sounds waits for
+   the store), and a close does not clear a case that was asked for after it. In those overlaps the wrong student could be
+   left on screen, or an empty screen after a student was opened; the writes after a wait already checked the case
+   (v25.71, v25.72), with one exception: Autosave, let in while the overtaken case was still loading, kept a form it had
+   read for one student where the next student's safety copy picked it up (autoSave now guards that itself, too). */
+function caseAsk(){return state.caseReq=(state.caseReq||0)+1;}
 function caseTurn(){state.caseGen++;clearTimeout(factsTimer);factsTimer=null;factsOwed=false;state.factSrcSig={};
   Object.values(state.frames).forEach(fr=>{try{if(fr.contentWindow)CASE_GONE.add(fr.contentWindow);}catch(e){}});}
 function noteFactSource(id,st){
@@ -5635,14 +5656,17 @@ async function autoSave(force){
     let work=!!A.key;
     for(const id of ids){
       const r=await grab(id,'snapshot',null,force?2500:5000);if(gen!==state.caseGen)return;
-      if(r&&r.snap)A.forms[id]={title:r.title,total:r.snap.total,data:r.snap.data,own:r.snap.own||''};
+      if(r&&r.snap)A.forms[id]={title:r.title,total:r.snap.total,data:r.snap.data,own:r.snap.own||'',g:gen};
       if((r&&r.edited)||(state.status[id]||{}).edited){work=true;if(!(r&&r.snap))missed=true;}
     }
-    kept.forEach(id=>{const P=state.pending[id],sn=P.snap||{};A.forms[id]={title:P.title,total:sn.total,data:sn.data||{},own:sn.own||''};});
+    kept.forEach(id=>{const P=state.pending[id],sn=P.snap||{};A.forms[id]={title:P.title,total:sn.total,data:sn.data||{},own:sn.own||'',g:gen};});
     if(!work){state.autoSig=sig;return;}   // forms only opened, nothing done in them yet: no copy
-    Object.keys(A.forms).forEach(id=>{if(!inCase(id))delete A.forms[id];});   // a form closed since is not in the copy
+    /* v25.73 (privacy audit) nor is a form gathered in another case: a copy begun for the last student and overtaken by the next
+       left what it had read, and a form of the same kind that was slow to answer in the next case went into that student's
+       safety copy as the last student's (each form gathered here carries the case it was read in, g) */
+    Object.keys(A.forms).forEach(id=>{const f=A.forms[id];if(!inCase(id)||(f&&f.g!==undefined&&f.g!==gen))delete A.forms[id];});   // a form closed since is not in the copy
     const forms={};
-    Object.keys(A.forms).forEach(id=>{forms[id]=Object.assign({},A.forms[id],{continued:A.continued[id]||null});});
+    Object.keys(A.forms).forEach(id=>{forms[id]=Object.assign({},A.forms[id],{continued:A.continued[id]||null});delete forms[id].g;});
     if(!Object.keys(forms).length)return;
     const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'')+famSumSig();
     if(h===A.written){state.autoSig=sig;return;}
@@ -5823,10 +5847,10 @@ async function autoRestore(r){
      !(await wsUI.confirm('Restore this copy? The forms open now are replaced; their own safety copy is written now and stays listed under Autosave.',{ok:'Restore'})))return;
   let d=null;
   try{d=await CP.unpack(r);}catch(e){alert('That copy could not be read: '+(e&&e.message||e));return;}
-  await autoSeal();
-  state.restoring=true;
-  const T={},was=state.caseId||null,notes=await loadCase(d,'autosave',T);
-  state.restoring=false;
+  const req=caseAsk();await autoSeal();if(req!==state.caseReq)return;   /* v25.73 as Open case (caseAsk) */
+  state.restoring=req;
+  const T={req},was=state.caseId||null,notes=await loadCase(d,'autosave',T);
+  if(state.restoring===req)state.restoring=false;
   if(T.gen!==state.caseGen)return;   /* v25.72 (case isolation) another case was opened while the copy loaded: nothing below is for it */
   /* v25.72 the copy restored is not the case that was open: it does not take over that case's file (the one-file edition
      wrote later saves back into it, so the restored student went into the last student's file), its saved mark or its id */
@@ -5866,8 +5890,9 @@ async function autoOffer(){
 
 /* shared by Open case and the autosave offer, so both behave identically */
 async function loadCase(d,how,T){
+  const req=(T&&T.req)||caseAsk();if(req!==state.caseReq)return [];   /* v25.73 a newer request has the screen (caseAsk); T.gen stays unset, so the caller's own steps stop too */
   warmStop();
-  if(mediaHas(d))d=await mediaIn(d,how);   /* only a case with TV-1's media inside waits for the store */
+  if(mediaHas(d)){d=await mediaIn(d,how);if(req!==state.caseReq)return [];}   /* only a case with TV-1's media inside waits for the store */
   caseTurn();   /* v25.71 (case isolation) */
   if(T)T.gen=state.caseGen;   /* v25.72 what the caller goes on to do (the saved mark, the file later saves go into, the case id) is for this case: it stops if another has been opened by then */
   Object.values(state.frames).forEach(fr=>fr.remove());undoAfterOff(1);   /* v25.72 (privacy) a form's kept Undo record goes with its case */
@@ -6593,7 +6618,9 @@ $('#saveCase').addEventListener('click',()=>{saveCase();});
    same Save case), then every form is closed and the bar is cleared, the way Open case clears the screen before it
    loads a file. Nothing is closed unless the file is written with every form in it. */
 async function clearCase(){
+  const req=caseAsk();   /* v25.73 a case asked for while the copy below is written has the screen: this close stands down ('left') and clears nothing of it */
   await autoSeal();   /* the copy of what was open is written and left alone; the next case gets a copy of its own */
+  if(req!==state.caseReq)return 'left';
   caseTurn();   /* v25.71 (case isolation) */
   Object.values(state.frames).forEach(fr=>fr.remove());undoAfterOff(1);   /* v25.72 (privacy) a form's kept Undo record goes with its case */
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.docs=[];state.famSum=null;
@@ -6966,7 +6993,12 @@ const clAgo=iso=>{const s=String(iso||''),n=tdDays(/T/.test(s)&&!isNaN(Date.pars
 async function caseloadOpen(){let L=await clList();
   if(L===null){dialog('Caseload','<p>This browser keeps no caseload here: its storage is not available (a private window, or storage turned off).</p>');return;}
   /* the case on screen: its summary as it is now (its copy stays its last save) */
-  const ck=clKey(packet()),me=ck&&L.find(r=>r.key===ck);if(me){me.sum=clSummary();try{await clTx('readwrite',st=>st.put(me));}catch(e){}}
+  /* v25.73 (privacy audit) the summary goes into the row as the store holds it at that moment, in one step. The row read a
+     moment before used to be put back whole: a Save case that landed between the two was undone in the caseload (its
+     file stayed right), and a student removed meanwhile came back. */
+  const ck=clKey(packet()),me=ck&&L.find(r=>r.key===ck);if(me){const sum=clSummary();me.sum=sum;
+    try{const now=await clTx('readwrite',st=>{const g=st.get(ck);g.onsuccess=()=>{const row=g.result;if(row){row.sum=sum;st.put(row);}};return g;});
+      const i=L.indexOf(me);if(!now){if(i>=0)L.splice(i,1);}else if(now.saved!==me.saved&&i>=0)L[i]=now;}catch(e){}}
   L.sort((a,b)=>clUrgency(a)-clUrgency(b)||String(b.saved).localeCompare(String(a.saved)));
   const SL=L.filter(isStaffRec);L=L.filter(r=>!isStaffRec(r));   /* v22.30 the staff record(s), listed apart */
   const staffBox='<h3 class="cl-h">Staff records<\/h3>'+(SL.length?clCards(SL,'dlg')+'<p class="hint">The RBTs you supervise, in one record (Form RS-1): kept and synced like a student\u2019s case, apart from the students.<\/p>'
@@ -7450,11 +7482,10 @@ const clExpireDays=()=>{try{return +localStorage.getItem('nbh.caseload.expire')|
 const b64=u=>{let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s);};
 const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 /* a passphrase box, the workstation's own dialog */
-wsUI.prompt=(text,opt)=>new Promise(res=>{opt=opt||{};const d=$('#cfDlg'),i=String(text).indexOf('\n');$('#cfTitle').textContent=i>=0?text.slice(0,i):text;
+wsUI.prompt=(text,opt)=>wsUI.hold(null,(d,done)=>{opt=opt||{};const i=String(text).indexOf('\n');$('#cfTitle').textContent=i>=0?text.slice(0,i):text;   /* v25.73 in its turn (wsUI.hold) */
   $('#cfBody').textContent=i>=0?text.slice(i+1):'';$('#cfBody').style.display=i>=0?'':'none';
   const f=$('#cfFoot');f.innerHTML='';f.style.flexWrap='wrap';const inp=document.createElement('input');inp.type=opt.password?'password':'text';inp.placeholder=opt.placeholder||'';
   inp.autocomplete='off';inp.setAttribute('aria-label',opt.label||'Passphrase');inp.style.cssText='flex:1 1 100%;min-height:44px;font:inherit;font-size:16px;padding:8px 10px;margin:0 0 8px;border:1px solid #b8c4cb;border-radius:8px';
-  const done=v=>{f.style.flexWrap='';try{d.close();}catch(e){}res(v);};
   const c=document.createElement('button');c.type='button';c.textContent=opt.cancel||'Cancel';c.onclick=()=>done(null);
   const ok=document.createElement('button');ok.type='button';ok.className='primary';ok.textContent=opt.ok||'OK';ok.onclick=()=>done(inp.value);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();done(inp.value);}});
@@ -7781,7 +7812,7 @@ $('#blank').addEventListener('click',e=>{const o=e.target.closest('[data-clopen]
   {const da=e.target.closest('[data-dueall]');if(da){const g=da.dataset.dueall;dueOpenSet(g,!dueAllOn(g));paintBlank().then(()=>{const b=document.querySelector('#blankCl [data-dueall="'+g+'"]');if(b)b.focus();});return;}}   /* v23.71; v25.72 a group at a time */
   if(e.target.closest('#blNew')){if(Object.keys(state.frames).length||Object.keys(state.pending).length){$('#closeCase').click();return;}foldBar(false);const i=$('#pClient');if(i){i.focus();try{i.select();}catch(x){}}return;}
   if(e.target.closest('#blRead')){$('#readDoc').click();return;}if(e.target.closest('#blOpen')){$('#openCase').click();return;}if(e.target.closest('#blStaff')){staffStart();return;}if(e.target.closest('#blCl')){caseloadOpen();return;}});
-{const cc5=clearCase;clearCase=async function(){const r=await cc5.apply(this,arguments);try{paintBlank();}catch(e){}return r;};}
+{const cc5=clearCase;clearCase=async function(){const r=await cc5.apply(this,arguments);if(r==='left')return r;   /* v25.73 stood down: another case has the screen */try{paintBlank();}catch(e){}return r;};}
 {const ck5=caseloadKeep;caseloadKeep=async function(){const r=await ck5.apply(this,arguments);try{paintBlank();}catch(e){}return r;};}
 setTimeout(()=>{try{paintBlank();}catch(e){}},900);
 /* Today's count on its button: red when a restraint or seclusion notice is due, or something is overdue */
@@ -7858,9 +7889,9 @@ async function mailFor(ev,d){const src=ev.source,from=(src===window&&d.self)?Str
   if(!clGid()){answer({unavailable:true,why:'The Google sign-in key is not set on this '+HERE+' (Help, Google, set up once, keeps it; or Form DD-1, Google Sheet).'});return;}
   if(GM.busy){answer({unavailable:true,why:'Another set of emails is being sent; try again in a moment.'});return;}
   clGsiLoad().catch(()=>{});
-  const go=await new Promise(res=>{const dlg=$('#cfDlg');$('#cfTitle').textContent='Send '+L.length+' email'+(L.length===1?'':'s')+' from your school account?';
+  const go=await wsUI.hold(null,(dlg,done)=>{$('#cfTitle').textContent='Send '+L.length+' email'+(L.length===1?'':'s')+' from your school account?';   /* v25.73 in its turn (wsUI.hold) */
     $('#cfBody').textContent='From Form '+from+', one email to each person, each with their own link:\n'+L.slice(0,8).map(m=>'• '+(m.name?m.name+' ':'')+'<'+m.to+'>').join('\n')+(L.length>8?'\n• and '+(L.length-8)+' more':'')+'\n\nThey go from the Google account you sign in with, like any email you send from it.';
-    $('#cfBody').style.display='';const f=$('#cfFoot');f.innerHTML='';const done=v=>{try{dlg.close();}catch(e){}res(v);};
+    $('#cfBody').style.display='';const f=$('#cfFoot');f.innerHTML='';
     const c=document.createElement('button');c.type='button';c.textContent='Not now';c.onclick=()=>done(null);
     const mailApp=document.createElement('button');mailApp.type='button';mailApp.textContent='Use the Mail app instead';mailApp.onclick=()=>done('app');
     const ok=document.createElement('button');ok.type='button';ok.className='primary';ok.textContent=gmTok()?'Send':'Sign in and send';
@@ -7991,7 +8022,7 @@ $('#closeCase').addEventListener('click',async()=>{
   if(work&&!typed&&!edited){
     if(!(await wsUI.confirm('Close this case? No student has been named and nothing has been typed in the open forms, so it is not saved; the forms are cleared, ready for the next case.',{ok:'Close without saving',danger:true})))return;
     if(turned())return;
-    await clearCase();
+    if((await clearCase())==='left')return;   /* v25.73 another case was asked for meanwhile and has the screen */
     wsUI.toast('The case is closed; nothing was saved. Start the next one: enter the student, then open forms.',{ms:8000});
     say('Case closed, not saved');return;}
   if(work){
@@ -8004,12 +8035,12 @@ $('#closeCase').addEventListener('click',async()=>{
     try{saved=await saveCase();}catch(e){saved=false;}
     if(turned())return;
     if(!saved){wsUI.toast('The case was not saved, so nothing was closed. Everything is as it was.',{kind:'warn',ms:9000});return;}
-    await clearCase();
+    if((await clearCase())==='left')return;   /* v25.73 */
     wsUI.toast('The case is closed and saved. Start the next one: enter the student, then open forms.',{kind:'ok',ms:9000});
     say('Case closed and saved');return;
   }
   const had=open.length||Object.keys(state.pending).length||typed;
-  await clearCase();
+  if((await clearCase())==='left')return;   /* v25.73 */
   wsUI.toast(had?'The case is closed; there was nothing to save. Start the next one: enter the student, then open forms.':'Nothing was open. Start a case: enter the student, then open forms.',{ms:8000});
   say('Case closed');
 });
@@ -8025,10 +8056,12 @@ async function openCaseText(text,handle,opt){
        !(await wsUI.confirm('Open this case? '+ids.length+' form'+(ids.length===1?'':'s')+' will be listed and filled from the file as you open them.\n'+
                 'What is open now is replaced.',{ok:'Open case'})))return;
     const btn=$('#openCase');btn.textContent='Opening\u2026';btn.disabled=true;
+    const req=caseAsk();   /* v25.73 this request, as it is made: a case asked for after it takes the screen */
     await autoSeal();   /* v21.44 the copy of what is open now is written and left alone; this case gets a copy of its own */
-    state.restoring=true;
-    const T={},notes=await loadCase(d,'file',T);
-    state.restoring=false;
+    if(req!==state.caseReq){btn.textContent='Open case';btn.disabled=false;return;}
+    state.restoring=req;   /* v25.73 held by this request: one that finishes late does not let Autosave in on the next one's loading */
+    const T={req},notes=await loadCase(d,'file',T);
+    if(state.restoring===req)state.restoring=false;
     btn.textContent='Open case';btn.disabled=false;
     if(T.gen!==state.caseGen)return;   /* v25.72 (case isolation) another case was opened while this one loaded: the saved mark, the file and the case id below are not for it */
     state.savedAt=new Date();state.lastSig=caseSig();autoBaseline();
@@ -8227,9 +8260,10 @@ async function bootEmbedded(){
   catch(e){alert((e&&e.message||e)+'\n\nOpen the folder edition of the workstation instead.');chip();return;}
   if(c&&c.id){state.caseId=c.id;}
   if(c&&c.forms&&Object.keys(c.forms).length){
-    state.restoring=true;
-    const notes=await loadCase(c,'file');
-    state.restoring=false;
+    const T={req:caseAsk()};state.restoring=T.req;   /* v25.73 as Open case (caseAsk) */
+    const notes=await loadCase(c,'file',T);
+    if(state.restoring===T.req)state.restoring=false;
+    if(T.gen!==state.caseGen){autoOffer();return;}
     state.savedAt=new Date();state.lastSig=caseSig();autoBaseline();
     say('Case opened from this file'+(notes.length?' \u2014 '+notes.join('; '):''));
     /* a working copy older than the file is the file's own past; only one saved
@@ -8520,7 +8554,7 @@ async function drvNewerPaint(){const bar=$('#drvBar');if(!bar)return;const k=clK
     if(rec&&rec.drv&&d){let rd=null;try{rd=parseCase(rec.text);}catch(e){}
       if(rec.text===text||(rd&&d.saved&&rd.saved&&Math.abs(Date.parse(rd.saved)-Date.parse(d.saved))<120000)){state.drvBase=rec.drv.ver||null;state.drvBaseText=rec.drv.base||null;}}}catch(e){}
   drvNewerPaint();return out;};}
-{const cc9=clearCase;clearCase=async function(){const r=await cc9.apply(this,arguments);state.drvBase=null;state.drvBaseText=null;state.drvKey='';drvNewerPaint();return r;};}
+{const cc9=clearCase;clearCase=async function(){const r=await cc9.apply(this,arguments);if(r==='left')return r;   /* v25.73 */state.drvBase=null;state.drvBaseText=null;state.drvKey='';drvNewerPaint();return r;};}
 /* opening a student gets their newest copy first */
 const drvIdle=async()=>{for(let i=0;i<300&&DRV.busy;i++)await new Promise(r=>setTimeout(r,100));};
 {const cg9=caseloadGo;caseloadGo=async function(key,form){
@@ -9606,7 +9640,7 @@ function hxBar(){let b=$('#hxBar');if(!b){const d=$('#drvBar')||$('#pwaBar');if(
   $('#hxBarText').innerHTML='<b>'+esc(H.name)+'<\/b>: the case as it was saved '+esc(hxWhenIn(H.at))+(H.dev?' '+esc(hxDev(H.dev)):'')+'. Save case makes it the current version; the latest stays in History.';}
 {const sc=saveCase;saveCase=async function(){const out=await sc.apply(this,arguments);try{if(out&&state.hx){state.hx=null;hxBar();}}catch(e){}return out;};}
 {const oc=openCaseText;openCaseText=async function(){if(!HX.opening&&state.hx){state.hx=null;hxBar();}return oc.apply(this,arguments);};}
-{const cc=clearCase;clearCase=async function(){const out=await cc.apply(this,arguments);state.hx=null;try{hxBar();}catch(e){}return out;};}
+{const cc=clearCase;clearCase=async function(){const out=await cc.apply(this,arguments);if(out==='left')return out;   /* v25.73 */state.hx=null;try{hxBar();}catch(e){}return out;};}
 /* ---- where History is: the bar (More on the iPad), the command box, each student in Caseload ---- */
 {const x=$('#caseXlsx');if(x&&!$('#hxBtn'))x.insertAdjacentHTML('afterend','<button id="hxBtn" class="rare" type="button" title="The case as it was at each save: open one, restore one form, compare with now">History<\/button>');
   const b=$('#hxBtn');if(b)b.addEventListener('click',()=>hxOpen());}
@@ -10273,7 +10307,8 @@ async function shSend(o){
 
 /* ---- a file from a colleague, opened with Open case */
 async function shLoad(d,id,merged){
-  await autoSeal();state.restoring=true;const T={},notes=await loadCase(d,'file',T);state.restoring=false;
+  const req=caseAsk();await autoSeal();if(req!==state.caseReq)return [];   /* v25.73 as Open case (caseAsk) */
+  state.restoring=req;const T={req},notes=await loadCase(d,'file',T);if(state.restoring===req)state.restoring=false;
   if(T.gen!==state.caseGen)return notes;   /* v25.72 (case isolation), as Open case */
   state.savedAt=merged?null:new Date();state.lastSig=merged?'':caseSig();autoBaseline();state.caseHandle=null;state.caseId=id||d.id||null;
   try{paintSave();}catch(e){}return notes;}
@@ -12908,19 +12943,21 @@ function stripPlace(){const s=PL.strip;if(!s||s.hidden)return;const fr=state.cur
 function stripShow(o,nm){let s=$('#wsResume');if(!s){s=mk('div',{id:'wsResume',role:'status','aria-live':'polite',hidden:''});document.body.appendChild(s);}PL.strip=s;
   const where=o.form?'Form '+o.form+(o.sheet&&o.sheet.t?', '+o.sheet.t:''):'the case';
   s.innerHTML='<span class="wr-t">Back where you left off: <b>'+esc(nm)+'</b> · '+esc(where)+'</span><button type="button" class="wr-f">Start fresh</button><button type="button" class="wr-x" aria-label="Dismiss">&times;</button>';
-  s.hidden=false;stripPlace();let held=false,tm=0;const gone=()=>{clearTimeout(tm);s.hidden=true;};const arm=ms=>{clearTimeout(tm);tm=setTimeout(()=>{if(held)return arm(2000);gone();},ms);};
+  s.hidden=false;stripPlace();let held=false,tm=0;const gone=()=>{clearTimeout(tm);s.hidden=true;};
+  const gen=state.caseGen;   /* v25.73 (privacy audit) the strip is about the case it came with: it goes when another is opened, and its Start fresh, tapped in that moment, closes nothing (it used to close the student opened since, and delete that student's safety copy) */
+  const arm=ms=>{clearTimeout(tm);tm=setTimeout(()=>{if(held)return arm(2000);gone();},ms);};
   s.onpointerenter=()=>{held=true;};s.onpointerleave=()=>{held=false;};s.onfocusin=()=>{held=true;};s.onfocusout=()=>{held=false;};
   s.querySelector('.wr-x').onclick=gone;
   /* what the person has done since: a key or an edit, here or in a form */
   PL.touched=false;const seen=new WeakSet(),mine=e=>{if(e.isTrusted&&!(e.target&&e.target.closest&&e.target.closest('#wsResume')))PL.touched=true;};
   const hook=d=>{if(!d||seen.has(d))return;seen.add(d);['input','change','keydown'].forEach(t=>d.addEventListener(t,mine,true));};
-  hook(document);const ht=setInterval(()=>{if(s.hidden){clearInterval(ht);return;}Object.values(state.frames).forEach(f=>{try{hook(f.contentDocument);}catch(e){}});},700);
-  s.querySelector('.wr-f').onclick=async()=>{gone();try{localStorage.removeItem(PL_K());}catch(e){}PL.last='none';
+  hook(document);const ht=setInterval(()=>{if(s.hidden){clearInterval(ht);return;}if(state.caseGen!==gen){gone();clearInterval(ht);return;}Object.values(state.frames).forEach(f=>{try{hook(f.contentDocument);}catch(e){}});},700);
+  s.querySelector('.wr-f').onclick=async()=>{gone();if(state.caseGen!==gen)return;try{localStorage.removeItem(PL_K());}catch(e){}PL.last='none';
     /* changes made since: Close case saves them first, as always */
     if(PL.touched&&caseDirty()){$('#closeCase').click();return;}
     /* nothing done since: the case is its caseload copy with a sheet turned and a scroll; its safety copy goes, nothing is offered next time */
     try{state.lastSig=caseSig();autoWipe(state.lastSig);}catch(e){}
-    try{await clearCase();}catch(e){}try{await paintBlank();}catch(e){}say0('Started fresh: no student open');const f=$('#blank button,#blank input');if(f)try{f.focus({preventScroll:true});}catch(e){}};
+    let left=false;try{left=(await clearCase())==='left';}catch(e){}if(left)return;try{await paintBlank();}catch(e){}say0('Started fresh: no student open');const f=$('#blank button,#blank input');if(f)try{f.focus({preventScroll:true});}catch(e){}};
   arm(20000);}
 addEventListener('resize',()=>stripPlace());
 const placeHere=(o,nm)=>{stripShow(o,nm);say0('Back where you left off: '+nm+(o.form?', Form '+o.form:''));placeApply(o).then(()=>stripPlace());};
@@ -13278,7 +13315,7 @@ document.addEventListener('input',e=>{if(e.target&&e.target.closest&&e.target.cl
 document.addEventListener('focusout',e=>{if(e.target&&e.target.closest&&e.target.closest('#bar'))setTimeout(apply,0);});
 try{PH_MQ.addEventListener('change',()=>apply());}catch(e){}
 /* a case closed: the start screen again. With students kept the cursor goes to New student rather than the hidden Name box */
-{const cc=clearCase;clearCase=async function(){ST.asked=false;const r=await cc.apply(this,arguments);
+{const cc=clearCase;clearCase=async function(){ST.asked=false;const r=await cc.apply(this,arguments);if(r==='left')return r;   /* v25.73 */
   try{if(kept()&&!open()&&!caseNow()){if(phOn()&&B.classList.contains('bar-open')){const t=$('#barToggle');if(t)t.click();}   /* a phone: the strip folds again */
     const a=document.activeElement;if(a&&a.id==='pClient'&&!T(a.value)){const n=phOn()?phNew:top.querySelector('#blTopNew');try{a.blur();}catch(e){}apply();if(n&&n.offsetParent)try{n.focus({preventScroll:true});}catch(e){}}railFold();}
     apply();}catch(e){}return r;};}

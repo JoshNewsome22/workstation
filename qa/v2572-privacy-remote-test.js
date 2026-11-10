@@ -77,13 +77,13 @@ async function box(port){const data=path.join(OUT,'box-'+port);fs.mkdirSync(data
 async function newPage(tag,opt){opt=opt||{};
   const c=await br.newContext({viewport:{width:1180,height:820},hasTouch:true,serviceWorkers:'block',acceptDownloads:true,userAgent:IPAD_UA});
   if(opt.drive){await c.addInitScript(GSI);await c.route('https://www.googleapis.com/**',opt.drive);await c.route('https://accounts.google.com/**',r=>r.fulfill({contentType:'text/javascript',body:'/* simulated */'}));await c.route('https://apis.google.com/**',r=>r.fulfill({contentType:'text/javascript',body:'/* simulated */'}));}
-  else await c.addInitScript(()=>{try{if(window.top===window){localStorage.setItem('nbh.ws.where@nbh','files');localStorage.setItem('nbh.ws.installTip','dismissed');}}catch(e){}window.print=function(){};});
+  else await c.addInitScript(()=>{try{if(window.top===window){localStorage.setItem('nbh.ws.where@nbh','files');localStorage.setItem('nbh.ws.where@rps','files');localStorage.setItem('nbh.ws.installTip','dismissed');}}catch(e){}window.print=function(){};});
   const p=await c.newPage();p.on('pageerror',e=>errs.push(tag+': '+String(e.message||e).slice(0,240)));p.on('dialog',d=>d.accept().catch(()=>{}));
-  await p.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(2500);
+  await p.goto(L.shellUrl());await sleep(2500);
   await p.evaluate(async()=>{const l=await clList();for(const r of l||[])await clTx('readwrite',st=>st.delete(r.key));try{await window.nbhCopies.clear();}catch(e){}
     ['#dlg','#cfDlg'].forEach(s=>{const d=document.querySelector(s);if(d&&d.open)d.close();});window.__t=[];const t=wsUI.toast;wsUI.toast=function(m,o){window.__t.push(String(m));return t.apply(this,arguments);};});
   return {c,p};}
-const frameOf=(p,id)=>p.frames().find(f=>f!==p.mainFrame()&&decodeURIComponent(f.url()).includes(FILE[id]));
+const frameOf=(p,id)=>p.frames().find(f=>f!==p.mainFrame()&&L.frameIs(f,id,FILE[id]));
 async function setBar(p,o){await p.evaluate(o=>{const set=(s,v)=>{const e=document.querySelector(s);if(!e)return;e.value=v||'';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
   set('#pClient',o.client);set('#pSid',o.sid);set('#pGrade',o.grade);set('#pSite',o.site);set('#pBcba',o.bcba);},o);await sleep(300);}
 async function answerIn(fr){for(let i=0;i<3;i++){const o=await fr.evaluate(()=>{const d=document.getElementById('nbhUiDlg');if(d&&d.open){d.querySelector('.u-f button:last-child').click();return true;}return false;}).catch(()=>false);if(!o)break;await sleep(900);}}
@@ -270,7 +270,7 @@ async function respond(url,text){const c=await br.newContext({viewport:{width:39
     document.querySelector('button:not(.ghost)').click();},text);await sleep(1800);
   const done=await rp.evaluate(()=>/Sent\./.test(document.body.innerText));await c.close();return done;}
 async function formPage(id){const c=await br.newContext({viewport:{width:1300,height:900},acceptDownloads:true});const pg=await c.newPage();pg.on('pageerror',e=>errs.push(id+': '+String(e.message||e).slice(0,240)));pg.on('dialog',d=>d.accept().catch(()=>{}));
-  await pg.goto(L.BASE+'/NBH-Workstation/'+encodeURI(FILE[id]));await sleep(1200);await pg.evaluate(()=>{window.confirm=()=>true;if(window.nbhUI)nbhUI.confirm=async()=>true;});return {c,pg};}
+  await pg.goto(L.formUrl(encodeURI(FILE[id])));await sleep(1200);await pg.evaluate(()=>{window.confirm=()=>true;if(window.nbhUI)nbhUI.confirm=async()=>true;});return {c,pg};}
 /* Form CF-1: the student, a rater on the sheet, the reply box at this address, and that rater's link */
 const cfFill=(pg,o)=>pg.evaluate(o=>{const set=(n,v)=>{const e=document.querySelector('[data-m="'+n+'"]');if(!e)return;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
   set('client',o.client);set('sid',o.sid||'');set('bcba','Simulated BCBA');set('email','simulated.bcba@example.org');},o);

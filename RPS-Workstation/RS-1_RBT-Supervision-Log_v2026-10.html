@@ -3006,7 +3006,7 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     const other=d&&typeof d==='object'&&typeof d.form==='string'&&d.form!=='RS-1'?d.form:'';
     const next=other?null:rosterFrom(d);
     if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved RS-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form RS-1. Nothing was changed.':'That file could not be read as a saved RS-1 form. Nothing was changed.');return;}
-    const prev={sups:G.sups,rules:G.rules,rbts:R,cur:R.indexOf(S)};applyRoster(next);curKey='';openC=new Set();try{renderAll();}catch(err){applyRoster(prev);renderAll();alert('That file could not be read as a saved RS-1 form. Nothing was changed.');}};
+    const prev={sups:G.sups,rules:G.rules,rbts:R,cur:R.indexOf(S)};applyRoster(next);curKey='';openC=new Set();if(!window.__nbhQuiet)window.__tsKey=null;try{renderAll();}catch(err){applyRoster(prev);renderAll();alert('That file could not be read as a saved RS-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
 
 /* ---------------- CSV: the school year's service days and contacts, one row each ---------------- */
@@ -3024,7 +3024,7 @@ $('#csvBtn').addEventListener('click',()=>{
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='RS-1_'+nm+'_'+y+'-'+(y+1)+'.csv';document.body.appendChild(a);a.click();a.remove();});
 
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\n'+(R.length>1?'All '+R.length+' supervisees, ':'The setup, ')+'the supervisors, every month, the goals and the PDUs are cleared. Unsaved work will be lost.',{ok:'Clear all',danger:true})){resetAll();curKey='';openC=new Set();renderAll();setView('setup');}});
-function resetAll(){G.sups=[newSup()];G.rules={};S=newRbt();R=[S];}
+function resetAll(){window.__tsKey=null;G.sups=[newSup()];G.rules={};S=newRbt();R=[S];}   /* v25.73 (privacy) __tsKey: a name typed to sign with was the last record's (renderSign empties the boxes) */
 
 /* ---------------- simulation (simulated people and codes only) ---------------- */
 async function loadSim(){

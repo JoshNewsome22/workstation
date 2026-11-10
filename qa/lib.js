@@ -4,8 +4,24 @@ const fs=require('fs'),path=require('path');
 try{const _fs=require('fs'),_p=require('path');_fs.mkdirSync(_p.join(__dirname,'out'),{recursive:true});const _src=_fs.readFileSync(require.main.filename,'utf8');for(const m of _src.matchAll(/\/out\/([\w.-]+)\//g))_fs.mkdirSync(_p.join(__dirname,'out',m[1]),{recursive:true});}catch(e){}
 const ROOT=process.env.WS_ROOT||require('path').resolve(__dirname,'..');
 const BASE=process.env.WS_URL||'http://127.0.0.1:8123';
+/* v25.73 the edition under test. WS_EDITION=RPS-Workstation: the school edition's folder. WS_ONEFILE=1: the one-file edition
+   of that name (deliver/<edition>.html). A test that takes its addresses from shellUrl() and formUrl(), and finds a form's
+   frame with frameIs(), runs on any of them; nothing it checks changes.
+   In the one-file edition a form opens inside the workstation from the file itself (no address of its own): its frame
+   is named after the form as it is made, so frameIs() finds it; a form opened on its own (formUrl) is the folder
+   edition's, so a scenario that opens one says nothing about the one file. Save case there writes a download, as on an
+   iPad (no "save as" window, which this browser would leave open for ever). */
+const ED=process.env.WS_EDITION||'NBH-Workstation',ONE=!!process.env.WS_ONEFILE;
+const shellUrl=()=>BASE+(ONE?'/deliver/'+ED+'.html':'/'+ED+'/index.html');
+const formUrl=file=>BASE+'/'+ED+'/'+file;
+const frameIs=(f,id,file)=>{try{return decodeURIComponent(f.url()).includes(file)||(ONE&&f.name()==='nbhform:'+id);}catch(e){return false;}};
+if(ONE){const launch=chromium.launch.bind(chromium);chromium.launch=async function(){const b=await launch.apply(null,arguments),nc=b.newContext.bind(b);
+  b.newContext=async function(){const c=await nc.apply(null,arguments);await c.addInitScript(()=>{if(window.top!==window)return;
+    try{window.showSaveFilePicker=undefined;window.showOpenFilePicker=undefined;}catch(e){}
+    try{const d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,'srcdoc');Object.defineProperty(HTMLIFrameElement.prototype,'srcdoc',{configurable:true,enumerable:d.enumerable,get(){return d.get.call(this);},
+      set(v){try{const m=/<title>\s*Form\s+([A-Z]{2,4}-\d)\b/.exec(String(v).slice(0,20000));if(m)this.name='nbhform:'+m[1];}catch(e){}d.set.call(this,v);}});}catch(e){}});return c;};return b;};}
 function forms(edition){
-  edition=edition||'NBH-Workstation';
+  edition=edition||ED;
   const idx=fs.readFileSync(path.join(ROOT,edition,'index.html'),'utf8');
   const m=/const FORMS=(\[[\s\S]*?\n\]);/.exec(idx);
   const FORMS=new Function('return '+m[1])();
@@ -58,4 +74,4 @@ async function packetChoose(page,aud,touch){aud=aud||'iep';const card='#dlg .pk-
   await page.waitForSelector('#dlg[open] .pk-card[data-aud="'+aud+'"]',{timeout:20000});
   const go=async sel=>{if(touch)await page.locator(sel).tap();else await page.evaluate(s=>document.querySelector(s).click(),sel);};
   await go(card);await page.waitForSelector('#dlg[open] #pkPrint',{timeout:10000});await go('#pkPrint');}
-module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts,navTap,tapOrMenu,IPAD_UA,ipadBrowser,ipadCtx,packetChoose};
+module.exports={chromium,fs,path,ROOT,BASE,ED,ONE,shellUrl,formUrl,frameIs,forms,loadSim,wire,sleep,mailParts,navTap,tapOrMenu,IPAD_UA,ipadBrowser,ipadCtx,packetChoose};

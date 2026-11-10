@@ -21,7 +21,7 @@ const A_MARKS=[/Mateo/i,/Rivera/i,/4471823/];const marks=t=>A_MARKS.filter(re=>r
 const errs=[];let br;
 async function page(tag){const c=await br.newContext({viewport:{width:1180,height:820},serviceWorkers:'block',acceptDownloads:true});await c.addInitScript(()=>{window.print=function(){};});
   const p=await c.newPage();p.on('pageerror',e=>errs.push(tag+': '+String(e.message||e).slice(0,240)));return {c,p};}
-async function open(p,id){await p.goto(L.BASE+'/NBH-Workstation/'+FILE[id],{waitUntil:'load',timeout:60000});await p.waitForFunction(()=>window.nbhBridge&&window.nbhBridge.ownSave,null,{timeout:30000});await sleep(900);}
+async function open(p,id){await p.goto(L.formUrl(FILE[id]),{waitUntil:'load',timeout:60000});await p.waitForFunction(()=>window.nbhBridge&&window.nbhBridge.ownSave,null,{timeout:30000});await sleep(900);}
 /* the form's own question box: its words, and a button of it pressed by its words */
 const asked=p=>p.evaluate(()=>{const d=document.getElementById('nbhUiDlg');return d&&d.open?d.textContent.replace(/\s+/g,' ').trim():'';});
 const press=(p,re)=>p.evaluate(src=>{const d=document.getElementById('nbhUiDlg');if(!d||!d.open)return false;const b=[...d.querySelectorAll('button')].find(x=>new RegExp(src).test(x.textContent.trim()));if(!b)return false;b.click();return true;},re.source);
