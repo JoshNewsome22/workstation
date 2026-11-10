@@ -89,7 +89,8 @@ async function run(br,f,sz){
     const bad=[],order=[],blanks={},opened={};let last=null,guard=0,shots=0,maxPer=0,hid=null;
     while(guard++<700){const sc=await screen(p);if(sc.S.rev)break;const pr=parse(sc.S.progress);
       if(!pr)bad.push('progress "'+sc.S.progress+'"');
-      else{if(last?!(pr.a===last.z+1&&pr.n===last.n&&pr.t===last.t&&(pr.s===last.s||pr.s===last.s+1)):!(pr.a===1&&pr.s===1))order.push((last?last.t0:'start')+' -> '+sc.S.progress);last=Object.assign(pr,{t0:sc.S.progress});maxPer=Math.max(maxPer,pr.z-pr.a+1);}
+      /* v25.72 (TD-1 review T10) the questions count on the sheet on screen (each sheet from 1), the sheet as the top bar counts it */
+      else{if(last?!(pr.t===last.t&&(pr.s===last.s?pr.a===last.z+1&&pr.n===last.n:pr.s>last.s&&pr.a===1&&last.z===last.n)):!(pr.a===1))order.push((last?last.t0:'start')+' -> '+sc.S.progress);last=Object.assign(pr,{t0:sc.S.progress});maxPer=Math.max(maxPer,pr.z-pr.a+1);}
       opened[sc.S.si]=sc.S.counts[sc.S.si];
       if(!sc.nq)bad.push(sc.S.progress+': no question on screen');
       if(sc.noField)bad.push(sc.S.progress+': a question with no box on screen');
@@ -111,7 +112,7 @@ async function run(br,f,sz){
       await press('.fx2-stbar .fx2-stnext');await sleep(sz.touch?230:200);}
     const end=await screen(p);
     const mism=scanned.map((c,i)=>opened[i]!=null&&opened[i]!==c?s0.sheets[i]+' '+c+' counted, '+opened[i]+' open':null).filter(Boolean);
-    ok('2 '+tag+': Next walks '+guard+' screens, '+(last?last.n:0)+' questions on '+(last?last.t:0)+' sheet(s), in order, and ends at Review the blank ones',end.S.rev&&last&&last.z===last.n&&last.s===last.t&&!order.length&&!bad.some(x=>/^progress/.test(x)),{order:order.slice(0,4),end:end.S,last});
+    ok('2 '+tag+': Next walks '+guard+' screens, '+(last?last.n:0)+' questions on '+(last?last.t:0)+' sheet(s), in order, and ends at Review the blank ones',end.S.rev&&last&&last.z===last.n&&last.s<=last.t&&!order.length&&!bad.some(x=>/^progress/.test(x)),{order:order.slice(0,4),end:end.S,last});
     ok('2 '+tag+': each sheet\'s count when it is open is the count it was given ('+scanned.join(',')+')',!mism.length&&Object.keys(opened).length===scanned.length,{mism,opened});
     ok('3 '+tag+': every screen holds a question; every box on screen in one, with its label; no table or whole part cut; large tables, runners and graphs alone'+(sz.per>1?' (up to '+maxPer+' a screen)':''),!bad.filter(x=>!/^progress|blank as counted/.test(x)).length,bad.filter(x=>!/^progress|blank as counted/.test(x)).slice(0,6));
     ok('4 '+tag+': a question the form hides is skipped ('+(hid&&hid.t0)+' then '+(hid&&hid.t1)+') and joins again when it shows ('+(hid&&hid.t2)+')',hid&&(hid.skip||(hid.t1<hid.t0&&hid.t2===hid.t0&&hid.p3===hid.p0)),hid);

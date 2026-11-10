@@ -92,7 +92,7 @@ async function main(){
      src:[...document.querySelectorAll('#compWrap p.method.td9-src')].every(e=>getComputedStyle(e).display!=='none'),stepsb:[...document.querySelectorAll('#compWrap b.td9-stepsb')].every(e=>getComputedStyle(e).display!=='none'),
      grid:getComputedStyle(document.querySelector('.sheet.td9-grid')).display,q:getComputedStyle(document.querySelector('.qrow .qt')).fontSize};});
  await p.emulateMedia({media:'screen'});await p.evaluate(()=>window.dispatchEvent(new Event('afterprint')));
- const back=await p.evaluate(()=>[...document.querySelectorAll('option[data-td9-choose]')].every(o=>o.textContent==='Choose…'));
+ const back=await p.evaluate(()=>[...document.querySelectorAll('option[data-td9-choose]')].every(o=>o.textContent===(o.dataset.td9t||'Choose…')));   /* v25.72 (T11) the Add component box's own words, "Choose a component" */
  ok('on paper nothing the layout adds prints, the blank answers stay blank, the examples are back in their boxes, the source lines and the steps heading print, and the sheet keeps its own layout and sizes',pr.added===0&&pr.chooseBlank&&pr.phBack&&pr.src&&pr.stepsb&&pr.grid==='block'&&pr.q!=='16px'&&back,pr);
  /* iPad upright */
  const u=await b.newPage({viewport:{width:820,height:1180},hasTouch:true,isMobile:true});await u.goto(URL);await sleep(1500);await sim(u);await view(u,'teach');

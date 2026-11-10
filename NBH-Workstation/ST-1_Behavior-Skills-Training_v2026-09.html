@@ -3909,6 +3909,8 @@ html{touch-action:manipulation}
   html.nbh-hc{--nbh-ink:#000;--nbh-muted:#263238;--nbh-rule:#5e7673;--nbh-rule2:#3f5654;--nbh-field:#4d6562;--nbh-field-hover:#2f4543;--nbh-focus:#0a4f75;--ink:#000;--muted:#263238}
   html.nbh-hc body{color:#000}
   html.nbh-hc .hint,html.nbh-hc .muted,html.nbh-hc .help,html.nbh-hc small,html.nbh-hc .note,html.nbh-hc .method{color:#263238}
+  /* v25.72 (TD-1 review B7) the dark top bar keeps its light words: the next sheet's name beside the arrow was darkened with the page's small text */
+  html.nbh-hc .toolbar .nbh-arrows button small{color:inherit}
   html.nbh-hc input:not([type=checkbox]):not([type=radio]):not([type=range]),html.nbh-hc select,html.nbh-hc textarea{border-color:#4d6562}
   html.nbh-hc ::placeholder{color:#4a585e;opacity:1}
   html.nbh-hc :focus-visible{outline:3px solid #0a4f75 !important;outline-offset:2px}
@@ -5280,6 +5282,8 @@ try{paint();}catch(e){}
       finally { body.className = was; if (CF.panes) keys.forEach(function(k){ panes[k].forEach(function(e){ e.removeAttribute('data-fx2-scan'); }); }); hold(false); if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); if (mo) mo.takeRecords(); scanning = false; }
     }
     function order(){ return views().map(function(b){ return b.getAttribute('data-view'); }); }
+    /* v25.72 the sheets as the top bar counts them (nbh-ui: every tab of #viewSeg on show) */
+    function topTabs(){ var s = D.getElementById('viewSeg'); return s ? Array.prototype.filter.call(s.querySelectorAll('button,[role="tab"]'), function(b){ return !b.hidden && getComputedStyle(b).display !== 'none'; }) : []; }
     function sheetList(){ var vs = views().map(function(b){ return b.getAttribute('data-view'); }); if (!vs.length) return [''];
       return vs.filter(function(v){ return v === key ? list.length : (scans[v] || []).length; }); }
 
@@ -5407,8 +5411,11 @@ try{paint();}catch(e){}
       var txt;
       if (rev) { txt = 'Review the blank ones'; setText(sp, total + ' question' + (total === 1 ? '' : 's') + ' in all'); }
       else if (!scr.length) { txt = 'Nothing to answer on this sheet'; setText(sp, vlabel(key)); }
-      else { var s = scr[at], a = list.indexOf(s[0]) + 1 + before, z = list.indexOf(s[s.length - 1]) + 1 + before;
-        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + total + (sh.length > 1 || si >= 0 ? ' · Sheet ' + (si + 1) + ' of ' + sh.length : '');
+      /* v25.72 (TD-1 review T10, the BCBA's call) the questions are counted on the sheet on screen, and the sheet is counted as
+         the top bar counts it (every sheet in its list, "2 of 13"); it read "Question 26 of 187 · Sheet 2 of 11" */
+      else { var s = scr[at], a = list.indexOf(s[0]) + 1, z = list.indexOf(s[s.length - 1]) + 1, tb = topTabs(), ti = -1;
+        tb.forEach(function(b, j){ if (b.getAttribute('data-view') === key) ti = j; });
+        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + list.length + (ti >= 0 && tb.length > 1 ? ' · Sheet ' + (ti + 1) + ' of ' + tb.length : '');
         setText(sp, [vlabel(key), s[0].sec].filter(Boolean).join(' \u00b7 ') || s[0].title); }
       setText(live, txt);
       var last = !rev && at >= scr.length - 1 && sh.indexOf(key) === sh.length - 1;

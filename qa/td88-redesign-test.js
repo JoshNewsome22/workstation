@@ -45,7 +45,7 @@ const keys=fs.existsSync(SIM)?fs.readdirSync(SIM).filter(k=>fs.existsSync(path.j
     let after='',saved='';if(first){first.checked=false;first.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,200));after=document.querySelector('#sendBuild').textContent;saved=(document.querySelector('[name="sel.picks"]')||{}).value||'';}
     return {picks,btn,after,saved,meter:(document.querySelector('#selMeter .td-meter')||{}).textContent||''};});
   ok('1 Select: rows with ticks, the core ticked (the consequence protocol among them), the button counts the ticks, an untick is kept',
-    A.picks.length>=2&&A.picks.some(x=>x.code==='R_PB'&&x.core&&x.on)&&A.picks.filter(x=>x.core).every(x=>x.on)&&/^Add the \d+ ticked component/.test(A.btn)&&A.after!==A.btn&&/":0/.test(A.saved),A);
+    A.picks.length>=2&&A.picks.some(x=>x.code==='R_PB'&&x.core&&x.on)&&A.picks.filter(x=>x.core).every(x=>x.on)&&/^Add (\d+ )?to Build/.test(A.btn)&&A.after!==A.btn&&/":0/.test(A.saved),A);
   /* 2. the meter */
   ok('2 the plan’s size in sight: components, staff steps, pages, duplicates',/This plan so far: \d+ components? · \d+ staff steps? · about \d+ pages?/.test(A.meter)&&/Duplicates:/.test(A.meter)&&/(A plan staff can run|More than staff can run)/.test(A.meter),A.meter);
   /* 3. the card */
@@ -57,7 +57,7 @@ const keys=fs.existsSync(SIM)?fs.readdirSync(SIM).filter(k=>fs.existsSync(path.j
     d.querySelector('input[name$=".who"]').value='classroom staff (simulated)';fire(d.querySelector('input[name$=".who"]'));
     const cs=window.__tdComps();const mine=cs.find(c=>c.i===+d.dataset.i);
     sheet('final');await new Promise(r=>setTimeout(r,600));const steps=document.querySelectorAll('#finalBody .plan-step').length;const setups=document.querySelectorAll('#finalBody .plan-setup li').length;const whos=document.querySelectorAll('#finalBody .plan-who').length;
-    const expectSteps=cs.filter(c=>!window.__tdIsAssess||true).reduce((a,c)=>a+c.steps.length,0);
+    const expectSteps=cs.filter(c=>!window.__tdIsAssess(c)).reduce((a,c)=>a+c.steps.length,0);   /* v25.72 (T6) the BCBA's assessments print unnumbered, so only the staff cards' steps are numbered */
     return {who,su,n0,n1:document.querySelectorAll('#compWrap .card').length,libTicked,setupLike,mine:{steps:mine.steps.length,setup:mine.setup.length,who:mine.who},steps,setups,whos,expectSteps,dup:document.querySelectorAll('#compWrap .td-dup').length};});
   ok('3 a card has who/when/where and a set-up tick on each step; the library card’s set-up steps are ticked; the plan numbers the every-session steps only, the set-up steps apart; a second card says so',
     B.who&&B.su&&B.n1===B.n0+1&&B.libTicked.length===B.setupLike&&B.mine.setup===B.libTicked.length&&B.mine.who==='classroom staff (simulated)'&&B.steps>=B.expectSteps&&B.setups>=B.mine.setup&&B.whos>=1&&B.dup>=1,B);

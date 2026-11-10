@@ -312,7 +312,7 @@ const clock=()=>{const T=new Date('2026-11-05T10:00:00').getTime();const D0=Date
       out.push({sheet:sh.id,grid:getComputedStyle(sh).display,side:!!a&&b.left>=a.right-1&&b.top<a.bottom,below:!!a&&b.top>=a.bottom-1,head:(r.querySelector('.td9-rh b')||{}).textContent||'',
         prog:((q&&q.querySelector('.td9-prog'))||{}).textContent||'',add:!!r.querySelector('.td9-add'),sw:r.querySelectorAll('.td-pk input').length,
         ns:q?q.querySelectorAll('.nbh-segb[data-v="not sure"]').length:0,qn:q?q.querySelectorAll('.qrow').length:0});});return out;});
-  for(const [w,h,want] of [[1376,1032,'side'],[1032,1376,'side'],[820,1180,'below'],[390,844,'below']]){const ctx=await L.ipadCtx(ipad,{viewport:{width:w,height:h}});await ctx.addInitScript(clock);const p=await open(ctx,'TD-1','T1 '+w);const got=[];
+  for(const [w,h,want] of [[1376,1032,'side'],[1032,1376,'below']/* v25.72 (TD-1 review T4) the 13-inch iPad upright takes the upright layout */,[820,1180,'below'],[390,844,'below']]){const ctx=await L.ipadCtx(ipad,{viewport:{width:w,height:h}});await ctx.addInitScript(clock);const p=await open(ctx,'TD-1','T1 '+w);const got=[];
     for(const v of SEL){await view(p,v);(await selector(p)).forEach(x=>got.push(Object.assign({v},x)));}
     const bad=got.filter(x=>!x[want]||x.head!=='Recommended'||!/^\d+ of \d+ answered$/.test(x.prog)||!x.add||!x.sw||(want==='side'&&x.grid!=='grid'));
     const ns=got.reduce((n,x)=>n+x.ns,0);
