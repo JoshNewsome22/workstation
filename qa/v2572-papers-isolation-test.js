@@ -12,6 +12,8 @@
    L  the recent-students list and the pins hold students' keys (name and ID). A student removed from the caseload stayed
       on the recent list, and Remove all student data left both lists. After Remove all, every place this browser keeps
       things for the page (local and session storage, every IndexedDB store) is read for the students' names and IDs.
+      Form TB-1's bank (My definitions) is the BCBA's own work: it stays, the question says so and names the entries
+      that may name a student kept here (the BCBA, 11/10).
    usage: WS_URL=http://127.0.0.1:8171 node qa/v2572-papers-isolation-test.js [M D N L]   results in qa/out/v2572-papers-isolation/ */
 const L=require(__dirname+'/lib.js');const {sleep,fs,path}=L;
 const FILE=Object.fromEntries(L.forms().map(f=>[f.id,f.file]));
@@ -183,7 +185,15 @@ const LEFT=/Mateo|Luis|Rivera|4471823|Ana |scratch|Carried|Banyan|561-555/;   /*
     ok('L a student removed from the caseload is no longer on the recent list; the other still is',!/mateo|4471823/.test(l1)&&/priya/.test(l1),l1);
     await sleep(16000);await closeBoxes(p);   /* the Undo offer has passed */
     /* Remove all student data */
+    /* two entries in Form TB-1's bank (My definitions), the BCBA's own work: one names the student still kept here */
+    await p.evaluate(()=>new Promise(res=>{const r=indexedDB.open('nbh-tb1-bank',1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('defs'))r.result.createObjectStore('defs',{keyPath:'id'});};r.onerror=()=>res();
+      r.onsuccess=()=>{const db=r.result,t=db.transaction('defs','readwrite'),st=t.objectStore('defs');
+        st.put({id:'my-test1',lab:'Leaving the seat',def:'Priya leaves her seat without permission during independent work (simulated)',saved:'2026-11-09T12:00:00.000Z'});
+        st.put({id:'my-test2',lab:'Calling out',def:'Speaks without raising a hand during whole-class teaching (simulated)',saved:'2026-11-09T12:01:00.000Z'});t.oncomplete=()=>{db.close();res();};};}));
     await p.evaluate(()=>{clRemoveAll();});
+    await p.waitForFunction(()=>document.getElementById('cfDlg').open&&/^Remove every student/.test(document.getElementById('cfTitle').textContent),null,{timeout:8000}).catch(()=>{});
+    const qb=await p.evaluate(()=>document.getElementById('cfDlg').open?document.getElementById('cfBody').textContent:'');
+    ok('L the question says Form TB-1’s bank stays, and names the entry that may name a student (not the other)',/2 saved definitions in Form TB-1’s bank \(My definitions\) stay/.test(qb)&&/“Leaving the seat”/.test(qb)&&!/Calling out/.test(qb),qb.slice(-420));
     const q=await answer(p,/^Remove every student/,/^Remove everything/,8000);await answer(p,/never saved to a file/,/^Remove anyway/,2500);
     await sleep(30000);await closeBoxes(p);   /* and its Undo offer has passed */
     const left=await p.evaluate(async()=>{const out=[];const add=(where,text)=>out.push({where,text:String(text||'')});
@@ -194,10 +204,12 @@ const LEFT=/Mateo|Luis|Rivera|4471823|Ana |scratch|Carried|Banyan|561-555/;   /*
         let todo=names.length;const fin=()=>{if(!--todo){db.close();res();}};
         names.forEach(nm=>{try{const g=db.transaction(nm,'readonly').objectStore(nm).getAll();g.onsuccess=()=>{let t='';try{t=JSON.stringify(g.result,(k,v)=>v instanceof ArrayBuffer||ArrayBuffer.isView(v)?'[bytes]':v);}catch(e){t='';}add('IndexedDB '+d.name+' / '+nm,t);fin();};g.onerror=fin;}catch(e){fin();}});};});}
       return out;});
-    const who=[].concat(A_MARKS,B_MARKS),named=left.filter(x=>marks(x.text,who).length).map(x=>({where:x.where,holds:marks(x.text,who)}));
+    const who=[].concat(A_MARKS,B_MARKS),all=left.filter(x=>marks(x.text,who).length).map(x=>({where:x.where,holds:marks(x.text,who)}));
+    const bankLeft=left.find(x=>/nbh-tb1-bank/.test(x.where)),named=all.filter(x=>!/nbh-tb1-bank/.test(x.where));
+    ok('L my bank is kept whole (both entries), as the question said',!!bankLeft&&/my-test1/.test(bankLeft.text)&&/my-test2/.test(bankLeft.text),bankLeft&&bankLeft.text.slice(0,200));
     fs.writeFileSync(path.join(OUT,'L-left.json'),JSON.stringify({places:left.map(x=>x.where),named},null,1));
     ok('L Remove all student data asked first',!!q,q);
-    ok('L after it, nothing this browser keeps for the workstation names a student (local and session storage, every IndexedDB store)',left.length>3&&!named.length,named);
+    ok('L after it, nothing this browser keeps for the workstation names a student (local and session storage, every IndexedDB store but my bank)',left.length>3&&!named.length,named);
     await c.close();}
 
   ok('no page errors',!errs.length,errs.slice(0,6));

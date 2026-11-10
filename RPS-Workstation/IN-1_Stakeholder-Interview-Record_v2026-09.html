@@ -3358,7 +3358,8 @@ function place(objs){const res={placed:[],held:[],done:[],cells:0},taken=new Set
 const kit=NBH_RESPOND.replyKit({form:'IN-1',rec:()=>S,inst:pg=>pg,pages:()=>Object.keys(RP_SETS).map(k=>[k,RP_SETS[k].title]),pageOf,
   round:()=>'',people:()=>S.resp.filter(r=>String(r.n||'').trim()).map(r=>({name:r.n,role:String(r.rel||'').trim()||r.role,pg:rpSetOf(r.role)})),
   payload:pg=>withSet(pg,()=>rpPayload()),place,force:null,changed:()=>{try{renderAll();}catch(e){}},
-  short:()=>NBH_RESPOND.shortName(S.meta.client||''),bcba:()=>String(S.meta.bcba||'').trim()||'the interviewer',
+  short:()=>NBH_RESPOND.shortName(S.meta.client||''),full:()=>String(S.meta.client||''),   /* v25.72 full: whose replies and reply box these are (nbh-respond.js, sameStudent) */
+  bcba:()=>String(S.meta.bcba||'').trim()||'the interviewer',
   why:()=>window.NBH_RESPOND_MISSING?'The file nbh-respond.js is not beside this form, so no page can be built.':!$('#rpEmail').value.trim()?'Enter your email above first: the answers come to it when the reply box cannot be reached.':''});
 const rp0=rpPayload;rpPayload=function(){return kit.withBox(rp0.apply(this,arguments));};   /* the dialog's pages and links carry the box */
 window.__rp.payload=rpPayload;window.__rp.kit=kit;

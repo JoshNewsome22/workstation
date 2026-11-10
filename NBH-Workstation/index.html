@@ -3469,7 +3469,15 @@ window.addEventListener('message',ev=>{
   }
   /* the file check loads forms in hidden frames; their replies are not real status */
   if(state.probing&&!state.frames[d.id])return;
+  /* v25.72 (privacy audit R3) a form's status, and the status its answers carry, count only when they come from the window of
+     the frame this case holds under that form's id. A form loaded out of sight (the caseload's Form DD-1 for another
+     student once its work is over, the packet's, the file check's) is not this case's form, so what it says of its fields,
+     its student's name and its details is not taken as this case's. A form talked to directly (fr.__direct, quietForm
+     above) is handed its questions by this window and answers from its own; an answer that names this window as its
+     sender is taken for such a form only. */
+  let own=false;{const F=state.frames[d.id];try{own=!!F&&(F.contentWindow===ev.source||(!!F.__direct&&ev.source===window));}catch(e){own=false;}}
   if(d.nbh==='pong'||d.nbh==='status'){
+    if(!own)return;
     state.status[d.id]=d.status;settleSig(d.id);   /* v23.77 */
     if(FACT_SRC[d.id])noteFactSource(d.id,d.status);   /* v21.31 the case */
     if(state.dueSig===undefined)state.dueSig={};const dsig=(d.status&&d.status.sig)||'';if(state.dueSig[d.id]!==dsig){state.dueSig[d.id]=dsig;noteDue();}   /* v21.35 due */
@@ -3478,7 +3486,7 @@ window.addEventListener('message',ev=>{
     renderRail();
     if(state.cur===d.id)$('#crumbStatus').textContent=d.status.filled+' fields filled';
   } else if(d.nbh==='payload'||d.nbh==='snapshot'||d.nbh==='restored'||d.nbh==='facts-out'||d.nbh==='facts-applied'||d.nbh==='csv-out'||d.nbh==='fill-applied'){
-    if(d.nbh!=='payload'&&d.status){state.status[d.id]=d.status;settleSig(d.id);noteWho(d.id,d.who);renderRail();}   /* v23.77 */
+    if(d.nbh!=='payload'&&d.status&&own){state.status[d.id]=d.status;settleSig(d.id);noteWho(d.id,d.who);renderRail();}   /* v23.77; v25.72 from this case's own frame only */
     /* answered in the order asked, per form and per kind of answer. v21.43: only by the frame that was asked, so
        one form cannot answer for another (the relay hands a snapshot on to the asking form as the partner's) */
     const q=pending[d.id+'|'+d.nbh];
@@ -5871,7 +5879,7 @@ async function loadCase(d,how,T){
      opened, and Save case then wrote those forms into a file and a caseload copy under that student's name. */
   else{['#pClient','#pSid','#pGrade','#pSite','#pBcba'].forEach(sel=>{const e=$(sel);if(e)e.value='';});setPhoto('',true);who();}
   commitBar(true);   /* v21.44 (A8) another case: the earlier values on the bar are not corrections of this one */
-  state.openAs=caseAs();state.staffAsked=false;   /* v25.72 the student this case was opened as (clOtherAsk); a staff record beside it is asked about for this case */
+  state.openAs=caseAs();state.staffAsked=false;state.oddOk='';   /* v25.72 the student this case was opened as (clOtherAsk); a staff record beside it is asked about for this case */
   if(d.facts)setFacts(d.facts,false); else setFacts(null,false);   /* v21.31 the case */
   state.docs=Array.isArray(d.docs)?d.docs.filter(x=>x&&typeof x==='object'&&x.at).slice(-50):[];   /* v25.68 the papers made for it (none in an older case) */
   famSumIn(d);   /* v25.70 the family's plan summary as the BCBA edited it (none in an older case) */
@@ -6427,6 +6435,8 @@ async function saveCase(o){o=o&&(o.file||o.whole)?o:{};   /* v21.89 {file:true}:
   const gen=state.caseGen,turned=()=>gen!==state.caseGen,gone=w=>caseSaveLeft(p,w);
   /* the name and ID at the top now match another student kept here: asked before anything is read or written (clOtherAsk) */
   const rep=await clOtherAsk(p);if(turned())return gone();if(!rep)return false;
+  /* a form of the case holds another student's name: asked before it is saved (caseOddAsk) */
+  const odd=await caseOddAsk(p,'Save');if(turned())return gone();if(!odd)return false;
   /* v22.31 a staff record (Form RS-1) open beside a student's case. Nothing entered in it: it is left out of the case and
      closed, without a question. Something entered: Leave it out (the case is saved without it and it is closed), Keep it in
      this case, or Cancel. Before, the one question had only Keep and Cancel, and Cancel stopped the save, and with it Close
@@ -6594,7 +6604,7 @@ async function clearCase(){
   setFacts(null,false);
   state.due=[];state.dueAll={};state.dueSig={};clearTimeout(dueTimer);paintDue();
   state.caseId=null;state.caseHandle=null;state.lastSig='';state.savedAt=null;state.autoSig=caseSig();
-  state.dirtySince=null;state.nudged=false;state.barAuto=false;state.openAs=null;state.staffAsked=false;   /* v25.72 the next case is asked for itself */
+  state.dirtySince=null;state.nudged=false;state.barAuto=false;state.openAs=null;state.staffAsked=false;state.oddOk='';   /* v25.72 the next case is asked for itself */
   clearTimeout(state.watch);
   $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';$('#crumbFile').textContent='';
   railAtStart();renderRail();foldBar(false);paintSave();chip();
@@ -6914,6 +6924,23 @@ async function clList(){try{const all=await clTx('readonly',st=>st.getAll());ret
    student's place without a word, on this device and, with Google Drive, over that student's file there (with the first
    student's forms, reply links and all). It asks first, naming both. A case typed from blank is not asked about: it has
    been no one else's. Resolves true to go on. */
+/* v25.72 (the BCBA, 11/10) the last check before a case is written. A form of the case holds a name other than the student's
+   at the top: the strip says "Different student" and Build packet asks, but Save case saved without a word, so a form that
+   reached the wrong case by any route went into that student's file. It asks, naming the forms and the names as the strip
+   does. "Save anyway" is remembered for the same forms and names in this case (state.oddOk), so each later save is not
+   asked again; a change in them, or another case, asks afresh. Resolves true to go on. */
+async function caseOddAsk(p,verb){let c=null;try{c=corrections();}catch(e){return true;}
+  const now=clean(p.client),W=state.whoIs||{};if(!now||!c)return true;
+  /* the workstation's own sample ("SIMULATED \u2013 Sample Student", what Load simulation puts in a form) is no one's name: the strip
+     says it is there, and it is not asked about */
+  const warn=c.odd.concat(c.fix.filter(f=>f.warn).map(f=>f.id)).filter((id,i,a)=>a.indexOf(id)===i&&inCase(id)&&!/^SIMULATED\b/i.test(clean(W[id])));if(!warn.length)return true;
+  const sig=now+'>'+warn.map(id=>id+'='+clean(W[id])).join('|');if(state.oddOk===sig)return true;
+  const by=new Map();warn.forEach(id=>{const n=clean(W[id]);if(!by.has(n))by.set(n,[]);by.get(n).push(id);});
+  const one=warn.length===1,said=[...by].map(([n,ids])=>'\u201c'+n+'\u201d in '+andList(ids)).join('; ');
+  const y=await wsUI.confirm(verb+' '+now+'\u2019s case with another student\u2019s name in it?\n'+(one?'Form '+warn[0]+' holds':warn.length+' forms hold')+' a name other than '+now+': '+said+
+    '. The case is '+(verb==='Keep'?'kept':'saved')+' with '+(one?'that form':'those forms')+' in it, as '+(one?'it is':'they are')+'.\n\nIf the name in the form is a slip, press Cancel and correct it. If the form is another student\u2019s, press Cancel, keep its work with its own Save data, and close it.',
+    {ok:verb+' anyway',danger:true});
+  if(y)state.oddOk=sig;return !!y;}
 async function clOtherAsk(p){const key=clKey(p),as=state.openAs;if(!key||!as||!as.key||as.key===key||clOff())return true;
   const old=(await clList()||[]).find(r=>r.key===key);if(!old)return true;
   /* each is named with the ID, so two cases of one name (the ID added or corrected since) read apart */
@@ -7458,8 +7485,23 @@ clBackup=async function(){const L=await clList();if(!L||!L.length){alert('No stu
 async function clExpire(){const n=clExpireDays();if(!n)return 0;const L=await clList()||[],cut=Date.now()-n*7*864e5,me=clKey(packet());
   const old=L.filter(r=>r.key!==me&&!r.unfiled&&!isStaffRec(r)&&Date.parse(r.saved)<cut);   /* v22.30 the staff record is kept */for(const r of old)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   if(old.length)wsUI.toast(old.length+' student'+(old.length===1?' was':'s were')+' not saved for '+n+' weeks and '+(old.length===1?'is':'are')+' no longer kept on this '+HERE+' (their case files are not touched).',{ms:9000});return old.length;}
-async function clRemoveAll(){const L=await clList()||[];
-  if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, their case history (the earlier saves kept here), every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it.'+(window.__ws2571?' For a few seconds afterwards, Undo puts it all back.':' This cannot be undone.'),{ok:'Remove everything',danger:true})))return;
+/* v25.72 (the BCBA, 11/10) Form TB-1's bank (My definitions) is the BCBA's own work and stays when students are removed. The
+   question says so, and names the entries whose kept words hold a name or an ID of a student kept here, to look at and
+   delete in Form TB-1. Read as TB-1 keeps it (the same store, made the same way if it is not there yet). */
+async function clBankNamed(L){let list=[];
+  try{list=await new Promise(res=>{let r,done=false;const fin=v=>{if(!done){done=true;res(v);}};try{if(!window.indexedDB)return fin([]);r=indexedDB.open('nbh-tb1-bank',1);}catch(e){return fin([]);}setTimeout(()=>fin([]),3000);
+    r.onupgradeneeded=()=>{try{const db=r.result;if(!db.objectStoreNames.contains('defs'))db.createObjectStore('defs',{keyPath:'id'});}catch(e){}};
+    r.onerror=()=>fin([]);r.onblocked=()=>fin([]);
+    r.onsuccess=()=>{const db=r.result;try{const q=db.transaction('defs','readonly').objectStore('defs').getAll();q.onsuccess=()=>{try{db.close();}catch(e){}fin(q.result||[]);};q.onerror=()=>{try{db.close();}catch(e){}fin([]);};}catch(e){try{db.close();}catch(x){}fin([]);}};});}catch(e){list=[];}
+  try{const a=JSON.parse(localStorage.getItem('nbh.tb1.bank.v1')||'[]');if(Array.isArray(a))list=list.concat(a);}catch(e){}
+  list=list.filter(e=>e&&typeof e==='object'&&String(e.lab||'').trim());
+  const words=[];(L||[]).forEach(r=>{if(isStaffRec(r))return;nameWords(String(r.client||'').replace(/^SIMULATED\s*[\u2013-]\s*/,'')).filter(w=>w.length>=3).forEach(w=>words.push(w));
+    const id=nameWords(r.sid).join('');if(id.length>=4)words.push(id);});
+  const hit=e=>{const t=' '+nameWords([e.lab,e.def,e.tops,e.excl,e.on,e.off,e.unit,e.note].map(x=>Array.isArray(x)?x.join(' '):String(x==null?'':x)).join(' ')).join(' ')+' ';return words.some(w=>t.includes(' '+w+' '));};
+  return {n:list.length,named:list.filter(hit).map(e=>String(e.lab).trim())};}
+async function clRemoveAll(){const L=await clList()||[];let B={n:0,named:[]};try{B=await clBankNamed(L);}catch(e){}
+  const bank=B.n?'\n\nYour '+B.n+' saved definition'+(B.n===1?'':'s')+' in Form TB-1’s bank (My definitions) '+(B.n===1?'stays':'stay')+': '+(B.named.length?B.named.length+' of them may name a student kept here ('+B.named.slice(0,6).map(x=>'\u201c'+x+'\u201d').join(', ')+(B.named.length>6?' and '+(B.named.length-6)+' more':'')+'). Look at '+(B.named.length===1?'it':'them')+' in Form TB-1 and delete what names a student.':'none holds the name or ID of a student kept here.'):'';
+  if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, their case history (the earlier saves kept here), every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it.'+(window.__ws2571?' For a few seconds afterwards, Undo puts it all back.':' This cannot be undone.')+bank,{ok:'Remove everything',danger:true})))return;
   const unf=L.filter(r=>r.unfiled);
   if(unf.length&&!(await wsUI.confirm(unf.length+' of them '+(unf.length===1?'was':'were')+' kept here but never saved to a file: '+unf.map(clName).join(', ')+'\nTheir work is only on this '+HERE+'. Remove anyway?',{ok:'Remove anyway',danger:true})))return;
   try{if(window.__ws2571)await __ws2571.rmAllMark();}catch(e){}   /* v25.71 what goes is read now, for Undo (ws-v2571) */
@@ -7478,6 +7520,7 @@ setTimeout(()=>{try{const t=localStorage.getItem('nbh.stash.fail');if(t){localSt
 async function caseKeepOnly(){const p=packet();if(!clKey(p)||clOff())return false;
   const gen=state.caseGen,turned=()=>gen!==state.caseGen;   /* v25.72 (case isolation) of the case it began with, as Save case is */
   if(!(await clOtherAsk(p))||turned())return false;
+  if(!(await caseOddAsk(p,'Keep'))||turned())return false;
   const open=Object.keys(state.frames).filter(id=>!state.pending[id]),kept=Object.keys(state.pending);let forms={};const late=[];
   for(const id of open){const r=await grab(id,'snapshot',null,8000);if(turned())return false;if(r&&r.snap)forms[id]={title:r.title,snap:r.snap};else late.push(id);}
   kept.forEach(id=>{const P=state.pending[id];if(P)forms[id]={title:P.title,snap:P.snap};});forms=orderCase(forms);
@@ -8324,6 +8367,13 @@ async function drvPut(r,id,k){const base=r.drv&&r.drv.ver||null,text=r.text;
 /* Drive's copy comes here */
 async function drvBring(f,r,j){j=j||await drvRead(f.id);const x=j.rec||{};
   const key=clKey({client:x.client||'',sid:x.sid||''});if(!key)return null;
+  /* v25.72 (privacy audit) a file is one student's. Drive files it under a student (appProperties.k: the hash of the ID and
+     name, which is how the sync matched it to a copy here), and the file's own record names a student: every file the
+     workstation writes has the two agree. One that names another student inside (changed outside the workstation, or
+     damaged) used to be taken by that record: it replaced the other student's copy here and removed the copy it had been
+     matched to. Such a file is left as it is, nothing here is changed, and Google Drive's line names it. */
+  {const k=f.appProperties&&f.appProperties.k;if(k&&k!==await drvHash(drvKey({client:x.client||'',sid:x.sid||''}))){
+    DRV.err=DRV.err||('the file “'+String(f.name||'a case file')+'” in the workstation’s Google Drive folder is filed under one student and names another inside, so it was left as it is and nothing here was changed. Take it out of that folder in Google Drive.');return null;}}
   const rec=Object.assign({},r||{},{key,scope:clScope(),client:x.client||'',sid:x.sid||'',site:x.site||'',grade:x.grade||'',bcba:x.bcba||'',saved:x.saved||f.modifiedTime,
     sum:x.sum||{items:[]},text:await mediaPackText(j.text),dev:x.dev||'',read:x.read,unfiled:false,drv:{id:f.id,ver:String(f.version),dirty:false,at:new Date().toISOString()}});rec.drv.base=rec.text;   /* v23.53 */
   if(!(await drvPutIf(rec,r))){DRV.again=DRV.again||true;return null;}return rec;}
@@ -9647,7 +9697,14 @@ async function logNowOpen(){
     '<\/form>');
   setTimeout(()=>{const e=$('#lnBeh');if(e)try{e.focus();}catch(x){}},60);
 }
-function lnWait(id,ms){return new Promise(res=>{const t0=Date.now();(function tick(){if(state.frames[id]&&state.status[id]&&!state.pending[id])return res(true);if(Date.now()-t0>ms)return res(false);setTimeout(tick,150);})();});}
+function lnWait(id,ms,stop){return new Promise(res=>{const t0=Date.now();(function tick(){if(stop&&stop())return res(false);if(state.frames[id]&&state.status[id]&&!state.pending[id])return res(true);if(Date.now()-t0>ms)return res(false);setTimeout(tick,150);})();});}
+/* v25.72 (privacy audit L1) what Log it now and Today's numbers hold for the student on screen is for that student alone.
+   Form DD-1 can take up to half a minute to load, and the box can be closed meanwhile and another student opened: the form
+   named DD-1 is then the next student's. lnTurn() takes the case's turn (state.caseGen, v25.71) and its student once that
+   case is the one on screen; turned() is true as soon as another case is opened or the bar names another student, the
+   wait for the form ends there (lnWait's stop), and nothing is sent. The messages name the student. */
+function lnTurn(key){const gen=state.caseGen,p=packet(),who=clName({client:p.client,sid:p.sid});
+  return {who,turned:()=>gen!==state.caseGen||clKey(packet())!==key};}
 /* v22.22 (review F471) a student who is not on screen: their Form DD-1, as kept on this device, logs the incident out of sight (the
    way Caseload collects replies), and their kept copy takes it; the case on screen is not touched. A kept case with no Form
    DD-1 yet opens, as before. */
@@ -9670,9 +9727,11 @@ async function lnDeliver(key,inc){
     if(d&&d.forms&&d.forms['DD-1']&&d.forms['DD-1'].snap)return lnAway(r,d,inc);}
   if(key!==clKey(packet())){await caseloadGo(key,'DD-1');if(!lnOnScreen()||clKey(packet())!==key)return {ok:false,why:'the case was not switched'};}
   else if(!state.frames['DD-1'])openForm('DD-1');
-  if(!(await lnWait('DD-1',30000)))return {ok:false,why:'Form DD-1 did not open'};
+  const T=lnTurn(key),not=()=>({ok:false,turned:true,who:T.who,why:'another student was opened before Form DD-1 was ready'});   /* v25.72 */
+  if(!(await lnWait('DD-1',30000,T.turned)))return T.turned()?not():{ok:false,why:'Form DD-1 did not open'};
   await new Promise(r=>setTimeout(r,250));
-  const r=await grab('DD-1','log-incident',{inc},10000);return r||{ok:false,why:'Form DD-1 did not answer'};
+  if(T.turned())return not();
+  const r=await grab('DD-1','log-incident',{inc},10000);return r?Object.assign({},r,{who:T.who}):{ok:false,why:'Form DD-1 did not answer'};
 }
 async function logNowSave(ev){if(ev)ev.preventDefault();if(LN.busy)return;
   const g=k=>{const e=$(k);return e?String(e.value||''):'';};
@@ -9681,9 +9740,10 @@ async function logNowSave(ev){if(ev)ev.preventDefault();if(LN.busy)return;
   if(!inc.beh&&!inc.what){wsUI.toast('Name the behavior, or say what happened.',{kind:'warn'});return;}
   const key=g('#lnWho');LN.busy=true;const b=$('#lnSave');if(b){b.disabled=true;b.textContent='Logging…';}
   try{const r=await lnDeliver(key,inc);
+    if(r&&r.turned){wsUI.toast('Not logged for '+r.who+': '+r.why+'. The form on screen is another student’s, and nothing was written on it. Log it again and choose '+r.who+'.',{kind:'warn',ms:12000});return;}   /* v25.72 */
     if(!r||!r.ok){wsUI.toast('Not logged'+(r&&r.why?': '+r.why:'')+'. Open Form DD-1 and use Log an incident.',{kind:'warn',ms:9000});return;}
     try{if($('#lnForm'))$('#dlg').close();}catch(e){}
-    const I=r.inc||{};wsUI.toast('Logged on '+(r.away?r.away+'’s ':'')+'Form DD-1: '+(I.name||inc.beh||'the incident')+(inc.time?' at '+lnHm(inc.time):'')+(I.counted?', one added to the day’s count':'')+(I.hold?' ('+I.hold+')':'')+'.'+(r.away?' It is in their case on this '+HERE+' (and goes to Google Drive with it, if Drive is on); the case on screen is not changed.':''),{kind:'ok',ms:r.away?10000:7000});
+    const I=r.inc||{};wsUI.toast('Logged on '+(r.away||r.who?(r.away||r.who)+'’s ':'')+'Form DD-1: '+(I.name||inc.beh||'the incident')+(inc.time?' at '+lnHm(inc.time):'')+(I.counted?', one added to the day’s count':'')+(I.hold?' ('+I.hold+')':'')+'.'+(r.away?' It is in their case on this '+HERE+' (and goes to Google Drive with it, if Drive is on); the case on screen is not changed.':''),{kind:'ok',ms:r.away?10000:7000});
     try{paintBadge();}catch(e){}}
   finally{LN.busy=false;const b2=$('#lnSave');if(b2){b2.disabled=false;b2.textContent='Log it';}}
 }
@@ -10163,18 +10223,28 @@ async function shOpen(){
   setTimeout(()=>{const f=$('#shPeer');if(f&&!f.value)f.focus();},50);
 }
 async function shSend(o){
+  /* v25.72 (privacy audit S1) one student's share, start to finish. The box is closed by now, so another student can be
+     opened while the forms answer or the pictures and sounds are packed (seconds, for a case heavy with them). The case's
+     turn (state.caseGen, v25.71) is taken here; the student, the caseload key and the case id are taken once, as soon as
+     the forms have answered, and the file's name and the share kept on this device use those and nothing read later. If
+     the case has turned, nothing is written and the message names the student the share was for. */
+  const gen=state.caseGen,who0=clName({client:packet().client,sid:packet().sid});
+  const turned=()=>{if(gen===state.caseGen)return false;wsUI.toast('Not shared: another student was opened before '+who0+'’s file was written, so no file was made. Open '+who0+'’s case and share it again.',{kind:'warn',ms:12000});return true;};
   const {forms,late}=await shCollect(o.ids);
+  if(turned())return;
   if(late.length){alert('Form'+(late.length>1?'s ':' ')+late.join(', ')+' did not answer in time, so nothing was written. Try again in a moment.');return;}
-  const now=caseData(packet(),forms,state.caseId||(state.caseId=caseUid()));delete now.facts;
+  const p0=packet(),key0=clKey(p0),cid=state.caseId||(state.caseId=caseUid());
+  const now=caseData(p0,forms,cid);delete now.facts;
   const rec=o.rec;
   const base=rec&&rec.base?JSON.parse(rec.base):JSON.parse(JSON.stringify(now));
-  const share={v:1,id:rec?rec.id:'s'+caseUid(),case:state.caseId,from:o.me,to:o.peer,round:(rec?+rec.round||0:0)+1,forms:o.ids,sent:new Date().toISOString(),base};
+  const share={v:1,id:rec?rec.id:'s'+caseUid(),case:cid,from:o.me,to:o.peer,round:(rec?+rec.round||0:0)+1,forms:o.ids,sent:new Date().toISOString(),base};
   const text=await mediaOut(JSON.stringify(Object.assign({},now,{share}),null,1));
+  if(turned())return;
   const safe=s=>String(s).replace(/[^\w-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'colleague';
-  const fn='CASE_'+caseName(packet())+'_for-'+safe(o.peer)+'_'+shDay()+'.json';
+  const fn='CASE_'+caseName(p0)+'_for-'+safe(o.peer)+'_'+shDay()+'.json';
   let where='';try{where=await shWrite(text,fn);}catch(e){alert('The file could not be written: '+(e&&e.message||e));return;}
   if(!where)return;
-  const r=rec||{id:share.id,role:'owner',peer:o.peer,caseId:state.caseId,caseKey:clKey(packet()),client:packet().client,base:JSON.stringify(base),round:0};
+  const r=rec||{id:share.id,role:'owner',peer:o.peer,caseId:cid,caseKey:key0,client:p0.client,base:JSON.stringify(base),round:0};
   r.me=o.me;r.peer=o.peer;r.round=share.round;r.sent=share.sent;await shPut(r);
   try{localStorage.setItem('nbh.share.me',o.me);}catch(e){}
   await wsUI.alert('The file for '+o.peer+' is saved: '+where+'.\n'+o.ids.length+' form'+(o.ids.length===1?'':'s')+' in it. Send it to '+o.peer+' through your school email or AirDrop. '+
@@ -10487,9 +10557,14 @@ async function dyAway(r,d,entry){if(CLX.busy)return {ok:false,why:'Caseload is r
 async function dyDeliver(key,entry){const p0=packet();
   if(!(p0.client&&key===clKey(p0))){const r=(await clList()||[]).find(x=>x.key===key);let d=null;try{d=r&&parseCase(r.text);}catch(e){}
     if(d&&d.forms&&d.forms['DD-1']&&d.forms['DD-1'].snap)return dyAway(r,d,entry);return {ok:false,why:'Form DD-1 is not in their case yet'};}
+  /* v25.72 (privacy audit L1) the numbers are for the student on screen now: another student opened while Form DD-1 loads
+     ends the wait, and nothing is sent to the form then on screen (lnTurn, at Log it now) */
+  const T=lnTurn(key),not=()=>({ok:false,turned:true,who:T.who,why:'another student was opened before Form DD-1 was ready'});
   if(state.pending['DD-1'])await warmForm('DD-1');else if(!state.frames['DD-1'])return {ok:false,why:'Form DD-1 is not in this case yet'};
-  if(!(await lnWait('DD-1',30000)))return {ok:false,why:'Form DD-1 did not open'};
-  const r=await grab('DD-1','day-entry',{entry},10000);return r||{ok:false,why:'Form DD-1 did not answer'};}
+  if(T.turned())return not();
+  if(!(await lnWait('DD-1',30000,T.turned)))return T.turned()?not():{ok:false,why:'Form DD-1 did not open'};
+  if(T.turned())return not();
+  const r=await grab('DD-1','day-entry',{entry},10000);return r?Object.assign({},r,{who:T.who}):{ok:false,why:'Form DD-1 did not answer'};}
 document.addEventListener('submit',async e=>{if(!e.target||e.target.id!=='dyForm')return;e.preventDefault();if(DY.busy)return;
   const key=String(($('#dyWho')||{}).value||''),date=String(($('#dyDate')||{}).value||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){wsUI.toast('Give the day.',{kind:'warn'});return;}
   const d={};document.querySelectorAll('#dyRows tr[data-dyt]').forEach((tr,i)=>{const id=tr.dataset.dyt,v=x=>parseInt((tr.querySelector(x)||{}).value,10)||0;
@@ -10498,10 +10573,11 @@ document.addEventListener('submit',async e=>{if(!e.target||e.target.id!=='dyForm
   if(!Object.keys(d).length&&!obsMin){wsUI.toast('Nothing to save yet: give a number.',{kind:'warn'});return;}
   DY.busy=true;const b=$('#dySave');if(b){b.disabled=true;b.textContent='Saving…';}
   let r;try{r=await dyDeliver(key,{date,d,obsMin,note,w});}catch(x){r={ok:false,why:String(x&&x.message||x)};}finally{DY.busy=false;const b2=$('#dySave');if(b2){b2.disabled=false;b2.textContent='Save';}}
+  if(r&&r.turned){wsUI.toast('Nothing was saved for '+r.who+': '+r.why+'. The form on screen is another student’s, and nothing was written on it. Enter the numbers again for '+r.who+'.',{kind:'warn',ms:12000});return;}   /* v25.72 */
   if(!r||!r.ok){wsUI.toast('Nothing was saved: '+((r&&r.why)||'Form DD-1 did not answer')+'.',{kind:'warn',ms:9000});return;}
   const went=r.placed.map(x=>x.name+' '+x.what).join(', '),held=r.held.map(x=>(x.name||'a target')+': '+(DY_HELD[x.why]||x.why)).join('; ');
   try{$('#dlg').close();}catch(x){}
-  wsUI.toast((r.away?r.away+': ':'')+(went?'on Form DD-1 for '+date+': '+went+'.':'the minutes observed are on Form DD-1.')+(held?' Not entered: '+held+'.':'')+(r.away?' Their case on this '+HERE+' holds it.':' Save case keeps it.'),{kind:held?'warn':'ok',ms:held?12000:7000});
+  wsUI.toast((r.away||r.who?(r.away||r.who)+': ':'')+(went?'on Form DD-1 for '+date+': '+went+'.':'the minutes observed are on Form DD-1.')+(held?' Not entered: '+held+'.':'')+(r.away?' Their case on this '+HERE+' holds it.':' Save case keeps it.'),{kind:held?'warn':'ok',ms:held?12000:7000});
   if($('#dlg').open===false&&typeof paintBlank==='function'){try{paintBlank();}catch(x){}}});
 /* the buttons: each student's card, the start screen, Today, the command box */
 {const cc=clCard;clCard=function(r,w){const h=cc.apply(this,arguments);if(isStaffRec(r))return h;

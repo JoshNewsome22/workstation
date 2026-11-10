@@ -7822,8 +7822,19 @@ window.__tdScenes={has:id=>!!byId[id],play,close,count:()=>Object.keys(byId).len
 #tdVideo{position:fixed;inset:0;z-index:9000;background:rgba(20,30,40,.6);display:flex;align-items:center;justify-content:center;padding:12px}
 #tdVideo[hidden]{display:none}
 #tdVideo .tv-box{background:#f3f6f5;border-radius:14px;width:min(100%,1040px);max-height:100%;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.35);font:16px/1.45 -apple-system,Helvetica,Arial,sans-serif;color:#1f2f3f}
-#tdVideo .tv-hd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px 8px}
-#tdVideo .tv-hd h3{margin:0;font:600 17px Georgia,serif;flex:1 1 260px;min-width:0}
+#tdVideo .tv-hd{display:flex;align-items:center;flex-wrap:nowrap;gap:8px 10px;padding:10px 14px 8px}
+#tdVideo .tv-hd h3{margin:0;font:600 17px Georgia,serif;flex:1 1 auto;min-width:0}
+/* v25.72 the design review's V6: one header row (the title, Close); under the video the AI label and Open in the video library */
+#tdVideo .tv-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 10px;margin:10px 14px 0}
+#tdVideo #tv-close svg{display:none}
+@media (max-width:699px){#tdVideo{padding:0}
+  #tdVideo .tv-box{width:100%;height:100%;max-height:none;border-radius:0;box-shadow:none}
+  #tdVideo .tv-hd{padding:4px 4px 4px 14px;min-height:52px}
+  #tdVideo .tv-hd h3{font-size:16px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  #tdVideo #tv-close{flex:0 0 44px;width:44px;height:44px;min-width:44px;padding:0;border:0;background:none;display:grid;place-items:center}
+  #tdVideo #tv-close svg{display:block;width:24px;height:24px}
+  #tdVideo #tv-close .tv-cl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  #tdVideo .tv-box video{width:100%;margin:0;border-radius:0}}
 #tdVideo .tv-ai{font-size:13px;font-weight:700;color:#8a5a00;background:#fff4dc;border:1px solid #e7c27a;border-radius:999px;padding:3px 10px;white-space:nowrap}
 #tdVideo video{display:block;width:calc(100% - 24px);margin:0 12px;border-radius:10px;background:#1f2f3f;aspect-ratio:16/9}
 #tdVideo .tv-msg{margin:8px 14px;font-size:15px}
@@ -8056,27 +8067,51 @@ function line(id,menu){const k=keyOf(id),v=VIDS[k];if(!v||!v.shows)return '';con
  if(c){const dd=Object.keys(LROW).filter(x=>norm(c[x])!==norm(S[x])&&!/^not stated/i.test(c[x]||'')).map(x=>LROW[x].toLowerCase()+': '+c[x]);
   t+=' '+(dd.length?'This version differs in '+dd.join('; ')+'.':'This version matches it on timing and reinforcers.');}
  return t;}
-let box=null,opener=null;const urls={};
+let box=null,opener=null,cur='',held=[],saveT=0;const urls={},order=[];
 const $=id=>box.querySelector('#'+id);
+/* v25.72 (the design review's V6) what is watched here is kept where the video library keeps it (localStorage nbh.videos.v1:
+   the video's key, the second it stopped at, its length, watched to the end once, when; nothing about a student), so the
+   library's Continue watching and Watched, and the player here, pick up from it */
+const VKEY='nbh.videos.v1';
+function vstore(){try{const o=JSON.parse(localStorage.getItem(VKEY)||'null');if(o&&typeof o==='object'&&o.items&&typeof o.items==='object')return o;}catch(e){}return {v:1,items:{}};}
+function keepProg(k,t,d,ended){if(!VIDS[k]||!(d>0))return;const s=vstore(),p=s.items[k]&&typeof s.items[k]==='object'?s.items[k]:{};
+ s.items[k]={t:ended||t>=d-2?0:Math.max(0,Math.floor(t)),d:Math.round(d),w:!!p.w||!!ended||t>=d*0.95,at:Date.now()};try{localStorage.setItem(VKEY,JSON.stringify(s));}catch(e){}}
+const mmss=s=>{s=Math.max(0,Math.floor(s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+/* at most two videos kept decoded: an older one is let go */
+function keepUrl(k,u){urls[k]=u;const i=order.indexOf(k);if(i>=0)order.splice(i,1);order.push(k);
+ while(order.length>2){const j=order.findIndex(x=>x!==k);if(j<0)break;const old=order.splice(j,1)[0];try{URL.revokeObjectURL(urls[old]);}catch(e){}delete urls[old];}}
 function build(){box=document.createElement('div');box.id='tdVideo';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby','tv-title');
- box.innerHTML='<div class="tv-box"><div class="tv-hd"><h3 id="tv-title"></h3><span class="tv-ai">AI-generated · simulated people</span><button type="button" id="tv-lib">Browse all videos</button><button type="button" id="tv-close">Close</button></div>'+
-  '<video id="tv-video" controls playsinline preload="metadata"></video><p class="tv-msg" id="tv-msg" aria-live="polite"></p>'+
-  '<p class="tv-note" id="tv-note"></p></div>';
+ box.innerHTML='<div class="tv-box"><div class="tv-hd"><h3 id="tv-title"></h3><button type="button" id="tv-close"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="tv-cl">Close</span></button></div>'+
+  '<video id="tv-video" controls playsinline preload="metadata"></video><div class="tv-row"><span class="tv-ai">AI-generated · simulated people</span><button type="button" id="tv-lib">Open in the video library</button></div>'+
+  '<p class="tv-msg" id="tv-msg" aria-live="polite"></p><p class="tv-note" id="tv-note"></p></div>';
  document.body.appendChild(box);
- $('tv-close').addEventListener('click',close);$('tv-lib').addEventListener('click',()=>{close();library('');});box.addEventListener('click',ev=>{if(ev.target===box)close();});
- document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&box&&!box.hidden)close();});}
+ $('tv-close').addEventListener('click',close);$('tv-lib').addEventListener('click',()=>{const k=cur;close();library(k);});box.addEventListener('click',ev=>{if(ev.target===box)close();});
+ document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&box&&!box.hidden)close();});
+ /* the focus stays inside the player while it is open */
+ box.addEventListener('keydown',ev=>{if(ev.key!=='Tab')return;const f=[...box.querySelectorAll('button,video[controls],[href],[tabindex]:not([tabindex="-1"])')].filter(e=>!e.hidden&&e.getClientRects().length);if(!f.length)return;
+  const a=f[0],z=f[f.length-1],at=document.activeElement;if(!box.contains(at)){ev.preventDefault();a.focus();}else if(ev.shiftKey&&at===a){ev.preventDefault();z.focus();}else if(!ev.shiftKey&&at===z){ev.preventDefault();a.focus();}});
+ const vid=$('tv-video'),keep=(force,ended)=>{const k=vid.dataset.id;if(!k||!(vid.duration>0))return;const now=Date.now();if(!force&&now-saveT<2000)return;saveT=now;keepProg(k,vid.currentTime,vid.duration,ended);};
+ vid.addEventListener('timeupdate',()=>keep(false));vid.addEventListener('pause',()=>keep(true));vid.addEventListener('seeked',()=>keep(true));vid.addEventListener('ended',()=>keep(true,true));
+ vid.addEventListener('loadedmetadata',()=>{const k=vid.dataset.id,p=k&&vstore().items[k];if(p&&p.t>=5&&p.t<vid.duration-2){try{vid.currentTime=p.t;}catch(e){}msg('Picks up where it stopped on this device, at '+mmss(p.t)+'.');}});}
+/* the page behind takes no taps and no focus while the player is open */
+function hold(on){if(on){held=[...document.body.children].filter(e=>e!==box&&!e.inert&&!/^(SCRIPT|STYLE|TEMPLATE)$/.test(e.tagName));held.forEach(e=>{e.inert=true;});}else{held.forEach(e=>{e.inert=false;});held=[];}}
 function msg(t,err){const m=$('tv-msg');m.textContent=t||'';m.hidden=!t;m.classList.toggle('tv-err',!!err);}
-async function play(id,from){const k=keyOf(id),v=VIDS[k];if(!v)return;if(!box)build();opener=from||document.activeElement;
- const vid=$('tv-video');if(vid.dataset.id&&vid.dataset.id!==k){try{vid.pause();}catch(e){}}
- $('tv-title').textContent=v.title;$('tv-note').textContent=v.note;box.hidden=false;setTimeout(()=>{try{$('tv-close').focus();}catch(e){}},30);
+async function play(id,from){const k=keyOf(id),v=VIDS[k];if(!v)return;if(!box)build();if(box.hidden)opener=from||document.activeElement;cur=k;
+ const vid=$('tv-video');if(vid.dataset.id&&vid.dataset.id!==k){try{if(vid.duration>0)keepProg(vid.dataset.id,vid.currentTime,vid.duration,false);vid.pause();}catch(e){}}
+ $('tv-title').textContent=v.title;$('tv-note').textContent=v.note;if(box.hidden){box.hidden=false;hold(true);}setTimeout(()=>{try{$('tv-close').focus();}catch(e){}},30);
  if(!urls[k]){vid.removeAttribute('src');delete vid.dataset.id;vid.hidden=true;msg('Loading the video…');
   try{if(!(window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[k]))await v.load();
    const b64=window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[k];if(!b64)throw new Error('no video data');
    const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-   urls[k]=URL.createObjectURL(new Blob([u],{type:'video/mp4'}));}
+   try{delete window.NBH_TD1_VIDEO[k];}catch(e){}   /* v25.72 the text copy goes once the video is decoded */
+   keepUrl(k,URL.createObjectURL(new Blob([u],{type:'video/mp4'})));}
   catch(e){msg('The video could not be loaded here. It is a file beside the forms ('+v.file+'): open the workstation from its folder or from the website. The one-file edition does not carry it.',true);return;}}
+ if(box.hidden||cur!==k)return;   /* v25.72 closed, or another video asked for, while this one loaded */
  if(vid.dataset.id!==k){vid.src=urls[k];vid.dataset.id=k;}vid.hidden=false;msg('');}
-function close(){if(!box)return;const vid=$('tv-video');try{vid.pause();}catch(e){}box.hidden=true;if(opener&&opener.focus)try{opener.focus();}catch(e){}opener=null;}
+function close(){if(!box)return;const vid=$('tv-video');try{if(vid.dataset.id&&vid.duration>0)keepProg(vid.dataset.id,vid.currentTime,vid.duration,false);vid.pause();}catch(e){}
+ /* v25.72 Close lets the video go: no picture kept decoded in a player nobody sees */
+ vid.removeAttribute('src');delete vid.dataset.id;try{vid.load();}catch(e){}cur='';
+ box.hidden=true;hold(false);if(opener&&opener.focus)try{opener.focus();}catch(e){}opener=null;}
 /* the plan's cards: a card built from a bank protocol with a video, or a card of a component with one (A_HIGHP), gets Watch
    the video beside Remove, and the video's line under the card's header */
 /* v25.68 (11/7) a card from the menu shows its component's video; a DRO card set to "Momentary, variable times" the momentary one */

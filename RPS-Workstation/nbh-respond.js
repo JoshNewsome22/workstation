@@ -825,8 +825,48 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     if(/^https?:$/.test(location.protocol)&&!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname))return location.origin+'/reply/box.php';return '';};
   U.boxNorm=function(b){if(!b||typeof b!=='object')return null;var hx=function(v){return /^[a-f0-9]{32}$/.test(String(v||''))?String(v):'';},j=function(v){return /^[A-Za-z0-9_-]{40,50}$/.test(String(v||''))?String(v):'';};
     var id=hx(b.id),token=hx(b.token),pub=b.pub||{},priv=b.priv||{};if(!id||!token||!j(pub.x)||!j(pub.y)||!j(priv.d)||!j(priv.x)||!j(priv.y))return null;
-    return {id:id,token:token,pub:{x:pub.x,y:pub.y},priv:{d:priv.d,x:priv.x,y:priv.y},site:/^https?:\/\//i.test(String(b.site||''))?String(b.site):'',got:(Array.isArray(b.got)?b.got:[]).map(String).slice(-2000),
-      held:(Array.isArray(b.held)?b.held:[]).filter(function(x){return x&&typeof x==='object';}).slice(-300),made:String(b.made||'')};};
+    var bx={id:id,token:token,pub:{x:pub.x,y:pub.y},priv:{d:priv.d,x:priv.x,y:priv.y},site:/^https?:\/\//i.test(String(b.site||''))?String(b.site):'',got:(Array.isArray(b.got)?b.got:[]).map(String).slice(-2000),
+      held:(Array.isArray(b.held)?b.held:[]).filter(function(x){return x&&typeof x==='object';}).slice(-300),made:String(b.made||'')};
+    if(b.stu)bx.stu=String(b.stu).slice(0,80);   /* v25.72 the student the box was made for, as the links name them (U.sameStudent) */
+    if(Array.isArray(b.aka)&&b.aka.length)bx.aka=b.aka.map(function(x){return String(x||'').slice(0,80);}).filter(Boolean).slice(-8);   /* v25.72 earlier names of this same student (U.boxQuestion, Same student) */
+    return bx;};
+  /* v25.72 (the BCBA, 11/10) the question asked before a link is made, when the reply box in the form was made for what reads
+     as another student and links from it have gone out: the form does not change boxes by itself. It is the form's own
+     question box (nbh-ui's #nbhUiDlg, its looks), with three answers, and names both names as the form has them: was, the
+     name kept with the box; now, the student's name on the form.
+       U.boxQuestion(was, now) -> a promise of 'keep' (the same student), 'new' (a different student) or '' (Cancel) */
+  U.boxQuestion=function(was,now){return new Promise(function(res){var d=document,g=d.getElementById('nbhUiDlg');
+    if(!g){g=d.createElement('dialog');g.id='nbhUiDlg';g.className='noprint';g.setAttribute('aria-labelledby','nbhUiH');g.setAttribute('aria-describedby','nbhUiB');
+      g.innerHTML='<div class="u-h" id="nbhUiH"></div><div class="u-b" id="nbhUiB"></div><div class="u-f" id="nbhUiF"></div>';d.body.appendChild(g);}
+    d.getElementById('nbhUiH').textContent='Is '+now+' the same student as '+was+'?';
+    var b=d.getElementById('nbhUiB');b.style.display='';
+    b.textContent='This form’s reply box was made for '+was+', and links from it have gone out.\nSame student: the box stays. Links already sent keep working, and their answers come to this form.\nDifferent student: this form starts a new reply box. Answers to links already sent no longer come to this form.\nCancel: no link is made, and nothing changes.';
+    var f=d.getElementById('nbhUiF');f.innerHTML='';f.style.flexWrap='wrap';var done=function(v){try{g.close();}catch(e){}res(v);};
+    [['','Cancel'],['keep','Same student: keep the reply box'],['new','Different student: start a new one']].forEach(function(o){var x=d.createElement('button');x.type='button';x.textContent=o[1];x.addEventListener('click',function(){done(o[0]);});f.appendChild(x);});
+    g.oncancel=function(ev){ev.preventDefault();done('');};
+    try{if(g.open)g.close();g.showModal();}catch(e){g.setAttribute('open','');}
+    try{f.firstChild.focus();}catch(e){}});};
+  /* v25.72 (privacy audit R1) is the student a reply or a reply box names plainly another than the form's? The names in play
+     are short on purpose: a link carries the first name and last initial ("Mateo R."), a page the initials ("M.R.") or
+     words the BCBA typed. Only a plain difference counts: a corrected spelling, a second surname, the names the other way
+     round, initials, a short form that begins the name, typed words that are not a name, and a form with no name yet all
+     read as the same student.
+       U.sameStudent(label, full) -> false only when both name someone and they cannot be the same person. */
+  U.sameStudent=function(label,full){
+    var fold=function(t){t=String(t||'').replace(/\s*\((?:ID|id)\b[^)]*\)\s*/g,' ');try{t=t.normalize('NFD').replace(/[\u0300-\u036f]/g,'');}catch(e){}return t.toLowerCase();};
+    var lab=String(label||'').replace(/\s*\((?:ID|id)\b[^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim(),F=fold(full).split(/[^a-z]+/).filter(Boolean);
+    if(!lab||!F.length)return true;
+    var ini=F.map(function(w){return w.charAt(0);}),has=function(c){return ini.indexOf(c)>=0;},m;
+    /* edit distance, for a spelling put right */
+    var dist=function(a,b){var p=[],i,j,q,t;for(j=0;j<=b.length;j++)p[j]=j;for(i=1;i<=a.length;i++){q=[i];for(j=1;j<=b.length;j++){t=Math.min(p[j]+1,q[j-1]+1,p[j-1]+(a.charAt(i-1)===b.charAt(j-1)?0:1));q[j]=t;}p=q;}return p[b.length];};
+    var like=function(a,b){if(a===b)return true;if(b.length===1)return a.charAt(0)===b;var s=a.length<b.length?a:b,l=a.length<b.length?b:a;
+      if(s.length>=3&&l.indexOf(s)===0)return true;var d=dist(a,b);return d<=1||(d<=2&&s.length>=7);};
+    if(/^(?:[A-Za-zÀ-ɏ]\s*\.\s*)+$/.test(lab)){var L=fold(lab).replace(/[^a-z]/g,'');return has(L.charAt(0))&&has(L.charAt(L.length-1));}   /* initials */
+    m=/^([A-Za-zÀ-ɏ][A-Za-zÀ-ɏ'’\-]+)(?:\s+([A-Za-zÀ-ɏ])\.)?$/.exec(lab);   /* "Mateo" or "Mateo R." */
+    if(!m)return true;   /* words that are not a name: nothing to tell by */
+    var first=fold(m[1]).replace(/[^a-z]/g,''),last=m[2]?fold(m[2]):'';
+    if(!last&&/^(student|client|child|learner|pupil|simulated)$/.test(first))return true;
+    return F.some(function(w,i){return like(first,w)&&(!last||F.length<2||F.some(function(v,k){return k!==i&&v.charAt(0)===last;}));});};
   U.boxClient=function(o){var C={last:''},busy=null,coll=null,S=window.crypto&&crypto.subtle;
     var hex=function(u){var s='';for(var i=0;i<u.length;i++)s+=(u[i]<16?'0':'')+u[i].toString(16);return s;};
     var te=function(t){return new TextEncoder().encode(t);},host=function(u){var m=/^https?:\/\/([^\/]+)/i.exec(u||'');return m?m[1]:'';};
@@ -855,22 +895,27 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     C.link=function(){var b=B();return C.ready()?{u:b.site,b:b.id,k:{x:b.pub.x,y:b.pub.y}}:null;};
     C.host=host;
     /* registers the box (once; again at another site); true when the pages and links can carry it */
-    C.ensure=function(){var u=C.site();if(!u||!C.can())return Promise.resolve(false);if(C.ready())return Promise.resolve(true);if(busy)return busy;
-      busy=(B()?Promise.resolve(B()):keys().then(function(b){o.set(b);return b;})).then(function(b){return sha(b.token).then(function(h){return post(u+'?a=new',{b:b.id,t:h});}).then(function(){b.site=u;o.set(b);C.last='';return true;});})
-        .catch(function(e){C.last=msg(e);return false;}).then(function(v){busy=null;paint();return v;});return busy;};
+    /* v25.72 (privacy audit R2) the record the box belongs to (o.cur(), when the form gives one) is taken before the first wait.
+       A wait that began for one record writes nothing once the form holds another (Clear all, another saved form opened,
+       Load simulation, a snapshot put back): the first student's box and replies do not enter the second's record. */
+    function cur(){return o.cur?o.cur():null;}
+    function turn(){var c0=cur();return function(){if(cur()!==c0){var e=new Error('the form holds another record now');e.gone=true;throw e;}};}
+    C.ensure=function(){var u=C.site();if(!u||!C.can())return Promise.resolve(false);if(C.ready())return Promise.resolve(true);if(busy)return busy;var same=turn();
+      busy=(B()?Promise.resolve(B()):keys().then(function(b){same();o.set(b);return b;})).then(function(b){return sha(b.token).then(function(h){return post(u+'?a=new',{b:b.id,t:h});}).then(function(){same();b.site=u;o.set(b);C.last='';return true;});})
+        .catch(function(e){if(!(e&&e.gone))C.last=msg(e);return false;}).then(function(v){busy=null;paint();return v;});return busy;};
     /* the replies not yet taken, unlocked: {objs, unread, fresh, all}; null when the box cannot be reached. noEnsure: the box's own
        site only, nothing registered (the workstation's quiet collect) */
-    C.fetch=function(opt){opt=opt||{};if(coll)return coll;
-      coll=(opt.noEnsure?Promise.resolve(!!(B()&&B().site&&C.can())):C.ensure()).then(function(ok){if(!ok)return null;var b=B();
+    C.fetch=function(opt){opt=opt||{};if(coll)return coll;var same=turn();   /* v25.72 */
+      coll=(opt.noEnsure?Promise.resolve(!!(B()&&B().site&&C.can())):C.ensure()).then(function(ok){if(!ok)return null;same();var b=B();
         return listR(b).then(function(j){var all=j.replies||[],objs=[],unread=0,junk=[];
           var fresh=all.filter(function(r){return r&&r.id&&r.k&&r.iv&&r.ct&&b.got.indexOf(r.id)<0;});
           return fresh.reduce(function(p,r){return p.then(function(){return dec(b,r).then(function(x){if(x&&typeof x==='object'){x.at=String(r.at||'');objs.push(x);}else{unread++;junk.push(r.id);}},function(){unread++;junk.push(r.id);}).then(function(){b.got.push(r.id);});});},Promise.resolve())
             /* v22.12 (review F500): a reply the form cannot unlock was not locked for this box (junk, or a page sent from a forged
                link): it is taken out of the box at once, so junk cannot fill the box and turn real answers back to email */
-            .then(function(){if(b.got.length>2000)b.got=b.got.slice(-2000);o.set(b);C.last='';
+            .then(function(){same();if(b.got.length>2000)b.got=b.got.slice(-2000);o.set(b);C.last='';
               return (junk.length?post(b.site+'?a=del&b='+encodeURIComponent(b.id),{t:b.token,ids:junk}).then(function(){return junk.length;},function(){return 0;}):Promise.resolve(0))
-                .then(function(rm){return {objs:objs,unread:unread,removed:rm,fresh:fresh.length,all:all.length};});});});})
-        .catch(function(e){C.last=msg(e);return null;}).then(function(v){coll=null;paint();return v;});return coll;};
+                .then(function(rm){same();return {objs:objs,unread:unread,removed:rm,fresh:fresh.length,all:all.length};});});});})
+        .catch(function(e){if(!(e&&e.gone))C.last=msg(e);return null;}).then(function(v){coll=null;paint();return v;});return coll;};
     /* the replies taken are removed from the site (they stay in the file) */
     C.purge=function(){var b=B();if(!b||!b.got.length||!C.ready())return Promise.resolve(null);
       return post(b.site+'?a=del&b='+encodeURIComponent(b.id),{t:b.token,ids:b.got.slice(-300)}).then(function(j){C.last='';paint();return j;},function(e){C.last=msg(e);paint();return null;});};
@@ -909,10 +954,48 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     function rb(){var s=cfg.rec();if(!s)return U.rbNorm(null);if(!s.rb||!s.rb.__k){s.rb=U.rbNorm(s.rb);try{Object.defineProperty(s.rb,'__k',{value:1,enumerable:false});}catch(e){}}return s.rb;}
     function devAddr(){try{var a=localStorage.getItem(DEV)||'';if(a)return a;var o=JSON.parse(localStorage.getItem('nbh.ia1.respondent')||'{}');return String(o['rp.box']||'');}catch(e){return '';}}
     function addr(){var e=$('#rbBox');return ((e&&e.value)||rb().addr||devAddr()||'').trim();}
-    var C=U.boxClient({get:function(){return rb().box;},set:function(b){rb().box=b;},addr:addr,paint:function(){paintBox();}});K.client=C;
+    /* v25.72 (privacy audit R1, R2) the form's student now, as a link names them (short) and in full (cfg.full, when the form
+       gives it); a new box takes the short name as the student it is for; cur: the record the box is in (the box client
+       writes nothing after a wait once the form holds another) */
+    function shortNow(){try{return String((cfg.short&&cfg.short())||'');}catch(e){return '';}}
+    function fullNow(){try{return String((cfg.full&&cfg.full())||'')||shortNow();}catch(e){return shortNow();}}
+    var C=U.boxClient({get:function(){return rb().box;},set:function(b){if(b&&!b.stu){var sh=shortNow();if(sh)b.stu=sh;}rb().box=b;},cur:function(){return cfg.rec()?rb():null;},addr:addr,paint:function(){paintBox();}});K.client=C;
     function ping(){try{var n=$('#rbNote');if(n)n.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}}
     function changed(){try{cfg.changed();}catch(e){}ping();}
     function toast(t,kind){try{if(window.nbhUI&&nbhUI.toast)nbhUI.toast(t,kind?{kind:kind}:{});}catch(e){}}
+    /* v25.72 (privacy audit R1; the BCBA, 11/10) the reply box belongs to the student it was made for (box.stu). The box travels
+       with the form's data, so a form whose student is now plainly another (a case used to start another student's, a name
+       typed over) still held the first student's box: a link made from it sent the second student's answers to the first
+       student's box, and the first's answers came into this form. A box from before v25.72, or one made before the form
+       had a name, takes the form's student as its own.
+       boxMine(), before a link is made: '' when the box is this student's, or there is none; the words said when a box
+       that no link has gone out from was let go (boxSent: no one on the list was sent a link, no answer has come, so
+       nothing is lost) and the form starts one of its own; 'ask' when links have gone out: the form does not change
+       boxes by itself. boxAsk() then asks (U.boxQuestion). Same student: the box and its links stay, the name kept with
+       the box becomes this one, and the earlier name is kept beside it (aka), so an answer to a link already sent is
+       placed, not held. Different student: the box is let go, with its keys, the ids it had taken and the replies it
+       held, and the note and a message say so. Cancel: nothing changes. boxAsk() resolves false on Cancel: no link is made. */
+    var said='',asking=null;
+    function boxSent(){var r=rb(),b=r.box;return !!(b&&(b.got.length||b.held.length||r.placed||r.sends.some(function(s){return s.sent||s.back;})));}
+    function boxDrop(was){var sh=shortNow();rb().box=null;
+      var t='This form’s reply box was made for '+was+', and the form is now about '+(sh||'another student')+', so it starts a reply box of its own. Links made from now on use the new box; answers to links sent for '+was+' do not come to this form.';
+      var n=$('#rbNote');if(n)n.textContent=t;toast(t,'warn');changed();paintHeld();said=t;return t;}
+    function boxMine(){var r=rb(),b=r.box;if(!b)return '';var sh=shortNow();
+      if(!b.stu){if(sh)b.stu=sh;return '';}
+      if(U.sameStudent(b.stu,fullNow()))return '';
+      return boxSent()?'ask':boxDrop(b.stu);}
+    function boxAsk(){if(boxMine()!=='ask')return Promise.resolve(true);if(asking)return asking;var r0=rb(),b0=r0.box,was=b0.stu;
+      asking=U.boxQuestion(was,fullNow()).then(function(v){asking=null;if(rb()!==r0||r0.box!==b0)return false;
+        if(v==='new'){boxDrop(was);return true;}
+        if(v!=='keep')return false;
+        b0.aka=(b0.aka||[]).filter(function(x){return x!==was;}).concat([was]).slice(-8);b0.stu=shortNow()||was;
+        var t='The reply box is kept: it is '+b0.stu+'’s now, and the links already sent keep working.',n=$('#rbNote');if(n)n.textContent=t;changed();return true;});
+      return asking;}
+    /* the student label on a page (the form fills it once, with the initials): one left from the form's earlier student is
+       written again from this student's name */
+    function labelMine(){var e=$('#rpStudent'),full=fullNow();if(!e||!e.value||!full||U.sameStudent(e.value,full))return;
+      var ini=full.split(/\s+/).map(function(w){return w.charAt(0);}).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.');e.value=ini?ini+'.':'';
+      try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(er){}}
     /* ---- the dialog's parts ---- */
     function inject(){var dl=$(cfg.dlg||'#rpDlg'),body=dl&&$('.gf-body',dl);if(!body||$('#rbSend'))return;
       if(!$('#nbh-rb-css')){var st=d.createElement('style');st.id='nbh-rb-css';st.textContent='.nbh-rb{border-top:1px solid #cfdad8;margin:12px 0 0;padding:10px 0 0}.nbh-rb-h{font-weight:700;margin:0 0 4px}.nbh-rb-t input,.nbh-rb-t select{width:100%;box-sizing:border-box;font:inherit;font-size:13px;padding:4px 6px;border:1px solid #b7c8c5;border-radius:3px;background:#fff}.nbh-rb-t td{vertical-align:top}.nbh-rb-t button{min-width:32px}.nbh-rb .f{display:block}.nbh-rb .f label{display:block;margin:8px 0 3px}.nbh-rb .f input{display:block;width:100%;box-sizing:border-box}.nbh-rb-scroll{overflow-x:auto;max-width:100%}@media print{.nbh-rb{display:none!important}}';d.head.appendChild(st);}
@@ -951,7 +1034,8 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
         paintHeld();paintBox();changed();});
       /* the dialog opens: the box is registered (when a site is known) so the links carry it; the list is drawn while it is open */
       dl.addEventListener('close',function(){var tb=$('#rbRows');if(tb)tb.innerHTML='';});
-      var rpb=$('#rpBtn');if(rpb)rpb.addEventListener('click',function(){setTimeout(function(){var e=$('#rbBox');if(e&&!e.value)e.value=rb().addr||devAddr()||'';paintRows();paintBox();if(C.site())C.ensure();},0);});
+      var rpb=$('#rpBtn');if(rpb)rpb.addEventListener('click',function(){setTimeout(function(){var e=$('#rbBox');if(e&&!e.value)e.value=rb().addr||devAddr()||'';labelMine();paintRows();paintBox();
+        boxAsk().then(function(ok){if(!ok){try{dl.close();}catch(er){}return;}paintRows();paintBox();paintHeld();if(C.site())C.ensure();});},0);});   /* v25.72 labelMine; boxAsk: the box is this student's before a link is made here, and Cancel closes the box of links */
       ['#rpRound','#rpRole','#rpInst'].forEach(function(q){var e=$(q);if(e)e.addEventListener('change',function(){if(dl.open)paintRows();});});
       var em=$('#rpEmail');if(em)em.addEventListener('input',paintBtns);
       var rcbtn=$('#rcBtn');if(rcbtn)rcbtn.addEventListener('click',function(){setTimeout(function(){paintBox();paintHeld();},0);});
@@ -980,7 +1064,9 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
         r.sends.push({id:newId(),name:nm,role:String(p.role||'').trim(),email:old?old.email:'',pg:p.pg||cfg.pageOf(p.role)||(cfg.pages()[0]||[''])[0],round:rd,sent:'',how:'',due:'',rem:'',back:'',from:''});n++;});
       if(n){paintRows();changed();}return n;}
     /* ---- the pages ---- */
-    K.withBox=function(p){var l=C.link();if(!p||!l)return p;p.box=l;var who=p.bcba||'the BCBA';
+    K.withBox=function(p){var st=boxMine();if(st==='ask')return p;   /* v25.72 the question is not answered yet: this link goes without a box, never with another student's */
+      if(st&&C.site())C.ensure();   /* a box was let go: the next link carries the new one */
+      var l=C.link();if(!p||!l)return p;p.box=l;var who=p.bcba||'the BCBA';
       if(p.instructions)p.instructions=String(p.instructions).replace(/When you have finished, press Send:[\s\S]*$/,'When you have finished, press Send: your answers go straight to '+who+'.');return p;};
     K.base=function(){return location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';};
     K.personPayload=function(s){var p=cfg.payload(s.pg,s.round);if(!p)return null;p=K.withBox(p);p.who={name:s.name.trim(),role:s.role.trim(),sid:s.id};var fl=cfg.fill?cfg.fill(s):null;if(fl&&Object.keys(fl).length)p.who.fill=fl;var sh=cfg.short&&cfg.short();if(sh)p.student=sh;
@@ -992,13 +1078,18 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       var list=rows().filter(function(s){return remind?s.sent&&!s.back:!s.sent;}),skip=[];
       var go=list.filter(function(s){if(!s.name.trim()){skip.push('a person with no name');return false;}if(!EMAIL_RE.test(s.email)){skip.push(s.name.trim()+' (no email)');return false;}return true;});
       if(!go.length){say(skip.length?'Nothing sent: '+skip.join(', ')+'.':remind?'No one to remind: everyone sent is back.':'Everyone on the list has been sent the page.');return Promise.resolve(null);}
-      return (C.site()?C.ensure():Promise.resolve(false)).then(function(){
+      /* v25.72 (privacy audit R1, R2) the box is this student's before any link is made (boxAsk); and the people chosen are of
+         the record on the form now: if the form holds another by the time the box is registered, nothing is sent */
+      var moved='',r0=rb(),stop={};
+      return boxAsk().then(function(ok){if(!ok)return stop;moved=said;said='';return C.site()?C.ensure():false;}).then(function(x){
+        if(x===stop){say('Nothing was sent.');return null;}
+        if(rb()!==r0){say('Nothing was sent: the form holds another record now.');return null;}
         var due=($('#rpDue')&&$('#rpDue').value.trim())||'';go.forEach(function(s){if(due&&!remind)s.due=due;});
         var msgs=go.map(function(s){var p=K.personPayload(s);return U.personMail({to:s.email,name:s.name.trim(),items:[{title:p.title||'Questionnaire',label:p.title||'Questionnaire',url:K.base()+U.payloadToHash(p),due:p.due||'',boxed:!!p.box}],student:p.student,bcba:cfg.bcba?cfg.bcba():p.bcba,remind:remind});});
         var mark=function(k,how){var s=go[k];if(!s)return;if(remind)s.rem=today();else{s.sent=today();s.how=how==='mail'?'mail':'email';}paintRows();changed();};
         var sum=function(out){var t=out.declined?'Not sent.':out.via==='workstation'?'Sent '+out.sent.length+' of '+go.length+' email'+(go.length===1?'':'s')+(out.from?' from '+out.from:'')+(out.sent.length?' ('+out.sent.map(function(k){return go[k].name.trim();}).join(', ')+')':'')+'.'+(out.failed.length?' Not sent: '+out.failed.map(function(f){return go[f.k].name.trim()+' ('+go[f.k].email+'): '+f.err;}).join('; ')+'.':'')
             :out.via==='mail'?out.sent.length+' of '+go.length+' opened in the Mail app'+(out.sent.length?' ('+out.sent.map(function(k){return go[k].name.trim();}).join(', ')+')':'')+'; the workstation could not send ('+out.why+').':'';
-          if(skip.length&&t)t+=' Left out: '+skip.join(', ')+'.';if(t)say(t);};
+          if(skip.length&&t)t+=' Left out: '+skip.join(', ')+'.';if(t)say(t+(moved?' '+moved:''));};
         return U.mailFlow({form:cfg.form,messages:msgs,remind:remind,onSent:mark,onUpdate:sum});});};
     /* ---- collecting ---- */
     function markBack(o){var r=rb(),nm=String(o.name||'').trim().toLowerCase(),s=null;if(o.sid)s=r.sends.find(function(x){return x.id===o.sid;})||null;
@@ -1010,12 +1101,16 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     function normName(t){return String(t||'').toLowerCase().replace(/[^a-z\u00c0-\u024f ]+/g,' ').replace(/\b(mr|mrs|ms|miss|dr)\b/g,' ').replace(/\s+/g,' ').trim();}
     function sameName(a,b){a=normName(a);b=normName(b);if(!a||!b)return true;if(a===b)return true;var A=a.split(' '),B=b.split(' ');
       return A.some(function(w){return w.length>1&&B.indexOf(w)>=0;});}
-    function screen(list){var r=rb(),seen={},keep=[],flag=[];
+    /* v25.72 (privacy audit R1) and a reply that names plainly another student than this form's (U.sameStudent: its page was
+       made for that student, and the box it came through travelled here with the form's data) is held the same way. */
+    function screen(list){var r=rb(),seen={},keep=[],flag=[],full=fullNow(),aka=(r.box&&r.box.aka)||[];   /* aka: earlier names the BCBA said are this same student */
       list.forEach(function(o){var s=o.sid?r.sends.find(function(x){return x.id===o.sid;})||null:null,why='';
-        if(s){if(s.back||seen[o.sid])why='again';else if(!sameName(o.name,s.name))why='name';}
-        if(o.sid)seen[o.sid]=1;if(why)flag.push({o:o,why:why,to:s.name.trim()});else keep.push(o);});
+        if(o.student&&full&&!U.sameStudent(o.student,full)&&!aka.some(function(a){return U.sameStudent(o.student,a);}))why='student';
+        else if(s){if(s.back||seen[o.sid])why='again';else if(!sameName(o.name,s.name))why='name';}
+        if(o.sid)seen[o.sid]=1;if(why)flag.push({o:o,why:why,to:s?s.name.trim():''});else keep.push(o);});
       return {keep:keep,flag:flag};}
     function heldWhy(o){var at=o.at?' It came '+String(o.at).replace('T',' ').slice(0,16)+'.':'';
+      if(o.why==='student')return 'it is about '+esc(o.student||'another student')+', and this form is about '+esc(shortNow()||'another student')+': it was answered on a page made for the other student.'+at+' Keep it only if it is about this student.';
       if(o.why==='again')return 'a second reply through the link sent to '+esc(o.sentTo||'this person')+', whose answers are placed already.'+at+' Keep it only if you know who sent it.';
       if(o.why==='name')return 'it came through the link made for '+esc(o.sentTo||'another person')+' but is signed '+esc(o.name||'with another name')+': the link may have been passed on.'+at+' Keep it only if you know who answered.';
       return o.why==='fit'?'it does not fit this form (its items or questions differ from this form’s).':o.why==='error'?'it could not be placed.':esc(o.why);}
@@ -1023,8 +1118,8 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
       if(n){changed();var t='Collected '+(res.done||[]).join('; ')+' from the reply box'+(res.cells!=null?': '+res.cells+' answers':'')+'.';var ln=$('#rbCollectLine');if(ln)ln.textContent=t;toast(t,'ok');}
       paintHeld();paintBox();paintRows();return n;}
     var inflight=null;
-    K.collect=function(quiet,opt){if(inflight)return inflight;
-      inflight=C.fetch(opt).then(function(f){if(!f){paintBox();return null;}var bx=rb().box,mine=f.objs.filter(function(o){return o.form===cfg.form;}),res={placed:[],held:[],done:[],cells:0};
+    K.collect=function(quiet,opt){if(inflight)return inflight;var r0=rb();   /* v25.72 (privacy audit R2) the record this collect is for: nothing is placed in another */
+      inflight=C.fetch(opt).then(function(f){if(!f||rb()!==r0){paintBox();return null;}var bx=rb().box,mine=f.objs.filter(function(o){return o.form===cfg.form;}),res={placed:[],held:[],done:[],cells:0};
           var sc=screen(mine);mine=sc.keep;
           if(mine.length){try{res=cfg.place(mine)||res;}catch(e){res={placed:[],held:mine.map(function(o){return {o:o,why:'error'};}),done:[]};}}
           res.held=(res.held||[]).concat(sc.flag);
@@ -1038,7 +1133,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
         .then(function(v){inflight=null;return v;},function(e){inflight=null;C.last=String((e&&e.message)||e);paintBox();return null;});return inflight;};
     function paintBox(){var t=C.line();['#rbBoxLine','#rbCollectLine'].forEach(function(q){var e=$(q);if(e&&(q==='#rbBoxLine'||!e.textContent||/^(Reply box|No reply box|This browser)/.test(e.textContent)))e.textContent=t;});var pb=$('#rbPurge'),bx=rb().box;if(pb)pb.disabled=!(bx&&bx.got.length);}
     function paintHeld(){var h=$('#rbHeld');if(!h)return;var held=(rb().box&&rb().box.held)||[];
-      h.innerHTML=held.map(function(o,i){var chk=o.why==='again'||o.why==='name';return '<div class="gf-warn rb-held"><b>Reply'+(o.name?' from '+esc(o.name):'')+(o.inst?' ('+esc(o.inst)+')':'')+'</b>: '+heldWhy(o)+' '+
+      h.innerHTML=held.map(function(o,i){var chk=o.why==='again'||o.why==='name'||o.why==='student';return '<div class="gf-warn rb-held"><b>Reply'+(o.name?' from '+esc(o.name):'')+(o.inst?' ('+esc(o.inst)+')':'')+'</b>: '+heldWhy(o)+' '+
         (chk?'<button type="button" data-hkeep="'+i+'">Keep and place it</button> ':cfg.force?'<button type="button" data-hadd="'+i+'">Place it anyway</button> ':'')+'<button type="button" data-hdrop="'+i+'">Discard</button></div>';}).join('');}
     /* ---- the workstation's side ---- */
     K.out=function(){var r=rb();if(!r.box&&!r.sends.length&&!r.placed)return null;var o={placed:r.placed,waiting:r.sends.filter(function(s){return s.sent&&!s.back;}).length,held:r.box?r.box.held.length:0};if(r.last)o.last=r.last;return o;};
