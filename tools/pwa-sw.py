@@ -75,6 +75,8 @@ def loads(text):
     # has its picture beside it (nbh-td1-poster-….jpg), which the video library shows
     out += [m.group(2) for m in re.finditer(r'(["\'])(nbh-td1-video-[A-Za-z0-9-]+\.js)\1', text)]
     out += [m.group(2) for m in re.finditer(r'(["\'])(nbh-td1-poster-[A-Za-z0-9-]+\.jpg)\1', text)]
+    # v25.73: the study podcast's episodes are named in the same list (nbh-pod-….js, the audio as base64), loaded when listened to
+    out += [m.group(2) for m in re.finditer(r'(["\'])(nbh-pod-[A-Za-z0-9-]+\.js)\1', text)]
     seen, keep = set(), []
     for x in out:
         x = x.split('?')[0].split('#')[0]

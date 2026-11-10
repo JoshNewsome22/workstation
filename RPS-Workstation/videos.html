@@ -23,7 +23,13 @@
      heard marked and kept in view, a line tapped plays from it, a search); captions of what is said as a real text track,
      off until CC is turned on (kept in localStorage nbh.videos.pref with the tab last chosen: no student, nothing typed);
      on an iPad the browser's control bar in a band below the picture, clear of its caption strip; on a phone the picture
-     cropped to its scene, with the page's own bar, and the Steps and Transcript right under it. -->
+     cropped to its scene, with the page's own bar, and the Steps and Transcript right under it.
+     v25.73 (the BCBA, 11/10, the design review's P1 to P4) The Research Behind the Plan, the study podcast: a shelf above the
+     first procedure (under Continue watching), found by the search and following the Procedure, Function and Watched
+     filters; each episode's page (videos.html#pod=<key>: Listen, Open the TD-1 card, Watch the procedure, the transcript by
+     nbh-transcript.js with the turns of nbh-pod-transcripts.js, About this episode, the study); a video whose card has an
+     episode gains Listen to the study. One player, the bar at the bottom of the screen (nbh-pod-player.js), for the whole
+     page; one sound at a time. What was heard is kept in localStorage nbh.pod.v1 (the second, the speed; no student). -->
 <script>
 /* the workstation's text size, contrast and low light (localStorage nbh.view, as the forms read it), before the page draws */
 (function(){var R=document.documentElement;try{if(window.parent!==window)R.classList.add('nbh-framed');}catch(e){}
@@ -123,7 +129,7 @@ body.vl-watching #vlClose{margin-left:auto}
 .vl-seen svg{width:13px;height:13px}
 .vl-info{display:flex;gap:12px;padding:10px 2px 0;align-items:flex-start}
 .vl-av{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 .6875rem/1 var(--sans);letter-spacing:.02em;background:var(--navy)}
-.vl-f-dro{background:#1D3A52}.vl-f-dra{background:#7a3b52}.vl-f-ncr{background:#2f6b37}.vl-f-rird{background:#6b4a7a}.vl-f-highp{background:#9b4e15}.vl-f-fct{background:#22657a}
+.vl-f-dro{background:#1D3A52}.vl-f-dra{background:#7a3b52}.vl-f-ncr{background:#2f6b37}.vl-f-rird{background:#6b4a7a}.vl-f-highp{background:#9b4e15}.vl-f-fct{background:#22657a}.vl-f-choice{background:#5a5a1e}
 .vl-txt{position:relative;min-width:0;display:flex;flex-direction:column;gap:3px}
 /* a title wraps and is never cut */
 .vl-t{font-weight:600;font-size:1rem;line-height:1.3;color:var(--ink);overflow-wrap:break-word}
@@ -277,6 +283,35 @@ body.vl-watching #vlClose{margin-left:auto}
 .vl-ni .vl-m{font-size:.8125rem;-webkit-line-clamp:1}
 @media (max-width:1179px){.vl-next ol.vl-nl{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px}.vl-ni{grid-template-columns:minmax(120px,40%) minmax(0,1fr)}}
 @media (max-width:699px){.vl-next ol.vl-nl{grid-template-columns:minmax(0,1fr)}.vl-w h2.vl-wt{font-size:1.375rem}.vl-player{border-radius:0;margin:0 calc(-1*var(--gut))}}
+/* v25.73 the study podcast: its shelf, its cards (wide and short, a headphones tile, "Listen"), an episode's page */
+.vl-podic,.vl-pct,.vl-ept{display:grid;place-items:center;background:#3b4852;color:#fff;flex:0 0 auto}
+.vl-podic{width:40px;height:40px;border-radius:10px}.vl-podic svg{width:22px;height:22px}
+.vl-pgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:1099px){.vl-pgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+.vl-pc{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--rule);border-radius:var(--r);background:var(--paper);color:inherit;text-decoration:none;min-width:0;-webkit-tap-highlight-color:transparent}
+.vl-pc:hover{border-color:#93aead}.vl-pc:focus-visible{outline-offset:3px}
+.vl-pct{width:84px;height:84px;border-radius:12px}.vl-pct svg{width:40px;height:40px}
+.vl-pcx{display:flex;flex-direction:column;gap:3px;min-width:0}
+.vl-pcm{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;color:var(--muted);font-size:.875rem;font-weight:500}
+.vl-pc .vl-t{font-size:1.0625rem}
+.vl-lis{display:inline-flex;align-items:center;gap:6px}.vl-lis svg{width:16px;height:16px}
+.vl-ep{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;padding-top:12px;padding-bottom:40px;align-items:start}
+@media (max-width:1179px){.vl-ep{grid-template-columns:minmax(0,1fr)}}
+.vl-eph{display:flex;gap:18px;align-items:flex-start}
+.vl-ept{width:128px;height:128px;border-radius:16px}.vl-ept svg{width:60px;height:60px}
+.vl-eps{margin:6px 0 4px;color:var(--muted);font-size:.9375rem}
+.vl-ep h2.vl-wt{margin:0;font:600 1.75rem/1.2 var(--serif);color:var(--navy)}
+.vl-ep h2.vl-wt:focus{outline:none}.vl-ep h2.vl-wt:focus-visible{outline:3px solid var(--focus);outline-offset:4px;border-radius:4px}
+.vl-eptr{padding:14px 14px 6px}
+.vl-epth{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 10px;margin:0 2px 10px}
+.vl-epth h3{margin:0;font:600 1.125rem/1.3 var(--sans);color:var(--ink)}.vl-epth small{color:var(--muted);font-size:.875rem}
+.vl-eptr .nt{--nt-h:min(64vh,640px)}
+.vl-epside .vl-panel:first-child{margin-top:0}
+.vl-ref i{font-style:italic}
+.vl-btn.vl-on .vl-i-play,.vl-btn .vl-i-pause{display:none}.vl-btn.vl-on .vl-i-pause{display:block}
+@media (max-width:699px){.vl-pgrid{grid-template-columns:minmax(0,1fr)}.vl-pct{width:72px;height:72px}.vl-pct svg{width:34px;height:34px}
+  .vl-ept{width:72px;height:72px;border-radius:12px}.vl-ept svg{width:36px;height:36px}.vl-eph{gap:14px}.vl-ep h2.vl-wt{font-size:1.375rem}
+  .vl-eptr{padding:12px 10px 4px;margin-left:calc(-1*var(--gut) + 6px);margin-right:calc(-1*var(--gut) + 6px)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.vl-card:hover .vl-thumb img{transform:none}}
 @media print{.vl-head,.vl-filt,.vl-next{display:none}}
 </style>
@@ -284,6 +319,8 @@ body.vl-watching #vlClose{margin-left:auto}
 <script src="nbh-video-steps.js"></script>
 <script src="nbh-video-transcripts.js"></script>
 <script src="nbh-transcript.js"></script>
+<script src="nbh-pod-transcripts.js"></script>
+<script src="nbh-pod-player.js"></script>
 </head>
 <body>
 <a class="vl-skip" href="#vlMain">Skip to the videos</a>
@@ -329,6 +366,10 @@ var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){r
 if(!D||!D.list||!D.list.length){$('vlList').innerHTML='<div class="vl-none"><p>The list of videos (nbh-videos.js) could not be loaded. Open the workstation from its folder or from the website.</p></div>';return;}
 var LIST=D.list,BY={},FAM={},FN={attention:'Attention',escape:'Escape',tangible:'Tangible',automatic:'Automatic'},FNS=['attention','escape','tangible','automatic'];
 LIST.forEach(function(v){BY[v.key]=v;});D.families.forEach(function(f){FAM[f[0]]={key:f[0],short:f[1],name:f[2]};});
+/* v25.73 the study podcast's episodes (nbh-videos.js podcasts), their turns (nbh-pod-transcripts.js) and the one player */
+var PODS=D.podcasts||[],PBY={},PT=window.NBH_POD_TRANSCRIPTS||{},POD=window.NBHPod||null,SERIES='The Research Behind the Plan';PODS.forEach(function(p){PBY[p.key]=p;});
+var podOf=function(v){return PODS.filter(function(p){return p.cards.some(function(c){return v.cards.indexOf(c)>=0;});})[0]||null;};
+var vidOf=function(p){return LIST.filter(function(v){return v.cards.some(function(c){return p.cards.indexOf(c)>=0;});})[0]||null;};
 /* the workstation around this page (its Videos): Close, and a card opened in its Form TD-1 */
 var WS=false;try{WS=window.parent!==window&&!!window.parent.__wsVideos;}catch(e){WS=false;}
 var tell=function(m){try{window.parent.postMessage(m,'*');}catch(e){}};
@@ -367,6 +408,10 @@ var words=function(s){return norm(s).split(/[^a-z0-9]+/).filter(Boolean);};
 function hay(v){var f=fam(v);return [v.title,f.short,f.name,citeOf(v),v.note,(v.shows||{}).summary,(v.fn||[]).join(' '),
   v.cards.map(function(id){var c=D.cards[id]||{};return (c.lab||'')+' '+(c.cite||'')+' '+(c.code||'');}).join(' ')].join(' ');}
 LIST.forEach(function(v){var w=words(hay(v));v._cmp=w.join('');var u={};w.forEach(function(x){if(x.length>=4)u[x]=1;});v._tok=Object.keys(u);});
+/* v25.73 an episode is found by its title, its series, its study, its card, About this episode and every word of its transcript */
+function podHay(p){return [p.title,p.series,p.after,'podcast listen episode audio',(p.about||[]).join(' '),(p.fn||[]).join(' '),(FAM[p.family]||{}).name||'',
+  p.cards.map(function(id){var c=D.cards[id]||{};return (c.lab||'')+' '+(c.cite||'')+' '+(c.code||'');}).join(' '),(PT[p.key]||[]).map(function(l){return l[2];}).join(' ')].join(' ');}
+PODS.forEach(function(p){var w=words(podHay(p));p._cmp=w.join('');var u={};w.forEach(function(x){if(x.length>=4)u[x]=1;});p._tok=Object.keys(u);});
 /* one letter wrong, missing or extra */
 function near(a,b){var la=a.length,lb=b.length;if(Math.abs(la-lb)>1)return false;var i=0,j=0,e=0;
   while(i<la&&j<lb){if(a.charAt(i)===b.charAt(j)){i++;j++;continue;}if(++e>1)return false;if(la>lb)i++;else if(lb>la)j++;else{i++;j++;}}
@@ -376,11 +421,11 @@ function wordIn(v,w){if(v._cmp.indexOf(w)>=0)return true;
   if(w.length<5)return false;
   return v._tok.some(function(t){return near(w,t)||(t.length>w.length&&(near(w,t.slice(0,w.length))||near(w,t.slice(0,w.length+1))||near(w,t.slice(0,w.length-1))));});}
 /* the keys the search finds (all when it is empty) */
-function found(q){var w=words(q).map(function(x){return SPELL[x]||x;}),all={};if(!w.length){LIST.forEach(function(v){all[v.key]=1;});return all;}
+function found(q,L){L=L||LIST;var w=words(q).map(function(x){return SPELL[x]||x;}),all={};if(!w.length){L.forEach(function(v){all[v.key]=1;});return all;}
   var joined=w.join(''),out={},any=false;joined=SPELL[joined]||joined;
-  if(w.length>1||/[-‐–—\/]/.test(q))LIST.forEach(function(v){if(v._cmp.indexOf(joined)>=0){out[v.key]=1;any=true;}});
+  if(w.length>1||/[-‐–—\/]/.test(q))L.forEach(function(v){if(v._cmp.indexOf(joined)>=0){out[v.key]=1;any=true;}});
   if(any)return out;
-  LIST.forEach(function(v){if(w.every(function(x){return wordIn(v,x);}))out[v.key]=1;});return out;}
+  L.forEach(function(v){if(w.every(function(x){return wordIn(v,x);}))out[v.key]=1;});return out;}
 
 /* ---------- a card ---------- */
 var CHECK='<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg>';
@@ -396,7 +441,18 @@ function card(v,inFam){var f=fam(v);
     '<span class="vl-m">'+esc(citeOf(v))+(inFam?'':' · '+esc(f.short))+(v.dur?'<span class="vl-sr"> · '+spoken(v.dur)+'</span>':'')+'</span>'+(status(v)?'<span class="vl-st">'+status(v)+'</span>':'')+'</span></span></a>';}
 
 /* ---------- the home page: the filters, the search, Continue watching, a shelf per procedure (or one grid, filtered) ---------- */
-var flt={fam:'',fn:'',seen:'all'},q='',view='home',homeY=0,lastKey='',hits=found('');
+var flt={fam:'',fn:'',seen:'all'},q='',view='home',homeY=0,lastKey='',hits=found(''),phits=found('',PODS);
+/* v25.73 an episode: heard on this device (nbh.pod.v1, the player's), and whether the filters and the search keep it */
+var HEAD_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3.5" y="14" width="4" height="6.5" rx="1.6"/><rect x="16.5" y="14" width="4" height="6.5" rx="1.6"/></svg>';
+var pprog=function(k){try{return POD&&POD.progress?POD.progress(k):null;}catch(e){return null;}};
+var heard=function(k){var p=pprog(k);return !!p&&!!p.w;};
+function podPass(p){if(!phits[p.key])return false;if(flt.fam&&p.family!==flt.fam)return false;if(flt.fn&&(p.fn||[]).indexOf(flt.fn)<0)return false;
+  if(flt.seen==='seen'&&!heard(p.key))return false;if(flt.seen==='unseen'&&heard(p.key))return false;return true;}
+function podCard(p){var g=pprog(p.key),st=g&&g.t>=5&&(!g.d||g.t<g.d-2)?'Stopped at '+mmss(g.t):g&&g.w?'<b>Listened</b>':'';
+  return '<a class="vl-pc" href="#pod='+encodeURIComponent(p.key)+'" data-pod="'+esc(p.key)+'"><span class="vl-pct" aria-hidden="true">'+HEAD_ICO+'</span><span class="vl-pcx">'+
+    '<span class="vl-pcm"><span>Listen · '+p.min+' min</span><span class="vl-ai">AI voices</span></span><span class="vl-t">'+esc(p.title)+'</span><span class="vl-m">'+esc(p.after)+'<span class="vl-sr"> · '+esc(SERIES)+' · an episode of about '+p.min+' minutes</span></span>'+(st?'<span class="vl-st">'+st+'</span>':'')+'</span></a>';}
+function podShelf(L){return '<section class="vl-sec vl-podsec" id="vlPods" aria-labelledby="vlPodsH"><div class="vl-sech"><span class="vl-podic" aria-hidden="true">'+HEAD_ICO+'</span><span class="vl-shd"><h2 id="vlPodsH">'+esc(SERIES)+'</h2><span class="vl-sub">Listen · short talks about the studies behind the cards</span></span></div>'+
+  '<div class="vl-pgrid">'+L.map(podCard).join('')+'</div></section>';}
 function passWith(v,o){if(!hits[v.key])return false;if(o.fam&&v.family!==o.fam)return false;if(o.fn&&(v.fn||[]).indexOf(o.fn)<0)return false;
   if(o.seen==='seen'&&!watched(v.key))return false;if(o.seen==='unseen'&&watched(v.key))return false;return true;}
 var pass=function(v){return passWith(v,flt);};
@@ -415,15 +471,16 @@ function paintFilters(){
     [].forEach.call(s.options,function(o){var c={};c[x[1]]=o.value;var lab=o.value?(x[2].filter(function(y){return y[0]===o.value;})[0]||['',''])[1]:'Any';o.textContent=lab+' ('+count(c)+')';});s.value=flt[x[1]];});
   $('vlSeen').value=flt.seen;}
 function fltName(){var b=[];if(flt.fam)b.push(fam({family:flt.fam}).short);if(flt.fn)b.push(FN[flt.fn]);if(flt.seen!=='all')b.push(flt.seen==='seen'?'Watched':'Not watched');return b.join(' · ');}
-function paintHome(){hits=found(q);paintFilters();var L=LIST.filter(pass),h='',qq=q.trim(),plain=!flt.fam&&!flt.fn&&flt.seen==='all'&&!words(q).length;
+function paintHome(){hits=found(q);phits=found(q,PODS);paintFilters();var L=LIST.filter(pass),PL=PODS.filter(podPass),h='',qq=q.trim(),plain=!flt.fam&&!flt.fn&&flt.seen==='all'&&!words(q).length;
   $('vlCount').textContent=plain?LIST.length+' videos':L.length+' of '+LIST.length+' videos'+(fltName()?' · '+fltName():'')+(qq?' · “'+qq+'”':'');
   if(plain){var C=LIST.filter(function(v){return inProgress(v.key);}).sort(function(a,b){return prog(b.key).at-prog(a.key).at;});
     if(C.length){h+='<section class="vl-sec" id="vlCont" aria-labelledby="vlContH"><div class="vl-sech"><span class="vl-shd"><h2 id="vlContH">Continue watching</h2><span class="vl-sub">'+C.length+' started on this device</span></span></div><div class="vl-row">'+C.map(function(v){return card(v,false);}).join('')+'</div></section>';
       preload(C[0]);}
+    if(PODS.length)h+=podShelf(PODS);
     FAMS.forEach(function(f){var F=LIST.filter(function(v){return v.family===f[0];});
       h+='<section class="vl-sec vl-fam" data-fam="'+f[0]+'" aria-labelledby="vlFam-'+f[0]+'"><div class="vl-sech"><span class="vl-av vl-f-'+f[0]+'" aria-hidden="true">'+esc(f[1])+'</span><span class="vl-shd"><h2 id="vlFam-'+f[0]+'">'+esc(f[2])+'</h2><span class="vl-sub">'+esc(f[1])+' · '+F.length+' video'+(F.length>1?'s':'')+'</span></span>'+
         (F.length>1?'<button type="button" class="vl-btn" data-set="fam:'+f[0]+'">Only '+esc(f[1])+'</button>':'')+'</div><div class="vl-grid">'+F.map(function(v){return card(v,true);}).join('')+'</div></section>';});}
-  else if(L.length)h='<div class="vl-sec"><div class="vl-grid">'+L.map(function(v){return card(v,false);}).join('')+'</div></div>';
+  else if(L.length||PL.length)h=(PL.length?podShelf(PL):'')+(L.length?'<div class="vl-sec"><div class="vl-grid">'+L.map(function(v){return card(v,false);}).join('')+'</div></div>':'');
   else{/* nothing found: the Procedure and Function choices, then all */
     var none=fltName();
     h='<div class="vl-none"><p>No video matches '+(qq?'“'+esc(qq)+'”':'')+(none?(qq?' in ':'')+esc(none):'')+'.</p>'+
@@ -508,6 +565,9 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
   var acts=v.cards.map(function(id,i){var c=D.cards[id]||{},c1=(c.cite||'').split('; ')[0];
     return '<div class="vl-actr"><button type="button" class="vl-btn'+(i?'':' vl-pri')+' vl-open" data-card="'+esc(id)+'" aria-describedby="vlCard'+i+'">'+OPEN_ICO+'Open the TD-1 card</button>'+
       '<span class="vl-actl" id="vlCard'+i+'"><b>'+esc(cap(c.lab||id))+'</b>'+esc([c.code,c1].filter(Boolean).join(' · '))+'</span></div>';}).join('');
+  /* v25.73 a video whose card has an episode of the study podcast: Listen to the study, in the bar (the page stays) */
+  var pe=podOf(v);if(pe)acts+='<div class="vl-actr"><button type="button" class="vl-btn vl-listen" data-listen="'+esc(pe.key)+'" aria-describedby="vlListenL">'+HEAD_ICO+'Listen to the study</button>'+
+    '<span class="vl-actl" id="vlListenL"><b>'+esc(pe.title)+'</b>'+esc(SERIES)+' · '+pe.min+' min · <span class="vl-ai">AI voices</span></span></div>';
   var sum=(v.shows||{}).summary;
   $('vlWatch').innerHTML='<div class="vl-w"><div class="vl-wmain">'+
     '<div class="vl-player"><video id="vlVideo" controls playsinline preload="metadata" tabindex="0" poster="'+esc(v.poster)+'" aria-label="'+esc(v.title)+'"></video>'+
@@ -616,6 +676,43 @@ var wideFns=[],vidKeys=null,fullFns=[];function watchWide(f){wideFns=[f];}
 addEventListener('keydown',function(e){if(vidKeys)vidKeys(e);},true);
 try{matchMedia('(min-width: 1180px)').addEventListener('change',function(){wideFns.forEach(function(f){f();});});matchMedia('(max-width: 699px)').addEventListener('change',function(){wideFns.forEach(function(f){f();});});}catch(e){}
 $('vlWatch').addEventListener('click',function(e){var b=e.target.closest('[data-card]');if(!b)return;openCard(b.dataset.card);});
+$('vlWatch').addEventListener('click',function(e){var b=e.target.closest('[data-listen]');if(!b||!POD)return;POD.play(b.dataset.listen,{from:b,transcript:podTr});});
+/* ---------- v25.73 an episode's page: Listen (in the bar), Open the TD-1 card, Watch the procedure, the transcript, About ---------- */
+var curPod='',podT=null;
+var PI='<svg class="vl-i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="vl-i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>';
+var NOTE='Nora and Sam are AI voices. The episode is based on the published article.';
+function refHtml(r){return esc(r).replace(/(Journal of [^,]+, \d+)/,'<i>$1</i>');}
+/* the bar's Transcript in the library: the episode's page, at its transcript */
+function podTr(k){if(view==='pod'&&curPod===k){var el=$('vlEpTrH');if(el){try{el.scrollIntoView({block:'start',behavior:REDUCE()?'auto':'smooth'});}catch(x){}el.tabIndex=-1;try{el.focus({preventScroll:true});}catch(x){}}return;}
+  if(view==='home')homeY=window.scrollY||0;location.hash='pod='+encodeURIComponent(k);}
+function epPaint(){if(!POD)return;var st=POD.state();if(POD.trButton)POD.trButton(!(view==='pod'&&st.key===curPod));var b=$('vlEpPlay');if(!b)return;var on=st.key===curPod&&!st.paused;b.classList.toggle('vl-on',on);b.querySelector('span').textContent=on?'Pause':'Listen';
+  var r=$('vlEpRes'),g=pprog(curPod);if(r){var show=st.key!==curPod&&!!g&&g.t>=5&&(!g.d||g.t<g.d-2);r.hidden=!show;if(show)$('vlEpResT').textContent='Picks up where it stopped on this device, at '+mmss(g.t)+'.';}
+}
+function paintPod(p){var v=vidOf(p),T=PT[p.key]||[];
+  var cards=p.cards.map(function(id,i){var c=D.cards[id]||{},c1=(c.cite||'').split('; ')[0];
+    return '<div class="vl-actr"><button type="button" class="vl-btn vl-open" data-card="'+esc(id)+'" aria-describedby="vlPCard'+i+'">'+OPEN_ICO+'Open the TD-1 card</button>'+
+      '<span class="vl-actl" id="vlPCard'+i+'"><b>'+esc(cap(c.lab||id))+'</b>'+esc([c.code,c1].filter(Boolean).join(' · '))+'</span></div>';}).join('');
+  $('vlWatch').innerHTML='<div class="vl-ep"><div class="vl-wmain">'+
+    '<div class="vl-eph"><span class="vl-ept" aria-hidden="true">'+HEAD_ICO+'</span><div><p class="vl-eps">'+esc(p.series)+'</p><h2 class="vl-wt" id="vlTitle" tabindex="-1">'+esc(p.title)+'</h2>'+
+      '<p class="vl-wm"><span>'+esc(p.after)+'</span><span aria-hidden="true">·</span><span>Listen · about '+p.min+' min</span><span class="vl-ai">AI voices</span></p></div></div>'+
+    '<div class="vl-act"><div class="vl-actr"><button type="button" class="vl-btn vl-pri" id="vlEpPlay" aria-describedby="vlEpPlayL">'+PI+'<span>Listen</span></button>'+
+      '<span class="vl-actl" id="vlEpPlayL"><b>Plays in the bar at the bottom of the screen</b>Nora and Sam: simulated hosts, AI voices</span></div>'+
+      '<div class="vl-resume" id="vlEpRes" hidden><span id="vlEpResT"></span><button type="button" class="vl-btn" id="vlEpRestart">Start from the beginning</button></div>'+cards+
+      (v?'<div class="vl-actr"><a class="vl-btn" href="#video='+encodeURIComponent(v.key)+'" data-key="'+esc(v.key)+'" aria-describedby="vlPVid">'+PLAY_ICO+'Watch the procedure</a>'+
+        '<span class="vl-actl" id="vlPVid"><b>'+esc(v.title)+'</b>'+(v.dur?'Video · '+mmss(v.dur)+' · ':'')+'AI-generated · simulated people</span></div>':'')+'</div>'+
+    '<section class="vl-panel vl-eptr" aria-labelledby="vlEpTrH"><div class="vl-epth"><h3 id="vlEpTrH">Transcript</h3><small>Tap a line to jump to it</small></div><div id="vlEpTr"></div></section>'+
+    '</div><aside class="vl-epside" aria-label="About this episode"><section class="vl-panel"><h3>About this episode</h3>'+(p.about||[]).map(function(x){return '<p class="vl-note">'+esc(x)+'</p>';}).join('')+'</section>'+
+    '<section class="vl-panel"><h3>The study</h3><p class="vl-note vl-ref">'+refHtml(p.ref||'')+'</p></section></aside></div>';
+  var b=$('vlEpPlay'),go=function(at){if(!POD)return;var o={from:b,transcript:podTr};if(at!=null)o.at=at;POD.play(p.key,o);epPaint();};
+  b.addEventListener('click',function(){if(!POD)return;var st=POD.state();if(st.key===p.key&&!st.paused)POD.pause();else go();epPaint();});
+  $('vlEpRestart').addEventListener('click',function(){go(0);});
+  if(T.length&&window.NBHTranscript&&POD){podT=window.NBHTranscript.create({media:POD.audio(),name:'Transcript of '+p.title,note:NOTE,
+      lines:T.map(function(l){return {t:l[0],who:l[1],text:l[2]};}),seek:function(t){go(t);}});$('vlEpTr').appendChild(podT.el);
+    if(POD.current()!==p.key)podT.update(-1);else podT.follow(true);}
+  else $('vlEpTr').innerHTML='<p class="vl-note">The transcript could not be loaded here. Open the workstation from its folder or from the website.</p>';
+  if(!POD)b.disabled=true;
+  epPaint();}
+if(POD)POD.on(function(type){if(type==='time')return;epPaint();if(view==='home'&&(type==='pause'||type==='ended'||type==='close')){var sh=document.getElementById('vlPods');if(sh)sh.querySelector('.vl-pgrid').innerHTML=PODS.filter(podPass).map(podCard).join('');}});
 function openCard(id){pauseNow();
   if(WS){tell({nbh:'videos-card',card:id});return;}
   location.href=(D.form||'TD-1_Function-Based-Treatment-Developer_v2026-09.html')+'#card='+encodeURIComponent(id);}
@@ -623,35 +720,44 @@ function pauseNow(){var vid=$('vlVideo');if(vid&&cur){try{if(vid.duration>0)setP
 
 /* ---------- the two views, from the address: #video=<key> a video's page, else the home page ---------- */
 function route(focus){var m=/^#video=([^&]+)/.exec(location.hash||''),k=m?decodeURIComponent(m[1]):'',v=BY[k];
+  /* v25.73 #pod=<key>: an episode's page */
+  var pm=/^#pod=([^&]+)/.exec(location.hash||''),pk=pm?decodeURIComponent(pm[1]):'',pp=PBY[pk];
+  if(podT){podT.destroy();podT=null;}
+  if(pp){if(view==='home')homeY=window.scrollY||0;pauseNow();releasePlayer();cur=null;token++;wideFns=[];fullFns=[];vidKeys=null;curPod=pk;lastKey='';view='pod';B.classList.add('vl-watching');$('vlHome').hidden=true;$('vlWatch').hidden=false;$('vlBack').hidden=false;
+    paintPod(pp);window.scrollTo(0,0);document.title=pp.title+' · Video library';if(focus){var t0=$('vlTitle');if(t0)t0.focus({preventScroll:true});}return;}
+  var wasPod=curPod;curPod='';
   /* v25.70 #family=<procedure>: a form's Watch how, the home page showing that procedure's videos */
   var fm=/^#family=([a-z]{2,12})$/.exec(location.hash||'');if(fm&&D.families.some(function(f){return f[0]===fm[1];})){flt={fam:fm[1],fn:'',seen:'all'};q='';var qi=$('vlQ');if(qi)qi.value='';}
   if(v){if(view==='home')homeY=window.scrollY||0;pauseNow();releasePlayer();cur=v.key;lastKey=v.key;view='watch';B.classList.add('vl-watching');$('vlHome').hidden=true;$('vlWatch').hidden=false;$('vlBack').hidden=false;
     paintWatch(v);openedByTap=false;window.scrollTo(0,0);document.title=v.title+' · Video library';if(focus){var t=$('vlTitle');if(t)t.focus({preventScroll:true});}}
   else{var was=view;pauseNow();releasePlayer();cur=null;token++;view='home';wideFns=[];fullFns=[];B.classList.remove('vl-watching');$('vlWatch').hidden=true;$('vlWatch').innerHTML='';$('vlHome').hidden=false;$('vlBack').hidden=true;
-    document.title='Video library · FBA and BIP Workstation';paintHome();if(was==='watch'){window.scrollTo(0,homeY);if(focus&&lastKey){var c=document.querySelector('#vlList .vl-card[data-key="'+lastKey+'"]');if(c)c.focus({preventScroll:true});}}}}
+    document.title='Video library · FBA and BIP Workstation';paintHome();if(was==='watch'||was==='pod'){window.scrollTo(0,homeY);if(focus&&(lastKey||wasPod)){var c=wasPod?document.querySelector('#vlList .vl-pc[data-pod="'+wasPod+'"]'):document.querySelector('#vlList .vl-card[data-key="'+lastKey+'"]');if(c)c.focus({preventScroll:true});}}}
+  epPaint();}
 /* a video opened from the home page sits one step after it in the history (Back, and All videos, go back to it); a video
    opened from Up next takes the place of the one before, so All videos is always one step */
 var fromHome=false;
-document.addEventListener('click',function(e){var a=e.target.closest('a[href^="#video="]');if(!a||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;openedByTap=true;
-  if(view==='watch'){e.preventDefault();location.replace(a.getAttribute('href'));}else fromHome=true;});
+document.addEventListener('click',function(e){var a=e.target.closest('a[href^="#video="],a[href^="#pod="]');if(!a||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;openedByTap=true;
+  if(view!=='home'){e.preventDefault();location.replace(a.getAttribute('href'));}else fromHome=true;});
 addEventListener('hashchange',function(){route(true);});
-function home(){if(view!=='watch')return;if(fromHome){fromHome=false;history.back();return;}location.hash='';}
+function home(){if(view==='home')return;if(fromHome){fromHome=false;history.back();return;}location.hash='';}
 $('vlBack').addEventListener('click',home);
 $('vlClose').hidden=!WS;$('vlClose').addEventListener('click',function(){pauseNow();tell({nbh:'videos-close'});});
 document.addEventListener('keydown',function(e){if(e.key!=='Escape'||e.defaultPrevented)return;if(document.fullscreenElement||document.webkitFullscreenElement)return;
   if(e.target&&e.target.id==='vlQ'&&e.target.value)return;
-  if(view==='watch'){e.preventDefault();home();}else if(WS){e.preventDefault();pauseNow();tell({nbh:'videos-close'});}});
+  if(e.target&&e.target.closest&&e.target.closest('#nbhPod'))return;   /* v25.73 the player's own Escape (its sheet) */
+  if(view!=='home'){e.preventDefault();home();}else if(WS){e.preventDefault();pauseNow();tell({nbh:'videos-close'});}});
 /* the workstation: its text size, contrast and low light; a pause when it puts the library away; the focus when it shows it */
 function applyView(v){v=v||{};R.classList.toggle('nbh-tx-1',v.t===1);R.classList.toggle('nbh-tx-2',v.t===2);R.classList.toggle('nbh-hc',!!v.hc);R.classList.toggle('nbh-dark',!!v.dark);}
 function viewFromStore(){try{applyView(JSON.parse(localStorage.getItem('nbh.view')||'{}'));}catch(e){}}
 addEventListener('message',function(e){var d=e.data;if(!d||e.source!==window.parent||window.parent===window)return;
-  if(d.nbh==='view')applyView(d.v);else if(d.nbh==='videos-pause')pauseNow();
-  else if(d.nbh==='videos-focus'){var t=view==='watch'?$('vlTitle'):document.querySelector('#vlChips [aria-checked=true]');if(t&&!t.offsetParent)t=$('vlSelFam');if(view==='home'){var c=lastKey&&document.querySelector('#vlList .vl-card[data-key="'+lastKey+'"]');if(c)t=c;}if(t)try{t.focus({preventScroll:view!=='home'||!!lastKey});}catch(x){}}});
+  if(d.nbh==='view')applyView(d.v);else if(d.nbh==='videos-pause'){pauseNow();if(POD)POD.pause();}
+  else if(d.nbh==='videos-focus'){var t=view!=='home'?$('vlTitle'):document.querySelector('#vlChips [aria-checked=true]');if(t&&!t.offsetParent)t=$('vlSelFam');if(view==='home'){var c=lastKey&&document.querySelector('#vlList .vl-card[data-key="'+lastKey+'"]');if(c)t=c;}if(t)try{t.focus({preventScroll:view!=='home'||!!lastKey});}catch(x){}}});
 addEventListener('pagehide',pauseNow);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){var vid=$('vlVideo');if(vid&&cur&&vid.duration>0)setProg(cur,vid.currentTime,vid.duration,false);}});
 var head=$('vlHead');addEventListener('scroll',function(){head.classList.toggle('vl-stuck',(window.scrollY||0)>4);},{passive:true});
 window.__vl={view:function(){return view;},key:function(){return cur;},chip:function(){return (flt.fam?'fam:'+flt.fam:'')+(flt.fn?(flt.fam?' ':'')+'fn:'+flt.fn:'')||'all';},filters:function(){return {fam:flt.fam,fn:flt.fn,seen:flt.seen};},
   store:function(){return JSON.parse(JSON.stringify(store));},framed:function(){return WS;},
-  mem:function(){return {urls:Object.keys(urls).length,keys:order.slice(),loading:Object.keys(loads).length};},found:function(s){return Object.keys(found(s)).sort();}};
+  mem:function(){return {urls:Object.keys(urls).length,keys:order.slice(),loading:Object.keys(loads).length};},found:function(s){return Object.keys(found(s)).sort();},
+  pod:function(){return curPod;},podsFound:function(s){return Object.keys(found(s,PODS)).sort();}};
 route(false);
 })();
 </script>

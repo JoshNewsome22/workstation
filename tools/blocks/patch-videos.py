@@ -6,7 +6,9 @@ videos.html), kept current in two places:
    names (src and open: its code, its words, its functions and its study); each video's functions (those its cards name;
    for a video whose cards name none, each function that at least half of the bank's cards of the same code name, so a
    high-p video reads as escape); from index.html the file of Form TD-1 (the library opens a card there); from each
-   video's MP4 its length in seconds (to a tenth). --check allows a length one second off (a video's sound redone can move its
+   video's MP4 its length in seconds (to a tenth). v25.73 the same for the study podcast's episodes (PODS, after the part it
+   writes): each card an episode names, the episode's functions (pfn, those its cards name) and its length (pdur, from the
+   audio's MP4). --check allows a length one second off (a video's sound redone can move its
    end by a frame or two).
 2. Form TD-1's copy of the whole file: <script id="nbh-videos"> on the line before <script id="td1-video">, so the form
    needs no second file to show its videos (its one-file edition has the list too).
@@ -65,10 +67,27 @@ def entries(src):
     return out
 
 
+def pod_entries(src):
+    """v25.73 each episode of PODS: its key, its audio file and the cards it names"""
+    if 'var PODS = [' not in src:
+        return []
+    out = []
+    body = src[src.index('var PODS = ['):]
+    body = body[:body.index('\n];')]
+    for m in re.finditer(r"\n \{key:'([^']+)'(.*)", body):
+        key, rest = m.group(1), m.group(2)
+        fm = re.search(r"file:'(nbh-pod-[a-z0-9-]+\.js)'", rest)
+        cm = re.search(r"cards:\[([^\]]*)\]", rest)
+        if not fm or not cm or not re.findall(r"'([^']+)'", cm.group(1)):
+            fail('the episode %s names no audio file or no card' % key)
+        out.append((key, fm.group(1), re.findall(r"'([^']+)'", cm.group(1))))
+    return out
+
+
 def mp4_seconds(path):
-    """the length of the MP4 the video file carries as base64: its movie header (mvhd)"""
+    """the length of the MP4 the video (or v25.73 episode) file carries as base64: its movie header (mvhd)"""
     s = read(path)
-    m = re.search(r"NBH_TD1_VIDEO\['[^']+'\]\s*=\s*'([A-Za-z0-9+/=]+)'", s)
+    m = re.search(r"NBH_(?:TD1_VIDEO|POD_AUDIO)\['[^']+'\]\s*=\s*'([A-Za-z0-9+/=]+)'", s)
     if not m:
         fail(os.path.basename(path) + ' holds no video')
     b = base64.b64decode(m.group(1))
@@ -116,7 +135,25 @@ def gen(folder, src):
         if not os.path.isfile(path):
             fail('the video file %s is not in %s' % (file, folder))
         dur[key] = round(mp4_seconds(path), 1)
-    return {'form': fm.group(1), 'cards': cards, 'fn': fn, 'dur': dur}
+    pfn, pdur = {}, {}
+    for key, file, ids in pod_entries(src):
+        f = set()
+        for cid in ids:
+            p = by.get(cid)
+            if not p:
+                fail('the episode %s names the card %s, which the protocol bank does not hold' % (key, cid))
+            cite = '; '.join(refs[r]['cite'] for r in (p.get('src') or []) if r in refs and refs[r].get('cite'))
+            cards[cid] = {'code': p['code'], 'lab': p['lab'], 'fn': [x for x in (p.get('fn') or []) if x in FNS], 'cite': cite}
+            f.update(cards[cid]['fn'])
+        pfn[key] = [x for x in FNS if x in f]
+        path = os.path.join(folder, file)
+        if not os.path.isfile(path):
+            fail('the episode file %s is not in %s' % (file, folder))
+        pdur[key] = round(mp4_seconds(path), 1)
+    g = {'form': fm.group(1), 'cards': cards, 'fn': fn, 'dur': dur}
+    if pdur:
+        g['pfn'], g['pdur'] = pfn, pdur
+    return g
 
 
 def render(src, g):
@@ -161,7 +198,9 @@ def main(argv):
     if check and have is not None:
         # a length one second off is current (see the top)
         ok = (have.get('form') == g['form'] and have.get('cards') == g['cards'] and have.get('fn') == g['fn'] and
-              set(have.get('dur', {})) == set(g['dur']) and all(abs(have['dur'][k] - g['dur'][k]) <= 1 for k in g['dur']))
+              set(have.get('dur', {})) == set(g['dur']) and all(abs(have['dur'][k] - g['dur'][k]) <= 1 for k in g['dur']) and
+              have.get('pfn') == g.get('pfn') and set(have.get('pdur', {})) == set(g.get('pdur', {})) and
+              all(abs(have['pdur'][k] - g['pdur'][k]) <= 1 for k in g.get('pdur', {})))
         out = src if ok else render(src, g)
     else:
         out = render(src, g)
@@ -199,7 +238,7 @@ def main(argv):
         write(vpath, out)
     if t2 != t:
         write(tpath, t2)
-    print('patch-videos.py: %d videos; %s' % (len(g['dur']), ', '.join(stale) + ' written' if stale else 'nothing to change'))
+    print('patch-videos.py: %d videos, %d episodes; %s' % (len(g['dur']), len(g.get('pdur', {})), ', '.join(stale) + ' written' if stale else 'nothing to change'))
     return 0
 
 

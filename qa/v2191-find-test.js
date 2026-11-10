@@ -128,7 +128,7 @@ const OUT=__dirname+'/out/v2191-find/';
   ok('13 the target behavior (a fact) opens Form TB-1 at the field that holds “Elopement”, not focused',!!rt&&rt.found===true&&/Elopement/i.test(o2.val||'')&&!o2.focused&&await page.evaluate(()=>state.cur==='TB-1'),{rt,o2});
   /* 14 another student, from the start screen's search */
   await page.evaluate(async()=>{state.lastSig=caseSig();await clearCase();});await sleep(900);await page.evaluate(()=>paintBlank());await sleep(600);
-  const bl=await page.evaluate(()=>{const i=document.getElementById('blFindIn'),c=document.querySelector('#blankCl .cl-cards');return {i:!!i,above:!!i&&!!c&&!!(i.compareDocumentPosition(c)&Node.DOCUMENT_POSITION_FOLLOWING)};});
+  const bl=await page.evaluate(()=>{const i=document.getElementById('blFindIn'),c=document.querySelector('#blankCl .cl-cards,#blankCl .cl-minis');return {i:!!i,above:!!i&&!!c&&!!(i.compareDocumentPosition(c)&Node.DOCUMENT_POSITION_FOLLOWING)};});
   ok('14 the start screen has the search, above the cards',bl.i&&bl.above,bl);
   await page.fill('#blFindIn','cafe staff');await sleep(600);
   await page.screenshot({path:OUT+'blank-search-1180.png'});

@@ -1,7 +1,7 @@
 /* v25.69 (the BCBA, 11/8: "a video layout dashboard like YouTube ... that can show all the video protocols that I have in
    the bank") the video library: videos.html, the workstation's Videos. Simulated data only: the videos are AI-generated
    with simulated people, and nothing here is about a student.
-   A. the files: nbh-videos.js the one list (24 videos at v25.70, FCT 4, each its file, its picture, its card or cards, its length and
+   A. the files: nbh-videos.js the one list (25 videos at v25.73: FCT 4, Choice 1, each its file, its picture, its card or cards, its length and
       functions; Form TD-1 reads it, from its copy, which tools/blocks/patch-videos.py --check finds current); each picture a
       640 x 360 JPEG under 40 KB beside the forms; the offline list (tools/pwa-sw.py) finds the page, the list and every
       picture; this test in the release list.
@@ -33,7 +33,7 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
 /* the list, as a page reads it */
 const ctx0={window:{}};vm.createContext(ctx0);vm.runInContext(fs.readFileSync(path.join(DIR,'nbh-videos.js'),'utf8'),ctx0);const V=ctx0.window.NBH_VIDEOS;
 const LIST=V.list,BY={};LIST.forEach(v=>{BY[v.key]=v;});
-/* v25.70 the counts below are read from the list (24 videos: FCT has four), except the one check in A that names them */
+/* v25.70 the counts below are read from the list (v25.73: 25 videos, the choice video on a Choice shelf of its own), except the one check in A that names them */
 const N=LIST.length,SHELVES=V.families.filter(f=>LIST.some(v=>v.family===f[0])).map(f=>f[0]+':'+LIST.filter(v=>v.family===f[0]).length).join(' ');
 const mmss=s=>{s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
 const errs=[];
@@ -43,8 +43,8 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
  /* ---------------- A. the files ---------------- */
  {const fams={};LIST.forEach(v=>{fams[v.family]=(fams[v.family]||0)+1;});
   const wrong=LIST.filter(v=>!(fs.existsSync(path.join(DIR,v.file))&&fs.existsSync(path.join(DIR,v.poster))&&v.cards.length&&v.cards.every(id=>V.cards[id]&&V.cards[id].lab)&&v.dur>60&&v.dur<200&&v.title&&v.note&&Array.isArray(v.fn)));
-  ok('A nbh-videos.js: 24 videos (DRO 4, DRA 4, NCR 4, RIRD 3, high-p 5, FCT 4), each its file, its picture, its cards from the bank, its length, its note',
-   LIST.length===24&&fams.dro===4&&fams.dra===4&&fams.ncr===4&&fams.rird===3&&fams.highp===5&&fams.fct===4&&!wrong.length&&/^TD-1_.*\.html$/.test(V.form)&&fs.existsSync(path.join(DIR,V.form)),{fams,wrong:wrong.map(v=>v.key)});
+  ok('A nbh-videos.js: 25 videos (DRO 4, DRA 4, NCR 4, RIRD 3, high-p 5, FCT 4, Choice 1), each its file, its picture, its cards from the bank, its length, its note',
+   LIST.length===25&&fams.dro===4&&fams.dra===4&&fams.ncr===4&&fams.rird===3&&fams.highp===5&&fams.fct===4&&fams.choice===1&&!wrong.length&&/^TD-1_.*\.html$/.test(V.form)&&fs.existsSync(path.join(DIR,V.form)),{fams,wrong:wrong.map(v=>v.key)});
   const fnOf=k=>BY[k].fn.join(',');
   ok('A the functions come from the cards: NCR attention attention, NCR during work escape, DRA items tangible, DRA automatic automatic, RIRD automatic, FCT escape, attention and tangible; a high-p video (cards with none) escape, as most high-p cards',
    fnOf('ncr_attention')==='attention'&&fnOf('ncr_work')==='escape'&&fnOf('dra_tangible')==='tangible'&&fnOf('dra_automatic')==='automatic'&&fnOf('rird_pica')==='automatic'&&fnOf('fct-practical-guide-thinning')==='escape,attention,tangible'&&fnOf('a_highp_peer')==='escape',LIST.map(v=>v.key+':'+fnOf(v.key)));
@@ -94,7 +94,7 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
    const shown=()=>p.evaluate(()=>[...document.querySelectorAll('#vlList .vl-card')].map(c=>c.dataset.key).sort().join(' '));
    const exp=f=>LIST.filter(f).map(v=>v.key).sort().join(' ');
    const chips=await p.evaluate(()=>[...document.querySelectorAll('#vlFilt .vl-chip')].map(c=>c.dataset.chip).concat([...document.getElementById('vlSeen').options].map(o=>'seen:'+o.value)));
-   ok('C '+E+' the filters: Procedure (Any, DRO, DRA, NCR, RIRD, High-p, FCT), Function (Any, Attention, Escape, Tangible, Automatic), Watched (All, Watched, Not watched)',chips.join(' ')==='fam:any fam:dro fam:dra fam:ncr fam:rird fam:highp fam:fct fn:any fn:attention fn:escape fn:tangible fn:automatic seen:all seen:seen seen:unseen',chips);
+   ok('C '+E+' the filters: Procedure (Any, DRO, DRA, NCR, RIRD, High-p, FCT, Choice), Function (Any, Attention, Escape, Tangible, Automatic), Watched (All, Watched, Not watched)',chips.join(' ')==='fam:any fam:dro fam:dra fam:ncr fam:rird fam:highp fam:fct fam:choice fn:any fn:attention fn:escape fn:tangible fn:automatic seen:all seen:seen seen:unseen',chips);
    const wrong=[];
    for(const c of chips.filter(c=>!/:any$|^seen:all$/.test(c))){if(c.startsWith('seen:'))await p.selectOption('#vlSeen',c.slice(5));else await tap(p,'#vlFilt [data-chip="'+c+'"]');await sleep(120);const got=await shown();
     const e=c.startsWith('fam:')?exp(v=>v.family===c.slice(4)):c.startsWith('fn:')?exp(v=>v.fn.includes(c.slice(3))):c==='seen:seen'?'':exp(()=>true);

@@ -7,7 +7,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1500);
   await page.evaluate(async()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};try{localStorage.removeItem('nbh.caseload.off');localStorage.removeItem('nbh.caseload.ini');}catch(e){}
     const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));});
-  const student=async(name,sid,site)=>{await page.fill('#pClient',name);await page.dispatchEvent('#pClient','input');await page.fill('#pSid',sid);await page.fill('#pSite',site);
+  /* v25.72 (the BCBA's approved start screen, 11/10) with students kept the start screen puts the empty student strip away: New student shows it, as a person taps it */
+  const student=async(name,sid,site)=>{if(!(await page.locator('#pClient').isVisible()))await page.click('#blTopNew');await page.fill('#pClient',name);await page.dispatchEvent('#pClient','input');await page.fill('#pSid',sid);await page.fill('#pSite',site);
     await page.evaluate(()=>openForm('DD-1'));await page.waitForFunction(()=>!!state.status['DD-1'],null,{timeout:30000});await sleep(1500);
     const fr=page.frames().find(f=>/Daily_Behavior/.test(f.url()));await fr.evaluate(async()=>{try{nbhUI.confirm=async()=>true;}catch(e){}const b=document.querySelector('#simBtn,#btnSim,#load-demo,#btnLoadExample');if(b)b.click();});await sleep(2000);
     await page.evaluate(async()=>{await gatherFacts(false);});const [dl]=await Promise.all([page.waitForEvent('download',{timeout:30000}),page.evaluate(()=>saveCase())]);await sleep(800);};

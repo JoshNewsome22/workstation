@@ -81,12 +81,18 @@ async function settleDialogs(){for(let k=0;k<6;k++){
   if(!d)return;DIALOGS.push({step:stepName,unexpected:true,t:d.t,b:(d.b||'').slice(0,300),btns:d.btns});note('(a notice left open: '+d.t.slice(0,120)+' — closed)');
   if(d.k==='cf'){const i=d.btns.findIndex(x=>/^(OK|Close|Not now|Cancel)$/.test(x));await page.locator('#cfFoot button').nth(i>=0?i:d.btns.length-1).tap().catch(()=>{});}
   else await shell(()=>document.getElementById('dlg').close());await sleep(200);}}
-const formList=async()=>{const rt=page.locator('#railToggle');if(await rt.isVisible().catch(()=>false))await rt.tap();else await page.locator('#wnForms').tap();};
+const formList0=async()=>{const rt=page.locator('#railToggle');if(await rt.isVisible().catch(()=>false))await rt.tap({timeout:6000});else await page.locator('#wnForms').tap({timeout:6000});};
+/* v25.72 a student typed on the start screen brings the case home while Forms is tapped (the rows over the stage change as it
+   arrives): tapped again once they have settled */
+const formList=async()=>{try{await formList0();}catch(e){await sleep(900);await formList0();}};
 /* open a form from the form list (the Forms button, then the form), and wait until it has answered and, from a case file, been filled */
 async function openF(id){await settleDialogs();
   const inList=await page.locator('#rail [data-open="'+id+'"]').isVisible().catch(()=>false);
   /* v25.71: since v25.65's top bar A the list of forms opens from Forms in the heading (#wnForms) where #railToggle is hidden */
-  if(!inList){await formList();await sleep(350);}
+  if(!inList){await formList();await sleep(350);
+    /* v25.72 with students kept the list starts put away on the start screen; a student typed on the bar brings the case home,
+       which puts the list away as it arrives (upright and on an iPad sideways): Forms again, as a person taps it */
+    if(!(await page.locator('#rail [data-open="'+id+'"]').isVisible().catch(()=>false))){await sleep(600);await formList();await sleep(350);}}
   await page.locator('#rail [data-open="'+id+'"]').tap();
   await page.waitForFunction(id=>!!state.status[id]&&!state.pending[id],id,{timeout:45000});
   /* the case reaches a form 1.1 s after it loads (makeFrame): wait for that before reading it */

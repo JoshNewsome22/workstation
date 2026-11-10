@@ -14,6 +14,7 @@ const UA={ipad:'Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.
 const OUT=__dirname+'/out/v2191-cards/';
 const ELOP=[5,4,6,5,4,4,3,5,3,3,2,3,2,2,1,2,1,1,0,1,1,0,0,1,0];
 async function shell(br,vp,ua,touch){const ctx=await br.newContext({viewport:vp,userAgent:ua,hasTouch:!!touch,isMobile:!!touch&&vp.width<500,serviceWorkers:'block',deviceScaleFactor:1});
+  await ctx.addInitScript(()=>{try{localStorage.setItem('nbh.ws.cards','full');}catch(e){}});   /* v25.72 the start screen's detailed cards (Detailed cards): the compact ones are qa/v2572-start-screen-test.js's */
   const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1400);
   await page.evaluate(async()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};wsUI.choose=async()=>'switch';
     try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on@nbh'].forEach(k=>localStorage.removeItem(k));}catch(e){}const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));});
@@ -54,8 +55,9 @@ const measure=(page,root)=>page.evaluate(root=>{const R=document.querySelector(r
   const recC0=recs.find(r=>r.client==='SIMULATED – Sample Student 2');
   ok('1b the student kept before v21.91 has no photo copy and no trend yet',!!recC0&&!recC0.thumb&&!('trend' in (recC0.sum||{})));
   await A.ctx.close();
-  /* v21.92 at 1180 the form list is a column beside the start screen, so the start screen shows two across; Caseload still three or more */
-  const WIDTHS=[[390,844,UA.iphone,true,1,1],[820,1180,UA.ipad,true,2,2],[1180,820,UA.ipad,true,2,3],[1440,900,UA.mac,false,3,3]];
+  /* v21.92 at 1180 the form list is a column beside the start screen, so the start screen shows two across; Caseload still three or more.
+     v25.72 (the BCBA's approved start screen, 11/10) with students kept the list starts put away, so the start screen has the width: three across */
+  const WIDTHS=[[390,844,UA.iphone,true,1,1],[820,1180,UA.ipad,true,2,2],[1180,820,UA.ipad,true,3,3],[1440,900,UA.mac,false,3,3]];
   let last=null;
   for(const [w,h,ua,touch,bcols,cols] of WIDTHS){const S=await shell(br,{width:w,height:h},ua,touch);
     await S.page.evaluate(async R=>{await clTx('readwrite',st=>{R.forEach(r=>st.put(r));});},recs);

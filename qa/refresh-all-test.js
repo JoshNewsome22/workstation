@@ -47,7 +47,8 @@ const IPHONE=IPAD.replace('iPad; CPU OS','iPhone; CPU iPhone OS');
   const s1=await page.evaluate(()=>{const b=$('#blRefresh'),n=$('#blRfNote'),h=$('#blankCl h2');return {btn:b&&b.textContent.trim(),note:n&&n.textContent,after:!!h&&h.nextElementSibling&&h.nextElementSibling.classList.contains('bl-rf'),h:b&&Math.round(b.getBoundingClientRect().height)};});
   ok('1 the start screen has Refresh all under the caseload\'s heading, with when it last ran',s1.btn==='Refresh all'&&s1.after&&/^Not refreshed yet on this iPad\./.test(s1.note)&&s1.h>=44,s1);
   const PICS=process.env.PICS;if(PICS)await page.screenshot({path:PICS+'/Refresh_all_before.png'});
-  const card0=await page.evaluate(()=>{const c=[...document.querySelectorAll('#blankCl .cl-card')].find(x=>/Mateo/.test(x.textContent));return c?c.querySelector('.cl-tw').textContent.replace(/\s+/g,' '):'';});
+  /* v25.72 the start screen's compact card (its trend line and its numbers in the title) or the detailed card */
+  const card0=await page.evaluate(()=>{const c=[...document.querySelectorAll('#blankCl .cl-card,#blankCl .cl-mini')].find(x=>/Mateo/.test(x.textContent));const t=c&&c.querySelector('.cl-tw,.cm-tr');return t?((t.getAttribute('title')||'')+' '+t.textContent).replace(/\s+/g,' '):'';});
   /* the phone */
   const ph=await br.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,userAgent:IPHONE});
   const pg=await ph.newPage();await pg.goto(T.url,{waitUntil:'load'});await sleep(600);
@@ -57,8 +58,8 @@ const IPHONE=IPAD.replace('iPad; CPU OS','iPhone; CPU iPhone OS');
   ok('2a the phone sends two elopements for today',/^Sent\./.test(sent),sent);
   await page.tap('#blRefresh');await page.waitForFunction(()=>!RF.busy&&/^Refreshed/.test(($('#blRfNote')||{}).textContent||''),null,{timeout:60000});await sleep(800);
   const a=await page.evaluate(async([el,today])=>{const r=(await clList()||[]).find(x=>/Mateo Rivera/.test(x.client||''));const d=parseCase(r.text),own=JSON.parse(d.forms['DD-1'].snap.own);
-    const row=(own.rows||[]).find(x=>x.date===today),c=[...document.querySelectorAll('#blankCl .cl-card')].find(x=>/Mateo/.test(x.textContent));
-    return {val:row&&row.values&&row.values[el],note:$('#blRfNote').textContent,toasts:window.__toasts.slice(),card:c?c.querySelector('.cl-tw').textContent.replace(/\s+/g,' '):'',frames:Object.keys(state.frames).length,host:document.querySelectorAll('#clHost iframe').length,asked:window.__asked};},[T.el,T.today]);
+    const row=(own.rows||[]).find(x=>x.date===today),c=[...document.querySelectorAll('#blankCl .cl-card,#blankCl .cl-mini')].find(x=>/Mateo/.test(x.textContent)),ct=c&&c.querySelector('.cl-tw,.cm-tr');
+    return {val:row&&row.values&&row.values[el],note:$('#blRfNote').textContent,toasts:window.__toasts.slice(),card:ct?((ct.getAttribute('title')||'')+' '+ct.textContent).replace(/\s+/g,' '):'',frames:Object.keys(state.frames).length,host:document.querySelectorAll('#clHost iframe').length,asked:window.__asked};},[T.el,T.today]);
   if(PICS)await page.screenshot({path:PICS+'/Refresh_all_after.png'});
   ok('2b one tap brings them onto the case without opening it; the card is drawn again; the line and a notice say so; nothing left open',
     String(a.val)==='2'&&/^Refreshed today at .*: 1 student with something new\.$/.test(a.note)&&a.toasts.some(t=>/Mateo Rivera \(simulated\): 1 placed on Form DD-1/.test(t))&&a.card!==card0&&a.frames===0&&a.host===0&&a.asked===0,{a,card0});

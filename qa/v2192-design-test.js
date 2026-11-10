@@ -58,9 +58,14 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
   try{
   /* ---- 1. the start screen: iPad sideways ---- */
   {const {ctx,page,errs}=await shell(br,{width:1180,height:820},UA.ipad,true,true);
+    /* v25.72 (the BCBA's approved start screen, 11/10) with students kept the list starts put away, and the Forms button brings
+       it back as the column it was */
+    const a0=await railState(page);
+    ok('1 iPad sideways, nothing open, students kept: the form list starts put away (the start screen takes the width), the Forms button shows',!a0.open&&!a0.scrim&&a0.blankLeft<=1&&a0.toggle,a0);
+    await page.evaluate(()=>document.getElementById('railToggle').click());await sleep(400);
     const a=await railState(page);
-    ok('1 iPad sideways, nothing open: the form list is a column beside the start screen (static, from the left edge), no scrim over the caseload',a.open&&a.pos==='static'&&a.vis==='visible'&&a.x[0]===0&&a.x[1]>=280&&a.x[1]<=320&&a.blankLeft>=a.x[1]-1&&!a.scrim,a);
-    const cards=await page.evaluate(()=>{const C=[...document.querySelectorAll('#blankCl .cl-card')];const t0=Math.round(C[0].getBoundingClientRect().top);return {n:C.length,across:C.filter(c=>Math.abs(Math.round(c.getBoundingClientRect().top)-t0)<=2).length,sw:document.documentElement.scrollWidth};});
+    ok('1b the Forms button brings the form list back as a column beside the start screen (static, from the left edge), no scrim over the caseload',a.open&&a.pos==='static'&&a.vis==='visible'&&a.x[0]===0&&a.x[1]>=280&&a.x[1]<=320&&a.blankLeft>=a.x[1]-1&&!a.scrim,a);
+    const cards=await page.evaluate(()=>{const C=[...document.querySelectorAll('#blankCl .cl-card,#blankCl .cl-mini')];const t0=Math.round(C[0].getBoundingClientRect().top);return {n:C.length,across:C.filter(c=>Math.abs(Math.round(c.getBoundingClientRect().top)-t0)<=2).length,sw:document.documentElement.scrollWidth};});
     ok('2 the caseload shows beside the list: two cards across, nothing wider than the screen',cards.n===3&&cards.across===2&&cards.sw<=1180,cards);
     await page.evaluate(()=>document.getElementById('railHide').click());await sleep(400);const b=await railState(page);
     ok('3 Hide puts the list away (the start screen takes the width, the edge tab shows); Escape and the edge tab still work',!b.open&&b.vis==='hidden'&&b.blankLeft<=1&&b.edge,b);
