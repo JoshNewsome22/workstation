@@ -4,7 +4,7 @@
       a step's start the start of one of its captions; the offline list holds it; this test in the release list.
    B. V1 the home page on an iPad sideways (1180 x 820), upright (820 x 1180) and a phone (390 x 844): four columns on both
       iPads, list rows with the picture at the left on the phone; whole cards in view (4, 8, 4) and the page's length in
-      screens (3.0, 2.0, 4.0 at most; v25.73 3.4, 2.2, 4.0 with the seventh shelf); in a procedure's section no badge and no repeated procedure; every title whole (up to
+      screens (3.0, 2.0, 4.0 at most; v25.73 3.6, 2.4, 4.3 with the seventh shelf and the podcast's shelf); in a procedure's section no badge and no repeated procedure; every title whole (up to
       3 lines, 4 upright); nothing wider than the screen; every control 44 px.
    C. V2 the filters: on an iPad two labelled rows (Procedure, Function), Any first in each, one choice in each, and they
       combine; Watched a menu, the count at the right; the counts follow the search; DRO in class only under Any. On the
@@ -66,8 +66,10 @@ let AXE=null;try{AXE=fs.readFileSync(require.resolve('axe-core/axe.min.js',{path
  const small=p=>p.evaluate(()=>[...document.querySelectorAll('button,a[href],input,select,video,[tabindex="0"]')].filter(e=>e.offsetParent!==null&&!e.classList.contains('vl-skip')).map(e=>{const t=e.closest('.vl-sel')||e;const r=t.getBoundingClientRect();return {e:e.id||e.className||e.tagName,w:Math.round(r.width),h:Math.round(r.height)};}).filter(x=>x.h<44||x.w<44));
 
  /* ---------------- B. V1 the home page at three sizes ---------------- */
- /* v25.73 a seventh shelf (Choice, one video) adds a row of cards: 3.4 and 2.2 screens at most (were 3.0 and 2.0) */
- const WANT={ipadL:{cols:4,cards:4,screens:3.4,lines:3},ipadP:{cols:4,cards:8,screens:2.2,lines:4},phone:{cols:1,cards:4,screens:4.0,lines:3}};
+ /* v25.73 a seventh shelf (Choice, one video) adds a row of cards, and the study podcast's shelf (the design review's P1, approved
+   at its cost: the first video 199 px lower sideways, 227 px on a phone) sits above the first procedure: 3.6, 2.4 and 4.3 screens
+   at most (were 3.0, 2.0 and 4.0), and on a phone 2 whole video cards in the first screen (were 4) */
+ const WANT={ipadL:{cols:4,cards:4,screens:3.6,lines:3},ipadP:{cols:4,cards:8,screens:2.4,lines:4},phone:{cols:1,cards:2,screens:4.3,lines:3}};
  for(const size of Object.keys(SZ)){const {ctx,p}=await mk(size);await home(p);
   await p.waitForFunction(()=>[...document.querySelectorAll('#vlList .vl-card img')].every(i=>i.complete),null,{timeout:20000}).catch(()=>{});
   const r=await p.evaluate(()=>{const g=document.querySelector('#vlList .vl-fam .vl-grid'),cards=[...document.querySelectorAll('#vlList .vl-card')];

@@ -8,7 +8,10 @@
      media:    the <video> or <audio> it follows
      seek:     function(t), optional: how a tapped line or heading plays from t (default: media.currentTime = t, play)
      name:     a name for the list, for screen readers ("Transcript")
+     note:     optional plain text shown above the lines, in a box (v25.73: the podcast's "Nora and Sam are AI voices. ...")
    }) -> {el, update(t), follow(on), search(q), destroy()}
+   v25.73 the study podcast (nbh-pod-player.js and the library's episode page) uses it as it is, with note; the
+   screen-reader text of its lines is hidden by its own style, so a page without the library's styles (Form TD-1) reads well.
    The page gives the list its height (CSS variable --nt-h on el, default 60vh). Styles are the page's tokens with fallbacks. */
 (function () {
 'use strict';
@@ -44,7 +47,10 @@ var CSS = '' +
 '.nt-ln[aria-current]{background:var(--on,#e8f1f6);box-shadow:inset 3px 0 0 var(--navy,#1D3A52)}.nt-ln[aria-current] b{color:var(--navy,#1D3A52)}' +
 '.nt-ln mark{background:#ffe08a;color:inherit;border-radius:2px}.nt-ln.nt-hit-on{outline:2px solid #c99a00;outline-offset:-2px}' +
 '@media (hover:hover){.nt-ln:hover,.nt-h:hover{background:rgba(29,58,82,.06)}}' +
-'html.nbh-hc .nt-see span{color:#000}';
+'html.nbh-hc .nt-see span{color:#000}' +
+'.nt-note{margin:0 0 8px;padding:8px 12px;border:1px solid var(--ai-rule,#e7c27a);border-radius:10px;background:var(--ai-bg,#fff4dc);color:var(--ai-ink,#7a4f00);font-size:.9375rem;line-height:1.4}' +
+'.nt .nt-q input{padding:0 10px 0 38px!important;min-height:44px!important;height:auto!important;font-size:1rem!important}' +
+'.nt .vl-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;margin:-1px;padding:0;border:0}';
 var done = false;
 function css() { if (done) return; done = true; var s = document.createElement('style'); s.id = 'nbh-transcript-css'; s.textContent = CSS; document.head.appendChild(s); }
 var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
@@ -62,6 +68,7 @@ function create(o) {
   var h = '<div class="nt-bar"><div class="nt-q">' + ICO_Q + '<input type="search" id="' + id + 'q" placeholder="Search the transcript" aria-label="Search the transcript" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div>' +
     '<button type="button" class="nt-btn nt-follow" aria-pressed="true" title="Keep the line being heard in view">' + ICO_OK + 'Follow</button></div>' +
     '<div class="nt-find" hidden><span role="status" aria-live="polite"></span><button type="button" class="nt-btn nt-prev" aria-label="Previous match">' + ICO_UP + '</button><button type="button" class="nt-btn nt-next" aria-label="Next match">' + ICO_DN + '</button></div>' +
+    (o.note ? '<p class="nt-note">' + esc(o.note) + '</p>' : '') +
     (o.key ? '<p class="nt-key">' + o.key + '</p>' : '') +
     '<ol class="nt-list" aria-label="' + esc(o.name || 'Transcript') + '">';
   /* the lines under their headings, in the order the page lists the headings: each heading with a moment of its own
