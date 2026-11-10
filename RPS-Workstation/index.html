@@ -2446,11 +2446,13 @@ const wsUI=(()=>{
      hold(none, build): none is what Cancel answers; build(d, done) fills the box, shows it and calls done(answer). */
   let line=Promise.resolve(),asked=0;
   U.hold=(none,build)=>{const waited=asked>0;asked++;const before=line;let free;line=new Promise(r=>{free=r;});
-    return before.then(()=>new Promise(res=>{const d=$('#cfDlg');let over=false;const from=waited?performance.now()+400:0;
+    /* a question with none before it is shown at once, as it always was (whoever asked may look at the box in the same breath); only one that has to wait is shown later */
+    const show=res=>{const d=$('#cfDlg');let over=false;const from=waited?performance.now()+400:0;
       const end=v=>{if(over)return;over=true;d.removeEventListener('close',shut);try{if(d.open)d.close();}catch(e){}asked--;free();res(v);};
       const shut=()=>{if(!d.open)end(none);};   /* the close of the question before this one arrives late, with this one open: not ours */
       const done=v=>{if(performance.now()<from)return;end(v);};
-      try{$('#cfFoot').style.flexWrap='';build(d,done);d.addEventListener('close',shut);}catch(e){end(none);}}));};
+      try{$('#cfFoot').style.flexWrap='';build(d,done);d.addEventListener('close',shut);}catch(e){end(none);}};
+    return waited?before.then(()=>new Promise(show)):new Promise(show);};
   const ask=(text,opt,question)=>U.hold(false,(d,done)=>{const p=split(text);$('#cfTitle').textContent=p.head;$('#cfBody').textContent=p.body;$('#cfBody').style.display=p.body?'':'none';
     const f=$('#cfFoot');f.innerHTML='';
     if(question){const c=document.createElement('button');c.type='button';c.textContent=opt.cancel||'Cancel';c.addEventListener('click',()=>done(false));f.appendChild(c);}
@@ -2965,7 +2967,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v25.73';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v25.74';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -12732,13 +12734,12 @@ window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr};
 @media print{.ws-undo-row,.ws-wn,.ws-rings,#wsResume{display:none!important}}
 </style>
 <script type="application/json" id="ws-whatsnew">
-{"v": "v25.73",
+{"v": "v25.74",
 "title": "What's new in this version",
 "notes": "SETUP.md",
 "items":[
-"Start screen: your students come first, as compact cards with each one's trend and next due date. What's due is ordered by what needs you now, and there is less above the page.",
-"Listen: “The Research Behind the Plan”, a 7-minute talk about the study behind a card, with a transcript that follows the sound. The first episode is on the choice-of-task card and in the video library.",
-"A new video, choice of task, is on its TD-1 card and in the library: 25 videos now."]}
+"Privacy: the last seven fixes from the check of every path between students. Two cases opened or closed within a moment of each other now keep to themselves, and questions wait their turn.",
+"Nothing else changes in this version."]}
 </script>
 <script id="ws-v2570">
 /* v25.70 (the BCBA, 11/9; S/research/NEXT.md and NEXT2.md #2). The release step edits the list above (ws-whatsnew): its v is

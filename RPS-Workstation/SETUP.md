@@ -9905,6 +9905,52 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.74: The last seven fixes from the privacy check
+(the privacy check the BCBA asked for: every path from one student's information to another's files)
+- **Two paths where one student's work could reach another student's safety copy.** Both needed two cases opened or
+  closed within a moment of each other; neither touched a saved case file.
+  - **A slow form and two quick opens.** When a second student was opened while the first was still loading, a form of
+    the first student that was slow to answer could be written into the second student's safety copy. Autosave now
+    writes a form only into the case it was read in.
+  - **"Back where you left off ... Start fresh".** The strip belongs to the case it came with. If another student was
+    opened while it showed, its Start fresh closed that student and deleted that student's safety copy. It now goes
+    when another case opens, and a tap in that moment does nothing.
+- **The case asked for last has the screen.** A case with pictures or sound inside is slow to open, and used to take
+  the screen back from the one tapped after it; a close that was slow to finish cleared a case opened after it. Each
+  request to open or close now stands down when a newer one has been made (Open case, Close case, the Caseload, the
+  safety copy, a shared link and the one-file edition's own case).
+- **One question at a time.** A second question raised while one was on screen took the box over: the first was never
+  answered, and the tap meant for it answered the second. Each question now waits its turn, a box closed another way
+  counts as Cancel, and a question that had to wait takes no answer for its first 0.4 seconds.
+- **The Caseload** writes a student's summary into the row as the device holds it at that moment. The row read a moment
+  before used to be put back whole, which could undo a save made in between or bring back a student just removed.
+- **Three boxes on forms** are emptied on the person's own Open and on Clear all: RS-1's names typed to sign with, and
+  IA-1's box for a new group of informants. On CF-1, IN-1 and SV-1 the reply box remembers that a link, a page file or
+  an email was made by hand, so the form asks "Is ... the same student as ...?" before it changes boxes.
+- **The test run.** 509 tests on the merged copy; 487 passed at the first run. Of the 22 that did not:
+  - **One was a fault of this version, found by the run and fixed.** With questions waiting their turn, every question
+    box opened a moment late, also when nothing was ahead of it. A question with none before it now opens at once, as
+    it always did; only one that has to wait opens later.
+  - **Nine passed when run alone** (i239-one-form, link-te1, v2265, wording-relay, v2568-fx2-g3, v2569-fx2-g5,
+    v2570-stepper, ipad-layout and v2255). v2255 is unsteady: its print check on Form TE-1 passed four times of seven
+    alone, and TE-1 and everything it loads are the same files as in v25.73.
+  - **Twelve fail on v25.71 too:** packet-gate (listed twice), tk1-bus, tk1-audit, link-tk1, v2570-shell (What's new),
+    v2191-focus, student-journey, wording-rollout, sprint-a7, a11y-release (it needs axe-core), and
+    v2571-stepper-more (TD-1 does not skip a question it hides).
+  - **After the fix the whole run was not repeated.** Run again on the fixed copy: the 20 guard tests (the privacy,
+    case, save, Undo, start screen, video, podcast, transcript and offline tests) and shell-ui. All pass;
+    v2571-undo-more timed out once beside the other lanes and passed alone (39 of 39).
+- **Checks.** New test: v2573-privacy-rest (53 checks). The privacy tests can now be run on the school edition and the
+  one-file edition as well as this one. On the fixed copy:
+  - **School edition:** all eight privacy tests pass (v2573-privacy-rest's reply-box scenario timed out when two lanes
+    ran it at once, and passed alone, 18 of 18).
+  - **One-file edition:** six of the eight pass whole. In v2572-privacy-remote the Drive scenario does not apply (the
+    one-file edition has no Google Drive); its other scenarios pass. In v2572-save-isolation the scenario that opens a
+    form on its own does not run there as written (the same on v25.73); its other scenarios pass.
+  - **School one-file edition:** v2573-privacy-rest and v2571-case-isolation pass.
+- **Not checked.** Safari on a real iPad: these paths depend on timing, and were tested in Chromium with the delays made
+  on purpose.
+
 ### v25.73: Students first on the start screen, a talk to listen to about the study behind a card, and the choice-of-task video
 (the BCBA, 11/10: the start screen's review, then "Yes build it"; "Podcast audio okay", with Eric as the second voice and
 no spoken note about AI voices; version A of the choice video)
