@@ -43,6 +43,14 @@ let DAYS=[['8/10/2026',[6,[2,3]]],['8/11/2026',[5,[2,2]]],['8/12/2026',[1,[1,1]]
   await Promise.all([page.waitForEvent('download',{timeout:30000}),page.evaluate(()=>saveCase())]);await sleep(800);
   await page.evaluate(async()=>{await clearCase();});await sleep(800);
   /* a second student with no sheet */
+  /* v25.73 (the start screen, 11/10) with a student kept the empty student strip is put away: New student shows it, as a person taps it */
+  await page.waitForFunction(()=>{const v=e=>!!e&&!!e.getClientRects().length;return v(document.querySelector('#blTopNew'))||v(document.querySelector('#pClient'));},null,{timeout:8000}).catch(()=>{});await sleep(1200);
+  /* the note left on screen by the save ("Case file written…") is answered first, as a person would: New student is behind it */
+  for(let k=0;k<3;k++){const open=await page.evaluate(()=>{const d=document.querySelector('#cfDlg');if(!d||!d.open)return false;const b=[...d.querySelectorAll('button')].find(x=>/^(Cancel|OK|Not now|It is in Files)$/.test(x.textContent.trim()));if(b)b.click();else d.close();return true;});if(!open)break;await sleep(400);}
+  if(await page.locator('#blTopNew').isVisible())await page.click('#blTopNew');
+  /* New student asks once where case files live when no place is chosen yet: answered Cancel, as before this version */
+  for(let k=0;k<3;k++){await sleep(500);const open=await page.evaluate(()=>{const d=document.querySelector('#cfDlg');if(!d||!d.open)return false;const b=[...d.querySelectorAll('button')].find(x=>/^Cancel$/.test(x.textContent.trim()));if(b)b.click();else d.close();return true;});if(!open)break;}
+  await page.waitForSelector('#pClient',{state:'visible',timeout:8000});
   await page.fill('#pClient','SIMULATED – Sample Student');await page.dispatchEvent('#pClient','input');await page.fill('#pSid','SIM-000');
   await page.evaluate(()=>openForm('DD-1'));await page.waitForFunction(()=>!!state.status['DD-1'],null,{timeout:30000});await sleep(1200);
   await Promise.all([page.waitForEvent('download',{timeout:30000}),page.evaluate(()=>saveCase())]);await sleep(800);

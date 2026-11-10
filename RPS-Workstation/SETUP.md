@@ -9905,6 +9905,68 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.73: Students first on the start screen, a talk to listen to about the study behind a card, and the choice-of-task video
+(the BCBA, 11/10: the start screen's review, then "Yes build it"; "Podcast audio okay", with Eric as the second voice and
+no spoken note about AI voices; version A of the choice video)
+- **The start screen** (the workstation with no case open; seven changes from its review).
+  - **Students first.** The caseload is the first thing on the page, as compact cards: initials or photo, name, school
+    and grade, the first target's trend line with the trend in words, the first item due, and Open. Three across on an
+    iPad held sideways, two upright, one row each on a phone. "Detailed cards" brings back the earlier cards and is
+    remembered on the device. With five students, the first card starts 276 px down the page (it was 1,731), and all
+    five are in view when the workstation opens.
+  - **What's due** is ordered by what needs her now: needs you now, overdue and this week on top, then To look at (the
+    first five) and Coming up (the first two), each with its own Show all.
+  - **Less above the page.** With students kept and nothing open, the empty student-details bar is hidden and the forms
+    list starts folded. New student shows the bar with Name ready, and the Forms button brings the list back. The bars
+    above the content take 111 px on an iPad (164 before). A first run with no student kept looks as it did.
+  - **One filled button.** With no case open, Open on the last-saved row is the one filled button; Build packet and
+    Save case are outlines.
+  - **Next 90 days** is one row with its counts and the busiest week; Show timeline opens the chart in place and is
+    remembered. Key findings shows only when there is a finding.
+  - **Initials only** on the start screen is the Caseload's own setting, and the cards, the last-saved row, What's due
+    and the timeline all follow it.
+  - **Phone.** The timeline's month labels keep clear of Today and the end date. No text is under 12 px and no control
+    under 44 px; no sideways scroll at 320 px.
+  - Not on the compact cards: the pin button (a pinned student shows a pin mark and stays first; pin from the detailed
+    cards or Caseload) and each student's own Today's numbers (the button under the students covers everyone).
+- **The Research Behind the Plan** (a short talk about the study behind a card; two simulated hosts with AI voices).
+  - The first episode is "Choice of task, and why function matters", about Romaniuk et al. (2002), 6 minutes 41
+    seconds, for the TD-1 card "Let the student choose which academic task to work on".
+  - **In the video library:** a shelf above the first procedure group, found by search (the title, the study and every
+    word of the transcript) and by the filters. The episode's page has Listen, Open the TD-1 card, Watch the procedure,
+    the transcript and the study.
+  - **On the TD-1 card:** Listen sits beside Watch how. It starts the sound at once in a bar at the bottom of the
+    screen (back 15 s, play or pause, forward 15 s, the time, speed, Transcript, Close, and a position line to drag),
+    so the card stays readable. The position and speed are remembered on the device; nothing about a student is kept.
+  - **Transcript:** each turn under its speaker's name, the line being spoken marked and kept in view while Follow is
+    on, tap a line to play from it, and search. Its note reads "Nora and Sam are AI voices. The episode is based on the
+    published article." The hosts do not say it themselves (the BCBA, 11/10); the "AI voices" label is on the shelf
+    card, the episode page and the TD-1 line.
+  - A video and the episode pause each other. Playing does not touch an open case: closing a case or changing student
+    while it plays leaves both as they should be, and no case file holds anything of the episode.
+  - Stored like the videos (3.3 MB), so it plays offline. The offline copy is now 147 files, about 187 MB.
+- **A new video: choice of task** (version A, the BCBA's choice, 11/10), on its TD-1 card and in the library under a new
+  group, Activity choice. 25 videos. Its Steps list has all six steps, with the two a card covers marked "On the opening
+  card" and "On the closing card", and its transcript was checked against the sound.
+- **Privacy.** Nothing in this version changes what is kept about a student. The seven remaining fixes from the privacy
+  check (two of them paths where one student's work could reach another's safety copy) are built and tested on their
+  own branch and follow in v25.74, after their own full run.
+- **The test run.** 507 tests on the merged copy; 486 passed at the first run. Of the 21 that did not:
+  - **One was a fault of this version, found by the run and fixed.** With students kept, the start screen hides the
+    student-details bar, and New student did nothing when the question "Where do your case files live?" was closed
+    with Cancel. New student now goes on to the Name box either way; the question comes back at the next Open case or New
+    student until it is answered.
+    The test that found it (v2180) now starts its second student through New student.
+  - **One test counted the videos** (v2568-td1-versions expected 24) and now expects 25.
+  - **Eight passed when run alone** (tb1-library, i239-one-form, sprint-a9, v2568-fx2-g3, i236-numbers,
+    v2571-undo-more, v2570-stepper, v2569-td1-align); the run shared the machine with video builds.
+  - **Eleven fail on v25.71 too:** packet-gate, tk1-audit, link-tk1, v2570-shell (What's new), v2191-focus,
+    student-journey, wording-rollout, sprint-a7, sprint-a8, a11y-release (it needs axe-core), and v2571-stepper-more
+    (TD-1 does not skip a question it hides).
+- **Checks.** New tests: v2572-start-screen and v2573-podcast.
+- **Not checked.** Safari on a real iPad or iPhone: the first tap on Listen (the browser's rule on starting sound), the
+  lock-screen controls, VoiceOver, and how the 48 kbps audio sounds to a person.
+
 ### v25.72: One student's information never reaches another's files, a transcript for every video, and Form TD-1's review
 (the BCBA, 11/9 and 11/10: "Find every path where one student's information could reach another student's files"; the
 video library's and Form TD-1's design reviews, then "Start making the improvements"; "On the page is enough")
