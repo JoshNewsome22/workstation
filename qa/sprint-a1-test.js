@@ -398,7 +398,7 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
     p=await open(TD1);await set(p,'m.fn',fn);await view(p,'select');await set(p,`q.${fn}.0`,'no');await view(p,'respond');
     check(await v(p,'rb.3')==='no'&&await v(p,'rb.target')===ALT[fn],`12 ${fn}: the Select sheet answered "no", question 4 empty: it takes "no" and the step is the alternative`,[await v(p,'rb.3'),await v(p,'rb.target')]);
     await set(p,'rb.3','yes');await sleep(200);
-    check(/question 1 on the Select sheet \(is extinction feasible\?\) is answered "no"/.test(await note(p)),`12 ${fn}: question 4 then "yes": the note names the disagreement`,await note(p));
+    check(new RegExp('question '+(fn==='attention'?2:1)+' on the Select sheet \\(is extinction feasible\\?\\) is answered "no"').test(await note(p))   /* v25.72 (T8) "Whose attention" is numbered: attention's extinction question is 2 */,`12 ${fn}: question 4 then "yes": the note names the disagreement`,await note(p));
     await p.close();}
 
   console.log('\n=== TD-1: wording');

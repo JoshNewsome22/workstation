@@ -11,7 +11,19 @@
      Videos (over the workstation, in a frame) or on its own; videos.html#video=<key> opens a video's page, and (v25.70, a form's
      Watch how) videos.html#family=<procedure> the home page at that procedure's videos. What was watched
      on this device, and where each video stopped, is kept in this browser (localStorage nbh.videos.v1): the video's key,
-     the second and the time, nothing about a student. -->
+     the second and the time, nothing about a student.
+     v25.72 (the video library's design review, V1 to V7 and V9 to V11): four columns on an iPad and list rows on a phone;
+     Procedure and Function filters that combine, with Watched; on a video's page its Steps (nbh-video-steps.js: each
+     step's start and title and the captions, word for word as the video shows them) and Open the TD-1 card first; a
+     message over the picture when a video cannot be loaded; at most two videos kept decoded; the load's progress from
+     the website; a search that forgives spelling; the keys of a player; the poster and Play under reduced motion.
+     v25.72 (captions and transcript, the BCBA's choice of the plan's Option 1): the Steps list every step the picture's
+     panel shows (a step only on a card says so), and a Transcript tab beside them (nbh-video-transcripts.js, drawn by
+     nbh-transcript.js: the narration, the people's lines by role, the on-screen notes the narration does not say; the line
+     heard marked and kept in view, a line tapped plays from it, a search); captions of what is said as a real text track,
+     off until CC is turned on (kept in localStorage nbh.videos.pref with the tab last chosen: no student, nothing typed);
+     on an iPad the browser's control bar in a band below the picture, clear of its caption strip; on a phone the picture
+     cropped to its scene, with the page's own bar, and the Steps and Transcript right under it. -->
 <script>
 /* the workstation's text size, contrast and low light (localStorage nbh.view, as the forms read it), before the page draws */
 (function(){var R=document.documentElement;try{if(window.parent!==window)R.classList.add('nbh-framed');}catch(e){}
@@ -19,7 +31,7 @@
 </script>
 <style>
 :root{--ink:#1F2D36;--navy:#1D3A52;--wash:#F2F6F5;--paper:#fff;--rule:#D9E2E0;--box:#B9C7C4;--muted:#55656C;--chip:#E5EDEB;--chip-h:#D8E4E1;
-  --focus:#2f7fa8;--prog:#2f7fa8;--ai-ink:#7a4f00;--ai-bg:#fff4dc;--ai-rule:#e7c27a;
+  --focus:#2f7fa8;--prog:#2f7fa8;--ai-ink:#7a4f00;--ai-bg:#fff4dc;--ai-rule:#e7c27a;--on:#e8f1f6;
   --sans:"Inter","Helvetica Neue","Segoe UI",Arial,system-ui,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
   --gut:24px;--r:12px;font-size:16px}
 html.nbh-tx-1{font-size:18px}html.nbh-tx-2{font-size:20px}
@@ -31,10 +43,10 @@ html.nbh-hc{--ink:#000;--muted:#263238;--rule:#5e7673;--box:#3f5654;--focus:#0a4
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--wash);color:var(--ink);font:400 1rem/1.45 var(--sans);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overflow-x:hidden}
-button,input{font:inherit;color:inherit}
+button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .vl-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;margin:-1px;padding:0;border:0}
-.vl-skip{position:absolute;left:8px;top:-60px;z-index:50;background:var(--navy);color:#fff;padding:10px 14px;border-radius:8px;font-weight:600;text-decoration:none}
+.vl-skip{position:absolute;left:8px;top:-60px;z-index:50;display:inline-flex;align-items:center;min-height:44px;background:var(--navy);color:#fff;padding:0 14px;border-radius:8px;font-weight:600;text-decoration:none}
 .vl-skip:focus{top:8px}
 .vl-wrap{max-width:1680px;margin:0 auto;padding:0 var(--gut)}
 .vl-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;min-width:44px;padding:0 16px;border:1px solid var(--box);border-radius:10px;
@@ -48,7 +60,7 @@ button,input{font:inherit;color:inherit}
 /* ---------- the top: the title, the search, Close (in the workstation) ---------- */
 .vl-head{position:sticky;top:0;z-index:20;background:rgba(242,246,245,.94);-webkit-backdrop-filter:saturate(1.4) blur(10px);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid transparent}
 .vl-head.vl-stuck{border-bottom-color:var(--rule)}
-.vl-hrow{display:flex;align-items:center;gap:12px 16px;min-height:72px;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.vl-hrow{display:flex;align-items:center;gap:10px 16px;min-height:68px;padding-top:8px;padding-bottom:8px;flex-wrap:wrap}
 .vl-brand{display:flex;align-items:center;gap:12px;min-width:0;flex:0 1 auto}
 .vl-mark{width:40px;height:40px;border-radius:12px;background:var(--navy);color:#fff;display:grid;place-items:center;flex:0 0 auto}
 .vl-mark svg{width:22px;height:22px}
@@ -62,34 +74,40 @@ button,input{font:inherit;color:inherit}
 body.vl-watching .vl-search{display:none}
 body.vl-watching #vlClose{margin-left:auto}
 
-/* ---------- the chips ---------- */
-.vl-chips{display:flex;flex-wrap:wrap;gap:8px;padding:6px 0 4px;align-items:center}
-.vl-chip{position:relative;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid transparent;background:var(--chip);color:var(--ink);font-weight:500;font-size:.9375rem;cursor:pointer;white-space:nowrap}
+/* ---------- the filters: Procedure and Function (they combine), Watched, the count ---------- */
+.vl-intro{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:0 0 6px;color:var(--muted);font-size:.9375rem}
+.vl-filt{display:grid;gap:8px;padding:2px 0 0}
+.vl-frow{display:flex;align-items:center;gap:12px;min-width:0}
+.vl-fl{flex:0 0 5.25rem;font-weight:600;font-size:.8125rem;color:var(--muted)}
+.vl-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0;flex:0 1 auto}
+.vl-chip{position:relative;min-height:44px;min-width:44px;padding:0 13px;border-radius:12px;border:1px solid transparent;background:var(--chip);color:var(--ink);font-weight:500;font-size:.9375rem;cursor:pointer;white-space:nowrap}
 .vl-chip:hover{background:var(--chip-h)}
-.vl-chip[aria-pressed=true]{background:var(--navy);color:#fff;font-weight:600}
-.vl-chip .vl-n{font-size:.8125rem;opacity:.75;margin-left:6px;font-weight:500}
-.vl-cdiv{width:1px;align-self:stretch;margin:8px 4px;background:var(--box)}
-.vl-count{margin:10px 0 0;color:var(--muted);font-size:.9375rem;min-height:1.45em}
-.vl-intro{margin:2px 0 6px;color:var(--muted);font-size:.9375rem;max-width:90ch}
+.vl-chip[aria-checked=true]{background:var(--navy);color:#fff;font-weight:600}
+.vl-chip .vl-n{font-size:.8125rem;opacity:.8;margin-left:6px;font-weight:500}
+.vl-chip .vl-n:empty{display:none}
+.vl-menus{display:none}
+.vl-sel{position:relative;display:flex;align-items:center;gap:6px;min-height:44px;border:1px solid var(--box);border-radius:10px;background:var(--paper);color:var(--navy);min-width:0}
+.vl-sel>span{font-weight:500;font-size:.9375rem;color:var(--muted);white-space:nowrap;padding-left:14px}
+.vl-sel select{-webkit-appearance:none;appearance:none;border:0;background:transparent;min-height:42px;padding:0 34px 0 0;font-weight:600;font-size:.9375rem;color:var(--navy);cursor:pointer;min-width:0;width:100%;border-radius:10px}
+.vl-sel select:focus{outline:none}
+.vl-sel:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+.vl-sel svg{position:absolute;right:9px;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--muted);pointer-events:none}
+.vl-sel-seen{margin-left:auto;flex:0 0 auto}
+.vl-sel-seen select{width:auto}
+.vl-count{margin:0 0 0 auto;padding-left:8px;color:var(--muted);font-size:.9375rem;white-space:nowrap;min-height:1.45em;flex:0 0 auto}
+@media (max-width:1099px){.vl-fl{flex-basis:4.6rem}.vl-frow{gap:8px}.vl-chip{padding:0 10px}.vl-chip .vl-n{margin-left:4px}.vl-chips{gap:6px}}
 
-/* ---------- a shelf (Continue watching, one per procedure) and the grid ---------- */
-.vl-sec{margin:28px 0 8px}
-.vl-sech{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+/* ---------- a shelf (Continue watching, one per procedure) and the grid: four columns on an iPad, either way up ---------- */
+.vl-sec{margin:22px 0 4px}
+.vl-sech{display:flex;align-items:center;gap:12px;margin:0 0 10px}
 .vl-shd{display:flex;align-items:baseline;gap:4px 12px;flex-wrap:wrap;min-width:0;flex:1 1 auto}
 .vl-sech h2{margin:0;font:600 1.375rem/1.2 var(--serif);color:var(--navy)}
 .vl-sech .vl-sub{color:var(--muted);font-size:.9375rem}
 .vl-sech .vl-btn{margin-left:auto;min-height:44px;font-size:.875rem;padding:0 14px;flex:0 0 auto}
-@media (max-width:699px){.vl-sech h2{font-size:1.1875rem}.vl-shd{flex-direction:column;gap:2px}}
-.vl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 20px}
-.vl-row{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 40px)/3.3);gap:20px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:2px 2px 10px;margin:-2px}
+.vl-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px 16px}
+.vl-row{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 64px)/4.4);gap:16px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:2px 2px 10px;margin:-2px}
 .vl-row>*{scroll-snap-align:start}
-@media (min-width:1700px){.vl-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.vl-row{grid-auto-columns:calc((100% - 60px)/4.3)}}
-@media (max-width:1099px){.vl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vl-row{grid-auto-columns:calc((100% - 20px)/2.3)}}
-@media (max-width:699px){:root{--gut:16px}.vl-grid{grid-template-columns:minmax(0,1fr);gap:24px}.vl-row{grid-auto-columns:82%}
-  .vl-chips{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;margin:0 calc(-1*var(--gut));padding:6px var(--gut) 8px;scrollbar-width:none}
-  .vl-chips::-webkit-scrollbar{display:none}.vl-head h1{font-size:1.375rem}.vl-hrow{min-height:60px}.vl-search{flex-basis:100%;max-width:none;order:3}
-  .vl-mark{width:34px;height:34px;border-radius:10px}#vlClose{margin-left:auto}
-  body.vl-watching .vl-brand{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}}
+@media (max-width:1099px){.vl-grid{gap:20px 12px}.vl-row{grid-auto-columns:calc((100% - 36px)/3.3);gap:12px}}
 
 /* ---------- a video's card ---------- */
 .vl-card{display:block;color:inherit;text-decoration:none;border-radius:var(--r);min-width:0;-webkit-tap-highlight-color:transparent}
@@ -101,68 +119,171 @@ body.vl-watching #vlClose{margin-left:auto}
 .vl-pbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.55)}
 .vl-pbar i{display:block;height:100%;background:var(--prog)}
 .vl-pbar~.vl-dur{bottom:12px}
-.vl-seen{position:absolute;left:8px;top:8px;background:rgba(14,24,32,.84);color:#fff;font:600 .75rem/1 var(--sans);padding:5px 8px 5px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:4px}
+.vl-seen{position:absolute;left:8px;top:8px;background:rgba(14,24,32,.84);color:#fff;font-weight:600;font-size:max(12px,.75rem);line-height:1;font-family:var(--sans);padding:5px 8px 5px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:4px}
 .vl-seen svg{width:13px;height:13px}
-.vl-info{display:flex;gap:12px;padding:12px 2px 0;align-items:flex-start}
+.vl-info{display:flex;gap:12px;padding:10px 2px 0;align-items:flex-start}
 .vl-av{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 .6875rem/1 var(--sans);letter-spacing:.02em;background:var(--navy)}
 .vl-f-dro{background:#1D3A52}.vl-f-dra{background:#7a3b52}.vl-f-ncr{background:#2f6b37}.vl-f-rird{background:#6b4a7a}.vl-f-highp{background:#9b4e15}.vl-f-fct{background:#22657a}
 .vl-txt{position:relative;min-width:0;display:flex;flex-direction:column;gap:3px}
-.vl-t{font-weight:600;font-size:1.0625rem;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* a title wraps and is never cut */
+.vl-t{font-weight:600;font-size:1rem;line-height:1.3;color:var(--ink);overflow-wrap:break-word}
 .vl-m{color:var(--muted);font-size:.875rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .vl-st{color:var(--muted);font-size:.8125rem}
 .vl-st b{color:#2f6b37;font-weight:600}
-.vl-none{margin:40px 0;padding:28px;border-radius:var(--r);background:var(--paper);border:1px solid var(--rule);text-align:center}
+.vl-none{margin:28px 0;padding:24px;border-radius:var(--r);background:var(--paper);border:1px solid var(--rule);text-align:center}
 .vl-none p{margin:0 0 12px}
+.vl-try{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 16px}
+.vl-try .vl-btn{font-weight:500}
+.vl-tryh{color:var(--muted);font-size:.9375rem}
+
+/* a phone: list rows, the picture at the left; three menus side by side, the count under them */
+@media (max-width:699px){:root{--gut:16px}
+  .vl-head h1{font-size:1.375rem}.vl-hrow{min-height:60px}.vl-search{flex-basis:100%;max-width:none;order:3}
+  .vl-mark{width:34px;height:34px;border-radius:10px}#vlClose{margin-left:auto}
+  body.vl-watching .vl-brand{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  .vl-intro{font-size:.875rem;margin:0 0 8px}
+  .vl-filt{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"a b c" "n n n";gap:8px}
+  .vl-frow,.vl-menus{display:contents}.vl-fl,.vl-chips{display:none}
+  .vl-sel-fam{grid-area:a}.vl-sel-fn{grid-area:b}.vl-sel-seen{grid-area:c;margin:0}.vl-sel-seen select{width:100%}
+  .vl-sel{flex-direction:column;align-items:stretch;gap:0;min-height:52px;padding:0}
+  .vl-sel>span{font-size:.6875rem;font-weight:600;line-height:1.25;padding:6px 28px 0 11px}
+  .vl-sel select{min-height:26px;padding:0 28px 6px 11px;text-overflow:ellipsis}
+  .vl-sel svg{right:6px}
+  .vl-count{grid-area:n;justify-self:start;font-size:.875rem;margin:2px 0 0;padding:0}
+  .vl-sec{margin:18px 0 4px}
+  .vl-sech h2{font-size:1.1875rem}.vl-shd{flex-direction:column;gap:2px}.vl-sech .vl-btn{display:none}
+  .vl-grid{grid-template-columns:minmax(0,1fr);gap:14px}
+  .vl-row{grid-auto-flow:row;grid-auto-columns:auto;overflow:visible;gap:14px;scroll-snap-type:none;padding:0;margin:0}
+  .vl-card{display:grid;grid-template-columns:136px minmax(0,1fr);gap:10px;align-items:start}
+  .vl-card .vl-thumb{border-radius:8px}
+  .vl-card .vl-info{padding:0;gap:0}
+  .vl-card .vl-av{display:none}
+  .vl-t{font-size:.9375rem}
+  .vl-m{font-size:.8125rem;margin-top:2px}
+  .vl-st{font-size:.75rem}
+  .vl-card .vl-dur{right:4px;bottom:5px;font-size:.75rem;padding:3px 5px}
+  .vl-card .vl-pbar~.vl-dur{bottom:9px}
+  .vl-card .vl-seen{left:4px;top:4px;padding:4px 6px 4px 5px}}
+@media (max-width:359px){.vl-card{grid-template-columns:116px minmax(0,1fr)}}
 
 /* ---------- a video's page ---------- */
 .vl-w{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;padding-top:8px;padding-bottom:40px;align-items:start}
 @media (max-width:1179px){.vl-w{grid-template-columns:minmax(0,1fr)}}
 .vl-player{position:relative;border-radius:var(--r);overflow:hidden;background:#0f1a22;aspect-ratio:16/9}
 .vl-player video{display:block;width:100%;height:100%;background:#0f1a22}
-.vl-load{position:absolute;inset:auto 0 0 0;padding:12px 16px;background:linear-gradient(transparent,rgba(10,18,24,.85));color:#fff;font-size:.9375rem}
+.vl-load{position:absolute;left:0;right:0;bottom:0;padding:30px 18px 14px;background:linear-gradient(to top,rgba(10,18,24,.86),rgba(10,18,24,0));color:#fff;font:600 1rem/1.3 var(--sans);pointer-events:none}
 .vl-load[hidden]{display:none}
-.vl-load.vl-err{position:static;background:#fbe9e7;color:#7a2416;border-top:1px solid #e6b9b1}
-.vl-kick{display:flex;align-items:center;gap:10px;margin:18px 0 6px;color:var(--muted);font-size:.9375rem}
+.vl-load .vl-lmb{font-weight:500;opacity:.9;margin-left:8px;font-size:.9375rem}
+.vl-lbar{height:6px;border-radius:3px;background:rgba(255,255,255,.3);margin-top:10px;overflow:hidden}
+.vl-lbar[hidden]{display:none}
+.vl-lbar i{display:block;height:100%;width:0;background:#fff;border-radius:3px}
+.vl-fail,.vl-play{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px 20px;text-align:center}
+.vl-fail{background:rgba(10,18,24,.8);color:#fff;font:500 1rem/1.4 var(--sans)}
+.vl-fail p{margin:0;max-width:34em}
+.vl-fail .vl-btn{background:#fff;color:var(--navy);border-color:#fff}
+.vl-fail[hidden],.vl-play[hidden]{display:none}
+.vl-play{background:rgba(10,18,24,.25)}
+.vl-play .vl-btn{min-height:56px;padding:0 24px;font-size:1.0625rem;background:#fff;color:var(--navy);border-color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.vl-play .vl-btn svg{width:22px;height:22px}
+.vl-kick{display:flex;align-items:center;gap:10px;margin:16px 0 6px;color:var(--muted);font-size:.9375rem}
 .vl-kick .vl-av{width:32px;height:32px;font-size:.625rem}
 .vl-w h2.vl-wt{margin:0;font:600 1.625rem/1.25 var(--serif);color:var(--navy)}
 .vl-w h2.vl-wt:focus{outline:none}
 .vl-w h2.vl-wt:focus-visible{outline:3px solid var(--focus);outline-offset:4px;border-radius:4px}
 .vl-wm{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:8px 0 0;color:var(--muted);font-size:.9375rem}
-.vl-resume{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:14px 0 0;padding:6px 6px 6px 14px;background:#e8f1f6;border-radius:10px;font-size:.9375rem}
+.vl-resume{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:14px 0 0;padding:6px 6px 6px 14px;background:var(--on);border-radius:10px;font-size:.9375rem}
 .vl-resume[hidden]{display:none}
 .vl-resume .vl-btn{min-height:44px;margin-left:auto}
+/* Open the TD-1 card: the main button, with the card's name beside it */
+.vl-act{display:grid;gap:10px;margin:14px 0 0}
+.vl-actr{display:flex;align-items:center;gap:8px 14px}
+.vl-actr .vl-btn{flex:0 0 auto;min-height:48px}
+.vl-actr .vl-btn svg{width:20px;height:20px}
+.vl-actl{font-size:.9375rem;line-height:1.35;color:var(--muted);min-width:0}
+.vl-actl b{display:block;color:var(--ink);font-weight:600}
+@media (max-width:699px){.vl-actr{flex-direction:column;align-items:stretch}.vl-actr .vl-btn{justify-content:center}.vl-actl{font-size:.875rem}}
 .vl-panel{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r);padding:16px 18px;margin:18px 0 0}
 .vl-panel h3{margin:0 0 10px;font:600 1.0625rem/1.3 var(--sans);color:var(--ink)}
 .vl-panel p{margin:0 0 10px;max-width:80ch}
 .vl-panel p:last-child{margin-bottom:0}
-.vl-opens{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.vl-open{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:10px 14px;text-align:left;border:1px solid var(--box);border-radius:10px;background:var(--paper);cursor:pointer}
-.vl-open:hover{background:#eef3f5;border-color:#93aead}
-.vl-open svg{width:22px;height:22px;flex:0 0 auto;color:var(--navy)}
-.vl-open span{display:flex;flex-direction:column;min-width:0}
-.vl-open b{color:var(--navy);font-size:.9375rem}
-.vl-open small{color:var(--muted);font-size:.8125rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .vl-fns{display:flex;flex-wrap:wrap;gap:6px;margin:0}
 .vl-fns{align-items:center}.vl-fns b{font-weight:600;font-size:.875rem;color:var(--muted);margin-right:2px}
 .vl-fns span{background:var(--chip);border-radius:999px;padding:3px 10px;font-size:.8125rem}
 .vl-note{color:var(--muted);font-size:.9375rem}
+/* the Steps: beside the video on an iPad sideways, under it otherwise */
+.vl-steps{padding:12px 8px 8px}
+.vl-stepsh{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:2px 10px;margin:0 10px 6px}
+.vl-stepsh h3{margin:0;font:600 1.0625rem/1.3 var(--sans);color:var(--ink);text-transform:none;letter-spacing:0}
+.vl-stepsh small{font-size:.8125rem;color:var(--muted)}
+.vl-steps ol{list-style:none;margin:0;padding:0;display:block}
+.vl-steps li{border-radius:8px}
+.vl-sbtn{display:grid;grid-template-columns:3.1em 26px minmax(0,1fr);gap:8px;align-items:center;width:100%;min-height:44px;padding:6px 8px;border:0;background:none;border-radius:8px;text-align:left;font-weight:500;font-size:.9375rem;line-height:1.3;color:var(--ink);cursor:pointer}
+.vl-sbtn:hover{background:rgba(29,58,82,.06)}
+.vl-stm{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.875rem}
+.vl-sn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--box);display:grid;place-items:center;font-size:.75rem;font-weight:700;color:var(--muted);background:var(--paper)}
+.vl-sn.vl-sn0{border-color:transparent;background:none}
+.vl-steps li.vl-on{background:var(--on);box-shadow:inset 3px 0 0 var(--navy)}
+.vl-steps li.vl-on .vl-sbtn{font-weight:700;color:var(--navy)}
+.vl-steps li.vl-on .vl-sn{background:var(--navy);border-color:var(--navy);color:#fff}
+.vl-scap{margin:0;padding:0 12px 10px calc(3.1em + 50px);font-size:.875rem;line-height:1.45;color:var(--ink)}
+.vl-scap[hidden]{display:none}
+.vl-next .vl-steps{margin:0 0 22px}
+/* v25.72 captions and transcript: the Steps and the Transcript as two tabs; every step listed, a step only on a card says so */
+.vl-tabs{padding:6px 8px 8px}
+.vl-next .vl-tabs{margin:0 0 22px}
+.vl-tabl{display:flex;align-items:flex-end;gap:2px;margin:0 2px 8px;border-bottom:1px solid var(--rule)}
+.vl-tab{min-height:44px;min-width:44px;padding:0 14px;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;background:none;font:600 1rem/1.2 var(--sans);color:var(--muted);cursor:pointer;border-radius:8px 8px 0 0}
+.vl-tab[aria-selected=true]{color:var(--navy);border-bottom-color:var(--navy)}
+.vl-tab:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.vl-cc{margin:0 0 4px auto;min-height:44px;padding:0 12px;font-size:.9375rem;font-weight:700;gap:6px}
+.vl-cc svg{width:20px;height:20px}
+.vl-cc[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.vl-tabs .vl-steps{padding:0}
+.vl-tabs .vl-stepsh{margin:2px 10px 4px}
+.vl-tabs .vl-stepsh h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.vl-steps[hidden],.vl-trans[hidden]{display:none}
+.vl-snote{display:block;font-size:.8125rem;font-weight:500;color:var(--muted);margin-top:1px}
+.vl-steps li[data-where] .vl-sn{border-style:dashed}
+.vl-trans{padding:0 4px}
+.vl-trans .nt{--nt-h:min(60vh,560px)}
+.vl-next .vl-trans .nt{--nt-h:max(280px,calc(100vh - 330px))}
+/* the picture: on an iPad the browser's control bar in a band below the picture, clear of its caption strip */
+.vl-player.vl-band{aspect-ratio:auto;height:0;padding-top:calc(56.25% + 92px)}
+.vl-player.vl-band video{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:50% 0}
+/* on a phone: the picture cropped to its scene (896 x 504 of the 1280 x 720 frame, from 64 px down), cards shown whole */
+.vl-player.vl-crop video{position:absolute;left:0;top:-12.698%;width:142.857%;height:142.857%;max-width:none;object-fit:fill}
+.vl-player.vl-crop.vl-full video{top:0;width:100%;height:100%;object-fit:contain}
+.vl-player video::cue{font-family:var(--sans);line-height:1.35;background:rgba(15,26,34,.86);color:#fff}
+.vl-bar{display:flex;align-items:center;gap:2px;padding:2px 6px;background:#0f1a22;color:#fff;margin:0 calc(-1*var(--gut))}
+.vl-bar[hidden]{display:none}
+.vl-bb{width:44px;height:44px;min-width:44px;border:0;border-radius:8px;background:none;color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;flex:0 0 auto}
+.vl-bb svg{width:24px;height:24px}
+.vl-bb .vl-pz,.vl-bb.vl-on svg:first-child{display:none}.vl-bb.vl-on .vl-pz{display:block}
+.vl-bb[aria-pressed=true]{background:rgba(255,255,255,.2)}
+.vl-bb:focus-visible,.vl-bseek:focus-visible{outline:3px solid #8fd0f0;outline-offset:-3px}
+.vl-btime{font:500 .8125rem var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap;margin:0 6px}
+.vl-bseek{flex:1 1 auto;min-width:60px;height:44px;margin:0 4px;accent-color:#fff;background:none;cursor:pointer}
+@media (max-width:699px){#vlStepsTop .vl-tabs{margin:12px 0 0}#vlStepsTop .vl-cc{display:none}}
 /* Up next */
 .vl-next h2{margin:0 0 12px;font:600 1.25rem/1.2 var(--serif);color:var(--navy)}
-.vl-next h3{margin:16px 0 8px;font:700 .75rem/1.2 var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.vl-next h3:first-of-type{margin-top:0}
-.vl-next ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.vl-next h3.vl-nh{margin:16px 0 8px;font:700 .75rem/1.2 var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.vl-next h3.vl-nh:first-of-type{margin-top:0}
+.vl-next ol.vl-nl{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .vl-ni{display:grid;grid-template-columns:168px minmax(0,1fr);gap:12px;align-items:start;color:inherit;text-decoration:none;border-radius:10px;padding:4px;margin:-4px;min-height:44px}
 .vl-ni:hover{background:rgba(29,58,82,.06)}
 .vl-ni .vl-thumb{border-radius:8px}
 .vl-ni .vl-dur{right:5px;bottom:5px;font-size:.75rem;padding:3px 5px}
 .vl-ni .vl-t{font-size:.9375rem}
 .vl-ni .vl-m{font-size:.8125rem;-webkit-line-clamp:1}
-@media (max-width:1179px){.vl-next ol{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px}.vl-ni{grid-template-columns:minmax(120px,40%) minmax(0,1fr)}}
-@media (max-width:699px){.vl-next ol{grid-template-columns:minmax(0,1fr)}.vl-w h2.vl-wt{font-size:1.375rem}.vl-player{border-radius:0;margin:0 calc(-1*var(--gut))}}
+@media (max-width:1179px){.vl-next ol.vl-nl{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px}.vl-ni{grid-template-columns:minmax(120px,40%) minmax(0,1fr)}}
+@media (max-width:699px){.vl-next ol.vl-nl{grid-template-columns:minmax(0,1fr)}.vl-w h2.vl-wt{font-size:1.375rem}.vl-player{border-radius:0;margin:0 calc(-1*var(--gut))}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.vl-card:hover .vl-thumb img{transform:none}}
-@media print{.vl-head,.vl-chips,.vl-next{display:none}}
+@media print{.vl-head,.vl-filt,.vl-next{display:none}}
 </style>
 <script src="nbh-videos.js"></script>
+<script src="nbh-video-steps.js"></script>
+<script src="nbh-video-transcripts.js"></script>
+<script src="nbh-transcript.js"></script>
 </head>
 <body>
 <a class="vl-skip" href="#vlMain">Skip to the videos</a>
@@ -177,9 +298,16 @@ body.vl-watching #vlClose{margin-left:auto}
 </header>
 <main id="vlMain" tabindex="-1">
   <section id="vlHome" class="vl-wrap" aria-label="All videos">
-    <p class="vl-intro"><span class="vl-ai">AI-generated · simulated people</span> The procedure videos of Form TD-1’s protocol bank. Each shows a procedure, not a real session: adapt every step to the student’s plan.</p>
-    <div class="vl-chips" id="vlChips" role="group" aria-label="Show"></div>
-    <p class="vl-count" id="vlCount" role="status"></p>
+    <p class="vl-intro"><span class="vl-ai">AI-generated · simulated people</span><span>Each video shows a procedure, not a real session. Adapt every step to the student’s plan.</span></p>
+    <div class="vl-filt" id="vlFilt">
+      <div class="vl-menus">
+        <label class="vl-sel vl-sel-fam"><span>Procedure</span><select id="vlSelFam"></select><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></label>
+        <label class="vl-sel vl-sel-fn"><span>Function</span><select id="vlSelFn"></select><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></label>
+      </div>
+      <div class="vl-frow" data-row="fam"><span class="vl-fl" id="vlFamL">Procedure</span><div class="vl-chips" id="vlChips" role="radiogroup" aria-labelledby="vlFamL"></div><p class="vl-count" id="vlCount" role="status"></p></div>
+      <div class="vl-frow" data-row="fn"><span class="vl-fl" id="vlFnL">Function</span><div class="vl-chips" id="vlFns" role="radiogroup" aria-labelledby="vlFnL"></div>
+        <label class="vl-sel vl-sel-seen"><span>Watched</span><select id="vlSeen"><option value="all">All</option><option value="seen">Watched</option><option value="unseen">Not watched</option></select><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></label></div>
+    </div>
     <div id="vlList"></div>
   </section>
   <section id="vlWatch" class="vl-wrap" hidden aria-labelledby="vlTitle"></section>
@@ -187,15 +315,27 @@ body.vl-watching #vlClose{margin-left:auto}
 <script>
 (function(){
 'use strict';
-var D=window.NBH_VIDEOS,R=document.documentElement,B=document.body;
+var D=window.NBH_VIDEOS,R=document.documentElement,B=document.body,STEPS={};
+/* nbh-video-steps.js: steps [number, start, title], caps [start, caption, step number] */
+(function(){var S=window.NBH_VIDEO_STEPS||{};Object.keys(S).forEach(function(k){var x=S[k];if(!x||!x.steps||!x.caps)return;
+  STEPS[k]={steps:x.steps.map(function(s){return {n:s[0],t:s[1],title:s[2],where:s[3]||'',with:s[4]};}),caps:x.caps};});})();
+/* nbh-video-transcripts.js: [start, who, text] per line ('N' the narrator, 'O' on screen, else the role of the person) */
+var TRANS=window.NBH_VIDEO_TRANSCRIPTS||{};
+/* the viewer's choices on this device (localStorage nbh.videos.pref): captions on or off, the Steps or Transcript tab */
+var PREF='nbh.videos.pref';function pref(){try{var o=JSON.parse(localStorage.getItem(PREF)||'{}');return o&&typeof o==='object'?o:{};}catch(e){return {};}}
+function setPref(k,val){var o=pref();o[k]=val;try{localStorage.setItem(PREF,JSON.stringify(o));}catch(e){}}
 var $=function(id){return document.getElementById(id);};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
 if(!D||!D.list||!D.list.length){$('vlList').innerHTML='<div class="vl-none"><p>The list of videos (nbh-videos.js) could not be loaded. Open the workstation from its folder or from the website.</p></div>';return;}
-var LIST=D.list,BY={},FAM={},FN={attention:'Attention',escape:'Escape',tangible:'Tangible',automatic:'Automatic'};
+var LIST=D.list,BY={},FAM={},FN={attention:'Attention',escape:'Escape',tangible:'Tangible',automatic:'Automatic'},FNS=['attention','escape','tangible','automatic'];
 LIST.forEach(function(v){BY[v.key]=v;});D.families.forEach(function(f){FAM[f[0]]={key:f[0],short:f[1],name:f[2]};});
 /* the workstation around this page (its Videos): Close, and a card opened in its Form TD-1 */
 var WS=false;try{WS=window.parent!==window&&!!window.parent.__wsVideos;}catch(e){WS=false;}
 var tell=function(m){try{window.parent.postMessage(m,'*');}catch(e){}};
+var REDUCE=function(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
+var WIDE=function(){try{return matchMedia('(min-width: 1180px)').matches;}catch(e){return false;}};
+var PHONE=function(){try{return matchMedia('(max-width: 699px)').matches;}catch(e){return false;}};
+var isFull=function(){return !!(document.fullscreenElement||document.webkitFullscreenElement);};
 
 /* ---------- what was watched on this device: localStorage nbh.videos.v1, {v:1, items:{key:{t,d,w,at}}} — the second a
    video stopped at (t), its length (d), watched to the end once (w), when (at). No student, nothing typed. ---------- */
@@ -217,10 +357,30 @@ function cite(v){if(v.after)return v.after;var c=(D.cards[v.cards[0]]||{}).cite|
 function citeOf(v){return v.after||(v.key==='a_highp'?'TD-1’s own steps':cite(v));}
 var fam=function(v){return FAM[v.family]||{key:v.family,short:v.family,name:v.family};};
 var cap=function(s){s=String(s||'');return s.charAt(0).toUpperCase()+s.slice(1);};
-var norm=function(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,"'");};
-function hay(v){var f=fam(v);return norm([v.title,f.short,f.name,citeOf(v),v.note,(v.shows||{}).summary,(v.fn||[]).join(' '),
-  v.cards.map(function(id){var c=D.cards[id]||{};return (c.lab||'')+' '+(c.cite||'')+' '+(c.code||'');}).join(' ')].join(' '));}
-LIST.forEach(function(v){v._hay=hay(v);});
+
+/* ---------- the search, forgiving spelling: a hyphen and a space alike ("non-contingent", "noncontingent"; "high p",
+   "high-p"), a few other spellings, a word of five letters or more with one letter wrong, missing or extra ---------- */
+var norm=function(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’‘']/g,'');};
+var SPELL={behaviour:'behavior',behaviours:'behaviors',behavioural:'behavioral',favourite:'favorite',favourites:'favorites',colour:'color',colours:'colors',
+  centre:'center',programme:'program',organise:'organize',hip:'highp',hiprobability:'highprobability'};
+var words=function(s){return norm(s).split(/[^a-z0-9]+/).filter(Boolean);};
+function hay(v){var f=fam(v);return [v.title,f.short,f.name,citeOf(v),v.note,(v.shows||{}).summary,(v.fn||[]).join(' '),
+  v.cards.map(function(id){var c=D.cards[id]||{};return (c.lab||'')+' '+(c.cite||'')+' '+(c.code||'');}).join(' ')].join(' ');}
+LIST.forEach(function(v){var w=words(hay(v));v._cmp=w.join('');var u={};w.forEach(function(x){if(x.length>=4)u[x]=1;});v._tok=Object.keys(u);});
+/* one letter wrong, missing or extra */
+function near(a,b){var la=a.length,lb=b.length;if(Math.abs(la-lb)>1)return false;var i=0,j=0,e=0;
+  while(i<la&&j<lb){if(a.charAt(i)===b.charAt(j)){i++;j++;continue;}if(++e>1)return false;if(la>lb)i++;else if(lb>la)j++;else{i++;j++;}}
+  return e+(la-i)+(lb-j)<=1;}
+function wordIn(v,w){if(v._cmp.indexOf(w)>=0)return true;
+  if(w.length>=4&&/s$/.test(w)&&v._cmp.indexOf(w.slice(0,-1))>=0)return true;
+  if(w.length<5)return false;
+  return v._tok.some(function(t){return near(w,t)||(t.length>w.length&&(near(w,t.slice(0,w.length))||near(w,t.slice(0,w.length+1))||near(w,t.slice(0,w.length-1))));});}
+/* the keys the search finds (all when it is empty) */
+function found(q){var w=words(q).map(function(x){return SPELL[x]||x;}),all={};if(!w.length){LIST.forEach(function(v){all[v.key]=1;});return all;}
+  var joined=w.join(''),out={},any=false;joined=SPELL[joined]||joined;
+  if(w.length>1||/[-‐–—\/]/.test(q))LIST.forEach(function(v){if(v._cmp.indexOf(joined)>=0){out[v.key]=1;any=true;}});
+  if(any)return out;
+  LIST.forEach(function(v){if(w.every(function(x){return wordIn(v,x);}))out[v.key]=1;});return out;}
 
 /* ---------- a card ---------- */
 var CHECK='<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg>';
@@ -229,80 +389,232 @@ function thumb(v){var p=prog(v.key),bar=inProgress(v.key)&&p.d?'<span class="vl-
     (v.dur?'<span class="vl-dur" aria-hidden="true">'+mmss(v.dur)+'</span>':'')+'</span>';}
 function status(v){var p=prog(v.key),bits=[];
   if(inProgress(v.key))bits.push('Stopped at '+mmss(p.t));else if(watched(v.key))bits.push('<b>Watched</b>');return bits.join(' · ');}
-function card(v){var f=fam(v);
+/* in a procedure's section the section's heading names the procedure: no badge, no " · DRO" */
+function card(v,inFam){var f=fam(v);
   return '<a class="vl-card" href="#video='+encodeURIComponent(v.key)+'" data-key="'+esc(v.key)+'">'+thumb(v)+
-    '<span class="vl-info"><span class="vl-av vl-f-'+esc(f.key)+'" aria-hidden="true">'+esc(f.short)+'</span><span class="vl-txt"><span class="vl-t">'+esc(v.title)+'</span>'+
-    '<span class="vl-m">'+esc(citeOf(v))+' · '+esc(f.short)+(v.dur?'<span class="vl-sr"> · '+spoken(v.dur)+'</span>':'')+'</span>'+(status(v)?'<span class="vl-st">'+status(v)+'</span>':'')+'</span></span></a>';}
+    '<span class="vl-info">'+(inFam?'':'<span class="vl-av vl-f-'+esc(f.key)+'" aria-hidden="true">'+esc(f.short)+'</span>')+'<span class="vl-txt"><span class="vl-t">'+esc(v.title)+'</span>'+
+    '<span class="vl-m">'+esc(citeOf(v))+(inFam?'':' · '+esc(f.short))+(v.dur?'<span class="vl-sr"> · '+spoken(v.dur)+'</span>':'')+'</span>'+(status(v)?'<span class="vl-st">'+status(v)+'</span>':'')+'</span></span></a>';}
 
-/* ---------- the home page: the chips, the search, Continue watching, a shelf per procedure (or one grid, filtered) ---------- */
-var CHIPS=[['all','All']].concat(D.families.map(function(f){return ['fam:'+f[0],f[1]];}),[['-'],['fn:attention','Attention'],['fn:escape','Escape'],['fn:tangible','Tangible'],['fn:automatic','Automatic'],['-'],['seen','Watched'],['unseen','Not watched']]);
-var chip='all',q='',view='home',homeY=0,lastKey='';
-function pass(v){if(chip.indexOf('fam:')===0&&v.family!==chip.slice(4))return false;if(chip.indexOf('fn:')===0&&(v.fn||[]).indexOf(chip.slice(3))<0)return false;
-  if(chip==='seen'&&!watched(v.key))return false;if(chip==='unseen'&&watched(v.key))return false;
-  var words=norm(q).split(/\s+/).filter(Boolean);return words.every(function(w){return v._hay.indexOf(w)>=0;});}
-function paintChips(){var n=function(id){return LIST.filter(function(v){var c=chip;chip=id;var r=pass(v);chip=c;return r;}).length;};
-  $('vlChips').innerHTML=CHIPS.map(function(c){if(c[0]==='-')return '<span class="vl-cdiv" aria-hidden="true"></span>';
-    return '<button type="button" class="vl-chip" data-chip="'+c[0]+'" aria-pressed="'+(chip===c[0])+'">'+esc(c[1])+'<span class="vl-n" aria-hidden="true">'+n(c[0])+'</span><span class="vl-sr">, '+n(c[0])+' videos</span></button>';}).join('');}
-function chipName(){var c=CHIPS.filter(function(x){return x[0]===chip;})[0];return c?c[1]:'';}
-function paintHome(){paintChips();var L=LIST.filter(pass),h='',plain=chip==='all'&&!norm(q).trim();
-  $('vlCount').textContent=plain?LIST.length+' videos':L.length+' of '+LIST.length+' videos'+(chip!=='all'?' · '+chipName():'')+(q.trim()?' · “'+q.trim()+'”':'');
+/* ---------- the home page: the filters, the search, Continue watching, a shelf per procedure (or one grid, filtered) ---------- */
+var flt={fam:'',fn:'',seen:'all'},q='',view='home',homeY=0,lastKey='',hits=found('');
+function passWith(v,o){if(!hits[v.key])return false;if(o.fam&&v.family!==o.fam)return false;if(o.fn&&(v.fn||[]).indexOf(o.fn)<0)return false;
+  if(o.seen==='seen'&&!watched(v.key))return false;if(o.seen==='unseen'&&watched(v.key))return false;return true;}
+var pass=function(v){return passWith(v,flt);};
+var count=function(ch){var o={fam:flt.fam,fn:flt.fn,seen:flt.seen};for(var k in ch)o[k]=ch[k];return LIST.filter(function(v){return passWith(v,o);}).length;};
+var FAMS=D.families.filter(function(f){return LIST.some(function(v){return v.family===f[0];});});
+/* the two rows: one Tab stop each, the arrow keys inside (a radio group) */
+function chipHtml(kind,val,label){return '<button type="button" role="radio" class="vl-chip" data-chip="'+kind+':'+(val||'any')+'" aria-checked="false" tabindex="-1">'+esc(label)+'<span class="vl-n" aria-hidden="true"></span><span class="vl-sr"></span></button>';}
+$('vlChips').innerHTML=chipHtml('fam','','Any')+FAMS.map(function(f){return chipHtml('fam',f[0],f[1]);}).join('');
+$('vlFns').innerHTML=chipHtml('fn','','Any')+FNS.map(function(f){return chipHtml('fn',f,FN[f]);}).join('');
+$('vlSelFam').innerHTML='<option value="">Any</option>'+FAMS.map(function(f){return '<option value="'+f[0]+'">'+esc(f[1])+'</option>';}).join('');
+$('vlSelFn').innerHTML='<option value="">Any</option>'+FNS.map(function(f){return '<option value="'+f+'">'+FN[f]+'</option>';}).join('');
+function paintFilters(){
+  [].forEach.call(document.querySelectorAll('#vlFilt .vl-chip'),function(b){var p=b.dataset.chip.split(':'),k=p[0],val=p[1]==='any'?'':p[1],o={};o[k]=val;var n=count(o),on=flt[k]===val;
+    b.setAttribute('aria-checked',String(on));b.tabIndex=on?0:-1;b.querySelector('.vl-n').textContent=val?n:'';b.querySelector('.vl-sr').textContent=', '+n+' video'+(n===1?'':'s');});
+  [['vlSelFam','fam',FAMS.map(function(f){return [f[0],f[1]];})],['vlSelFn','fn',FNS.map(function(f){return [f,FN[f]];})]].forEach(function(x){var s=$(x[0]);
+    [].forEach.call(s.options,function(o){var c={};c[x[1]]=o.value;var lab=o.value?(x[2].filter(function(y){return y[0]===o.value;})[0]||['',''])[1]:'Any';o.textContent=lab+' ('+count(c)+')';});s.value=flt[x[1]];});
+  $('vlSeen').value=flt.seen;}
+function fltName(){var b=[];if(flt.fam)b.push(fam({family:flt.fam}).short);if(flt.fn)b.push(FN[flt.fn]);if(flt.seen!=='all')b.push(flt.seen==='seen'?'Watched':'Not watched');return b.join(' · ');}
+function paintHome(){hits=found(q);paintFilters();var L=LIST.filter(pass),h='',qq=q.trim(),plain=!flt.fam&&!flt.fn&&flt.seen==='all'&&!words(q).length;
+  $('vlCount').textContent=plain?LIST.length+' videos':L.length+' of '+LIST.length+' videos'+(fltName()?' · '+fltName():'')+(qq?' · “'+qq+'”':'');
   if(plain){var C=LIST.filter(function(v){return inProgress(v.key);}).sort(function(a,b){return prog(b.key).at-prog(a.key).at;});
-    if(C.length)h+='<section class="vl-sec" id="vlCont" aria-labelledby="vlContH"><div class="vl-sech"><span class="vl-shd"><h2 id="vlContH">Continue watching</h2><span class="vl-sub">'+C.length+' started on this device</span></span></div><div class="vl-row">'+C.map(card).join('')+'</div></section>';
-    D.families.forEach(function(f){var F=LIST.filter(function(v){return v.family===f[0];});if(!F.length)return;
+    if(C.length){h+='<section class="vl-sec" id="vlCont" aria-labelledby="vlContH"><div class="vl-sech"><span class="vl-shd"><h2 id="vlContH">Continue watching</h2><span class="vl-sub">'+C.length+' started on this device</span></span></div><div class="vl-row">'+C.map(function(v){return card(v,false);}).join('')+'</div></section>';
+      preload(C[0]);}
+    FAMS.forEach(function(f){var F=LIST.filter(function(v){return v.family===f[0];});
       h+='<section class="vl-sec vl-fam" data-fam="'+f[0]+'" aria-labelledby="vlFam-'+f[0]+'"><div class="vl-sech"><span class="vl-av vl-f-'+f[0]+'" aria-hidden="true">'+esc(f[1])+'</span><span class="vl-shd"><h2 id="vlFam-'+f[0]+'">'+esc(f[2])+'</h2><span class="vl-sub">'+esc(f[1])+' · '+F.length+' video'+(F.length>1?'s':'')+'</span></span>'+
-        (F.length>1?'<button type="button" class="vl-btn" data-chip="fam:'+f[0]+'">Only '+esc(f[1])+'</button>':'')+'</div><div class="vl-grid">'+F.map(card).join('')+'</div></section>';});}
-  else if(L.length)h='<div class="vl-sec"><div class="vl-grid">'+L.map(card).join('')+'</div></div>';
-  else h='<div class="vl-none"><p>No video matches '+(q.trim()?'“'+esc(q.trim())+'”':'')+(chip!=='all'?(q.trim()?' in ':'')+esc(chipName()):'')+'.</p><button type="button" class="vl-btn vl-pri" data-chip="all" data-clear="1">Show all videos</button></div>';
+        (F.length>1?'<button type="button" class="vl-btn" data-set="fam:'+f[0]+'">Only '+esc(f[1])+'</button>':'')+'</div><div class="vl-grid">'+F.map(function(v){return card(v,true);}).join('')+'</div></section>';});}
+  else if(L.length)h='<div class="vl-sec"><div class="vl-grid">'+L.map(function(v){return card(v,false);}).join('')+'</div></div>';
+  else{/* nothing found: the Procedure and Function choices, then all */
+    var none=fltName();
+    h='<div class="vl-none"><p>No video matches '+(qq?'“'+esc(qq)+'”':'')+(none?(qq?' in ':'')+esc(none):'')+'.</p>'+
+      '<p class="vl-tryh">Try a procedure or a function:</p><div class="vl-try">'+FAMS.map(function(f){return '<button type="button" class="vl-btn" data-set="fam:'+f[0]+'" data-clear="1">'+esc(f[1])+'</button>';}).join('')+
+      FNS.map(function(f){return '<button type="button" class="vl-btn" data-set="fn:'+f+'" data-clear="1">'+FN[f]+'</button>';}).join('')+'</div>'+
+      '<button type="button" class="vl-btn vl-pri" data-set="all" data-clear="1">Show all videos</button></div>';}
   $('vlList').innerHTML=h;}
-$('vlChips').addEventListener('click',function(e){var b=e.target.closest('[data-chip]');if(!b)return;setChip(b.dataset.chip,b);});
-$('vlList').addEventListener('click',function(e){var b=e.target.closest('button[data-chip]');if(!b)return;if(b.dataset.clear){q='';$('vlQ').value='';}setChip(b.dataset.chip);});
-/* the chip chosen keeps the focus (the row is drawn again); from a shelf's Only button the page goes up to the chips */
-function setChip(c,from){var inRow=!!(from&&from.closest&&from.closest('#vlChips'));chip=c;paintHome();var b=document.querySelector('#vlChips [data-chip="'+c+'"]');
-  if(b){try{b.focus({preventScroll:inRow});}catch(e){}}if(!inRow){try{$('vlChips').scrollIntoView({block:'nearest'});}catch(e){}}}
+/* a choice: "fam:dro", "fn:any", "all" (everything back) */
+function setFilter(c,keep){if(c==='all')flt={fam:'',fn:'',seen:'all'};else{var p=c.split(':');flt[p[0]]=p[1]==='any'?'':p[1];}paintHome();
+  if(keep){var b=document.querySelector('#vlFilt [data-chip="'+c+'"]');if(b){try{b.focus({preventScroll:true});}catch(e){}}}}
+function groupKeys(e){var g=e.currentTarget,bs=[].slice.call(g.querySelectorAll('.vl-chip')),i=bs.indexOf(document.activeElement),j=-1;if(i<0)return;
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')j=(i+1)%bs.length;else if(e.key==='ArrowLeft'||e.key==='ArrowUp')j=(i-1+bs.length)%bs.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=bs.length-1;
+  if(j<0)return;e.preventDefault();setFilter(bs[j].dataset.chip,true);}
+['vlChips','vlFns'].forEach(function(id){$(id).addEventListener('click',function(e){var b=e.target.closest('[data-chip]');if(b)setFilter(b.dataset.chip,true);});$(id).addEventListener('keydown',groupKeys);});
+$('vlSelFam').addEventListener('change',function(){flt.fam=this.value;paintHome();});
+$('vlSelFn').addEventListener('change',function(){flt.fn=this.value;paintHome();});
+$('vlSeen').addEventListener('change',function(){flt.seen=this.value;paintHome();});
+/* a shelf's Only button, and the choices when nothing is found: the page goes up to the filters */
+$('vlList').addEventListener('click',function(e){var b=e.target.closest('button[data-set]');if(!b)return;if(b.dataset.clear){q='';$('vlQ').value='';}setFilter(b.dataset.set);
+  var t=document.querySelector('#vlFilt [aria-checked=true][data-chip="'+b.dataset.set+'"]')||(b.dataset.set.indexOf('fn:')===0?document.querySelector('#vlFns [aria-checked=true]'):document.querySelector('#vlChips [aria-checked=true]'));
+  if(t&&t.offsetParent){try{t.focus({preventScroll:true});}catch(x){}}else{var s=b.dataset.set.indexOf('fn:')===0?$('vlSelFn'):$('vlSelFam');try{s.focus({preventScroll:true});}catch(x){}}
+  try{$('vlFilt').scrollIntoView({block:'nearest'});}catch(x){}});
 var qt=null;$('vlQ').addEventListener('input',function(){clearTimeout(qt);qt=setTimeout(function(){q=$('vlQ').value;paintHome();},120);});
 $('vlQ').addEventListener('keydown',function(e){if(e.key==='Enter'){clearTimeout(qt);q=$('vlQ').value;paintHome();}});
 
-/* ---------- a video's page ---------- */
-var urls={},token=0,cur=null,saveT=0,openedByTap=false;
-function loadScript(src){return new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=function(){res();};s.onerror=function(){rej(new Error(src));};document.head.appendChild(s);});}
-function videoUrl(v){if(urls[v.key])return Promise.resolve(urls[v.key]);
+/* ---------- loading a video: from the website the file is read as a stream, so its progress shows; from a folder it is
+   loaded as a script, as before. At most two videos are kept decoded: an older one is released. ---------- */
+var urls={},order=[],loads={},token=0,cur=null,saveT=0,openedByTap=false,KEEP=2;
+var WEB=/^https?:$/.test(location.protocol);
+function loadScript(src){return new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=function(){s.remove();res();};s.onerror=function(){s.remove();rej(new Error(src));};document.head.appendChild(s);});}
+function keepUrl(k,u){urls[k]=u;order=order.filter(function(x){return x!==k;});order.push(k);
+  while(order.length>KEEP){var i=0;while(i<order.length&&order[i]===cur)i++;if(i>=order.length-1)break;var old=order.splice(i,1)[0];try{URL.revokeObjectURL(urls[old]);}catch(e){}delete urls[old];}}
+function toBlob(b64){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:'video/mp4'});}
+function fetchText(v,L){return fetch(v.file).then(function(r){if(!r.ok)throw new Error(r.status);var total=+r.headers.get('content-length')||0;L.total=total;
+  if(!r.body||!r.body.getReader)return r.text();var rd=r.body.getReader(),parts=[],got=0;
+  function step(){return rd.read().then(function(x){if(x.done)return;parts.push(x.value);got+=x.value.length;L.loaded=got;if(L.total&&got>L.total)L.total=0;L.tick();return step();});}
+  return step().then(function(){var all=new Uint8Array(got),o=0;parts.forEach(function(p){all.set(p,o);o+=p.length;});parts=null;return new TextDecoder().decode(all);});});}
+function videoUrl(v){if(urls[v.key]){keepUrl(v.key,urls[v.key]);return Promise.resolve(urls[v.key]);}if(loads[v.key])return loads[v.key].p;
+  var L=loads[v.key]={loaded:0,total:0,fns:[],tick:function(){L.fns.forEach(function(f){try{f(L);}catch(e){}});}};
   var have=function(){return window.NBH_TD1_VIDEO&&window.NBH_TD1_VIDEO[v.key];};
-  return (have()?Promise.resolve():loadScript(v.file)).then(function(){var b64=have();if(!b64)throw new Error('no video data');
-    var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-    urls[v.key]=URL.createObjectURL(new Blob([u],{type:'video/mp4'}));try{delete window.NBH_TD1_VIDEO[v.key];}catch(e){}return urls[v.key];});}
+  var data=have()?Promise.resolve(have()):WEB&&window.fetch&&window.TextDecoder?fetchText(v,L).then(function(t){var m=/=\s*'([A-Za-z0-9+\/=]+)'/.exec(t);t=null;if(!m)throw new Error('no video data');return m[1];})
+    :loadScript(v.file).then(function(){return have();});
+  L.p=data.then(function(b64){if(!b64)throw new Error('no video data');try{delete window.NBH_TD1_VIDEO[v.key];}catch(e){}var u=URL.createObjectURL(toBlob(b64));b64=null;delete loads[v.key];keepUrl(v.key,u);return u;},
+    function(e){delete loads[v.key];throw e;});
+  return L.p;}
+/* the "Continue watching" video, and a card touched (before the tap ends): loading starts at once */
+function preload(v){if(!v||urls[v.key]||loads[v.key])return;setTimeout(function(){if(view==='home'&&!urls[v.key]&&!loads[v.key])videoUrl(v).catch(function(){});},400);}
+document.addEventListener('pointerdown',function(e){var a=e.target.closest&&e.target.closest('a[href^="#video="]');if(!a)return;var v=BY[a.dataset.key];if(v&&!urls[v.key])videoUrl(v).catch(function(){});},{passive:true});
+/* the player let go: no picture decoded behind a page that does not show it */
+function releasePlayer(){var vid=$('vlVideo');if(!vid)return;try{vid.pause();}catch(e){}vid.removeAttribute('src');try{vid.load();}catch(e){}}
+
+/* ---------- a video's page ---------- */
 function nextOf(v){var fam1=LIST.filter(function(x){return x.family===v.family&&x.key!==v.key;}),seen={};fam1.forEach(function(x){seen[x.key]=1;});
   var fn1=(v.fn||[]).length?LIST.filter(function(x){return x.key!==v.key&&!seen[x.key]&&(x.fn||[]).some(function(f){return v.fn.indexOf(f)>=0;});}):[];
   return {fam:fam1,fn:fn1};}
 var OPEN_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>';
+var PLAY_ICO='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
+var PAUSE_ICO='<svg class="vl-pz" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>';
+var CC_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10.5 10.2a2.4 2.4 0 1 0 0 3.6M17 10.2a2.4 2.4 0 1 0 0 3.6" stroke-linecap="round"/></svg>';
+var FULL_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+/* the captions file (WebVTT) from a transcript: each spoken line in sentences, the people's lines with their role */
+function vttOf(lines,dur){var sp=lines.filter(function(l){return l[1]!=='O';}),out='WEBVTT\n',n=0;
+  var ts=function(x){x=Math.max(0,x);var h=Math.floor(x/3600),m=Math.floor(x%3600/60),sec=x%60;return (h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(sec<10?'0':'')+sec.toFixed(3);};
+  sp.forEach(function(l,i){var nx=i+1<sp.length?sp[i+1][0]:(dur||l[0]+30),who=l[1]==='N'?'':'['+l[1]+'] ',parts=l[2].match(/[^.!?]+[.!?]+["”’)]*\s*|[^.!?]+$/g)||[l[2]];
+    var total=parts.join('').length,end=Math.min(nx-0.05,l[0]+total/14+0.8),t=l[0];if(end<=t+0.6)end=Math.min(Math.max(t+1,nx),t+3);
+    parts.forEach(function(p,j){var d=(end-l[0])*p.length/total,e=j===parts.length-1?end:t+d;out+='\n'+(++n)+'\n'+ts(t)+' --> '+ts(e)+'\n'+(j?'':who)+p.trim()+'\n';t=e;});});
+  return out;}
 function nextItem(x){var f=fam(x);return '<li><a class="vl-ni" href="#video='+encodeURIComponent(x.key)+'" data-key="'+esc(x.key)+'">'+thumb(x)+
   '<span class="vl-txt"><span class="vl-t">'+esc(x.title)+'</span><span class="vl-m">'+esc(citeOf(x))+' · '+esc(f.short)+'</span><span class="vl-st">'+status(x)+'</span></span></a></li>';}
-function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){return FN[x]||x;});
-  var opens=v.cards.map(function(id){var c=D.cards[id]||{};return '<button type="button" class="vl-open" data-card="'+esc(id)+'">'+OPEN_ICO+'<span><b>Open the TD-1 card</b><small>'+esc(c.cite?c.cite+': ':'')+esc(c.lab||id)+'</small></span></button>';}).join('');
+/* the Steps: each step's start and its title as the video shows them; the step playing is marked, with its caption */
+function stepsHtml(S,hasT){var WH={open:'On the opening card',close:'On the closing card'};
+  return '<section class="vl-panel vl-tabs" id="vlTabs" aria-label="Steps and transcript"><div class="vl-tabl" role="tablist" aria-label="Steps and transcript">'+
+    '<button type="button" role="tab" id="vlTabS" class="vl-tab" aria-controls="vlSteps" aria-selected="true">Steps</button>'+
+    (hasT?'<button type="button" role="tab" id="vlTabT" class="vl-tab" aria-controls="vlTrans" aria-selected="false" tabindex="-1">Transcript</button>'+
+      '<button type="button" class="vl-btn vl-cc" id="vlCC" aria-pressed="false" title="Captions of what is said">'+CC_ICO+'<span>CC</span><span class="vl-sr"> captions</span></button>':'')+'</div>'+
+    '<div class="vl-steps" id="vlSteps" role="tabpanel" aria-labelledby="vlTabS"><div class="vl-stepsh"><h3 id="vlStepsH">Steps</h3><small>Tap a step to jump to it</small></div><ol>'+
+    S.steps.map(function(s,i){var note=WH[s.where]||(s.where==='with'?'Shown with step '+s.with:'');
+      return '<li data-i="'+i+'"'+(s.where?' data-where="'+s.where+'"':'')+'><button type="button" class="vl-sbtn" data-t="'+s.t+'"><span class="vl-stm">'+mmss(s.t)+'</span><span class="vl-sn'+(s.n?'':' vl-sn0')+'" aria-hidden="true">'+(s.n||'')+'</span><span>'+(s.n?'<span class="vl-sr">Step '+s.n+': </span>':'')+esc(s.title)+(note?'<span class="vl-snote">'+note+'</span>':'')+'</span></button><p class="vl-scap" hidden></p></li>';}).join('')+'</ol></div>'+
+    (hasT?'<div class="vl-trans" id="vlTrans" role="tabpanel" aria-labelledby="vlTabT" hidden></div>':'')+'</section>';}
+function stepAt(S,t){var c=null;for(var i=0;i<S.caps.length;i++){if(S.caps[i][0]<=t+0.05)c=S.caps[i];else break;}return c;}
+function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){return FN[x]||x;}),S=STEPS[v.key];
+  var acts=v.cards.map(function(id,i){var c=D.cards[id]||{},c1=(c.cite||'').split('; ')[0];
+    return '<div class="vl-actr"><button type="button" class="vl-btn'+(i?'':' vl-pri')+' vl-open" data-card="'+esc(id)+'" aria-describedby="vlCard'+i+'">'+OPEN_ICO+'Open the TD-1 card</button>'+
+      '<span class="vl-actl" id="vlCard'+i+'"><b>'+esc(cap(c.lab||id))+'</b>'+esc([c.code,c1].filter(Boolean).join(' · '))+'</span></div>';}).join('');
   var sum=(v.shows||{}).summary;
   $('vlWatch').innerHTML='<div class="vl-w"><div class="vl-wmain">'+
-    '<div class="vl-player"><video id="vlVideo" controls playsinline preload="metadata" poster="'+esc(v.poster)+'" aria-label="'+esc(v.title)+'"></video><p class="vl-load" id="vlLoad" role="status">Loading the video…</p></div>'+
+    '<div class="vl-player"><video id="vlVideo" controls playsinline preload="metadata" tabindex="0" poster="'+esc(v.poster)+'" aria-label="'+esc(v.title)+'"></video>'+
+      '<div class="vl-load" id="vlLoad" role="status"><span id="vlLoadT">Loading the video…</span><span class="vl-lmb" id="vlLoadMb"></span><div class="vl-lbar" id="vlLoadBar" hidden><i></i></div></div>'+
+      '<div class="vl-fail" id="vlFail" hidden><p>This video is not saved on this device. Connect to the internet, then try again.</p><button type="button" class="vl-btn" id="vlRetry">Try again</button></div>'+
+      '<div class="vl-play" id="vlPlay" hidden><button type="button" class="vl-btn" id="vlPlayBtn">'+PLAY_ICO+'Play</button></div></div>'+
+    '<div class="vl-bar" id="vlBar" hidden><button type="button" class="vl-bb" id="vlBPlay" aria-label="Play">'+PLAY_ICO+PAUSE_ICO+'</button><span class="vl-btime" id="vlBTime" aria-hidden="true">0:00 / 0:00</span>'+
+      '<input type="range" class="vl-bseek" id="vlBSeek" min="0" max="1" step="0.1" value="0" aria-label="Position in the video">'+
+      '<button type="button" class="vl-bb vl-bcc" id="vlBCC" aria-pressed="false" aria-label="Captions">'+CC_ICO+'</button><button type="button" class="vl-bb" id="vlBFull" aria-label="Full screen">'+FULL_ICO+'</button></div>'+
+    '<div id="vlStepsTop"></div>'+
     '<p class="vl-kick"><span class="vl-av vl-f-'+esc(f.key)+'" aria-hidden="true">'+esc(f.short)+'</span>'+esc(f.name)+'</p>'+
     '<h2 class="vl-wt" id="vlTitle" tabindex="-1">'+esc(v.title)+'</h2>'+
     '<p class="vl-wm"><span>'+(v.after?'After '+esc(v.after):esc(citeOf(v)))+'</span>'+(v.dur?'<span aria-hidden="true">·</span><span><span class="vl-sr">Length </span>'+mmss(v.dur)+'</span>':'')+'<span class="vl-ai">AI-generated · simulated people</span></p>'+
     '<div class="vl-resume" id="vlResume" hidden><span id="vlResumeT"></span><button type="button" class="vl-btn" id="vlRestart">Start from the beginning</button></div>'+
-    '<div class="vl-panel"><h3>In Form TD-1</h3><div class="vl-opens">'+opens+'</div></div>'+
+    '<div class="vl-act">'+acts+'</div><div id="vlStepsHere"></div>'+
     '<div class="vl-panel">'+(sum?'<h3>What the video shows</h3><p>'+esc(cap(sum))+'.</p>':'')+
       (fnw.length?'<p class="vl-fns"><b>Function'+(fnw.length>1?'s':'')+' of the behavior in its card'+(v.cards.length>1?'s':'')+':</b> '+fnw.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</p>':'')+
-      '<h3 style="margin-top:14px">About this video</h3><p class="vl-note">'+esc(v.note)+' Captions are part of the picture.</p></div>'+
-    '</div><aside class="vl-next" aria-labelledby="vlNextH"><h2 id="vlNextH">Up next</h2>'+
-      (N.fam.length?'<h3 id="vlNextF">More '+esc(f.short)+'</h3><ol aria-labelledby="vlNextF">'+N.fam.map(nextItem).join('')+'</ol>':'')+
-      (N.fn.length?'<h3 id="vlNextN">Also for '+esc(fnw.join(', ').toLowerCase())+'</h3><ol aria-labelledby="vlNextN">'+N.fn.map(nextItem).join('')+'</ol>':'')+
+      '<h3 style="margin-top:14px">About this video</h3><p class="vl-note">'+esc(v.note)+' Captions are part of the picture. The Transcript beside the Steps has every word as text, and CC adds captions of what is said.</p></div>'+
+    '</div><aside class="vl-next" aria-labelledby="vlNextH"><div id="vlStepsSide"></div><h2 id="vlNextH">Up next</h2>'+
+      (N.fam.length?'<h3 class="vl-nh" id="vlNextF">More '+esc(f.short)+'</h3><ol class="vl-nl" aria-labelledby="vlNextF">'+N.fam.map(nextItem).join('')+'</ol>':'')+
+      (N.fn.length?'<h3 class="vl-nh" id="vlNextN">Also for '+esc(fnw.join(', ').toLowerCase())+'</h3><ol class="vl-nl" aria-labelledby="vlNextN">'+N.fn.map(nextItem).join('')+'</ol>':'')+
       (!N.fam.length&&!N.fn.length?'<p class="vl-note">No other video of this procedure yet.</p>':'')+
     '</aside></div>';
-  var vid=$('vlVideo'),my=++token,ld=$('vlLoad'),tap=openedByTap;
+  var vid=$('vlVideo'),my=++token,ld=$('vlLoad'),tap=openedByTap,seekTo=null,curCap=null;
+  var pl=vid.parentNode,bar=$('vlBar'),tw=TRANS[v.key],hasT=!!(tw&&tw.length&&window.NBHTranscript),track=null,tr=null;
+  var playFrom=function(t){if(vid.readyState>=1){try{vid.currentTime=t;}catch(x){}var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});$('vlPlay').hidden=true;}else seekTo=t;};
+  /* the picture: on an iPad the browser's control bar sits in a band below it, clear of the caption strip; on a phone the
+     picture is cropped to its scene (the header, the step panel and the caption strip are text on the page) and the page's
+     own bar plays it; the opening and closing cards are shown whole */
+  var layout=function(){var ph=PHONE();pl.classList.toggle('vl-band',!ph);pl.classList.toggle('vl-crop',ph);
+    if(vid.getAttribute('src'))vid.controls=!ph||isFull();bar.hidden=!ph;};
+  /* the Steps and the Transcript, two tabs: beside the video (iPad sideways), right under the video and its bar (phone),
+     under Open the TD-1 card (iPad upright). Every step is listed; a step with no moment of its own says where it is. */
+  var sEl=null,mark=function(){};
+  if(S&&S.steps&&S.steps.length){var sw=document.createElement('div');sw.innerHTML=stepsHtml(S,hasT);sEl=sw.firstChild;
+    var place=function(){var to=WIDE()?$('vlStepsSide'):PHONE()?$('vlStepsTop'):$('vlStepsHere');if(to&&sEl.parentNode!==to)to.appendChild(sEl);};
+    place();watchWide(function(){place();layout();});
+    mark=function(){var c=stepAt(S,vid.currentTime||0);pl.classList.toggle('vl-full',!c||c[2]==null||c[2]===0);if(c===curCap)return;curCap=c;
+      [].forEach.call(sEl.querySelectorAll('.vl-steps li'),function(li){var i=+li.dataset.i,s=S.steps[i],on=!!c&&!s.where&&s.n===c[2]&&(s.n||s.title===c[1]),p=li.querySelector('.vl-scap'),b=li.querySelector('.vl-sbtn');
+        li.classList.toggle('vl-on',on);if(on){b.setAttribute('aria-current','step');p.textContent=c[1]&&s.n?c[1]:'';p.hidden=!(c[1]&&s.n);}else{b.removeAttribute('aria-current');p.hidden=true;p.textContent='';}});};
+    $('vlSteps').addEventListener('click',function(e){var b=e.target.closest('.vl-sbtn');if(!b)return;var t=+b.dataset.t;if(vid.readyState>=1){try{vid.currentTime=t;}catch(x){}mark();}playFrom(t);});
+    vid.addEventListener('timeupdate',mark);vid.addEventListener('seeked',mark);mark();
+    /* the tabs: a tap or the arrow keys; the choice is kept on this device */
+    var tabs=[].slice.call(sEl.querySelectorAll('[role=tab]'));
+    var pick=function(which,focus){tabs.forEach(function(b){var on=b.id===(which==='transcript'?'vlTabT':'vlTabS');b.setAttribute('aria-selected',String(on));b.tabIndex=on?0:-1;if(on&&focus)b.focus();});
+      $('vlSteps').hidden=which==='transcript';if($('vlTrans'))$('vlTrans').hidden=which!=='transcript';if(which==='transcript'&&tr)tr.update(vid.currentTime||0);};
+    sEl.querySelector('.vl-tabl').addEventListener('click',function(e){var b=e.target.closest('[role=tab]');if(!b)return;var w=b.id==='vlTabT'?'transcript':'steps';pick(w);setPref('tab',w);});
+    sEl.querySelector('.vl-tabl').addEventListener('keydown',function(e){if(!e.target.matches('[role=tab]')||!/^(ArrowLeft|ArrowRight|Home|End)$/.test(e.key)||tabs.length<2)return;e.preventDefault();
+      var w=e.target.id==='vlTabS'?'transcript':'steps';if(e.key==='Home')w='steps';if(e.key==='End')w='transcript';pick(w,true);setPref('tab',w);});
+    /* the transcript: narration, the people's lines by role, the on-screen notes the narration does not say */
+    if(hasT){var WHO={N:'Narrator',O:'On screen'};
+      tr=window.NBHTranscript.create({media:vid,name:'Transcript of '+v.title,lead:'Opening card',
+        lines:tw.map(function(l){return {t:l[0],who:WHO[l[1]]||l[1],text:l[2]};}),
+        heads:S.steps.map(function(s){return {t:s.t,label:s.title,num:s.n,own:!s.where,note:s.where==='open'?'On the opening card':s.where==='close'?'On the closing card':s.where==='with'?'Shown with step '+s.with:''};}),
+        key:'Every word heard, with what the picture shows in <i>italics</i>. Tap a line to play from it.',seek:playFrom});
+      $('vlTrans').appendChild(tr.el);}
+    var want=/[&#]tab=transcript\b/.test(location.hash)?'transcript':pref().tab;pick(hasT&&want==='transcript'?'transcript':'steps');}
+  /* captions of what is said (the narration and the people's lines), a real text track: off unless CC was turned on here */
+  if(hasT){var cues=vttOf(tw,v.dur||0);track=document.createElement('track');track.kind='captions';track.label='English';track.srclang='en';
+    track.src=URL.createObjectURL(new Blob([cues],{type:'text/vtt'}));vid.appendChild(track);
+    var ccOn=function(on){if(track.track)track.track.mode=on?'showing':'hidden';[$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.setAttribute('aria-pressed',String(!!on));});};
+    ccOn(!!pref().cc);
+    [$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.addEventListener('click',function(){var on=b.getAttribute('aria-pressed')!=='true';ccOn(on);setPref('cc',on);});});
+    /* the browser's own captions menu changes it too */
+    vid.textTracks.addEventListener('change',function(){var on=!!track.track&&track.track.mode==='showing';[$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.setAttribute('aria-pressed',String(on));});});}
+  else{var bc=$('vlBCC');if(bc)bc.hidden=true;}
+  /* the phone's bar: play and pause, the time, the position, captions, full screen (the browser's own player there) */
+  var BP=$('vlBPlay'),BT=$('vlBTime'),BS=$('vlBSeek');
+  var paintBar=function(){var d=vid.duration>0?vid.duration:(v.dur||0),t=vid.currentTime||0;BP.setAttribute('aria-label',vid.paused?'Play':'Pause');BP.classList.toggle('vl-on',!vid.paused);
+    BT.textContent=mmss(t)+' / '+mmss(d);BS.max=String(Math.max(1,Math.round(d*10)/10));if(!BS.dragging)BS.value=String(Math.round(t*10)/10);BS.setAttribute('aria-valuetext',spoken(t)+' of '+spoken(d));};
+  ['play','pause','timeupdate','loadedmetadata','seeked'].forEach(function(n){vid.addEventListener(n,paintBar);});paintBar();
+  BP.addEventListener('click',function(){if(vid.paused){var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});$('vlPlay').hidden=true;}else vid.pause();});
+  BS.addEventListener('input',function(){BS.dragging=true;try{vid.currentTime=+BS.value;}catch(e){}});BS.addEventListener('change',function(){BS.dragging=false;});
+  vid.addEventListener('click',function(){if(!vid.controls&&vid.getAttribute('src')){if(vid.paused){var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});}else vid.pause();}});
+  $('vlBFull').addEventListener('click',function(){try{if(vid.requestFullscreen)vid.requestFullscreen().catch(function(){if(vid.webkitEnterFullscreen)vid.webkitEnterFullscreen();});else if(vid.webkitEnterFullscreen)vid.webkitEnterFullscreen();}catch(e){}});
+  fullFns=[layout];
+  layout();
   $('vlRestart').addEventListener('click',function(){try{vid.currentTime=0;}catch(e){}$('vlResume').hidden=true;try{vid.play();}catch(e){}});
-  vid.addEventListener('loadedmetadata',function(){var p=prog(v.key);if(p&&inProgress(v.key)&&p.t<vid.duration-2){try{vid.currentTime=p.t;}catch(e){}$('vlResumeT').textContent='Picks up where it stopped on this device, at '+mmss(p.t)+'.';$('vlResume').hidden=false;}});
+  vid.addEventListener('loadedmetadata',function(){if(seekTo!=null){try{vid.currentTime=seekTo;}catch(e){}seekTo=null;var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});return;}
+    var p=prog(v.key);if(p&&inProgress(v.key)&&p.t<vid.duration-2){try{vid.currentTime=p.t;}catch(e){}$('vlResumeT').textContent='Picks up where it stopped on this device, at '+mmss(p.t)+'.';$('vlResume').hidden=false;}});
   var keep=function(force,ended){if(cur!==v.key||!(vid.duration>0))return;var now=Date.now();if(!force&&now-saveT<2000)return;saveT=now;setProg(v.key,vid.currentTime,vid.duration,ended);};
   vid.addEventListener('timeupdate',function(){keep(false);});vid.addEventListener('pause',function(){keep(true);});vid.addEventListener('seeked',function(){keep(true);});
   vid.addEventListener('ended',function(){keep(true,true);});
-  vid.addEventListener('play',function(){$('vlResume').hidden=true;});
-  videoUrl(v).then(function(u){if(my!==token)return;vid.src=u;ld.hidden=true;if(tap){var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});}})
-    .catch(function(){if(my!==token)return;ld.className='vl-load vl-err';ld.textContent='The video could not be loaded here. It is a file beside the forms ('+v.file+'): open the workstation from its folder or from the website. The one-file edition does not carry it.';});}
+  vid.addEventListener('play',function(){$('vlResume').hidden=true;$('vlPlay').hidden=true;});
+  /* the player's keys: Space plays and pauses, the arrows skip 5 seconds */
+  /* (on the window, before the event reaches the player, so a browser's own keys for it do not act a second time) */
+  vidKeys=function(e){if(e.target!==vid||e.altKey||e.ctrlKey||e.metaKey||!(vid.duration>0))return;
+    if(e.key===' '||e.key==='Spacebar'){e.preventDefault();e.stopPropagation();if(vid.paused){var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});}else vid.pause();}
+    else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();e.stopPropagation();try{vid.currentTime=Math.max(0,Math.min(vid.duration,vid.currentTime+(e.key==='ArrowRight'?5:-5)));}catch(x){}}};
+  /* Tab from the title goes to the player */
+  $('vlTitle').addEventListener('keydown',function(e){if(e.key!=='Tab'||e.shiftKey)return;var t=!$('vlFail').hidden?$('vlRetry'):!$('vlPlay').hidden?$('vlPlayBtn'):vid;e.preventDefault();try{t.focus();}catch(x){}});
+  $('vlPlayBtn').addEventListener('click',function(){$('vlPlay').hidden=true;var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});try{vid.focus({preventScroll:true});}catch(x){}});
+  var lt=0,showProg=function(L){var now=Date.now();if(now-lt<100&&L.loaded<L.total)return;lt=now;
+    if(L.total){var pc=Math.min(100,Math.round(L.loaded/L.total*100));$('vlLoadT').textContent='Loading the video… '+pc+'%';$('vlLoadMb').textContent=(L.loaded/1048576).toFixed(1)+' of '+(L.total/1048576).toFixed(1)+' MB';
+      var bar=$('vlLoadBar');bar.hidden=false;bar.firstChild.style.width=pc+'%';}
+    else if(L.loaded){$('vlLoadMb').textContent=(L.loaded/1048576).toFixed(1)+' MB';}};
+  var go=function(){ld.hidden=false;$('vlFail').hidden=true;vid.controls=!!urls[v.key]&&!PHONE();vid.tabIndex=0;$('vlLoadT').textContent='Loading the video…';$('vlLoadMb').textContent='';$('vlLoadBar').hidden=true;
+    var pr=videoUrl(v);if(loads[v.key]){loads[v.key].fns.push(function(L){if(my===token)showProg(L);});showProg(loads[v.key]);}
+    pr.then(function(u){if(my!==token)return;vid.src=u;vid.controls=!PHONE();ld.hidden=true;
+        if(tap){if(REDUCE())$('vlPlay').hidden=false;else{var p2=vid.play();if(p2&&p2.catch)p2.catch(function(){});}}})
+      .catch(function(){if(my!==token)return;ld.hidden=true;vid.controls=false;vid.tabIndex=-1;vid.removeAttribute('src');$('vlFail').hidden=false;$('vlFail').setAttribute('role','alert');});};
+  $('vlRetry').addEventListener('click',function(){$('vlFail').removeAttribute('role');go();try{$('vlTitle').focus({preventScroll:true});}catch(x){}});
+  go();}
+var wideFns=[],vidKeys=null,fullFns=[];function watchWide(f){wideFns=[f];}
+['fullscreenchange','webkitfullscreenchange'].forEach(function(n){document.addEventListener(n,function(){fullFns.forEach(function(f){f();});});});
+addEventListener('keydown',function(e){if(vidKeys)vidKeys(e);},true);
+try{matchMedia('(min-width: 1180px)').addEventListener('change',function(){wideFns.forEach(function(f){f();});});matchMedia('(max-width: 699px)').addEventListener('change',function(){wideFns.forEach(function(f){f();});});}catch(e){}
 $('vlWatch').addEventListener('click',function(e){var b=e.target.closest('[data-card]');if(!b)return;openCard(b.dataset.card);});
 function openCard(id){pauseNow();
   if(WS){tell({nbh:'videos-card',card:id});return;}
@@ -312,10 +624,10 @@ function pauseNow(){var vid=$('vlVideo');if(vid&&cur){try{if(vid.duration>0)setP
 /* ---------- the two views, from the address: #video=<key> a video's page, else the home page ---------- */
 function route(focus){var m=/^#video=([^&]+)/.exec(location.hash||''),k=m?decodeURIComponent(m[1]):'',v=BY[k];
   /* v25.70 #family=<procedure>: a form's Watch how, the home page showing that procedure's videos */
-  var fm=/^#family=([a-z]{2,12})$/.exec(location.hash||'');if(fm&&D.families.some(function(f){return f[0]===fm[1];})){chip='fam:'+fm[1];q='';var qi=$('vlQ');if(qi)qi.value='';}
-  if(v){if(view==='home')homeY=window.scrollY||0;pauseNow();cur=v.key;lastKey=v.key;view='watch';B.classList.add('vl-watching');$('vlHome').hidden=true;$('vlWatch').hidden=false;$('vlBack').hidden=false;
+  var fm=/^#family=([a-z]{2,12})$/.exec(location.hash||'');if(fm&&D.families.some(function(f){return f[0]===fm[1];})){flt={fam:fm[1],fn:'',seen:'all'};q='';var qi=$('vlQ');if(qi)qi.value='';}
+  if(v){if(view==='home')homeY=window.scrollY||0;pauseNow();releasePlayer();cur=v.key;lastKey=v.key;view='watch';B.classList.add('vl-watching');$('vlHome').hidden=true;$('vlWatch').hidden=false;$('vlBack').hidden=false;
     paintWatch(v);openedByTap=false;window.scrollTo(0,0);document.title=v.title+' · Video library';if(focus){var t=$('vlTitle');if(t)t.focus({preventScroll:true});}}
-  else{var was=view;pauseNow();cur=null;token++;view='home';B.classList.remove('vl-watching');$('vlWatch').hidden=true;$('vlWatch').innerHTML='';$('vlHome').hidden=false;$('vlBack').hidden=true;
+  else{var was=view;pauseNow();releasePlayer();cur=null;token++;view='home';wideFns=[];fullFns=[];B.classList.remove('vl-watching');$('vlWatch').hidden=true;$('vlWatch').innerHTML='';$('vlHome').hidden=false;$('vlBack').hidden=true;
     document.title='Video library · FBA and BIP Workstation';paintHome();if(was==='watch'){window.scrollTo(0,homeY);if(focus&&lastKey){var c=document.querySelector('#vlList .vl-card[data-key="'+lastKey+'"]');if(c)c.focus({preventScroll:true});}}}}
 /* a video opened from the home page sits one step after it in the history (Back, and All videos, go back to it); a video
    opened from Up next takes the place of the one before, so All videos is always one step */
@@ -334,10 +646,12 @@ function applyView(v){v=v||{};R.classList.toggle('nbh-tx-1',v.t===1);R.classList
 function viewFromStore(){try{applyView(JSON.parse(localStorage.getItem('nbh.view')||'{}'));}catch(e){}}
 addEventListener('message',function(e){var d=e.data;if(!d||e.source!==window.parent||window.parent===window)return;
   if(d.nbh==='view')applyView(d.v);else if(d.nbh==='videos-pause')pauseNow();
-  else if(d.nbh==='videos-focus'){var t=view==='watch'?$('vlTitle'):document.querySelector('#vlChips [aria-pressed=true]');if(view==='home'){var c=lastKey&&document.querySelector('#vlList .vl-card[data-key="'+lastKey+'"]');if(c)t=c;}if(t)try{t.focus({preventScroll:view!=='home'||!!lastKey});}catch(x){}}});
+  else if(d.nbh==='videos-focus'){var t=view==='watch'?$('vlTitle'):document.querySelector('#vlChips [aria-checked=true]');if(t&&!t.offsetParent)t=$('vlSelFam');if(view==='home'){var c=lastKey&&document.querySelector('#vlList .vl-card[data-key="'+lastKey+'"]');if(c)t=c;}if(t)try{t.focus({preventScroll:view!=='home'||!!lastKey});}catch(x){}}});
 addEventListener('pagehide',pauseNow);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){var vid=$('vlVideo');if(vid&&cur&&vid.duration>0)setProg(cur,vid.currentTime,vid.duration,false);}});
 var head=$('vlHead');addEventListener('scroll',function(){head.classList.toggle('vl-stuck',(window.scrollY||0)>4);},{passive:true});
-window.__vl={view:function(){return view;},key:function(){return cur;},chip:function(){return chip;},store:function(){return JSON.parse(JSON.stringify(store));},framed:function(){return WS;}};
+window.__vl={view:function(){return view;},key:function(){return cur;},chip:function(){return (flt.fam?'fam:'+flt.fam:'')+(flt.fn?(flt.fam?' ':'')+'fn:'+flt.fn:'')||'all';},filters:function(){return {fam:flt.fam,fn:flt.fn,seen:flt.seen};},
+  store:function(){return JSON.parse(JSON.stringify(store));},framed:function(){return WS;},
+  mem:function(){return {urls:Object.keys(urls).length,keys:order.slice(),loading:Object.keys(loads).length};},found:function(s){return Object.keys(found(s)).sort();}};
 route(false);
 })();
 </script>

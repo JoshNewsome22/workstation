@@ -81,7 +81,10 @@ async function settleDialogs(){for(let k=0;k<6;k++){
   if(!d)return;DIALOGS.push({step:stepName,unexpected:true,t:d.t,b:(d.b||'').slice(0,300),btns:d.btns});note('(a notice left open: '+d.t.slice(0,120)+' — closed)');
   if(d.k==='cf'){const i=d.btns.findIndex(x=>/^(OK|Close|Not now|Cancel)$/.test(x));await page.locator('#cfFoot button').nth(i>=0?i:d.btns.length-1).tap().catch(()=>{});}
   else await shell(()=>document.getElementById('dlg').close());await sleep(200);}}
-const formList=async()=>{const rt=page.locator('#railToggle');if(await rt.isVisible().catch(()=>false))await rt.tap();else await page.locator('#wnForms').tap();};
+const formList0=async()=>{const rt=page.locator('#railToggle');if(await rt.isVisible().catch(()=>false))await rt.tap({timeout:6000});else await page.locator('#wnForms').tap({timeout:6000});};
+/* v25.72 a student typed on the start screen brings the case home while Forms is tapped (the rows over the stage change as it
+   arrives): tapped again once they have settled */
+const formList=async()=>{try{await formList0();}catch(e){await sleep(900);await formList0();}};
 /* open a form from the form list (the Forms button, then the form), and wait until it has answered and, from a case file, been filled */
 async function openF(id){await settleDialogs();
   const inList=await page.locator('#rail [data-open="'+id+'"]').isVisible().catch(()=>false);

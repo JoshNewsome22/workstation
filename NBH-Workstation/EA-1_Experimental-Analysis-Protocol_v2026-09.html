@@ -3350,16 +3350,19 @@ function snapshot(){const f={};$$('[name]').forEach(el=>{f[el.name]=el.type==='c
 function snapshotPrefix(p){const f={};$$('[name]').forEach(el=>{if(el.name.startsWith(p))f[el.name]=el.value;});return f;}
 function applyFields(f){Object.keys(f).forEach(k=>{const el=document.querySelector('[name="'+k+'"]');if(!el)return;if(el.type==='checkbox')el.checked=!!f[k];else el.value=f[k];});try{window.eaPaintClear&&window.eaPaintClear();window.eaPaintBlind&&window.eaPaintBlind();}catch(e){}}   /* v22.49 (F149, I78) */
 function collect(){return {form:'EA-1',rev:'2026-09',saved:new Date().toISOString(),counts:{cond:+$('#nCond').value,sess:+$('#nSess').value,trial:+$('#nTrial').value,tx:+$('#nTx').value,phases:$('#phaseBody').children.length},fields:snapshot()};}
-function reset(){$('#condWrap').innerHTML='';$('#sessBody').innerHTML='';$('#trialTbl').innerHTML='';$('#txBody').innerHTML='';$('#phaseBody').innerHTML='';$('#varRec').innerHTML='';$$('[name^="m."],[name^="s."],[name^="v."],[name^="d."],[name^="t."],[name^="q."],[name^="rrb."],[name^="cfa."]').forEach(el=>{if(el.type==='checkbox')el.checked=false;else if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});}
+function reset(){$('#condWrap').innerHTML='';$('#sessBody').innerHTML='';$('#trialTbl').innerHTML='';$('#txBody').innerHTML='';$('#phaseBody').innerHTML='';$('#varRec').innerHTML='';$$('[name^="m."],[name^="s."],[name^="v."],[name^="d."],[name^="t."],[name^="q."],[name^="rrb."],[name^="cfa."],[name^="pl."],[name^="d2."],[name^="lod."]').forEach(el=>{if(el.type==='checkbox')el.checked=false;else if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});}   /* v25.72 (privacy) the plan's store, the second analyst's reading and the level of differentiation are the record's too: Clear all left them for the next student */
 function restore(d){reset();const c=d.counts||{};$('#nCond').value=c.cond||4;$('#nSess').value=c.sess||24;$('#nTrial').value=c.trial||10;$('#nTx').value=c.tx||30;
  renderConds();renderSess();for(let i=0;i<(c.phases||0);i++)$('#phaseBody').appendChild(phaseRow(i));renderTxRows();
  const f=d.fields||{};applyFields(f);refreshCondNames();applyFields(f);renderTrials(true);applyFields(f);renderSess();renderVariant();renderTrialFig();renderGraph();renderTx();
  const k=val('t.design');if(DESIGNS[k])$('#dsgnNote').innerHTML='<b>Design requirements</b>'+DESIGNS[k].note;extPanels();cfaCompute();rrbRead();alAfterRestore(d);try{document.dispatchEvent(new CustomEvent('ea:restored',{detail:d}));}catch(e){}if(window.eaPlan&&window.eaPlan.landing)window.eaPlan.landing();}   /* v24.20 (R-137, R-080) */
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`EA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
-$('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='EA-1')throw 0;restore(d);$('#simBanner').hidden=!(d.fields&&/^SIMULATED/.test(d.fields['m.client']||''));}catch(err){alert('That file is not a saved copy of Form EA-1.');}};rd.readAsText(f);e.target.value='';});
+$('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='EA-1')throw 0;restore(d);if(!window.__nbhQuiet)eaPhaseOff();$('#simBanner').hidden=!(d.fields&&/^SIMULATED/.test(d.fields['m.client']||''));}catch(err){alert('That file is not a saved copy of Form EA-1.');}};rd.readAsText(f);e.target.value='';});
 $('#printBtn').addEventListener('click',()=>window.print());
-$('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;restore({counts:{}});$('#simBanner').hidden=true;setView('setup');});
+/* v25.72 (privacy) the recorder's phase label is taken from the record when the box is empty: left from the record before, it
+   labelled the next record's sessions. It goes with the record (Clear all, and Open by the person) unless a session is running */
+function eaPhaseOff(){const p=document.getElementById('eaPhase');if(p&&!p.disabled)p.value='';}
+$('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;restore({counts:{}});eaPhaseOff();$('#simBanner').hidden=true;setView('setup');});
 window.addEventListener('beforeprint',()=>{renderGraph();renderTrialFig();renderAnalysis();renderTx();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 cfaInit();restore({counts:{}});
@@ -4505,6 +4508,8 @@ html{touch-action:manipulation}
   html.nbh-hc{--nbh-ink:#000;--nbh-muted:#263238;--nbh-rule:#5e7673;--nbh-rule2:#3f5654;--nbh-field:#4d6562;--nbh-field-hover:#2f4543;--nbh-focus:#0a4f75;--ink:#000;--muted:#263238}
   html.nbh-hc body{color:#000}
   html.nbh-hc .hint,html.nbh-hc .muted,html.nbh-hc .help,html.nbh-hc small,html.nbh-hc .note,html.nbh-hc .method{color:#263238}
+  /* v25.72 (TD-1 review B7) the dark top bar keeps its light words: the next sheet's name beside the arrow was darkened with the page's small text */
+  html.nbh-hc .toolbar .nbh-arrows button small{color:inherit}
   html.nbh-hc input:not([type=checkbox]):not([type=radio]):not([type=range]),html.nbh-hc select,html.nbh-hc textarea{border-color:#4d6562}
   html.nbh-hc ::placeholder{color:#4a585e;opacity:1}
   html.nbh-hc :focus-visible{outline:3px solid #0a4f75 !important;outline-offset:2px}
@@ -7222,8 +7227,10 @@ try{redraw();}catch(e){}
   function intro(){
     var p = D.querySelector('header.nbh-mast p.nbh-sub'); if (!p || p.dataset.fx2) return; p.dataset.fx2 = '1'; p.classList.add('fx2-intro');
     var n = D.querySelector('header.nbh-mast p.nbh-savenote'); if (n) n.classList.add('fx2-introx');
-    var b = el('button', 'fx2-more noprint', 'Show the full introduction'); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
-    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? 'Hide the full introduction' : 'Show the full introduction'); });
+    /* v25.72 FX2_CFG.intro: [show, hide], the link's words for a form whose sheets have an introduction of their own (TD-1) */
+    var W = Array.isArray(C.intro) && C.intro.length === 2 ? C.intro : ['Show the full introduction', 'Hide the full introduction'];
+    var b = el('button', 'fx2-more noprint', W[0]); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? W[1] : W[0]); });
     (n || p).after(b);
   }
 
@@ -7749,6 +7756,8 @@ try{redraw();}catch(e){}
       finally { body.className = was; if (CF.panes) keys.forEach(function(k){ panes[k].forEach(function(e){ e.removeAttribute('data-fx2-scan'); }); }); hold(false); if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); if (mo) mo.takeRecords(); scanning = false; }
     }
     function order(){ return views().map(function(b){ return b.getAttribute('data-view'); }); }
+    /* v25.72 the sheets as the top bar counts them (nbh-ui: every tab of #viewSeg on show) */
+    function topTabs(){ var s = D.getElementById('viewSeg'); return s ? Array.prototype.filter.call(s.querySelectorAll('button,[role="tab"]'), function(b){ return !b.hidden && getComputedStyle(b).display !== 'none'; }) : []; }
     function sheetList(){ var vs = views().map(function(b){ return b.getAttribute('data-view'); }); if (!vs.length) return [''];
       return vs.filter(function(v){ return v === key ? list.length : (scans[v] || []).length; }); }
 
@@ -7876,8 +7885,11 @@ try{redraw();}catch(e){}
       var txt;
       if (rev) { txt = 'Review the blank ones'; setText(sp, total + ' question' + (total === 1 ? '' : 's') + ' in all'); }
       else if (!scr.length) { txt = 'Nothing to answer on this sheet'; setText(sp, vlabel(key)); }
-      else { var s = scr[at], a = list.indexOf(s[0]) + 1 + before, z = list.indexOf(s[s.length - 1]) + 1 + before;
-        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + total + (sh.length > 1 || si >= 0 ? ' · Sheet ' + (si + 1) + ' of ' + sh.length : '');
+      /* v25.72 (TD-1 review T10, the BCBA's call) the questions are counted on the sheet on screen, and the sheet is counted as
+         the top bar counts it (every sheet in its list, "2 of 13"); it read "Question 26 of 187 · Sheet 2 of 11" */
+      else { var s = scr[at], a = list.indexOf(s[0]) + 1, z = list.indexOf(s[s.length - 1]) + 1, tb = topTabs(), ti = -1;
+        tb.forEach(function(b, j){ if (b.getAttribute('data-view') === key) ti = j; });
+        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + list.length + (ti >= 0 && tb.length > 1 ? ' · Sheet ' + (ti + 1) + ' of ' + tb.length : '');
         setText(sp, [vlabel(key), s[0].sec].filter(Boolean).join(' \u00b7 ') || s[0].title); }
       setText(live, txt);
       var last = !rev && at >= scr.length - 1 && sh.indexOf(key) === sh.length - 1;

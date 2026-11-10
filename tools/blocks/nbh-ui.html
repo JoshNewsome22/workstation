@@ -137,6 +137,8 @@ html{touch-action:manipulation}
   html.nbh-hc{--nbh-ink:#000;--nbh-muted:#263238;--nbh-rule:#5e7673;--nbh-rule2:#3f5654;--nbh-field:#4d6562;--nbh-field-hover:#2f4543;--nbh-focus:#0a4f75;--ink:#000;--muted:#263238}
   html.nbh-hc body{color:#000}
   html.nbh-hc .hint,html.nbh-hc .muted,html.nbh-hc .help,html.nbh-hc small,html.nbh-hc .note,html.nbh-hc .method{color:#263238}
+  /* v25.72 (TD-1 review B7) the dark top bar keeps its light words: the next sheet's name beside the arrow was darkened with the page's small text */
+  html.nbh-hc .toolbar .nbh-arrows button small{color:inherit}
   html.nbh-hc input:not([type=checkbox]):not([type=radio]):not([type=range]),html.nbh-hc select,html.nbh-hc textarea{border-color:#4d6562}
   html.nbh-hc ::placeholder{color:#4a585e;opacity:1}
   html.nbh-hc :focus-visible{outline:3px solid #0a4f75 !important;outline-offset:2px}
@@ -1375,10 +1377,22 @@ try { (function(){
   W.addEventListener('scroll', function(){ if (box && !box.hidden) place(); }, true);
   W.addEventListener('resize', function(){ if (box && !box.hidden) place(); });
   /* a person typed by hand into a row the directory does not hold: offered to it, once */
-  D.addEventListener('change', function(e){ if (busy || !e.isTrusted) return; var b = bindOf(e.target); if (!b) return;
-    var p = personOf(e.target, b), hasMail = b.field === 'email' || !!(b.sib && (b.sib.email || b.sib.contact));
+  /* v25.72 (privacy) the directory is staff only, and is suggested in every student's forms. A parent's row was offered when
+     the name and the address were typed before the role (the role box still empty), and when the role was a family word
+     the list did not have (Caregiver, Abuela). So: nothing is offered while the row's role box is empty; the offer is
+     made when the role is typed (the role box of a row counts as its row); and the family words are read without accents */
+  function isFamily(r){ var t = String(r == null ? '' : r); try { t = t.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {} return FAMILY.test(t) || FAMILY2.test(t); }
+  var FAMILY2 = /\b(care ?givers?|carers?|nana|nanny|abuel\w*|madre|padre|mama|papa|tia|tio|herman[ao]s?|madrastra|padrastro|tutora? legal|cousin|niece|nephew|god(parent|mother|father)|in-law|spouse|husband|wife)\b/i;
+  function rowOwner(el){ var c = [];
+    try { if (el.name && /(^|[.\]])role$/.test(el.name)) ['name', 'email'].forEach(function(f){ var t = D.querySelector('[name="' + el.name.replace(/role$/, f).replace(/(["\\])/g, '\\$1') + '"]'); if (t) c.push(t); });
+      if (el.id && /^rb-r-/.test(el.id)) ['rb-n-', 'rb-e-'].forEach(function(a){ var t = D.getElementById(el.id.replace(/^rb-r-/, a)); if (t) c.push(t); }); } catch (e) {}
+    for (var i = 0; i < c.length; i++) { var b = bindOf(c[i]); if (b && sibs(c[i], b).role === el) return c[i]; } return null; }
+  D.addEventListener('change', function(e){ if (busy || !e.isTrusted) return; var el = e.target, b = bindOf(el);
+    if (!b) { el = el && el.tagName ? rowOwner(el) : null; b = el ? bindOf(el) : null; if (!b) return; }
+    var p = personOf(el, b), hasMail = b.field === 'email' || !!(b.sib && (b.sib.email || b.sib.contact));
     if (!hasMail || !p.name || !p.email || !EM.test(p.email)) return;   /* a name alone is not offered: the directory is for sending */
-    if (FAMILY.test(p.role)) return;   /* a parent or relative in a team row is never offered: the directory is staff only */
+    var rb = sibs(el, b).role; if (rb && !String(rb.value || '').trim()) return;   /* v25.72 the role is not typed yet */
+    if (isFamily(p.role) || (rb && isFamily(rb.value))) return;   /* a parent or relative in a team row is never offered: the directory is staff only */
     var k = key(p.name) + '|' + key(p.email); if (offered[k]) return; offered[k] = 1;
     load().then(function(j){ if (j.list.some(function(x){ return same(x, p); })) return;
       var U = W.nbhUI, t = U && U.toast ? U.toast(p.name + (p.email ? ' (' + p.email + ')' : '') + ' is not in your staff directory.', { ms: 14000 }) : null; if (!t) return;
@@ -1961,8 +1975,21 @@ try { (function(){
   function ownNow(){ var t = null; try { t = fileNow(); } catch (e) { t = null; } if (!t) return null;
     var sn = null; try { sn = W.nbhBridge && W.nbhBridge.snapshot ? W.nbhBridge.snapshot() : null; } catch (e) {}
     return { own: t, snap: sn }; }
+  /* v25.72 (privacy) whose record a mark is. The mark kept for the page that comes back (akey, below) is one student's whole
+     form file, so it carries the student the form named and the workstation's case turn (nbh.case.turn, written anew each
+     time a case is opened or closed), both read at the tap. It is offered back only in the same turn, only to a form that
+     does not name another student, and never by a form in a frame nobody sees (the workstation's quiet loads and the
+     Caseload's own frames) */
+  function whoNow(){ try { return String((W.nbhBridge && W.nbhBridge.who ? W.nbhBridge.who() : '') || '').trim(); } catch (e) { return ''; } }
+  function turnNow(){ try { return sessionStorage.getItem('nbh.case.turn') || ''; } catch (e) { return ''; } }
+  function nameKey(n){ return String(n == null ? '' : n).toLowerCase().replace(/[^a-z0-9\u00c0-\uffff]+/g, ''); }
+  function other(who){ var a = nameKey(who), b = nameKey(whoNow()); return !!a && !!b && a !== b; }
+  function seen(){ if (W.parent === W) return true; var f = null; try { f = W.frameElement; } catch (e) { f = null; } if (!f) return false;
+    try { if (f.hidden || (f.classList && f.classList.contains('warm')) || (f.closest && f.closest('#clHost,[hidden],[aria-hidden="true"]'))) return false;
+      var cs = f.ownerDocument.defaultView.getComputedStyle(f); if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+      var r = f.getBoundingClientRect(); return r.width > 1 && r.height > 1 && r.right > 0 && r.bottom > 0; } catch (e) { return false; } }
   U.undoMark = function(){ var o = ownNow(), sn = null; if (!o) try { sn = W.nbhBridge && W.nbhBridge.snapshot ? W.nbhBridge.snapshot() : null; } catch (e) { sn = null; }
-    return { own: o ? o.own : null, snap: o ? o.snap : sn, view: viewNow(), x: W.scrollX || 0, y: W.scrollY || 0, sig: sig(), n: D.querySelectorAll('input,select,textarea').length, at: Date.now() }; };
+    return { own: o ? o.own : null, snap: o ? o.snap : sn, view: viewNow(), x: W.scrollX || 0, y: W.scrollY || 0, sig: sig(), n: D.querySelectorAll('input,select,textarea').length, at: Date.now(), who: whoNow(), turn: turnNow() }; };
   /* the form differs from the mark (what Save data would write; without a file of its own, the fields). Two files are the
      same when every value is: the save times are left out, and a part one file has and the other does not counts only when
      it holds something (a form opening its file fills in its empty defaults, such as an unused reply box) */
@@ -2048,7 +2075,7 @@ try { (function(){
   function akey(){ var id = ''; try { id = W.nbhBridge && W.nbhBridge.formId ? W.nbhBridge.formId() : ''; } catch (e) {} return 'nbh.undo.after|' + location.pathname + '|' + id; }
   function watch(m, what){ var t0 = Date.now(), n = 0, w = { m: m }; watching = w;
     var quit = function(ev){ if (ev && (!ev.isTrusted || (ev.target && ev.target.closest && ev.target.closest('dialog')))) return; if (watching === w) watching = null; off(); };   /* only the person's own typing ends the watch: a form's own input events (DT-1's session log) do not */
-    var keep = function(){ if (watching !== w || !m.own) return; try { sessionStorage.setItem(akey(), JSON.stringify({ own: m.own, view: m.view, x: m.x, y: m.y, what: what, at: Date.now() })); } catch (e) {} };
+    var keep = function(){ if (watching !== w || !m.own) return; try { sessionStorage.setItem(akey(), JSON.stringify({ own: m.own, view: m.view, x: m.x, y: m.y, what: what, at: Date.now(), who: m.who || '', turn: m.turn || '' })); } catch (e) {} };
     W.addEventListener('pagehide', keep);
     var off = function(){ D.removeEventListener('input', quit, true); D.removeEventListener('keydown', quit, true); W.removeEventListener('pagehide', keep); };
     setTimeout(function(){ if (watching === w) { D.addEventListener('input', quit, true); D.addEventListener('keydown', quit, true); } }, 0);
@@ -2064,9 +2091,14 @@ try { (function(){
     var m; try { m = U.undoMark(); } catch (x) { return; } if (!m || (!m.own && !m.snap)) return;
     if (m.own) arm();   /* Undo puts back every value: the form's question, if it names this action, is answered for it */
     watch(m, said(b)); }, true);
-  (function(){ var s = null; try { s = sessionStorage.getItem(akey()); if (s) sessionStorage.removeItem(akey()); } catch (e) { s = null; } if (!s) return;
+  (function(){ if (!seen()) return;   /* v25.72 a frame nobody sees neither takes the mark nor offers it */
+    var s = null; try { s = sessionStorage.getItem(akey()); if (s) sessionStorage.removeItem(akey()); } catch (e) { s = null; } if (!s) return;
     var o = null; try { o = JSON.parse(s); } catch (e) { return; } if (!o || !o.own || !(Date.now() - o.at < 30000)) return;
-    var go = function(){ setTimeout(function(){ U.undoOffer(o.what, function(){ return U.undoBack(o); }); }, 1500); };
+    if (String(o.turn || '') !== turnNow()) return;   /* v25.72 kept in another case: the workstation has opened or closed a case since */
+    var opt = {}, back = function(){ if (other(o.who) || String(o.turn || '') !== turnNow()) { opt.quiet = true;
+        try { U.toast('Not undone: this form now holds another student\u2019s record.', { kind: 'warn', ms: 6000 }); } catch (e) {} return false; }
+      return U.undoBack(o); };
+    var go = function(){ setTimeout(function(){ if (other(o.who) || String(o.turn || '') !== turnNow()) return; U.undoOffer(o.what, back, opt); }, 1500); };
     if (D.readyState === 'complete') go(); else W.addEventListener('load', go); })();
   D.addEventListener('keydown', function(e){ if (!last || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || (e.key !== 'z' && e.key !== 'Z')) return;
     var a = D.activeElement; if (a && a.matches && a.matches('input,textarea,select,[contenteditable=""],[contenteditable="true"]')) return;

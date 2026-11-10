@@ -3025,6 +3025,22 @@ function bankDialog(){if(bankDlg)return bankDlg;const host=document.createElemen
  d.$('.bklab').addEventListener('input',()=>{const dup=bankFind(d.$('.bklab').value);d.$('.bkdup').textContent=dup?'Replaces \u201c'+dup.lab+'\u201d, already in the bank.':'';});
  return d;}
 const bankFind=lab=>{const f=libFold(lab);return f?bank.list.find(e=>libFold(e.lab)===f)||null:null;};
+/* v25.72 (privacy) my bank is offered for every student on this device, and it is the BCBA's own (Remove all student data
+   leaves it). So before an entry is kept, what it would keep is read for the student on this form: each word of the name
+   (three letters or more, as a whole word, in any capitals; not a word any definition uses) and the student ID. One found,
+   the form says which word and in which part, and asks. An entry that names no one is saved as before. */
+const BANK_PLAIN=/^(the|and|student|students|sample|simulated|learner|client|child|pupil|name|unknown|test|demo|none|von|van|del|der|den|dos|das|los|las|san|bin|ibn|mrs|miss|junior|senior)$/i;
+const BANK_PARTS=[['lab','the name in the bank'],['aka','the other names'],['def','the definition'],['tops','the topographies'],['ex','the examples'],['nex','the non-examples'],['border','the borderline cases'],['excl','the exclusions'],['on','the onset'],['off','the offset'],['unit','the counting unit'],['note','the note to myself']];
+function bankNames(e){
+ const rx=w=>new RegExp('(^|[^\\p{L}\\p{N}])'+w.replace(/[.*+?^$()|{}\[\]\\]/g,'\\$&')+'(?![\\p{L}\\p{N}])','iu');
+ const words=val('m.client').split(/[^\p{L}\p{N}]+/u).filter(w=>Array.from(w).length>=3&&!BANK_PLAIN.test(w)&&!/^\d+$/.test(w));
+ const sid=val('m.sid'),seek=Array.from(new Set(words.map(w=>w.toLowerCase()))).map(k=>words.find(w=>w.toLowerCase()===k));
+ if(Array.from(sid).length>=3)seek.push(sid);
+ const tests=seek.map(w=>[w,rx(w)]),out=[];
+ BANK_PARTS.forEach(([k,part])=>{const text=Array.isArray(e[k])?e[k].join(', '):String(e[k]==null?'':e[k]);if(!text)return;
+  const found=tests.filter(x=>x[1].test(text)).map(x=>'“'+x[0]+'”');
+  if(found.length)out.push(found.join(' and ')+' in '+part);});
+ return out;}
 function bankSave(t){const g=k=>val(`tgt[${t}].${k}`);
  if(!g('def')){nbhUI.toast('Write the operational definition of target '+(t+1)+' first: the bank keeps the definition with its type, style, dimension, examples, non-examples, borderline cases, exclusions, onset, offset and counting unit.',{kind:'warn',ms:7000});return;}
  const d=bankDialog(),lab=g('lab')||'';d.$('.bklab').value=lab;d.$('.bkaka').value='';d.$('.bknote').value='';d.$('.bknoex').checked=true;   /* v23.17 (review F32) */
@@ -3035,6 +3051,8 @@ function bankSave(t){const g=k=>val(`tgt[${t}].${k}`);
  save.onclick=async()=>{const noex=d.$('.bknoex').checked;const name=String(d.$('.bklab').value||'').trim().slice(0,80);if(!name){d.$('.bklab').focus();return;}save.disabled=true;
   const dup=bankFind(name),e={id:(dup&&dup.id)||('my-'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36)),cat:BANK_CAT,lab:name,
    aka:String(d.$('.bkaka').value||'').split(',').map(x=>x.trim()).filter(Boolean).slice(0,12),type:g('type'),style:g('style'),dim:g('dim'),unit:g('unit'),def:g('def'),tops:g('tops'),ex:noex?'':g('ex'),nex:noex?'':g('nex'),on:g('on'),off:g('off'),border:noex?'':g('border'),excl:g('excl'),note:String(d.$('.bknote').value||'').trim(),mine:true,saved:new Date().toISOString()};
+  const named=bankNames(e);   /* v25.72 (privacy) */
+  if(named.length&&!(await nbhUI.confirm('Save it with the student\u2019s name in it?\nIt holds '+named.join('; ')+': the student on this form. My bank is offered for every student on this device, and it stays when a student\u2019s data is removed. To take the name out, cancel and change the card (or the boxes of this dialog) first.',{ok:'Save it as it is'}))){save.disabled=false;return;}
   try{await bankPut(e);d.close();nbhUI.toast((dup?'Replaced in my bank: ':'Saved to my bank: ')+'\u201c'+name+'\u201d. It is offered first in every library search on this form, on every target card and in the candidate picker, for every student. The library panel on this sheet can save the bank to a file.',{ms:9000});}
   catch(x){save.disabled=false;nbhUI.toast('The bank could not keep it: '+((x&&x.message)||x),{kind:'warn'});}};
  if(d.showModal)d.showModal();else d.setAttribute('open','');try{d.$('.bklab').focus();}catch(x){}}
@@ -3852,6 +3870,8 @@ html{touch-action:manipulation}
   html.nbh-hc{--nbh-ink:#000;--nbh-muted:#263238;--nbh-rule:#5e7673;--nbh-rule2:#3f5654;--nbh-field:#4d6562;--nbh-field-hover:#2f4543;--nbh-focus:#0a4f75;--ink:#000;--muted:#263238}
   html.nbh-hc body{color:#000}
   html.nbh-hc .hint,html.nbh-hc .muted,html.nbh-hc .help,html.nbh-hc small,html.nbh-hc .note,html.nbh-hc .method{color:#263238}
+  /* v25.72 (TD-1 review B7) the dark top bar keeps its light words: the next sheet's name beside the arrow was darkened with the page's small text */
+  html.nbh-hc .toolbar .nbh-arrows button small{color:inherit}
   html.nbh-hc input:not([type=checkbox]):not([type=radio]):not([type=range]),html.nbh-hc select,html.nbh-hc textarea{border-color:#4d6562}
   html.nbh-hc ::placeholder{color:#4a585e;opacity:1}
   html.nbh-hc :focus-visible{outline:3px solid #0a4f75 !important;outline-offset:2px}
@@ -4425,8 +4445,10 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   function intro(){
     var p = D.querySelector('header.nbh-mast p.nbh-sub'); if (!p || p.dataset.fx2) return; p.dataset.fx2 = '1'; p.classList.add('fx2-intro');
     var n = D.querySelector('header.nbh-mast p.nbh-savenote'); if (n) n.classList.add('fx2-introx');
-    var b = el('button', 'fx2-more noprint', 'Show the full introduction'); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
-    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? 'Hide the full introduction' : 'Show the full introduction'); });
+    /* v25.72 FX2_CFG.intro: [show, hide], the link's words for a form whose sheets have an introduction of their own (TD-1) */
+    var W = Array.isArray(C.intro) && C.intro.length === 2 ? C.intro : ['Show the full introduction', 'Hide the full introduction'];
+    var b = el('button', 'fx2-more noprint', W[0]); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? W[1] : W[0]); });
     (n || p).after(b);
   }
 
@@ -4952,6 +4974,8 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
       finally { body.className = was; if (CF.panes) keys.forEach(function(k){ panes[k].forEach(function(e){ e.removeAttribute('data-fx2-scan'); }); }); hold(false); if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); if (mo) mo.takeRecords(); scanning = false; }
     }
     function order(){ return views().map(function(b){ return b.getAttribute('data-view'); }); }
+    /* v25.72 the sheets as the top bar counts them (nbh-ui: every tab of #viewSeg on show) */
+    function topTabs(){ var s = D.getElementById('viewSeg'); return s ? Array.prototype.filter.call(s.querySelectorAll('button,[role="tab"]'), function(b){ return !b.hidden && getComputedStyle(b).display !== 'none'; }) : []; }
     function sheetList(){ var vs = views().map(function(b){ return b.getAttribute('data-view'); }); if (!vs.length) return [''];
       return vs.filter(function(v){ return v === key ? list.length : (scans[v] || []).length; }); }
 
@@ -5079,8 +5103,11 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
       var txt;
       if (rev) { txt = 'Review the blank ones'; setText(sp, total + ' question' + (total === 1 ? '' : 's') + ' in all'); }
       else if (!scr.length) { txt = 'Nothing to answer on this sheet'; setText(sp, vlabel(key)); }
-      else { var s = scr[at], a = list.indexOf(s[0]) + 1 + before, z = list.indexOf(s[s.length - 1]) + 1 + before;
-        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + total + (sh.length > 1 || si >= 0 ? ' · Sheet ' + (si + 1) + ' of ' + sh.length : '');
+      /* v25.72 (TD-1 review T10, the BCBA's call) the questions are counted on the sheet on screen, and the sheet is counted as
+         the top bar counts it (every sheet in its list, "2 of 13"); it read "Question 26 of 187 · Sheet 2 of 11" */
+      else { var s = scr[at], a = list.indexOf(s[0]) + 1, z = list.indexOf(s[s.length - 1]) + 1, tb = topTabs(), ti = -1;
+        tb.forEach(function(b, j){ if (b.getAttribute('data-view') === key) ti = j; });
+        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + list.length + (ti >= 0 && tb.length > 1 ? ' · Sheet ' + (ti + 1) + ' of ' + tb.length : '');
         setText(sp, [vlabel(key), s[0].sec].filter(Boolean).join(' \u00b7 ') || s[0].title); }
       setText(live, txt);
       var last = !rev && at >= scr.length - 1 && sh.indexOf(key) === sh.length - 1;

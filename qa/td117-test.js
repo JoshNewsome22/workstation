@@ -45,6 +45,6 @@ let n=0,bad=0;const ok=(t,c,d)=>{n++;if(!c)bad++;console.log((c?'PASS ':'FAIL ')
  R=await rows();const hp4=R.find(r=>r.code==='A_HIGHP');
  ok('Remove on the card turns the row back (the stored tick stays, so "Ticked to add")',hp4&&!hp4.onb&&hp4.label==='Ticked to add',hp4);
  const sl=await p.evaluate(()=>{document.querySelector('#viewSeg [data-view="select"]').click();return document.getElementById('sendBuild').textContent;});
- ok('the Select sheet\'s send button counts what is left to add and what is already there',/Add the \d+ ticked components? to Build · \d+ already there/.test(sl)||/Add the 0 ticked components to Build · \d+ already there/.test(sl),sl);
+ ok('the Select sheet\'s send button counts what is left to add and what is already there',/^Add (\d+ )?to Build · \d+ already there$/.test(sl)   /* v25.72 (TD-1 review T1) "Add N to Build", the margin's words too */,sl);
  ok('no page errors',!errs.length,errs.slice(0,4));
  console.log('RESULT: '+(bad?bad+' failed':'all passed'));await b.close();process.exit(bad?1:0);})();

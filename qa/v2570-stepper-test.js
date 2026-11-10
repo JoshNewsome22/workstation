@@ -108,7 +108,9 @@ async function pilot(br,f,vp){
     const bad=[],walk=[];let last=null,guard=0,shots=0;
     while(guard++<400){sc=await screen(p);if(sc.S.rev)break;pr=parse(sc.S.progress);walk.push(sc.S.progress);
       if(!pr)bad.push('progress '+sc.S.progress);
-      else{if(last&&!(pr.a===last.z+1&&pr.n===last.n&&(pr.s===last.s||pr.s===last.s+1)))bad.push('after "'+last.t0+'" came "'+sc.S.progress+'"');last=Object.assign(pr,{t0:sc.S.progress});}
+      /* v25.72 (TD-1 review T10) the questions count on the sheet on screen: on the same sheet the next screen goes on from the
+         last, on the next sheet it starts at 1; the sheet is counted as the top bar counts it (sheets with no question skipped) */
+      else{if(last&&!(pr.s===last.s?pr.a===last.z+1&&pr.n===last.n:pr.s>last.s&&pr.a===1&&last.z===last.n&&pr.t===last.t))bad.push('after "'+last.t0+'" came "'+sc.S.progress+'"');last=Object.assign(pr,{t0:sc.S.progress});}
       if(sc.loose.length)bad.push(sc.S.progress+': boxes on screen in no question '+sc.loose.join(','));
       if(sc.nolab.length)bad.push(sc.S.progress+': a label out of sight '+sc.nolab.join(','));
       if(sc.cutT)bad.push(sc.S.progress+': a table cut in two');if(sc.cutR.length)bad.push(sc.S.progress+': choices cut in two '+sc.cutR.join(','));
@@ -116,7 +118,7 @@ async function pilot(br,f,vp){
       if(shots<2&&pr&&pr.s>=2){await p.screenshot({path:path.join(OUT,f.id+'-'+vp.width+'x'+vp.height+'-s2-'+(++shots)+'.png')});}
       await p.locator('.fx2-stbar .fx2-stnext').tap();await sleep(260);}
     ok('3 '+tag+': on every screen only its questions are on screen, each with its label; no table or set of choices cut in two',!bad.filter(x=>!/^after|^progress/.test(x)).length,bad.filter(x=>!/^after|^progress/.test(x)).slice(0,6));
-    ok('4 '+tag+': Next walks every screen in order ('+walk.length+' screens, '+(last?last.n:0)+' questions on '+(last?last.t:0)+' sheets) and ends at Review the blank ones',sc.S.rev&&last&&last.z===last.n&&last.s===last.t&&!bad.some(x=>/^after|^progress/.test(x)),{bad:bad.filter(x=>/^after|^progress/.test(x)).slice(0,4),end:sc.S,last});
+    ok('4 '+tag+': Next walks every screen in order ('+walk.length+' screens, '+(last?last.n:0)+' questions on '+(last?last.t:0)+' sheets) and ends at Review the blank ones',sc.S.rev&&last&&last.z===last.n&&last.s<=last.t&&!bad.some(x=>/^after|^progress/.test(x)),{bad:bad.filter(x=>/^after|^progress/.test(x)).slice(0,4),end:sc.S,last});
     /* 6: the review */
     await p.screenshot({path:path.join(OUT,f.id+'-'+vp.width+'x'+vp.height+'-review.png')});
     const rv=await p.evaluate(()=>{const r=document.querySelector('.fx2-strev');const S=fx2Layout.step.state();return {h:r&&r.querySelector('h2').textContent,n:r?r.querySelectorAll('li button').length:-1,heads:r?[...r.querySelectorAll('h3')].map(h=>h.textContent):[],
@@ -191,7 +193,7 @@ async function sweep(br,f){
   try{const p=await openForm(ctx,f,errs);
     await p.evaluate(()=>{fx2Layout.step.enable();fx2Layout.step.set(1);});await sleep(800);
     let s=await ST(p);out.sheets=s.sheets.length;out.total=s.counts.reduce((a,b)=>a+b,0);const scanned=s.counts.slice();const opened={};let guard=0,big=0,loose=0,empty=0,nolab=0,prog=0,last=null;
-    while(guard++<600){const sc=await screen(p);if(sc.S.rev)break;const pr=parse(sc.S.progress);if(!pr)prog++;else{if(last&&pr.a!==last.z+1)prog++;last=pr;}
+    while(guard++<600){const sc=await screen(p);if(sc.S.rev)break;const pr=parse(sc.S.progress);if(!pr)prog++;else{if(last&&!(pr.s===last.s?pr.a===last.z+1:pr.a===1))prog++;last=pr;}   /* v25.72 (T10) each sheet counts from 1 */
       opened[sc.S.si]=sc.S.counts[sc.S.si];if(sc.loose.length)loose++;if(!sc.nq)empty++;if(sc.nolab.length)nolab++;
       const n=await p.evaluate(()=>{const S=fx2Layout.step.state();return S.screen.reduce((a,i)=>a+S.qs[i].n,0);});if(n>8)big++;
       await p.evaluate(()=>fx2Layout.step.next());await sleep(120);}

@@ -1879,7 +1879,7 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     const next=other?null:fromFile(d);
     if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved CN-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form CN-1. Nothing was changed.':'That file could not be read as a saved CN-1 form. Nothing was changed.');return;}
     /* v21.87 a file opens on its last note (the newest; new notes are added at the end), not the first */
-    const prev=S;S=next;cur=Math.max(0,((next&&next.notes)||[]).length-1);try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved CN-1 form. Nothing was changed.');}};
+    const prev=S;S=next;cur=Math.max(0,((next&&next.notes)||[]).length-1);try{renderAll();if(!window.__nbhQuiet)cnDraftsOff();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved CN-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
@@ -1888,7 +1888,11 @@ $('#csvBtn').addEventListener('click',()=>{
   const out=[head];noteRows().reverse().forEach(r=>{const n=r.n;out.push([r.i+1,n.date,n.start,n.end,r.dur==null?'':r.dur,n.type,n.setting,n.present,n.plan,n.purpose,n.data_forms,n.data_rate,n.data_goal,n.data_unit,n.data_dir==='up'?'higher is better':'lower is better',n.observed,n.integ,n.integ_date,n.integ_note,n.problems,n.recs,n.changes,authText(n),n.training,n.materials,n.next.filter(s=>s.what).map(s=>s.what+' ('+s.who+(s.when?', by '+s.when:'')+(s.done?', done':'')+')').join('; '),n.t_obs,n.t_cons,n.t_train,n.t_direct,n.t_meet,n.t_doc,n.t_travel,n.sig_date?n.sig:'',n.sig_date,n.written].concat((e=>isMissed(n)?['0','Not held','',e.note]:[e.min==null?'':e.min,kindLab(e.kind),e.with,e.note])(svcOf(n,r.i)),
     [isMissed(n)?'':(e=>countsIep(e,IEPK[S.meta.iep_kind]?S.meta.iep_kind:'')?'yes':'no')(svcOf(n,r.i)),n.data_beh,n.data_week,n.data_phase,n.data_run,n.data_need,n.integ_crit,n.integ_criterion,n.integ_ptype,n.integ_by,n.integ_how,[n.fb_who,n.fb_data,n.fb_change].filter(Boolean).join('; '),CHG_LAB[n.chg_kind]||'',n.safety,n.as_given,n.as_how,n.as_withdraw,n.as_part,n.miss_reason,n.miss_min,n.miss_madeup,n.sig_time,(n.add||[]).map(a=>a.date+' '+a.time+' '+a.by+': '+a.text).join(' | ')]));});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='CN-1_log.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();cur=0;renderAll();setView('note');}});
+/* v25.72 (privacy) an addendum being written, its reason and the search of the log belong to the record that was open: they go
+   when it goes (Clear all, and Open by the person; a restore by the workstation or by Undo, window.__nbhQuiet, leaves them) */
+function cnDraftsOff(){const b=document.getElementById('addBox');if(b)b.hidden=true;['addText','addWhy'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const q=document.getElementById('logSearch');if(q&&q.value){q.value='';try{renderLog();}catch(e){}}}
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();cur=0;renderAll();setView('note');cnDraftsOff();}});
 
 /* ---------------- simulation ---------------- */
 async function loadSim(){
@@ -2927,6 +2931,8 @@ html{touch-action:manipulation}
   html.nbh-hc{--nbh-ink:#000;--nbh-muted:#263238;--nbh-rule:#5e7673;--nbh-rule2:#3f5654;--nbh-field:#4d6562;--nbh-field-hover:#2f4543;--nbh-focus:#0a4f75;--ink:#000;--muted:#263238}
   html.nbh-hc body{color:#000}
   html.nbh-hc .hint,html.nbh-hc .muted,html.nbh-hc .help,html.nbh-hc small,html.nbh-hc .note,html.nbh-hc .method{color:#263238}
+  /* v25.72 (TD-1 review B7) the dark top bar keeps its light words: the next sheet's name beside the arrow was darkened with the page's small text */
+  html.nbh-hc .toolbar .nbh-arrows button small{color:inherit}
   html.nbh-hc input:not([type=checkbox]):not([type=radio]):not([type=range]),html.nbh-hc select,html.nbh-hc textarea{border-color:#4d6562}
   html.nbh-hc ::placeholder{color:#4a585e;opacity:1}
   html.nbh-hc :focus-visible{outline:3px solid #0a4f75 !important;outline-offset:2px}
@@ -3570,8 +3576,10 @@ window.nbhRec=window.nbhRec||(function(){
   function intro(){
     var p = D.querySelector('header.nbh-mast p.nbh-sub'); if (!p || p.dataset.fx2) return; p.dataset.fx2 = '1'; p.classList.add('fx2-intro');
     var n = D.querySelector('header.nbh-mast p.nbh-savenote'); if (n) n.classList.add('fx2-introx');
-    var b = el('button', 'fx2-more noprint', 'Show the full introduction'); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
-    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? 'Hide the full introduction' : 'Show the full introduction'); });
+    /* v25.72 FX2_CFG.intro: [show, hide], the link's words for a form whose sheets have an introduction of their own (TD-1) */
+    var W = Array.isArray(C.intro) && C.intro.length === 2 ? C.intro : ['Show the full introduction', 'Hide the full introduction'];
+    var b = el('button', 'fx2-more noprint', W[0]); b.type = 'button'; b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('click', function(){ var o = !p.classList.contains('open'); tog(p, 'open', o); if (n) tog(n, 'open', o); b.setAttribute('aria-expanded', String(o)); setText(b, o ? W[1] : W[0]); });
     (n || p).after(b);
   }
 
@@ -4097,6 +4105,8 @@ window.nbhRec=window.nbhRec||(function(){
       finally { body.className = was; if (CF.panes) keys.forEach(function(k){ panes[k].forEach(function(e){ e.removeAttribute('data-fx2-scan'); }); }); hold(false); if (scrollX !== sx || scrollY !== sy) scrollTo(sx, sy); if (mo) mo.takeRecords(); scanning = false; }
     }
     function order(){ return views().map(function(b){ return b.getAttribute('data-view'); }); }
+    /* v25.72 the sheets as the top bar counts them (nbh-ui: every tab of #viewSeg on show) */
+    function topTabs(){ var s = D.getElementById('viewSeg'); return s ? Array.prototype.filter.call(s.querySelectorAll('button,[role="tab"]'), function(b){ return !b.hidden && getComputedStyle(b).display !== 'none'; }) : []; }
     function sheetList(){ var vs = views().map(function(b){ return b.getAttribute('data-view'); }); if (!vs.length) return [''];
       return vs.filter(function(v){ return v === key ? list.length : (scans[v] || []).length; }); }
 
@@ -4224,8 +4234,11 @@ window.nbhRec=window.nbhRec||(function(){
       var txt;
       if (rev) { txt = 'Review the blank ones'; setText(sp, total + ' question' + (total === 1 ? '' : 's') + ' in all'); }
       else if (!scr.length) { txt = 'Nothing to answer on this sheet'; setText(sp, vlabel(key)); }
-      else { var s = scr[at], a = list.indexOf(s[0]) + 1 + before, z = list.indexOf(s[s.length - 1]) + 1 + before;
-        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + total + (sh.length > 1 || si >= 0 ? ' · Sheet ' + (si + 1) + ' of ' + sh.length : '');
+      /* v25.72 (TD-1 review T10, the BCBA's call) the questions are counted on the sheet on screen, and the sheet is counted as
+         the top bar counts it (every sheet in its list, "2 of 13"); it read "Question 26 of 187 · Sheet 2 of 11" */
+      else { var s = scr[at], a = list.indexOf(s[0]) + 1, z = list.indexOf(s[s.length - 1]) + 1, tb = topTabs(), ti = -1;
+        tb.forEach(function(b, j){ if (b.getAttribute('data-view') === key) ti = j; });
+        txt = (a === z ? 'Question ' + a : 'Questions ' + a + '–' + z) + ' of ' + list.length + (ti >= 0 && tb.length > 1 ? ' · Sheet ' + (ti + 1) + ' of ' + tb.length : '');
         setText(sp, [vlabel(key), s[0].sec].filter(Boolean).join(' \u00b7 ') || s[0].title); }
       setText(live, txt);
       var last = !rev && at >= scr.length - 1 && sh.indexOf(key) === sh.length - 1;
