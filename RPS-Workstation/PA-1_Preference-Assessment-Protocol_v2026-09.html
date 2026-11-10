@@ -3487,9 +3487,14 @@ function restorePb(d){if(d&&Array.isArray(d.ssPb))S.ss.forEach((r,i)=>{if(Array.
 /* save / load / print / clear */
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(saveable())],{type:'application/json'}));a.download=`PA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
-$('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='PA-1')throw 0;S=Object.assign(blank(),d);if(d.csaSeries==null)S.csaSeries=2;restorePb(d);renderAll();$('#simBanner').hidden=!/^SIMULATED/.test(S.meta.client||'');}catch(err){alert('That file is not a saved copy of Form PA-1.');}};rd.readAsText(f);e.target.value='';});
+$('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='PA-1')throw 0;S=Object.assign(blank(),d);if(d.csaSeries==null)S.csaSeries=2;restorePb(d);renderAll();paDraftsOff(!window.__nbhQuiet);$('#simBanner').hidden=!/^SIMULATED/.test(S.meta.client||'');}catch(err){alert('That file is not a saved copy of Form PA-1.');}};rd.readAsText(f);e.target.value='';});
 $('#printBtn').addEventListener('click',()=>window.print());
-$('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;S=blank();renderAll();$('#simBanner').hidden=true;});
+/* v25.72 (privacy) the brief MSWO's quick check is drawn again from the record whenever the record is replaced (its date,
+   note and picks stayed on screen from the record before, and Log wrote the note into the new one); and the live
+   recorder's setting, note and write-in, typed for the record that was open, go when it goes (Clear all, and Open by the
+   person; a restore by the workstation or by Undo leaves them) */
+function paDraftsOff(typed){try{quickRender();}catch(e){}if(!typed)return;['pa-run-eco-set','pa-run-eco-note','pa-run-eco-other'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});}
+$('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;S=blank();renderAll();paDraftsOff(true);$('#simBanner').hidden=true;});
 window.addEventListener('beforeprint',()=>{computeAll();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();

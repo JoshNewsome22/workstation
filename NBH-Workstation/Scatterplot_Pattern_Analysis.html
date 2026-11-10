@@ -5962,10 +5962,14 @@ $("#fileIn").addEventListener("change", e => {
     if(held && !(await nbhUI.confirm("Replace the record on screen (" + held + " marked cell" + (held === 1 ? "" : "s") + ") with the file\u2019s?\nThe marks on screen are not kept.", {ok:"Replace"}))){ e.target.value = ""; return; }
     try{
       state.meta = Object.assign({}, d.meta || {});
+      /* v25.72 (privacy) the file replaces the record's own settings: one it does not carry (the activity column and the
+         activity beside each time, the guide, the video link: a file saved without them) goes back to the form's default.
+         It was left as the record before had it, so the last student's daily schedule printed on the next student's sheet. */
+      ["actOn","activity","guide","video"].forEach(k => { delete state.cfg[k]; });
       Object.assign(state.cfg,  d.cfg  || {});
       if(!d.cfg || d.cfg.levels === undefined) state.cfg.levels = 2;
       takeHelpers(d.cfg);
-      state.codes = d.codes || state.codes;
+      state.codes = Array.isArray(d.codes) ? d.codes : [{k:"A",d:""},{k:"B",d:""},{k:"C",d:""},{k:"D",d:""}];   /* v25.72 (privacy) as above: the codes are the record's */
       loadBehaviors(d);
       syncToolbar(); renderCodes(); renderMeta(); renderBehBar(); render();
     }catch(err){

@@ -3278,6 +3278,13 @@ let factsTimer=null,factsBusy=false,factsAgain=false,factsAgainPush=false,factsO
    copy or the caseload's copy that began before the turn now leaves the next case alone; and the answers still on their way
    from the closed forms count no more (CASE_GONE) */
 state.caseGen=0;const CASE_GONE=new WeakSet();
+/* v25.72 (privacy) a form's Undo keeps the form's whole file for the page that comes back after a Clear all that loads the page
+   again (sessionStorage, nbh.undo.after|..., written by nbh-ui as the page goes): one student's record. The frames go at a
+   case turn, which is when it is written, so it is removed straight after they are removed (and once more a moment later),
+   and the turn gets a new name (nbh.case.turn) that a kept record must match to be offered. Remove all student data
+   removes the records too. */
+function undoAfterOff(turn){const go=()=>{try{for(let i=sessionStorage.length-1;i>=0;i--){const k=sessionStorage.key(i);if(k&&k.indexOf('nbh.undo.after|')===0)sessionStorage.removeItem(k);}}catch(e){}};
+  if(turn){try{sessionStorage.setItem('nbh.case.turn',Date.now().toString(36)+Math.random().toString(36).slice(2,8));}catch(e){}setTimeout(go,0);}go();}
 function caseTurn(){state.caseGen++;clearTimeout(factsTimer);factsTimer=null;factsOwed=false;state.factSrcSig={};
   Object.values(state.frames).forEach(fr=>{try{if(fr.contentWindow)CASE_GONE.add(fr.contentWindow);}catch(e){}});}
 function noteFactSource(id,st){
@@ -5844,7 +5851,7 @@ async function loadCase(d,how){
   warmStop();
   if(mediaHas(d))d=await mediaIn(d,how);   /* only a case with TV-1's media inside waits for the store */
   caseTurn();   /* v25.71 (case isolation) */
-  Object.values(state.frames).forEach(fr=>fr.remove());
+  Object.values(state.frames).forEach(fr=>fr.remove());undoAfterOff(1);   /* v25.72 (privacy) a form's kept Undo record goes with its case */
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.pending={};state.caseOrder=[];
   state.whoIs={};state.details={};   /* v21.44 (A8) the closed forms' names count no more */
   $('#blank').style.display='';document.body.classList.remove('has-form');
@@ -6524,7 +6531,7 @@ $('#saveCase').addEventListener('click',()=>{saveCase();});
 async function clearCase(){
   await autoSeal();   /* the copy of what was open is written and left alone; the next case gets a copy of its own */
   caseTurn();   /* v25.71 (case isolation) */
-  Object.values(state.frames).forEach(fr=>fr.remove());
+  Object.values(state.frames).forEach(fr=>fr.remove());undoAfterOff(1);   /* v25.72 (privacy) a form's kept Undo record goes with its case */
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.docs=[];state.famSum=null;
   state.whoIs={};state.details={};state.split=[];
   if(state.seenKey){(state.seenBy=state.seenBy||{})[state.seenKey]=state.seen||[];}state.seen=[];state.seenKey='';   /* v25.67 kept for this student (loadCase) */
@@ -7378,6 +7385,7 @@ async function clRemoveAll(){const L=await clList()||[];
   try{clearTimeout(mediaSweepT);await mediaSweep({all:true});}catch(e){}   /* v22.56 every sound and picture kept in the store, but those the case on screen holds */
   try{if(typeof shWipe==='function')await shWipe();}catch(e){}   /* v23.52 what each share last had in common */
   try{['nbh.caseload.backup','nbh.caseload.read','nbh.stash.fail'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.tok');sessionStorage.removeItem('nbh.google.mail');}catch(e){}
+  undoAfterOff();   /* v25.72 (privacy) a form's kept Undo record is a student's whole form */
   wsUI.toast('Every student’s data is removed from this '+HERE+'. The case files you saved are where you kept them.',{kind:'ok',ms:9000});
   if($('#dlg').open)caseloadOpen();paintBlank();}
 /* the last safety copy before the page closed could not be kept (storage full): said when the workstation next opens */

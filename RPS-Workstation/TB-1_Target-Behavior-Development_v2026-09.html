@@ -3025,6 +3025,22 @@ function bankDialog(){if(bankDlg)return bankDlg;const host=document.createElemen
  d.$('.bklab').addEventListener('input',()=>{const dup=bankFind(d.$('.bklab').value);d.$('.bkdup').textContent=dup?'Replaces \u201c'+dup.lab+'\u201d, already in the bank.':'';});
  return d;}
 const bankFind=lab=>{const f=libFold(lab);return f?bank.list.find(e=>libFold(e.lab)===f)||null:null;};
+/* v25.72 (privacy) my bank is offered for every student on this device, and it is the BCBA's own (Remove all student data
+   leaves it). So before an entry is kept, what it would keep is read for the student on this form: each word of the name
+   (three letters or more, as a whole word, in any capitals; not a word any definition uses) and the student ID. One found,
+   the form says which word and in which part, and asks. An entry that names no one is saved as before. */
+const BANK_PLAIN=/^(the|and|student|students|sample|simulated|learner|client|child|pupil|name|unknown|test|demo|none|von|van|del|der|den|dos|das|los|las|san|bin|ibn|mrs|miss|junior|senior)$/i;
+const BANK_PARTS=[['lab','the name in the bank'],['aka','the other names'],['def','the definition'],['tops','the topographies'],['ex','the examples'],['nex','the non-examples'],['border','the borderline cases'],['excl','the exclusions'],['on','the onset'],['off','the offset'],['unit','the counting unit'],['note','the note to myself']];
+function bankNames(e){
+ const rx=w=>new RegExp('(^|[^\\p{L}\\p{N}])'+w.replace(/[.*+?^$()|{}\[\]\\]/g,'\\$&')+'(?![\\p{L}\\p{N}])','iu');
+ const words=val('m.client').split(/[^\p{L}\p{N}]+/u).filter(w=>Array.from(w).length>=3&&!BANK_PLAIN.test(w)&&!/^\d+$/.test(w));
+ const sid=val('m.sid'),seek=Array.from(new Set(words.map(w=>w.toLowerCase()))).map(k=>words.find(w=>w.toLowerCase()===k));
+ if(Array.from(sid).length>=3)seek.push(sid);
+ const tests=seek.map(w=>[w,rx(w)]),out=[];
+ BANK_PARTS.forEach(([k,part])=>{const text=Array.isArray(e[k])?e[k].join(', '):String(e[k]==null?'':e[k]);if(!text)return;
+  const found=tests.filter(x=>x[1].test(text)).map(x=>'“'+x[0]+'”');
+  if(found.length)out.push(found.join(' and ')+' in '+part);});
+ return out;}
 function bankSave(t){const g=k=>val(`tgt[${t}].${k}`);
  if(!g('def')){nbhUI.toast('Write the operational definition of target '+(t+1)+' first: the bank keeps the definition with its type, style, dimension, examples, non-examples, borderline cases, exclusions, onset, offset and counting unit.',{kind:'warn',ms:7000});return;}
  const d=bankDialog(),lab=g('lab')||'';d.$('.bklab').value=lab;d.$('.bkaka').value='';d.$('.bknote').value='';d.$('.bknoex').checked=true;   /* v23.17 (review F32) */
@@ -3035,6 +3051,8 @@ function bankSave(t){const g=k=>val(`tgt[${t}].${k}`);
  save.onclick=async()=>{const noex=d.$('.bknoex').checked;const name=String(d.$('.bklab').value||'').trim().slice(0,80);if(!name){d.$('.bklab').focus();return;}save.disabled=true;
   const dup=bankFind(name),e={id:(dup&&dup.id)||('my-'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36)),cat:BANK_CAT,lab:name,
    aka:String(d.$('.bkaka').value||'').split(',').map(x=>x.trim()).filter(Boolean).slice(0,12),type:g('type'),style:g('style'),dim:g('dim'),unit:g('unit'),def:g('def'),tops:g('tops'),ex:noex?'':g('ex'),nex:noex?'':g('nex'),on:g('on'),off:g('off'),border:noex?'':g('border'),excl:g('excl'),note:String(d.$('.bknote').value||'').trim(),mine:true,saved:new Date().toISOString()};
+  const named=bankNames(e);   /* v25.72 (privacy) */
+  if(named.length&&!(await nbhUI.confirm('Save it with the student\u2019s name in it?\nIt holds '+named.join('; ')+': the student on this form. My bank is offered for every student on this device, and it stays when a student\u2019s data is removed. To take the name out, cancel and change the card (or the boxes of this dialog) first.',{ok:'Save it as it is'}))){save.disabled=false;return;}
   try{await bankPut(e);d.close();nbhUI.toast((dup?'Replaced in my bank: ':'Saved to my bank: ')+'\u201c'+name+'\u201d. It is offered first in every library search on this form, on every target card and in the candidate picker, for every student. The library panel on this sheet can save the bank to a file.',{ms:9000});}
   catch(x){save.disabled=false;nbhUI.toast('The bank could not keep it: '+((x&&x.message)||x),{kind:'warn'});}};
  if(d.showModal)d.showModal();else d.setAttribute('open','');try{d.$('.bklab').focus();}catch(x){}}

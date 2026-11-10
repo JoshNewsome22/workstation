@@ -3182,6 +3182,7 @@ function importJSON(file){
       if(window.abcV2564In) abcV2564In(d);   /* v25.64 a file without them opens as before */
       state.noise = (d.noise && Array.isArray(d.noise.runs)) ? d.noise : { runs: [] };
       $("#data-status").textContent = "Loaded " + state.entries.length + " incidents and " + state.samples.length + " background samples.";
+      if(!window.__nbhQuiet && window.abcDraftsOff) abcDraftsOff();   /* v25.72 (privacy) the person's own Open: the entry being typed was the last record's */
     }catch(err){
       state.entries = kept.entries; state.samples = kept.samples; state.faFunction = kept.faFunction;
       $("#a-function").value = kept.fn;
@@ -4844,14 +4845,23 @@ function init(){
 /* v24.39 (review R-121, R-122, E-02) the simulation seeded and marked: the same example at every load, New example for another */
 {const sim0=loadDemo;loadDemo=async function(){if(window.nbhSim)nbhSim.begin();let r;try{r=await sim0.apply(this,arguments);}finally{try{if(window.nbhSim)nbhSim.after(loadDemo, true);}catch(e){}}return r;};}
   $("#load-demo").addEventListener("click", loadDemo);
+  /* v25.72 (privacy) what was typed and not yet added belongs to the record that was open: the incident being entered, a
+     probe's stop rule, a sample's activity and the activity filter of the analysis. They go when the record goes: Clear
+     all, and Open by the person. A restore by the workstation or by Undo (window.__nbhQuiet) leaves them alone. */
+  window.abcDraftsOff = () => {
+    clearForm();
+    ["pr-stop","bg-activity"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+    const fa = document.getElementById("a-activity"); if(fa && fa.value){ fa.value = ""; try{ renderAnalysis(); }catch(e){} }
+  };
   $("#clear-all").addEventListener("click", async () => {
     if(await nbhUI.confirm("Clear all?\nIncidents, samples, the header fields and the function established by FA are cleared.", {ok:"Clear all", danger:true})){
       state.entries = []; state.samples = []; state.noise = { runs: [] };
       if(window.abcV2564In) abcV2564In({});   /* v25.64 */
+      if(window.abcIoaSet) abcIoaSet({});   /* v25.72 (privacy) the second observer's agreement is the record's: Clear all left it for the next student */
       writeHeader({client:"",observer:"",location:"",start:"",end:"",target:"",window:"",checks:""});
       /* v21.21 cross-form (X2): the function is saved with the record now, so it is cleared with it */
       $("#a-function").value = ""; state.faFunction = "";
-      clearForm(); refreshAll();
+      abcDraftsOff(); refreshAll();
       $("#data-status").textContent = "Everything cleared.";
     }
   });
