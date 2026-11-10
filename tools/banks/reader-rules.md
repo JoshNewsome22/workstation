@@ -76,7 +76,11 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
     the Behavioral Interventions banks: dnra-food-token-or-break-without-ee, dro-brief-analysis-picks-demand-reinforcer,
     fct-concurrent-schedules-no-extinction-school and ncr-meal-video-thinned-plus-preferred-bite. The BCBA's default (11/9):
     the dental-exam baseline of ta_chain-dental-exam-steps (Abdel-Jalil et al., 2026), a 30-s break with a preferred item
-    after challenging behavior, unmarked until then, is an OPTION step the same way.
+    after challenging behavior, unmarked until then, is an OPTION step the same way. v25.72: two cards whose notes had
+    named such a step and left it out now carry it as an OPTION step, which makes twelve: dro-bracelet-cue-quiet-work-attention
+    (Della Rosa et al., 2015: conversation after off-topic talk in the bracelet-off practice) and
+    fct-three-requests-break-items-attention (Ghaemmaghami et al., 2016: items and attention after problem behavior during a
+    break, in the first two teaching phases).
 
 ## When each rule started
 

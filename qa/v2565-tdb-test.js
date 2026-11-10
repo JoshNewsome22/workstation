@@ -201,7 +201,8 @@ const F=L.forms().find(x=>x.id==='TD-1');
   ok('FEED-M5b the bank gives the pathway in order: pre-cut portions and the utensil down, then the pager faded by strength',/^Rapid eating: try these in order\. First, pre-cut portions/.test(bk.rule)&&/faded by lowering the vibration strength, not by spacing the cues/.test(bk.rule)&&/choking first aid/.test(bk.rule)&&bk.shows.includes('dri-utensil-down-pacing')&&bk.shows.includes('p_sf-pager-intensity-pacing'),bk);
   const hp=B['a_highp-feeding-bites'];
   ok('FEED-M6a high-p bites are offered in front of the student by default; the lips stay an ordinary choice',/in front of the student’s mouth/.test(hp.steps[2])&&!/at the lips with the same instruction/.test(hp.steps[5])&&/in front of the student’s mouth/.test(hp.params['High-p instructions (3 in use)']));
-  ok('FEED-M6b the feeding high-p cards say "selectivity only" and name the step ladder as the default (Dawson et al., 2003)',['a_highp-feeding-bites','a_highp-preferred-bites','a_highp-preferred-food-bites','a_highp-food-step-sequence'].every(i=>/selectivity only/.test(B[i].note)&&B[i].src.includes('dawson2003')));
+  /* v25.72: five cards, with the Trejo & Fryling (2018) card, a_highp-water-or-motor-tasks-before-bite */
+  ok('FEED-M6b the feeding high-p cards say "selectivity only" and name the step ladder as the default (Dawson et al., 2003)',['a_highp-feeding-bites','a_highp-preferred-bites','a_highp-preferred-food-bites','a_highp-food-step-sequence','a_highp-water-or-motor-tasks-before-bite'].every(i=>/selectivity only/.test(B[i].note)&&B[i].src.includes('dawson2003')));
   bk=await bank(p,'a_highp-preferred-bites');ok('FEED-M6c the bank panel: selectivity only, refer for refusal, with a button to the step ladder',/^For food selectivity only/.test(bk.rule)&&/refer to the feeding team/.test(bk.rule)&&bk.shows.includes('a_highp-food-step-sequence'),bk);
   const TX=['p_sf-food-texture-fading','effort-lower-food-texture','effort-smoother-texture-packing','effort-texture-bite-packing'];
   ok('FEED-M8a each texture card serves only what the SLP or the feeding team prescribed in Form FD-1, and steps up only on their written step',TX.every(i=>B[i].steps.some(s=>/^Serve only the texture, liquid thickness and bite size that the SLP or the feeding team prescribed/.test(s))));
@@ -209,10 +210,12 @@ const F=L.forms().find(x=>x.id==='TD-1');
   const md=B['dra-main-dish-after-new-food'];
   ok('FEED-L6 in school: a small extra portion, the lunch always served; the simultaneous-presentation comparison in the note (Piazza et al., 2002)',md.steps.some(s=>/^In school: the preferred item is a small extra portion beyond the student’s usual lunch, and the lunch itself is always served/.test(s))&&/simultaneous presentation/.test(md.note)&&md.src.includes('piazza2002a'));
   /* the cards approved to carry an OPTION step (the BCBA, 11/9: the 7 cards from the BI/BAP banks kept; three of them, the Fisher
-     et al. (2018) and Mitteer et al. (2026) cards, were already approved, so four are new); any other card with one fails */
-  const OPT_OK='c_csa-competing-items-plus-extinction,c_csa-select-by-reduction,dnra-food-token-or-break-without-ee,dro-brief-analysis-picks-demand-reinforcer,fct-card-lean-schedule,fct-concurrent-schedules-no-extinction-school,fct-lean-long-resurgence,fct-resurgence-mitigation-comparison,ncr-meal-video-thinned-plus-preferred-bite,ta_chain-dental-exam-steps';   /* (the BCBA's default, 11/9: dental-exam baseline marked optional) */
+     et al. (2018) and Mitteer et al. (2026) cards, were already approved, so four are new); any other card with one fails.
+     v25.72: twelve, with dro-bracelet-cue-quiet-work-attention (Della Rosa et al., 2015) and
+     fct-three-requests-break-items-attention (Ghaemmaghami et al., 2016) */
+  const OPT_OK='c_csa-competing-items-plus-extinction,c_csa-select-by-reduction,dnra-food-token-or-break-without-ee,dro-bracelet-cue-quiet-work-attention,dro-brief-analysis-picks-demand-reinforcer,fct-card-lean-schedule,fct-concurrent-schedules-no-extinction-school,fct-lean-long-resurgence,fct-resurgence-mitigation-comparison,fct-three-requests-break-items-attention,ncr-meal-video-thinned-plus-preferred-bite,ta_chain-dental-exam-steps';   /* (the BCBA's default, 11/9: dental-exam baseline marked optional) */
   const optIds=Object.values(B).filter(x=>x.steps.some(s=>OPT.test(s))).map(x=>x.id).sort().join(',');
-  ok('the bank holds no OPTION step outside the ten cards approved to carry one',optIds===OPT_OK,optIds);
+  ok('the bank holds no OPTION step outside the twelve cards approved to carry one (v25.72: ten, then the Della Rosa et al., 2015, and Ghaemmaghami et al., 2016, cards)',optIds===OPT_OK,optIds);
 
   /* ---- a file saved before v25.65 opens and saves as it was ---- */
   await p.close();p=await open();
