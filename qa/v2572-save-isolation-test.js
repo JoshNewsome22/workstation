@@ -44,7 +44,7 @@ async function openForm(p,id,sim){await p.evaluate(id=>openForm(id),id);
   if(sim&&fr){await L.loadSim(fr);await sleep(1200);await answerIn(fr);await sleep(600);}return fr;}
 async function answer(p,titleRe,btnRe,ms){const t=Date.now();while(Date.now()-t<(ms||15000)){
   const r=await p.evaluate(([tr,br])=>{const g=document.getElementById('cfDlg');if(!g||!g.open)return null;const t=document.getElementById('cfTitle').textContent;if(!new RegExp(tr).test(t))return null;
-    const b=[...document.querySelectorAll('#cfFoot button')].find(x=>new RegExp(br).test(x.textContent));if(!b)return {t,none:[...document.querySelectorAll('#cfFoot button')].map(x=>x.textContent)};b.click();return {t};},[titleRe.source,btnRe.source]).catch(()=>null);
+    const b=[...document.querySelectorAll('#cfFoot button')].find(x=>new RegExp(br).test(x.textContent));if(!b)return {t,none:[...document.querySelectorAll('#cfFoot button')].map(x=>x.textContent)};const body=((document.getElementById('cfBody')||{}).textContent||'').slice(0,300);b.click();return {t,body};},[titleRe.source,btnRe.source]).catch(()=>null);
   if(r)return r;await sleep(60);}return null;}
 async function closeBoxes(p){return await p.evaluate(()=>{const out=[];['#dlg','#cfDlg'].forEach(s=>{const d=document.querySelector(s);if(d&&d.open){out.push((d.querySelector('#cfTitle,#dlgTitle,h2,h3')||d).textContent.trim().slice(0,200));const b=[...d.querySelectorAll('button')].find(x=>/^(OK|Close|Not now|It is in Files)$/.test(x.textContent.trim()));if(b)b.click();else d.close();}});return out;}).catch(()=>[]);}
 async function waitDl(p,n,ms){const t=Date.now();while(Date.now()-t<(ms||30000)){if(p.__dl.length>=n)return true;await sleep(100);}return false;}
@@ -192,6 +192,9 @@ async function firstOnScreen(p,forms){await setBar(p,A);for(const id of (forms||
     /* the answer Replace does what it says, and is not asked again for the same case */
     await p.evaluate(()=>{$('#saveCase').click();});
     const q2=await answer(p,/^Replace the case already kept for/,/^Replace the kept case/,8000);
+    /* the forms on screen still carry the first student's name, so Save asks about that too before anything is written; the person goes on */
+    const q2b=await answer(p,/case with another student’s name in it\?$/,/^Save anyway/,8000);
+    ok('R the forms still name the first student: Save asks about that as well, naming him',!!q2b&&/Mateo Rivera/.test(q2b.body||q2b.t||''),q2b);
     await waitDl(p,nDl+1,60000).catch(()=>{});await answer(p,/Case file written|Case saved|Case written/,/It is in Files|^OK$/,8000);await closeBoxes(p);await sleep(1500);
     const end=await stores(p),rowB2=keyOf(end.caseload,/Priya/);let f2=[];try{f2=Object.keys(JSON.parse(rowB2.text).forms||{});}catch(e){}
     ok('R Replace: the case on screen is kept in her place, as the question said',!!q2&&f2.join()==='DM-1,IN-1',{q2,f2});

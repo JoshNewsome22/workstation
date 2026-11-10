@@ -184,6 +184,13 @@ async function fillSome(target,n,word){
   return target.evaluate(([n,w])=>{let k=0;for(const el of document.querySelectorAll('textarea,input[type="text"],input:not([type])')){
     if(k>=n)break;if(el.offsetParent===null||el.readOnly||el.disabled)continue;el.value=w+' '+(++k);['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));}return k;},[n,word]);
 }
+/* v25.72 these checks type a note into a form's first boxes, the student's name box among them, so Save case now asks
+   ("Save …'s case with another student's name in it?") before anything is written: answered Save anyway, as a person would */
+async function oddOk(page){
+  const seen=await page.waitForFunction(()=>{const d=document.querySelector('#cfDlg');return d&&d.open&&/another student’s name in it\?$/.test(document.querySelector('#cfTitle').textContent);},null,{timeout:6000}).then(()=>true).catch(()=>false);
+  if(seen)await page.evaluate(()=>{const b=Array.from(document.querySelectorAll('#cfFoot button')).find(x=>/^Save anyway/.test(x.textContent.trim()));if(b)b.click();});
+  return seen;
+}
 async function confirmDlg(page,ok){
   await page.waitForFunction(()=>document.querySelector('#cfDlg')&&document.querySelector('#cfDlg').open,null,{timeout:5000}).catch(()=>{});
   const t=await page.evaluate(()=>document.querySelector('#cfTitle').textContent+' / '+document.querySelector('#cfBody').textContent);
@@ -373,7 +380,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     check('C offline: a form is filled and its Save data writes the file',r1==='ok'&&!!d1&&/^CF-1_.*\.json$/.test(d1.suggestedFilename())&&body1.indexOf('Offline note 4471')>=0,r1+' '+(d1&&d1.suggestedFilename()));
     await sleep(4500);   /* the form's next status carries the change */
     const dl2=page.waitForEvent('download',{timeout:15000}).catch(()=>null);
-    await page.evaluate(()=>$('#saveCase').click());const d2=await dl2;
+    await page.evaluate(()=>$('#saveCase').click());await oddOk(page);const d2=await dl2;
     let body2='';if(d2){const p2=await d2.path().catch(()=>null);if(p2)body2=fs.readFileSync(p2,'utf8');}
     check('C offline: Save case writes the case file with the form in it',!!d2&&/^CASE_Offline_Student_.*\.json$/.test(d2.suggestedFilename())&&body2.indexOf('Offline note 4471')>=0,d2&&d2.suggestedFilename());
     await page.evaluate(()=>{const d=document.querySelector('#cfDlg');if(d&&d.open)d.close();});
@@ -660,7 +667,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     await ps.goto(NBH);await sleep(900);
     await ps.fill('#pClient','Share Student');await openIn(ps,'CF-1');await fillSome(frameOf(ps,'CF-1_'),8,'Shared entry');await sleep(4500);
     await ps.evaluate(()=>{window.__shared=[];});
-    await ps.evaluate(()=>$('#saveCase').click());await sleep(2500);
+    await ps.evaluate(()=>$('#saveCase').click());await oddOk(ps);await sleep(2500);
     sh=await ps.evaluate(()=>window.__shared||[]);
     check('K the shell: Save case goes to the share sheet as the case file',sh.length===1&&/^CASE_Share_Student_.*\.json$/.test(sh[0].name)&&/"CF-1"/.test(sh[0].text)&&dls===0,JSON.stringify(sh.map(x=>x.name)));
     await ps.evaluate(()=>{const d=document.querySelector('#cfDlg');if(d&&d.open)d.close();});
