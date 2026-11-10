@@ -170,6 +170,21 @@ const errs=[];
    const sw=await p.evaluate(()=>document.documentElement.scrollWidth);if(sw>w)wide.push([w,sw]);await ctx.close();}
   ok('G nothing wider than the screen at 390, 820 and 1180 px',!wide.length,wide);}
 
+ /* ---------------- D. TD-1's player: the band and Transcript (when TD-1 has them) ---------------- */
+ {const {ctx,p}=await mk(1180,820);const TD='TD-1_Function-Based-Treatment-Developer_v2026-09.html';
+  await p.goto(U+TD+'#card=dro-break-after-calm-interval');await p.waitForFunction(()=>window.__tdVideo,null,{timeout:60000}).catch(()=>{});
+  const has=await p.evaluate(()=>!!window.__tdVideo);
+  if(has){await sleep(1200);await p.evaluate(()=>window.__tdVideo.play('dro_resetting'));
+   await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&!v.hidden&&v.readyState>=1;},null,{timeout:60000}).catch(()=>{});
+   const r=await p.evaluate(()=>{const v=document.getElementById('tv-video'),q=v.getBoundingClientRect(),cs=getComputedStyle(v),t=document.getElementById('tv-tr');
+     return {band:Math.round(q.height-q.width*9/16),fit:cs.objectFit,pos:cs.objectPosition,tr:!!t,th:t?Math.round(t.getBoundingClientRect().height):0};});
+   if(r.tr){const pop=ctx.waitForEvent('page',{timeout:8000}).catch(()=>null);await p.locator('#tv-tr').click();const np=await pop;
+    const pref=await p.evaluate(()=>localStorage.getItem('nbh.videos.pref'));let tab='';
+    if(np){await np.waitForFunction(()=>document.getElementById('vlTabs'),null,{timeout:20000}).catch(()=>{});tab=await np.evaluate(()=>{const t=document.querySelector('#vlTabT');return t?t.getAttribute('aria-selected')+' '+location.hash:'';}).catch(()=>'');}
+    ok('D TD-1’s player: the picture plus a '+r.band+' px band at the bottom for the browser’s bar; Transcript ('+r.th+' px) opens the video’s page on its Transcript tab',r.band>=90&&r.fit==='contain'&&/^50% 0/.test(r.pos)&&r.th>=44&&/"tab":"transcript"/.test(pref||'')&&/^true #video=dro_resetting/.test(tab),{r,pref,tab});}
+   else ok('D TD-1’s player has no band or Transcript yet (its own commit)',true);}
+  await ctx.close();}
+
  ok('H no page errors',!errs.length,errs.slice(0,5));
  await b.close();
  console.log(bad?'FAILED '+bad+' of '+n:'ALL PASSED '+n+'/'+n);process.exit(bad?1:0);

@@ -7638,6 +7638,9 @@ window.__tdScenes={has:id=>!!byId[id],play,close,count:()=>Object.keys(byId).len
   #tdVideo .tv-box video{width:100%;margin:0;border-radius:0}}
 #tdVideo .tv-ai{font-size:13px;font-weight:700;color:#8a5a00;background:#fff4dc;border:1px solid #e7c27a;border-radius:999px;padding:3px 10px;white-space:nowrap}
 #tdVideo video{display:block;width:calc(100% - 24px);margin:0 12px;border-radius:10px;background:#1f2f3f;aspect-ratio:16/9}
+/* v25.72 (captions and transcript) the browser's control bar in a 92 px band below the picture, clear of its caption strip */
+#tdVideo video{aspect-ratio:auto;height:calc((min(100vw - 24px,1040px) - 24px)*.5625 + 92px);object-fit:contain;object-position:50% 0}
+@media (max-width:699px){#tdVideo video{height:calc(100vw*.5625 + 92px)}}
 #tdVideo .tv-msg{margin:8px 14px;font-size:15px}
 #tdVideo .tv-msg.tv-err{color:#8e2b20}
 #tdVideo .tv-note{margin:8px 14px 14px;font-size:13px;color:#556}
@@ -7883,10 +7886,12 @@ function keepUrl(k,u){urls[k]=u;const i=order.indexOf(k);if(i>=0)order.splice(i,
  while(order.length>2){const j=order.findIndex(x=>x!==k);if(j<0)break;const old=order.splice(j,1)[0];try{URL.revokeObjectURL(urls[old]);}catch(e){}delete urls[old];}}
 function build(){box=document.createElement('div');box.id='tdVideo';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby','tv-title');
  box.innerHTML='<div class="tv-box"><div class="tv-hd"><h3 id="tv-title"></h3><button type="button" id="tv-close"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="tv-cl">Close</span></button></div>'+
-  '<video id="tv-video" controls playsinline preload="metadata"></video><div class="tv-row"><span class="tv-ai">AI-generated · simulated people</span><button type="button" id="tv-lib">Open in the video library</button></div>'+
+  '<video id="tv-video" controls playsinline preload="metadata"></video><div class="tv-row"><span class="tv-ai">AI-generated · simulated people</span><button type="button" id="tv-tr" style="margin-left:auto">Transcript</button><button type="button" id="tv-lib">Open in the video library</button></div>'+
   '<p class="tv-msg" id="tv-msg" aria-live="polite"></p><p class="tv-note" id="tv-note"></p></div>';
  document.body.appendChild(box);
- $('tv-close').addEventListener('click',close);$('tv-lib').addEventListener('click',()=>{const k=cur;close();library(k);});box.addEventListener('click',ev=>{if(ev.target===box)close();});
+ $('tv-close').addEventListener('click',close);$('tv-lib').addEventListener('click',()=>{const k=cur;close();library(k);});
+ /* v25.72 Transcript: the video's page in the library on its Transcript tab (the tab the library keeps in nbh.videos.pref) */
+ $('tv-tr').addEventListener('click',()=>{const k=cur;try{const o=JSON.parse(localStorage.getItem('nbh.videos.pref')||'{}')||{};o.tab='transcript';localStorage.setItem('nbh.videos.pref',JSON.stringify(o));}catch(e){}close();library(k);});box.addEventListener('click',ev=>{if(ev.target===box)close();});
  document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&box&&!box.hidden)close();});
  /* the focus stays inside the player while it is open */
  box.addEventListener('keydown',ev=>{if(ev.key!=='Tab')return;const f=[...box.querySelectorAll('button,video[controls],[href],[tabindex]:not([tabindex="-1"])')].filter(e=>!e.hidden&&e.getClientRects().length);if(!f.length)return;
