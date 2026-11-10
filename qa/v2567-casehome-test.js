@@ -80,7 +80,7 @@ const putRec=(p,rec)=>p.evaluate(async rec=>{const r=JSON.parse(rec);r.scope=clS
   ok('0 the simulated case is kept on the iPad with two more simulated students',K.ok&&!!K.key&&!!K.rec,{ok:K.ok});
   /* 1. no case: the caseload page */
   const nc=await p.evaluate(()=>{const c=document.querySelector('#blank .card'),cl=document.getElementById('blankCl'),cs=getComputedStyle(document.getElementById('blank'));
-    return {card:getComputedStyle(c).display!=='none'&&c.getBoundingClientRect().height>0,cl:!!cl&&!cl.hidden&&cl.offsetParent!==null,h2:(cl.querySelector('h2')||{}).textContent,cards:cl.querySelectorAll('.cl-card').length,
+    return {card:getComputedStyle(c).display!=='none'&&c.getBoundingClientRect().height>0,cl:!!cl&&!cl.hidden&&cl.offsetParent!==null,h2:(cl.querySelector('h2')||{}).textContent,cards:cl.querySelectorAll('.cl-card,.cl-mini').length,   /* v25.72 the start screen's compact cards */
       due:!!cl.querySelector('.due-board,p'),btns:['blNew','blRead','blOpen','blCl'].every(id=>!!document.getElementById(id)),flex:cs.display,center:cs.textAlign,
       home:document.body.classList.contains('ws-home')||document.body.classList.contains('ws-case'),ch:document.getElementById('caseHome')?getComputedStyle(document.getElementById('caseHome')).display:'none',
       tabs:getComputedStyle(document.getElementById('chTabs')).display,packet:getComputedStyle(document.querySelector('nav.rail .rh-top>b')).display,colBtn:getComputedStyle(document.getElementById('chColBtn')).display};});
@@ -88,7 +88,7 @@ const putRec=(p,rec)=>p.evaluate(async rec=>{const r=JSON.parse(rec);r.scope=clS
     nc.card&&nc.cl&&/Your caseload/.test(nc.h2)&&nc.cards===3&&nc.due&&nc.btns&&nc.flex==='flex'&&nc.center==='center'&&!nc.home&&nc.ch==='none'&&nc.tabs==='none'&&nc.packet!=='none'&&nc.colBtn==='none',nc);
   await p.screenshot({path:OUT+'no-case-1376.png'});
   /* 2. a card's Open: the case home */
-  await p.evaluate(k=>{const b=document.querySelector('#blankCl .cl-card[data-clrow="'+k.replace(/"/g,'\\"')+'"] .cl-card-acts [data-clopen]');b.click();},K.key);
+  await p.evaluate(k=>{const q=k.replace(/"/g,'\\"'),b=document.querySelector('#blankCl .cl-card[data-clrow="'+q+'"] .cl-card-acts [data-clopen],#blankCl .cl-mini[data-clrow="'+q+'"] .cm-open');b.click();   /* v25.72 the compact card's Open */},K.key);
   let s=await waitHome(p);await sleep(1200);await shut(p);
   const row=await p.evaluate(()=>({crumb:getComputedStyle(document.querySelector('.stagew>.crumb')).display,typed:document.querySelectorAll('#caseHome input,#caseHome textarea,#caseHome select,#caseHome [contenteditable]').length}));
   ok('2 a card\'s Open lands on the case home: no form loaded, the case\'s '+s.pending.length+' forms waiting, the student on the line',s.home&&s.shown&&s.cur===null&&s.frames.length===0&&s.pending.length>=8&&s.client==='Sample Student',s);
@@ -201,8 +201,9 @@ const putRec=(p,rec)=>p.evaluate(async rec=>{const r=JSON.parse(rec);r.scope=clS
   ok('6b Students: the caseload as compact cards, pinned first, the one on screen marked, each with its trend chip; 44 px or more',col.cards.length===4&&col.cards[0].n==='Sample Student'&&col.cards[0].cur==='true'&&col.heads[0]==='Pinned'&&col.cards.every(c=>!!c.chip&&c.h>=44),col);
   await p.screenshot({path:OUT+'home-1376-open.png'});
   await p.reload();await sleep(3000);await stubs(p);
-  const kept1=await p.evaluate(()=>({hidden:document.body.classList.contains('rail-hidden'),k:localStorage.getItem('nbh.ws.rail')}));
+  /* v25.72 the start screen puts the list away while students are kept (the BCBA's approved start screen): the column's kept state is read on the case home */
   await p.evaluate(k=>caseloadGo(k,''),K.key);await waitHome(p);await sleep(800);await shut(p);
+  const kept1=await p.evaluate(()=>({hidden:document.body.classList.contains('rail-hidden'),k:localStorage.getItem('nbh.ws.rail')}));
   await p.locator('#chColBtn').tap();await sleep(800);
   const fold=await p.evaluate(()=>({hidden:document.body.classList.contains('rail-hidden'),k:localStorage.getItem('nbh.ws.rail'),exp:document.getElementById('chColBtn').getAttribute('aria-expanded')}));
   await p.reload();await sleep(3000);await stubs(p);const kept2=await p.evaluate(()=>({hidden:document.body.classList.contains('rail-hidden'),k:localStorage.getItem('nbh.ws.rail')}));
@@ -250,7 +251,7 @@ const putRec=(p,rec)=>p.evaluate(async rec=>{const r=JSON.parse(rec);r.scope=clS
   await cr.close();
   /* ================= the phone ================= */
   const cp=await ctxFor(br,390,844,{});const ph=await start(cp,'390');const kp=await putRec(ph,K.rec);
-  const p0=await ph.evaluate(()=>({blank:getComputedStyle(document.querySelector('#blank .card')).display,cl:document.querySelectorAll('#blankCl .cl-card').length}));
+  const p0=await ph.evaluate(()=>({blank:getComputedStyle(document.querySelector('#blank .card')).display,cl:document.querySelectorAll('#blankCl .cl-card,#blankCl .cl-mini').length}));
   await ph.evaluate(k=>caseloadGo(k,''),kp);await waitHome(ph);await sleep(1200);await shut(ph);
   const pp=await ph.evaluate(()=>{const v=s=>{const e=document.querySelector(s);return !!e&&e.getBoundingClientRect().width>0&&getComputedStyle(e).display!=='none';};
     const L=[...document.querySelectorAll('#caseHome .ch-p,#caseHome .ch-alert,#caseHome .ch-o2')].map(e=>{const r=e.getBoundingClientRect();return [Math.round(r.left),Math.round(r.width)];});

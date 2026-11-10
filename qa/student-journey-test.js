@@ -86,7 +86,10 @@ const formList=async()=>{const rt=page.locator('#railToggle');if(await rt.isVisi
 async function openF(id){await settleDialogs();
   const inList=await page.locator('#rail [data-open="'+id+'"]').isVisible().catch(()=>false);
   /* v25.71: since v25.65's top bar A the list of forms opens from Forms in the heading (#wnForms) where #railToggle is hidden */
-  if(!inList){await formList();await sleep(350);}
+  if(!inList){await formList();await sleep(350);
+    /* v25.72 with students kept the list starts put away on the start screen; a student typed on the bar brings the case home,
+       which puts the list away as it arrives (upright and on an iPad sideways): Forms again, as a person taps it */
+    if(!(await page.locator('#rail [data-open="'+id+'"]').isVisible().catch(()=>false))){await sleep(600);await formList();await sleep(350);}}
   await page.locator('#rail [data-open="'+id+'"]').tap();
   await page.waitForFunction(id=>!!state.status[id]&&!state.pending[id],id,{timeout:45000});
   /* the case reaches a form 1.1 s after it loads (makeFrame): wait for that before reading it */

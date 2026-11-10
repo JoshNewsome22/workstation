@@ -67,8 +67,10 @@ const ymd=t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+Stri
   /* the start screen and Today */
   await p.evaluate(()=>{try{$('#dlg').close();}catch(e){}todayOpen();});await sleep(1200);const td=await p.evaluate(()=>!!document.querySelector('#dlgBody #tdDay'));
   await p.evaluate(()=>{try{$('#dlg').close();}catch(e){}});await p.evaluate(async()=>{await clearCase();});await sleep(1500);
-  const bl=await p.evaluate(()=>({btn:!!document.querySelector('#blDay'),cards:[...document.querySelectorAll('#blank .cl-card [data-clday]')].length}));
-  ok('1b Today and the start screen offer it, and the start screen\'s cards',td&&bl.btn&&bl.cards>=2,{td,bl});
+  /* v25.72 the start screen's cards are compact (Open only) unless Detailed cards is on: each card's Today's numbers is on the detailed cards */
+  const bl=await p.evaluate(async()=>{const btn=!!document.querySelector('#blDay');localStorage.setItem('nbh.ws.cards','full');await paintBlank();
+    const cards=[...document.querySelectorAll('#blank .cl-card [data-clday]')].length;localStorage.removeItem('nbh.ws.cards');await paintBlank();return {btn,cards};});
+  ok('1b Today and the start screen offer it, and the start screen\'s detailed cards',td&&bl.btn&&bl.cards>=2,{td,bl});
   ok('5 no page errors',!errs.length,errs.slice(0,4));
   }catch(e){fails++;console.log('FAIL exception',e&&e.stack||e);}
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

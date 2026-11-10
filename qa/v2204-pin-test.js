@@ -8,6 +8,7 @@ const UA_IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.1
 (async()=>{const br=await chromium.launch();
   try{
   const ctx=await br.newContext({viewport:{width:1180,height:820},userAgent:UA_IPAD,hasTouch:true,serviceWorkers:'block'});
+  await ctx.addInitScript(()=>{try{localStorage.setItem('nbh.ws.cards','full');}catch(e){}});   /* v25.72 the start screen's detailed cards (Detailed cards): the compact ones are qa/v2572-start-screen-test.js's */
   const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));
   await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1400);
   await page.evaluate(async()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};

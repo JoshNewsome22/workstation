@@ -100,14 +100,17 @@ const lastAn=(p,sel)=>p.evaluate(sel=>(window.__an||[]).filter(x=>x.a&&x.a.id===
   const R=await getRecs(p);
   /* ---------- 4 Key findings ---------- */
   await p.evaluate(()=>paintBlank());await sleep(1200);
-  const kf=await p.evaluate(()=>{const s=document.querySelector('#blankCl .w1-kf');if(!s)return null;const h2=document.querySelector('#blankCl>h2');
-    const nx=h2&&h2.nextElementSibling;return {after:!!nx&&(nx===s||nx.classList.contains('bl-rf')&&nx.nextElementSibling===s),head:s.querySelector('h3').textContent,cards:[...s.querySelectorAll('.w1-k')].map(k=>({cls:k.className,t:k.querySelector('b').textContent,p:k.querySelector('p').textContent,b:[...k.querySelectorAll('button')].map(b=>({t:b.textContent,h:Math.round(b.getBoundingClientRect().height),hold:b.dataset.w1hold||'',go:b.dataset.w1go||'',form:b.dataset.w1form||''}))}))};});
+  const kf=await p.evaluate(()=>{const s=document.querySelector('#blankCl .w1-kf');if(!s)return null;
+    /* v25.72 (the BCBA's approved start screen, 11/10) the students' cards come first: Key findings is straight under them */
+    const bc=document.querySelector('#blankCl>.bl-cards');return {after:!!bc&&bc.nextElementSibling===s,head:s.querySelector('h3').textContent,cards:[...s.querySelectorAll('.w1-k')].map(k=>({cls:k.className,t:k.querySelector('b').textContent,p:k.querySelector('p').textContent,b:[...k.querySelectorAll('button')].map(b=>({t:b.textContent,h:Math.round(b.getBoundingClientRect().height),hold:b.dataset.w1hold||'',go:b.dataset.w1go||'',form:b.dataset.w1form||''}))}))};});
   const wr=kf&&kf.cards.find(x=>/wrong/.test(x.cls)),th=kf&&kf.cards.find(x=>/thin/.test(x.cls));
-  ok('4 Key findings on the caseload page, under its heading (after Refresh all): at most a few sentences, the wrong way first',!!kf&&kf.after&&kf.head==='Key findings'&&kf.cards.length>=1&&kf.cards.length<=3&&/wrong/.test(kf.cards[0].cls),kf);
+  ok('4 Key findings on the caseload page, straight under the students\' cards: at most a few sentences, the wrong way first',!!kf&&kf.after&&kf.head==='Key findings'&&kf.cards.length>=1&&kf.cards.length<=3&&/wrong/.test(kf.cards[0].cls),kf);
   ok('4 the wrong-way finding names Sample Student C from the cards\' trend (Form DD-1), with "See what may be holding Sample Student C back" (44 px)',!!wr&&/1 student is trending the wrong way/.test(wr.t)&&/Sample Student C, .* rising over the last \d+ days of data \(Form DD-1, as on the cards\)/.test(wr.p)&&!/Sample Student[,:] /.test(wr.p.replace(/Sample Student C/g,''))&&wr.b.length===1&&/See what may be holding Sample Student C back/.test(wr.b[0].t)&&wr.b[0].hold&&wr.b[0].h>=44,wr);
   ok('4 the thin-data finding: a review in the next 30 days with 3 or more of the last 10 school days without data on Form DD-1, each with "Open DD-1 for …"',!!th&&/reviews? in the next 30 days rests? on thin data/.test(th.t)&&/Sample Student B: annual IEP review \d+\/\d+, \d+ of the last 10 school days without data on Form DD-1/.test(th.p)&&/Sample Student C: plan review \d+\/\d+, 3 of the last 10 school days without data \(1 marked absent\) on Form DD-1/.test(th.p)&&th.b.every(b=>b.go&&b.form==='DD-1'&&b.h>=44),th);
   await p.screenshot({path:OUT+'caseload-1376.png'});
   /* ---------- 5 the next 90 days ---------- */
+  /* v25.72 the start screen folds the chart to one row (Show timeline): opened here, as the BCBA opens it */
+  await p.evaluate(async()=>{localStorage.setItem('nbh.ws.n90','open');await paintBlank();});await sleep(1200);
   const want=await p.evaluate(async()=>{const L=(await clList()).filter(r=>!isStaffRec(r)),t0=tdISO(new Date()),t90=tdAdd(t0,90),out=[],seen=new Set();
     L.forEach(r=>{const f=(parseCase(r.text)||{}).facts||{};calEvents(f).forEach(e=>{if(e.date<t0||e.date>t90)return;if(/^Home sheet back/.test(e.what))return;const k=r.key+'|'+e.date+'|'+e.what;if(seen.has(k))return;seen.add(k);out.push(e.what+'|'+e.date);});});return out;});
   const n90=await p.evaluate(()=>{const s=document.querySelector('#blankCl .w1-n90w');if(!s)return null;const dots=[...s.querySelectorAll('.w1-dot')],more=[...s.querySelectorAll('.w1-more')];

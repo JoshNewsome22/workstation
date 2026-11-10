@@ -73,9 +73,11 @@ const vis=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);if(!e)return
   await p.tap('#duePh');await sleep(400);
   const d2=await p.evaluate(()=>({rows:[...document.querySelectorAll('#blankCl .due-board .due-row')].filter(r=>r.offsetParent).length,btn:$('#duePh').textContent,ex:$('#duePh').getAttribute('aria-expanded')}));
   await spyGo(p);await p.tap('#blankCl .due-board .due-row.od .due-who');await sleep(150);const g4=await got(p);
-  ok('4 What\'s due shows its counts; By date shows the rows by date; a tap anywhere on a row opens it',/1 need you now · 1 overdue · 1 this week · 1 coming up · 1 to look at/.test(d1.sum)&&d1.rows===0&&d1.btn==='By date'&&d2.rows===5&&d2.ex==='true'&&!!g4&&/mateo/.test(g4[0])&&g4[1]==='RR-1',{d1,d2,g4});
+  ok('4 What\'s due shows its counts; By date shows the rows by date; a tap anywhere on a row opens it',/1 need you now · 1 overdue · 1 this week · 1 to look at · 1 coming up/.test(d1.sum)&&d1.rows===0&&d1.btn==='By date'&&d2.rows===5&&d2.ex==='true'&&!!g4&&/mateo/.test(g4[0])&&g4[1]==='RR-1',{d1,d2,g4});
   await p.tap('#duePh');await sleep(400);
-  /* 5 the cards */
+  /* 5 the cards. v25.72 (the BCBA's approved start screen, 11/10): the start screen's cards are compact rows unless Detailed
+     cards is on (qa/v2572-start-screen-test.js checks the rows); the phone's detailed cards are checked here, as they were */
+  await p.evaluate(async()=>{localStorage.setItem('nbh.ws.cards','full');await paintBlank();});await sleep(400);
   const cards=await p.evaluate(()=>[...document.querySelectorAll('#blankCl .cl-card')].map(c=>({who:c.querySelector('.cl-nm').textContent,hot:c.classList.contains('ph-hot'),
     first:[...((c.querySelector('.cl-due > .ph-row')||{}).children||[])].map(x=>x.textContent.trim()).filter(Boolean).join(' '),more:(c.querySelector('.ph-more > summary')||{}).textContent||'',rest:[...c.querySelectorAll('.ph-more .ph-row')].map(x=>[...x.children].map(y=>y.textContent.trim()).filter(Boolean).join(' ')),
     next:getComputedStyle(c.querySelector('.cl-next')).display,names:(c.textContent.match(/Rivera|Whitfield|Park/g)||[]).length})));
@@ -93,6 +95,7 @@ const vis=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);if(!e)return
       badge:!!tb&&!!pb&&pb.hidden===tb.hidden&&pb.textContent===tb.textContent,toast:!!tr&&tr.bottom<=bar.top,
       small:[...document.querySelectorAll('#blank button,#blank summary,#phoneBar button,header.top button')].filter(x=>x.offsetParent).map(x=>[x.id||x.className||x.textContent.trim().slice(0,20),Math.round(x.getBoundingClientRect().height)]).filter(x=>x[1]<44)};});
   ok('6 the cards run edge to edge, nothing wider than the screen; every button at least 44 px tall; Today\'s count is on the bar; a message sits above the bar',e6.l===0&&e6.w===390&&e6.sw<=390&&!e6.wide&&!e6.small.length&&e6.badge&&e6.toast,e6);
+  await p.evaluate(async()=>{localStorage.removeItem('nbh.ws.cards');await paintBlank();});await sleep(400);   /* v25.72 the compact rows again */
   /* 8 the rules, on the start screen with the rows by date and a card's "+N more" open */
   await p.tap('#duePh');await sleep(300);await p.evaluate(()=>{const d=document.querySelector('#blankCl .ph-more');if(d)d.open=true;});await sleep(200);
   const ax1=await axe(p);if(ax1)ok('8a the phone\'s start screen keeps WCAG 2.1 A and AA (axe-core)',!ax1.length,ax1);else console.log('NOTE axe-core is not installed: 8 skipped');
@@ -117,7 +120,8 @@ const vis=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);if(!e)return
       return {bar:v('#phoneBar'),crumb:v('.crumb'),list:v('#railNav'),cl:v('#caseloadBtn'),td:v('#todayBtn'),rows:[...document.querySelectorAll('#blankCl .due-board .due-row')].filter(r=>r.offsetParent).length,
         last:v('#blankDrv .bl-last'),pick:v('#blankDrv .bl-pick'),due:[...document.querySelectorAll('#blankCl .cl-due')].some(x=>x.offsetParent),next:[...document.querySelectorAll('#blankCl .cl-next')].every(x=>x.offsetParent),
         ph:[...document.querySelectorAll('#blankCl .cl-ph')].every(x=>x.offsetParent),duePh:v('#duePh')};});
-    ok('7 the '+nm+' is as it was: no bar, the list of forms beside the start screen, the form\'s row with Caseload and Today, the rows of What\'s due, the cards as before',!s.bar&&s.crumb&&s.list&&s.cl&&s.td&&s.rows===5&&s.last&&!s.pick&&!s.due&&s.next&&s.ph&&!s.duePh,s);
+    /* v25.72 (the BCBA's approved start screen, 11/10) with students kept the list of forms starts put away (the Forms button brings it) */
+    ok('7 the '+nm+' is as it was: no bar, the list of forms put away beside the start screen (v25.72), the form\'s row with Caseload and Today, the rows of What\'s due, the cards',!s.bar&&s.crumb&&!s.list&&s.cl&&s.td&&s.rows===5&&s.last&&!s.pick&&!s.due&&s.next&&s.ph&&!s.duePh,s);
     await c.close();}
   ok('9 no page errors',!errs.length,errs.slice(0,4));
   }catch(x){fails++;console.log('FAIL exception',x&&x.stack||x);}

@@ -5,12 +5,13 @@
       each form named, a button for each;
    2. the days counted from today: 10/18, saved on 10/13 as "in 5 days", is 2 days overdue; 10/22, saved on 10/19 as
       "in 3 days", is in 2 days;
-   3. the groups in order: Needs you now, Overdue, This week, Coming up, To look at, each with its count, and the counts
-      at the top;
+   3. the groups in order: Needs you now, Overdue, This week, To look at, Coming up (v25.72, the BCBA's approved start
+      screen: what needs her now first), each with its count, and the counts at the top in the same order;
    4. a date over a year past is set aside under its own line, not in Overdue;
    5. what has no date (no data lately) keeps its words and its button;
    6. a button opens that student's case at that form;
-   7. many rows: the first of each group, then Show all opens the rest in place, and Show fewer closes them;
+   7. many rows: the first of each group, then the group's Show all opens the rest in place, and Show fewer closes them
+      (v25.72 a group at a time);
    8. on an iPad a row is one line across; on a phone it stacks, nothing wider than the screen;
    9. a student's card (iPad, laptop, Caseload) counts its days from today too: "due 10/18 (in 5 days)", saved on 10/13,
       is "(2 days overdue)" on Mateo's card;
@@ -38,10 +39,11 @@ const read=p=>p.evaluate(()=>{const b=document.querySelector('#blankCl .due-boar
     rows:[...b.querySelectorAll(':scope > .due-rows > .due-row')].map(r=>({cls:r.className,date:[...r.querySelector('.due-date').children].map(x=>x.textContent).join(' '),who:r.querySelector('.due-who').innerText,what:r.querySelector('.due-what').innerText.replace(/\s+/g,' '),
       btn:[...r.querySelectorAll('button')].map(x=>x.textContent)})),
     long:(b.querySelector('.due-long summary')||{}).textContent||'',longRows:[...b.querySelectorAll('.due-long .due-row')].map(r=>r.textContent.replace(/\s+/g,' ')),
-    more:(b.querySelector('#dueAll')||{}).textContent||''};});
+    more:(b.querySelector('[data-dueall="wk"]')||{}).textContent||''};});   /* v25.72 each group's own Show all */
 (async()=>{const br=await L.chromium.launch();const errs=[];
   try{
   const ctx=await br.newContext({viewport:{width:1366,height:1024},hasTouch:true,userAgent:IPAD,serviceWorkers:'block'});ctx.on('dialog',d=>d.accept().catch(()=>{}));
+  await ctx.addInitScript(()=>{try{localStorage.setItem('nbh.ws.cards','full');}catch(e){}});   /* v25.72 9 reads a student's detailed card (Detailed cards; the compact card is qa/v2572-start-screen-test.js's) */
   const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));await p.clock.install({time:new Date(2026,9,20,9,0,0)});
   await p.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(1500);
   await p.evaluate(()=>{window.confirm=()=>true;try{wsUI.confirm=async()=>true;}catch(e){}try{sessionStorage.removeItem('nbh.due.all');}catch(e){}});
@@ -50,7 +52,7 @@ const read=p=>p.evaluate(()=>{const b=document.querySelector('#blankCl .due-boar
   ok('1 one row for the student and the date: the reevaluation (RR-1, DM-1) and the review (DM-1), a button a form',!!m&&a.rows.filter(r=>/Mateo/.test(r.who)&&/10\/18/.test(r.date)).length===1&&/^Reevaluation RR-1, DM-1 · Next review DM-1$/.test(m.what)&&m.btn.join()==='Open RR-1,Open DM-1',{m,rows:a&&a.rows});
   const l=a&&a.rows.find(r=>/Leo/.test(r.who));
   ok('2 the days from today: 10/18 is 2 days overdue (saved "in 5 days"), 10/22 is in 2 days (saved "in 3 days")',!!m&&m.date==='Sun 10/18 2 days overdue'&&!!l&&l.date==='Thu 10/22 in 2 days'&&l.what==='Plan review PR-1',{m:m&&m.date,l});
-  ok('3 the groups in order, each counted, and the counts at the top',!!a&&a.groups.join('|')==='Needs you now 1|Overdue 1|This week 1|Coming up 1|To look at 1'&&/What’s due 1 need you now · 1 overdue · 1 this week · 1 coming up · 1 to look at/.test(a.head),a&&{g:a.groups,h:a.head});
+  ok('3 the groups in order, each counted, and the counts at the top',!!a&&a.groups.join('|')==='Needs you now 1|Overdue 1|This week 1|To look at 1|Coming up 1'&&/What’s due 1 need you now · 1 overdue · 1 this week · 1 to look at · 1 coming up/.test(a.head),a&&{g:a.groups,h:a.head});
   ok('4 a date over a year past is set aside under its own line, not in Overdue',!!a&&/^1 date over a year past, set aside/.test(a.long)&&a.longRows.length===1&&/Rights at 18/.test(a.longRows[0])&&!a.rows.some(r=>/Rights at 18/.test(r.what)),a&&{long:a.long,lr:a.longRows});
   const d=a&&a.rows.find(r=>/^Data/.test(r.date));
   ok('5 what has no date keeps its words and its button; what needs you now comes first, red',!!d&&d.what==='No data on Form DD-1 since 9/30 (9 school days)'&&d.btn.join()==='Open DD-1'&&/now/.test(a.rows[0].cls)&&/Safety/.test(a.rows[0].date),{d,first:a&&a.rows[0]});
@@ -59,8 +61,8 @@ const read=p=>p.evaluate(()=>{const b=document.querySelector('#blankCl .due-boar
   const g=await p.evaluate(async()=>{const was=caseloadGo;let got=null;caseloadGo=async(k,f)=>{got=[k,f];};const b=[...document.querySelectorAll('#blankCl .due-row button')].find(x=>x.textContent==='Open DM-1');b.click();await new Promise(r=>setTimeout(r,100));caseloadGo=was;return got;});
   ok('6 a button opens that student\'s case at that form',!!g&&/\|4471823\|mateo rivera \(simulated\)$/.test(g[0])&&g[1]==='DM-1',g);
   await KEEP(p,true);const b=await read(p);const wk=b&&b.rows.filter(r=>/wk/.test(r.cls)).length;
-  await p.click('#dueAll');await sleep(400);const c=await read(p);const wk2=c&&c.rows.filter(r=>/wk/.test(r.cls)).length;
-  await p.click('#dueAll');await sleep(400);const e=await read(p);
+  await p.click('#blankCl [data-dueall="wk"]');await sleep(400);const c=await read(p);const wk2=c&&c.rows.filter(r=>/wk/.test(r.cls)).length;
+  await p.click('#blankCl [data-dueall="wk"]');await sleep(400);const e=await read(p);
   ok('7 many rows: the first of each group, Show all opens the rest in place, Show fewer closes them',!!b&&wk===8&&/^Show all \d+$/.test(b.more)&&wk2>8&&c.more==='Show fewer'&&e.rows.length===b.rows.length,{wk,wk2,more:b&&b.more,more2:c&&c.more});
   const lay=await p.evaluate(()=>{const r=document.querySelector('#blankCl .due-row.od');const k=[...r.children].map(x=>Math.round(x.getBoundingClientRect().top));return {tops:k,flat:Math.max(...k)-Math.min(...k)<30};});
   ok('8a on an iPad a row is one line across: the date, the student, what is due, the buttons',lay.flat,lay);
