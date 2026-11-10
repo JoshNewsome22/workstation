@@ -33,7 +33,7 @@ const frameOf=(page,file)=>page.frames().find(f=>f.url().indexOf(file)>=0);
     const fr=frameOf(page,'Daily_Behavior');
     const inc=fr?await fr.evaluate(()=>{const L=(S.incidents||[]);return {n:L.length,i:L[0]?{date:L[0].date,time:L[0].time,name:ddIncName(L[0]),before:L[0].before,what:L[0].what,did:L[0].did,ended:L[0].ended,by:L[0].by,parent:L[0].parent,hold:L[0].hold||'',bcba:L[0].bcba}:null,rows:document.querySelectorAll('#ddInc tbody tr').length};}):null;
     ok('3 Mateo’s case opened with Form DD-1, which holds the incident as logged (a behavior not on its sheet kept by name)',after.client==='Mateo Rivera'&&after.cur==='DD-1'&&!after.dlgOpen&&inc&&inc.n===1&&inc.i.time==='10:32'&&inc.i.name==='Hitting'&&/open hand/.test(inc.i.what)&&inc.i.parent==='no'&&inc.i.by==='Simulated BCBA'&&inc.i.hold===''&&inc.rows>=1,{after,inc});
-    ok('4 the workstation said what was logged',/Logged on Form DD-1: Hitting at 10:32 am/.test(after.toast),after.toast);
+    ok('4 the workstation said what was logged, and for whom (v25.72: the message names the student)',/Logged on Mateo Rivera’s Form DD-1: Hitting at 10:32 am/.test(after.toast),after.toast);
     /* ---- 2. with the case on screen: from the Today list, a restraint, the behavior matched to the sheet ---- */
     await fr.evaluate(()=>{nbhUI.confirm=async()=>true;});await loadSim(fr);await sleep(2500);
     const sim=await fr.evaluate(()=>({n:(S.incidents||[]).length,b:S.behaviors.filter(b=>ddCountable(b)).map(b=>({id:b.id,name:b.name}))}));
@@ -48,7 +48,7 @@ const frameOf=(page,file)=>page.frames().find(f=>f.url().indexOf(file)>=0);
     await page.click('#lnSave');await sleep(2500);
     const inc2=await fr.evaluate(()=>{const L=(S.incidents||[]);const i=L.filter(x=>x.time==='13:05').pop()||{};return {n:L.length,name:ddIncName(i),beh:i.beh,hold:i.hold||'',time:i.time,counted:!!i.counted};});
     const toast2=await page.evaluate(()=>[...document.querySelectorAll('.ws-toast')].map(e=>e.textContent.trim()).join(' | ').slice(-220));
-    ok('7 the second incident matched the sheet’s behavior (case aside), carries the restraint and counts for the day',inc2.n===sim.n+1&&inc2.beh===sim.b[0].id&&inc2.name===sim.b[0].name&&inc2.hold==='restraint'&&inc2.time==='13:05'&&inc2.counted&&/Logged on Form DD-1: .* at 1:05 pm, one added to the day’s count \(restraint\)/.test(toast2),{inc2,toast2,sim});
+    ok('7 the second incident matched the sheet’s behavior (case aside), carries the restraint and counts for the day',inc2.n===sim.n+1&&inc2.beh===sim.b[0].id&&inc2.name===sim.b[0].name&&inc2.hold==='restraint'&&inc2.time==='13:05'&&inc2.counted&&/Logged on Mateo Rivera’s Form DD-1: .* at 1:05 pm, one added to the day’s count \(restraint\)/.test(toast2),{inc2,toast2,sim});
     /* the case facts carry both, home not yet told */
     await page.evaluate(()=>gatherFacts(true));await sleep(800);
     const facts=await page.evaluate(()=>{const f=state.facts||{};const L=((f['DD-1']||f.dd1||{}).incidentList)||(f.incidentList)||[];let n=L.length;if(!n){try{const d=state.facts&&state.facts.src;}catch(e){}}return {n,items:todayItems().filter(x=>/Home|incident/i.test(x.k+' '+x.t)).map(x=>x.k+': '+x.t.replace(/<[^>]*>/g,'').slice(0,90))};});

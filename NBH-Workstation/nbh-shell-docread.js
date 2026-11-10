@@ -629,7 +629,13 @@ function drCardsOfOcr(data){
     ls.forEach(l=>{const t=l.trim();if(!t)return;if(HD.test(clean(t))){end();cur.push(t);return;}cur.push(t);if(rel&&rel(t)&&cur.length>2)end();});end();});
   return cards.length?cards.join('\n\n'):'';
 }
+/* v25.72 (privacy audit) the document was read for the case on screen then: its turn (state.caseGen, v25.71) is kept with what
+   was read, and Place writes nothing once another case has been opened (a case file opened into the app from Files, a
+   share coming in), at the start or while it waits for Form DM-1 */
+function drTurned(){try{$('#dlg').close();}catch(e){}
+  wsUI.toast('Nothing more was placed: another case was opened after this document was read, and its details are not that student’s. Read the document again for the student it is about.',{kind:'warn',ms:12000});}
 function drShow(text,from,cols){
+  DR.gen=state.caseGen;
   DR.text=text;const res=DR.res=nbhDocRead.parse(text,cols);
   const out=$('#drOut');if(!out)return;
   const haveBeh=!!(state.facts&&(state.facts.behaviors||[]).length&&(state.facts.src||{}).behaviors!=='document');
@@ -686,6 +692,7 @@ function drShow(text,from,cols){
 }
 async function drPlace(){
   const res=DR.res;if(!res)return;
+  const gen=DR.gen,turned=()=>gen!==state.caseGen;if(turned()){drTurned();return;}   /* v25.72 */
   const over=!!$('#drOver').checked,bar={},dm={},tick=[];
   res.fields.forEach((f,i)=>{
     const c=$('#drOut [data-dr="'+i+'"]');if(!c||!c.checked)return;
@@ -713,12 +720,15 @@ async function drPlace(){
   /* Form DM-1, opened if it is not */
   if(Object.keys(dm).length||cons.length||team.length){
     if(!state.frames['DM-1'])openForm('DM-1',true);
-    const t0=Date.now();while(!state.status['DM-1']&&Date.now()-t0<15000)await new Promise(r=>setTimeout(r,120));
+    const t0=Date.now();while(!state.status['DM-1']&&Date.now()-t0<15000&&!turned())await new Promise(r=>setTimeout(r,120));
+    if(turned()){drTurned();return;}   /* v25.72 Form DM-1 on screen now is another case's */
     rep.dm=await grab('DM-1','fill',{fields:dm,over,contacts:cons,team},8000);
+    if(turned()){drTurned();return;}
   }
   /* the case: target behaviors from a plan, when the forms hold none */
   if(behs.length){
-    const t1=Date.now();while(factsBusy&&Date.now()-t1<6000)await new Promise(r=>setTimeout(r,100));   /* a gather under way would write over them */
+    const t1=Date.now();while(factsBusy&&Date.now()-t1<6000&&!turned())await new Promise(r=>setTimeout(r,100));   /* a gather under way would write over them */
+    if(turned()){drTurned();return;}
     const f=Object.assign({},state.facts||{});f.src=Object.assign({},f.src||{});
     f.behaviors=behs.map(b=>({label:b.label,def:b.def||'',ex:'',nex:'',type:b.isRep?'replacement':'',isRep:!!b.isRep,fn:'',fnKey:'',dim:'',unit:'',rep:'',ctx:'',src:'document'}));
     f.src.behaviors='document';f.when=new Date().toISOString();
