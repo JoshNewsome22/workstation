@@ -828,6 +828,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     var bx={id:id,token:token,pub:{x:pub.x,y:pub.y},priv:{d:priv.d,x:priv.x,y:priv.y},site:/^https?:\/\//i.test(String(b.site||''))?String(b.site):'',got:(Array.isArray(b.got)?b.got:[]).map(String).slice(-2000),
       held:(Array.isArray(b.held)?b.held:[]).filter(function(x){return x&&typeof x==='object';}).slice(-300),made:String(b.made||'')};
     if(b.stu)bx.stu=String(b.stu).slice(0,80);   /* v25.72 the student the box was made for, as the links name them (U.sameStudent) */
+    if(b.out)bx.out=1;   /* v25.74 a link, an email or a page file carrying this box was made by hand from the dialog (no name kept: replyKit, boxSent) */
     if(Array.isArray(b.aka)&&b.aka.length)bx.aka=b.aka.map(function(x){return String(x||'').slice(0,80);}).filter(Boolean).slice(-8);   /* v25.72 earlier names of this same student (U.boxQuestion, Same student) */
     return bx;};
   /* v25.72 (the BCBA, 11/10) the question asked before a link is made, when the reply box in the form was made for what reads
@@ -975,8 +976,13 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
        the box becomes this one, and the earlier name is kept beside it (aka), so an answer to a link already sent is
        placed, not held. Different student: the box is let go, with its keys, the ids it had taken and the replies it
        held, and the note and a message say so. Cancel: nothing changes. boxAsk() resolves false on Cancel: no link is made. */
-    var said='',asking=null;
-    function boxSent(){var r=rb(),b=r.box;return !!(b&&(b.got.length||b.held.length||r.placed||r.sends.some(function(s){return s.sent||s.back;})));}
+    /* v25.74 (privacy audit) the list above knows the emails it sent; a link copied, a page saved or an email started by hand
+       from the dialog's own buttons was on no record, so a box whose only link went out that way counted as never used and
+       was let go without the question: the answer to that link then came to no form. The box now keeps that one went out
+       (box.out, in the form's record with the box; no name, nothing in the browser), marked when a page carrying the box is
+       built during a tap on one of those buttons. */
+    var said='',asking=null,hand=0;
+    function boxSent(){var r=rb(),b=r.box;return !!(b&&(b.out||b.got.length||b.held.length||r.placed||r.sends.some(function(s){return s.sent||s.back;})));}
     function boxDrop(was){var sh=shortNow();rb().box=null;
       var t='This form’s reply box was made for '+was+', and the form is now about '+(sh||'another student')+', so it starts a reply box of its own. Links made from now on use the new box; answers to links sent for '+was+' do not come to this form.';
       var n=$('#rbNote');if(n)n.textContent=t;toast(t,'warn');changed();paintHeld();said=t;return t;}
@@ -1034,6 +1040,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
         paintHeld();paintBox();changed();});
       /* the dialog opens: the box is registered (when a site is known) so the links carry it; the list is drawn while it is open */
       dl.addEventListener('close',function(){var tb=$('#rbRows');if(tb)tb.innerHTML='';});
+      dl.addEventListener('click',function(e){if(!(e.target&&e.target.closest&&e.target.closest('#rpSave,#rpLink,#rpMail')))return;hand=1;setTimeout(function(){hand=0;},0);},true);   /* v25.74 Save the page as a file, Copy a link, Email it: what they build goes out (K.withBox) */
       var rpb=$('#rpBtn');if(rpb)rpb.addEventListener('click',function(){setTimeout(function(){var e=$('#rbBox');if(e&&!e.value)e.value=rb().addr||devAddr()||'';labelMine();paintRows();paintBox();
         boxAsk().then(function(ok){if(!ok){try{dl.close();}catch(er){}return;}paintRows();paintBox();paintHeld();if(C.site())C.ensure();});},0);});   /* v25.72 labelMine; boxAsk: the box is this student's before a link is made here, and Cancel closes the box of links */
       ['#rpRound','#rpRole','#rpInst'].forEach(function(q){var e=$(q);if(e)e.addEventListener('change',function(){if(dl.open)paintRows();});});
@@ -1067,6 +1074,7 @@ window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==
     K.withBox=function(p){var st=boxMine();if(st==='ask')return p;   /* v25.72 the question is not answered yet: this link goes without a box, never with another student's */
       if(st&&C.site())C.ensure();   /* a box was let go: the next link carries the new one */
       var l=C.link();if(!p||!l)return p;p.box=l;var who=p.bcba||'the BCBA';
+      if(hand){var bo=rb().box;if(bo&&!bo.out){bo.out=1;setTimeout(ping,0);}}   /* v25.74 made by hand, to go out: the box remembers (boxSent) */
       if(p.instructions)p.instructions=String(p.instructions).replace(/When you have finished, press Send:[\s\S]*$/,'When you have finished, press Send: your answers go straight to '+who+'.');return p;};
     K.base=function(){return location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';};
     K.personPayload=function(s){var p=cfg.payload(s.pg,s.round);if(!p)return null;p=K.withBox(p);p.who={name:s.name.trim(),role:s.role.trim(),sid:s.id};var fl=cfg.fill?cfg.fill(s):null;if(fl&&Object.keys(fl).length)p.who.fill=fl;var sh=cfg.short&&cfg.short();if(sh)p.student=sh;

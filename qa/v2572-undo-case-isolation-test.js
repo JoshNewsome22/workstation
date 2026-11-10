@@ -33,13 +33,13 @@ const IPAD_UA='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.1
 const errs=[];let br;
 async function newPage(tag){
   const c=await br.newContext({viewport:{width:1180,height:820},hasTouch:true,serviceWorkers:'block',acceptDownloads:true,userAgent:IPAD_UA});
-  await c.addInitScript(()=>{try{if(window.top===window){localStorage.setItem('nbh.ws.where@nbh','files');localStorage.setItem('nbh.ws.installTip','dismissed');}}catch(e){}window.print=function(){};});
+  await c.addInitScript(()=>{try{if(window.top===window){localStorage.setItem('nbh.ws.where@nbh','files');localStorage.setItem('nbh.ws.where@rps','files');localStorage.setItem('nbh.ws.installTip','dismissed');}}catch(e){}window.print=function(){};});
   const p=await c.newPage();p.on('pageerror',e=>errs.push(tag+': '+String(e.message||e).slice(0,240)));p.on('dialog',d=>d.accept().catch(()=>{}));
-  await p.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(2500);
+  await p.goto(L.shellUrl());await sleep(2500);
   await p.evaluate(async()=>{const l=await clList();for(const r of l||[])await clTx('readwrite',st=>st.delete(r.key));try{await window.nbhCopies.clear();}catch(e){}
     ['#dlg','#cfDlg'].forEach(s=>{const d=document.querySelector(s);if(d&&d.open)d.close();});});
   return {c,p};}
-const frameOf=(p,id)=>p.frames().find(f=>f!==p.mainFrame()&&decodeURIComponent(f.url()).includes(FILE[id]));
+const frameOf=(p,id)=>p.frames().find(f=>f!==p.mainFrame()&&L.frameIs(f,id,FILE[id]));
 async function setBar(p,o){await p.evaluate(o=>{const set=(s,v)=>{const e=document.querySelector(s);if(!e)return;e.value=v||'';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
   set('#pClient',o.client);set('#pSid',o.sid);set('#pGrade',o.grade);set('#pSite',o.site);set('#pBcba',o.bcba);},o);await sleep(300);}
 async function answerIn(fr){for(let i=0;i<3;i++){const o=await fr.evaluate(()=>{const d=document.getElementById('nbhUiDlg');if(d&&d.open){d.querySelector('.u-f button:last-child').click();return true;}return false;}).catch(()=>false);if(!o)break;await sleep(900);}}
@@ -169,7 +169,7 @@ async function scenP(){console.log('\n== P: the form’s own rule (a record put 
     await plant(p,FILE[id],id,{own:ownA,who:'',turn:await turn(p),what:'Form cleared.'});
     const made=await p.evaluate(async src=>{const fr=await eval(src);window.__t72=fr;return !!fr;},make);
     ok(tag+': the Caseload’s hidden frame for Form '+id+' loads (the test’s own footing)',made);
-    const hid=p.frames().find(f=>f!==p.mainFrame()&&decodeURIComponent(f.url()).includes(FILE[id]));
+    const hid=p.frames().find(f=>f!==p.mainFrame()&&L.frameIs(f,id,FILE[id]));
     u=await findUndo(p,[hid],4000);
     ok(tag+': a hidden frame offers no Undo',!u,u&&u.r);
     const k=await keptOf(p);
@@ -190,7 +190,7 @@ async function scenR(){console.log('\n== R: Remove all student data removes a ke
 async function scenK(){console.log('\n== K: Undo still works where it should (Form AD-1, whose Clear all loads the page again) ==');
   {const c=await br.newContext({viewport:{width:1180,height:820},serviceWorkers:'block'});await c.addInitScript(()=>{window.print=function(){};});
     const p=await c.newPage();p.on('pageerror',e=>errs.push('K1: '+String(e.message||e).slice(0,240)));
-    await p.goto(L.BASE+'/NBH-Workstation/'+FILE['AD-1']);await p.waitForFunction(()=>window.nbhBridge&&window.nbhBridge.ownSave,null,{timeout:30000});await sleep(900);
+    await p.goto(L.formUrl(FILE['AD-1']));await p.waitForFunction(()=>window.nbhBridge&&window.nbhBridge.ownSave,null,{timeout:30000});await sleep(900);
     await p.locator('[name="s_name"]').first().fill(A.client);await p.locator('[name="s_name"]').first().press('Tab');await sleep(500);
     await p.locator('#nbhMoreBtn').click();await sleep(300);
     const nav=p.waitForNavigation({timeout:15000}).then(()=>true).catch(()=>false);

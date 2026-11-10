@@ -40,10 +40,10 @@ const KEEP={
   'OB-1':{file:{clear:/^\/(meta|cfg)\//},boxClear:'header'},
   'SP-1':{file:{clear:/./},boxClear:'header'},
   'DD-1':{box:/^#(stBoxIn|stPageIn)$/},
-  'DM-1':{box:/^#dxLook$/},'SR-1':{box:/^#catSearch$/},'VS-1':{box:/^#libQ$/},'RS-1':{box:/^#ts_(sup|rbt)$/}};
+  'DM-1':{box:/^#dxLook$/},'SR-1':{box:/^#catSearch$/},'VS-1':{box:/^#libQ$/}};   /* v25.74 Form RS-1's names typed to sign with (#ts_sup, #ts_rbt) are no longer let off: Open and Clear all empty them */
 /* the boxes that were found holding the last student's words: they must be empty whatever else a form keeps */
 const DRAFTS={'ABC-1':['pr-stop','bg-activity','a-activity','e-activity','e-staff','e-narrative'],'CN-1':['addText','addWhy','logSearch'],'PA-1':['pa-run-eco-set','pa-run-eco-note','pa-run-eco-other','paQuickNote'],
-  'OB-1':['obrNoteW'],'DD-1':['stWho','stSets'],'MT-1':['typeMarks'],'EA-1':['eaPhase'],'AD-1':['adrPhase']};
+  'OB-1':['obrNoteW'],'DD-1':['stWho','stSets'],'MT-1':['typeMarks'],'EA-1':['eaPhase'],'AD-1':['adrPhase'],'IA-1':['anNewName']};   /* v25.74 IA-1: the name typed for a new group of informants */
 
 const own=p=>p.evaluate(()=>window.nbhBridge.ownSave());
 function leaves(o,pre,out){if(o&&typeof o==='object'){for(const k of Object.keys(o))leaves(o[k],pre+'/'+k,out);}else out[pre]=o;return out;}
@@ -68,7 +68,7 @@ async function boxes(p){const seen=new Set();const look=()=>p.evaluate(MARK=>Arr
   if(views)await p.evaluate(()=>{const b=document.querySelector('#viewSeg button,.tabs [role="tab"],.tabbar button[data-tab]');if(b)b.click();}).catch(()=>{});
   return [...seen];}
 const draftsHeld=(p,ids)=>p.evaluate(([ids,MARK])=>ids.filter(id=>{const e=document.getElementById(id);return !!(e&&String(e.value||'').indexOf(MARK)>=0);}),[ids||[],MARK]);
-async function fresh(p,f){await p.goto(L.BASE+'/NBH-Workstation/'+f.file,{waitUntil:'load',timeout:60000});await p.waitForFunction(()=>window.nbhBridge&&window.nbhBridge.ownSave,null,{timeout:30000});await sleep(900);
+async function fresh(p,f){await p.goto(L.formUrl(f.file),{waitUntil:'load',timeout:60000});await p.waitForFunction(()=>window.nbhBridge&&window.nbhBridge.ownSave,null,{timeout:30000});await sleep(900);
   await p.evaluate(()=>{window.confirm=()=>true;});}
 /* the person's own Open: a file put in the form's file box (no workstation, no quiet restore) */
 async function openFile(p,text){await p.setInputFiles(FILEIN,{name:'blank.json',mimeType:'application/json',buffer:Buffer.from(text,'utf8')});await sleep(900);
