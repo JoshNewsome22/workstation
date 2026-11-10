@@ -2,7 +2,7 @@
    later, the podcasts. Real text: the speaker of each turn, the line being heard marked (aria-current) and kept in view
    while Follow is on, a line tapped to play from it, a search. Nothing here is about a student.
    NBHTranscript.create({
-     lines:    [{t: seconds, who: 'Narrator' | a role | 'On screen', text}],   in time order
+     lines:    [{t: seconds, who: 'Narrator' | a role | 'On screen' | 'Note', text}],   in time order
      heads:    [{t, label, num, note, own}]   optional headings (a video's steps), in the order shown; a heading with
                own:false has no moment of its own (a step only on a card): it is listed, never marked
      media:    the <video> or <audio> it follows
@@ -87,14 +87,14 @@ function create(o) {
     if (r.head != null) { var x = heads[r.head];
       h += '<li><button type="button" class="nt-h' + (x.own === false ? ' nt-off' : '') + '" data-head="' + r.head + '" data-t="' + x.t + '"' + (x.num != null ? ' data-step="' + x.num + '"' : '') + '>' +
         '<span class="nt-tm">' + mmss(x.t) + '</span><span class="nt-n' + (x.num ? '' : ' nt-n0') + '" aria-hidden="true">' + (x.num || '') + '</span><span>' + (x.num ? '<span class="vl-sr">Step ' + x.num + ': </span>' : '') + esc(x.label) + (x.note ? '<small>' + esc(x.note) + '</small>' : '') + '</span></button></li>'; return; }
-    var l = lines[r.line], see = l.who === 'On screen';
+    var l = lines[r.line], see = l.who === 'On screen' || l.who === 'Note';   /* v25.75 'Note': what happens, for a video whose picture no longer carries the words */
     h += '<li><button type="button" class="nt-ln' + (see ? ' nt-see' : '') + '" data-i="' + r.line + '" data-t="' + l.t + '"><b>' + esc(l.who) + '<span class="vl-sr">, ' + mmss(l.t) + ':</span></b><span class="nt-x">' + esc(l.text) + '</span></button></li>';
   });
   el.innerHTML = h + '</ol>';
   var list = el.querySelector('.nt-list'), q = el.querySelector('input'), fb = el.querySelector('.nt-follow'), find = el.querySelector('.nt-find');
   var btns = [].slice.call(list.querySelectorAll('.nt-ln')), hbtns = [].slice.call(list.querySelectorAll('.nt-h[data-head]'));
   var following = true, cur = -1, curH = -1, auto = 0;
-  var spoken = lines.map(function (l, i) { return l.who === 'On screen' ? -1 : i; }).filter(function (i) { return i >= 0; });
+  var spoken = lines.map(function (l, i) { return l.who === 'On screen' || l.who === 'Note' ? -1 : i; }).filter(function (i) { return i >= 0; });
   function lineAtT(t) { var c = -1; for (var i = 0; i < spoken.length; i++) { if (lines[spoken[i]].t <= t + 0.05) c = spoken[i]; else break; } return c; }
   function headAtT(t) { var c = -1; heads.forEach(function (x, i) { if (x.own !== false && x.t <= t + 0.05 && (c < 0 || x.t >= heads[c].t)) c = i; }); return c; }
   function inView(b) {

@@ -12,7 +12,7 @@
       redirection to the task, echoes); a card with no video has no button and no line, in the bank panel and on the plan;
       a DRO card from the menu shows the resetting video, and the momentary one when its DRO type is momentary.
    D. each video: no file loaded until asked; its source card's button loads its file and plays it from the device
-      (its length, 720p), with its title and its note (AI video model, the cards it was made from, simulated, adapt).
+      (its length, 1080p since v25.75), with its title and its note (AI video model, the cards it was made from, simulated, adapt).
    E. the interval helper: the arithmetic (session seconds ÷ responses, averaged; 50% to 100% of the mean; the 5-s floor;
       a session with no responses left out); on a DRO card it opens, computes as typed, never fills the card's field, Go to
       the field moves to it, each way of lengthening opens its card; Form DD-1's baseline fills the rows (a count, a rate
@@ -96,7 +96,7 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
  /^This card’s alternative: [^ ].+\.$/,/^This card names no function; its alternative: [^ ].+\.$/,/^This card’s request: [^ ].+\.$/,/^This card names no function; its request: [^ ].+\.$/,/^The clip shows pica; this card is for another behavior: [a-z].+\.$/,/^This card redirects to the task or activity at hand, not to one-step directions\.$/,/^This card asks for echoes \(vocal imitation\), not answers to questions\.$/];
 (async()=>{
  /* ---------------- A. the files ---------------- */
- {const out=[];for(const k of Object.keys(VID)){const s=fs.readFileSync(path.join(DIR,VID[k].f),'utf8');const h=/^\/\* Form TD-1’s video for [^]*?, (\d+):(\d\d)\. An AI-generated video of\s+simulated people, with captions and narration added\. MP4 \(H\.264 720p, AAC\), (\d+) bytes, SHA-256 ([0-9a-f]{64})/.exec(s);
+ {const out=[];for(const k of Object.keys(VID)){const s=fs.readFileSync(path.join(DIR,VID[k].f),'utf8');const h=/^\/\* Form TD-1’s video for [^]*?, (\d+):(\d\d)\. An AI-generated video of\s+simulated people, re-drawn in the full-picture frame \(v25\.75\): the step’s name and the notes in the picture, narration added\. MP4 \(H\.264 1080p, AAC\), (\d+) bytes, SHA-256 ([0-9a-f]{64})/.exec(s);
    const m=/NBH_TD1_VIDEO\['([a-z_]+)'\]='([A-Za-z0-9+/=]+)';\s*$/.exec(s);const buf=m?Buffer.from(m[2],'base64'):Buffer.alloc(0);
    out.push({k,head:!!h,key:m&&m[1],size:h&&+h[3]===buf.length,sha:h&&h[4]===crypto.createHash('sha256').update(buf).digest('hex'),mp4:buf.slice(4,8).toString()==='ftyp',len:h&&Math.abs(+h[1]*60+ +h[2]-VID[k].dur)<=1});}
   const wrong=out.filter(x=>!(x.head&&x.key===x.k&&x.size&&x.sha&&x.mp4&&x.len));
@@ -170,8 +170,8 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
   await p.evaluate(id=>{window.__tdBank.show(id);document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .load button.vid').click();},x.src[x.src.length-1]);
   await p.waitForFunction(k=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1&&!v.hidden&&v.dataset.id===k;},k,{timeout:30000}).catch(()=>{});
   const o=await p.evaluate(f=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {k:v.dataset.id,src:v.src.slice(0,5),dur:v.duration,w:v.videoWidth,h:v.videoHeight,title:d.querySelector('#tv-title').textContent,ai:d.querySelector('.tv-ai').textContent,note:d.querySelector('.tv-note').textContent,err:d.querySelector('#tv-msg').classList.contains('tv-err'),script:[...document.scripts].some(s=>s.src.endsWith('/'+f))};},x.f);
-  ok('D '+k+': its card’s button loads '+x.f+' and plays it from the device (about '+x.dur+' s, 720p); the note: an AI video model, the cards after '+x.after+', simulated, adapt every step',
-   o.k===k&&o.script&&o.src==='blob:'&&Math.abs(o.dur-x.dur)<1.5&&o.w===1280&&o.h===720&&!o.err&&o.title.length>10&&/AI-generated/.test(o.ai)&&o.note.startsWith('Made with an AI video model from the steps of the card')&&o.note.includes(x.after)&&/simulated: it shows the procedure, not a real session/.test(o.note)&&/Adapt every step to the student’s plan\./.test(o.note),o);
+  ok('D '+k+': its card’s button loads '+x.f+' and plays it from the device (about '+x.dur+' s, 1080p since v25.75, the re-drawn frame); the note: an AI video model, the cards after '+x.after+', simulated, adapt every step',
+   o.k===k&&o.script&&o.src==='blob:'&&Math.abs(o.dur-x.dur)<1.5&&o.w===1920&&o.h===1080&&!o.err&&o.title.length>10&&/AI-generated/.test(o.ai)&&o.note.startsWith('Made with an AI video model from the steps of the card')&&o.note.includes(x.after)&&/simulated: it shows the procedure, not a real session/.test(o.note)&&/Adapt every step to the student’s plan\./.test(o.note),o);
   await p.keyboard.press('Escape');await sleep(200);}
  ok('D each file loaded once, only when asked',got.length===NV&&new Set(got).size===NV,got);
  /* ---------------- E. the interval helper ---------------- */

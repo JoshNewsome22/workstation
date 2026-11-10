@@ -551,7 +551,7 @@ function vttOf(lines,dur){var sp=lines.filter(function(l){return l[1]!=='O';}),o
 function nextItem(x){var f=fam(x);return '<li><a class="vl-ni" href="#video='+encodeURIComponent(x.key)+'" data-key="'+esc(x.key)+'">'+thumb(x)+
   '<span class="vl-txt"><span class="vl-t">'+esc(x.title)+'</span><span class="vl-m">'+esc(citeOf(x))+' · '+esc(f.short)+'</span><span class="vl-st">'+status(x)+'</span></span></a></li>';}
 /* the Steps: each step's start and its title as the video shows them; the step playing is marked, with its caption */
-function stepsHtml(S,hasT){var WH={open:'On the opening card',close:'On the closing card'};
+function stepsHtml(S,hasT,full){var WH={open:full?'Said at the opening':'On the opening card',close:'On the closing card'};   /* v25.75 a re-drawn video's opening card is its title: those steps are narrated over it */
   return '<section class="vl-panel vl-tabs" id="vlTabs" aria-label="Steps and transcript"><div class="vl-tabl" role="tablist" aria-label="Steps and transcript">'+
     '<button type="button" role="tab" id="vlTabS" class="vl-tab" aria-controls="vlSteps" aria-selected="true">Steps</button>'+
     (hasT?'<button type="button" role="tab" id="vlTabT" class="vl-tab" aria-controls="vlTrans" aria-selected="false" tabindex="-1">Transcript</button>'+
@@ -585,7 +585,7 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
     '<div class="vl-act">'+acts+'</div><div id="vlStepsHere"></div>'+
     '<div class="vl-panel">'+(sum?'<h3>What the video shows</h3><p>'+esc(cap(sum))+'.</p>':'')+
       (fnw.length?'<p class="vl-fns"><b>Function'+(fnw.length>1?'s':'')+' of the behavior in its card'+(v.cards.length>1?'s':'')+':</b> '+fnw.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</p>':'')+
-      '<h3 style="margin-top:14px">About this video</h3><p class="vl-note">'+esc(v.note)+' Captions are part of the picture. The Transcript beside the Steps has every word as text, and CC adds captions of what is said.</p></div>'+
+      '<h3 style="margin-top:14px">About this video</h3><p class="vl-note">'+esc(v.note)+(v.frame==='full'?' The Steps beside the video show what happens in each step as it plays.':' Captions are part of the picture.')+' The Transcript beside the Steps has every word as text, and CC adds captions of what is said.</p></div>'+
     '</div><aside class="vl-next" aria-labelledby="vlNextH"><div id="vlStepsSide"></div><h2 id="vlNextH">Up next</h2>'+
       (N.fam.length?'<h3 class="vl-nh" id="vlNextF">More '+esc(f.short)+'</h3><ol class="vl-nl" aria-labelledby="vlNextF">'+N.fam.map(nextItem).join('')+'</ol>':'')+
       (N.fn.length?'<h3 class="vl-nh" id="vlNextN">Also for '+esc(fnw.join(', ').toLowerCase())+'</h3><ol class="vl-nl" aria-labelledby="vlNextN">'+N.fn.map(nextItem).join('')+'</ol>':'')+
@@ -593,16 +593,19 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
     '</aside></div>';
   var vid=$('vlVideo'),my=++token,ld=$('vlLoad'),tap=openedByTap,seekTo=null,curCap=null;
   var pl=vid.parentNode,bar=$('vlBar'),tw=TRANS[v.key],hasT=!!(tw&&tw.length&&window.NBHTranscript),track=null,tr=null;
+  var FULLF=v.frame==='full';
   var playFrom=function(t){if(vid.readyState>=1){try{vid.currentTime=t;}catch(x){}var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});$('vlPlay').hidden=true;}else seekTo=t;};
   /* the picture: on an iPad the browser's control bar sits in a band below it, clear of the caption strip; on a phone the
      picture is cropped to its scene (the header, the step panel and the caption strip are text on the page) and the page's
      own bar plays it; the opening and closing cards are shown whole */
-  var layout=function(){var ph=PHONE();pl.classList.toggle('vl-band',!ph);pl.classList.toggle('vl-crop',ph);
+  /* v25.75 a video re-drawn in the full-picture frame (frame: 'full' in nbh-videos.js) is never cropped: its scene is the
+     whole picture. The band stays on an iPad, so the browser's bar does not sit on the step's name at the bottom. */
+  var layout=function(){var ph=PHONE();pl.classList.toggle('vl-band',!ph);pl.classList.toggle('vl-crop',ph&&!FULLF);
     if(vid.getAttribute('src'))vid.controls=!ph||isFull();bar.hidden=!ph;};
   /* the Steps and the Transcript, two tabs: beside the video (iPad sideways), right under the video and its bar (phone),
      under Open the TD-1 card (iPad upright). Every step is listed; a step with no moment of its own says where it is. */
   var sEl=null,mark=function(){};
-  if(S&&S.steps&&S.steps.length){var sw=document.createElement('div');sw.innerHTML=stepsHtml(S,hasT);sEl=sw.firstChild;
+  if(S&&S.steps&&S.steps.length){var sw=document.createElement('div');sw.innerHTML=stepsHtml(S,hasT,FULLF);sEl=sw.firstChild;
     var place=function(){var to=WIDE()?$('vlStepsSide'):PHONE()?$('vlStepsTop'):$('vlStepsHere');if(to&&sEl.parentNode!==to)to.appendChild(sEl);};
     place();watchWide(function(){place();layout();});
     mark=function(){var c=stepAt(S,vid.currentTime||0);pl.classList.toggle('vl-full',!c||c[2]==null||c[2]===0);if(c===curCap)return;curCap=c;
@@ -618,11 +621,11 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
     sEl.querySelector('.vl-tabl').addEventListener('keydown',function(e){if(!e.target.matches('[role=tab]')||!/^(ArrowLeft|ArrowRight|Home|End)$/.test(e.key)||tabs.length<2)return;e.preventDefault();
       var w=e.target.id==='vlTabS'?'transcript':'steps';if(e.key==='Home')w='steps';if(e.key==='End')w='transcript';pick(w,true);setPref('tab',w);});
     /* the transcript: narration, the people's lines by role, the on-screen notes the narration does not say */
-    if(hasT){var WHO={N:'Narrator',O:'On screen'};
+    if(hasT){var WHO={N:'Narrator',O:FULLF?'Note':'On screen'};   /* v25.75 in a re-drawn video the step's name and the timers are in the picture; the other notes are on the page only */
       tr=window.NBHTranscript.create({media:vid,name:'Transcript of '+v.title,lead:'Opening card',
         lines:tw.map(function(l){return {t:l[0],who:WHO[l[1]]||l[1],text:l[2]};}),
-        heads:S.steps.map(function(s){return {t:s.t,label:s.title,num:s.n,own:!s.where,note:s.where==='open'?'On the opening card':s.where==='close'?'On the closing card':s.where==='with'?'Shown with step '+s.with:''};}),
-        key:'Every word heard, with what the picture shows in <i>italics</i>. Tap a line to play from it.',seek:playFrom});
+        heads:S.steps.map(function(s){return {t:s.t,label:s.title,num:s.n,own:!s.where,note:s.where==='open'?(FULLF?'Said at the opening':'On the opening card'):s.where==='close'?'On the closing card':s.where==='with'?'Shown with step '+s.with:''};}),
+        key:(FULLF?'Every word heard, with notes on what happens in <i>italics</i>.':'Every word heard, with what the picture shows in <i>italics</i>.')+' Tap a line to play from it.',seek:playFrom});
       $('vlTrans').appendChild(tr.el);}
     var want=/[&#]tab=transcript\b/.test(location.hash)?'transcript':pref().tab;pick(hasT&&want==='transcript'?'transcript':'steps');}
   /* captions of what is said (the narration and the people's lines), a real text track: off unless CC was turned on here */

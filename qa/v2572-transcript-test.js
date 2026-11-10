@@ -72,7 +72,7 @@ const errs=[];
      return {heads:[...document.querySelectorAll('#vlTrans .nt-h[data-step]')].map(h=>+h.dataset.step+'|'+h.querySelector('.nt-n').nextSibling.textContent.replace(/^Step \d+: /,'')),
       shown:lis.every(li=>{const q=li.getBoundingClientRect();return li.offsetParent&&q.height>0&&q.top>=box.top-1&&q.bottom<=box.bottom+1;})&&!document.getElementById('vlSteps').hidden,
       n:lis.length,notes:lis.filter(li=>li.dataset.where).map(li=>li.querySelector('.vl-snote')&&li.querySelector('.vl-snote').textContent)};});
-   const want=s.map(x=>x[0]+'|'+x[2]+(x[3]==='open'?'On the opening card':x[3]==='close'?'On the closing card':x[3]==='with'?'Shown with step '+x[4]:''));
+   const want=s.map(x=>x[0]+'|'+x[2]+(x[3]==='open'?(BY[k].frame==='full'?'Said at the opening':'On the opening card'):x[3]==='close'?'On the closing card':x[3]==='with'?'Shown with step '+x[4]:''));
    if(JSON.stringify(r.heads)!==JSON.stringify(want))badH.push([k,r.heads.length,want.length,r.heads.find((h,i)=>h!==want[i]),want.find((h,i)=>h!==r.heads[i])]);
    if(!r.shown||r.n!==s.length||r.notes.some(x=>!x))badV.push([k,r]);
    if(!(await loaded(p))){badM.push([k,'not loaded']);continue;}
@@ -95,6 +95,9 @@ const errs=[];
    await p.locator('#vlTabS').click();await sleep(100);const ci=s.findIndex(x=>x[3]==='close'||x[3]==='open');
    if(ci>=0){await p.locator('#vlSteps li').nth(ci).locator('.vl-sbtn').click();await sleep(500);const c2=await p.evaluate(()=>{const v=document.getElementById('vlVideo');v.pause();return {t:v.currentTime,on:[...document.querySelectorAll('#vlSteps li.vl-on')].map(li=>li.dataset.where||'')};});
     if(!(c2.t>=s[ci][1]-0.05&&c2.t<s[ci][1]+1.5)||c2.on.some(Boolean))badCard.push([k,s[ci],c2]);}}
+  /* v25.75 the videos re-drawn in the full-picture frame: marked in the list, their opening line says "a simulated example" */
+  {const full=LIST.filter(v=>v.frame==='full'),bad=full.filter(v=>{const n=(TR[v.key]||[]).filter(l=>l[1]==='N')[0];return !n||!/: a simulated example of /.test(n[2])||/AI-generated/.test(n[2]);}).map(v=>v.key);
+   ok('A v25.75 '+full.length+' videos are marked as re-drawn (frame: full); the first narrated line of each says "a simulated example", not "AI-generated"',full.length===24&&!bad.length,{n:full.length,bad});}
   ok('B for all '+LIST.length+' videos the transcript’s step headings equal the Steps list (same steps, order, words and card notes)',!badH.length,badH.slice(0,5));
   ok('B the Steps tab shows every step at once, a step only on a card says so',!badV.length,badV.slice(0,3));
   ok('C the line heard is marked (aria-current, one line) at three times in each of the '+LIST.length+' videos ('+marks+' checks); no card-only step marked',!badM.length,badM.slice(0,5));
@@ -136,7 +139,14 @@ const errs=[];
   const r=await p.evaluate(()=>{const g=id=>document.getElementById(id).getBoundingClientRect().toJSON();const v=document.getElementById('vlVideo'),pl=v.parentNode.getBoundingClientRect(),vr=v.getBoundingClientRect();
     const bar=[...document.querySelectorAll('#vlBar button,#vlBar input')].filter(e=>e.offsetParent).map(e=>{const q=e.getBoundingClientRect();return [e.id,Math.round(q.width),Math.round(q.height)];});
     return {controls:v.controls,crop:v.parentNode.classList.contains('vl-crop'),scale:vr.width/pl.width,off:(pl.top-vr.top)/vr.height,bar:g('vlBar'),player:pl.toJSON(),tabs:g('vlTabs'),title:g('vlTitle'),open:document.querySelector('.vl-open').getBoundingClientRect().toJSON(),targets:bar,sw:document.documentElement.scrollWidth};});
-  ok('E phone: the picture cropped to its scene (896 x 504 of the frame: '+r.scale.toFixed(3)+' times wider, '+(r.off*720).toFixed(0)+' px of the frame above), the browser’s controls off',r.crop&&!r.controls&&Math.abs(r.scale-1280/896)<0.01&&Math.abs(r.off*720-64)<2,r);
+  /* v25.75 a video re-drawn in the full-picture frame is shown whole on a phone (its scene is the whole picture); one still in the first frame is cropped to its scene */
+  ok('E phone: a re-drawn video is shown whole, not cropped ('+r.scale.toFixed(3)+' times the player’s width, '+(r.off*720).toFixed(0)+' px above), the browser’s controls off',BY.dro_resetting.frame==='full'&&!r.crop&&!r.controls&&Math.abs(r.scale-1)<0.01&&Math.abs(r.off*720)<2,r);
+  {const old=LIST.find(v=>v.frame!=='full');
+   if(old){const q=await ctx.newPage();await q.goto(U+'videos.html#video='+old.key);await q.waitForFunction(()=>window.__vl&&document.getElementById('vlTabs'),null,{timeout:20000});await loaded(q);
+    const S0=(ST[old.key]||{}).caps||[],at=(S0.find(c=>c[2])||[20])[0]+1;await seek(q,at);
+    const r0=await q.evaluate(()=>{const v=document.getElementById('vlVideo'),pl=v.parentNode.getBoundingClientRect(),vr=v.getBoundingClientRect();return {controls:v.controls,crop:v.parentNode.classList.contains('vl-crop'),full:v.parentNode.classList.contains('vl-full'),scale:vr.width/pl.width,off:(pl.top-vr.top)/vr.height};});
+    ok('E phone: a video still in the first frame ('+old.key+') is cropped to its scene (896 x 504 of the frame: '+r0.scale.toFixed(3)+' times wider, '+(r0.off*720).toFixed(0)+' px of the frame above)',r0.crop&&!r0.controls&&!r0.full&&Math.abs(r0.scale-1280/896)<0.01&&Math.abs(r0.off*720-64)<2,r0);await q.close();}
+   else ok('E phone: no video is left in the first frame',true);}
   ok('E phone: the page’s own bar right under the picture with 4 controls of 44 px or more and the time, then the tabs, then the title and Open the TD-1 card',Math.abs(r.bar.top-r.player.bottom)<1&&r.targets.length===4&&r.targets.every(x=>x[1]>=44&&x[2]>=44)&&r.tabs.top>=r.bar.bottom&&r.title.top>=r.tabs.bottom&&r.open.top>r.title.top&&r.sw<=390,r);
   await seek(p,5);const card=await p.evaluate(()=>document.querySelector('.vl-player').classList.contains('vl-full'));
   ok('E phone: the opening card is shown whole (not cropped)',card);

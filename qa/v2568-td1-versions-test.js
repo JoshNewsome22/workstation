@@ -11,7 +11,7 @@
       in two columns with the steps lined up (one column under 1000 px), Add this version to the plan adding the card exactly
       as Add to the plan does; the keyboard (Enter on a chip, the arrow keys); nothing of it saved;
    C. the video: Watch the video on all 35 cards, with the line computed from the card's rows as the approved mockup does;
-      the file loaded only when asked, played from the device (2:49, 720p); the player's note; the FCT video as it was;
+      the file loaded only when asked, played from the device (2:49, 1080p since v25.75); the player's note; the FCT video as it was;
       the plan cards built from an A_HIGHP card (from the bank or the menu) carry the button and the line, nothing saved,
       nothing printed; the offline copy's list finds the file through the loadScript pattern;
    D. the quality check on the Final plan sheet: the eight items of research #14 in order, each met / not met / not
@@ -169,14 +169,14 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
  await p.evaluate(()=>{window.__tdBank.show('a_highp-edible-then-direct');document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .load button.vid').click();});
  await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1&&!v.hidden&&v.dataset.id==='a_highp';},null,{timeout:30000}).catch(()=>{});
  {const o=await p.evaluate(()=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {open:d&&!d.hidden,src:v?v.src.slice(0,5):'',dur:v?v.duration:0,w:v?v.videoWidth:0,h:v?v.videoHeight:0,title:d.querySelector('#tv-title').textContent,ai:d.querySelector('.tv-ai').textContent,note:d.querySelector('.tv-note').textContent,err:d.querySelector('#tv-msg').classList.contains('tv-err'),script:[...document.scripts].some(s=>/nbh-td1-video-highp\.js$/.test(s.src))};});
-  ok('C the player loads nbh-td1-video-highp.js when asked and plays from the device: about 2:49, 720p',o.open&&o.script&&o.src==='blob:'&&Math.abs(o.dur-169.2)<1.5&&o.w===1280&&o.h===720&&!o.err,o);
+  ok('C the player loads nbh-td1-video-highp.js when asked and plays from the device: about 2:49, 1080p (v25.75, the re-drawn frame)',o.open&&o.script&&o.src==='blob:'&&Math.abs(o.dur-169.2)<1.5&&o.w===1920&&o.h===1080&&!o.err,o);
   ok('C the player’s note: AI-generated, simulated people, the sequence and not a real session, adapt every step, the Responding to behavior sheet if the hard request is not done',/^High-probability request sequence/.test(o.title)&&/AI-generated/.test(o.ai)&&/simulated people/.test(o.ai)&&/simulated: it shows the sequence, not a real session/.test(o.note)&&/Adapt every step to the student’s plan/.test(o.note)&&/If the student does not do the hard request, follow the Responding to behavior sheet for the function\./.test(o.note),o);}
  await p.keyboard.press('Escape');await sleep(200);
  /* the FCT video as it was */
  await p.evaluate(()=>{window.__tdBank.show('fct-practical-guide-thinning');document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .load button.vid').click();});
  await p.waitForFunction(()=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1&&!v.hidden&&/fct/.test(v.dataset.id||'');},null,{timeout:30000}).catch(()=>{});
  {const o=await p.evaluate(()=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {title:d.querySelector('#tv-title').textContent,note:d.querySelector('.tv-note').textContent,dur:v.duration,line:(document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .vidln')||{}).textContent||''};});
-  ok('C the FCT video is as it was: its title, its note, about 117 s; v25.70 (FCT has four videos) the line under its button says it shows this card’s steps',o.title==='Functional communication training: the break request, step by step'&&o.note==='Made with an AI video model from the card’s steps, with captions and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.'&&Math.abs(o.dur-117.0)<1.5&&/^The video shows this card’s steps: for escape, a break card/.test(o.line),o);}
+  ok('C the FCT video is as it was: its title, its note, about 117 s; v25.70 (FCT has four videos) the line under its button says it shows this card’s steps',o.title==='Functional communication training: the break request, step by step'&&o.note==='Made with an AI video model from the card’s steps, with the step’s name in the picture and narration added. The people and the room are simulated: it shows the sequence, not a real session. Adapt every step to the student’s plan, and complete the escape-extinction consent block (Responding to behavior sheet) before using escape extinction.'&&Math.abs(o.dur-117.0)<1.5&&/^The video shows this card’s steps: for escape, a break card/.test(o.line),o);}
  await p.keyboard.press('Escape');await sleep(200);
  /* the plan's cards */
  await p.evaluate(()=>{window.__tdBank.show('a_highp-momentum-compliance');document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .load button.add').click();});await sleep(800);
@@ -252,7 +252,7 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
   await p.evaluate(id=>{window.__tdBank.show(id);document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .load button.vid').click();},x.src);
   await p.waitForFunction(k=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1&&!v.hidden&&v.dataset.id===k;},k,{timeout:30000}).catch(()=>{});
   const o=await p.evaluate(f=>{const d=document.getElementById('tdVideo'),v=document.getElementById('tv-video');return {k:v.dataset.id,dur:v.duration,w:v.videoWidth,h:v.videoHeight,title:d.querySelector('#tv-title').textContent,note:d.querySelector('.tv-note').textContent,err:d.querySelector('#tv-msg').classList.contains('tv-err'),script:[...document.scripts].some(s=>s.src.endsWith('/'+f))};},x.file);
-  ok('F '+k+': its card opens it, '+x.file+' loaded when asked, played from the device (about '+x.dur+' s, 720p), the note names its study',o.k===k&&o.script&&Math.abs(o.dur-x.dur)<1.5&&o.w===1280&&o.h===720&&!o.err&&o.note.includes(x.after)&&/simulated: it shows the sequence, not a real session/.test(o.note),o);
+  ok('F '+k+': its card opens it, '+x.file+' loaded when asked, played from the device (about '+x.dur+' s, 1080p), the note names its study',o.k===k&&o.script&&Math.abs(o.dur-x.dur)<1.5&&o.w===1920&&o.h===1080&&!o.err&&o.note.includes(x.after)&&/simulated: it shows the sequence, not a real session/.test(o.note),o);
   await p.keyboard.press('Escape');await sleep(200);}
  /* ---------------- E. touch and errors ---------------- */
  await view(p,'build');await sleep(300);
