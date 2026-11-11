@@ -11836,6 +11836,10 @@ body:not(.sr-choose) .railhead .sr-tl,body:not(.sr-choose) .railhead .rh-tools #
 #rail .item .st.sr-w:empty{display:none}
 #rail .item .sr-odd{margin-left:6px;flex:0 0 auto}
 #rail li.sr-shli{list-style:none;padding:0 0 6px 0;border:0}
+/* v25.75 the arrow that says the open form's sheets fold: down while they show, sideways when folded */
+#rail .item .open[aria-expanded]::after{content:'';flex:0 0 auto;width:8px;height:8px;margin:0 6px 3px 10px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);opacity:.85}
+#rail .item .open[aria-expanded=false]::after{transform:rotate(-45deg);margin-bottom:0}
+@media print{#rail .item .open[aria-expanded]::after{display:none}}
 .sr-sheets{list-style:none;margin:0;padding:2px 8px 4px 46px}
 .sr-sheets button{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:6px 10px;border:0;border-radius:8px;background:none;color:var(--ink);font:500 14px/1.3 var(--sans);text-align:left;justify-content:flex-start;white-space:normal}
 .sr-sheets button:hover{background:var(--shade)}
@@ -12105,6 +12109,7 @@ function paintTree(){const rail=$('#rail');if(!rail)return;const id=single()?sta
 const li=id&&rail.querySelector('.item[data-id="'+id+'"]'),cur=t.findIndex(tabOn);
 const sig=id+'|'+t.map((b,k)=>tabLabel(b)+'.'+(b.dataset.nbhFill||'')+(k===cur?'*':'')).join(',');
 const old=rail.querySelector('.sr-shli');
+rail.querySelectorAll('.item [aria-expanded]').forEach(e=>{if(!li||t.length<2||!li.contains(e))e.removeAttribute('aria-expanded');});
 if(!li||t.length<2){if(old)old.remove();treeSig='';return;}
 if(treeShut&&treeShut!==id)treeShut='';
 {const hb=li.querySelector('button,a')||li;hb.setAttribute('aria-expanded',String(treeShut!==id));}

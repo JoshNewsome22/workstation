@@ -16,14 +16,18 @@ let fails=0,n=0;const ok=(name,c,i)=>{n++;console.log((c?'PASS ':'FAIL ')+name+(
   await show();const a=await st();ok(tag+': the open form shows its sheets under its row ('+a.sheets+')',a.cur==='DM-1'&&a.sheets>=2&&a.after&&a.exp==='true',a);
   await row('DM-1').click({position:{x:60,y:12}});await sleep(600);await show();const b=await st();
   ok(tag+': a tap on the open form’s row folds the sheets away; the form stays open',b.cur==='DM-1'&&b.sheets===0&&b.exp==='false'&&b.frames===a.frames,b);
+  const arrow=()=>p.evaluate(()=>{const b=document.querySelector('#rail .item[data-id="'+state.cur+'"] .open');const c=getComputedStyle(b,'::after');return {w:c.width,t:c.transform,d:c.display};});
+  const ar1=await arrow();
   await sleep(700);const b2=await st();ok(tag+': they stay folded (the list repaints without bringing them back)',b2.sheets===0,b2);
   await row('DM-1').click({position:{x:60,y:12}});await sleep(600);await show();const d=await st();
   ok(tag+': the next tap brings them back',d.sheets===a.sheets&&d.after&&d.exp==='true',d);
+  const ar2=await arrow();ok(tag+': the row carries an arrow that turns when the sheets fold',ar1.w==='8px'&&ar2.w==='8px'&&ar1.d!=='none'&&ar1.t!==ar2.t&&ar1.t!=='none',{ar1,ar2});
   await p.locator('#rail .sr-shli [data-srsheet="1"]').click();await sleep(700);await show();
   const s2=await p.evaluate(()=>{const b=document.querySelector('#rail .sr-shli [data-srsheet="1"]');return !!b&&b.getAttribute('aria-current')==='true';});
   ok(tag+': a sheet row still goes to its sheet',s2);
   await row('DM-1').click({position:{x:60,y:12}});await sleep(500);await show();
   await p.evaluate(()=>openForm('IC-1'));await p.waitForFunction(()=>state.cur==='IC-1',null,{timeout:20000});await sleep(1500);await show();const e2=await st();
+  const stale=await p.evaluate(()=>{const b=document.querySelector('#rail .item[data-id="DM-1"] .open');return b.hasAttribute('aria-expanded');});ok(tag+': the row of a form that is no longer open carries no arrow',!stale);
   await p.evaluate(()=>openForm('DM-1'));await sleep(1200);await show();const e3=await st();
   ok(tag+': folded is for that visit only: after another form, coming back shows the sheets again',e2.cur==='IC-1'&&e3.cur==='DM-1'&&e3.sheets===a.sheets,{e2,e3});
   ok(tag+': no page error',!errs.length,errs.slice(0,3));await c.close();}
