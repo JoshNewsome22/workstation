@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.85: Publication graphs, the change line's label and the points of a long series
+(the BCBA, 11/11, with a picture of a Publication graph in Daily data on an iPad: "Can you fix this?")
+- **What the picture showed.** A graph of 62 school days with a dashed change line near the right edge. Two faults in
+  the Publication drawing (the same code in Daily data and in Form EA-1):
+  1. The change line's label was set to the right of its line and, having no room there, was pushed back to the left
+     until it fitted, so the dashed line ran through the words.
+  2. The data points merged into a thick bar along the axis: the plot is at most 340 pt wide, so 62 days are 5.5 pt
+     apart, and each point with its outline was 5.8 pt wide.
+- **The label.** It goes to the right of its line when it fits there, else to the left of it, clear of the labels
+  already set and of the other change lines. Only when neither side has room does it sit over its line, and then the
+  line starts below the words.
+- **The points.** A point is 2.5 pt while the sessions are 7 pt or more apart (up to 49 sessions on the widest plot).
+  Closer than that it shrinks with the spacing, never under 1.3 pt, with a finer outline: at 62 days the points are
+  2.0 pt and stand apart. Past about 105 sessions on one plot they touch again; the "Days shown" choices are the remedy
+  there.
+- **Read from the picture.** The request did not say which fault was meant; these are the two the picture shows. The
+  Colour graphs are not changed.
+- **The test run.** The whole run was not repeated. Run on the final copy: the new test (qa/v2585-pub-figure-test.js,
+  9 checks, invented data) and the graph and form tests named in the commit. The offline-copy test was not run (not
+  enough free disk in this session).
 ### v25.84: The pale strip above the top bar
 (the BCBA, 11/11, with a picture of the installed app on an iPad: "Why does the very top of the app have a faded white
 tint? Also, it is not allowing me to select print")

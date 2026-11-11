@@ -6881,7 +6881,7 @@ function tw(s,pt,bold){if(ctx===null){try{ctx=document.createElement("canvas").g
 function x(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function f(n){return (Math.round(n*100)/100).toString();}
 function wrap(t,w,pt,max){var out=[],cur="";String(t||"").split(/\s+/).filter(Boolean).forEach(function(word){var s=cur?cur+" "+word:word;if(!cur||tw(s,pt)<=w)cur=s;else{out.push(cur);cur=word;}});if(cur)out.push(cur);return max&&out.length>max?null:out;}
-function marker(sym,cx,cy,r,title){var k=SYM[sym%SYM.length],fill=k[1]?"#000":"#fff",a=' fill="'+fill+'" stroke="#000" stroke-width="0.8"',t=title?"<title>"+x(title)+"</title>":"",s;
+function marker(sym,cx,cy,r,title,sw){var k=SYM[sym%SYM.length],fill=k[1]?"#000":"#fff",a=' fill="'+fill+'" stroke="#000" stroke-width="'+(sw||0.8)+'"',t=title?"<title>"+x(title)+"</title>":"",s;
   if(k[0]==="circle")s='<circle cx="'+f(cx)+'" cy="'+f(cy)+'" r="'+f(r)+'"'+a+">";
   else if(k[0]==="square"){var h=r*0.9;s='<rect x="'+f(cx-h)+'" y="'+f(cy-h)+'" width="'+f(2*h)+'" height="'+f(2*h)+'"'+a+">";}
   else if(k[0]==="triangle"){var q=r*1.2;s='<polygon points="'+f(cx)+","+f(cy-q)+" "+f(cx+q)+","+f(cy+q*0.75)+" "+f(cx-q)+","+f(cy+q*0.75)+'"'+a+">";}
@@ -6897,6 +6897,9 @@ function figure(sp){
   var n=Math.max(1,sp.nSlots|0),ratio=ratioOf(sp.ratio),P=sp.panels||[],k=P.length||1;
   var pw=Math.max(150,Math.min(340,n*12)),ph=k===1?pw*ratio:Math.max(52,pw*ratio*1.2/k),gapP=12,z=sp.zero?3:0;
   var T={tick:7.5,title:9,lab:8.5,small:6.5,cap:8.5,dl:8};
+  /* v25.85 a data point is 2.5 pt while the sessions are 7 pt or more apart; closer than that it shrinks with the spacing
+     (never under 1.3 pt), with a finer outline, so the points of a long series stay apart */
+  var mr=Math.max(1.3,Math.min(2.5,pw/n*0.36)),msw=mr<2.5?0.6:0.8;
   /* the left margin holds the widest tick label and the rotated title */
   var tickW=0;P.forEach(function(p){for(var v=0;v<=p.top*(1+1e-9);v+=p.step){tickW=Math.max(tickW,tw(p.tick?p.tick(v):f(v),T.tick));}});
   var ML=Math.ceil(5+T.title+5+tickW+5+3.5);
@@ -6937,8 +6940,15 @@ function figure(sp){
     if(p.tierL){var ty=y0+ph/2-(p.tierL.length-1)*4.75+2.8;p.tierL.forEach(function(l,m){g.push('<text class="pub-tier" x="'+f(left+pw+5)+'" y="'+f(ty+m*9.5)+'" font-size="'+T.dl+'">'+x(l)+"</text>");});}
     /* phase-change lines: solid, the full height; a minor change or event dashed */
     (p.vlines||[]).forEach(function(l){var vx=X(l.s);g.push('<line class="pub-ph" x1="'+f(vx)+'" y1="'+f(pi===0&&L0.length?y0-2:y0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.8"'+(l.dash?' stroke-dasharray="2.4 1.6"':"")+"/>");});
-    (p.events||[]).forEach(function(l){var vx=X(l.s),e0=pi===0&&ev0?y0-ev0+1:y0;g.push('<line class="pub-ev" x1="'+f(vx)+'" y1="'+f(e0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="2.4 1.6"/>');
-      if(l.text&&pi===0&&ev0){var ew=tw(l.text,T.small),ex=Math.min(vx+2,left+pw+MR-ew-2);g.push('<text class="pub-evl" x="'+f(ex)+'" y="'+f(y0-3)+'" font-size="'+T.small+'">'+x(l.text)+"</text>");}});
+    /* v25.85 (the BCBA, 11/11, with a picture: a change line ran through its own label): the label goes to the right of its
+       line when it fits there, else to the left of it, clear of the labels already set and of the other change lines; only when neither side has room does it
+       sit over the line, and then the line starts below the words */
+    var evBox=[],evX=(p.events||[]).map(function(l){return X(l.s);});
+    (p.events||[]).forEach(function(l,li){var vx=X(l.s),e0=pi===0&&ev0?y0-ev0+1:y0,lab="";
+      if(l.text&&pi===0&&ev0){var ew=tw(l.text,T.small),lo=2,hi=left+pw+MR-2,free=function(a){return a>=lo&&a+ew<=hi&&evBox.every(function(b){return a+ew+2<=b[0]||a>=b[1]+2;})&&evX.every(function(q,qi){return qi===li||q<a-1||q>a+ew+1;});};
+        var ex=free(vx+3)?vx+3:free(vx-3-ew)?vx-3-ew:null,over=ex===null;if(over){ex=Math.max(lo,Math.min(vx+3,hi-ew));e0=y0;}
+        evBox.push([ex,ex+ew]);lab='<text class="pub-evl" x="'+f(ex)+'" y="'+f(y0-3)+'" font-size="'+T.small+'"'+(over?' data-over="1"':"")+">"+x(l.text)+"</text>";}
+      g.push('<line class="pub-ev" x1="'+f(vx)+'" y1="'+f(e0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="2.4 1.6"/>');if(lab)g.push(lab);});
     /* criterion: a thin dashed line across its conditions */
     (p.crit||[]).forEach(function(c){var cy2=Y(c.y);g.push('<line class="pub-crit" x1="'+f(c.s0<=-0.5?left:X(c.s0))+'" y1="'+f(cy2)+'" x2="'+f(c.s1>=n-0.5?left+pw:X(c.s1))+'" y2="'+f(cy2)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="3 2"/>');
       if(c.label)g.push('<text x="'+f(c.s1>=n-0.5?left+pw:X(c.s1))+'" y="'+f(cy2-2)+'" font-size="'+T.small+'" text-anchor="end">'+x(c.label)+"</text>");});
@@ -6946,8 +6956,8 @@ function figure(sp){
     if(p.dog!=null){var dx=X(p.dog),nx=P[pi+1]&&P[pi+1].dog!=null?X(P[pi+1].dog):null;var d="M"+f(dx)+" "+f(y0)+"V"+f(yb+z);if(nx!==null)d+="V"+f(yb+z+gapP/2)+"H"+f(nx)+"V"+f(py[pi+1]);g.push('<path class="pub-dog" d="'+d+'" fill="none" stroke="#000" stroke-width="0.8"/>');}
     /* the data: each segment joined, points drawn over the paths; an open point is filled white */
     (p.series||[]).forEach(function(s){(s.segs||[]).forEach(function(seg){if(seg.length<2)return;g.push('<polyline points="'+seg.map(function(o){return f(X(o.i))+","+f(Y(o.y));}).join(" ")+'" fill="none" stroke="#000" stroke-width="0.9"'+(DASH[s.dash%DASH.length]?' stroke-dasharray="'+DASH[s.dash%DASH.length]+'"':"")+"/>");});});
-    (p.singles||[]).forEach(function(o){g.push('<circle cx="'+f(X(o.i))+'" cy="'+f(Y(o.y))+'" r="2.4" fill="#fff" stroke="#000" stroke-width="0.7" stroke-dasharray="1 0.8"><title>'+x(o.title||"")+"</title></circle>");});
-    (p.series||[]).forEach(function(s){(s.pts||[]).forEach(function(o){g.push(marker(s.sym,X(o.i),Y(o.y),2.5,o.title));if(o.mark)g.push('<text x="'+f(X(o.i))+'" y="'+f(Y(o.y)-4.5)+'" font-size="'+T.small+'" text-anchor="middle">'+x(o.mark)+"</text>");});});
+    (p.singles||[]).forEach(function(o){g.push('<circle cx="'+f(X(o.i))+'" cy="'+f(Y(o.y))+'" r="'+f(Math.min(2.4,mr))+'" fill="#fff" stroke="#000" stroke-width="0.7" stroke-dasharray="1 0.8"><title>'+x(o.title||"")+"</title></circle>");});
+    (p.series||[]).forEach(function(s){(s.pts||[]).forEach(function(o){g.push(marker(s.sym,X(o.i),Y(o.y),mr,o.title,msw));if(o.mark)g.push('<text x="'+f(X(o.i))+'" y="'+f(Y(o.y)-mr-2)+'" font-size="'+T.small+'" text-anchor="middle">'+x(o.mark)+"</text>");});});
     /* marks: a second observer's day (an open inverted triangle) and probes at the top; absences above the axis */
     (p.tmarks||[]).forEach(function(m){var mx=X(m.s);if(m.kind==="ioa")g.push('<polygon class="pub-ioa" points="'+f(mx-2)+","+f(y0+0.5)+" "+f(mx+2)+","+f(y0+0.5)+" "+f(mx)+","+f(y0+3.8)+'" fill="#000"><title>'+x(m.title||"")+"</title></polygon>");
       else g.push('<text x="'+f(mx)+'" y="'+f(y0+T.small+5)+'" font-size="'+T.small+'" text-anchor="middle">'+x(m.kind)+"<title>"+x(m.title||"")+"</title></text>");});
