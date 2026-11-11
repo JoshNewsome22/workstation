@@ -1,6 +1,6 @@
 /* v23.55 (review Wave 4, F488, F473, F517): zoom is not stopped (an iPad or iPhone only keeps Safari from zooming into a
    tapped field); the view tabs' progress dots wait until typing pauses and then catch up; typing in IA-1 has no long
-   freeze; Help counts 48 forms. Simulated data only.  usage: node qa/w4-zoom-typing-test.js */
+   freeze; Help counts 49 forms. Simulated data only.  usage: node qa/w4-zoom-typing-test.js */
 const L=require(__dirname+'/lib.js');const {sleep}=L;
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,900):''));if(!c)fails++;};
 const IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
@@ -28,7 +28,7 @@ const IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (
   /* Help */
   const h=await br.newContext();const hp=await h.newPage();await hp.goto(L.BASE+'/NBH-Workstation/index.html');await sleep(900);
   const src=fs.readFileSync(dir+'index.html','utf8');
-  ok('6 Help counts 48 forms (the one-file edition and the note on forms opened on their own)',/All 48 forms are inside this file/.test(src)&&/Each of the 48 forms also works on its own/.test(src)&&!/\b46 forms\b/.test(src.replace(/<!--[\s\S]*?-->/g,'')),null);
+  ok('6 Help counts 49 forms (the one-file edition and the note on forms opened on their own)',/All 49 forms are inside this file/.test(src)&&/Each of the 49 forms also works on its own/.test(src)&&!/\b46 forms\b/.test(src.replace(/<!--[\s\S]*?-->/g,'')),null);
   await h.close();
   ok('7 no page errors',errs.length===0,errs);
   }catch(e){fails++;console.log('FAIL exception',e&&e.stack||e);}

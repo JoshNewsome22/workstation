@@ -7,7 +7,7 @@
      and, on screen only, what was typed and not yet added: an incident being entered and a probe's stop rule (ABC-1), an
      addendum and its reason (CN-1), the live recorder's setting and note and the quick check (PA-1), the recorder's note
      (OB-1), the staff link being made (DD-1), typed marks (MT-1), the recorder's phase label (EA-1, AD-1).
-   Every one of the 48 forms is opened on its own and put through four runs, each from a fresh page:
+   Every one of the 49 forms is opened on its own and put through four runs, each from a fresh page:
      1  a marker typed into every text box of the form, then Open (the person's own: the file box) of the form's own blank
         file: the form's file holds no marker; then every sheet is shown, and no box that can be seen holds one, nor does
         any of the boxes named in DRAFTS (seen or not: they are the ones a button reads)
@@ -115,5 +115,5 @@ async function one(br,f,log){const id=f.id,K=KEEP[id]||{},kf=K.file||{};const R=
   await br.close();
   for(const f of forms){const R=out[f.id];
     ok(f.id+': Open and Clear all leave nothing of the record before ('+(R.filled||0)+' boxes marked, '+(R.sim||0)+' leaves from the simulation)',!R.bad.length,R.bad);}
-  ok('all the forms were run',forms.length===(ONLY.length||48),forms.length);
+  ok('all the forms were run',forms.length===(ONLY.length||49),forms.length);
   console.log('\n'+(n-fails)+' of '+n+' checks passed');process.exit(fails?1:0);})();

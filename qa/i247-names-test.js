@@ -13,7 +13,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const own=forms.filter(f=>/function nbhNameControls|function nbhHasName/.test(fs.readFileSync(path.join(W,f),'utf8')));
   const ui=fs.readFileSync(path.join(W,'nbh-ui.js'),'utf8'),srcP=path.join(L.ROOT,'tools','blocks','nbh-ui.html'),src=fs.existsSync(srcP)?fs.readFileSync(srcP,'utf8'):null;
   ok('1 no form carries its own copy of the naming routine ('+forms.length+' forms); nbh-ui.js has it once'+(src?', and its source':''),
-    forms.length===48&&!own.length&&(ui.match(/function nbhNameControls/g)||[]).length===1&&(src===null||(src.match(/function nbhNameControls/g)||[]).length===1),{own:own.slice(0,5)});
+    forms.length===49&&!own.length&&(ui.match(/function nbhNameControls/g)||[]).length===1&&(src===null||(src.match(/function nbhNameControls/g)||[]).length===1),{own:own.slice(0,5)});
   const ctx=await br.newContext({viewport:{width:1366,height:900}});ctx.on('dialog',d=>d.accept().catch(()=>{}));
   const file=pre=>forms.find(f=>f.startsWith(pre));
   /* v25.71: a field with a label of its own is named too (nbhHasName leaves it as it is): v25.64 put TB-1's five cusp criteria,

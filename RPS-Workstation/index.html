@@ -1882,7 +1882,8 @@ const FORMS=[
   ['BC-1','Behavioral Contrast','BC-1_Behavioral-Contrast_v2026-09.html'],
   ['MS-1','Medication Side Effects','MS-1_Medication-Side-Effect-Monitoring_v2026-09.html'],
   ['IM-1','Self-Injury Trauma Scale and Injury Monitoring','IM-1_Self-Injury-Trauma-and-Injury-Monitoring_v2026-10.html'],
-  ['FD-1','Feeding and Mealtime','FD-1_Feeding-and-Mealtime_v2026-11.html']]]   /* v25.66 the 48th form */
+  ['FD-1','Feeding and Mealtime','FD-1_Feeding-and-Mealtime_v2026-11.html'],   /* v25.66 the 48th form */
+  ['ME-1','Medical Event Record','ME-1_Medical-Event-Record_v2026-11.html']]]   /* v25.78 the 49th form */
 ];
 /* v25.68 (design review H6, M1) each form's short name (the form row and the list of forms say the code and it, the full name in
    the tooltip) and the words it is found by (Find a form). Beside FORMS, not in its rows: the build tools read each row as
@@ -1894,7 +1895,7 @@ const FORM_SHORT={'DM-1':'Student profile','IC-1':'Consent','RR-1':'Records revi
   'SM-1':'Self-monitoring','SR-1':'Reinforcement schedules','GC-1':'Group contingencies','VS-1':'Visual supports','TK-1':'Token board','RM-1':'Relapse plan',
   'PR-1':'Plan review','CN-1':'Session notes','RS-1':'RBT supervision','CR-1':'Crisis plan','CT-1':'Caregiver training','TV-1':'Training video','HD-1':'Home sheets',
   'EB-1':'Staff brief','QS-1':'Quick start','DT-1':'Delay tolerance','AD-1':'Reinforcer delivery','TE-1':'Token economy','BC-1':'Behavioral contrast',
-  'MS-1':'Medication effects','IM-1':'Injury monitoring','FD-1':'Feeding'};
+  'MS-1':'Medication effects','IM-1':'Injury monitoring','FD-1':'Feeding','ME-1':'Medical events'};
 const FORM_KW={'DM-1':'details contacts family language interpreter culture','IC-1':'permission parent signature signed agreement',
   'RR-1':'files history evaluation prior iep','TB-1':'definition define operational dead man test','IA-1':'fast qabf mas questionnaire rating function',
   'IN-1':'interview teacher parent','SI-1':'','OB-1':'narrative ioa agreement',
@@ -1909,12 +1910,13 @@ const FORM_KW={'DM-1':'details contacts family language interpreter culture','IC
   'RS-1':'hours','CR-1':'restraint seclusion safety emergency debrief','CT-1':'parent home','TV-1':'film',
   'HD-1':'parent family','EB-1':'substitute limited contact','QS-1':'','DT-1':'waiting',
   'AD-1':'','TE-1':'','BC-1':'','MS-1':'',
-  'IM-1':'sits','FD-1':'meal food eating'};
+  'IM-1':'sits','FD-1':'meal food eating',
+  'ME-1':'er emergency room hospital 911 ambulance seizure swallowed ingested ingestion pica choking allergy allergic injury illness discharge nurse incident'};
 const ALL=FORMS.flatMap(g=>g[1]);
 const state={cur:null,ticked:{},status:{},frames:{},mismatch:{},savedAt:null,lastSig:'',pending:{},caseOrder:[],lastInput:0,warm:null};   /* v21.61 pending: the case's forms not loaded yet, as the file holds them */
 
 /* ================= the one-file edition =================
-   build-single.py packs the 48 forms, the PDF tools and a copy of this page
+   build-single.py packs the 49 forms, the PDF tools and a copy of this page
    into this one file, gzip-compressed and base64-encoded in text blocks at
    the end of the body. When those blocks are present the forms are opened
    from them, and a case is kept as one HTML file: this page, the same blocks,
@@ -3338,6 +3340,10 @@ FACT_SRC['DA-1']='demands';FACT_GEN.push('DA-1');
 /* v25.66 (FEED-H3..H6) Form FD-1 joins the case as 'feeding': the screen and gate, the meal observation, the plan and the data */
 FACT_SRC['FD-1']='feeding';FACT_GEN.push('FD-1');
 {const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.feeding);};factsSig=function(f){return fsg(f)+(f&&f.feeding?JSON.stringify(f.feeding):'');};}
+/* v25.78 Form ME-1 joins the case as 'medical': how many medical events, the last one's date, kind and level of care, and the
+   follow-up still open. What happened, what a doctor said and the attachments stay on Form ME-1. */
+FACT_SRC['ME-1']='medical';FACT_GEN.push('ME-1');
+{const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.medical);};factsSig=function(f){return fsg(f)+(f&&f.medical?'|med'+JSON.stringify(f.medical):'');};}
 /* v25.69 (wave 3) Form OB-1's classroom practices check, carried in gatherFacts below */
 {const hf=hasFacts,fsg=factsSig;hasFacts=function(f){return hf(f)||!!(f&&f.classroom);};factsSig=function(f){return fsg(f)+(f&&f.classroom?'|cls'+JSON.stringify(f.classroom):'');};}
 async function gatherFacts(push){
@@ -3432,6 +3438,7 @@ function paintFacts(){
   if(f.records)bits.push('<b>Records</b> <i>('+esc(s.records||'')+')</i>');
   if(f.home)bits.push('<b>Home sheets:</b> '+((f.home.sheets||[]).length)+' <i>('+esc(s.home||'')+')</i>');
   if(f.injury)bits.push('<b>Injuries</b> <i>('+esc(s.injury||'')+')</i>');
+  if(f.medical)bits.push('<b>Medical events:</b> '+(+f.medical.count||0)+' <i>('+esc(s.medical||'')+')</i>');   /* v25.78 Form ME-1 */
   if(f.skills)bits.push('<b>Skill programs:</b> '+((f.skills.programs||[]).length)+' <i>('+esc(s.skills||'')+')</i>');
   if(f.training)bits.push('<b>Rehearsal steps:</b> '+(f.training.steps||[]).length+' <i>('+esc(s.training||'')+')</i>');   /* v21.77 Form TV-1, for Form ST-1 */
   if((f.menu||[]).length)bits.push('<b>Reinforcers:</b> '+esc(f.menu.slice(0,4).map(m=>m.name).join(', '))+(f.menu.length>4?' and '+(f.menu.length-4)+' more':'')+' <i>('+esc(s.menu||'')+')</i>');
@@ -3766,7 +3773,7 @@ function staticize(html){
 const MP_GUIDE_FORMS=['AD-1','DM-1','EA-1','EB-1','GB-1','IA-1','IC-1','MS-1','OB-1','PA-1','QS-1','RR-1','RA-1','TB-1','TD-1',
   /* v22.77 (I242) the forms whose Guide is their Guide view (.only-guide), left out of the packet now unless kept here */
   'BC-1','CF-1','CN-1','CR-1','CT-1','DA-1','FS-1','GC-1','HD-1','IM-1','IN-1','MT-1','PD-1','PR-1','RM-1','SA-1','SI-1','SM-1','SR-1','ST-1','SV-1',
-  'TE-1','TI-1','TK-1','TV-1','VS-1','FD-1'];
+  'TE-1','TI-1','TK-1','TV-1','VS-1','FD-1','ME-1'];
 function packetOpts(){let o={};try{o=JSON.parse(localStorage.getItem('nbh.packet')||'{}')||{};}catch(e){}
   return {refs:/^(end|form|none)$/.test(o.refs)?o.refs:'end',abc:o.abc==='full'?'full':'compact',blanks:!!o.blanks,order:o.order==='list'?'list':'case',guides:Object.assign({},o.guides||{})};}
 /* v22.39 (review F466) the packet in the case's order: consent, assessment, the FBA, the plan, then the data record (DD-1 and the
@@ -4898,7 +4905,7 @@ const CASE_MAP=[
  ['Define what is being assessed','In the first days. The targets defined here carry to every other form.',
   [['TB-1','candidates to targets: definitions, examples, clusters, replacement'],['SI-1','the student’s own account, assent plan, treatment preference'],['IN-1','teacher, parent and staff interviews'],['IA-1','indirect instruments (FAST, QABF, MAS, PBQ, WEFA) scored and compared; respondent pages']]],
  ['Observe and measure','Across the first one to two weeks; DD-1 starts the baseline that runs for the rest of the case.',
-  [['OB-1','direct observation record'],['IM-1','injuries from self-injury: the SIT Scale at intake, then on its schedule'],['FD-1','feeding and mealtime: the screen and who leads, a meal observation, food preferences, bite-by-bite data'],['ABC-1','ABC recording and conditional probabilities'],['SP-1','scatter plot: when and where it happens'],['MT-1','discontinuous measurement when counting is not possible'],['DD-1','daily data and the graph: baseline, then treatment']]],
+  [['OB-1','direct observation record'],['IM-1','injuries from self-injury: the SIT Scale at intake, then on its schedule'],['FD-1','feeding and mealtime: the screen and who leads, a meal observation, food preferences, bite-by-bite data'],['ME-1','a medical event at school: a swallowed item, a seizure, a serious injury, an allergic reaction; what was done, the care received, the papers and photos, the follow-up'],['ABC-1','ABC recording and conditional probabilities'],['SP-1','scatter plot: when and where it happens'],['MT-1','discontinuous measurement when counting is not possible'],['DD-1','daily data and the graph: baseline, then treatment']]],
  ['Test what you think','When the descriptive data leave the function open, or the stakes call for it; reinforcers are assessed here either way.',
   [['VI-1','isolate one variable from the descriptive record, before an analysis'],['EA-1','experimental (functional) analysis and its variants'],['DA-1','which demands, when escape is the hypothesis'],['PA-1','preference assessment: the ranked menu carries forward'],['RA-1','confirm the preferred items reinforce']]],
  ['Conclude','One report, with the hypothesis, what was ruled out, and what would change the conclusion.',
@@ -5027,7 +5034,7 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Install it</b> to open it from its own icon: on an iPad, in Safari, <b>Share</b>, then <b>Add to Home Screen</b>; on a Mac, in Safari, <b>File</b>, then <b>Add to Dock</b>; in Chrome or Edge, the install icon in the address bar. Each device keeps its own copy. Installed on an iPad, a file you save opens the share sheet: choose <b>Save to Files</b>; the master print and a respondent page\u2019s preview open inside the app, with Print and Close, and <b>Own tab</b> shows the form full-window.</p>'+
      '<p>The website only hands the workstation\u2019s files to the device; what you type is not sent back to it. Where a student\u2019s information can go is listed under <b>Where the student\u2019s data goes</b>, below.</p>'):'')+
    (EMBED?fold('The one-file edition',
-     '<p>All 48 forms are inside this file. <b>Save case</b> writes the case as a file of its own, <i>CASE_Student_date.json</i> (the same file the website edition writes, a few hundred KB); <b>Open case</b> in this file opens it again. Keep that file with the student’s records.</p>'+
+     '<p>All 49 forms are inside this file. <b>Save case</b> writes the case as a file of its own, <i>CASE_Student_date.json</i> (the same file the website edition writes, a few hundred KB); <b>Open case</b> in this file opens it again. Keep that file with the student’s records.</p>'+
      '<p>For someone who does not have the workstation, <b>Case</b>, <b>Save a case that opens on its own</b> writes <i>Student.case.html</i>: the whole workstation (about 21 MB) with the case in it, which opens when it is double-clicked. A <i>.case.html</i> saved before v22.22 opens as before, and Save case writes back into it.</p>'):'')+
    fold('The staff directory, questionnaires and the rest',   /* v23.56 (review F513) */
      '<p><b>Staff directory</b> (the top bar; also Go to): the school staff you send forms to, typed once for the whole caseload: name, role, the groups they belong to (<i>Member of</i>), email, phone, school and a note. <b>Add a person</b>, or <b>Paste a list</b> (rows copied from a spreadsheet, an email’s To line, or a group’s members page); <b>Save to a file</b> writes a CSV and <b>Open a file</b> reads one back. The forms offer it wherever a staff member is named, and in any other text box <b>@</b> and the first letters of a name or a role write the name in. With Google Drive on, the directory is kept there too, and each device’s changes are merged.</p>'+
@@ -5048,7 +5055,7 @@ $('#help').addEventListener('click',()=>{
      '<div class="sh-row"><label for="hpApiKey">API key on this '+HERE+' (shared cases)</label><input id="hpApiKey" autocomplete="off" spellcheck="false" value="'+esc(kvGet('nbh.google.apikey')||'')+'"></div>'+
      '<button type="button" class="primary" id="hpKeysSave">Keep them on this '+HERE+'</button></div>')+
    fold('Where the student\u2019s data goes',dataWhere())+
-   '<div class="note">Each of the 48 forms also works on its own, opened directly from this folder, with the shared nbh-*.js files beside it: it saves, opens and prints as it does here. A single form file sent somewhere else, away from those files, opens without its letterhead, writing help and Autosave; for one file that carries everything, use the one-file edition. Nothing the workstation does changes the form files.</div>');
+   '<div class="note">Each of the 49 forms also works on its own, opened directly from this folder, with the shared nbh-*.js files beside it: it saves, opens and prints as it does here. A single form file sent somewhere else, away from those files, opens without its letterhead, writing help and Autosave; for one file that carries everything, use the one-file edition. Nothing the workstation does changes the form files.</div>');
 });
 
 /* ================= bookmarking a saved packet =================
@@ -6339,17 +6346,18 @@ async function grab(id,verb,extra,ms,frame){
    case holds references, so Autosave, the caseload and case history stay small; anything written to a file, a hand-on copy, a
    backup or Drive carries them again, so a file opens anywhere. (v22.57) The other forms' pictures and the student photo are
    kept so by the caseload and History; those forms hold them inline while open. */
-const MEDIA_FORMS=['TV-1','IM-1'];   /* v25.66 IM-1's wound photos are kept as references too */
+const MEDIA_FORMS=['TV-1','IM-1','ME-1'];   /* v25.66 IM-1's wound photos are kept as references too; v25.78 ME-1's photos and papers, and a PDF (a discharge paper) is kept in the store as a picture is */
 /* v22.57 every form's pictures and the student photo: the caseload copy, History's restore points and Drive's copy brought
    here keep them in the store too (each holds references), and a form other than TV-1 is handed them inline, as before, when
    the case opens or one form is restored. A picture is the same picture inline or as a reference: Drive's "same copy" test
    and History's comparisons see it so. */
+const MEDIA_DATA=/data:(?:(?:image|audio|video)\/|application\/pdf)/;
 function mediaHas(d){const M=window.nbhMedia;if(!M||!d||!d.forms)return false;if(M.isRef(d.photoSrc))return true;
   return Object.keys(d.forms).some(id=>{const f=d.forms[id];if(!f||!f.snap)return false;let t;try{t=JSON.stringify(f.snap);}catch(e){return false;}
-    return MEDIA_FORMS.includes(id)?/data:(image|audio|video)\//.test(t):t.indexOf(M.PREFIX)>=0;});}
+    return MEDIA_FORMS.includes(id)?MEDIA_DATA.test(t):t.indexOf(M.PREFIX)>=0;});}
 async function mediaIn(d,how){const M=window.nbhMedia;if(!M||!d||!d.forms)return d;let n=0,bytes=0,miss=0;
   for(const id of Object.keys(d.forms)){const f=d.forms[id];if(!f||!f.snap)continue;let t;try{t=JSON.stringify(f.snap);}catch(e){continue;}
-    if(MEDIA_FORMS.includes(id)){if(!/data:(image|audio|video)\//.test(t))continue;
+    if(MEDIA_FORMS.includes(id)){if(!MEDIA_DATA.test(t))continue;
       try{const r=await M.absorbText(t,4000);if(r.n){f.snap=JSON.parse(r.text);n+=r.n;bytes+=r.bytes;}}catch(e){}}
     else if(t.indexOf(M.PREFIX)>=0){try{const r=await M.inlineText(t);f.snap=JSON.parse(r.text);miss+=r.missing.length;}catch(e){}}}
   if(M.isRef(d.photoSrc)){let u='';try{u=await M.dataUrl(d.photoSrc);}catch(e){}if(u)d.photoSrc=u;else{delete d.photoSrc;miss++;}}
@@ -6360,7 +6368,7 @@ async function mediaIn(d,how){const M=window.nbhMedia;if(!M||!d||!d.forms)return
 async function mediaSnapIn(id,snap){const M=window.nbhMedia;if(!M||MEDIA_FORMS.includes(id)||!snap)return snap;
   try{const t=JSON.stringify(snap);if(t.indexOf(M.PREFIX)<0)return snap;return JSON.parse((await M.inlineText(t)).text);}catch(e){return snap;}}
 /* the case kept on this device: each picture, sound and the student photo of 4000+ characters as a reference */
-const MEDIA_BIG=/data:(?:image|audio|video)\/[^"\\]{4000}/;
+const MEDIA_BIG=/data:(?:(?:image|audio|video)\/|application\/pdf)[^"\\]{4000}/;
 async function mediaPackParts(forms,photoSrc){const M=window.nbhMedia,out={forms,photoSrc,changed:false};
   if(!M||!forms)return out;try{await M.ready();}catch(e){return out;}if(M.mode()==='memory')return out;
   const F={};for(const id of Object.keys(forms)){const f=forms[id];F[id]=f;if(!f||!f.snap)continue;let t;try{t=JSON.stringify(f.snap);}catch(e){continue;}
@@ -6836,6 +6844,7 @@ function tdSafety(f){const L=[],cr=f.crisis||{},inj=f.injury||{},rd=((f.data||{}
   rsUnlogged(f).forEach(x=>L.push({k:'Safety',t:'Form '+x.src+' records a '+(x.kind==='seclusion'?'seclusion':'restraint')+' on '+esc(tdMd(x.date))+(x.time?' '+esc(x.time):'')+' that is not on Form DD-1’s incident record: log it there (Log it now), so its notices and its report are tracked',open:'DD-1'}));
   (inj.open||[]).filter(x=>x&&!x.done).forEach(x=>L.push({k:'Injury',t:esc(x.what)+(x.due?' (due '+esc(tdMd(x.due))+', '+tdWhen(x.due)+')':''),open:'IM-1'}));
   if(+inj.count30>=3)L.push({k:'Injury',t:inj.count30+' injuries in the last 30 days (Form IM-1): look at the trend with the team and the nurse',open:'IM-1'});
+  ((f.medical||{}).open||[]).filter(x=>x&&!x.done).forEach(x=>L.push({k:'Medical',t:esc(x.what)+(x.due?' (event of '+esc(tdMd(x.due))+')':''),open:'ME-1'}));   /* v25.78 Form ME-1: the follow-up a medical event still needs */
   return L;}
 /* v23.31 (CR-1 review I175) Form CR-1's own dates on Today: the crisis plan's next review (two weeks ahead, or past), and a change
    a restraint's debriefing decided that is not done, due within a week or overdue (the form it lands on opens) */
@@ -6987,7 +6996,7 @@ async function clOtherAsk(p){const key=clKey(p),as=state.openAs;if(!key||!as||!a
   return !!(await wsUI.confirm('Replace the case already kept for '+b+'?\nThe case on screen was opened as '+aa+'. The name and ID at the top now match '+bb+', a case already kept on this '+HERE+(when?' (saved '+when+')':'')+
     '. Saving puts the case on screen in its place'+(drv?', here and in Google Drive':'')+'.\n\nIf the name or ID at the top is a slip, press Cancel and correct it. To work on the case already kept, press Cancel and open it from Caseload.',
     {ok:'Replace the kept case',danger:true}));}
-const CL_ORDER=['Overdue','Safety','Injury','Removals','Decision','Timeline','Due','Home','Data','Integrity','Aim'];
+const CL_ORDER=['Overdue','Safety','Injury','Medical','Removals','Decision','Timeline','Due','Home','Data','Integrity','Aim'];
 const TD_HOT=/^(Overdue|Safety|Injury|Removals)$/;   /* v21.92 a red tag; v24.90 ten days of removal too */
 const clRank=k=>{const i=CL_ORDER.indexOf(k);return i<0?CL_ORDER.length:i;};
 const clName=r=>{if(isStaffRec(r))return String(r.client).trim();const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim();if(!clIni())return w||'(no name)';const p=w.split(/\s+/).filter(Boolean);return p.length?p.map(x=>x[0].toUpperCase()+'.').join(' '):'(no name)';};
@@ -8673,7 +8682,7 @@ if(typeof nbhDocRead==='undefined'){const b=document.getElementById('readDoc');i
 </script>
 <script id="nbh-pwa">
 /* ================= the offline copy and the installed app (v21.43) =================
-   sw.js, beside this page, keeps a copy of the workstation's own files on this device (the shell, the 48 forms, the
+   sw.js, beside this page, keeps a copy of the workstation's own files on this device (the shell, the 49 forms, the
    picture library, the respondent page, the PDF tools, the manifest and icons), so everything opens without the
    internet; see the comment at the top of sw.js. This part of the page registers it, on https or on this computer
    (localhost) only, never from a drive and never in the one-file edition, which needs none. The chip beside Autosave
@@ -11553,7 +11562,7 @@ function alertOf(){let L=[];try{L=todayItems();}catch(e){L=[];}
   const od=x=>/class="late"|\d+ days? overdue/.test(String(x.t||''));
   const need=L.filter(x=>x&&(TD_HOT.test(x.k)||x.k==='Integrity'||od(x))).map(x=>({x,r:od(x)&&!TD_HOT.test(x.k)?0:clRank(x.k)}));
   need.sort((a,b)=>a.r-b.r);return {top:need.length?need[0].x:null,od:need.length&&need[0].r===0&&!TD_HOT.test(need[0].x.k),rest:L.length-(need.length?1:0)};}
-const KIND={Overdue:'Overdue',Safety:'Safety',Injury:'Injury',Removals:'Removals from class',Integrity:'Treatment integrity'};
+const KIND={Overdue:'Overdue',Safety:'Safety',Injury:'Injury',Medical:'Medical',Removals:'Removals from class',Integrity:'Treatment integrity'};
 function alertHtml(){const a=alertOf(),x=a.top;if(!x)return '';
   const h=a.od?'Overdue':KIND[x.k]||x.k,ti=x.k==='Integrity'?(()=>{const t=(state.facts||{}).integrity,c=t&&t.criterion||90;return /under|below|not met|wrongly/i.test(x.t)?'Treatment integrity is under '+c+'%':/No integrity check/.test(x.t)?'Treatment integrity has not been checked lately':'Treatment integrity';})():h;
   return '<section class="ch-alert ch-o1" aria-labelledby="chAlH"><h3 id="chAlH">'+esc(ti)+'</h3><p class="ch-at">'+x.t+'</p><div class="ch-btns">'+

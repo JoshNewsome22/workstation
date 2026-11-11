@@ -106,7 +106,8 @@
   var REF_RE = /nbh-media:(m[0-9a-f]+-\d+):([^:"'\\\s]*):(\d+)/g;
   function refsIn(text) { var out = [], m; REF_RE.lastIndex = 0; while ((m = REF_RE.exec(String(text)))) out.push(makeRef(m[1], m[2], +m[3])); return out; }
   /* a data URL inside a JSON text: the escaped form is what the text holds (a data URL has no quotes or backslashes) */
-  var DATA_RE = /data:(image|audio|video)\/[a-zA-Z0-9.+-]+(?:;[^;,"'\\\s]+)*?;base64,[A-Za-z0-9+\/=]+/g;
+  /* v25.78 a PDF (Form ME-1's discharge papers) is kept as a picture is */
+  var DATA_RE = /data:(?:(?:image|audio|video)\/[a-zA-Z0-9.+-]+|application\/pdf)(?:;[^;,"'\\\s]+)*?;base64,[A-Za-z0-9+\/=]+/g;
   async function absorbText(text, min) {
     min = min || 4000; var s = String(text), found = {}, m, n = 0, bytes = 0;
     DATA_RE.lastIndex = 0;

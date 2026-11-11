@@ -11,7 +11,7 @@ Paths below are from the repository root. The test server the checks expect:
 - `tools/zip-release.sh <folder> [--speech]` (v22.17) — the upload zips: both editions without `nbh-asr/`, the reply box,
   the rewrite relay, and with `--speech` the recogniser's own zips. `README.md`, *Making a release*, has the order.
 - `tools/forms/<ID>/` — the source parts of the thirteen forms built from parts
-  (CN-1, DA-1, FD-1, GC-1, HD-1, IM-1, QS-1, SA-1, SI-1, SM-1, SR-1, TK-1, TV-1, VS-1): `meta.json`, `toolbar.html`,
+  (CN-1, DA-1, FD-1, GC-1, HD-1, IM-1, ME-1, QS-1, SA-1, SI-1, SM-1, SR-1, TK-1, TV-1, VS-1): `meta.json`, `toolbar.html`,
   `own.css`, `body.html`, `script.js` (SM-1 and VS-1 keep `script-main.js`, copied to
   `script.js`; TK-1 keeps `script-main.js` and its `script.js` is the vendored QR encoder
   `tools/vendor/qrcode-generator/qrcode.js`, licence header kept, followed by `script-main.js`). Never edit the built file of one of these forms; edit the parts and rebuild.

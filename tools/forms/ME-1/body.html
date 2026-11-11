@@ -1,0 +1,84 @@
+  <script src="nbh-media.js"></script>   <!-- v25.78 ME-1 attachments: the media store, photos and papers kept once on this device by reference -->
+  <!-- ===================== EVENTS (v25.78, the BCBA, 11/11) ===================== -->
+  <section class="only-events">
+    <h2 class="nbh-band">Student and Health Record</h2>
+    <div class="fieldgrid">
+      <div><label>Student</label><input data-m="client"></div>
+      <div><label>Student ID</label><input data-m="sid"></div>
+      <div><label>Grade</label><input data-m="grade"></div>
+      <div><label>Date of birth</label><input data-m="dob" placeholder="M/D/YYYY"></div>
+      <div><label>School or setting</label><input data-m="site"></div>
+      <div><label>Case BCBA</label><input data-m="bcba"></div>
+      <div><label>Medical alerts and allergies (Form DM-1)</label><input data-m="alerts" placeholder="seizure disorder; peanut allergy (EpiPen with the nurse)"></div>
+      <div><label>Health plans on file, and who holds them</label><input data-m="plans" placeholder="seizure action plan, with the school nurse"></div>
+      <div><label>School nurse</label><input data-m="nurse"></div>
+      <div><label>Emergency contact (name, phone)</label><input data-m="emerg"></div>
+    </div>
+    <p class="hint meScr" id="meCaseNote"></p>
+    <div class="meBox"><h3>What this record is, and is not</h3>
+      <p>It keeps what happened, what was done, what the doctor said and who was told, in one place with the case. It does <b>not</b> replace the school&rsquo;s or agency&rsquo;s own incident or accident report, the nurse&rsquo;s record, or a report of suspected abuse or neglect. In an emergency, follow the student&rsquo;s health plan and call 911; write here afterwards.</p></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Medical Events</h2>
+    <div class="grid-wrap"><table class="rt wide meList" id="meList"><thead><tr><th>#</th><th>Date</th><th>Kind</th><th>What happened</th><th>Care</th><th>Back at school</th><th>Still open</th><th>Attached</th><th class="noprint"></th><th class="nx"></th></tr></thead><tbody></tbody></table></div>
+    <div class="tools noprint"><button type="button" id="meNew2">New event</button><span class="status" id="meCount"></span></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Still Open</h2>
+    <p class="hint">What each event still needs: a follow-up not done, a clearance not received, a parent or guardian not yet told, a report not yet recorded.</p>
+    <ul id="meOpen"></ul>
+
+    <div class="noprint meScr">
+      <h3>When printing</h3>
+      <div class="ckrow">
+        <label class="ck"><input type="checkbox" data-c="printOne"> Print only the event that is open (not every event)</label>
+        <label class="ck"><input type="checkbox" id="mePhPrintOn"> Include the photos when printing</label>
+      </div>
+      <p class="hint">Photos print only when that box is ticked, and it is unticked each time the form opens. Attached papers (PDF) are listed by name on the printout; they are not printed with it.</p>
+    </div>
+  </section>
+
+  <!-- ===================== THIS EVENT ===================== -->
+  <section class="only-event">
+    <div id="meEdit" class="meScr"></div>
+    <div id="mePaper" class="mePaper"></div>
+    <input type="file" accept="image/*" id="mePhFile" multiple hidden aria-hidden="true" tabindex="-1">
+    <input type="file" accept="application/pdf,.pdf,image/*" id="meDocFile" multiple hidden aria-hidden="true" tabindex="-1">
+    <dialog id="meAttDlg" class="meDlg noprint" aria-labelledby="meAttDlgT">
+      <h3 id="meAttDlgT" style="margin:0 0 6px"></h3>
+      <div id="meAttDlgB"></div>
+      <div class="tools"><button type="button" class="tool" id="meAttClose">Close</button></div>
+    </dialog>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What This Form Is For</h2>
+    <p>One record for each medical event that needed more than routine care at school or on school time: something swallowed, a seizure that was long or intense, a serious injury, an allergic reaction, choking or trouble breathing, or an illness that ended with a doctor or an emergency room. The team can see what happened, what the doctor said, who was told and what still has to be done, without asking the family twice.</p>
+    <div class="meBox"><h3>It is not the official report</h3>
+      <p>The school&rsquo;s or agency&rsquo;s own incident or accident report, the nurse&rsquo;s record and any report of suspected abuse or neglect are made as their own rules say, by the people those rules name. This record sits beside them. In an emergency, follow the student&rsquo;s health plan and call 911; write here afterwards.</p></div>
+
+    <h2 class="nbh-band" style="margin-top:16px">Writing an Event</h2>
+    <ul>
+      <li><b>Kind.</b> Choosing the kind adds the questions that kind needs: for a seizure, when it started and ended and whether rescue medicine was given; for something swallowed, what it was, how many and where it came from; for an injury, the body part and how it happened.</li>
+      <li><b>What happened.</b> Write what was seen and done, in plain words, in the order it happened. Write who saw it. Do not write a diagnosis: write what the doctor said under <i>What the doctor said</i>, in the doctor&rsquo;s words or the discharge papers&rsquo; words.</li>
+      <li><b>Times.</b> A seizure&rsquo;s start and end give its length. The record shows the length; the student&rsquo;s seizure action plan says what to do and when to call 911.</li>
+      <li><b>Who was told.</b> The parent or guardian, an administrator, the BCBA, and whether the school&rsquo;s own report was made.</li>
+      <li><b>Back at school.</b> The date, whether a doctor&rsquo;s clearance was needed and received, and any limits on activity.</li>
+      <li><b>After the event.</b> What may have contributed, and what was changed. The form names the other forms worth opening: for something swallowed, Form DM-1&rsquo;s safety precautions, the item pool on Form PA-1 and the pica safety checklist in Form TD-1&rsquo;s protocol bank.</li>
+      <li><b>Follow-up.</b> Each thing still to do, with its date. What is still open shows on the Events page and reaches the workstation&rsquo;s lists.</li>
+    </ul>
+
+    <h2 class="nbh-band" style="margin-top:16px">Photos and Papers</h2>
+    <ul>
+      <li><b>Papers.</b> Discharge papers and a doctor&rsquo;s note can be attached as a PDF, or as photos of the pages. A PDF may be up to 8 MB.</li>
+      <li><b>Photos.</b> A photo is made smaller before it is kept. A photo <b>of the student</b> (an injury) can be added only when <i>Consent to photograph the student</i> is answered Yes. A photo of an item or of papers does not need that consent. Never photograph a private area.</li>
+      <li><b>Where they are kept.</b> On this device, and inside the case file when the case is saved. They do not go into the case facts other forms read, the CSV, the staff pages or the reply box. They go where the case file goes: decide where that is as you do for the rest of the student&rsquo;s record.</li>
+      <li><b>Printing.</b> Photos print only when <i>Include the photos when printing</i> is ticked on the Events page. Attached PDFs are listed by name.</li>
+      <li><b>This form&rsquo;s own file.</b> <i>Save data</i> writes this form&rsquo;s file with the photos and papers inside it. In the workstation, <i>Save case</i> carries them with the case.</li>
+    </ul>
+
+    <h2 class="nbh-band" style="margin-top:16px">Late Entries</h2>
+    <p>Each event keeps the time it was first written. One written more than 24 hours after it happened is marked <b>Late entry</b> on screen and on paper. Write it anyway: a late record is better than none.</p>
+
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p><b>Load simulation</b> fills the form with three invented events for training: something swallowed, a long seizure and a fall. Every name and detail is made up, and its one picture is drawn by the form.</p>
+  </section>
