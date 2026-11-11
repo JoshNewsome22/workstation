@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.82: Three handwashing chaining videos
+(the BCBA, 11/11: a real-life chain for the chaining videos, with a $30 limit; then "The handwashing video is great" and,
+after the teacher's voice was put into the room, "The handwashing videos are good")
+- **The videos** (1080p). One six-step handwashing chain (water on, wet hands, soap, scrub, rinse, water off and dry),
+  the same room and the same two people, taught three ways, each on its own card of Form TD-1's protocol bank and on the
+  **Chain** shelf of the video library (now five videos; 31 in all), each with its Steps, captions and Transcript:
+  - **Forward chaining** (3:25), card "Forward chaining for handwashing with a 2-s delay and guided completion" (Preas &
+    Mathews, 2021): the steps marked mastered, training and not yet taught; 2 s on a mastered step and on the training
+    step; specific praise when it is done alone; every later step guided hand over hand; praise and the item at the
+    end only after an independent training step; a prompted trial with neither; the next step after 2 in a row.
+  - **Backward chaining** (3:32), card "Backward chaining of self-care tasks with a least-to-most cue sequence" (Realon
+    et al., 1986): the command as written; the earlier steps fully guided, without talking; at the last step the cue
+    sequence (wait, gesture, light physical prompt, full guidance); reinforcement at once in at least three forms; the
+    step and the level of help recorded; then the step before it.
+  - **Total-task chaining** (3:19), card "Teach dressing, handwashing and snack making as whole chains, with staff
+    coached by video call" (Craig et al., 2021): a baseline; one short instruction; every step in every session, with
+    help from most to least only where it is needed; reinforcement at the end only; each step scored and the
+    percentage worked out; a later session with less help, and the 80% in 2 sessions criterion.
+- **The earlier chaining videos stay.** Backward and forward chaining after Slocum and Tiger (2011), with the made-up
+  three-step chain, are still on their own cards and on the same shelf.
+- **The teacher's voice.** The BCBA asked that the teacher sound as if her voice comes from the video, with the
+  narrator on top, then for less echo, twice. Her three lines per video were filtered as a voice a few steps from the
+  camera and given a short, light room (about 0.3 s). The narration was not mixed again: the videos' original sound was
+  kept frame for frame, and only the short stretches in which the teacher speaks were replaced. Checked by comparing
+  the sound frames: every frame outside her lines is the original data.
+- **How they were made.** 23 shots at 2K from one set of still frames, used across the three videos; two shots were
+  taken again (the guided turn-off, where the adult had pushed the lever herself; the guided soap). Cost: $17.03 of
+  the $30 limit, 6 Kling credits for the stills, about 5,700 ElevenLabs characters.
+- **Known limits.** The student's preferred item at the end of the forward chain is named, not shown. Soap, scrub and
+  rinse are short shots; a real routine scrubs for longer. The citation names are spoken by the narrator's voice
+  model, and may not be said as the authors say them.
+- **Size.** The three videos add 66 MB: the 31 videos are 397 MB. The videos' size limit in the tests went from
+  340,000 KB to 400,000 KB.
+- **The test run.** The whole run was not repeated. Run on the final copy, and passing: the two video library tests,
+  the transcript test, the versions and procedure-video tests, budget, the podcast test (it saves the workstation for
+  offline use and plays from the saved copy), and the version and docs tests. Each of the three videos was opened in the library in Chromium and played. Changed on
+  purpose: the video tests expect 31 videos and five on the Chain shelf; the library may be 4.8 screens long on an
+  iPad held sideways, 3.2 upright and 5.1 on a phone (a second row of chaining videos); a video may be up to 4
+  minutes long (3:20 until now); and the videos' size limit is 400,000 KB. The local speech-to-text model heard the
+  spoken lines of the three videos right, apart from spellings such as "favourite".
+  The offline-copy test (pwa-test) was started and stopped: with 31 videos it needs more than the 3 GB of free disk
+  this session has.
+- **Not checked.** Safari on a real iPad, and how the teacher's voice sounds on the iPad's own speaker.
 ### v25.81: Item Safety Check on Form PA-1
 (the BCBA, 11/11: "Yes" to "Shall I build the item safety check in Form PA-1?")
 - **What it is.** A check of the non-food items in a stimulus pool before any of them is given to the student: could
