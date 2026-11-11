@@ -9905,6 +9905,44 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.87: Leaving full screen, made sturdier, with a Diagnostics line; the change line's label on Publication graphs
+(the BCBA, 11/11, two pictures of an iPad with no words: a video playing in the device's full-screen player, and the
+same video paused in the video library a second later)
+- **What the pictures show.** The device's full-screen player has an X and an AirPlay button at the top left and no
+  other way out: the v25.86 note's "button with two arrows that leaves full screen and plays on" is not on this iPad.
+  After the X the video is paused. The pictures do not show which version the iPad was running; the strip above the top
+  bar is still pale in them, which v25.84 was meant to darken, so the iPad may not have had v25.84 to v25.86 yet, or
+  neither fix works on it. Help says which version a device runs ("This is version ..."), and so does the first line
+  of Diagnostics.
+- **Made sturdier,** on the three points where a device could differ from what was simulated: the pause and the end of
+  full screen may be up to 1.2 s apart (was 0.8); the video is asked to play up to four times over 1.6 s, until it has
+  started (was once; a device may refuse while its player is still closing); and the device's third way of saying full
+  screen has ended (webkitpresentationmodechanged) is heard too. Once the video has started again, a later pause is
+  the person's and stays. A pause after full screen ended is taken as the X only when the video was still playing at
+  that moment.
+- **Diagnostics, "Video, leaving full screen".** One line that says what the device's player did the last time a video
+  left full screen: the time, the order of the two events, how far apart, how often the page asked to play, what the
+  device answered, and whether the video was playing two seconds later. "Nothing recorded yet" on a device that has
+  v25.87 and has closed a full-screen video means the device sent none of the three signals. Kept in the browser
+  (localStorage nbh.videos.fsx); no student, nothing typed. This is how an iPad can show what cannot be seen here.
+- **Still not seen on an iPad.** Checked by sending the device's events by hand in Chromium
+  (qa/v2587-fullscreen-record-test.js, 13 checks, and the v25.86 test). If the Diagnostics line shows the iPad refusing,
+  the remaining route is a full-screen view of the page's own, which the page closes itself and so never pauses.
+- **Publication graphs, the change line's label again** (the BCBA, 11/11, of the picture sent with v25.85: "The
+  positioning of the condition label still seems off in the screenshot you sent. It shouldn't be directly on top of the
+  phrase change, like its touching it"). In that picture the label stood 3 pt to the left of its line, over the days
+  before the change, and the line ran up beside the words. Now, in Daily data and Form EA-1:
+  1. The label names what holds after the line, so it stays over the days after it: to the right of its line on one
+     row; when that does not fit, to the right on two rows; only then to the left of the line, and over it only when
+     neither side has room.
+  2. It stands 6 pt from its line (was 3).
+  3. The line starts at the top of the plot, under the row of labels, and no longer runs up beside the words.
+  A second row of labels makes the plot 9 pt lower on the page. Read from the request: "condition label" is taken to
+  mean the dashed line's label, the one that touched the line in the picture; the condition's own label (centred over
+  its sessions, on the row above) is not moved. qa/v2585-pub-figure-test.js, now 11 checks.
+- **The test run.** The whole run was not repeated. Run on the final copy: the two full-screen tests, the graph tests,
+  and the video, version and Diagnostics tests named in the commit. The offline-copy test was not run (not enough free
+  disk in this session).
 ### v25.86: Leaving full screen with the X does not pause a playing video
 (the BCBA, 11/11: "Should there be a way to exit from out of full screen when playing a video without the video pausing
 after you click the x button. There is a way to make it full screen while still playing the video but not the inverse")

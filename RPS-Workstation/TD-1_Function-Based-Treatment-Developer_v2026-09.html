@@ -8145,17 +8145,39 @@ function keepUrl(k,u){urls[k]=u;const i=order.indexOf(k);if(i>=0)order.splice(i,
  while(order.length>2){const j=order.findIndex(x=>x!==k);if(j<0)break;const old=order.splice(j,1)[0];try{URL.revokeObjectURL(urls[old]);}catch(e){}delete urls[old];}}
 /* v25.86 (the BCBA, 11/11: "Should there be a way to exit from out of full screen when playing a video without the video
    pausing after you click the x button") On an iPad the full-screen player is the device's own: its X closes it and pauses
-   the video, while the arrows button leaves full screen and plays on. A pause that arrives together with the end of full
-   screen (within 0.8 s, either order) was the X, not the person: the video plays on. A video paused earlier stays paused,
-   as does one that had ended. */
-function nbhKeepPlaying(vid){if(!vid||vid.__nbhKeep)return;vid.__nbhKeep=1;var was=false,pauseAt=0,pauseFs=false,endAt=0,W=800;
+   the video, and the page cannot change that player. A pause that arrives together with the end of full screen (either
+   order) was the X, not the person: the video plays on. A video paused earlier stays paused, as does one that had ended.
+   v25.87 (the BCBA's pictures, 11/11: that player has an X and no other way out, and the video was paused after it)
+   Not seen on an iPad, so made sturdier on the three points a device could differ: the two events may be up to 1.2 s
+   apart (was 0.8); the video is asked to play up to four times over 1.6 s, until it has started (was once, and a
+   device may refuse while its player is still closing); and the device's third way of saying full screen has ended
+   (webkitpresentationmodechanged) is heard too. Once the video has started, a later pause is the person's again.
+   What the last close did is kept for Diagnostics, in localStorage nbh.videos.fsx: the time, the order of the two
+   events, the gap, how often play was asked and what the device answered, and the state 2 s later. No student, nothing
+   typed. */
+function nbhKeepPlaying(vid){if(!vid||vid.__nbhKeep)return;vid.__nbhKeep=1;var was=false,pauseAt=0,pauseFs=false,endAt=0,late=0,rec=null,W=1200;
   var fs=function(){try{return !!(vid.webkitDisplayingFullscreen||document.fullscreenElement===vid||document.webkitFullscreenElement===vid);}catch(e){return false;}};
-  var go=function(){if(vid.ended||!vid.paused||!vid.getAttribute('src'))return;setTimeout(function(){if(!vid.paused||vid.ended)return;try{var p=vid.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},50);};
-  var begin=function(){was=true;},end=function(){if(!was)return;was=false;endAt=Date.now();if(pauseFs&&endAt-pauseAt<W)go();};
+  var put=function(o){if(o)rec=o;if(!rec)return;try{localStorage.setItem('nbh.videos.fsx',JSON.stringify(rec));}catch(e){}};
+  var nm=function(e){return String(e&&e.name||e||'error').slice(0,40);};
+  var tryPlay=function(mine){if(rec!==mine||mine.play==='started'||vid.ended||!vid.paused||!vid.getAttribute('src'))return;mine.tries++;
+    try{var p=vid.play();if(p&&p.then)p.then(function(){mine.play='started';if(rec===mine)put();},function(e){if(mine.play!=='started')mine.play=nm(e);if(rec===mine)put();});else mine.play='started';}catch(e){mine.play=nm(e);}put();};
+  var resume=function(order,gap){var mine={v:1,at:Date.now(),order:order,gap:gap,did:'play',tries:0,play:'',after:''};put(mine);
+    [60,350,900,1600].forEach(function(ms){setTimeout(function(){tryPlay(mine);},ms);});
+    setTimeout(function(){mine.after=vid.ended?'ended':vid.paused?'paused':'playing';if(rec===mine){put();rec=null;}},2000);};
+  var begin=function(){was=true;late=0;},end=function(){if(!was)return;was=false;endAt=Date.now();late=0;var g=endAt-pauseAt;
+    if(vid.ended)put({v:1,at:endAt,order:'ended',gap:0,did:'nothing',tries:0,play:'',after:'ended'});
+    else if(pauseFs&&g<W)resume('pause, then close',g);
+    else if(vid.paused)put({v:1,at:endAt,order:pauseFs?'pause, then close':'paused before',gap:pauseFs?g:0,did:'left paused',tries:0,play:'',after:'paused'});
+    else{late=endAt;put({v:1,at:endAt,order:'no pause',gap:0,did:'nothing',tries:0,play:'',after:'playing'});}};
   vid.addEventListener('webkitbeginfullscreen',begin);vid.addEventListener('webkitendfullscreen',end);
+  vid.addEventListener('webkitpresentationmodechanged',function(){var m=vid.webkitPresentationMode;if(m==='fullscreen')begin();else if(m==='inline')end();});
   /* the page's own full screen: heard on the document, and let go once this player has left the page */
   ['fullscreenchange','webkitfullscreenchange'].forEach(function(n){var h=function(){if(!vid.isConnected){document.removeEventListener(n,h);return;}if(fs())begin();else end();};document.addEventListener(n,h);});
-  vid.addEventListener('pause',function(){pauseAt=Date.now();pauseFs=was||fs();if(!pauseFs&&endAt&&pauseAt-endAt<W)go();});
+  vid.addEventListener('pause',function(){pauseAt=Date.now();
+    /* a pause just after full screen ended with the video still playing: the X, heard in the other order */
+    if(!was&&late&&pauseAt-late<W){var g=pauseAt-late;late=0;pauseFs=false;resume('close, then pause',g);return;}
+    late=0;
+    pauseFs=was||fs();});
   vid.addEventListener('play',function(){pauseAt=0;pauseFs=false;});}
 function build(){box=document.createElement('div');box.id='tdVideo';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby','tv-title');
  box.innerHTML='<div class="tv-box"><div class="tv-hd"><h3 id="tv-title"></h3><button type="button" id="tv-close"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="tv-cl">Close</span></button></div>'+

@@ -2969,7 +2969,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v25.86';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v25.87';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -4844,12 +4844,29 @@ function chromeMajor(){
   const m=/(?:Chrome|Edg)\/(\d+)/.exec(navigator.userAgent||'');
   return m?parseInt(m[1],10):0;
 }
+/* v25.87 what the device's video player did the last time a video left full screen (videos.html and Form TD-1 write it:
+   localStorage nbh.videos.fsx, no student). Read on an iPad, this line says whether the X's pause was heard and whether
+   the device let the video start again. */
+function fsxDiag(){
+  let o=null;try{o=JSON.parse(localStorage.getItem('nbh.videos.fsx')||'null');}catch(e){}
+  if(!o||!o.at||!o.order)return 'nothing recorded yet: play a video, make it full screen, close it, then open this again';
+  let t='';try{t=new Date(o.at).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});}catch(e){}
+  const gap=Math.max(0,Math.round(+o.gap||0))+' ms apart',n=+o.tries||0;
+  let s;
+  if(o.order==='ended')s='the video had ended; not started again';
+  else if(o.order==='no pause')s='closing did not pause the video; nothing to do';
+  else if(o.order==='paused before')s='the video was already paused; left paused';
+  else if(o.did==='left paused')s=o.order+', '+gap+': taken as your own pause; left paused';
+  else s=o.order+', '+gap+'; asked to play '+n+' time'+(n===1?'':'s')+': '+(o.play==='started'?'started':o.play?'refused ('+o.play+')':'no answer')+(o.after?'; 2 s later: '+o.after:'');
+  return (t?'at '+t+': ':'')+s;
+}
 $('#diag').addEventListener('click',()=>{
   const cv=chromeMajor();
   const heads=cv>=131?'yes \u2014 version '+cv:cv?'no \u2014 this is version '+cv+', and 131 or later is needed':
     appleMobile()?'not in print \u2014 iPad and iPhone browsers are all Apple\u2019s engine underneath; save the master print as PDF and Finish PDF adds them':'no \u2014 not Chrome or Edge; save the master print as PDF and Finish PDF adds them';
   const rows=[
    ['Version',WS_REL,'The version of the workstation on this device. After an upload, this line shows whether this device has the new one'],
+   ['Video, leaving full screen',fsxDiag(),'What the device\u2019s video player did the last time a video left full screen here: whether closing paused the video, and whether the device let it start again (v25.87). No student is in it'],
    ['Page origin',String(window.origin),'"null" is normal when opened from a drive'],
    ['Secure context',String(window.isSecureContext),''],
    ['Folder access API',('showDirectoryPicker' in window)?'present':'absent','Not used yet; would allow reading a student folder'],
@@ -12793,12 +12810,13 @@ window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr};
 })();
 </script>
 <script type="application/json" id="ws-whatsnew">
-{"v": "v25.86",
+{"v": "v25.87",
 "title": "What's new in this version",
 "notes": "SETUP.md",
 "items":[
-"Videos: leaving full screen with the X no longer pauses a video that was playing. A video you had paused yourself stays paused.",
-"Publication graphs: a change line's label sits beside its line, and the points of a long series no longer merge (v25.85).",
+"Videos: leaving full screen with the X should no longer pause a video that was playing. A video you had paused yourself stays paused.",
+"Diagnostics (in the More menu) has a new line, Video, leaving full screen: it says what this device's player did the last time a video left full screen.",
+"Publication graphs: the label of a dashed change line now sits over the days after its line, on two rows when one does not fit, and clear of the line. The line starts under the words.",
 "The strip at the very top of the screen takes the dark top bar's colour (v25.84)."]}
 </script>
 <script id="ws-v2570">

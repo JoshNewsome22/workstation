@@ -6913,7 +6913,24 @@ function figure(sp){
   var L0=(P[0]&&P[0].labels)||[],notes=[],lines1=1;
   L0.forEach(function(l){var w=Math.max(10,X(l.s1)-X(l.s0)-4);var ls=wrap(l.text,w,T.lab,2),pt=T.lab;if(!ls){ls=wrap(l.text,w,7,2);pt=7;}
     if(!ls){notes.push(l.text);ls=["["+notes.length+"]"];pt=7;}l.lines=ls;l.pt=pt;lines1=Math.max(lines1,ls.length);});
-  var ev0=(P[0]&&P[0].events||[]).length?9:0,MT=(L0.length?Math.ceil(4+lines1*10+4):8)+ev0;
+  /* the labels of the dashed change lines, placed here, before the top margin is set, since a wrapped label needs a second row.
+     v25.85 (the BCBA, 11/11, with a picture: a change line ran through its own label): beside its line, clear of the labels
+     already set and of the other change lines; over the line only when neither side has room.
+     v25.87 (the BCBA, 11/11, of the picture of that fix: "It shouldn't be directly on top of the phrase change, like its
+     touching it") The label names what holds after the line, so it belongs over the days after it: to the right of its
+     line on one row; when that does not fit, to the right on two rows; only then to the left. It stands 6 pt from its
+     line (was 3), and the line no longer runs up beside the words: it starts at the top of the plot, under the labels. */
+  var EV=(P[0]&&P[0].events)||[],evX=EV.map(function(l){return X(l.s);}),evBox=[],evPl=[],evRows=1,EG=6;
+  EV.forEach(function(l,li){evPl[li]=null;if(!l.text)return;var vx=evX[li],lo=2,hi=left+pw+MR-2,w1=tw(l.text,T.small),pl=null,
+      free=function(a,w){return a>=lo&&a+w<=hi&&evBox.every(function(b){return a+w+2<=b[0]||a>=b[1]+2;})&&evX.every(function(q,qi){return qi===li||q<a-1||q>a+w+1;});};
+    if(free(vx+EG,w1))pl={x:vx+EG,w:w1,lines:[l.text]};
+    else{var lim=hi;evX.forEach(function(q,qi){if(qi!==li&&q>vx)lim=Math.min(lim,q-1);});evBox.forEach(function(b){if(b[0]>vx)lim=Math.min(lim,b[0]-2);});
+      var two=lim-vx-EG>=24?wrap(l.text,lim-vx-EG,T.small,2):null,w2=0;
+      if(two&&two.length===2){two.forEach(function(t){w2=Math.max(w2,tw(t,T.small));});if(free(vx+EG,w2))pl={x:vx+EG,w:w2,lines:two};}
+      if(!pl&&free(vx-EG-w1,w1))pl={x:vx-EG-w1,w:w1,lines:[l.text]};
+      if(!pl)pl={x:Math.max(lo,Math.min(vx+EG,hi-w1)),w:w1,lines:[l.text],over:true};}
+    evBox.push([pl.x,pl.x+pl.w]);evPl[li]=pl;evRows=Math.max(evRows,pl.lines.length);});
+  var ev0=EV.length?9*evRows:0,MT=(L0.length?Math.ceil(4+lines1*10+4):8)+ev0;
   var g=[],H0=MT,py=[];P.forEach(function(p,pi){py.push(H0+pi*(ph+z+gapP));});
   var plotB=py[k-1]+ph+z,MB=3.5+2+T.tick+5+T.title+4;
   var W=Math.ceil(ML+pw+MR),cw=W-10,cap=sp.caption?wrap(sp.caption,cw,T.cap):[],capH=cap.length?6+cap.length*10.5:0,H=Math.ceil(plotB+MB+capH+4);
@@ -6940,15 +6957,10 @@ function figure(sp){
     if(p.tierL){var ty=y0+ph/2-(p.tierL.length-1)*4.75+2.8;p.tierL.forEach(function(l,m){g.push('<text class="pub-tier" x="'+f(left+pw+5)+'" y="'+f(ty+m*9.5)+'" font-size="'+T.dl+'">'+x(l)+"</text>");});}
     /* phase-change lines: solid, the full height; a minor change or event dashed */
     (p.vlines||[]).forEach(function(l){var vx=X(l.s);g.push('<line class="pub-ph" x1="'+f(vx)+'" y1="'+f(pi===0&&L0.length?y0-2:y0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.8"'+(l.dash?' stroke-dasharray="2.4 1.6"':"")+"/>");});
-    /* v25.85 (the BCBA, 11/11, with a picture: a change line ran through its own label): the label goes to the right of its
-       line when it fits there, else to the left of it, clear of the labels already set and of the other change lines; only when neither side has room does it
-       sit over the line, and then the line starts below the words */
-    var evBox=[],evX=(p.events||[]).map(function(l){return X(l.s);});
-    (p.events||[]).forEach(function(l,li){var vx=X(l.s),e0=pi===0&&ev0?y0-ev0+1:y0,lab="";
-      if(l.text&&pi===0&&ev0){var ew=tw(l.text,T.small),lo=2,hi=left+pw+MR-2,free=function(a){return a>=lo&&a+ew<=hi&&evBox.every(function(b){return a+ew+2<=b[0]||a>=b[1]+2;})&&evX.every(function(q,qi){return qi===li||q<a-1||q>a+ew+1;});};
-        var ex=free(vx+3)?vx+3:free(vx-3-ew)?vx-3-ew:null,over=ex===null;if(over){ex=Math.max(lo,Math.min(vx+3,hi-ew));e0=y0;}
-        evBox.push([ex,ex+ew]);lab='<text class="pub-evl" x="'+f(ex)+'" y="'+f(y0-3)+'" font-size="'+T.small+'"'+(over?' data-over="1"':"")+">"+x(l.text)+"</text>";}
-      g.push('<line class="pub-ev" x1="'+f(vx)+'" y1="'+f(e0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="2.4 1.6"/>');if(lab)g.push(lab);});
+    /* a minor change or an event: a dashed line from the top of the plot; its label as placed above (first panel only) */
+    (p.events||[]).forEach(function(l,li){var vx=X(l.s),pl=pi===0?evPl[li]:null;
+      g.push('<line class="pub-ev" x1="'+f(vx)+'" y1="'+f(y0)+'" x2="'+f(vx)+'" y2="'+f(yb+z)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="2.4 1.6"/>');
+      if(pl)pl.lines.forEach(function(t,m){g.push('<text class="'+(m?"pub-evc":"pub-evl")+'" x="'+f(pl.x)+'" y="'+f(y0-3-(pl.lines.length-1-m)*9)+'" font-size="'+T.small+'"'+(pl.over?' data-over="1"':"")+">"+x(t)+"</text>");});});
     /* criterion: a thin dashed line across its conditions */
     (p.crit||[]).forEach(function(c){var cy2=Y(c.y);g.push('<line class="pub-crit" x1="'+f(c.s0<=-0.5?left:X(c.s0))+'" y1="'+f(cy2)+'" x2="'+f(c.s1>=n-0.5?left+pw:X(c.s1))+'" y2="'+f(cy2)+'" stroke="#000" stroke-width="0.6" stroke-dasharray="3 2"/>');
       if(c.label)g.push('<text x="'+f(c.s1>=n-0.5?left+pw:X(c.s1))+'" y="'+f(cy2-2)+'" font-size="'+T.small+'" text-anchor="end">'+x(c.label)+"</text>");});

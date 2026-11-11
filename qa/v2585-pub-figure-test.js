@@ -22,15 +22,22 @@ const DD=L.forms().find(f=>f.id==='DD-1').file,EA=L.forms().find(f=>f.id==='EA-1
       panels:[{yTitle:'Occurrences per day',top:5,step:1,series:[{name:'A',sym:0,dash:0,segs:[pts],pts}],singles:[],vlines:[],labels:[{s0:-0.5,s1:n-0.5,text:'Baseline'}],crit:[],tmarks:[],bmarks:[],events}]});
     const d=new DOMParser().parseFromString(f.svg,'image/svg+xml');const host=document.createElement('div');host.style.cssText='position:absolute;left:0;top:0';host.innerHTML=f.svg;document.body.appendChild(host);
     const labs=[...host.querySelectorAll('text.pub-evl')].map(t=>{const b=t.getBBox();return {x0:b.x,x1:b.x+b.width,y0:b.y,y1:b.y+b.height,over:t.getAttribute('data-over')==='1',text:t.textContent};});
+    const cont=[...host.querySelectorAll('text.pub-evc')].map(t=>{const b=t.getBBox();return {x0:b.x,x1:b.x+b.width,y0:b.y,y1:b.y+b.height,text:t.textContent};});
     const lines=[...host.querySelectorAll('line.pub-ev')].map(l=>({x:+l.getAttribute('x1'),y1:+l.getAttribute('y1'),y2:+l.getAttribute('y2')}));
     const cs=[...host.querySelectorAll('circle')].map(c=>({x:+c.getAttribute('cx'),r:+c.getAttribute('r'),sw:+c.getAttribute('stroke-width')}));
-    host.remove();return {W:f.W,pw:f.pw,labs,lines,cs};},[n,events]);
+    host.remove();return {W:f.W,pw:f.pw,labs,cont,lines,cs};},[n,events]);
   const crossed=r=>r.labs.some((b,k)=>r.lines.some(l=>l.x>b.x0-0.2&&l.x<b.x1+0.2&&l.y1<b.y1-0.5));
   const LONG='A long label for a change inside the condition';
-  let r=await fig(62,[{s:50.5,text:LONG}]);
-  ok('A1 a long label near the right edge is set to the left of its line; the line does not run through it',r.labs.length===1&&r.labs[0].x1<r.lines[0].x&&!r.labs[0].over&&!crossed(r)&&r.labs[0].x0>=0,r.labs.concat(r.lines));
+  let r=await fig(62,[{s:50.5,text:'Aide Steps Back From the Desk'}]);
+  /* v25.87 (the BCBA, 11/11: "It shouldn't be directly on top of the phrase change, like its touching it"): the label stays over the days after its line,
+     on two rows when one does not fit; 5 pt or more from the line; and the line starts under the words, not beside them */
+  const clear=r=>r.labs.concat(r.cont).every(b=>r.lines.every(l=>(b.x0-l.x>=5||l.x-b.x1>=5)))&&r.labs.concat(r.cont).every(b=>r.lines.every(l=>l.y1>=b.y1-0.6));
+  ok('A1 a long label near the right edge stays to the right of its line, on two rows, inside the figure',r.labs.length===1&&r.cont.length===1&&r.labs[0].x0>r.lines[0].x&&r.cont[0].x0>r.lines[0].x&&r.cont[0].y0>r.labs[0].y0+6&&Math.max(r.labs[0].x1,r.cont[0].x1)<=r.W&&!r.labs[0].over&&!crossed(r),r.labs.concat(r.cont,r.lines));
+  ok('A1b the label stands 5 pt or more from its line, and the line starts under the words',clear(r),r.labs.concat(r.cont,r.lines));
+  r=await fig(62,[{s:50.5,text:LONG}]);
+  ok('A1c a label too long for two rows on the right: the label goes to the left of its line, on one row, clear of it',r.labs.length===1&&r.cont.length===0&&r.labs[0].x1<r.lines[0].x&&!r.labs[0].over&&r.labs[0].x0>=0&&clear(r),r.labs.concat(r.lines));
   r=await fig(62,[{s:5.5,text:LONG}]);
-  ok('A2 near the left edge it stays to the right of its line',r.labs.length===1&&r.labs[0].x0>r.lines[0].x&&!crossed(r)&&r.labs[0].x1<=r.W,r.labs.concat(r.lines));
+  ok('A2 near the left edge it stays to the right of its line, on one row, clear of it',r.labs.length===1&&r.cont.length===0&&r.labs[0].x0>r.lines[0].x&&!crossed(r)&&r.labs[0].x1<=r.W&&clear(r),r.labs.concat(r.lines));
   r=await fig(62,[{s:30.5,text:'First change'},{s:33.5,text:'Second change'}]);
   const a=r.labs[0],b=r.labs[1];
   ok('A3 two change lines close together: the labels do not sit on each other, and no line runs through a label',r.labs.length===2&&(a.x1<=b.x0||b.x1<=a.x0)&&!crossed(r),r.labs.concat(r.lines));
