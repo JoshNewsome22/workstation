@@ -68,13 +68,13 @@ const NEXT={
 
 /* ---------------- state ---------------- */
 const uid=()=>'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const evBlank=()=>{const o={id:uid(),kind:'',rec:'',tasks:[],att:[]};FKEYS.forEach(k=>{o[k]='';});return o;};
+const evBlank=()=>{const o={id:uid(),kind:'',rec:'',upd:'',tasks:[],att:[]};FKEYS.forEach(k=>{o[k]='';});return o;};
 function blank(){return{meta:{},chk:{},events:[]};}
 let S=blank(),CUR=-1,CASE={note:''},PH_PRINT=false;
 function ensure(){
   ['meta','chk'].forEach(k=>{if(!S[k]||typeof S[k]!=='object'||Array.isArray(S[k]))S[k]={};});
   if(!Array.isArray(S.events))S.events=[];
-  S.events.forEach(e=>{if(!e.id)e.id=uid();if(!Array.isArray(e.tasks))e.tasks=[];if(!Array.isArray(e.att))e.att=[];FKEYS.forEach(k=>{if(typeof e[k]!=='string')e[k]='';});});
+  S.events.forEach(e=>{if(!e.id)e.id=uid();if(typeof e.upd!=='string')e.upd='';if(!Array.isArray(e.tasks))e.tasks=[];if(!Array.isArray(e.att))e.att=[];FKEYS.forEach(k=>{if(typeof e[k]!=='string')e[k]='';});});
   if(CUR>=S.events.length)CUR=S.events.length-1;
 }
 /* dates as the sheets write them (M/D/YYYY, M/D/YY) or ISO; times as 10:42, 10:42 AM, 2:05pm, 14:05 */
@@ -92,8 +92,10 @@ const optName=(list,v)=>{const o=list.find(x=>x[0]===v);return o&&v?o[1]:'';};
    marked late only when it surely is) */
 function evWhen(e){const d=pDate(e.date);if(!d)return null;const t=pTime(e.kind==='sz'&&T(e.szStart)?e.szStart:e.time);const w=new Date(d);if(t==null)w.setHours(23,59,0,0);else w.setHours(Math.floor(t/60),t%60,0,0);return w;}
 function isLate(e){const w=evWhen(e),r=Date.parse(e.rec||'');return !!w&&isFinite(r)&&r-w.getTime()>864e5;}
-function recLine(e){const r=Date.parse(e.rec||'');if(!isFinite(r))return '';const d=new Date(r);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;
-  return 'First written '+MDY(d)+' '+h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap;}
+const stamp=ms=>{const d=new Date(ms);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;return MDY(d)+' '+h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap;};
+/* when the event was first written, and when it was last changed if that is a minute or more later */
+function recLine(e){const r=Date.parse(e.rec||''),u=Date.parse(e.upd||'');if(!isFinite(r))return isFinite(u)?'Last changed '+stamp(u):'';
+  return 'First written '+stamp(r)+(isFinite(u)&&u-r>=60000?' · last changed '+stamp(u):'');}
 /* a seizure's length: from its times, else the minutes typed */
 function szMin(e){const a=pTime(e.szStart),b=pTime(e.szEnd);if(a!=null&&b!=null){let m=b-a;if(m<0)m+=1440;return m;}const n=num(e.szDur);return n!=null&&n>=0?n:null;}
 const szText=e=>{const m=szMin(e);return m==null?'':(m<1?'under a minute':m===1?'about 1 minute':'about '+(Math.round(m*10)/10)+' minutes');};
@@ -158,11 +160,12 @@ function renderEdit(){const el=$('#meEdit'),e=S.events[CUR];
     <div class="tools"><button type="button" id="meTaskAdd">Add a follow-up</button></div></div>`;
   h+=`<div class="mePart" data-part="att"><h3>Photos and Papers</h3>
     <p class="hint">Discharge papers, a doctor’s note, a photo of the item, or a photo of an injury. They are kept on this device and inside the case file, and nowhere else.</p>
+    <p class="hint meSafe">Photos do not replace the nurse’s check or a mandated report. For an injury that is unexplained or suspicious, follow the school’s or agency’s reporting procedure, including who may take photos, before photographing. Never photograph a private area.</p>
     <div class="fieldgrid"><div><label>Consent to photograph the student</label><select data-m="photoConsent" id="meCons" aria-label="Consent to photograph the student"><option value="">Not recorded</option>${Object.keys(CONS).map(k=>'<option value="'+k+'">'+esc(CONS[k])+'</option>').join('')}</select></div>
       <div><label>Added by (initials)</label><input data-m="photoBy" id="meBy" maxlength="20" aria-label="Added by (initials)"></div></div>
     <p id="meAttGate" role="status"></p>
     <div id="meAttList"></div>
-    <div class="tools"><button type="button" class="tool" id="meDocAdd">Add papers (PDF or photos of the pages)</button><button type="button" class="tool" id="mePhAdd">Add a photo</button><span class="status" id="meAttCount"></span></div></div>`;
+    <div class="tools"><button type="button" class="tool" id="meDocAdd">Add papers (PDF or photos of the pages)</button><button type="button" class="tool" id="mePhAdd">Add a photo (an item, a place)</button><button type="button" class="tool" id="mePhStu">Add a photo of the student</button><span class="status" id="meAttCount"></span></div></div>`;
   h+=part('Written by',P_BY);
   h+=`<div class="tools"><button type="button" id="meBack">Back to the events</button></div>`;
   el.innerHTML=h;
@@ -177,21 +180,23 @@ function renderTasks(){const e=S.events[CUR],tb=$('#meTasks tbody');if(!e||!tb)r
     :'<tr><td colspan="4" class="hint">No follow-up is written.</td></tr>';}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#meTaskAdd,#meBack');if(!t)return;const ev=S.events[CUR];
   if(t.id==='meBack'){renderList();setView('events');return;}
-  if(ev&&ev.tasks.length<30){ev.tasks.push({what:'',due:'',done:''});renderTasks();const x=$$('#meTasks input[data-f="what"]').pop();if(x)x.focus();}});
+  if(ev&&ev.tasks.length<30){ev.tasks.push({what:'',due:'',done:''});touch();renderTasks();const x=$$('#meTasks input[data-f="what"]').pop();if(x)x.focus();}});
 
 let tA=null;const soon=f=>{clearTimeout(tA);tA=setTimeout(f,250);};
-const after=()=>{renderDerived();renderList();renderPaper();};
+/* every change to the open event stamps it */
+const touch=()=>{const e=S.events[CUR];if(e)e.upd=new Date().toISOString();};
+const after=()=>{touch();renderDerived();renderList();renderPaper();};
 document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset)return;
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;soon(()=>{renderPaper();renderAttGate();});return;}
   if(el.dataset.ev!==undefined&&el.tagName!=='SELECT'){const ev=S.events[CUR];if(ev){ev[el.dataset.ev]=el.value;soon(after);}return;}
   if(el.dataset.tk!==undefined){const ev=S.events[CUR],t=ev&&ev.tasks[+el.dataset.tk];if(t){t[el.dataset.f]=el.value;soon(after);}return;}
-  if(el.dataset.at!==undefined&&el.tagName!=='SELECT'){const ev=S.events[CUR],a=ev&&ev.att[+el.dataset.at];if(a){a[el.dataset.f]=el.value.slice(0,el.dataset.f==='by'?20:300);soon(renderPaper);}return;}
+  if(el.dataset.at!==undefined&&el.tagName!=='SELECT'){const ev=S.events[CUR],a=ev&&ev.att[+el.dataset.at];if(a){a[el.dataset.f]=el.value.slice(0,el.dataset.f==='by'?20:300);soon(()=>{touch();renderDerived();renderPaper();});}return;}
 });
 document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset)return;
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderPaper();return;}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderPaper();renderAttGate();return;}
   if(el.dataset.ev!==undefined){const ev=S.events[CUR];if(!ev)return;ev[el.dataset.ev]=el.value;
-    if(el.dataset.ev==='kind'){renderEdit();renderList();renderPaper();const x=$('#meEdit [data-part="kind"] input,#meEdit [data-part="kind"] select');if(x)x.focus();}else after();return;}
+    if(el.dataset.ev==='kind'){touch();renderEdit();renderList();renderPaper();const x=$('#meEdit [data-part="kind"] input,#meEdit [data-part="kind"] select');if(x)x.focus();}else after();return;}
   if(el.dataset.at!==undefined&&el.tagName==='SELECT'){const ev=S.events[CUR],a=ev&&ev.att[+el.dataset.at];if(!a)return;
     if(el.value==='student'&&!consYes()){el.value=a.kind;nbhUI.toast(consWhy(),{kind:'warn',ms:8000});return;}
     a.kind=ATTKN[el.value]?el.value:'other';after();return;}
@@ -208,7 +213,7 @@ async function rowDel(r,i){const ev=S.events[CUR],list=r==='events'?S.events:r==
    a photographed page 2200 px, so its words stay readable). A PDF is kept as it is, up to 8 MB. A photo of the student
    needs "Consent to photograph the student" answered Yes. None of them goes into the case facts or the CSV, and photos
    print only when "Include the photos when printing" is ticked (off each time the form opens). */
-const ATT_MAX=12,PDF_MAX=8*1048576,ATT_URL={};let attWarm=false;
+const ATT_MAX=12,PDF_MAX=8*1048576,ATT_URL={};let attWarm=false,PH_STU=false;   /* PH_STU: the photo being chosen is of the student */
 const ATT_OK=v=>{v=String(v==null?'':v);const M=window.nbhMedia;
   if(M&&M.isRef(v)){const mm=(M.parse(v)||{}).mime||'';return /^image\/(jpeg|png|webp)$/.test(mm)||mm==='application/pdf';}
   return /^data:(image\/(jpeg|png|webp)|application\/pdf);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16e6;};
@@ -249,14 +254,14 @@ async function shrink(file,max){const url=URL.createObjectURL(file);
 const toData=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.onerror=()=>rej(r.error);r.readAsDataURL(b);});
 const isPdfFile=async f=>{try{const b=new Uint8Array(await f.slice(0,5).arrayBuffer());return String.fromCharCode(...b)==='%PDF-';}catch(e){return false;}};
 async function attKeep(blob,mime){const M=window.nbhMedia;return M?await M.put(blob,{kind:mime==='application/pdf'?'file':'image',mime}):await toData(blob);}
-async function attAdd(files,asDoc){const e=S.events[CUR];if(!e)return;let n=0,bad=0,big=0,full=0;
+async function attAdd(files,asDoc,stu){const e=S.events[CUR];if(!e)return;let n=0,bad=0,big=0,full=0;stu=!!stu&&!asDoc&&consYes();
   for(const f of Array.from(files||[])){if(e.att.length>=ATT_MAX){full++;continue;}
     try{let blob,mime,name=attClean(f.name)||'file';
       if(/^image\//.test(f.type||'')){blob=await shrink(f,asDoc?2200:1600);mime='image/jpeg';name=name.replace(/\.[a-z0-9]+$/i,'')+'.jpg';}
       else if(asDoc&&await isPdfFile(f)){if(f.size>PDF_MAX){big++;continue;}blob=f.type==='application/pdf'?f:new Blob([f],{type:'application/pdf'});mime='application/pdf';if(!/\.pdf$/i.test(name))name+='.pdf';}
       else{bad++;continue;}
       const ref=await attKeep(blob,mime);if(!ATT_OK(ref)){bad++;continue;}
-      e.att.push({ref,name,size:blob.size,kind:asDoc?'paper':(e.kind==='ing'?'item':'other'),at:attAt(Date.now()),by:T(S.meta.photoBy).slice(0,20),note:''});n++;}catch(err){bad++;}}
+      e.att.push({ref,name,size:blob.size,kind:asDoc?'paper':stu?'student':(e.kind==='ing'||e.kind==='br'?'item':'other'),at:attAt(Date.now()),by:T(S.meta.photoBy).slice(0,20),note:''});n++;}catch(err){bad++;}}
   renderAtt();after();
   if(n)nbhUI.toast(n+(n===1?' file':' files')+' attached to this event.',{kind:'ok'});
   if(big)nbhUI.toast(big+(big===1?' PDF is':' PDFs are')+' larger than 8 MB and '+(big===1?'was':'were')+' not attached. Scan at a lower quality, or attach photos of the pages.',{kind:'warn',ms:9000});
@@ -267,14 +272,15 @@ function attOpen(i){const e=S.events[CUR],a=e&&e.att[i],D=$('#meAttDlg'),src=a&&
   $('#meAttDlgB').innerHTML=attIsPdf(a)?`<iframe src="${esc(src)}" title="${esc(a.name)}"></iframe><p class="hint">If the pages do not show here, use Save a copy and open the file.</p>`:`<img src="${esc(src)}" alt="${esc(ATTKN[a.kind]+': '+a.name)}">`;
   try{D.showModal();}catch(err){D.setAttribute('open','');}}
 function attClose(){const D=$('#meAttDlg');$('#meAttDlgB').innerHTML='';try{D.close();}catch(err){D.removeAttribute('open');}}
-document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('#meDocAdd,#mePhAdd,[data-attopen],[data-attdel],#meAttClose');if(!t)return;
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('#meDocAdd,#mePhAdd,#mePhStu,[data-attopen],[data-attdel],#meAttClose');if(!t)return;
   if(t.id==='meDocAdd'){$('#meDocFile').click();return;}
-  if(t.id==='mePhAdd'){$('#mePhFile').click();return;}
+  if(t.id==='mePhAdd'){PH_STU=false;$('#mePhFile').click();return;}
+  if(t.id==='mePhStu'){if(!consYes()){nbhUI.toast(consWhy(),{kind:'warn',ms:8000});return;}PH_STU=true;$('#mePhFile').click();return;}
   if(t.id==='meAttClose'){attClose();return;}
   if(t.dataset.attopen!==undefined){attOpen(+t.dataset.attopen);return;}
   if(t.dataset.attdel!==undefined){const ev=S.events[CUR],i=+t.dataset.attdel;if(!ev||!ev.att[i])return;
     if(!(await nbhUI.confirm('Delete this attachment?\nIt is removed from this record.',{ok:'Delete',danger:true})))return;ev.att.splice(i,1);renderAtt();after();}});
-$('#mePhFile').addEventListener('change',e=>{const f=e.target.files;attAdd(f,false).finally(()=>{e.target.value='';});});
+$('#mePhFile').addEventListener('change',e=>{const f=e.target.files,stu=PH_STU;PH_STU=false;attAdd(f,false,stu).finally(()=>{e.target.value='';});});
 $('#meDocFile').addEventListener('change',e=>{const f=e.target.files;attAdd(f,true).finally(()=>{e.target.value='';});});
 $('#meAttDlg').addEventListener('close',()=>{$('#meAttDlgB').innerHTML='';});
 $('#mePhPrintOn').addEventListener('change',e=>{PH_PRINT=!!e.target.checked;renderPaper();});
@@ -297,6 +303,7 @@ function paperOf(e,n){const val=f=>f[2]==='sel'?optName(f[3],e[f[0]]):T(e[f[0]])
   const wb=dl(P_BY);if(wb)h+='<div class="mePart"><h3>Written by</h3>'+wb+'</div>';
   h+='<div class="meSign"><div>Signature</div><div>Role</div><div>Date</div></div></div>';return h;}
 function renderPaper(){const P=$('#mePaper');if(!P)return;const L=evSorted().filter(x=>used(x.e));
+  document.body.classList.toggle('me-one',!!(S.chk.printOne&&S.events[CUR]));
   const pick=S.chk.printOne&&S.events[CUR]?L.filter(x=>x.i===CUR):L;
   P.innerHTML=pick.map(x=>paperOf(x.e,evNo(x.i))).join('');}
 window.addEventListener('beforeprint',renderPaper);
@@ -330,6 +337,7 @@ function fromFile(d){
   o.events=arr(s.events,200).map(x=>{const e=evBlank();e.id=str(x.id)||uid();if(seen[e.id])e.id=uid();seen[e.id]=1;e.kind=KSHORT[str(x.kind)]?str(x.kind):'';
     FKEYS.forEach(k=>{const v=str(x[k]);e[k]=SELOK[k]?(SELOK[k].includes(v)?v:''):v.slice(0,6000);});
     e.rec=/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(str(x.rec))&&!isNaN(Date.parse(x.rec))?str(x.rec):'';
+    e.upd=/^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(str(x.upd))&&!isNaN(Date.parse(x.upd))?str(x.upd):'';
     e.tasks=arr(x.tasks,30).map(t=>({what:str(t.what).slice(0,600),due:str(t.due).slice(0,40),done:str(t.done).slice(0,40)}));
     e.att=attCopy(x.att);return e;});
   return o;
@@ -349,9 +357,9 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
   /* one line an event: every field as written, the lists as their words; the photos and papers only as a count */
-  const head=['Event','Kind','First written','Late entry'].concat(ALLF.map(f=>f[1]),['Seizure length (minutes)','Follow-up','Still open','Photos and papers']);
+  const head=['Event','Kind','First written','Last changed','Late entry'].concat(ALLF.map(f=>f[1]),['Seizure length (minutes)','Follow-up','Still open','Photos and papers']);
   const out=[head];evSorted().forEach(({e},k)=>{if(!used(e))return;const m=e.kind==='sz'?szMin(e):null;
-    out.push([k+1,KSHORT[e.kind]||'',e.rec,isLate(e)?'yes':''].concat(ALLF.map(f=>f[2]==='sel'?optName(f[3],e[f[0]]):e[f[0]]),[m==null?'':m,e.tasks.filter(t=>T(t.what)).map(t=>T(t.what)+(T(t.due)?' (due '+T(t.due)+')':'')+(T(t.done)?' (done '+T(t.done)+')':'')).join('; '),openOf(e).map(o=>o.what).join('; '),e.att.length]));});
+    out.push([k+1,KSHORT[e.kind]||'',e.rec,e.upd,isLate(e)?'yes':''].concat(ALLF.map(f=>f[2]==='sel'?optName(f[3],e[f[0]]):e[f[0]]),[m==null?'':m,e.tasks.filter(t=>T(t.what)).map(t=>T(t.what)+(T(t.due)?' (due '+T(t.due)+')':'')+(T(t.done)?' (done '+T(t.done)+')':'')).join('; '),openOf(e).map(o=>o.what).join('; '),e.att.length]));});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='ME-1_'+(S.meta.client||'student').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();CUR=-1;PH_PRINT=false;renderAll();setView('events');}});
 

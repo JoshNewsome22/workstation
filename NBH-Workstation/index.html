@@ -2192,7 +2192,7 @@ const onNarrow=()=>{
 };
 if(NARROW.addEventListener) NARROW.addEventListener('change',onNarrow); else if(NARROW.addListener) NARROW.addListener(onNarrow);
 $('#tickUsed').addEventListener('click',()=>{
-  ALL.forEach(([id])=>{const st=state.status[id]||(state.pending[id]||{}).status;state.ticked[id]=!!(st&&st.filled>4)&&!MP_ASK[id];});   /* v21.61 the case's forms not loaded yet count; v22.83 PD-1 only by hand */
+  ALL.forEach(([id])=>{const st=state.status[id]||(state.pending[id]||{}).status;state.ticked[id]=!!(st&&st.filled>4)&&!MP_ASK[id];});   /* v21.61 the case's forms not loaded yet count; v22.83 PD-1 only by hand; v25.78 ME-1 too */
   renderRail();
 });
 $('#tickNone').addEventListener('click',()=>{state.ticked={};renderRail();});
@@ -3205,7 +3205,9 @@ const OPEN_AT={'RA-1':['PA-1'],'TD-1':['PA-1','VS-1']};   /* v25.70 (the BCBA, 1
 function openAt(id,at){const fr=state.frames[id];if(!fr)return;const go=()=>{try{const w=fr.contentWindow;if(w.location.hash==='#'+at)w.location.hash='';w.location.hash=at;}catch(e){}};
   if(fr.dataset.loaded)go();else fr.addEventListener('load',go,{once:true});}
 /* v22.83 (review F248) forms ticked into the master print only by hand, after this question */
-const MP_ASK={'PD-1':'Form PD-1 is a supervision record about a staff member, kept by the BCBA. It is not part of the student\u2019s file, and parents can ask to see what is in the packet.\n\nPrint it with this student\u2019s packet anyway?'};
+const MP_ASK={'PD-1':'Form PD-1 is a supervision record about a staff member, kept by the BCBA. It is not part of the student\u2019s file, and parents can ask to see what is in the packet.\n\nPrint it with this student\u2019s packet anyway?',
+  /* v25.78 Form ME-1 holds medical information (what a doctor said, discharge instructions): into a packet only by hand, after a question */
+  'ME-1':'Form ME-1 holds medical information: what happened, what a doctor said and the discharge instructions. The team may not all need it, and parents can ask to see what is in the packet.\n\nPrint it with this student\u2019s packet?'};
 function openFor(ev,d){
   const from=relayFrom(ev.source),want=typeof d.want==='string'?d.want:'',
         reply=m=>{try{ev.source.postMessage(Object.assign({nbh:'opened',want},m),'*');}catch(e){}};
