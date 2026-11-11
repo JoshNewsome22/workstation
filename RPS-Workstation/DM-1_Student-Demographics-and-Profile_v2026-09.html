@@ -2258,9 +2258,12 @@ const FORMS=[['DM-1','Student Demographics and Profile'],['IC-1','Informed Conse
 /* v22.11 (review F512). The list stopped at the 31 forms of v21.16, so the cover could not show assent (SI-1) or injury
    monitoring (IM-1). The later forms are added at the end of FORMS, so old files keep their ticks, and the rows follow
    the workstation's order. GC-1 is left out: a class-wide system is kept outside any one student's file. */
-const PKORDER=['DM-1','IC-1','RR-1','TB-1','IA-1','IN-1','SI-1','OB-1','ABC-1','SP-1','DD-1','MT-1','PA-1','RA-1','DA-1','EA-1','VI-1','FS-1','TD-1','GB-1','SA-1','CF-1','SV-1','ST-1','TI-1','PD-1','SM-1','SR-1','VS-1','TK-1','RM-1','PR-1','CN-1','CR-1','CT-1','TV-1','HD-1','EB-1','QS-1','DT-1','AD-1','TE-1','BC-1','MS-1','IM-1','FD-1'];
+const PKORDER=['DM-1','IC-1','RR-1','TB-1','IA-1','IN-1','SI-1','OB-1','ABC-1','SP-1','DD-1','MT-1','PA-1','RA-1','DA-1','EA-1','VI-1','FS-1','TD-1','GB-1','SA-1','CF-1','SV-1','ST-1','TI-1','PD-1','SM-1','SR-1','VS-1','TK-1','RM-1','PR-1','CN-1','CR-1','CT-1','TV-1','HD-1','EB-1','QS-1','DT-1','AD-1','TE-1','BC-1','MS-1','IM-1','FD-1','ME-1'];
 /* v25.71 FD-1 (v25.66, the 48th form) has a row when DM-1 is opened on its own too, keyed by its id (pk[FD-1]) as the
    workstation's own list has keyed it since v25.66, so files saved since keep its tick; FORMS is unchanged. */
+/* v25.78 ME-1 (the 49th form) has its row the same way (pk[ME-1]). On its own the form cannot ask the workstation for
+   the names of the two later forms, so they are kept here; inside the workstation its own list is still used. */
+const PK_LATER={'FD-1':'Feeding and Mealtime','ME-1':'Medical Event Record'};
 
 const PKST=['','Complete','In progress','Planned','Not needed'];
 /* v23.09 (review F5) inside the workstation the rows follow the workstation's own form list (asked of it with "forms?"), so a
@@ -2270,7 +2273,7 @@ const PKST=['','Complete','In progress','Planned','Not needed'];
    which forms this case holds work on: In file is ticked for them (never unticked), and the row says "in this case". */
 const PK_OUT=['GC-1','RS-1'];let PK_SHELL=null;const PK_EXTRA=[];
 const pkKey=id=>{const i=FORMS.findIndex(f=>f[0]===id);return i>=0?String(i):id;};
-const pkTitle=id=>{const f=FORMS.find(x=>x[0]===id),w=PK_SHELL&&PK_SHELL.find(x=>x[0]===id);return f?f[1]:w?w[1]:id;};
+const pkTitle=id=>{const f=FORMS.find(x=>x[0]===id),w=PK_SHELL&&PK_SHELL.find(x=>x[0]===id);return f?f[1]:w?w[1]:PK_LATER[id]||id;};
 function pkIds(){const L=PK_SHELL?PK_SHELL.map(x=>x[0]).filter(id=>!PK_OUT.includes(id)):PKORDER.slice();PK_EXTRA.forEach(id=>{if(!L.includes(id))L.push(id);});return L;}
 function renderPk(){const keep={};$('#pkTbl tbody').querySelectorAll('[name]').forEach(e=>keep[e.name]=e.type==='checkbox'?e.checked:e.value);
  $('#pkTbl tbody').innerHTML=pkIds().map(id=>{const i=pkKey(id);return `<tr><td class="c"><input type="checkbox" name="pk[${i}].in"></td><td><b>${esc(id)}</b><small class="dm-incase" data-pk="${esc(id)}"></small></td><td>${esc(pkTitle(id))}</td><td><select class="w" name="pk[${i}].st">${opts(PKST)}</select></td><td class="c">${dt(`pk[${i}].d`)}</td><td>${txt(`pk[${i}].by`)}</td></tr>`;}).join('');

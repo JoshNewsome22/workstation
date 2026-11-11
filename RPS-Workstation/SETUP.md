@@ -9905,6 +9905,156 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.78: Form ME-1 (Medical Event Record), Explainers, and Practice counting
+(the BCBA, 11/11)
+
+**Explainers: a procedure you can drag and change** ("lets do 1 and 2")
+- **What it is.** A procedure shown as a drawn scene: an adult and a student at a table, with the timer, the signal and
+  the card. Play it, drag the bar to any moment, and change it. Two are here: **DRO, resetting** (a break for each
+  interval of calm work) and **FCT: green and red** (the signaled schedule and its thinning).
+- **Try it.** In DRO, choose the interval (10 s to 2 min) and press **Problem behavior happens now** at any moment: the
+  timer restarts and every later break moves. In FCT, press **She asks now** on green or on red, lengthen red (2 s to
+  4 min), take the card away on red, or add a preferred item on red. The page counts as it goes: breaks earned and the
+  rate, or the share of requests made on green.
+- **Tap a part.** The timer, the signal, the card, the adult, the student: each says what it is for in that procedure.
+- **From the card.** Each follows one card of Form TD-1's protocol bank and shows that card's rule and its limits. The
+  card's restrictive steps are not drawn. Where the card is silent the page says so (problem behavior during a break;
+  whether the schedule's clock runs while the reinforcer is given).
+- **Where.** In the video library: **Explainers you can step through** on its first page, and **Step through it** on the
+  two videos that have one. Also "Explainers" in the command box.
+
+**Practice counting: record a drawn scene and see your agreement**
+- **What it is.** A drawn student works at a table and does things at moments the page knows. You record the target as
+  you would in a classroom; at the end the page compares your record with what happened.
+- **Three ways to record.** A count (calling out), a duration (out of seat), and 10-second partial intervals.
+- **Look-alikes.** At classroom pace the scene holds moments that are not the target: a raised hand, speaking after
+  being called on, leaning to reach. A press at one of them is named, with why it does not count.
+- **The figures.** The ones two observers would compute: total count, count by 10-second interval (mean and exact),
+  total duration, and interval-by-interval, scored-interval and unscored-interval agreement. When the totals agree and
+  the moments do not, the page says so.
+- **After a scene.** Each moment missed and each extra press, with **Show me**; and the whole scene again with the
+  answers on the picture.
+- **Scene numbers.** The same number gives the same scene on any device, so two people can record it apart and compare.
+- **A presentation remote works**, as on Forms DD-1 and OB-1: Next records, Back takes the last one off.
+- **What it is not.** Speech is a bubble; there is no sound. A drawn scene is easier to watch than a classroom: it is
+  practice for the definition and the timing, not a check beside a trained observer with the student. Nothing recorded
+  is kept after the page is closed.
+- **Where.** **Practice counting** on the video library's first page, and in the command box.
+
+**Both pages are drawn by code, now in lit 3D** (the BCBA, 11/11: "3D after one more round on the figures", then yes to
+the corrected clip)
+- **The look.** The room, the table, the two figures and the objects are modeled and lit in three dimensions (soft
+  light from a photographed studio, contact shadows, rounded figures with jointed arms that reach the card, the timer
+  and the item). It is the look of the third test clip.
+- **Everything else is the same.** The same moments, the same buttons, the same parts to tap (each still a button a
+  keyboard and a screen reader can reach), the same counts and agreement figures.
+- **When 3D is not available** (an old browser or tablet without it), the page uses the flat drawing as before, without
+  asking. Adding **?flat=1** to the page's address chooses the flat drawing.
+- **Still no video and nothing from the internet.** No AI-generated picture. The 3D drawing code is one file
+  (nbh-scene3d.js, about 0.8 MB: the three.js library, MIT license, and a small studio light map from Poly Haven,
+  CC0; both are credited in the file). The pages work offline and when opened as files. They are not in the one-file
+  edition, as the videos are not.
+- **Fixed on the way.** The first version of these pages stopped "Use offline" from finishing: the workstation's
+  offline check did not recognize the two new pages. It does now, and the offline test covers them.
+
+**Form ME-1, the Medical Event Record (the 49th form)**
+(the BCBA, 11/11: a record for a visit to the emergency room, with photos and discharge papers attached, that covers
+something swallowed, a long or intense seizure, a serious injury and other medical events)
+- **What it is.** One record for each medical event that needed more than routine care. It is under **Specialist
+  protocols** in the forms list; searching "seizure", "swallowed", "ER" or "injury" finds it. Three pages: Events
+  (the student's health line, the list, what is still open), This event, and Guide.
+- **What it is not.** It does not replace the school's or agency's own incident or accident report, the nurse's
+  record, or a report of suspected abuse or neglect, and the form says so on its first page. It gives no medical
+  advice and decides nothing: in an emergency the health plan and 911 come first, and this is written afterwards.
+- **Kinds of event.** Something swallowed that is not food, a seizure, an injury, an allergic reaction, choking or
+  trouble breathing, an illness or another medical problem, and other. Choosing the kind adds its own questions:
+  - *Swallowed:* what, how many, how big, where it came from (a reinforcer or sensory item given by staff, classroom
+    material, found, from home), Poison Control, and when it passed or was cleared.
+  - *Seizure:* start and end, what it looked like, whether the student responded, how it compares with the student's
+    usual seizures, rescue medicine (which, when, by whom) and the recovery. The form works out the length from the
+    two times, or takes the minutes typed.
+  - *Injury:* the part of the body, how it happened (a fall, self-injury, another student, during a restraint or a
+    transport, not seen), a blow to the head, loss of consciousness, what it looked like.
+  - *Allergic reaction, choking or breathing, illness:* a few questions each.
+- **Every event has the same parts.** What happened (seen or not, by whom); what was done at school (first aid, the
+  nurse, 911, whether the health plan was followed); medical care (first aid, nurse, doctor or urgent care, emergency
+  room, admitted; how the student got there; what the doctor said; discharge instructions; limits; follow-up
+  appointment); who was told and when (parent or guardian, administrator, BCBA, the school's own report); back at
+  school (date, clearance, limits, staff told); the report question; what may have contributed and what was changed;
+  follow-up with dates; photos and papers; who wrote it.
+- **Late entries and changes.** Each event keeps the time it was first written. One written more than 24 hours
+  after the event is marked **Late entry** on screen and on paper. Every later change stamps the event, and "last
+  changed" shows beside "First written".
+- **Still open.** The form lists what each event still needs: the parent or guardian not recorded as told, the
+  report question not answered, discharge instructions not recorded or attached, the return not recorded, a clearance
+  not received, the school's own report not made, a swallowed item not recorded as passed or cleared, and each
+  follow-up not done. The same list reaches the workstation's Today list under **Medical**.
+- **Photos and papers.** Up to 12 for an event. **Add papers** takes a PDF (up to 8 MB) or photos of the pages; **Add
+  a photo (an item, a place)** and **Add a photo of the student** take a photo. Each has what it is, who added it,
+  when, and a note. A photo is made smaller first (1600 px; a photographed page 2200 px so its words stay readable).
+  - **Add a photo of the student** opens the camera only when *Consent to photograph the student* is answered Yes,
+    and a photo can be re-filed as "of the student" only then. A photo of an item or of papers does not need it. The
+    form says beside the buttons that photos do not replace the nurse's check or a mandated report.
+  - They are kept on the device and inside the case file. **Save case** writes them into the case file; **Save
+    data** on the form writes them into the form's own file. They do not go into the case facts other forms read,
+    the CSV, the staff pages or the reply box.
+  - Photos print only when **Include the photos when printing** is ticked, and the box is unticked each time the form
+    opens. Attached PDFs are listed by name on the printout.
+- **Printing one event.** **Print only the event that is open** prints the student's line and that one event. The
+  list of all events and what the others still need stay off the paper, so a copy for one event shows only that event.
+- **Packets.** Form ME-1 goes into a packet only when you tick it yourself, and ticking it asks first, because it
+  holds medical information. "Tick the forms in use" leaves it out. The Teacher and staff packet and the Family packet
+  never take it.
+- **What the rest of the case sees.** How many events, the last one's date, kind and level of care, and the open
+  items. Not what happened, not what the doctor said, not the attachments.
+- **After the event, the form points to what else to open.** After something swallowed: Form DM-1's safety
+  precautions (pica, choking risk), the item pool on Form PA-1, and the pica safety checklist in Form TD-1's protocol
+  bank. After a seizure: the health record and Medical emergency risk on Form DM-1, Form CR-1 with the nurse, Form
+  MS-1 if a medicine changed. After an injury: Form IM-1 when it came from self-injury, Form CR-1 when it happened
+  in a restraint.
+- **Form DM-1's Packet Contents** has a row for Form ME-1, also when Form DM-1 is opened on its own (the full test
+  run found it missing). On its own the form now also shows the names of Forms FD-1 and ME-1 in that table, not only
+  their codes.
+- **Form OB-1's recorder, after End.** Since the pocket clicker setting (v25.76), **Save into** and **Discard** ended
+  1 pixel below the window in the workstation at 1024 x 768. The row sits 4 pixels higher once the recording has
+  ended. v25.76 and v25.77 had no full test run, which is why this was found only now.
+- **Under the hood.** The workstation's media store keeps a PDF the way it keeps a picture, so a case with papers
+  stays small on the device and whole in its file. The forms count is 49 everywhere it is stated.
+- **The test run.** The whole run, the first since v25.75: 514 tests on the copy with Form ME-1 and the drawn pages
+  in 3D; 488 passed at the first run. Of the 26 that did not:
+  - **Two were real, and are fixed.** v2211-docs: Form DM-1's Packet Contents had no row for Form ME-1. sprint-a3:
+    Form OB-1's Save into and Discard ended 1 pixel below the window (it fails the same way on v25.77). Both pass now.
+  - **Thirteen passed when run alone:** abc109, abc128, lazy-clean, tk1, v2247, v2255, v2569-wave3,
+    v2571-stepper-more, sprint-a8, v2179, v2213-replies, v2568-fx2-g3 and v2572-transcript. The run had five tests
+    going at once on a nearly full disk, and three of these stopped with a crashed test browser. v2568-fx2-g3 failed
+    a different check on each of its first two tries and passed on the third, run with nothing else going.
+  - **Ten fail as on earlier releases:** packet-gate (listed twice), tk1-bus, tk1-audit, link-tk1, v2570-shell (What's
+    new), student-journey, wording-rollout, sprint-a7 and a11y-release (it needs axe-core). wording-rollout and
+    a11y-release were not run a second time.
+  - **One could not finish here:** v2217-release's check that the zip script makes both editions' zips needs more
+    free disk than this session has. The script itself made this release's school zip and its parts.
+  - **After that run, the two fixes were made and the whole run was not repeated.** Run again on the final copy:
+    v2211-docs, sprint-a3, sprint-a8, dm1-w3, fx2, v2578-medical, the three tests of the drawn pages, budget and the
+    version test. All pass.
+  - **The offline-copy test (pwa-test) was not run.** It needs about 1.8 GB of free disk (three copies of the site and
+    a browser profile holding the saved copy) and this session had 1 GB; it was stopped twice before the disk filled.
+    In its place, on the final copy: the podcast test, which saves the workstation for offline use and plays from the
+    saved copy with the network cut (passes), and one check by hand the same way: Explainers and Practice counting
+    open in 3D from the saved copy, the flat drawing too, and Forms ME-1 and DM-1 open, with no error. The scenarios
+    only pwa-test covers (an update arriving over a saved copy, two editions side by side) were not exercised for
+    this release.
+- **Not checked.** A real iPad: taking a photo with its camera, picking a PDF from Files, and opening an attached PDF
+  inside the form (Safari may show only the first page; **Save a copy** opens the whole file). No nurse, lawyer or
+  district office has read the wording: please read the "What this record is, and is not" box and the report question
+  against your district's procedure before relying on them.
+- **Not checked (the drawn pages).** A real iPad or iPhone: the 3D pages were tested in Chrome's engine only, because
+  Safari's engine is not available where the tests run. Please open **Explainers** and **Practice counting** on your
+  iPad once: you should see the lit 3D room; if you see the flat drawing, or anything odd, tell me. Also not checked:
+  how smoothly the scenes play there, and a real presentation remote on the practice page. No BCBA has read the explainers against the two studies; they follow the cards' wording.
+- **Shown, not built in.** One drawn procedure video (the FCT green and red video redrawn by code with its own
+  narration) was sent for a look on 11/11. It is not in the workstation.
+- **Not built yet.** A check of reinforcer and sensory items for size before they are used (Form PA-1 asks for
+  approval of food items only). It was proposed on 11/11 and waits for a yes.
 ### v25.77: The backward chaining video
 (the BCBA, 11/11: "Yes, go ahead" with a $12 limit; then "Yes" to putting it in the app as it is)
 - **The video** (2:19, 1080p; made at 2K, and the 2K file is kept). On Form TD-1's card "Backward chaining: guide the
