@@ -9905,6 +9905,29 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.84: The pale strip above the top bar
+(the BCBA, 11/11, with a picture of the installed app on an iPad: "Why does the very top of the app have a faded white
+tint? Also, it is not allowing me to select print")
+- **The strip.** The strip above the workstation belongs to the device: the status bar of the installed app, and
+  Safari's own bar in a tab. It takes its colour from the page: the theme-color tag, and the background colour of the
+  page itself. Both were light (white for the phone layout's white heading, and the page's paper), while the wide
+  layout's top bar has been dark since v25.63, so the strip showed as a pale band fading into the dark bar. With the
+  dark top bar, both now carry the bar's colour: the tag follows the heading's own colour, and the page's background
+  colour is the bar's, painted over with the paper the page always had, so nothing on the page looks different (a
+  picture of the wide layout before and after is the same, pixel for pixel, apart from a 2-pixel moving mark). The
+  phone layout keeps white. On paper nothing changes.
+- **Not seen on an iPad.** The cause is read from the picture and from how Safari chooses that colour; this session has
+  no iPad. If the strip is still pale after this release, the next place is the app's own description file
+  (manifest.json, theme colour white): changing it means removing the app from the Home Screen and adding it again.
+- **Print in the installed app: not changed.** An iPad does not open its print options for an app added to the Home
+  Screen; the workstation asks, nothing appears, and after a few seconds the notice says so (v21.43). To print: tap
+  Save case in the app; open the workstation in Safari (the website, not the Home Screen icon); open the case file
+  there; print from Safari. The installed app and Safari keep their data apart on an iPad, which is why the case goes
+  across as a file. A way to print without leaving the app (the workstation making the PDF itself and handing it to the
+  share sheet, where Print is) is a larger piece of work and is not built.
+- **The test run.** The whole run was not repeated. Run on the final copy: the new test (qa/v2584-tint-test.js, 6
+  checks) and the shell tests named in the commit. The offline-copy test was not run (not enough free disk in this
+  session).
 ### v25.83: Form TD-1, a step for another function is left out; the EXTINCTION mark
 (the BCBA, 11/11, on the four questions the TD-1 builder had left open: "Follow your recommendations")
 - **The four questions and what was done.**
