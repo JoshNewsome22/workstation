@@ -1099,6 +1099,16 @@ body.view-obs #obRec{display:block}
 .obr-tog[aria-pressed="true"]{background:#e4eef0;border-color:#2f7f86}
 .obr-tog[aria-pressed="true"]::before{content:"✓";margin-right:5px}
 .obr-tog[hidden]{display:none}
+/* v25.76 the pocket clicker: its hint, the mark on the tile it counts, and the count confirmed in large type */
+.obr-clkhint{flex:1 1 100%;font-size:13px;line-height:1.45;color:#3b4d55;margin:0;max-width:78ch}
+.obr-clkhint[hidden]{display:none}
+.obr-clkon{outline:3px solid #1d5c63;outline-offset:2px}
+.obr-clkon::before{content:"Clicker";position:absolute;top:6px;left:8px;background:#1d5c63;color:#fff;font:600 11px/1 Inter,"Segoe UI",Arial,sans-serif;padding:3px 7px;border-radius:999px}
+.obr-clk{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:60;background:#182e43;color:#fff;border-radius:18px;padding:18px 34px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.28);pointer-events:none;max-width:90vw}
+.obr-clk[hidden]{display:none}
+.obr-clk #obrClkN{display:block;font:700 96px/1 Inter,"Segoe UI",Arial,sans-serif;font-variant-numeric:tabular-nums}
+.obr-clk #obrClkW{display:block;font:600 22px/1.25 Inter,"Segoe UI",Arial,sans-serif;margin-top:6px}
+@media print{.obr-clk,.obr-clkhint{display:none!important}}
 .obr-iv{margin-top:12px;padding-top:10px;border-top:1px solid var(--nbh-mist,#eaf2f0)}
 .obr-ivhd{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
 .obr-ivhd h3{font:600 15px/1.25 var(--nbh-serif);color:var(--nbh-navy,#182e43);margin:0}
@@ -1698,8 +1708,12 @@ window.FX2_CFG.step = true;
   <div class="obr-set">
     <div class="obr-f"><label for="obrPlan">Planned length (min)</label><input id="obrPlan" type="number" min="0" step="any" inputmode="decimal" placeholder="none"></div>
     <div class="obr-f"><span class="obr-flab" id="obrPeerL">Comparison peer</span><button type="button" class="obr-tog" id="obrPeer" aria-pressed="true" aria-labelledby="obrPeerL obrPeer">Counted</button></div>
+    <!-- v25.76 (research 2, #21; the BCBA, 11/11) a pocket clicker as a discreet counter -->
+    <div class="obr-f"><span class="obr-flab" id="obrClkL">Pocket clicker</span><button type="button" class="obr-tog" id="obrClkOn" aria-pressed="false" aria-labelledby="obrClkL obrClkOn" aria-describedby="obrClkHint">Count with a clicker</button></div>
     <p class="obr-ivinfo" id="obrIvInfo">Interval sample</p>
+    <p class="obr-clkhint" id="obrClkHint" hidden>A Bluetooth presentation remote paired to this device counts for you while the observation runs: <b>Next</b> adds one to the tile marked <b>Clicker</b>, <b>Back</b> takes its last one off, and <b>Next held down</b> moves the clicker between the student and the peer (nothing is added). While a remote is paired, an iPad may hide its on-screen keyboard: turn the remote off to type a note.</p>
   </div>
+  <div class="obr-clk" id="obrClk" hidden aria-hidden="true"><span id="obrClkN"></span><span id="obrClkW"></span></div>
   <!-- v21.44 (A3): what is used while recording sits together, so it fits one screen of an iPad held sideways:
        Start, End and Save in one row beside the clock, the recorder's messages under them, the note box under the count tiles -->
   <div class="obr-main">
@@ -4545,6 +4559,35 @@ render();
   function typing(t){ if(!t || !t.tagName) return false; if(t.isContentEditable) return true;
     if(t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') return true;
     return t.tagName === 'INPUT' && TEXTY.test((t.getAttribute('type') || '').toLowerCase()); }
+  /* v25.76 the pocket clicker (research 2, #21): a presentation remote's Next adds one to the student's count (or the peer's),
+     Back takes the last one off, and Next held down moves the clicker between the two (the count its first press added
+     is taken back). Never in a field. */
+  const CK = {on:false, who:'s', held:false, t:0}, CK_NEXT = ['PageDown', 'ArrowRight', 'ArrowDown'], CK_BACK = ['PageUp', 'ArrowLeft', 'ArrowUp'];
+  const ckOn = byId('obrClkOn'), ckHint = byId('obrClkHint'), ckBox = byId('obrClk');
+  function ckMark(){ const w = CK.on ? (CK.who === 'p' && R.peer ? 'p' : 's') : ''; E.obrTapS.classList.toggle('obr-clkon', w === 's'); E.obrTapP.classList.toggle('obr-clkon', w === 'p'); }
+  function ckShow(n, w){ setText(byId('obrClkN'), String(n)); setText(byId('obrClkW'), w); ckBox.hidden = false; clearTimeout(CK.t); CK.t = setTimeout(() => { ckBox.hidden = true; }, 1800); }
+  const ckName = r => r === 'p' ? 'Peer' : 'Student';
+  if(ckOn) ckOn.addEventListener('click', () => { CK.on = !CK.on; ckOn.setAttribute('aria-pressed', String(CK.on)); ckHint.hidden = !CK.on; ckMark();
+    note(CK.on ? 'The clicker counts the student. Hold Next to move it to the peer.' : 'The clicker is off.'); });
+  document.addEventListener('keyup', e => { if(CK_NEXT.includes(e.key)) CK.held = false; });
+  document.addEventListener('keydown', e => {
+    if(!CK.on || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || document.querySelector('dialog[open]')) return;
+    const nx = CK_NEXT.includes(e.key), bk = CK_BACK.includes(e.key); if(!nx && !bk) return;
+    e.preventDefault();
+    if(CK.who === 'p' && !R.peer) CK.who = 's';
+    const r = CK.who, btn = r === 'p' ? E.obrTapP : E.obrTapS;
+    if(R.state !== 'run'){ if(!e.repeat) note(R.state === 'ready' ? 'The clicker counts once the observation runs: press Start first.' : R.state === 'pause' ? 'Paused: press Resume, and the clicker counts again.' : 'The observation has ended.', true); return; }
+    if(e.repeat){
+      if(nx && !CK.held){ CK.held = true; undoCount(r);
+        if(!R.peer){ note('The comparison peer is switched off, so the clicker stays on the student. Nothing was added.', true); ckShow(R.taps.s.length, 'Student'); }
+        else { CK.who = r === 's' ? 'p' : 's'; note('The clicker now counts the ' + (CK.who === 'p' ? 'peer' : 'student') + '. Nothing was added.'); ckShow(R.taps[CK.who].length, 'Now counting: ' + ckName(CK.who)); }
+        ckMark(); paint(); }
+      return; }
+    CK.held = false;
+    if(nx){ tap(r, btn); ckShow(R.taps[r].length, ckName(r)); }
+    else { const was = R.taps[r].length; undoCount(r); if(R.taps[r].length < was) ckShow(R.taps[r].length, ckName(r) + ': one taken off'); }
+    ckMark(); paint();
+  });
   document.addEventListener('keydown', e => {
     if(R.state === 'ready' || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || document.querySelector('dialog[open]')) return;
     const code = e.code || '', key = e.key || '', sh = e.shiftKey, SH = '!@#$', SHM = '%^&';

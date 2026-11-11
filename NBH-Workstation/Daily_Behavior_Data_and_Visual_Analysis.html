@@ -1232,6 +1232,14 @@ p.dd-numbered{margin-top:4px}
 button.ddl-locked:disabled{opacity:.45}
 label.filebtn.ddl-locked{border-style:dashed!important}
 .ddl-hit{filter:brightness(1.18)}
+/* v25.76 the pocket clicker: its hint, the mark on the behavior it counts, and the count confirmed in large type */
+.ddl-clkhint{font-size:13px;line-height:1.45;color:#3b4d55;margin:8px 0 0;max-width:78ch}
+.ddl-clkon{outline:3px solid #1d5c63;outline-offset:2px;position:relative}
+.ddl-clkon::after{content:"Clicker";position:absolute;top:-10px;right:8px;background:#1d5c63;color:#fff;font:600 11px/1 Inter,"Segoe UI",Arial,sans-serif;padding:3px 7px;border-radius:999px}
+.ddl-clk{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:60;background:#182e43;color:#fff;border-radius:18px;padding:18px 34px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.28);pointer-events:none;max-width:90vw}
+.ddl-clk #ddlClkN{display:block;font:700 96px/1 Inter,"Segoe UI",Arial,sans-serif;font-variant-numeric:tabular-nums}
+.ddl-clk #ddlClkW{display:block;font:600 22px/1.25 Inter,"Segoe UI",Arial,sans-serif;margin-top:6px;overflow-wrap:anywhere}
+@media print{.ddl-clk,.ddl-clkhint{display:none!important}}
 @media (prefers-reduced-motion:no-preference){.ddl-hit{transform:scale(.97)}}
 .ddl-num{flex:0 0 auto;min-width:74px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;text-align:right;
   font:700 27px/1 var(--nbh-sans);font-variant-numeric:tabular-nums;color:var(--nbh-navy,#182e43)}
@@ -2117,7 +2125,11 @@ window.FX2_CFG.step = { panes: 'main > section[data-panel="{v}"]',
         <button type="button" id="ddlTest">Test alert</button>
         <span class="ddl-gap"></span>
         <button type="button" class="ddl-tog" data-p="keys" aria-pressed="true">Keyboard keys</button>
+        <button type="button" class="ddl-tog" data-p="clicker" aria-pressed="false" aria-describedby="ddlClkHint">Count with a clicker</button>
       </div>
+      <!-- v25.76 (research 2, #21; the BCBA, 11/11) a pocket clicker as a discreet counter -->
+      <p class="ddl-clkhint" id="ddlClkHint" hidden>A Bluetooth presentation remote paired to this device counts for you while a session runs: <b>Next</b> adds one to the behavior marked <b>Clicker</b>, <b>Back</b> takes its last one off, and <b>Next held down</b> moves the clicker to the next counted behavior (nothing is added). It counts behaviors measured by count or rate. While a remote is paired, an iPad may hide its on-screen keyboard: turn the remote off to type.</p>
+      <div class="ddl-clk" id="ddlClk" hidden aria-hidden="true"><span id="ddlClkN"></span><span id="ddlClkW"></span></div>
       <div class="ddl-lv" id="ddlLv" hidden>
         <label for="ddlLevels">Prompt levels, in order <input type="text" id="ddlLevels" spellcheck="false" autocomplete="off"></label>
         <label for="ddlFrom">Numbered from <select id="ddlFrom"><option value="0">0</option><option value="1">1</option></select></label>
@@ -2431,11 +2443,11 @@ const uid = p => p + "_" + (Date.now().toString(36)) + (uidCounter++).toString(3
 /* live recording: the planned length and its alerts, the keyboard keys and the prompt levels of the Live Recording
    panel on the Daily data tab are kept with the record (settings.live); a file saved without them opens with these */
 const LIVE_LEVELS=["Independent","Gesture","Model","Partial physical","Full physical"];
-function liveDefaults(){ return {plan:"",alerts:true,sound:true,flash:true,vibrate:true,keys:true,levels:LIVE_LEVELS.slice(),levelFrom:0}; }
+function liveDefaults(){ return {plan:"",alerts:true,sound:true,flash:true,vibrate:true,keys:true,clicker:false,levels:LIVE_LEVELS.slice(),levelFrom:0}; }
 function liveSettings(x){
   const d=liveDefaults(), o=(x&&typeof x==="object"&&!Array.isArray(x))?x:{};
   if(typeof o.plan==="number"&&isFinite(o.plan)&&o.plan>=0.5&&o.plan<=600) d.plan=Math.round(o.plan*100)/100;
-  ["alerts","sound","flash","vibrate","keys"].forEach(k=>{ if(typeof o[k]==="boolean") d[k]=o[k]; });
+  ["alerts","sound","flash","vibrate","keys","clicker"].forEach(k=>{ if(typeof o[k]==="boolean") d[k]=o[k]; });
   if(Array.isArray(o.levels)&&o.levels.length>=2&&o.levels.length<=8&&o.levels.every(s=>typeof s==="string"&&s.trim()&&s.trim().length<=40)) d.levels=o.levels.map(s=>s.trim());
   if(o.levelFrom===0||o.levelFrom===1) d.levelFrom=o.levelFrom;
   return d;
@@ -6418,10 +6430,11 @@ function ask(p,orig,conf){
 /* ---------------- painting ---------------- */
 function toggles(p){
   box.querySelectorAll(".ddl-tog").forEach(b=>{ const k=b.dataset.p, on=!!p[k]; attr(b,"aria-pressed",on?"true":"false");
-    if(k==="alerts") setText(b,on?"Alerts on":"Alerts off"); else if(k!=="keys") dis(b,!p.alerts);
+    if(k==="alerts") setText(b,on?"Alerts on":"Alerts off"); else if(k!=="keys"&&k!=="clicker") dis(b,!p.alerts);
     if(k==="vibrate") show(b,TOUCH); });
   if(D.activeElement!==E.planIn){ const v=p.plan===""?"":String(p.plan); if(E.planIn.value!==v) E.planIn.value=v; }
   show(E.keys,p.keys);
+  { const h=byId("ddlClkHint"); if(h) h.hidden=!p.clicker; clkMark(); }
   const prm=S.behaviors.some(b=>b.measure==="prompt"); show(E.lv,prm);
   if(prm){ if(D.activeElement!==E.levels){ const t=p.levels.join(", "); if(E.levels.value!==t) E.levels.value=t; }
     if(E.from.value!==String(p.levelFrom)) E.from.value=String(p.levelFrom);
@@ -6481,8 +6494,42 @@ function byKey(i){
   if(k==="tri"||k==="prm"){ arm(b); return; }
   const c=cards.find(x=>x.id===b.id); act(b,"go"); if(c) hit(c.go);
 }
+/* v25.76 the pocket clicker (research 2, #21): a presentation remote's Next adds one to the chosen counted behavior, Back
+   takes its last one off, and Next held down moves on to the next counted behavior (the count its first press added is
+   taken back). It works with Keyboard keys off, and never in a field. */
+const CLK_NEXT=["PageDown","ArrowRight","ArrowDown"], CLK_BACK=["PageUp","ArrowLeft","ArrowUp"];
+let clkHeld=false, clkTimer=0;
+function clkList(){ return orderedBehaviors().filter(b=>KIND(b.measure)==="tap"&&!L.off[b.id]); }
+function clkCur(){ const l=clkList(); return l.find(b=>b.id===L.clk)||l[0]||null; }
+function clkMark(){ const on=P().clicker, b=on?clkCur():null; cards.forEach(c=>{ if(c.go) c.go.classList.toggle("ddl-clkon",!!b&&c.id===b.id); }); }
+function clkShow(n,w){ const el=byId("ddlClk"); if(!el) return; setText(byId("ddlClkN"),String(n)); setText(byId("ddlClkW"),String(w)); el.hidden=false;
+  clearTimeout(clkTimer); clkTimer=setTimeout(()=>{ el.hidden=true; },1800); }
+function clkKey(e){
+  const nx=CLK_NEXT.includes(e.key), bk=CLK_BACK.includes(e.key); if(!nx&&!bk) return false;
+  if(!tabData||tabData.classList.contains("hidden")||D.querySelector("dialog[open]")) return false;
+  const t=e.target, tag=(t&&t.tagName)||""; if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)||(t&&t.isContentEditable)) return false;
+  e.preventDefault();
+  if(L.state!=="run"){ if(!e.repeat) note(L.state==="ready"?"The clicker counts once a session runs: press Start first.":L.state==="pause"?"Paused: press Resume, and the clicker counts again.":"The session has ended: press Resume to count more, or save it.",true); return true; }
+  const b=clkCur();
+  if(!b){ if(!e.repeat) note("The clicker counts behaviors measured by count or rate, and none is being observed.",true); return true; }
+  if(e.repeat){
+    if(nx&&!clkHeld){ clkHeld=true; const l=clkList(); undo(b.id);
+      if(l.length<2){ note("Only "+bname(b)+" is counted, so the clicker stays on it. Nothing was added.",true); clkShow(stats(b,elapsed()).n,bname(b)); }
+      else { const nb=l[(l.indexOf(b)+1)%l.length]; L.clk=nb.id; note("The clicker now counts "+bname(nb)+". Nothing was added."); clkShow(stats(nb,elapsed()).n,"Now counting: "+bname(nb)); }
+      clkMark(); }
+    return true; }
+  clkHeld=false; L.armed=null;
+  if(nx){ L.clk=b.id; const c=cards.find(x=>x.id===b.id); act(b,"go"); if(c) hit(c.go); clkShow(stats(b,elapsed()).n,bname(b)); }
+  else if(undo(b.id)) clkShow(stats(b,elapsed()).n,bname(b)+": one taken off");
+  clkMark();
+  return true;
+}
+D.addEventListener("keyup",e=>{ if(CLK_NEXT.includes(e.key)) clkHeld=false; });
+/* read by qa/v2576-clicker-test.js */
+window.ddClkState=()=>{ const l=clkList(), T=elapsed(); return {on:!!P().clicker,state:L.state,ids:l.map(b=>b.id),n:l.map(b=>stats(b,T).n),ev:L.ev.length,cur:(clkCur()||{}).id||""}; };
 D.addEventListener("keydown",e=>{
   if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.isComposing) return;
+  if(P().clicker&&clkKey(e)) return;
   if(!P().keys||!tabData||tabData.classList.contains("hidden")||D.querySelector("dialog[open]")) return;
   const t=e.target, tag=(t&&t.tagName)||"";
   if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)||(t&&t.isContentEditable)) return;
