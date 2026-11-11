@@ -9905,6 +9905,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.77: The backward chaining video
+(the BCBA, 11/11: "Yes, go ahead" with a $12 limit; then "Yes" to putting it in the app as it is)
+- **The video** (2:19, 1080p; made at 2K, and the 2K file is kept). On Form TD-1's card "Backward chaining: guide the
+  early steps and teach the last step first" (Slocum & Tiger, 2011) and in the video library as the 27th video, on a
+  new shelf, **Chain** (chaining and task analysis). It has its Steps and its Transcript.
+- **What it shows.** A three-step chain (pat head, pat lap, clap): the steps written and baseline; the student picks an
+  item to earn; the instruction, and every step but the last guided; 5 s for the last step alone; praise and the item
+  when it is done alone; then one fewer step guided. The closing cards give the error correction (a model, then
+  guidance, stopping if the student pulls away), the mastery rule, the data, and the study's finding that forward and
+  backward chaining worked about equally.
+- **How it was made.** Six shots, each one action, each with a first and a last frame, written with the new shot rules
+  (objects move only when a hand moves them; exactly two arms and two hands; a fixed camera; where each thing starts and
+  ends). All six passed on the first take: no retakes. Cost: $3.90 of the $12 limit, 48 Kling credits (more than the
+  24 estimated: two end frames were retaken with a dearer editing model), 1,386 ElevenLabs characters.
+- **Known differences from the plan, accepted by the BCBA.** He claps twice, not once. The teacher holds one of his
+  forearms with both hands. Her smile is open for much of the video.
+- **Size.** The video adds 12 MB: the 27 videos are 320 MB.
+- **Checks.** Every shot was looked at frame by frame at full size (arms, hands, the car and the ball). The local
+  speech-to-text model heard every narration line and both of the teacher's lines right.
+- **The test run.** The whole run was not repeated. Run on the final copy, and passing: budget, the six video and
+  podcast tests, and the offline copy's first-visit scenario. Changed on purpose: the video tests expect 27 videos and
+  the Chain shelf, and the library may be 4.4 screens long on an iPad held sideways, 2.9 upright and 4.4 on a phone
+  (each shelf with one video adds a row).
+- **Not checked.** Safari on a real iPad, and how it sounds to a person.
 ### v25.76: Count with a pocket clicker
 (the BCBA, 11/11: "Yes, build the pocket clicker"; the second research round's #21)
 - **What it is.** A Bluetooth presentation remote paired to the iPad counts for you, so the iPad can sit on a shelf
