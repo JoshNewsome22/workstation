@@ -20,7 +20,7 @@
   --green:#2E7A4B;--red:#B5442E;--gold:#8a5a00;--sans:"Inter","Helvetica Neue","Segoe UI",Arial,system-ui,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--gut:24px;font-size:16px}
 html.nbh-tx-1{font-size:18px}html.nbh-tx-2{font-size:20px}
 html.nbh-hc{--ink:#000;--muted:#263238;--rule:#5e7673;--box:#3f5654;--focus:#0a4f75;--chip:#dbe5e3}
-@media screen{html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}html.nbh-dark .ex-stage svg{filter:invert(1) hue-rotate(180deg)}}
+@media screen{html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}html.nbh-dark .ex-stage svg,html.nbh-dark .ex-stage .nbh-scene3d canvas{filter:invert(1) hue-rotate(180deg)}}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--wash);color:var(--ink);font:400 1rem/1.45 var(--sans);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overflow-x:hidden}
@@ -116,6 +116,7 @@ button,input,select{font:inherit;color:inherit}
   </div>
 </div>
 <script src="nbh-scene.js"></script>
+<script src="nbh-scene3d.js"></script>
 <script>
 (function(){
 'use strict';
@@ -252,7 +253,10 @@ var FCT={key:'fct',name:'FCT: green and red',title:'FCT schedule thinning: green
 function segAt(T,t){for(var i=0;i<T.segs.length;i++)if(t<T.segs[i].t1-1e-9||i===T.segs.length-1)return T.segs[i];return null;}
 
 var EX={dro:DRO,fct:FCT},cur=null,P=null,EV=[],T=null,t=0,playing=false,speed=1,last=0,raf=0,shownPart='',edited=false;
-var scene=N.create($('#exStage'),{label:'A drawn scene of the procedure: an adult and a student at a table'});
+var USE3D=!/[?&]flat=1\b/.test(location.search)&&!!window.NBHScene3D&&NBHScene3D.ok(),scene=null;   /* lit 3D where the device can draw it; the flat drawing where it cannot (or with ?flat=1) */
+if(USE3D){try{scene=NBHScene3D.create($('#exStage'),{label:'A drawn scene of the procedure: an adult and a student at a table'});}catch(er){scene=null;var h3=document.querySelector('#exStage .nbh-scene3d');if(h3)h3.parentNode.removeChild(h3);}}
+if(!scene){USE3D=false;scene=N.create($('#exStage'),{label:'A drawn scene of the procedure: an adult and a student at a table'});}
+document.documentElement.classList.toggle('nbh-3d',USE3D);
 var reduce=false;try{reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
 
 function rebuild(keepT){T=cur.build(P,EV);var s=$('#exScrub');s.max=T.len;if(!keepT||t>T.len)t=Math.min(t,T.len);

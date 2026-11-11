@@ -11,7 +11,7 @@
    Simulated people only. usage: node qa/v2578-practice-test.js   (WS_URL and WS_ROOT as in qa/lib.js) */
 const L=require(__dirname+'/lib.js');const {sleep}=L;const fs=require('fs'),path=require('path');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1400):''));if(!c)fails++;};
-const W=path.join(L.ROOT,'NBH-Workstation'),URL=L.BASE+'/NBH-Workstation/practice.html';
+const W=path.join(L.ROOT,'NBH-Workstation'),URL=L.BASE+'/NBH-Workstation/practice.html?flat=1';   /* the flat drawing; the lit 3D scene has its own test, v2578-scene3d-test */
 (async()=>{const br=await L.chromium.launch();const errs=[],outside=[];
  try{
   const src=fs.readFileSync(path.join(W,'practice.html'),'utf8'),sw=fs.readFileSync(path.join(W,'sw.js'),'utf8');

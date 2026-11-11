@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = '97320d0bb182';
+const VERSION = 'fa5246d28fc3';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -213,6 +213,7 @@ const FILES = [
   'nbh-video-steps.js',
   'nbh-video-transcripts.js',
   'nbh-scene.js',
+  'nbh-scene3d.js',
   'respond.html',
   'videos.html',
   'explain.html',
@@ -448,8 +449,11 @@ function sane(path, u8, ctype) {
     const s = bin(u8);
     if (!/<\/html>\s*(?:<script\b[^>]*>[\s\S]*?<\/script\s*>\s*)*$/i.test(s.slice(-8192))) return 'end';
     // v25.69: the video library (videos.html) is a page of its own like respond.html: no save tag, its own mark
-    if (path !== 'respond.html' && path !== 'videos.html' && s.indexOf(SAVE_TAG) < 0) return 'mark';
+    // v25.78: so are the drawn pages (explain.html, practice.html): no save tag, their mark is the scene they draw with
+    const drawn = path === 'explain.html' || path === 'practice.html';
+    if (path !== 'respond.html' && path !== 'videos.html' && !drawn && s.indexOf(SAVE_TAG) < 0) return 'mark';
     if (path === 'videos.html' && s.indexOf('nbh-videos.js') < 0) return 'mark';
+    if (drawn && s.indexOf('nbh-scene.js') < 0) return 'mark';
     if (path === 'index.html' && (s.indexOf('const FORMS=[') < 0 || s.indexOf('<script id="nbh-pwa">') < 0)) return 'mark';
     if (path === 'respond.html' && s.indexOf('nbh-respond.js') < 0) return 'mark';
     return '';

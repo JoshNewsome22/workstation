@@ -23,7 +23,7 @@
   --green:#2E7A4B;--red:#B5442E;--gold:#8a5a00;--sans:"Inter","Helvetica Neue","Segoe UI",Arial,system-ui,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--gut:24px;font-size:16px}
 html.nbh-tx-1{font-size:18px}html.nbh-tx-2{font-size:20px}
 html.nbh-hc{--ink:#000;--muted:#263238;--rule:#5e7673;--box:#3f5654;--focus:#0a4f75;--chip:#dbe5e3}
-@media screen{html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}html.nbh-dark .pr-stage svg{filter:invert(1) hue-rotate(180deg)}}
+@media screen{html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}html.nbh-dark .pr-stage svg,html.nbh-dark .pr-stage .nbh-scene3d canvas{filter:invert(1) hue-rotate(180deg)}}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--wash);color:var(--ink);font:400 1rem/1.45 var(--sans);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overflow-x:hidden}
@@ -126,6 +126,7 @@ button,input,select{font:inherit;color:inherit}
   </div>
 </div>
 <script src="nbh-scene.js"></script>
+<script src="nbh-scene3d.js"></script>
 <script>
 (function(){
 'use strict';
@@ -196,7 +197,10 @@ function stateAt(ev,t){var st={papers:{show:true},sheet:{show:true,marks:clamp(.
   }
   return st;}
 
-var scene=N.create($('#prStage'),{label:'The practice scene: a drawn student at a table with an adult',tap:false});
+var USE3D=!/[?&]flat=1\b/.test(location.search)&&!!window.NBHScene3D&&NBHScene3D.ok(),scene=null;   /* lit 3D where the device can draw it; the flat drawing where it cannot (or with ?flat=1) */
+if(USE3D){try{scene=NBHScene3D.create($('#prStage'),{label:'The practice scene: a drawn student at a table with an adult',tap:false});}catch(er){scene=null;var h3=document.querySelector('#prStage .nbh-scene3d');if(h3)h3.parentNode.removeChild(h3);}}
+if(!scene){USE3D=false;scene=N.create($('#prStage'),{label:'The practice scene: a drawn student at a table with an adult',tap:false});}
+document.documentElement.classList.toggle('nbh-3d',USE3D);
 var mode='count',len=60,pace='class',seed=1000+Math.floor(Math.random()*9000),EV=[],phase='idle',t=0,t0=0,raf=0,presses=[],spans=[],marks={},LOG=[],review=null,lastIv=-1;
 function seg(el,items,cur,attr){el.innerHTML=items.map(function(x){return '<button type="button" class="pr-btn" data-'+attr+'="'+x[0]+'" aria-pressed="'+(x[0]===cur)+'">'+esc(x[1])+'</button>';}).join('');}
 function setup(){seg($('#prModes'),Object.keys(MODES).map(function(k){return [k,MODES[k].name];}),mode,'mode');

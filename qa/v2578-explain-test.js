@@ -11,7 +11,7 @@
    Simulated people only. usage: node qa/v2578-explain-test.js   (WS_URL and WS_ROOT as in qa/lib.js) */
 const L=require(__dirname+'/lib.js');const {sleep}=L;const fs=require('fs'),path=require('path');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1400):''));if(!c)fails++;};
-const W=path.join(L.ROOT,'NBH-Workstation'),URL=L.BASE+'/NBH-Workstation/explain.html';
+const W=path.join(L.ROOT,'NBH-Workstation'),URL=L.BASE+'/NBH-Workstation/explain.html?flat=1';   /* the flat drawing (what a device that cannot draw 3D shows); the lit 3D scene has its own test, v2578-scene3d-test */
 (async()=>{const br=await L.chromium.launch();const errs=[],outside=[];
  try{
   const src=fs.readFileSync(path.join(W,'explain.html'),'utf8'),sc=fs.readFileSync(path.join(W,'nbh-scene.js'),'utf8'),sw=fs.readFileSync(path.join(W,'sw.js'),'utf8'),idx=fs.readFileSync(path.join(W,'index.html'),'utf8'),vid=fs.readFileSync(path.join(W,'videos.html'),'utf8'),bank=fs.readFileSync(path.join(W,'nbh-td1-bank.js'),'utf8');

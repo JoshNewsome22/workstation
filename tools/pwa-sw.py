@@ -161,8 +161,9 @@ def files_of(folder):
     # v25.78 the drawn pages (the explainers and the counting practice) and the scene they draw with
     for pg in ('explain.html', 'practice.html'):
         if pg in pages:
-            if 'nbh-scene.js' not in read(os.path.join(folder, pg)):
-                fail(pg + ' does not name nbh-scene.js')
+            for need in ('nbh-scene.js', 'nbh-scene3d.js'):   # the flat drawing, and the lit 3D one that is used where the device can draw it
+                if need not in read(os.path.join(folder, pg)):
+                    fail(pg + ' does not name ' + need)
             out.append(pg)
     try:
         man = json.loads(read(os.path.join(folder, 'manifest.json')))

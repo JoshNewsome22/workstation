@@ -329,7 +329,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     'nbh-shell-docread.js' /* v25.68 the workstation's Read a document, loaded by the shell (its page's size budget) */,
     'videos.html','nbh-videos.js','nbh-video-steps.js','nbh-video-transcripts.js','nbh-transcript.js' /* v25.69 the video library and the videos' one list; v25.72 each video's Steps, its transcript and the transcript's drawing */,
     'nbh-pod-player.js','nbh-pod-transcripts.js','nbh-pod-romaniuk-2002.js' /* v25.73 the study podcast: its player, its episodes' turns, the pilot episode's audio */,
-    'explain.html','practice.html','nbh-scene.js' /* v25.78 the drawn pages (the explainers, the counting practice) and the scene they draw with */,
+    'explain.html','practice.html','nbh-scene.js','nbh-scene3d.js' /* v25.78 the drawn pages (the explainers, the counting practice) and the scenes they draw with (flat, and lit 3D) */,
     ...fs.readdirSync(path.join(ROOT,'NBH-Workstation')).filter(f=>/^nbh-td1-poster-[a-z0-9-]+\.jpg$/.test(f)) /* v25.69 each video's picture */];
   /* v21.67 the document readers (PDF.js, Tesseract) in their folders, named by index.html's nbh-offline meta */
   const offline=(/<meta name="nbh-offline" content="([^"]*)"/.exec(fs.readFileSync(path.join(ROOT,'NBH-Workstation','index.html'),'utf8'))||[0,''])[1].split(/\s+/).filter(Boolean);need.push(...offline);
