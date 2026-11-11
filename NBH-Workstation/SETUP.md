@@ -9905,6 +9905,53 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.75: Every video re-drawn in the full-picture frame, at 1080p
+(the BCBA, 11/10: the pilot's small corner words and "a simulated example"; then "Yes" to all 24 at 1080p and the opening
+lines recorded again; then "Yes, both" to the three remaining lines and the choice-of-task video)
+- **The picture.** In all 25 videos the scene now fills the picture (it was a smaller scene inside a header, a step
+  panel and a caption strip). On the scene: the number and title of the step showing, with marks for how far along it
+  is; the timers and short notes the scenes already had, drawn larger; "Simulated example" in the top corner. The
+  opening card is the title and one line; the closing points come one or two at a time on their own cards, in larger
+  type. Same scenes, same order, same timing, frame for frame: no scene was made again.
+- **1080p** (it was 720p). The scenes themselves were made at 720p and are enlarged, so it is the words and timers that
+  are sharper. 2K was compared on three videos: a little crisper again in the words only, at about 55% more to download.
+- **What is said.** The opening line of every video now says "a simulated example" (it said "an AI-generated, simulated
+  example"), and the closing line of two videos says "This is a simulated example" (FCT step by step, and the
+  high-probability request sequence). 27 lines were recorded again in the same voice and set into the sound at the old
+  line's place and loudness; the rest of each sound track is as it was (encoded once more). The label on the page,
+  "AI-generated · simulated people", is unchanged.
+- **Where the words went.** Nothing the first frame showed is lost: the steps are the Steps list beside the video, what
+  happens in each step shows under the step as it plays, and every word is in the Transcript. In a re-drawn video's
+  transcript those notes are labelled "Note" (they were "On screen"), and a step that is only narrated over the title
+  says "Said at the opening".
+- **On a phone** a video is shown whole (the first frame was cropped to its scene, which is no longer needed). On an
+  iPad the browser's control bar stays in the band below the picture, clear of the step's name.
+- **Size.** The 25 videos are now 294 MB (they were 112 MB), so the offline copy is about 400 MB, and a device that
+  keeps the workstation offline fetches all 25 again once. While an update is being saved, the old copy and the new one are both
+  held for a moment, so it needs about 800 MB free on the device.
+- **The forms list: fold the sheets** (the BCBA, 11/10). A tap on a form opens it and shows its sheets under its row,
+  as before. A second tap on that row now folds the sheets away, and the next tap brings them back. The form stays
+  open either way. The fold lasts for that visit: open another form and come back, and the sheets show again.
+  A small arrow on the row shows it: down while the sheets show, sideways when they are folded.
+- **The test run.** 509 tests on the copy with 24 of the videos re-drawn; 491 passed at the first run. Of the 18 that
+  did not:
+  - **Two came from the videos' size, and the tests were changed on purpose.** budget: the videos' size limit went
+    from 120 MB to 300 MB. pwa-test: the test browser's private profile holds about 850 MB of offline copy, and its
+    scenarios that keep two copies at once (an update, two editions side by side) now need more. Those scenarios pass
+    with a browser profile kept on disk, which the release list now asks for; the rest of the test passed as it was.
+  - **Five passed when run alone:** v2235-staff-directory, ea1-yoke, v2572-transcript, v2569-fx2-g5 and sm1-rate.
+  - **Eleven fail on v25.71 too:** packet-gate (listed twice), tk1-bus, tk1-audit, link-tk1, v2570-shell (What's new),
+    v2191-focus, student-journey, wording-rollout, sprint-a7 and a11y-release (it needs axe-core).
+  - **After that run, three things were added and the whole run was not repeated:** the choice-of-task video and the
+    three lines, the fold in the forms list with its arrow, and the two test changes above. Run again on the final
+    copy: the six video and podcast tests, v2572-transcript, v2575-rail-fold, shell-ui, v2568-shell, budget and the
+    offline scenarios named above. All pass.
+- **Checks.** Each new line was heard by the local speech-to-text model: all 27 say "simulated example" and none says
+  "AI". Every re-drawn video has the same number of frames as the one it replaces. v2568-td1-procvideos,
+  v2568-td1-versions and v2572-transcript now check the new frame (1080p, the note, the phone). New test: v2575-rail-fold.
+- **Not checked.** Safari on a real iPad or iPhone (1080p playback, the band under the picture, the captions track),
+  and how each new line sounds to a person: please listen to a few openings.
+
 ### v25.74: The last seven fixes from the privacy check
 (the privacy check the BCBA asked for: every path from one student's information to another's files)
 - **Two paths where one student's work could reach another student's safety copy.** Both needed two cases opened or

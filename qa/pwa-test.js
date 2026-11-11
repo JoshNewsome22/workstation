@@ -238,6 +238,10 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
   const O=makeOther(),XO='http://127.0.0.1:'+(await O.listen());
   const FILES=swFiles();
   const br=await chromium.launch();
+  /* v25.75: the test browser's private profile holds about 850 MB of offline copy, and two copies of an edition with the
+     1080p videos need more. PWA_DISK=<folder> gives each context a profile kept on disk in that folder instead (removed when it closes, and at the end). */
+  if(process.env.PWA_DISK){let k=0;br.newContext=async o=>{const d=path.join(process.env.PWA_DISK,'pwa-prof-'+process.pid+'-'+(++k));process.on('exit',()=>{try{fs.rmSync(d,{recursive:true,force:true});}catch(e){}});fs.rmSync(d,{recursive:true,force:true});
+    const c=await chromium.launchPersistentContext(d,o||{});const cl=c.close.bind(c);c.close=async()=>{await cl();fs.rmSync(d,{recursive:true,force:true});};return c;};}
   const errs=[];
 
   /* ================= A: manifest and icons ================= */
