@@ -430,6 +430,10 @@ body{
 .pa65-vid[hidden],#paSocAid[hidden],#paCombAid[hidden],#paEdChk[hidden],#csaWaitBox[hidden],#csaLatBox[hidden],#csaLatRec[hidden],#csaBlockBox[hidden],#csaBlockFlag[hidden],.pa65-dur[hidden],#paPbTan[hidden],[id^="tanFlag-"][hidden],[id^="vidFlag-"][hidden]{display:none!important}
 .pa65-r{display:inline-block;margin-left:4px;padding:0 5px;border:1px solid var(--nbh-flag,#9b4e15);border-radius:3px;color:var(--nbh-flag,#9b4e15);font-size:10.5px;letter-spacing:.04em}
 .pa65-uf{font-size:11.5px;line-height:1.35;color:var(--nbh-flag,#9b4e15)}.pa65-uf+.pa65-uf{margin-top:3px}
+/* v25.81 the item safety check: its table's fields fill their cells; an item not to be used is marked in words and in weight */
+#paSafeTbl select,#paSafeTbl input{width:100%;box-sizing:border-box}
+#paSafeTbl .pa-sf-stop{font-weight:700}
+#paSafeTbl td.pa-sf-food{color:#4a5a62;font-size:12px}
 #paUseTbl input{width:100%;box-sizing:border-box}
 @media print{.pa65-empty{display:none!important}}   /* v25.65 an optional new block with nothing in it does not print, so a file saved before prints as it did */
 .method{font-size:12px;line-height:1.55;color:var(--ink-soft);margin-top:4px}
@@ -1416,7 +1420,7 @@ html.fx2:not(.nbh-pr-measure):where(:not(.nbh-plain)) .fx2-sh .gridwrap:not(:has
    Cards: the informant interview by category, the stimulus pool, how each stimulus is used, the settings and
    routines and the in-context observations. Tables: every trial and session record, the matrices and the hierarchies;
    the walkthrough as it is */
-window.FX2_CFG = { cards: '#raisdTbl, #poolTbl, #paUseTbl, #ecoSetTbl, #ecoObsTbl', heads: '.fx2-sh h3.pa-run-title',
+window.FX2_CFG = { cards: '#raisdTbl, #poolTbl, #paUseTbl, #paSafeTbl, #ecoSetTbl, #ecoObsTbl', heads: '.fx2-sh h3.pa-run-title',
   keep: ['Fisher'],
   noseg: '#ssTbl, #psTbl, #msTbl, #foTbl, #ssdTbl, #ecoMatTbl, #ecoAttrTbl, #csaTbl, #csaRetestTbl, #stabTbl, #monTbl, table.inner' };
 /* v25.70 step by step (tools/blocks/fx2.html, step 13): this form offers All at once or Step by step */
@@ -1700,6 +1704,23 @@ window.FX2_CFG.step = true;
     <thead><tr><th class="n" style="width:6%">#</th><th style="width:28%">Stimulus</th><th style="width:22%">Category (e.g., salty-crunchy, gummy)</th><th style="width:16%">Access in the plan (s or min)</th><th>Flag</th></tr></thead>
     <tbody></tbody>
   </table>
+  </div>
+
+  <!-- v25.81 (the BCBA, 11/11) a size and hazard check of the non-food items before any of them is given to the student -->
+  <div id="paSafeBox">
+  <h3 class="sub">Item Safety Check (non-food items)</h3>
+  <p class="method" style="margin-top:0">Before a leisure, sensory or other item is given to the student, check whether the item, or any piece that can come off it, could be swallowed or block the airway. <b>The tube check:</b> the federal small-parts test uses a cylinder 1.25 in. (3.2 cm) across and up to 2.25 in. (5.7 cm) deep (16 CFR 1501); an item or piece that fits inside it is a small part. That test is written for children under 3. For a student of any age who puts things in the mouth it is the least to check, not proof that an item is safe: for such a student also use the small-ball size, 1.75 in. (4.4 cm) across (16 CFR 1500.18), and look at each item before every use for wear, cracks and loose pieces. This check does not replace the nurse&rsquo;s or the doctor&rsquo;s orders, or the school&rsquo;s own rules for materials.</p>
+  <div class="drow"><div class="dlab"><label for="paSafeMouth">Does the student put non-food items in the mouth?</label></div><div class="dval"><select data-meta="safeMouth" id="paSafeMouth"><option></option><option>No</option><option>Sometimes</option><option>Yes, often</option><option>Not known</option></select></div></div>
+  <div class="warn pa-food" id="paSafeCase" role="status" hidden></div>
+  <table class="rank" id="paSafeTbl">
+    <thead><tr><th class="n" style="width:6%">#</th><th style="width:22%">Stimulus</th><th style="width:24%">Tube check</th><th style="width:20%">Other hazards seen</th><th>Flag</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <div class="ident">
+    <div class="f"><label for="paSafeBy">Items checked by</label><input id="paSafeBy" data-meta="safeBy" placeholder="name and role"></div>
+    <div class="f"><label for="paSafeDate">Date checked</label><input id="paSafeDate" data-meta="safeDate" placeholder="date"></div>
+  </div>
+  <div class="warn pa-food" id="paSafeFlag" role="status" hidden></div>
   </div>
 
   <div class="cite">Interview categories follow the Reinforcer Assessment for Individuals with Severe Disabilities (Fisher, Piazza, Bowman, &amp; Amari, 1996, <em>American Journal on Mental Retardation, 101</em>, 15&ndash;25), in which stimuli nominated through the structured interview and then assessed directly were more effective reinforcers than those from a standard list. Green et al. (1988, <em>JABA, 21</em>, 31&ndash;43) found staff opinion a poor predictor of assessed preference; Northup (2000, <em>JABA, 33</em>, 335&ndash;338) found a reinforcer survey about 57% accurate against concurrent-operants reinforcer assessments with 20 children with attention deficit disorders; in the study it replicated, survey results often rated multiple categories as high preference and were less likely to identify low-preference categories (Northup et al., 1996); Cote et al. (2007, <em>JABA, 40</em>, 157&ndash;166) found a strong teacher&ndash;assessment correlation for only 1 of 9 toddlers; the top items from both methods functioned as reinforcers, and the direct assessment's top item was the more effective reinforcer for 5 of the 9.</div>
@@ -3814,6 +3835,72 @@ function pa65Paint(){try{pa65EmptyPaint();pa65TanPaint();pa65VidPaint();pa65Pool
 {const rp=renderPool;renderPool=function(){const r=rp.apply(this,arguments);try{pa65UsePaint();}catch(e){}return r;};}
 document.addEventListener('input',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.meta)pa65Paint();});
 document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset)return;if(el.dataset.meta==='csaUnit'||el.dataset.meta==='csaMode'){renderCSA();renderSummary();}else if(el.dataset.meta||el.dataset.run)pa65Paint();});
+
+/* v25.81 (the BCBA, 11/11) the item safety check: each non-food item's tube check (the federal small-parts cylinder,
+   16 CFR 1501) and any other hazard seen, kept on the item (size: 'big', 'small' or 'na'; haz: free text). Hazards are
+   also read from the item's own words (its name, category, notes and the hazards typed): magnets, button batteries,
+   balloons and thin film, items that grow in water, small or crumbling pieces, cords. Whether the student mouths
+   non-food items is asked here (meta.safeMouth) and read from Form DM-1's safety precautions inside a case (Pica,
+   Choking). An item that fits the tube is marked "Do not use" for such a student; starting a runner then asks first,
+   and the go-ahead is kept as meta.safeAck. Nothing here is a medical judgment: the text on the sheet says so. */
+const PA_SF_SIZE=[['',''],['big','Too large to fit, and nothing comes off'],['small','Fits in the tube, or a piece could come off'],['na','Not an object the student holds']];
+const PA_SF_HAZ=[
+ [/magnet/i,'mag','Magnets: two or more swallowed, or one with a metal object, can pull together through the bowel wall.',true],
+ [/batter(y|ies)|light[- ]?up|flashing|glow(s|ing)? (toy|ball|stick)|key ?fob|\bremote\b/i,'bat','Button or coin batteries can burn the throat within hours of being swallowed: use the item only if its battery door is screwed shut, and check it before each use.',false],
+ [/balloon|plastic bag|cling|shrink[- ]?wrap|\bfilm\b|disposable glove/i,'bal','Uninflated or broken balloons, and thin film, can block the airway (the federal balloon warning covers children under 8): throw broken pieces away at once.',true],
+ [/water ?beads?|gel beads?|orbee|grow(s|ing)?[- ]in[- ]water|expand(s|ing)? in water/i,'wat','Water beads grow after they are swallowed and can block the bowel.',true],
+ [/marbles?|\bbeads?\b|\bcoins?\b|pom[- ]?poms?|\bbuttons?\b|pebbles?|\bbeans?\b|\brice\b|\bsand\b|slime|putty|play[- ]?dough|\bfoam\b|squish|stickers?|googly|bouncy balls?|small balls?|building bricks?|small parts?|loose parts?|\bcaps?\b|\blids?\b/i,'sm','Often small, or comes apart into small pieces: do the tube check on the item and on every piece that can come off.',false],
+ [/strings?|\bcords?\b|lanyards?|ribbons?|\bropes?\b|necklaces?|yo-?yo|elastic|\bbands?\b|\bstraps?\b/i,'crd','Cords and strings can wrap around the neck: use under direct watch and put the item away afterward.',false]];
+const paSfObj=i=>{const s=S.stim[i]||{};return !!pa65T(s.name)&&s.type!=='Edible';};
+const paSfNeeds=i=>{const s=S.stim[i]||{};return paSfObj(i)&&s.type!=='Activity'&&s.type!=='Social'&&s.size!=='na';};
+function paSfCase(){const f=paCase(),fl=f&&f.profile&&f.profile.flags,L=((fl&&fl.safety)||[]).filter(x=>/^(pica|choking)/i.test(String(x)));return L;}
+function paSfRisk(){const m=pa65T(S.meta.safeMouth),c=paSfCase(),why=[];
+  if(/^(Sometimes|Yes)/.test(m))why.push('the answer above: '+m.toLowerCase());
+  if(c.length)why.push('Form DM-1’s safety precautions: '+c.join(', ').toLowerCase());
+  return {on:why.length>0,why:why.join('; '),asked:!!m,case:c};}
+function paSfHaz(i){const s=S.stim[i]||{},t=[s.name,s.cat,s.note,s.haz].map(pa65T).join(' ');return PA_SF_HAZ.filter(h=>h[0].test(t));}
+/* an item's flags: stop (do not use with this student), and the lines to show */
+function paSfFlags(i){const s=S.stim[i]||{},F=[],R=paSfRisk();let stop=false;if(!paSfObj(i))return {stop,F};
+  const hz=paSfHaz(i),need=paSfNeeds(i);
+  if(need&&!s.size)F.push('Not checked yet.');
+  if(s.size==='small'){if(R.on){stop=true;F.push('Do not use with this student: the item, or a piece of it, fits in the tube, and the student mouths non-food items ('+R.why+').');}
+    else F.push('Small enough to swallow or to block the airway. Use it only within arm’s reach and in sight, count the pieces out and back, or choose a larger version.');}
+  if(s.size==='big'&&R.on)F.push('Passes the tube check. For this student also check it against the small-ball size (1.75 in., 4.4 cm), and look at it before every use.');
+  hz.forEach(h=>{if(h[3]&&R.on){stop=true;F.push('Do not use with this student. '+h[2]);}else F.push(h[2]);});
+  /* an item not to be used says so first, and is not also said to pass */
+  const G=(stop?F.filter(x=>!/^Passes the tube check/.test(x)):F).slice().sort((a,b)=>(/^Do not use/.test(b)?1:0)-(/^Do not use/.test(a)?1:0));
+  return {stop,F:G};}
+function paSfSummary(){const stop=[],open=[];S.stim.forEach((s,i)=>{if(!paSfObj(i))return;const f=paSfFlags(i);if(f.stop)stop.push(name(i));else if(paSfNeeds(i)&&!s.size)open.push(name(i));});return {stop,open};}
+function paItemPaint(){const tb=$('#paSafeTbl tbody');if(!tb)return;const act=document.activeElement,R=paSfRisk();
+  const cell=i=>{const f=paSfFlags(i);return f.F.map(x=>'<div class="pa65-uf'+(/^Do not use/.test(x)?' pa-sf-stop':'')+'">'+esc(x)+'</div>').join('');};
+  if(act&&act.dataset&&act.dataset.sf!=null&&tb.contains(act)){S.stim.forEach((s,i)=>{const c=$('#paSafeF'+i);if(c)c.innerHTML=cell(i);});}
+  else tb.innerHTML=S.stim.map((s,i)=>s.type==='Edible'?`<tr><td class="n">${i+1}</td><td>${esc(name(i))}</td><td colspan="3" class="pa-sf-food">A food item: its approval, allergies and diet orders are in Restrictions above and on Form IC-1.</td></tr>`
+    :`<tr><td class="n">${i+1}</td><td>${esc(name(i))}</td><td><select data-sf="size" data-i="${i}" aria-label="Tube check of ${esc(name(i))}">${PA_SF_SIZE.map(o=>`<option value="${o[0]}"${(s.size||'')===o[0]?' selected':''}>${esc(o[1])}</option>`).join('')}</select></td><td><input data-sf="haz" data-i="${i}" value="${esc(pa65T(s.haz))}" placeholder="e.g., magnet, button battery, cord" aria-label="Other hazards of ${esc(name(i))}"></td><td id="paSafeF${i}">${cell(i)}</td></tr>`).join('');
+  const cs=$('#paSafeCase');if(cs){const c=R.case;cs.innerHTML=c.length?'<b>From the case</b>'+esc('Form DM-1’s safety precautions list '+c.join(' and ').toLowerCase()+' for this student. Treat every item as one the student may put in the mouth.'):'';pa65Show(cs,c.length>0);}
+  const fl=$('#paSafeFlag');if(fl){const m=paSfSummary(),bits=[];
+    if(m.stop.length)bits.push('Do not use with this student: '+m.stop.join(', ')+'. Take '+(m.stop.length===1?'it':'them')+' out of the pool, or record in Notes why the BCBA allows '+(m.stop.length===1?'it':'them')+' and how '+(m.stop.length===1?'it':'they')+' will be watched.');
+    if(m.open.length)bits.push((m.open.length===1?'One item is':m.open.length+' items are')+' not checked yet: '+m.open.join(', ')+'.');
+    if(!R.asked&&!R.case.length&&S.stim.some((s,i)=>paSfNeeds(i)))bits.push('Answer the question above: whether the student mouths non-food items decides which items can be used.');
+    if(S.meta.safeAck&&(m.stop.length||m.open.length))bits.push(S.meta.safeAck);
+    fl.innerHTML=bits.length?'<b>Item safety</b>'+esc(bits.join(' ')):'';pa65Show(fl,bits.length>0);}
+  const box=$('#paSafeBox');if(box)box.classList.toggle('pa65-empty',!S.stim.some(s=>s&&(s.size||pa65T(s.haz)))&&!pa65T(S.meta.safeMouth)&&!pa65T(S.meta.safeBy)&&!pa65T(S.meta.safeDate));}
+/* the answer is kept as the event starts down the page (capture), before any listener redraws the tables */
+['input','change'].forEach(t=>document.addEventListener(t,e=>{const el=e.target;if(!el||!el.dataset||el.dataset.sf==null)return;const s=S.stim[+el.dataset.i];if(s)s[el.dataset.sf]=el.value;},true));
+['input','change'].forEach(t=>document.addEventListener(t,e=>{const el=e.target;if(!el||!el.dataset)return;if(el.dataset.sf!=null||(el.closest&&el.closest('#poolTbl,#paUseTbl')))paItemPaint();}));
+{const pp=pa65Paint;pa65Paint=function(){pp.apply(this,arguments);try{paItemPaint();}catch(e){if(window.console)console.warn('PA-1 v25.81',e);}};}
+{const rp=renderPool;renderPool=function(){const r=rp.apply(this,arguments);try{paItemPaint();}catch(e){}return r;};}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{paItemPaint();}catch(e){}return r;};}
+let paSafeOk='',paSafeAsk=false;
+/* called by a runner as it takes over, after the food question: true to go on; false while the question is open or after Cancel */
+window.paSafeGate=function(r){const R=paSfRisk();if(!R.on)return true;const m=paSfSummary();if(!m.stop.length&&!m.open.length)return true;
+  const key=R.why+'|'+m.stop.join('|')+'||'+m.open.join('|');if(paSafeOk===key||paSafeAsk)return paSafeOk===key;paSafeAsk=true;
+  (async()=>{let go=false;const what=(m.stop.length?'Marked Do not use: '+m.stop.join(', ')+'. ':'')+(m.open.length?'Not checked yet: '+m.open.join(', ')+'. ':'');
+    try{go=await nbhUI.confirm('Run this assessment with these items?\nThis student mouths non-food items ('+R.why+'). '+what+'Run it only if the BCBA has decided these items can be used and how they will be watched.',{ok:'Run with these items',danger:true});}catch(e){go=false;}
+    paSafeAsk=false;if(!go){try{r.note('Not started: finish the Item Safety Check on the Indirect sheet, or take the marked items out of the pool.',true);}catch(e){}return;}
+    const d=new Date();paSafeOk=key;S.meta.safeAck='Run with these items confirmed by the assessor on '+(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()+'.';paItemPaint();r.primary();})();
+  return false;};
+/* the two per-item tables are drawn as the form opens (the table above was empty on a new form until something was typed) */
+try{pa65Paint();}catch(e){}
 /* the case: the default arrangement for a social function, and what Form TD-1 can read */
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let set=false;try{set=pa65ModeDefault();if(set)renderCSA();pa65Paint();}catch(e){}
   if(!set)return r;const rn=(r&&r.filled)||0;return {filled:rn+1,note:[r&&r.note,'the competing stimulus sheet set to the plan’s wait component (a social function)'].filter(Boolean).join('; ')};};}
@@ -3917,6 +4004,7 @@ function lockOn(list){lockOff();LOCK_ALWAYS.concat(list||[]).forEach(s=>qa(s).fo
 function lockOff(){LOCKED.splice(0).forEach(x=>{x[0].disabled=false;if(x[1]==null)x[0].removeAttribute('title');else x[0].title=x[1];});}
 function claim(r){if(ACTIVE&&ACTIVE!==r){r.note('The '+ACTIVE.label.toLowerCase()+' runner is in use on its own sheet. End it there first.',true);return false;}
   if(ACTIVE!==r){if(window.paFoodGate&&!window.paFoodGate(r))return false;   /* v22.37 (review F120): edibles without the parent's Yes on Form IC-1 ask first */
+    if(window.paSafeGate&&!window.paSafeGate(r))return false;   /* v25.81: a student who mouths non-food items, and an item marked Do not use or not checked, ask first */
     ACTIVE=r;lockOn(r.locks);}return true;}
 function release(r){if(ACTIVE===r){ACTIVE=null;lockOff();}sync();}
 

@@ -9905,6 +9905,50 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.81: Item Safety Check on Form PA-1
+(the BCBA, 11/11: "Yes" to "Shall I build the item safety check in Form PA-1?")
+- **What it is.** A check of the non-food items in a stimulus pool before any of them is given to the student: could
+  the item, or a piece that can come off it, be swallowed or block the airway. It is on Form PA-1's Indirect sheet,
+  after **How Each Stimulus Will Be Used**. Until now the form asked about approval for food items only.
+- **The tube check.** For each leisure, sensory or other item: **Too large to fit, and nothing comes off**, **Fits in
+  the tube, or a piece could come off**, or **Not an object the student holds**. The tube is the federal small-parts
+  test cylinder, 1.25 in. (3.2 cm) across and up to 2.25 in. (5.7 cm) deep (16 CFR 1501). The sheet says that the
+  test is written for children under 3, that for a student of any age who mouths items it is the least to check and
+  not proof an item is safe, and that the small-ball size, 1.75 in. (4.4 cm), should be used too (16 CFR 1500.18).
+- **Other hazards.** A box for hazards seen, and the form also reads an item's own words (its name, category, notes):
+  magnets, button or coin batteries, balloons and thin film, water beads, small or crumbling pieces (beads, marbles,
+  putty, foam and the like), and cords, bands and straps. Each gets one line saying what the hazard is.
+- **Does the student put non-food items in the mouth?** No, Sometimes, Yes often, or Not known. Inside a case the form
+  also reads **Pica** and **Choking** from Form DM-1's safety precautions, and says so.
+- **"Do not use with this student."** For a student who mouths items (by the answer or by Form DM-1), an item that
+  fits the tube is marked that way, and so are magnets, balloons and water beads whatever their size. An item that
+  passes is still to be checked against the small-ball size and looked at before every use. For a student who does
+  not mouth items the same findings are cautions: within arm's reach and in sight, count the pieces out and back, or
+  choose a larger version.
+- **Starting a session asks first.** With such a student, if an item is marked or not yet checked, **Start** on any
+  of the form's recorders asks before it runs, as it does for food items without the parent's approval. Cancel leaves
+  it not started. The go-ahead is noted on the sheet with its date and is not asked again for the same items.
+- **Who checked, and when** are kept with the check. Everything is saved in the form's file; a file saved before
+  opens as it did, and the block is left off the printout until something is entered in it.
+- **Fixed on the way.** On a new, empty Form PA-1 the table **How Each Stimulus Will Be Used** had no rows until
+  something was typed. It is drawn as the form opens.
+- **What it is not.** It is not a medical or legal judgment and does not replace the nurse's or the doctor's orders
+  or the school's rules for materials: the sheet says so. The hazard words are a short list, not every hazard. The
+  form does not measure anything: a person does the tube check with the item in hand.
+- **Not built.** The check stays on Form PA-1. Forms RA-1 and TE-1 and the token boards do not yet repeat an item's
+  "Do not use" mark.
+- **The test run.** The whole run was not repeated. Run on the final copy: the new item-safety test (v2581, 16 checks:
+  the section, the flags, the case's pica and choking precautions, the question before a session, saving and
+  reopening, a file saved before) and 22 tests that involve Form PA-1 or its layout, saving and printing (among them
+  pa1-w3, v2237-food-consent, v2565-pref, v2565-safety, v2567-fx2-g1, v2572-form-residue, v2193-fields,
+  v2215-print-phone, autosave, ra1-w3, budget, all-forms-shell, the version and docs tests). All pass.
+- **One fault found by those tests, and fixed before release.** The new code first used a name the form already had
+  for the competing-stimulus sheet's safety plan, which switched off three of that sheet's warnings; pa1-w3 and
+  v2565-pref caught it. The new code was renamed and both tests pass. Changed on purpose: the layout test's list of
+  Form PA-1's tables laid out as cards takes the new table.
+- **Not run.** The offline-copy test (pwa-test): not enough free disk in this session.
+- **Not checked.** A real iPad. No nurse, occupational therapist or district safety officer has read the wording
+  or the hazard list: please read both before relying on them.
 ### v25.80: The forward chaining video
 (the BCBA, 11/11: "Yes h3 forward chaining" with a $12 limit; then "Yes" to putting it in the app as it is)
 - **The video** (2:52, 1080p; made at 2K, and the 2K file is kept). On Form TD-1's card "Forward chaining: teach the

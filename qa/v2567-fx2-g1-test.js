@@ -39,7 +39,7 @@ const file=id=>L.forms().find(x=>x.id===id).file;
 const OUT=path.join(__dirname,'out','v2567-fx2-g1');fs.mkdirSync(OUT,{recursive:true});
 /* spot checks on top of the checks of every table: lists that are cards at 820 px, tables that stay tables */
 const CARDS={'SI-1':['#abTbl','#wbTbl','#alTbl','#pcTbl'],'OB-1':['#mbTbl','table.obck','table.oblog'],'SP-1':[],'MT-1':['table.mt-obsck'],
-  'VI-1':['#evTbl','#registerTbl','#diffTbl','#cvLogTbl'],'EA-1':['#phaseTbl','table.ea-acct'],'DA-1':['#taskTbl'],'PA-1':['#raisdTbl','#poolTbl','#paUseTbl','#ecoSetTbl','#ecoObsTbl'],
+  'VI-1':['#evTbl','#registerTbl','#diffTbl','#cvLogTbl'],'EA-1':['#phaseTbl','table.ea-acct'],'DA-1':['#taskTbl'],'PA-1':['#raisdTbl','#poolTbl','#paUseTbl','#paSafeTbl','#ecoSetTbl','#ecoObsTbl'],
   'DM-1':['#teamTbl','#medTbl'],'IC-1':['#logTbl'],'RR-1':['#medTbl'],'TB-1':['#selTbl'],'IA-1':['#outTbl'],'IN-1':['#respTbl','#convTbl']};
 const STAY={'SI-1':['#hardTbl','#prTbl'],'OB-1':['table.obs-count'],'SP-1':['#grid'],'MT-1':['#sessTbl'],'VI-1':['#agreeTbl','#hillTbl'],'EA-1':['#sessTbl','#trialTbl'],
   'DA-1':['#sessTbl','#pcTbl'],'PA-1':['#ssTbl','#ecoMatTbl'],'TB-1':['#qcTbl'],'IA-1':['#fastGrid'],'IN-1':['table.mx']};
