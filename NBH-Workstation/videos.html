@@ -82,6 +82,9 @@ body.vl-watching #vlClose{margin-left:auto}
 
 /* ---------- the filters: Procedure and Function (they combine), Watched, the count ---------- */
 .vl-intro{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:0 0 6px;color:var(--muted);font-size:.9375rem}
+/* v25.78 the drawn pages beside the videos: the explainers and the counting practice */
+.vl-more{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:22px 0 6px;padding-top:14px;border-top:1px solid var(--rule);font-size:.9375rem;color:var(--muted)}
+.vl-more .vl-btn{min-height:44px}
 .vl-filt{display:grid;gap:8px;padding:2px 0 0}
 .vl-frow{display:flex;align-items:center;gap:12px;min-width:0}
 .vl-fl{flex:0 0 5.25rem;font-weight:600;font-size:.8125rem;color:var(--muted)}
@@ -346,6 +349,7 @@ body.vl-watching #vlClose{margin-left:auto}
         <label class="vl-sel vl-sel-seen"><span>Watched</span><select id="vlSeen"><option value="all">All</option><option value="seen">Watched</option><option value="unseen">Not watched</option></select><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></label></div>
     </div>
     <div id="vlList"></div>
+    <p class="vl-more" id="vlMore"><span>Drawn, not video:</span><a class="vl-btn" href="explain.html" id="vlToExplain">Explainers you can step through</a><a class="vl-btn" href="practice.html" id="vlToPractice">Practice counting</a></p>
   </section>
   <section id="vlWatch" class="vl-wrap" hidden aria-labelledby="vlTitle"></section>
 </main>
@@ -560,6 +564,7 @@ function stepsHtml(S,hasT,full){var WH={open:full?'Said at the opening':'On the 
     S.steps.map(function(s,i){var note=WH[s.where]||(s.where==='with'?'Shown with step '+s.with:'');
       return '<li data-i="'+i+'"'+(s.where?' data-where="'+s.where+'"':'')+'><button type="button" class="vl-sbtn" data-t="'+s.t+'"><span class="vl-stm">'+mmss(s.t)+'</span><span class="vl-sn'+(s.n?'':' vl-sn0')+'" aria-hidden="true">'+(s.n||'')+'</span><span>'+(s.n?'<span class="vl-sr">Step '+s.n+': </span>':'')+esc(s.title)+(note?'<span class="vl-snote">'+note+'</span>':'')+'</span></button><p class="vl-scap" hidden></p></li>';}).join('')+'</ol></div>'+
     (hasT?'<div class="vl-trans" id="vlTrans" role="tabpanel" aria-labelledby="vlTabT" hidden></div>':'')+'</section>';}
+var EXPLAIN={dro_resetting:['dro','DRO, resetting'],fct_thinning_mult:['fct','FCT: green and red']};   /* v25.78 video key -> [explain.html's address, its name] */
 function stepAt(S,t){var c=null;for(var i=0;i<S.caps.length;i++){if(S.caps[i][0]<=t+0.05)c=S.caps[i];else break;}return c;}
 function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){return FN[x]||x;}),S=STEPS[v.key];
   var acts=v.cards.map(function(id,i){var c=D.cards[id]||{},c1=(c.cite||'').split('; ')[0];
@@ -568,6 +573,9 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
   /* v25.73 a video whose card has an episode of the study podcast: Listen to the study, in the bar (the page stays) */
   var pe=podOf(v);if(pe)acts+='<div class="vl-actr"><button type="button" class="vl-btn vl-listen" data-listen="'+esc(pe.key)+'" aria-describedby="vlListenL">'+HEAD_ICO+'Listen to the study</button>'+
     '<span class="vl-actl" id="vlListenL"><b>'+esc(pe.title)+'</b>'+esc(SERIES)+' · '+pe.min+' min · <span class="vl-ai">AI voices</span></span></div>';
+  /* v25.78 a video whose procedure has an explainer (explain.html): the same rule in a drawn scene that can be dragged and changed */
+  var ex=EXPLAIN[v.key];if(ex)acts+='<div class="vl-actr"><a class="vl-btn vl-explain" href="explain.html#'+ex[0]+'" aria-describedby="vlExplainL">Step through it</a>'+
+    '<span class="vl-actl" id="vlExplainL"><b>Explainer: '+esc(ex[1])+'</b>A drawn scene: drag to any moment, change the numbers, add what the student does</span></div>';
   var sum=(v.shows||{}).summary;
   $('vlWatch').innerHTML='<div class="vl-w"><div class="vl-wmain">'+
     '<div class="vl-player"><video id="vlVideo" controls playsinline preload="metadata" tabindex="0" poster="'+esc(v.poster)+'" aria-label="'+esc(v.title)+'"></video>'+

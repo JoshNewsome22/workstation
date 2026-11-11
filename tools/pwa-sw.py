@@ -102,7 +102,8 @@ def check_page(name, s):
         if word in s:
             fail('%s names %s: the worker cuts the host\'s snippet by that name, so no page of the workstation may' % (name, word))
     # v25.69 the video library (videos.html) saves no file, as respond.html saves none: neither carries the save block
-    if name not in ('respond.html', 'videos.html') and s.count(SAVE_TAG) != 1:
+    # v25.78 nor do the drawn pages (explain.html, practice.html)
+    if name not in ('respond.html', 'videos.html', 'explain.html', 'practice.html') and s.count(SAVE_TAG) != 1:
         fail('%s holds %d copies of %s, not one: run python3 tools/blocks/patch-pwa.py on the folder'
              % (name, s.count(SAVE_TAG), SAVE_TAG))
 
@@ -135,7 +136,7 @@ def files_of(folder):
         fail('index.html has no <script id="nbh-pwa"> part')
     out = ['index.html'] + forms
     # v25.69 the video library (videos.html, the workstation's Videos) is a page of the folder like respond.html
-    extra = [x for x in ('respond.html', 'videos.html') if os.path.isfile(os.path.join(folder, x))]
+    extra = [x for x in ('respond.html', 'videos.html', 'explain.html', 'practice.html') if os.path.isfile(os.path.join(folder, x))]
     pages = ['index.html'] + forms + extra
     for p in pages:
         s = read(os.path.join(folder, p))
@@ -157,6 +158,12 @@ def files_of(folder):
         if 'nbh-videos.js' not in read(os.path.join(folder, 'videos.html')):
             fail('videos.html does not name nbh-videos.js')
         out.append('videos.html')
+    # v25.78 the drawn pages (the explainers and the counting practice) and the scene they draw with
+    for pg in ('explain.html', 'practice.html'):
+        if pg in pages:
+            if 'nbh-scene.js' not in read(os.path.join(folder, pg)):
+                fail(pg + ' does not name nbh-scene.js')
+            out.append(pg)
     try:
         man = json.loads(read(os.path.join(folder, 'manifest.json')))
     except (OSError, ValueError) as e:

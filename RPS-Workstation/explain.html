@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Explainers · FBA and BIP Workstation</title>
+<!-- v25.78 (the BCBA, 11/11: "lets do 1 and 2") Explainers: a procedure shown as a drawn scene that can be played,
+     dragged to any moment and changed. Each follows the steps of one card of Form TD-1's protocol bank; the timeline is
+     worked out from the card's rule, the numbers chosen on the page and the moments the reader adds (problem behavior, a
+     request), so the same page shows what happens when the interval is longer or the student asks on red. A part of the
+     picture that is tapped says what it is for in this procedure. The people are drawn by nbh-scene.js; nothing is
+     generated, nothing is loaded from the internet, nothing is about a student, and nothing typed or tapped is kept.
+     explain.html#dro and explain.html#fct open one; the video library and the workstation link here. -->
+<script>
+(function(){var R=document.documentElement;try{if(window.parent!==window)R.classList.add('nbh-framed');}catch(e){}
+ try{var v=JSON.parse(localStorage.getItem('nbh.view')||'{}')||{};R.classList.toggle('nbh-tx-1',v.t===1);R.classList.toggle('nbh-tx-2',v.t===2);R.classList.toggle('nbh-hc',!!v.hc);R.classList.toggle('nbh-dark',!!v.dark);}catch(e){}})();
+</script>
+<style>
+:root{--ink:#1F2D36;--navy:#1D3A52;--wash:#F2F6F5;--paper:#fff;--rule:#D9E2E0;--box:#B9C7C4;--muted:#55656C;--chip:#E5EDEB;--focus:#2f7fa8;--on:#e8f1f6;
+  --green:#2E7A4B;--red:#B5442E;--gold:#8a5a00;--sans:"Inter","Helvetica Neue","Segoe UI",Arial,system-ui,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--gut:24px;font-size:16px}
+html.nbh-tx-1{font-size:18px}html.nbh-tx-2{font-size:20px}
+html.nbh-hc{--ink:#000;--muted:#263238;--rule:#5e7673;--box:#3f5654;--focus:#0a4f75;--chip:#dbe5e3}
+@media screen{html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}html.nbh-dark .ex-stage svg{filter:invert(1) hue-rotate(180deg)}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--wash);color:var(--ink);font:400 1rem/1.45 var(--sans);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overflow-x:hidden}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.ex-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.ex-wrap{max-width:1500px;margin:0 auto;padding:0 var(--gut) 40px}
+.ex-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:14px 0 10px}
+.ex-top h1{font:700 1.5rem/1.2 var(--serif);color:var(--navy);margin:0 auto 0 0}
+.ex-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;min-width:44px;padding:0 16px;border:1px solid var(--box);border-radius:10px;background:var(--paper);color:var(--navy);font-weight:600;font-size:.9375rem;cursor:pointer;text-decoration:none;white-space:nowrap}
+.ex-btn:hover{background:#eef3f5;border-color:#93aead}
+.ex-btn[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.ex-btn.go{background:var(--navy);color:#fff;border-color:var(--navy)}
+.ex-btn.warn{border-color:#c98f84;color:#8a2f1d;background:#fff6f4}
+.ex-btn:disabled{opacity:.5;cursor:default}
+.ex-seg{display:flex;flex-wrap:wrap;gap:6px}
+.ex-lead{margin:0 0 12px;color:var(--muted);max-width:70ch}
+.ex-grid{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(300px,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.ex-grid{grid-template-columns:minmax(0,1fr)}}
+.ex-card{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:14px 16px}
+.ex-card+.ex-card{margin-top:14px}
+.ex-card h2{font:700 1.0625rem/1.3 var(--sans);color:var(--navy);margin:0 0 8px}
+.ex-stage{position:relative;background:#EEF3F1;border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.ex-stage svg .ns-part:focus-visible{outline:none}
+.ex-stage svg .ns-part:focus-visible>*{filter:drop-shadow(0 0 0 #2f7fa8) drop-shadow(0 0 6px #2f7fa8)}
+.ex-stage svg .ns-part.on>*{filter:drop-shadow(0 0 5px #E2A93B) drop-shadow(0 0 2px #E2A93B)}
+.ex-step{display:inline-block;margin:10px 0 0;background:var(--navy);color:#fff;border-radius:10px;padding:6px 12px;font-weight:700;font-size:.9375rem;font-variant-numeric:tabular-nums}
+.ex-step.green{background:#2E7A4B}.ex-step.red{background:#B5442E}.ex-step.gold{background:#8a5a00}
+.ex-now{margin:6px 0 0;min-height:3.1em;font-size:1.0625rem;line-height:1.45}
+.ex-now b{color:var(--navy)}
+.ex-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px}
+.ex-time{font-variant-numeric:tabular-nums;color:var(--muted);min-width:7.5em;text-align:right;font-size:.9375rem}
+.ex-scrub{position:relative;flex:1 1 260px;min-width:200px;height:44px}
+.ex-scrub input{position:absolute;left:0;right:0;top:0;width:100%;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
+.ex-scrub input::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:transparent}
+.ex-scrub input::-moz-range-track{height:10px;border-radius:5px;background:transparent}
+.ex-scrub input::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--navy);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);margin-top:-8px}
+.ex-scrub input::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--navy);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.ex-track{position:absolute;left:13px;right:13px;top:17px;height:10px;border-radius:5px;background:var(--chip);overflow:hidden;pointer-events:none}
+.ex-track i{position:absolute;top:0;bottom:0}
+.ex-track i.work{background:#BFD4D2}.ex-track i.break{background:#E8C873}.ex-track i.green{background:#7DBE96}.ex-track i.red{background:#DE8F7F}.ex-track i.rf{background:#E8C873}
+.ex-marks{position:absolute;left:13px;right:13px;top:2px;height:40px;pointer-events:none}
+.ex-marks i{position:absolute;top:8px;width:3px;height:28px;margin-left:-1.5px;border-radius:2px;background:var(--navy)}
+.ex-marks i.pb,.ex-marks i.ignored{background:#8a2f1d}.ex-marks i.earn,.ex-marks i.honored{background:#2E7A4B}
+.ex-key{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0 0;padding:0;list-style:none;font-size:.8125rem;color:var(--muted)}
+.ex-key li{display:flex;align-items:center;gap:6px}
+.ex-key i{display:inline-block;width:14px;height:10px;border-radius:3px}
+.ex-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px}
+.ex-row>label,.ex-row>span.l{font-weight:600;font-size:.9375rem;flex:0 0 100%}
+.ex-hint{margin:0 0 10px;font-size:.875rem;color:var(--muted)}
+.ex-tally{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin:0;font-size:.9375rem}
+.ex-tally dt{color:var(--muted)}.ex-tally dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.ex-part{border-left:4px solid #E2A93B;padding:2px 0 2px 12px;margin:0}
+.ex-part b{display:block;color:var(--navy)}
+.ex-rule{margin:0;padding-left:1.15em}.ex-rule li{margin:0 0 6px}
+.ex-src{font-size:.875rem;color:var(--muted);margin:14px 0 0;max-width:90ch}
+.ex-src b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+@media print{.ex-top .ex-btn,.ex-bar,.ex-try{display:none!important}}
+</style>
+</head>
+<body>
+<div class="ex-wrap">
+  <header class="ex-top">
+    <h1>Explainers</h1>
+    <nav class="ex-seg" aria-label="Procedure" id="exPick"></nav>
+    <a class="ex-btn" href="practice.html" id="exToPractice">Practice counting</a>
+    <a class="ex-btn" href="videos.html" id="exToVideos">Videos</a>
+  </header>
+  <p class="ex-lead" id="exLead"></p>
+  <div class="ex-grid">
+    <main>
+      <div class="ex-stage" id="exStage"></div>
+      <div class="ex-step" id="exStep" aria-hidden="true"></div>
+      <p class="ex-now" id="exNow" aria-live="polite"></p>
+      <div class="ex-bar" role="group" aria-label="Play and move through the procedure">
+        <button type="button" class="ex-btn go" id="exPlay" aria-pressed="false">Play</button>
+        <button type="button" class="ex-btn" id="exBack" aria-label="Back to the start">Start over</button>
+        <div class="ex-scrub"><div class="ex-track" id="exTrack"></div><div class="ex-marks" id="exMarks"></div>
+          <input type="range" id="exScrub" min="0" max="100" step="0.1" value="0" aria-label="Moment in the procedure, in seconds"></div>
+        <span class="ex-time" id="exTime"></span>
+        <div class="ex-seg" role="group" aria-label="Speed"><button type="button" class="ex-btn" data-speed="1" aria-pressed="true">1×</button><button type="button" class="ex-btn" data-speed="2" aria-pressed="false">2×</button><button type="button" class="ex-btn" data-speed="4" aria-pressed="false">4×</button></div>
+      </div>
+      <ul class="ex-key" id="exKey"></ul>
+      <p class="ex-src" id="exSrc"></p>
+    </main>
+    <aside>
+      <section class="ex-card ex-try" aria-labelledby="exTryH"><h2 id="exTryH">Try it</h2><div id="exTry"></div></section>
+      <section class="ex-card" aria-labelledby="exTalH"><h2 id="exTalH">So far</h2><dl class="ex-tally" id="exTally"></dl></section>
+      <section class="ex-card" aria-labelledby="exPartH"><h2 id="exPartH">Tap a part of the picture</h2><p class="ex-part" id="exPart" aria-live="polite"><span class="ex-hint">The timer, the signal, the card, the adult, the student: each says what it is for here.</span></p></section>
+      <section class="ex-card" aria-labelledby="exRuleH"><h2 id="exRuleH">The rule, from the card</h2><ul class="ex-rule" id="exRule"></ul></section>
+    </aside>
+  </div>
+</div>
+<script src="nbh-scene.js"></script>
+<script>
+(function(){
+'use strict';
+var N=window.NBHScene,$=function(s){return document.querySelector(s);},tw=N.tween,clamp=N.clamp;
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var mmss=function(s){s=Math.max(0,Math.floor(s+1e-6));return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);};   /* time passed: whole seconds gone by */
+var secs=function(s){s=Math.round(s);return s<60?s+' s':(s%60?Math.floor(s/60)+' min '+(s%60)+' s':(s/60)+' min');};
+var R=N.REST;
+/* a hand that writes or colors: a small steady movement over the page */
+function scribble(t,cx,cy){return [cx+16*Math.sin(t*5.1)+6*Math.sin(t*11.3),cy+7*Math.sin(t*7.7)];}
+/* the mouth of someone talking: opens and closes */
+function talk(t){return .35+.65*Math.abs(Math.sin(t*9.5));}
+
+/* ====================== DRO, resetting (card dro-break-after-calm-interval, after Kodak et al., 2003) ======================
+   Work runs with a timer. Each interval that passes with no problem behavior earns a break; problem behavior restarts the
+   interval from zero. The timeline is worked out from the interval, the break and the moments of problem behavior. */
+var DRO={key:'dro',name:'DRO, resetting',title:'DRO, resetting: a break for each interval of calm work',
+  lead:'Each interval of work with no problem behavior earns a short break. Problem behavior restarts the interval from zero. Play it, drag it to any moment, change the interval, and add problem behavior where you like to see what the timer does.',
+  src:'Follows the steps of Form TD-1’s card <b>Earn a short break from work after each interval without problem behavior</b>, after Kodak et al. (2003). The people are drawn: it shows the rule, not a real session. The study ran with two 4-year-olds at home; timed breaks worked as well and need no reset. The card’s physical prompt and guiding back to the chair are restrictive and are not shown: they need district review and written consent first. Adapt every step to the student’s plan.',
+  params:{interval:10,brk:10},
+  intervals:[10,20,30,60,90,120],
+  example:function(P){return [{k:'pb',t:P.interval+P.brk+Math.min(6,P.interval*.6)}];},
+  key_:[['work','Work, the interval running'],['break','Break'],['pb','Problem behavior: the interval restarts',1],['earn','Interval complete: break earned',1]],
+  build:function(P,ev){var I=P.interval,B=P.brk,len=clamp(3*(I+B)+10,70,600),pb=ev.filter(function(e){return e.k==='pb';}).map(function(e){return e.t;}).sort(function(a,b){return a-b;});
+    var t=0,i=0,segs=[],marks=[];
+    while(t<len-1e-9){var w0=t,s=t,done=false;
+      while(!done){while(i<pb.length&&pb[i]<s-1e-9)i++;
+        var due=s+I;
+        if(i<pb.length&&pb[i]<due&&pb[i]<len){marks.push({t:pb[i],k:'pb'});s=pb[i];i++;continue;}
+        if(due>=len){segs.push({t0:w0,t1:len,k:'work'});t=len;done=true;break;}
+        segs.push({t0:w0,t1:due,k:'work'});marks.push({t:due,k:'earn'});segs.push({t0:due,t1:Math.min(len,due+B),k:'break'});t=due+B;done=true;}
+    }
+    return {len:len,segs:segs,marks:marks};},
+  /* where the interval began for a moment of work: the start of the work period or the last problem behavior in it */
+  since:function(T,seg,t){var s=seg.t0;T.marks.forEach(function(m){if(m.k==='pb'&&m.t>=seg.t0&&m.t<=t+1e-9)s=Math.max(s,m.t);});return s;},
+  can:function(T,t,kind){var seg=segAt(T,t);return seg&&seg.k==='work';},
+  why:function(kind){return 'During a break the interval is not running. The card does not say what to do about problem behavior in a break: decide that in the plan.';},
+  buttons:[['pb','Problem behavior happens now','warn']],
+  tally:function(T,t,P){var earn=0,pb=0;T.marks.forEach(function(m){if(m.t<=t+1e-9){if(m.k==='earn')earn++;else pb++;}});var mins=Math.max(t,1)/60;
+    return [['Breaks earned',earn],['Problem behavior',pb],['Per minute',(pb/mins).toFixed(1)],['Interval',secs(P.interval)]];},
+  rule:['Give a break of about 10 s each time the interval passes with no problem behavior.','Restart the interval from zero each time problem behavior occurs.','During work, praise each correct answer; prompt first with words, then with a model.','Start each earned break within 2 s of the end of the interval.','When the rate is at or below the criterion, lengthen the interval: 10 s, 20 s, 30 s, 1 min, 1.5 min, then 2 min.'],
+  parts:{timer:['The timer','It counts the interval of work with no problem behavior. It restarts from the full interval the moment problem behavior occurs, and at the start of work after each break. During a break it counts the break.'],
+    adult:['The adult','Praises correct answers, prompts with words and then a model, and starts the break within 2 s of the timer reaching zero. After problem behavior she says nothing about the timer: she restarts it and keeps the task going.'],
+    student:['The student','Works at the task. Calm work for the whole interval earns the break; nothing else is asked for the break.'],
+    sheet:['The work','The task stays in front of the student during the interval. In a break it is set aside: a break is a break from the task.'],
+    note:['The sign','The interval in force. It grows only when the rate of problem behavior is at or below the criterion set from baseline.'],
+    papers:['The adult’s papers','Where she records breaks earned and problem behavior, as the card’s data line asks (Forms MT-1 and DD-1).']},
+  state:function(T,t,P){var seg=segAt(T,t),st={note:{show:true,text:'Interval: '+secs(P.interval)},timer:{show:true},papers:{show:true},sheet:{show:true},adult:{},student:{}},A=st.adult,S=st.student,now='',step='',cls='';
+    var worked=0;T.segs.forEach(function(g){if(g.k==='work')worked+=Math.max(0,Math.min(t,g.t1)-g.t0);});st.sheet.marks=clamp(.15+worked/Math.max(30,T.len*.55),0,1);
+    if(seg.k==='work'){var s=DRO.since(T,seg,t),el=t-s,left=P.interval-el,lastPb=null;T.marks.forEach(function(m){if(m.k==='pb'&&m.t<=t+1e-9&&m.t>=seg.t0)lastPb=m.t;});
+      st.timer.left=left;st.timer.total=P.interval;st.timer.label='Calm work';
+      S.r=scribble(t,1300,726);S.look=[.15,.9];A.look=[.85,.25];A.mouth='rest';
+      step='Work: '+N.clock(left)+' left of the interval';now='<b>Work.</b> The timer counts '+secs(P.interval)+' with no problem behavior.';
+      var back=t-seg.t0;if(seg.t0>0&&back<2.2){A.mouth='talk';A.talk=talk(t);A.say='Back to work.';now='<b>Work starts again,</b> and the timer starts from the full interval.';}
+      /* praise for a correct answer, once in each interval, about halfway */
+      var half=s+P.interval*.5;if(el>1&&t>=half&&t<half+1.8&&!(lastPb!==null&&t-lastPb<3.4)){A.mouth='talk';A.talk=talk(t);A.say='Good, that’s right.';S.mouth='smile';now='<b>Praise for a correct answer.</b> It does not touch the timer.';}
+      if(lastPb!==null&&t-lastPb<3.4){var d=t-lastPb;
+        S.r=N.tweenP(d,0,.35,[1300,726],[1250,650]);S.l=N.tweenP(d,0,.35,R.student.l,[1120,660]);S.lean=tw(d,0,.4,0,.9);S.brow=-1;S.mouth='open';S.look=[.6,-.2];if(d<1.6)S.say='No!';
+        if(d>2.6){S.r=N.tweenP(d,2.6,3.3,[1250,650],[1300,726]);S.l=N.tweenP(d,2.6,3.3,[1120,660],R.student.l);S.lean=tw(d,2.6,3.3,.9,0);S.brow=0;S.mouth='flat';S.look=[.15,.9];}
+        A.mouth='rest';A.look=[.85,.2];st.timer.flash=d<1.2?1:0;if(d>1.3&&d<3.2){A.mouth='talk';A.talk=talk(t);A.say='Let’s keep going.';}
+        step='Problem behavior: the interval restarts';cls='red';now='<b>Problem behavior.</b> The interval restarts from zero: '+secs(P.interval)+' again. She says nothing about the timer and prompts the task.';}
+    }else{var bl=seg.t1-t,be=t-seg.t0,fullB=seg.t1-seg.t0;
+      st.timer.left=bl;st.timer.total=Math.max(P.brk,fullB);st.timer.label='Break';st.timer.flash=be<.9?1:0;
+      st.sheet.show=be<.5||bl<.5;A.look=[.85,.2];A.mouth='smile';S.mouth='smile';S.look=[-.7,0];S.lean=tw(be,0,.6,0,.5)-tw(bl,.6,0,0,.5)*0;
+      S.r=N.tweenP(be,0,.6,[1300,726],[1330,770]);S.l=N.tweenP(be,0,.6,R.student.l,[1060,770]);
+      A.r=be<1.2?N.tweenP(be,0,.5,R.adult.r,[1090,700]):N.tweenP(be,1.2,1.8,[1090,700],R.adult.r);
+      if(be<2.6){A.mouth='talk';A.talk=talk(t);A.say='You worked calmly. Break time.';}
+      step='Break: '+N.clock(bl)+' left';cls='gold';now='<b>The interval is complete: a break,</b> started within 2 s. The task is set aside for '+secs(fullB)+'.';
+      if(bl<.9){A.r=N.tweenP(.9-bl,0,.5,R.adult.r,[1090,700]);}}
+    return {st:st,now:now,step:step,cls:cls};}
+};
+
+/* ====================== FCT with a signaled schedule (card fct-signaled-schedule-thinning, after Greer et al., 2016b) ======================
+   A green signal while requests are honored, a red one while they are not. The schedule's clock waits while the
+   reinforcer is being given (the card does not say; the page says so). */
+var FCT={key:'fct',name:'FCT: green and red',title:'FCT schedule thinning: green for ask now, red for not now',
+  lead:'While the signal is green every request is honored at once. While it is red a request gets no answer. Red starts very short and is lengthened only when the student is asking on green. Play it, add requests on green and on red, and lengthen red to see what changes.',
+  src:'Follows the steps of Form TD-1’s card <b>Functional communication training thinned with signals showing when requests will be honored</b>, after Greer et al. (2016b), with attention as the reinforcer, as in its video. The people are drawn: it shows the rule, not a real session. The study was a record review of clinic cases, with no data from home or school. Here the schedule’s clock waits while the reinforcer is being given; the card does not say, so set it in the plan. The card’s time-out and response blocking are restrictive and are not shown. For escape, withholding the break after problem behavior is escape extinction: complete TD-1’s consent block first. Adapt every step to the student’s plan.',
+  params:{green:30,red:10,rf:20,away:false},
+  reds:[2,5,10,20,30,60,120,240],
+  example:function(P){var a=[{k:'req',t:5}];a.push({k:'req',t:P.green+P.rf+Math.min(P.red*.5,6)});a.push({k:'req',t:P.green+P.rf+P.red+4});return a;},
+  key_:[['green','Green: requests honored'],['red','Red: not now'],['rf','Request honored: time with her'],['honored','A request on green',1],['ignored','A request on red',1]],
+  build:function(P,ev){var G=P.green,Rd=P.red,len=clamp(2*(G+Rd)+G+2*P.rf,90,600),rq=ev.filter(function(e){return e.k==='req';}).map(function(e){return e.t;}).sort(function(a,b){return a-b;});
+    var t=0,i=0,ph='green',left=G,segs=[],marks=[{t:0,k:'green',sw:1}],guard=0;
+    while(t<len-1e-9&&guard++<5000){var next=i<rq.length?rq[i]:Infinity,end=t+left;
+      if(next<end&&next<len){if(next>t)segs.push({t0:t,t1:next,k:ph,left0:left});left-=(next-t);t=next;i++;
+        if(ph==='green'){marks.push({t:t,k:'honored'});var e=Math.min(len,t+P.rf);segs.push({t0:t,t1:e,k:'rf',left0:left});t=e;while(i<rq.length&&rq[i]<t)i++;}
+        else if(!P.away)marks.push({t:t,k:'ignored'});
+        continue;}
+      if(end>=len){segs.push({t0:t,t1:len,k:ph,left0:left});t=len;break;}
+      segs.push({t0:t,t1:end,k:ph,left0:left});t=end;ph=ph==='green'?'red':'green';left=ph==='green'?G:Rd;marks.push({t:t,k:ph,sw:1});}
+    return {len:len,segs:segs,marks:marks};},
+  can:function(T,t,kind,P){var seg=segAt(T,t);if(!seg)return false;if(seg.k==='rf')return false;if(seg.k==='red'&&P.away)return false;return true;},
+  why:function(kind,T,t,P){var seg=segAt(T,t);return seg&&seg.k==='rf'?'She already has what the request asks for.':'On red the card has been taken away, so she cannot ask with it.';},
+  buttons:[['req','She asks now (touches her card)','']],
+  tally:function(T,t,P){var h=0,g=0;T.marks.forEach(function(m){if(m.t<=t+1e-9){if(m.k==='honored')h++;else if(m.k==='ignored')g++;}});var n=h+g;
+    return [['Requests on green (honored)',h],['Requests on red (no answer)',g],['Asked on green',n?Math.round(100*h/n)+'%':'–'],['Red lasts',secs(P.red)]];},
+  rule:['Show the “available” signal while requests are honored and the “unavailable” signal while they are not.','Honor every request on green, at once, with 20 or 30 s of the reinforcer. Give no reinforcer for destructive behavior.','Lengthen red from about 2 s toward 4 min when problem behavior is at least 90% below baseline and at least 70% of requests are made on green.','If the student keeps asking on red, take the request card away during red.','If problem behavior stays high, add a preferred item during red.'],
+  parts:{signal:['The signal','Green means a request will be honored now; red means not now. It is a shape as well as a color: a ring for green, a bar for red. The adult changes it; the student does not.'],
+    timer:['The timer','The adult’s clock for the schedule: how long this green or this red still lasts. It is hers to see, not a countdown for the student. Here it waits while the reinforcer is being given.'],
+    card:['The request card','The request taught in the first steps: touching it or handing it over. On green it is honored at once. If the student keeps asking on red, the card is taken away during red and put back on green.'],
+    adult:['The adult','On green she answers a request at once and gives 20 or 30 s of her attention. On red she gives no answer and no look, and stays with her papers.'],
+    student:['The student','Colors, and asks with the card. The aim is asking on green and waiting on red.'],
+    sheet:['Her picture','What she does between requests, and what the adult talks with her about when a request is honored.'],
+    papers:['The adult’s papers','What the adult is busy with on red, and where she records requests on green and on red (Form DD-1).'],
+    item:['The item','A preferred item added during red when problem behavior stays high: the study needed it in 6 of 25 applications.']},
+  state:function(T,t,P){var seg=segAt(T,t),st={signal:{show:true},timer:{show:true},card:{show:true,label:'Talk'},papers:{show:true},sheet:{show:true,marks:clamp(.2+t/T.len,0,1)},adult:{},student:{}},A=st.adult,S=st.student,now='',step='',cls='';
+    var ph=seg.k==='rf'?'green':seg.k;st.signal.color=ph;
+    var left=seg.k==='rf'?seg.left0:seg.left0-(t-seg.t0);st.timer.left=left;st.timer.total=ph==='green'?P.green:P.red;st.timer.label=seg.k==='rf'?'Clock waits':(ph==='green'?'Green left':'Red left');
+    /* resting: she colors, the adult works at her papers */
+    S.r=scribble(t,1300,726);S.look=[.15,.9];A.l=[300,700];A.r=scribble(t*.8,520,704);A.look=[-.25,.95];A.mouth='rest';
+    if(ph==='red'&&P.away)st.card.show=false;
+    if(P.item&&ph==='red')st.item={show:true,kind:'book',at:[1010,716]};
+    /* the adult's hand changes the signal: it is at the signal for a moment around each change */
+    var sw=null;T.marks.forEach(function(m){if(m.sw&&m.t>0&&Math.abs(m.t-t)<.9)sw=m;});
+    if(sw){var d=t-sw.t;A.r=d<0?N.tweenP(d,-.9,-.15,[520,704],[640,520]):N.tweenP(d,.15,.9,[640,520],[520,704]);A.look=[.5,.2];}
+    if(seg.k==='rf'){var d2=t-seg.t0,e2=seg.t1-t;
+      S.l=d2<.5?N.tweenP(d2,0,.35,R.student.l,[990,712]):N.tweenP(d2,.9,1.5,[990,712],R.student.l);st.card.lift=d2<1?tw(d2,.25,.45,0,1)-tw(d2,.8,1,0,1):0;
+      A.look=[.9,.15];A.lean=tw(d2,.3,1,0,.8)-tw(e2,.8,0,0,.8)*0;A.mouth=(Math.floor(t/2.4)%2===0)?'talk':'smile';A.talk=talk(t);A.r=N.tweenP(d2,.3,1,[520,704],[600,690]);
+      S.look=[-.85,-.1];S.mouth=(Math.floor(t/2.4)%2===1)?'talk':'smile';S.talk=talk(t+.4);S.r=[1300,726];
+      if(d2<3.4)A.say='Hi! Tell me about your picture.';
+      if(e2<1){A.lean=tw(e2,1,0,.8,0);A.mouth='smile';S.mouth='smile';}
+      step='Green: request honored, '+N.clock(e2)+' with her';cls='green';now='<b>She asks on green: honored at once.</b> '+secs(P.rf)+' of the adult’s attention. The schedule’s clock waits.';
+    }else if(ph==='green'){step='Green: '+N.clock(left)+' left';cls='green';now='<b>Green.</b> Every request is honored now, at once.';
+      if(sw&&t>=sw.t&&t-sw.t<2.5)now='<b>Red is over: back to green.</b> Her next request will be honored.';
+    }else{step='Red: '+N.clock(left)+' left';cls='red';now='<b>Red.</b> Not now: a request gets no answer and no look.'+(P.away?' The card is taken away until green.':'');
+      var ig=null;T.marks.forEach(function(m){if(m.k==='ignored'&&m.t<=t+1e-9&&t-m.t<3)ig=m;});
+      if(ig){var d3=t-ig.t;S.l=d3<1.4?N.tweenP(d3,0,.35,R.student.l,[990,712]):N.tweenP(d3,1.4,2,[990,712],R.student.l);st.card.lift=tw(d3,.25,.45,0,1)-tw(d3,1.2,1.4,0,1);
+        S.look=d3<1.8?[-.85,-.1]:[.15,.9];S.mouth=d3<1.8?'flat':'rest';if(d3<1.8)S.r=[1300,726];
+        now='<b>She asks on red: no answer and no look.</b> The adult stays with her papers. It is counted as a request on red.';}
+    }
+    return {st:st,now:now,step:step,cls:cls};}
+};
+function segAt(T,t){for(var i=0;i<T.segs.length;i++)if(t<T.segs[i].t1-1e-9||i===T.segs.length-1)return T.segs[i];return null;}
+
+var EX={dro:DRO,fct:FCT},cur=null,P=null,EV=[],T=null,t=0,playing=false,speed=1,last=0,raf=0,shownPart='',edited=false;
+var scene=N.create($('#exStage'),{label:'A drawn scene of the procedure: an adult and a student at a table'});
+var reduce=false;try{reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+
+function rebuild(keepT){T=cur.build(P,EV);var s=$('#exScrub');s.max=T.len;if(!keepT||t>T.len)t=Math.min(t,T.len);
+  var tr=$('#exTrack'),mk=$('#exMarks');tr.innerHTML=T.segs.map(function(g){return '<i class="'+g.k+'" style="left:'+(100*g.t0/T.len).toFixed(3)+'%;width:'+(100*(g.t1-g.t0)/T.len).toFixed(3)+'%"></i>';}).join('');
+  mk.innerHTML=T.marks.filter(function(m){return !m.sw;}).map(function(m){return '<i class="'+m.k+'" style="left:'+(100*m.t/T.len).toFixed(3)+'%"></i>';}).join('');
+  draw(true);}
+var lastNow='',lastStep='';
+function draw(force){var r=cur.state(T,Math.min(t,T.len-1e-6),P);scene.set(r.st);
+  if(force||r.now!==lastNow){$('#exNow').innerHTML=r.now;lastNow=r.now;}
+  var sp=$('#exStep');if(force||r.step!==lastStep){sp.textContent=r.step;lastStep=r.step;}sp.className='ex-step'+(r.cls?' '+r.cls:'');
+  $('#exScrub').value=t;$('#exScrub').setAttribute('aria-valuetext',secs(t)+' of '+secs(T.len)+': '+r.step);
+  $('#exTime').textContent=mmss(t)+' / '+mmss(T.len);
+  $('#exTally').innerHTML=cur.tally(T,t,P).map(function(x){return '<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>';}).join('');
+  var seg=segAt(T,Math.min(t,T.len-1e-6));
+  [].forEach.call(document.querySelectorAll('#exTry [data-ev]'),function(b){var ok=t<T.len-.01&&cur.can(T,t,b.dataset.ev,P);b.disabled=!ok;b.title=ok?'':cur.why(b.dataset.ev,T,t,P);var w=document.getElementById('exWhy');if(w&&b===document.querySelector('#exTry [data-ev]'))w.textContent=ok?'':cur.why(b.dataset.ev,T,t,P);});
+  if(t>=T.len-1e-6&&playing)play(false);}
+function tick(ts){if(!playing)return;var dt=Math.min(.1,(ts-last)/1000);last=ts;t=Math.min(T.len,t+dt*speed);draw();raf=requestAnimationFrame(tick);}
+function play(on){playing=on;var b=$('#exPlay');b.textContent=on?'Pause':'Play';b.setAttribute('aria-pressed',String(on));cancelAnimationFrame(raf);
+  if(on){if(t>=T.len-.05)t=0;last=performance.now();raf=requestAnimationFrame(tick);}}
+function tryPanel(){var h='';
+  if(cur===DRO){h+='<div class="ex-row"><span class="l" id="exIvL">Interval of calm work</span><div class="ex-seg" role="group" aria-labelledby="exIvL">'+DRO.intervals.map(function(v){return '<button type="button" class="ex-btn" data-set="interval" data-v="'+v+'" aria-pressed="'+(P.interval===v)+'">'+secs(v)+'</button>';}).join('')+'</div></div>';
+    h+='<p class="ex-hint">The card lengthens the interval only when the rate of problem behavior is at or below the criterion set from baseline.</p>';}
+  else{h+='<div class="ex-row"><span class="l" id="exRdL">Red lasts</span><div class="ex-seg" role="group" aria-labelledby="exRdL">'+FCT.reds.map(function(v){return '<button type="button" class="ex-btn" data-set="red" data-v="'+v+'" aria-pressed="'+(P.red===v)+'">'+secs(v)+'</button>';}).join('')+'</div></div>';
+    h+='<p class="ex-hint">The card lengthens red when problem behavior is at least 90% below baseline and at least 70% of requests are made on green.</p>';
+    h+='<div class="ex-row"><button type="button" class="ex-btn" data-toggle="away" aria-pressed="'+(!!P.away)+'">Take the card away on red</button><button type="button" class="ex-btn" data-toggle="item" aria-pressed="'+(!!P.item)+'">Add a preferred item on red</button></div>';}
+  h+='<div class="ex-row">'+cur.buttons.map(function(b){return '<button type="button" class="ex-btn '+b[2]+'" data-ev="'+b[0]+'">'+esc(b[1])+'</button>';}).join('')+'<button type="button" class="ex-btn" id="exReset"'+(edited?'':' disabled')+'>Back to the example</button></div>';
+  h+='<p class="ex-hint" id="exWhy" aria-live="polite"></p>';
+  $('#exTry').innerHTML=h;}
+function pick(key,keep){cur=EX[key]||DRO;P=JSON.parse(JSON.stringify(cur.params));EV=cur.example(P);edited=false;t=0;play(false);
+  $('#exPick').innerHTML=Object.keys(EX).map(function(k){return '<button type="button" class="ex-btn" data-pick="'+k+'" aria-pressed="'+(EX[k]===cur)+'">'+esc(EX[k].name)+'</button>';}).join('');
+  document.title=cur.name+' · Explainers · FBA and BIP Workstation';$('#exLead').textContent=cur.lead;$('#exSrc').innerHTML=cur.src;
+  $('#exRule').innerHTML=cur.rule.map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
+  $('#exKey').innerHTML=cur.key_.map(function(k){return '<li><i class="'+k[0]+'" style="background:'+({work:'#BFD4D2','break':'#E8C873',green:'#7DBE96',red:'#DE8F7F',rf:'#E8C873',pb:'#8a2f1d',ignored:'#8a2f1d',earn:'#2E7A4B',honored:'#2E7A4B'}[k[0]])+(k[2]?';width:4px;height:16px':'')+'"></i>'+esc(k[1])+'</li>';}).join('');
+  showPart('');tryPanel();rebuild();try{if(location.hash.slice(1)!==cur.key)history.replaceState(null,'','#'+cur.key);}catch(e){}}
+function showPart(name){shownPart=name;var info=name&&cur.parts[name];Object.keys(scene.parts).forEach(function(k){scene.parts[k].classList.toggle('on',k===name&&!!info);});
+  $('#exPart').innerHTML=info?'<b>'+esc(info[0])+'</b>'+esc(info[1]):'<span class="ex-hint">'+(name?'That part has no job of its own in this procedure.':'The timer, the signal, the card, the adult, the student: each says what it is for here.')+'</span>';}
+
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button,[data-part]');if(!b)return;
+  if(b.dataset.part!==undefined){showPart(b.dataset.part);return;}
+  if(b.dataset.pick){pick(b.dataset.pick);return;}
+  if(b.id==='exPlay'){play(!playing);return;}
+  if(b.id==='exBack'){t=0;play(false);draw(true);return;}
+  if(b.dataset.speed){speed=+b.dataset.speed;[].forEach.call(document.querySelectorAll('[data-speed]'),function(x){x.setAttribute('aria-pressed',String(x===b));});return;}
+  if(b.dataset.set){P[b.dataset.set]=+b.dataset.v;if(!edited)EV=cur.example(P);t=0;tryPanel();rebuild();return;}
+  if(b.dataset.toggle){P[b.dataset.toggle]=!P[b.dataset.toggle];tryPanel();rebuild(true);return;}
+  if(b.dataset.ev){if(!cur.can(T,t,b.dataset.ev,P))return;EV=EV.filter(function(x){return Math.abs(x.t-t)>.25;});EV.push({k:b.dataset.ev,t:Math.round(t*10)/10});edited=true;tryPanel();rebuild(true);if(!playing&&!reduce)play(true);return;}
+  if(b.id==='exReset'){EV=cur.example(P);edited=false;t=0;tryPanel();rebuild();return;}});
+document.addEventListener('keydown',function(e){var p=e.target.closest&&e.target.closest('[data-part]');if(p&&(e.key==='Enter'||e.key===' ')){e.preventDefault();showPart(p.dataset.part);}});
+$('#exScrub').addEventListener('input',function(e){t=+e.target.value;if(playing)play(false);draw();});
+window.addEventListener('hashchange',function(){var k=location.hash.slice(1);if(EX[k]&&EX[k]!==cur)pick(k);});
+/* in the workstation's Videos frame the links stay in the frame; on its own they are ordinary links */
+window.NBHExplain={EX:EX,get:function(){return {cur:cur.key,P:P,EV:EV,T:T,t:t,playing:playing};},seek:function(x){t=clamp(x,0,T.len);draw(true);},segAt:segAt};
+pick(EX[location.hash.slice(1)]?location.hash.slice(1):'dro');
+})();
+</script>
+</body>
+</html>

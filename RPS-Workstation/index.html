@@ -12686,9 +12686,15 @@ function hold(on){if(on){held=[...B.children].filter(el=>!el.matches(KEEP)&&!el.
 const tell=m=>{try{if(fr&&fr.contentWindow)fr.contentWindow.postMessage(m,'*');}catch(e){}};
 function open(key,from){if(typeof EMBED!=='undefined'&&EMBED){try{wsUI.toast('The video library is in the workstation opened from its folder or the website; the one-file edition does not carry the videos.',{kind:'warn',ms:9000});}catch(e){}return;}
   const fam=/^family:([a-z]{2,12})$/.exec(key||''),hash=fam?'#family='+fam[1]:key?'#video='+encodeURIComponent(key):'';   /* v25.70 Watch how: a procedure's videos */
-  if(!fr){fr=document.createElement('iframe');fr.title='Video library';fr.src='videos.html'+hash;layer.appendChild(fr);
+  /* v25.78 the same frame shows the explainers and the counting practice (explain.html, practice.html: drawn pages, linked
+     from the library); 'page:explain' and 'page:practice' open them, and a video asked for while one of them is showing
+     brings the library back */
+  const pg=/^page:(explain|practice)(#[a-z]{1,12})?$/.exec(key||''),url=pg?pg[1]+'.html'+(pg[2]||''):'videos.html'+hash;
+  if(!fr){fr=document.createElement('iframe');fr.title='Video library';fr.src=url;layer.appendChild(fr);
     fr.addEventListener('load',()=>{if(isOpen())tell({nbh:'videos-focus'});},{once:true});}
-  else if(key!==undefined){try{const w=fr.contentWindow;if(w.location.hash!==hash){if(hash)w.location.hash=hash.slice(1);else w.location.hash='';}}catch(e){}}
+  else if(key!==undefined){try{const w=fr.contentWindow,here=String(w.location.pathname||'').split('/').pop();
+    if(pg||here!=='videos.html')w.location.replace(url);
+    else if(w.location.hash!==hash){if(hash)w.location.hash=hash.slice(1);else w.location.hash='';}}catch(e){}}
   if(!isOpen()){opener=from||document.activeElement;place();layer.hidden=false;hold(true);btn.setAttribute('aria-pressed','true');B.classList.add('vl-open');
     try{if(typeof say==='function')say('Video library');}catch(e){}}
   setTimeout(()=>{try{fr.focus();}catch(e){}tell({nbh:'videos-focus'});},60);}
@@ -12714,6 +12720,9 @@ addEventListener('resize',()=>{if(isOpen())place();});
 try{new MutationObserver(()=>{if(isOpen())place();}).observe(B,{attributes:true,attributeFilter:['class']});}catch(e){}
 /* the command box, and More on a phone */
 try{CMDS.push({k:'videos video library watch procedure dro ncr rird high-p fct youtube',n:'Videos: watch the procedure videos of the protocol bank',s:'command',go:()=>open(undefined,null)});}catch(e){}
+try{if(!(typeof EMBED!=='undefined'&&EMBED)){   /* v25.78 the drawn pages: not in the one-file edition, as the videos are not */
+  CMDS.push({k:'explainers explainer step through drag timeline dro fct green red signal interval drawn',n:'Explainers: step through a procedure in a drawn scene',s:'command',go:()=>open('page:explain',null)});
+  CMDS.push({k:'practice practise counting count data collection ioa agreement observer training duration interval clicker',n:'Practice counting: record a drawn scene and see your agreement',s:'command',go:()=>open('page:practice',null)});}}catch(e){}
 try{const g=PH_MORE.find(x=>x[0]==='The workstation');if(g&&!(typeof EMBED!=='undefined'&&EMBED))g[1].splice(1,0,['wsVideos','Videos']);}catch(e){}
 window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr};
 })();

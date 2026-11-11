@@ -71,7 +71,9 @@ let AXE=null;try{AXE=fs.readFileSync(require.resolve('axe-core/axe.min.js',{path
    at most (were 3.0, 2.0 and 4.0), and on a phone 2 whole video cards in the first screen (were 4) */
  /* v25.76 an eighth shelf (Group, the Good Behavior Game video) adds a row of cards on an iPad: 4.0 and 2.7 screens (the phone stays within 4.3) */
  /* v25.77 a ninth shelf (Chaining, the backward chaining video) adds another row: 4.4, 2.9 and 4.4 screens */
- const WANT={ipadL:{cols:4,cards:4,screens:4.4,lines:3},ipadP:{cols:4,cards:8,screens:2.9,lines:4},phone:{cols:1,cards:2,screens:4.4,lines:3}};
+ /* v25.78 a strip of two links below the list (the drawn explainers, practice counting) adds one row at the foot: 4.5, 3.0 and 4.6 screens;
+   the first screen is unchanged (the same whole cards in view) */
+const WANT={ipadL:{cols:4,cards:4,screens:4.5,lines:3},ipadP:{cols:4,cards:8,screens:3.0,lines:4},phone:{cols:1,cards:2,screens:4.6,lines:3}};
  for(const size of Object.keys(SZ)){const {ctx,p}=await mk(size);await home(p);
   await p.waitForFunction(()=>[...document.querySelectorAll('#vlList .vl-card img')].every(i=>i.complete),null,{timeout:20000}).catch(()=>{});
   const r=await p.evaluate(()=>{const g=document.querySelector('#vlList .vl-fam .vl-grid'),cards=[...document.querySelectorAll('#vlList .vl-card')];
