@@ -9905,6 +9905,23 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.86: Leaving full screen with the X does not pause a playing video
+(the BCBA, 11/11: "Should there be a way to exit from out of full screen when playing a video without the video pausing
+after you click the x button. There is a way to make it full screen while still playing the video but not the inverse")
+- **Why it paused.** On an iPad the full-screen player is the device's own, not the workstation's. Its X closes the
+  player and pauses the video; the button with two arrows beside it leaves full screen and plays on. The page cannot
+  change that player.
+- **What changed.** The page hears the pause and the end of full screen arrive together (within 0.8 s, in either
+  order), takes that as the X and not the person's pause, and plays on. A video the person paused earlier stays
+  paused, and a video that had ended is not started again. In the video library's player and in Form TD-1's Watch how.
+- **Not seen on an iPad.** Checked by sending the device's events by hand in Chromium (qa/v2586-fullscreen-play-test.js,
+  7 checks). Whether the iPad lets the page start the video again at that moment is the one thing only the device can
+  show; if it does not, the video stays paused as before, and one tap on play resumes it.
+- **Playing on in the background, as asked about, is not built.** Three routes were described to the BCBA: Picture in
+  Picture (the video in a small window over other apps), a small player that stays in a corner of the workstation while
+  a form is open, and sound only with the screen locked.
+- **The test run.** The whole run was not repeated. Run on the final copy: the new test and the video and form tests
+  named in the commit. The offline-copy test was not run (not enough free disk in this session).
 ### v25.85: Publication graphs, the change line's label and the points of a long series
 (the BCBA, 11/11, with a picture of a Publication graph in Daily data on an iPad: "Can you fix this?")
 - **What the picture showed.** A graph of 62 school days with a dashed change line near the right edge. Two faults in

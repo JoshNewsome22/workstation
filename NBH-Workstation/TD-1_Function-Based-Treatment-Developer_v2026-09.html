@@ -8143,6 +8143,20 @@ const mmss=s=>{s=Math.max(0,Math.floor(s||0));return Math.floor(s/60)+':'+String
 /* at most two videos kept decoded: an older one is let go */
 function keepUrl(k,u){urls[k]=u;const i=order.indexOf(k);if(i>=0)order.splice(i,1);order.push(k);
  while(order.length>2){const j=order.findIndex(x=>x!==k);if(j<0)break;const old=order.splice(j,1)[0];try{URL.revokeObjectURL(urls[old]);}catch(e){}delete urls[old];}}
+/* v25.86 (the BCBA, 11/11: "Should there be a way to exit from out of full screen when playing a video without the video
+   pausing after you click the x button") On an iPad the full-screen player is the device's own: its X closes it and pauses
+   the video, while the arrows button leaves full screen and plays on. A pause that arrives together with the end of full
+   screen (within 0.8 s, either order) was the X, not the person: the video plays on. A video paused earlier stays paused,
+   as does one that had ended. */
+function nbhKeepPlaying(vid){if(!vid||vid.__nbhKeep)return;vid.__nbhKeep=1;var was=false,pauseAt=0,pauseFs=false,endAt=0,W=800;
+  var fs=function(){try{return !!(vid.webkitDisplayingFullscreen||document.fullscreenElement===vid||document.webkitFullscreenElement===vid);}catch(e){return false;}};
+  var go=function(){if(vid.ended||!vid.paused||!vid.getAttribute('src'))return;setTimeout(function(){if(!vid.paused||vid.ended)return;try{var p=vid.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},50);};
+  var begin=function(){was=true;},end=function(){if(!was)return;was=false;endAt=Date.now();if(pauseFs&&endAt-pauseAt<W)go();};
+  vid.addEventListener('webkitbeginfullscreen',begin);vid.addEventListener('webkitendfullscreen',end);
+  /* the page's own full screen: heard on the document, and let go once this player has left the page */
+  ['fullscreenchange','webkitfullscreenchange'].forEach(function(n){var h=function(){if(!vid.isConnected){document.removeEventListener(n,h);return;}if(fs())begin();else end();};document.addEventListener(n,h);});
+  vid.addEventListener('pause',function(){pauseAt=Date.now();pauseFs=was||fs();if(!pauseFs&&endAt&&pauseAt-endAt<W)go();});
+  vid.addEventListener('play',function(){pauseAt=0;pauseFs=false;});}
 function build(){box=document.createElement('div');box.id='tdVideo';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby','tv-title');
  box.innerHTML='<div class="tv-box"><div class="tv-hd"><h3 id="tv-title"></h3><button type="button" id="tv-close"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="tv-cl">Close</span></button></div>'+
   '<video id="tv-video" controls playsinline preload="metadata"></video><div class="tv-row"><span class="tv-ai">AI-generated · simulated people</span><button type="button" id="tv-tr" style="margin-left:auto">Transcript</button><button type="button" id="tv-lib">Open in the video library</button></div>'+
@@ -8157,6 +8171,7 @@ function build(){box=document.createElement('div');box.id='tdVideo';box.hidden=t
   const a=f[0],z=f[f.length-1],at=document.activeElement;if(!box.contains(at)){ev.preventDefault();a.focus();}else if(ev.shiftKey&&at===a){ev.preventDefault();z.focus();}else if(!ev.shiftKey&&at===z){ev.preventDefault();a.focus();}});
  const vid=$('tv-video'),keep=(force,ended)=>{const k=vid.dataset.id;if(!k||!(vid.duration>0))return;const now=Date.now();if(!force&&now-saveT<2000)return;saveT=now;keepProg(k,vid.currentTime,vid.duration,ended);};
  vid.addEventListener('timeupdate',()=>keep(false));vid.addEventListener('pause',()=>keep(true));vid.addEventListener('seeked',()=>keep(true));vid.addEventListener('ended',()=>keep(true,true));
+ nbhKeepPlaying(vid);
  vid.addEventListener('loadedmetadata',()=>{const k=vid.dataset.id,p=k&&vstore().items[k];if(p&&p.t>=5&&p.t<vid.duration-2){try{vid.currentTime=p.t;}catch(e){}msg('Picks up where it stopped on this device, at '+mmss(p.t)+'.');}});}
 /* the page behind takes no taps and no focus while the player is open */
 function hold(on){if(on){held=[...document.body.children].filter(e=>e!==box&&!e.inert&&!/^(SCRIPT|STYLE|TEMPLATE)$/.test(e.tagName));held.forEach(e=>{e.inert=true;});}else{held.forEach(e=>{e.inert=false;});held=[];}}

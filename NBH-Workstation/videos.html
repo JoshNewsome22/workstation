@@ -534,6 +534,20 @@ function videoUrl(v){if(urls[v.key]){keepUrl(v.key,urls[v.key]);return Promise.r
 function preload(v){if(!v||urls[v.key]||loads[v.key])return;setTimeout(function(){if(view==='home'&&!urls[v.key]&&!loads[v.key])videoUrl(v).catch(function(){});},400);}
 document.addEventListener('pointerdown',function(e){var a=e.target.closest&&e.target.closest('a[href^="#video="]');if(!a)return;var v=BY[a.dataset.key];if(v&&!urls[v.key])videoUrl(v).catch(function(){});},{passive:true});
 /* the player let go: no picture decoded behind a page that does not show it */
+/* v25.86 (the BCBA, 11/11: "Should there be a way to exit from out of full screen when playing a video without the video
+   pausing after you click the x button") On an iPad the full-screen player is the device's own: its X closes it and pauses
+   the video, while the arrows button leaves full screen and plays on. A pause that arrives together with the end of full
+   screen (within 0.8 s, either order) was the X, not the person: the video plays on. A video paused earlier stays paused,
+   as does one that had ended. */
+function nbhKeepPlaying(vid){if(!vid||vid.__nbhKeep)return;vid.__nbhKeep=1;var was=false,pauseAt=0,pauseFs=false,endAt=0,W=800;
+  var fs=function(){try{return !!(vid.webkitDisplayingFullscreen||document.fullscreenElement===vid||document.webkitFullscreenElement===vid);}catch(e){return false;}};
+  var go=function(){if(vid.ended||!vid.paused||!vid.getAttribute('src'))return;setTimeout(function(){if(!vid.paused||vid.ended)return;try{var p=vid.play();if(p&&p.catch)p.catch(function(){});}catch(e){}},50);};
+  var begin=function(){was=true;},end=function(){if(!was)return;was=false;endAt=Date.now();if(pauseFs&&endAt-pauseAt<W)go();};
+  vid.addEventListener('webkitbeginfullscreen',begin);vid.addEventListener('webkitendfullscreen',end);
+  /* the page's own full screen: heard on the document, and let go once this player has left the page */
+  ['fullscreenchange','webkitfullscreenchange'].forEach(function(n){var h=function(){if(!vid.isConnected){document.removeEventListener(n,h);return;}if(fs())begin();else end();};document.addEventListener(n,h);});
+  vid.addEventListener('pause',function(){pauseAt=Date.now();pauseFs=was||fs();if(!pauseFs&&endAt&&pauseAt-endAt<W)go();});
+  vid.addEventListener('play',function(){pauseAt=0;pauseFs=false;});}
 function releasePlayer(){var vid=$('vlVideo');if(!vid)return;try{vid.pause();}catch(e){}vid.removeAttribute('src');try{vid.load();}catch(e){}}
 
 /* ---------- a video's page ---------- */
@@ -600,6 +614,7 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
       (!N.fam.length&&!N.fn.length?'<p class="vl-note">No other video of this procedure yet.</p>':'')+
     '</aside></div>';
   var vid=$('vlVideo'),my=++token,ld=$('vlLoad'),tap=openedByTap,seekTo=null,curCap=null;
+  nbhKeepPlaying(vid);
   var pl=vid.parentNode,bar=$('vlBar'),tw=TRANS[v.key],hasT=!!(tw&&tw.length&&window.NBHTranscript),track=null,tr=null;
   var FULLF=v.frame==='full';
   var playFrom=function(t){if(vid.readyState>=1){try{vid.currentTime=t;}catch(x){}var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});$('vlPlay').hidden=true;}else seekTo=t;};
