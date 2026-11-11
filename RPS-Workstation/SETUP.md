@@ -9905,6 +9905,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.80: The forward chaining video
+(the BCBA, 11/11: "Yes h3 forward chaining" with a $12 limit; then "Yes" to putting it in the app as it is)
+- **The video** (2:52, 1080p; made at 2K, and the 2K file is kept). On Form TD-1's card "Forward chaining: teach the
+  first step, then add each next step in order" (Slocum & Tiger, 2011) and in the video library as the 28th video, on
+  the **Chain** shelf beside backward chaining. It has its Steps and its Transcript.
+- **What it shows.** The same three-step chain, room and people as the backward chaining video (pat head, pat lap,
+  clap; the teacher calls it "the star dance", a name made up for the video): the steps written and baseline; the
+  student picks an item to earn; the instruction, and 5 s for the first step alone; praise, then the rest of the chain
+  guided; 30 s with the item at the end of the chain; after 3 independent trials in a row the next step added; and
+  last the whole chain alone. The closing cards give the error correction (a model, then guidance, stopping if the
+  student pulls away), the mastery rule, the data, and the study's finding that forward and backward chaining worked
+  about equally.
+- **How it was made.** Four new shots and three reused from the backward chaining video. All four passed review; one
+  had 1.4 s cut out where the student went back to patting his head after the clap. Cost: $3.25 of the $12 limit, 896
+  ElevenLabs characters, no Kling credits.
+- **Known limits.** The teacher's praise after the first step is narrated, not spoken by her. The item to earn is shown
+  when he picks it and at the end of the chain, not after every trial.
+- **Size.** The video adds 19 MB: the 28 videos are 339 MB. The videos' size limit in the tests went from 320,000 KB
+  to 340,000 KB.
+- **The test run.** The whole run was not repeated. Run on the final copy, and passing: the two video library tests,
+  the transcript test, the versions and procedure-video tests, budget, the podcast test (it saves the workstation for
+  offline use and plays from the saved copy), and the version and docs tests. Changed on purpose: the video tests
+  expect 28 videos and two on the Chain shelf, the library may be 4.7 screens long on a phone (one more row), and
+  the videos' size limit is 340,000 KB. The local speech-to-text model heard all 16 spoken lines of the video right.
+  The offline-copy test (pwa-test) was not run: not enough free disk in this session.
+- **Not checked.** Safari on a real iPad, and how it sounds to a person.
 ### v25.79: Behavioral Interventions 1995 to 2000 in the banks; NCR as an explainer and a practice
 (the BCBA, 11/11: "Lastly I am attaching some more articles to go into the banks" and "start making the next
 explainer/practice video for the next intervention")

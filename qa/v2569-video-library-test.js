@@ -43,8 +43,8 @@ const SIZES={side:[1376,1032],up:[1032,1376],laptop:[1440,900],phone:[390,844]};
  /* ---------------- A. the files ---------------- */
  {const fams={};LIST.forEach(v=>{fams[v.family]=(fams[v.family]||0)+1;});
   const wrong=LIST.filter(v=>!(fs.existsSync(path.join(DIR,v.file))&&fs.existsSync(path.join(DIR,v.poster))&&v.cards.length&&v.cards.every(id=>V.cards[id]&&V.cards[id].lab)&&v.dur>60&&v.dur<200&&v.title&&v.note&&Array.isArray(v.fn)));
-  ok('A nbh-videos.js: 27 videos (DRO 4, DRA 4, NCR 4, RIRD 3, high-p 5, FCT 4, Choice 1, Group 1 at v25.76, Chaining 1 at v25.77), each its file, its picture, its cards from the bank, its length, its note',
-   LIST.length===27&&fams.group===1&&fams.chain===1&&fams.dro===4&&fams.dra===4&&fams.ncr===4&&fams.rird===3&&fams.highp===5&&fams.fct===4&&fams.choice===1&&!wrong.length&&/^TD-1_.*\.html$/.test(V.form)&&fs.existsSync(path.join(DIR,V.form)),{fams,wrong:wrong.map(v=>v.key)});
+  ok('A nbh-videos.js: 28 videos (DRO 4, DRA 4, NCR 4, RIRD 3, high-p 5, FCT 4, Choice 1, Group 1 at v25.76, Chaining 1 at v25.77 and 2 at v25.80), each its file, its picture, its cards from the bank, its length, its note',
+   LIST.length===28&&fams.group===1&&fams.chain===2&&fams.dro===4&&fams.dra===4&&fams.ncr===4&&fams.rird===3&&fams.highp===5&&fams.fct===4&&fams.choice===1&&!wrong.length&&/^TD-1_.*\.html$/.test(V.form)&&fs.existsSync(path.join(DIR,V.form)),{fams,wrong:wrong.map(v=>v.key)});
   const fnOf=k=>BY[k].fn.join(',');
   ok('A the functions come from the cards: NCR attention attention, NCR during work escape, DRA items tangible, DRA automatic automatic, RIRD automatic, FCT escape, attention and tangible; a high-p video (cards with none) escape, as most high-p cards',
    fnOf('ncr_attention')==='attention'&&fnOf('ncr_work')==='escape'&&fnOf('dra_tangible')==='tangible'&&fnOf('dra_automatic')==='automatic'&&fnOf('rird_pica')==='automatic'&&fnOf('fct-practical-guide-thinning')==='escape,attention,tangible'&&fnOf('a_highp_peer')==='escape',LIST.map(v=>v.key+':'+fnOf(v.key)));
