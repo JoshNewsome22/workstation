@@ -114,7 +114,7 @@ button,input,select{font:inherit;color:inherit}
     </main>
     <aside>
       <section class="pr-card pr-setup" aria-labelledby="prSetH"><h2 id="prSetH">Set up</h2>
-        <div class="pr-row"><span class="l" id="prModeL">What to record</span><div class="pr-seg" role="group" aria-labelledby="prModeL" id="prModes"></div></div>
+        <div class="pr-row"><span class="l" id="prModeL">What to practice</span><div class="pr-seg" role="group" aria-labelledby="prModeL" id="prModes"></div></div>
         <div class="pr-def" id="prDef"></div>
         <div class="pr-row"><span class="l" id="prLenL">Length</span><div class="pr-seg" role="group" aria-labelledby="prLenL" id="prLens"></div></div>
         <div class="pr-row"><span class="l" id="prPaceL">Pace</span><div class="pr-seg" role="group" aria-labelledby="prPaceL" id="prPaces"></div></div>
@@ -145,7 +145,31 @@ var MODES={
    not:['Leaning far to reach something, still on the chair, is not out of seat.']},
  iv:{name:'10-second intervals',label:'Calling out, by interval',rec:'It happened in this interval',recOn:'Marked for this interval',unit:'intervals marked',
    def:'<b>Partial-interval recording, 10 s.</b> Mark an interval if a call-out happened at any time in it. One mark is enough for an interval; the mark clears when the next interval starts.',
-   not:['Raising a hand and waiting is not a call-out.','Speaking after the adult has called on her (“Yes?”) is not a call-out.']}};
+   not:['Raising a hand and waiting is not a call-out.','Speaking after the adult has called on her (“Yes?”) is not a call-out.']},
+ /* v25.79 a practice of giving, not of recording: the adult's part in noncontingent attention (card ncr-attention-ft1-after-school, after Noel & Getch, 2016).
+    The card's timer is 1 min; here it buzzes every 20 s, so that a short practice has enough buzzes to score. */
+ ncr:{name:'Comments on a timer (you are the adult)',label:'Comments on the timer',rec:'Give the comment',unit:'comments given',give:1,
+   def:'<b>You are the adult.</b> A timer buzzes on a fixed schedule: every 20 s here (every minute on the card). Each time it buzzes, give the student one short neutral comment within 5 s: press the button. Between buzzes, keep teaching and give no comment.',
+   not:['Problem behavior is not a buzz. A comment then follows the behavior, and is counted as an extra.','A comment more than 5 s after the buzz is late.','The card’s measure is the share of buzzes followed by an on-time comment; staff in the study practiced until 80%.']}};
+var NCR_I=20,NCR_SAY=['(Name), your book is open.','(Name), we are on page four.','(Name), that is the blue folder.','(Name), your pencil is on the desk.'],NCR_PB=['This is boring!','I don’t want to!','When is this over?','No!'];
+function makeNcr(seed,len,pace){var r=rng(seed*6151+len*17+(pace==='easy'?1:2)),ev=[],easy=pace==='easy',b,nb=Math.floor((len-6)/NCR_I);
+  for(b=NCR_I;b<=len-6;b+=NCR_I)ev.push({k:'buzz',t:b,dur:5});
+  var n=Math.max(1,Math.round(len/(easy?40:22))),tries=0,pb=[];
+  while(pb.length<n&&tries++<400){var near=!easy&&r()<.4,t=near?NCR_I*(1+Math.floor(r()*nb))-(1.2+r()*2.2):3+r()*(len-7);
+    t=Math.round(t*10)/10;if(t<2||t>len-3)continue;if(pb.some(function(x){return Math.abs(x-t)<5;}))continue;
+    var ph=t%NCR_I;if(t>=NCR_I-1&&(ph<5.6||ph>19.2))continue;   /* never on a buzz or in the 5 s after it: a comment there is plainly for the buzz */
+    pb.push(t);}
+  pb.forEach(function(t){ev.push({k:'pb',t:t,dur:1.9,say:NCR_PB[Math.floor(r()*NCR_PB.length)]});});
+  return ev.sort(function(a,b){return a.t-b.t;});}
+function stateNcr(ev,t){var st={papers:{show:true},sheet:{show:true,marks:clamp(.15+t/200,0,1)},timer:{show:true,total:NCR_I,label:'Next buzz'},note:{show:true,text:'Timer: every '+NCR_I+' s'},adult:{},student:{}},A=st.adult,S=st.student,next=null,lastB=null;
+  ev.forEach(function(e){if(e.k==='buzz'){if(e.t>t&&next===null)next=e.t;if(e.t<=t)lastB=e.t;}});
+  st.timer.left=next===null?0:next-t;if(lastB!==null&&t-lastB<1.3){st.timer.flash=1;st.timer.text='Bzz';}
+  S.r=scribble(t,1300,726);S.look=[.15,.9];A.look=[.1,-.05];A.mouth=(Math.floor(t/3.2)%3)?'talk':'rest';A.talk=talk(t)*.6;
+  ev.forEach(function(e){var d=t-e.t;if(e.k==='pb'&&d>=0&&d<=e.dur){S.mouth='open';S.say=e.say;S.brow=-1;S.look=[-.5,-.2];S.lean=tw(d,0,.4,0,.8)-tw(d,e.dur-.4,e.dur,0,.8);S.r=[1250,650];S.l=[1120,660];}});
+  /* the comment the person practicing gave: the adult turns to the student and says it */
+  var lp=-1;for(var i=0;i<presses.length;i++)if(presses[i]<=t)lp=i;
+  if(lp>=0&&t-presses[lp]<2.6){var c=t-presses[lp];A.look=[tw(c,0,.4,.1,.85),.15];A.mouth='talk';A.talk=talk(t);A.say=NCR_SAY[lp%NCR_SAY.length];A.brow=.3;}
+  return st;}
 var LENS=[60,120,180],PACES={easy:'Slower, few look-alikes',class:'Classroom pace, with look-alikes'};
 var CALLS=['I know!','Me! Me!','Look at this!','Is it lunch yet?','I’m done!','What’s next?','Mine is blue!','Can I go?'];
 var ASKS=['Is it twelve?','Can I use red?','Is this right?','May I get a pencil?'];
@@ -173,15 +197,17 @@ function makeScene(seed,len,pace){var r=rng(seed*7919+len*31+(pace==='easy'?1:2)
 /* the true record of a scene, for each way of recording */
 var UP_IN=.45;   /* she is "up" from this long after she starts to rise, to this long before she is down */
 function truth(ev,len,mode){
+  if(mode==='ncr')return ev.filter(function(e){return e.k==='buzz';}).map(function(e){return {t0:e.t,t1:e.t+5};});
   if(mode==='dur')return ev.filter(function(e){return e.k==='up';}).map(function(e){return {t0:e.t+UP_IN,t1:e.t+e.dur-UP_IN};});
   var calls=ev.filter(function(e){return e.k==='call';}).map(function(e){return {t0:e.t+.15,t1:e.t+e.dur};});
   return calls;}
 function looks(ev,mode){   /* the moments that look like the target and are not */
+  if(mode==='ncr')return ev.filter(function(e){return e.k==='pb';}).map(function(e){return {t0:e.t,t1:e.t+e.dur+1.1,why:'it came right after problem behavior, with no buzz'};});
   return ev.filter(function(e){return mode==='dur'?e.k==='reach':(e.k==='hand'||e.k==='called');}).map(function(e){
     return {t0:e.k==='called'?e.t+2.4:e.t,t1:e.t+e.dur,why:e.k==='reach'?'she leaned to reach, still on the chair':e.k==='hand'?'she raised her hand and waited':'she spoke after being called on'};});}
 function scribble(t,cx,cy){return [cx+16*Math.sin(t*5.1)+6*Math.sin(t*11.3),cy+7*Math.sin(t*7.7)];}
 function talk(t){return .35+.65*Math.abs(Math.sin(t*9.5));}
-function stateAt(ev,t){var st={papers:{show:true},sheet:{show:true,marks:clamp(.15+t/200,0,1)},adult:{},student:{}},A=st.adult,S=st.student;
+function stateAt(ev,t){if(mode==='ncr')return stateNcr(ev,t);var st={papers:{show:true},sheet:{show:true,marks:clamp(.15+t/200,0,1)},adult:{},student:{}},A=st.adult,S=st.student;
   S.r=scribble(t,1300,726);S.look=[.15,.9];A.l=[300,700];A.r=scribble(t*.8,520,704);A.look=[-.25,.95];
   /* the adult glances up now and then */
   if(Math.sin(t*.7+1)>.8)A.look=[.85,.25];
@@ -206,13 +232,13 @@ function seg(el,items,cur,attr){el.innerHTML=items.map(function(x){return '<butt
 function setup(){seg($('#prModes'),Object.keys(MODES).map(function(k){return [k,MODES[k].name];}),mode,'mode');
   seg($('#prLens'),LENS.map(function(v){return [v,(v/60)+' min'];}),len,'len');seg($('#prPaces'),Object.keys(PACES).map(function(k){return [k,PACES[k]];}),pace,'pace');
   var M=MODES[mode];$('#prDef').innerHTML=M.def+'<ul>'+M.not.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';$('#prSeed').value=seed;$('#prCountL').textContent=M.unit;
-  EV=makeScene(seed,len,pace);if(phase==='idle'||phase==='done'){t=0;scene.set(stateAt(EV,0));}}
+  EV=mode==='ncr'?makeNcr(seed,len,pace):makeScene(seed,len,pace);if(phase==='idle'||phase==='done'){t=0;scene.set(stateAt(EV,0));}}
 function idle(msg){phase='idle';cancelAnimationFrame(raf);$('#prVeil').hidden=false;$('#prVeil').innerHTML='<div><small>'+esc(msg||'Read the definition, then press Start.')+'</small></div>';$('#prTag').hidden=true;
   $('#prRec').disabled=true;$('#prRec').className='pr-rec';$('#prRec').textContent='Start the scene first';$('#prUndo').disabled=true;$('#prStart').textContent='Start';$('#prBar').style.width='0';$('#prIvs').hidden=true;$('#prCount').textContent='0';
   [].forEach.call(document.querySelectorAll('.pr-setup button,.pr-setup input'),function(b){b.disabled=false;});}
 function begin(){presses=[];spans=[];marks={};lastIv=-1;review=null;$('#prResult').hidden=true;phase='ready';var n=3,v=$('#prVeil');v.hidden=false;
   [].forEach.call(document.querySelectorAll('.pr-setup button,.pr-setup input'),function(b){b.disabled=true;});$('#prStart').textContent='Stop';
-  $('#prRec').disabled=false;$('#prRec').textContent=MODES[mode].rec;$('#prRec').className='pr-rec';$('#prUndo').disabled=mode==='iv';$('#prCount').textContent='0';
+  $('#prRec').disabled=false;$('#prRec').textContent=MODES[mode].rec;$('#prRec').className='pr-rec';$('#prUndo').disabled=mode==='iv'||mode==='ncr';$('#prCount').textContent='0';
   if(mode==='iv'){$('#prIvs').hidden=false;$('#prIvs').innerHTML=new Array(Math.ceil(len/BIN)+1).join('<i></i>');}
   try{$('#prRec').focus({preventScroll:true});}catch(e){}
   (function step(){if(phase!=='ready')return;if(n===0){v.hidden=true;phase='run';t=0;t0=performance.now();raf=requestAnimationFrame(tick);$('#prLive').textContent='The scene is running.';return;}v.innerHTML='<div>'+n+'</div>';n--;setTimeout(step,window.__prFast?30:700);})();}
@@ -221,7 +247,8 @@ function frame(){scene.set(stateAt(EV,t));$('#prBar').style.width=(100*t/len).to
   if(mode==='dur'){var open=spans.length&&spans[spans.length-1].t1===null,tot=spans.reduce(function(s,x){return s+((x.t1===null?t:x.t1)-x.t0);},0);$('#prCount').textContent=Math.round(tot);}
   if(mode==='iv'){var iv=Math.min(Math.ceil(len/BIN)-1,Math.floor(t/BIN));if(iv!==lastIv){lastIv=iv;var b=$('#prRec');b.classList.remove('on');b.textContent=MODES.iv.rec;[].forEach.call($('#prIvs').children,function(c,i){c.className=(marks[i]?'y':'')+(i===iv?' now':'');});}}}
 function press(){if(phase!=='run')return;var b=$('#prRec');b.classList.add('hit');setTimeout(function(){b.classList.remove('hit');},120);
-  if(mode==='count'){presses.push(t);$('#prCount').textContent=presses.length;$('#prUndo').disabled=false;}
+  if(mode==='ncr'){presses.push(t);$('#prCount').textContent=presses.length;}
+  else if(mode==='count'){presses.push(t);$('#prCount').textContent=presses.length;$('#prUndo').disabled=false;}
   else if(mode==='dur'){var last=spans[spans.length-1];if(last&&last.t1===null){last.t1=t;b.classList.remove('on');b.textContent=MODES.dur.rec;}else{spans.push({t0:t,t1:null});b.classList.add('on');b.textContent=MODES.dur.recOn;$('#prUndo').disabled=false;}}
   else{var iv=Math.min(Math.ceil(len/BIN)-1,Math.floor(t/BIN));marks[iv]=true;b.classList.add('on');b.textContent=MODES.iv.recOn;$('#prCount').textContent=Object.keys(marks).length;var c=$('#prIvs').children[iv];if(c)c.className='y now';}}
 function undo(){if(phase!=='run')return;if(mode==='count'&&presses.length){presses.pop();$('#prCount').textContent=presses.length;$('#prUndo').disabled=!presses.length;}
@@ -230,7 +257,17 @@ function undo(){if(phase!=='run')return;if(mode==='count'&&presses.length){press
 function score(){var T=truth(EV,len,mode),L=looks(EV,mode),nb=Math.ceil(len/BIN),o={mode:mode,len:len,seed:seed,pace:pace,items:[]};
   var bins=function(times){var a=new Array(nb).fill(0);times.forEach(function(x){a[Math.min(nb-1,Math.floor(x/BIN))]++;});return a;};
   var why=function(x){for(var i=0;i<L.length;i++)if(x>=L[i].t0-.3&&x<=L[i].t1+1.5)return L[i].why;return '';};
-  if(mode==='count'){var used=[],hits=0;
+  if(mode==='ncr'){var B=EV.filter(function(e){return e.k==='buzz';}).map(function(e){return e.t;}),PB=EV.filter(function(e){return e.k==='pb';}),usedN=[],on=0,late=0,missed=0,sum=0,la1=[],lb1=[];
+    B.forEach(function(b,i){var end=i+1<B.length?B[i+1]:len,j=-1;for(var q=0;q<presses.length;q++)if(!usedN[q]&&presses[q]>=b-.05&&presses[q]<end){j=q;break;}
+      if(j<0){missed++;la1.push([b,b+5,'miss']);o.items.push({k:'miss',t:b,text:'The timer buzzed and no comment was given before the next buzz'});return;}
+      usedN[j]=1;var d=presses[j]-b;if(d<=5){on++;sum+=d;la1.push([b,b+5,'hit']);lb1.push([presses[j],presses[j],'hit']);}
+      else{late++;la1.push([b,b+5,'miss']);lb1.push([presses[j],presses[j],'extra']);o.items.push({k:'extra',t:presses[j],text:'Late: '+d.toFixed(1)+' s after the buzz (the card allows 5 s)'});}});
+    var extra=0;presses.forEach(function(x,q){if(usedN[q])return;extra++;lb1.push([x,x,'extra']);var after=PB.some(function(e){return x>=e.t-.2&&x<=e.t+e.dur+1.1;});
+      o.items.push({k:'extra',t:x,text:after?'A comment right after problem behavior, with no buzz: it can work as attention for the behavior':'A comment with no buzz'});});
+    o.yours=presses.length;o.true_=B.length;o.main=pct(on,B.length);o.word='on time';
+    o.rows=[['Buzzes',B.length],['Comments on time (within 5 s)',on],['Late',late],['Missed',missed],['Extra comments (no buzz)',extra],['Buzzes followed by an on-time comment',o.main+'%','the card’s measure of staff accuracy; staff in the study practiced until 80%'],['Average delay of the on-time comments',on?(sum/on).toFixed(1)+' s':'–']];
+    o.lanes=[['The timer’s buzzes',la1],['Your comments',lb1]];}
+  else if(mode==='count'){var used=[],hits=0;
     T.forEach(function(ev){var j=-1;for(var i=0;i<presses.length;i++)if(!used[i]&&presses[i]>=ev.t0-.35&&presses[i]<=ev.t0+3.2){j=i;break;}
       if(j>=0){used[j]=1;hits++;ev.hit=1;}else o.items.push({k:'miss',t:ev.t0,text:'A call-out you did not count'});});
     presses.forEach(function(x,i){if(!used[i]){var w=why(x);o.items.push({k:'extra',t:x,text:w?'You counted when '+w+': not a call-out by this definition':'You counted, and there was no call-out'});}});
@@ -257,15 +294,17 @@ function score(){var T=truth(EV,len,mode),L=looks(EV,mode),nb=Math.ceil(len/BIN)
 function finish(){phase='done';cancelAnimationFrame(raf);if(mode==='dur'&&spans.length&&spans[spans.length-1].t1===null)spans[spans.length-1].t1=len;
   var o=score();review=o;LOG.unshift(o);$('#prBar').style.width='100%';$('#prVeil').hidden=true;$('#prCount').textContent=mode==='count'?presses.length:o.yours;$('#prRec').disabled=true;$('#prRec').className='pr-rec';$('#prRec').textContent='The scene has ended';$('#prUndo').disabled=true;$('#prStart').textContent='Start again';
   [].forEach.call(document.querySelectorAll('.pr-setup button,.pr-setup input'),function(b){b.disabled=false;});
+  $('#prResH').textContent=mode==='ncr'?'Your comments and the timer':'Your record and what happened';
   var lanes=o.lanes.map(function(l){return '<b>'+esc(l[0])+'</b><div class="pr-lane">'+l[1].map(function(x){return '<i class="'+x[2]+'" style="left:'+(100*x[0]/len).toFixed(2)+'%;width:'+Math.max(.6,100*(x[1]-x[0])/len).toFixed(2)+'%"></i>';}).join('')+'</div>';}).join('');
-  var h='<p style="margin:0 0 8px"><span class="pr-big">'+o.main+'%</span> agreement &nbsp;·&nbsp; scene '+o.seed+', '+esc(MODES[mode].label.toLowerCase())+', '+(len/60)+' min</p>';
-  if(o.main===100&&o.items.length)h+='<p style="margin:0 0 10px"><b>The totals agree, but the moments do not:</b> what was missed and what was added cancel out. '+(mode==='count'?'The count by interval shows it.':'The list below shows where.')+'</p>';
+  var h='<p style="margin:0 0 8px"><span class="pr-big">'+o.main+'%</span> '+(o.word||'agreement')+' &nbsp;·&nbsp; scene '+o.seed+', '+esc(MODES[mode].label.toLowerCase())+', '+(len/60)+' min</p>';
+  if(mode==='ncr')h+='<p style="margin:0 0 10px">'+(o.main>=80?'<b>At or above 80%,</b> the level staff practiced to in the study.':'<b>Below 80%,</b> the level staff practiced to in the study. Play it again with the answers shown, then try another scene.')+(o.rows[4][1]?' Extra comments are not in that figure: look at them below.':'')+'</p>';
+  else if(o.main===100&&o.items.length)h+='<p style="margin:0 0 10px"><b>The totals agree, but the moments do not:</b> what was missed and what was added cancel out. '+(mode==='count'?'The count by interval shows it.':'The list below shows where.')+'</p>';
   h+='<dl class="pr-score">'+o.rows.map(function(r){return '<dt>'+esc(r[0])+(r[2]?'<small>'+esc(r[2])+'</small>':'')+'</dt><dd>'+esc(r[1])+'</dd>';}).join('')+'</dl>';
-  h+='<div class="pr-lanes" role="img" aria-label="Two rows across the scene: what happened, and your record. Green agrees, red was missed, amber was not the target.">'+lanes+'</div><p class="pr-hint">Green: agrees. Red: happened and not recorded. Amber: recorded and not the target.</p>';
+  h+='<div class="pr-lanes" role="img" aria-label="Two rows across the scene: what happened, and your record. Green agrees, red was missed, amber was not the target.">'+lanes+'</div><p class="pr-hint">'+(mode==='ncr'?'Green: a buzz and its on-time comment. Red: a buzz with no on-time comment. Amber: a comment that was late or had no buzz.':'Green: agrees. Red: happened and not recorded. Amber: recorded and not the target.')+'</p>';
   h+=o.items.length?'<ul class="pr-list">'+o.items.map(function(it,i){return '<li><span><b class="'+it.k+'">'+mmss(it.t)+'</b> '+esc(it.text)+'</span><button type="button" class="pr-btn" data-show="'+i+'">Show me</button></li>';}).join('')+'</ul>':'<p style="margin:8px 0 0"><b>Nothing missed and nothing extra.</b></p>';
   h+='<div class="pr-row" style="margin:12px 0 0"><button type="button" class="pr-btn" id="prReplay">Play the scene again with the answers shown</button></div>';
-  $('#prResBody').innerHTML=h;$('#prResult').hidden=false;$('#prLive').textContent='The scene has ended: '+o.main+'% agreement.';
-  $('#prLog').innerHTML='<table class="pr-log"><thead><tr><th>Scene</th><th>Recorded</th><th>Length</th><th class="n">Agreement</th></tr></thead><tbody>'+LOG.map(function(x){return '<tr><td>'+x.seed+'</td><td>'+esc(MODES[x.mode].label)+'</td><td>'+(x.len/60)+' min</td><td class="n">'+x.main+'%</td></tr>';}).join('')+'</tbody></table><p class="pr-hint" style="margin:8px 0 0">Not kept after the page is closed.</p>';
+  $('#prResBody').innerHTML=h;$('#prResult').hidden=false;$('#prLive').textContent='The scene has ended: '+o.main+'% '+(o.word||'agreement')+'.';
+  $('#prLog').innerHTML='<table class="pr-log"><thead><tr><th>Scene</th><th>Recorded</th><th>Length</th><th class="n">Result</th></tr></thead><tbody>'+LOG.map(function(x){return '<tr><td>'+x.seed+'</td><td>'+esc(MODES[x.mode].label)+'</td><td>'+(x.len/60)+' min</td><td class="n">'+x.main+'%'+(x.word?' '+x.word:'')+'</td></tr>';}).join('')+'</tbody></table><p class="pr-hint" style="margin:8px 0 0">Not kept after the page is closed.</p>';
   try{$('#prResult').focus({preventScroll:true});$('#prResult').scrollIntoView({block:'nearest'});}catch(e){}}
 /* the scene again with the answers: from a moment, for a few seconds, or all of it */
 function replay(from,to){cancelAnimationFrame(raf);phase='review';$('#prVeil').hidden=true;var T=truth(EV,len,mode),L=looks(EV,mode),tag=$('#prTag'),start=performance.now(),a=Math.max(0,from),b=Math.min(len,to);
@@ -273,8 +312,8 @@ function replay(from,to){cancelAnimationFrame(raf);phase='review';$('#prVeil').h
   (function step(ts){if(phase!=='review')return;t=a+(ts-start)/1000*(window.__prSpeed||1);if(t>=b){t=b;phase='done';$('#prStart').textContent='Start again';tag.hidden=true;scene.set(stateAt(EV,t));return;}
     scene.set(stateAt(EV,t));$('#prBar').style.width=(100*t/len).toFixed(2)+'%';
     var on=T.filter(function(x){return t>=x.t0-.15&&t<=Math.max(x.t1,x.t0+1.4);})[0],no=L.filter(function(x){return t>=x.t0&&t<=x.t1+.3;})[0];
-    if(on){tag.hidden=false;tag.className='pr-tag yes';tag.textContent=mode==='dur'?'Out of seat: record it':'A call-out: record it';}
-    else if(no){tag.hidden=false;tag.className='pr-tag no';tag.textContent='Not the target: '+no.why;}
+    if(on){tag.hidden=false;tag.className='pr-tag yes';tag.textContent=mode==='ncr'?'The timer buzzed: give the comment within 5 s':mode==='dur'?'Out of seat: record it':'A call-out: record it';}
+    else if(no){tag.hidden=false;tag.className='pr-tag no';tag.textContent=mode==='ncr'?'Problem behavior: no buzz, so no comment':'Not the target: '+no.why;}
     else tag.hidden=true;
     raf=requestAnimationFrame(step);})(start);}
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button');if(!b)return;

@@ -61,10 +61,10 @@ button,input,select{font:inherit;color:inherit}
 .ex-scrub input::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--navy);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
 .ex-track{position:absolute;left:13px;right:13px;top:17px;height:10px;border-radius:5px;background:var(--chip);overflow:hidden;pointer-events:none}
 .ex-track i{position:absolute;top:0;bottom:0}
-.ex-track i.work{background:#BFD4D2}.ex-track i.break{background:#E8C873}.ex-track i.green{background:#7DBE96}.ex-track i.red{background:#DE8F7F}.ex-track i.rf{background:#E8C873}
+.ex-track i.work{background:#BFD4D2}.ex-track i.break{background:#E8C873}.ex-track i.green{background:#7DBE96}.ex-track i.red{background:#DE8F7F}.ex-track i.rf{background:#E8C873}.ex-track i.wait{background:#BFD4D2}.ex-track i.com{background:#E8C873}
 .ex-marks{position:absolute;left:13px;right:13px;top:2px;height:40px;pointer-events:none}
 .ex-marks i{position:absolute;top:8px;width:3px;height:28px;margin-left:-1.5px;border-radius:2px;background:var(--navy)}
-.ex-marks i.pb,.ex-marks i.ignored{background:#8a2f1d}.ex-marks i.earn,.ex-marks i.honored{background:#2E7A4B}
+.ex-marks i.pb,.ex-marks i.ignored{background:#8a2f1d}.ex-marks i.earn,.ex-marks i.honored,.ex-marks i.buzz{background:#2E7A4B}
 .ex-key{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0 0;padding:0;list-style:none;font-size:.8125rem;color:var(--muted)}
 .ex-key li{display:flex;align-items:center;gap:6px}
 .ex-key i{display:inline-block;width:14px;height:10px;border-radius:3px}
@@ -252,7 +252,64 @@ var FCT={key:'fct',name:'FCT: green and red',title:'FCT schedule thinning: green
 };
 function segAt(T,t){for(var i=0;i<T.segs.length;i++)if(t<T.segs[i].t1-1e-9||i===T.segs.length-1)return T.segs[i];return null;}
 
-var EX={dro:DRO,fct:FCT},cur=null,P=null,EV=[],T=null,t=0,playing=false,speed=1,last=0,raf=0,shownPart='',edited=false;
+/* ====================== NCR for attention on a fixed-time schedule (card ncr-attention-ft1-after-school, after Noel & Getch, 2016) ======================
+   A timer buzzes on a fixed schedule; at each buzz the adult gives one short neutral comment within 5 s. Nothing the
+   student does moves the timer: that is the difference from DRO. The card does not say how adults respond to problem
+   behavior between buzzes, or what to do when it comes just before one; the page says so and gives the comment on time. */
+var NCR_SAY=['(Name), your book is open.','(Name), we are on page four.','(Name), that is the blue folder.','(Name), your pencil is on the desk.'];
+var NCR={key:'ncr',name:'NCR: attention on a timer',title:'NCR for attention: a comment each time the timer buzzes',
+  lead:'A timer buzzes on a fixed schedule. At each buzz the adult gives the student one short neutral comment within 5 s, whatever the student is doing. Problem behavior does not move the timer. Play it, change the timer, and add problem behavior where you like to see that the schedule stays where it is.',
+  src:'Follows the steps of Form TD-1’s card <b>Fixed-time attention every minute, cued by a vibrating timer, for attention-maintained disruption during group lessons</b>, after Noel &amp; Getch (2016). The people are drawn: it shows the rule, not a real session. The study had two boys aged 10 and 12 in an after-school program, in 10-min lessons; the function was judged from interview and observation only, and the schedule was never thinned, so add a thinning plan and teach an appropriate way to ask for attention. The card does not say how adults respond to problem behavior between buzzes, or what to do when it comes just before a buzz: set both in the plan. Here the comment is given on time, as the card’s steps say. Adapt every step to the student’s plan.',
+  params:{interval:60},
+  intervals:[60,120,180],
+  example:function(P){return [{k:'pb',t:P.interval*.42},{k:'pb',t:P.interval*2-3}];},
+  key_:[['wait','Between buzzes: the lesson goes on'],['com','A comment, within 5 s of the buzz'],['pb','Problem behavior: the timer does not move',1],['buzz','The timer buzzes',1]],
+  build:function(P,ev){var I=P.interval,len=clamp(3*I+20,200,600),segs=[],marks,t=0,buzz=[];
+    /* the schedule is the clock's: each buzz is one interval after the last buzz, not after the comment */
+    for(var q=I;q<len-1e-9;q+=I)buzz.push(q);
+    buzz.forEach(function(b,i){segs.push({t0:t,t1:b,k:'wait'});segs.push({t0:b,t1:Math.min(len,b+5),k:'com',n:i});t=Math.min(len,b+5);});if(t<len)segs.push({t0:t,t1:len,k:'wait'});
+    marks=buzz.map(function(b,i){return {t:b,k:'buzz',n:i};});
+    ev.filter(function(e){return e.k==='pb'&&e.t<len;}).forEach(function(e){marks.push({t:e.t,k:'pb'});});marks.sort(function(a,b){return a.t-b.t;});
+    return {len:len,segs:segs,marks:marks,buzz:buzz};},
+  can:function(T,t,kind){return true;},
+  why:function(kind){return '';},
+  buttons:[['pb','Problem behavior happens now','warn']],
+  tally:function(T,t,P){var bz=0,cm=0,pb=0;T.marks.forEach(function(m){if(m.k==='buzz'){if(m.t<=t+1e-9)bz++;if(m.t+2<=t+1e-9)cm++;}else if(m.k==='pb'&&m.t<=t+1e-9)pb++;});var mins=Math.max(t,1)/60;
+    return [['Buzzes',bz],['Comments within 5 s',cm+' of '+bz],['Problem behavior',pb],['Per minute',(pb/mins).toFixed(1)],['Timer',secs(P.interval)]];},
+  rule:['In baseline, count how often adults attend to the student (praise or reprimands), and set the timer from that rate: every minute in the study.','Train staff with a rationale, a video model and practice until 80% of comments are on time.','Set a vibrating timer to buzz at each interval during the activity.','At each buzz, give the student one short neutral comment by name within 5 s.','Keep it neutral: no praise, no reprimand, and not said to the whole group.','Between buzzes, keep teaching the group.'],
+  parts:{timer:['The timer','It buzzes at the same interval all through the activity. Nothing the student does starts, stops or restarts it: the comment comes by the clock, not for a behavior.'],
+    adult:['The adult','Teaches the group. At each buzz she turns to the student and gives one short neutral comment by name within 5 s, then goes on teaching. The card does not say what she does about problem behavior between buzzes: set that in the plan.'],
+    student:['The student','Nothing is asked of the student for the comment. Attention arrives on the clock, so there is less reason to get it another way.'],
+    sheet:['The work','The lesson’s task. It is not part of the schedule: the comment does not depend on it.'],
+    note:['The sign','The timer’s interval. In the study it came from how often adults attended to the student in baseline, to the nearest minute, and was never lengthened; plan how you will lengthen it.'],
+    papers:['The adult’s papers','Where she counts problem behavior, and marks each buzz as followed by an on-time comment or not: the card’s two measures (Forms MT-1 and DD-1).']},
+  state:function(T,t,P){var seg=segAt(T,t),I=P.interval,st={note:{show:true,text:'Timer: every '+secs(I)},timer:{show:true},papers:{show:true},sheet:{show:true},adult:{},student:{}},A=st.adult,S=st.student,now='',step='',cls='';
+    var next=null,lastB=null;T.buzz.forEach(function(b){if(b>t+1e-9&&next===null)next=b;if(b<=t+1e-9)lastB=b;});
+    var left=next===null?0:next-t;st.timer.left=next===null?0:left;st.timer.total=I;st.timer.label='Next comment';
+    st.sheet.marks=clamp(.15+t/Math.max(60,T.len*.8),0,1);
+    /* the lesson: the student works, the adult teaches the group (she looks out over the table and talks) */
+    S.r=scribble(t,1300,726);S.look=[.15,.9];A.look=[.1,-.05];A.mouth=(Math.floor(t/3.2)%3)?'talk':'rest';A.talk=talk(t)*.6;
+    step='Lesson: '+N.clock(left)+' to the next buzz';now='<b>The lesson goes on.</b> The timer runs to the next buzz whatever happens.';
+    if(next===null){step='Lesson: the last buzz has passed';}
+    var lastPb=null;T.marks.forEach(function(m){if(m.k==='pb'&&m.t<=t+1e-9)lastPb=m.t;});
+    if(lastPb!==null&&t-lastPb<3.6){var d=t-lastPb;
+      S.r=N.tweenP(d,0,.35,[1300,726],[1250,650]);S.l=N.tweenP(d,0,.35,R.student.l,[1120,660]);S.lean=tw(d,0,.4,0,.8);S.brow=-1;S.mouth='open';S.look=[-.5,-.2];if(d<1.8)S.say='This is boring!';
+      if(d>2.7){S.r=N.tweenP(d,2.7,3.5,[1250,650],[1300,726]);S.l=N.tweenP(d,2.7,3.5,[1120,660],R.student.l);S.lean=tw(d,2.7,3.5,.8,0);S.brow=0;S.mouth='flat';S.look=[.15,.9];}
+      step='Problem behavior: the timer does not move';cls='red';
+      now='<b>Problem behavior.</b> The timer keeps its time: '+N.clock(left)+' to the next buzz, as before. The card does not say how adults respond between buzzes: set that in the plan.';
+      if(next!==null&&left<6)now+=' It came just before a buzz, and the card gives no rule for that either: decide it in the plan.';}
+    if(lastB!==null&&t-lastB<5){var c=t-lastB,n=T.buzz.indexOf(lastB);
+      st.timer.flash=c<1.3?1:0;st.timer.left=0;st.timer.text=c<1.3?'Bzz':undefined;if(c>=1.3){st.timer.left=next===null?0:left;}
+      A.look=[tw(c,.3,.9,.1,.85),.15];
+      if(c>=1&&c<3.6){A.mouth='talk';A.talk=talk(t);A.say=NCR_SAY[n%NCR_SAY.length];A.brow=.3;S.look=[-.7,0];if(!(lastPb!==null&&t-lastPb<3.6))S.mouth='rest';}
+      else if(c>=3.6){A.look=[tw(c,3.6,4.4,.85,.1),0];A.mouth='rest';}
+      step=c<1?'The timer buzzes':'A comment, within 5 s of the buzz';cls='gold';
+      now=c<1?'<b>The timer buzzes.</b> She has 5 s to give the comment.':'<b>One short neutral comment, by name.</b> No praise, no reprimand, and not to the whole group. Then the lesson goes on.';
+      if(lastPb!==null&&lastB-lastPb>=0&&lastB-lastPb<6)now+=' Problem behavior came just before this buzz; the card gives no rule for that, so the comment is still given on time here. Decide it in the plan.';}
+    return {st:st,now:now,step:step,cls:cls};}
+};
+
+var EX={dro:DRO,fct:FCT,ncr:NCR},cur=null,P=null,EV=[],T=null,t=0,playing=false,speed=1,last=0,raf=0,shownPart='',edited=false;
 var USE3D=!/[?&]flat=1\b/.test(location.search)&&!!window.NBHScene3D&&NBHScene3D.ok(),scene=null;   /* lit 3D where the device can draw it; the flat drawing where it cannot (or with ?flat=1) */
 if(USE3D){try{scene=NBHScene3D.create($('#exStage'),{label:'A drawn scene of the procedure: an adult and a student at a table'});}catch(er){scene=null;var h3=document.querySelector('#exStage .nbh-scene3d');if(h3)h3.parentNode.removeChild(h3);}}
 if(!scene){USE3D=false;scene=N.create($('#exStage'),{label:'A drawn scene of the procedure: an adult and a student at a table'});}
@@ -279,6 +336,8 @@ function play(on){playing=on;var b=$('#exPlay');b.textContent=on?'Pause':'Play';
 function tryPanel(){var h='';
   if(cur===DRO){h+='<div class="ex-row"><span class="l" id="exIvL">Interval of calm work</span><div class="ex-seg" role="group" aria-labelledby="exIvL">'+DRO.intervals.map(function(v){return '<button type="button" class="ex-btn" data-set="interval" data-v="'+v+'" aria-pressed="'+(P.interval===v)+'">'+secs(v)+'</button>';}).join('')+'</div></div>';
     h+='<p class="ex-hint">The card lengthens the interval only when the rate of problem behavior is at or below the criterion set from baseline.</p>';}
+  else if(cur===NCR){h+='<div class="ex-row"><span class="l" id="exIvL">The timer buzzes every</span><div class="ex-seg" role="group" aria-labelledby="exIvL">'+NCR.intervals.map(function(v){return '<button type="button" class="ex-btn" data-set="interval" data-v="'+v+'" aria-pressed="'+(P.interval===v)+'">'+secs(v)+'</button>';}).join('')+'</div></div>';
+    h+='<p class="ex-hint">The card sets the timer from how often adults attended to the student in baseline, to the nearest minute. It was never lengthened in the study: plan how you will lengthen it.</p>';}
   else{h+='<div class="ex-row"><span class="l" id="exRdL">Red lasts</span><div class="ex-seg" role="group" aria-labelledby="exRdL">'+FCT.reds.map(function(v){return '<button type="button" class="ex-btn" data-set="red" data-v="'+v+'" aria-pressed="'+(P.red===v)+'">'+secs(v)+'</button>';}).join('')+'</div></div>';
     h+='<p class="ex-hint">The card lengthens red when problem behavior is at least 90% below baseline and at least 70% of requests are made on green.</p>';
     h+='<div class="ex-row"><button type="button" class="ex-btn" data-toggle="away" aria-pressed="'+(!!P.away)+'">Take the card away on red</button><button type="button" class="ex-btn" data-toggle="item" aria-pressed="'+(!!P.item)+'">Add a preferred item on red</button></div>';}
@@ -289,7 +348,7 @@ function pick(key,keep){cur=EX[key]||DRO;P=JSON.parse(JSON.stringify(cur.params)
   $('#exPick').innerHTML=Object.keys(EX).map(function(k){return '<button type="button" class="ex-btn" data-pick="'+k+'" aria-pressed="'+(EX[k]===cur)+'">'+esc(EX[k].name)+'</button>';}).join('');
   document.title=cur.name+' · Explainers · FBA and BIP Workstation';$('#exLead').textContent=cur.lead;$('#exSrc').innerHTML=cur.src;
   $('#exRule').innerHTML=cur.rule.map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
-  $('#exKey').innerHTML=cur.key_.map(function(k){return '<li><i class="'+k[0]+'" style="background:'+({work:'#BFD4D2','break':'#E8C873',green:'#7DBE96',red:'#DE8F7F',rf:'#E8C873',pb:'#8a2f1d',ignored:'#8a2f1d',earn:'#2E7A4B',honored:'#2E7A4B'}[k[0]])+(k[2]?';width:4px;height:16px':'')+'"></i>'+esc(k[1])+'</li>';}).join('');
+  $('#exKey').innerHTML=cur.key_.map(function(k){return '<li><i class="'+k[0]+'" style="background:'+({work:'#BFD4D2','break':'#E8C873',green:'#7DBE96',red:'#DE8F7F',rf:'#E8C873',pb:'#8a2f1d',ignored:'#8a2f1d',earn:'#2E7A4B',honored:'#2E7A4B',wait:'#BFD4D2',com:'#E8C873',buzz:'#2E7A4B'}[k[0]])+(k[2]?';width:4px;height:16px':'')+'"></i>'+esc(k[1])+'</li>';}).join('');
   showPart('');tryPanel();rebuild();try{if(location.hash.slice(1)!==cur.key)history.replaceState(null,'','#'+cur.key);}catch(e){}}
 function showPart(name){shownPart=name;var info=name&&cur.parts[name];Object.keys(scene.parts).forEach(function(k){scene.parts[k].classList.toggle('on',k===name&&!!info);});
   $('#exPart').innerHTML=info?'<b>'+esc(info[0])+'</b>'+esc(info[1]):'<span class="ex-hint">'+(name?'That part has no job of its own in this procedure.':'The timer, the signal, the card, the adult, the student: each says what it is for here.')+'</span>';}

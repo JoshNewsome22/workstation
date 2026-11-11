@@ -9905,6 +9905,109 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.79: Behavioral Interventions 1995 to 2000 in the banks; NCR as an explainer and a practice
+(the BCBA, 11/11: "Lastly I am attaching some more articles to go into the banks" and "start making the next
+explainer/practice video for the next intervention")
+
+**Behavioral Interventions 1995 to 2000 (volumes 10 to 15) in the banks**
+(the BCBA, 11/11: "Lastly I am attaching some more articles to go into the banks"; the Google Drive folder. Volumes 1
+to 9 and 30 to 41 were already in; these six volumes, 126 files, were new. The 2015 to 2020 folders hold the same
+articles as before under new file names, so nothing was added from them.)
+- **Form TD-1's protocol bank: 57 new cards** (10 from 1995, 7 from 1996, 9 from 1997, 10 from 1998, 7 from 1999 and
+  14 from 2000), read under the current reader rules. Among them:
+  - *Function-based treatment:* FCT for two functions in turn with "I want (item) please" and "I need help please"
+    (Braithwaite & Richdale, 2000); three treatments matched to a brief assessment (Sigafoos & Tucker, 2000); a break
+    earned by a visible countdown timer, lengthened to the whole class (Mozzoni & Hartnedy, 2000); a posted 10-minute
+    break every hour for leaving the work site (Wesolowski et al., 1999); timed attention for off-topic talk, where a
+    dense schedule did nothing and a leaner one worked (Carr & Britton, 1999); choosing the order of a routine from
+    photos (Shukla et al., 1995).
+  - *DRO and tokens:* whole-interval DRO with sticker tokens for five students in a class (Didden et al., 1997);
+    self-managed DRO with a one-minute timer (Newman et al., 1997); DRO tokens for social boundaries with an optional
+    token loss (LeBlanc et al., 2000); bonus points inside a classroom token economy for math and spelling (Swain &
+    McLaughlin, 1998; Truchlicka et al., 1998); a unit-wide token economy (Foxx, 1998); a paid work crew with daily
+    work-habit ratings (Lieberman et al., 1997).
+  - *Stereotypy, self-injury and rumination:* preferred soft toys for hand mouthing (Realon et al., 1995); extra bread
+    at meals (Yang & Bruner, 1996; Masalsky & Luiselli, 1998), a spoonful every 20 s after meals (Wilder et al., 1997)
+    and unlimited fruit and vegetables with medical monitoring, followed for seven years (Dunn et al., 1997); supported
+    routines with a prompt before an error can happen (Saunders et al., 1996); keeping the rate of earning high in
+    repeating work (Saunders & Saunders, 1997); thin gloves as a test with competing objects for hair twirling (Rapp
+    et al., 2000); stimulation to the neck for head rocking, which worked only while it was on (Wilder et al., 2000);
+    fading wrist restraints the person asks for (Obi, 1997).
+  - *Teaching and independence:* recorded scripts for students who cannot read, faded in eight steps (Stevenson et
+    al., 2000); a memory wallet for conversation (Bourgeois & Mason, 1996); self-instructions with photo prompts
+    (Johnson & Miltenberger, 1996); step pictures on a booklet, a recorder or a handheld device, later shown in
+    clusters (Lancioni et al., 1995b, 1998, 1999); printed notes read with a word-picture book and watch alarms
+    (Lancioni et al., 1995a); self-recording at a tone (Selznick & Savage, 2000); tokens the student takes for a
+    different answer (Newman et al., 2000); reward choice at every delivery (Graff et al., 1998); a medium-probability
+    request sequence that worked as well as a high-probability one (Romano & Roll, 2000).
+  - *Classroom and groups:* reciprocal peer tutoring with a homework pass (Malone & McLaughlin, 1997); jogging before
+    class (Basile et al., 1995); an eight-session counseling group (Larkin & Thyer, 1999) and a ten-week anger and
+    coping course with hassle logs (O'Leary, 2000); a peer who tutors two others in social skills (Duan & O'Brien,
+    1998); praise, a spoken correction and gentle help in a group exercise class (Thompson & Born, 1999).
+  - *Meals, planned with the family, the doctor, the school nurse and a feeding specialist:* from tube to spoon by
+    amount and texture (Didden et al., 1999; pressing the jaw open and bringing on a swallow are left out); eating
+    alone with less going on after brain injury (Hartnedy & Mozzoni, 2000); paced meals (Osborne et al., 1995).
+- **Seven cards offer Add without punishment and Add with punishment (consent required).** One card carries an option
+  step that reinforces problem behavior on purpose (unticked by default): the baseline of the two-function FCT card.
+- **Never written, and kept on the set-aside list (9 entries):** holding a student as a consequence (Saunders et al.,
+  1996; Luiselli et al., 2000; Ellison, 1997; Kimmel, 1997), withholding drinks around meals (Wilder et al., 1997), a
+  punishment-only program followed up after 25 years (McGlynn & Locke, 1997), and a court case about shock and
+  restraint (Mudford, 1995).
+- **Not banked:** reviews, comments, surveys, editorials and book reviews; staff and teacher training and program
+  descriptions; assessment-only and measurement papers (among them Thompson et al., 1995; Favell et al., 1996; Rapp &
+  Miltenberger, 2000; Ortiz & Carr, 2000); medication reports; a staffing-ratio comparison (Graff, Green, & Libby,
+  1998); robot-assisted walking with a custom robot (Lancioni et al., 2000); a therapy package for hallucinations in a
+  hospital (Himadi & Curran, 1995); a laboratory study with an arbitrary response (Wilder, Carr, & Gaunt, 2000).
+- **Form GB-1's goal bank: 5 new objectives** (doing the day's tasks from a printed note with a word-picture book and
+  watch alarms; choosing the order of a routine from photos; telling facts with a memory wallet; staying at the work
+  site until the posted break; opening a conversation with an adult after recorded scripts are faded) **and 17 new
+  source lines** on objectives the bank already held.
+- **How it was read.** Each article's method and results were read from the text of the PDF (PDFs are opened only by an
+  isolated reader, and deleted after the text is taken). Details I could not confirm in the text were left off the
+  cards. No participant names are on any card.
+
+**NCR, attention on a timer: the third explainer**
+- **What it shows.** Noncontingent attention on a fixed-time schedule, from Form TD-1's card "Fixed-time attention every
+  minute, cued by a vibrating timer, for attention-maintained disruption during group lessons" (Noel & Getch, 2016). A
+  timer buzzes on the clock; at each buzz the adult gives the student one short neutral comment by name within 5
+  seconds: no praise, no reprimand, and not said to the whole group. Between buzzes the lesson goes on.
+- **The point it makes.** Problem behavior does not move the timer. Press **Problem behavior happens now** at any
+  moment and the next buzz stays where it was: that is the difference from DRO, where the interval restarts.
+- **Try it.** Set the timer to 1, 2 or 3 minutes. The tally counts buzzes, comments within 5 seconds and problem
+  behavior with its rate.
+- **What the card leaves open, and the page says so.** How adults respond to problem behavior between buzzes, and
+  what to do when it comes just before a buzz (the page still gives the comment on time, and says to decide it in
+  the plan).
+- **Where.** **Explainers you can step through** in the video library, and **Step through it** on the page of the
+  video "NCR for attention in class: comments on a timer". The command box finds Explainers under "ncr".
+
+**Comments on a timer (you are the adult): a fourth way to practice**
+- **What it is.** On the Practice counting page. This one practices giving, not recording: the timer buzzes and you
+  press **Give the comment** within 5 seconds. The drawn student also shows problem behavior between buzzes, which
+  is not a reason to comment.
+- **The score.** Comments on time, late, missed and extra, the share of buzzes followed by an on-time comment (the
+  card's measure of staff accuracy) read against the 80% staff practiced to in the study, and the average delay. A
+  comment given right after problem behavior with no buzz is named, with the reason: it can work as attention for
+  the behavior. Extra comments are listed apart from the percentage.
+- **Shorter than the card.** The practice buzzes every 20 seconds so a 1 to 3 minute scene has enough buzzes to
+  score; the card's timer is every minute. The page says so.
+- **Scene numbers** work as in the other three ways, and nothing is kept on the device.
+- **Both are drawn in lit 3D**, with the flat drawing where 3D is not available.
+- **The test run.** The whole run was not repeated (it ran for v25.78, earlier the same day). Run on the final copy,
+  and passing: the two bank tests, the feed test, the procedure-video and versions tests, the transcript test, the
+  three tests of the drawn pages, the new NCR test (v2579-ncr, 16 checks), the podcast test (it saves the workstation
+  for offline use and plays from the saved copy), budget, the version and docs tests and the all-forms shell check.
+  Changed on purpose: the video and versions tests count the new cards (36 high-p cards; 588 cards of the seven
+  codes with a video rule), and the explainer test expects three cards. The offline-copy test (pwa-test) was not run,
+  as for v25.78: not enough free disk in this session.
+- **Which video a new card shows.** Twelve of the 57 new cards belong to a procedure with videos. Each was read
+  against the videos and shows the closest: resetting DRO (2 cards), tokens DRO (2), NCR attention (1), NCR items
+  (1), breaks during work (1), blocking (1), DRA for work (1), FCT items with a wait (1), FCT attention (1), and
+  the praise-only high-p video (1).
+- **Not checked.** A real iPad or iPhone for the two NCR pages (Chrome's engine only, as for v25.78's drawn pages). No
+  BCBA has read the NCR explainer or the practice against the study; they follow the card's wording. The 57 new cards
+  were read by one reader and not second-read: before a card is used for a student, read its source line and its
+  note.
 ### v25.78: Form ME-1 (Medical Event Record), Explainers, and Practice counting
 (the BCBA, 11/11)
 
