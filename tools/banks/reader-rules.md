@@ -27,6 +27,15 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
    escape extinction): their own step starting "RESTRICTIVE:", with the note that it needs district review and
    written consent; escape extinction or guidance through a demand also points to TD-1's escape-extinction consent
    block (Responding to behavior sheet).
+   3a. **Extinction that is not escape extinction** (the attention, the item or another maintaining reinforcer
+   withheld after the problem behavior; "keep problem behavior on extinction"): the step that prescribes it starts
+   "EXTINCTION:" (v25.83; the BCBA, 11/11, on the TD-1 builder's question: "Follow your recommendations"). TD-1 knows
+   the step by its mark on any card: it shows whether extinction is agreed on the Responding to behavior sheet, and
+   the printed plan carries the note. Not marked: escape extinction and guidance through a demand (rule 3: a
+   RESTRICTIVE step); a step on an Extinction card (the card itself is extinction); the extinction component of a
+   multiple or chained schedule (requests go unanswered while the signal is off); a step that says the study used no
+   extinction; and a step that only refers to extinction (a precondition, a caution, a next step). One mark for a
+   step: a step that is RESTRICTIVE or OPTION keeps that mark.
 4. **Holds inside a teaching procedure** (the hands held down or at the sides, the hand held to the table for a few
    seconds after an error): their own step starting "RESTRICTIVE:", and the note says it needs district review and
    written consent, stops if the student resists, and is never used as a consequence for problem behavior or to make
@@ -89,6 +98,7 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
 | 1 Never written (the list) | before v25.20 | none |
 | 2 Restrictive and punishment procedures written into the steps (the inclusion rule, 10/28) | v24.78 | the first reading of 1968–2017 (v23.86) left them out; later reads mark them "RESTRICTIVE:" |
 | 2 The "RESTRICTIVE: Punishment (kind)" label the two Add buttons look for | v25.26 (JABA 1996) | 1992–1995 brought up to it in v25.31; 1968–1991, BAP, BI, rr1–rr3 and pmc not yet |
+| 3a The "EXTINCTION:" mark on a step that prescribes extinction other than escape extinction | v25.83 | marked so far: the 34 steps that name extinction outright (93 read); the steps that describe it without the word (about 1,300 candidates by a word search) and the escape-extinction steps of the early readings (rule 3) are not yet read for it |
 | 2 Add with or without punishment in TD-1 | v25.30 | works on any card whose step carries the mark |
 | 3 Other restrictive procedures marked | before v25.20 | readers sometimes left guidance through a demand out instead of marking it |
 | 3 Escape extinction at meals marked (nonremoval of the spoon or cup, putting spat-out food back, guiding the hand to the mouth, placing food in the mouth) | v25.64 pass over the whole TD-1 bank (the feeding review, 11/2): 22 steps in 18 cards had the consent note but no RESTRICTIVE mark | a bite only offered at the lips (taken away if the student turns away or does not open) is an ordinary step and stays unmarked (the BCBA, 11/2); only holding it there, or bringing it back after a refusal, is marked. The BCBA, 11/2: school teams can run escape extinction at meals, as a marked step with consent, planned with the family, the doctor and a feeding specialist; the cards stay addable to school and home plans |

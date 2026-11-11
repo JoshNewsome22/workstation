@@ -171,7 +171,7 @@ const SMALL=()=>{const out=[];const look=root=>root.querySelectorAll('*').forEac
   const C=await cards(p);ok('the four-card plan is built (DF, R_PB, FCT, FCT)',C.join(',')==='DF,R_PB,FCT,FCT',C);
   const b4=await p.evaluate(()=>[...document.querySelectorAll('#compWrap .card')].map(c=>[...c.querySelectorAll('ol.steps li')].map(li=>({k:(li.querySelector('textarea')||{}).value.slice(0,40),tag:!!li.querySelector('.td-exttag')})).filter(x=>x.tag)));
   ok('B4 the "Extinction step: not yet agreed" tag is on the practice guide\'s extinction step (Withhold the maintaining reinforcer), never on a RESTRICTIVE: or OPTION: step',
-    b4[2].length===1&&/^Withhold the maintaining reinforcer/.test(b4[2][0].k)&&b4.every(L=>L.every(x=>!/^(RESTRICTIVE|OPTION):/.test(x.k))),b4);
+    b4[2].length===1&&/^(EXTINCTION: Withhold the maintaining rei|Withhold the maintaining reinforcer)/.test(b4[2][0].k) /* v25.83 the bank's step carries the EXTINCTION: mark (the first 40 characters are read) */&&b4.every(L=>L.every(x=>!/^(RESTRICTIVE|OPTION):/.test(x.k))),b4);
   const b9=await p.evaluate(()=>[...document.querySelectorAll('#compWrap ol.steps li textarea')].map(t=>t.getAttribute('aria-label')||''));
   ok('B9 each step\'s box has its own name ("Step N"), not the Set-up box\'s words and the tag\'s run together',b9.length>20&&b9.every(n=>/^Step \d+$/.test(n)),b9.filter(n=>!/^Step \d+$/.test(n)).slice(0,4));
   /* T5 on the iPad upright: the code and the card's buttons on one row, the video sentence behind its link */

@@ -9905,6 +9905,50 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.83: Form TD-1, a step for another function is left out; the EXTINCTION mark
+(the BCBA, 11/11, on the four questions the TD-1 builder had left open: "Follow your recommendations")
+- **The four questions and what was done.**
+  1. The thinning table stays once for each card (a two-card plan prints two): nothing changed.
+  2. An extinction mark in the protocol bank: added (below).
+  3. An escape-only step in a plan for attention: left out of the plan (below).
+  4. The Responding to behavior sheet's button still adds the consequence protocol only, not the other ticked cards:
+     nothing changed.
+- **A step written for another function.** A step that starts "For escape:", "For attention:", "For tangibles:" (or
+  "For items:") or "For automatic:" belongs to that function. When the plan's function is another one, the step stays
+  on its card, greyed, with the line "Left out of this plan", and the card says "Step 6: left out, for escape" under
+  its title. It is not one of the plan's steps: not in the printed plan, the plan at a glance, the step count, the
+  staff step list or the text for the BIP. With no function chosen yet, or with several functions that include the
+  step's, it stays in. To use such a step anyway, take the "For ...:" off its start. Nothing is deleted from a saved
+  plan. Today this touches the FCT card's "For escape: chain a work requirement before the mand opportunity" and four
+  steps of the protocol bank (three "For attention:", one "For escape:").
+- **The EXTINCTION mark.** A step that starts "EXTINCTION:" is an extinction step by its mark, as "RESTRICTIVE:" and
+  "OPTION:" steps are known by theirs. On any card it shows "Extinction step: not yet agreed" or "agreed on (date)"
+  from the Responding to behavior sheet (until now only the FCT, DRA, NCR, NCE and DNRA cards did, from the step's
+  words), the card says "Step N: extinction step" under its title, the plan at a glance says "(extinction step: not
+  yet agreed)", the printed plan shows the step in blue with the note "Extinction step: use it only once extinction is
+  agreed", and the bank's list names "Extinction step" on the card's row. A marked step counts as extinction for the
+  "not feasible" check and, in a plan for escape, for the escape-extinction consent block, whatever its words.
+- **In the protocol bank.** 34 steps on 32 cards carry the mark. They are the steps that name extinction outright and
+  prescribe it: of the 93 unmarked steps that use the word, each was read, and 34 were marked. Not marked, by the
+  reader rules (new rule 3a): escape extinction and guidance through a demand (those are RESTRICTIVE steps), a step
+  on an Extinction card, the extinction component of a multiple or chained schedule, a step that says the study used
+  no extinction, and a step that only refers to extinction.
+- **Not done yet, and it matters.** Steps that describe extinction without the word ("give no comment", "do not
+  return the item", "keep the task going") are not marked: a word search finds about 1,300 steps to read for that.
+  Ten escape-extinction steps of the early readings are also still unmarked (they should become RESTRICTIVE steps,
+  rule 3). Until those are read, the form's older word checks still do that work, as before this release.
+- **The test run.** The whole run was not repeated. Run on the final copy: the new test (qa/v2583-td1-marks-test.js,
+  15 checks) and 46 tests that read Form TD-1 or its bank (the TD-1 and bank tests, escape extinction and consent,
+  the plan's text, print, the safety records, the videos' links, version, docs and budget). 44 pass. Changed on
+  purpose: the layout test's extinction-tag check reads the step with its mark. Two checks do not pass, and both failed
+  the same way before this release:
+  - v2565-tdb-test: 13 cards hold an OPTION step and 12 are approved. The thirteenth came in with v25.79:
+    fct-two-phrases-item-and-help-delay-2-to-5-s (Braithwaite & Richdale, 2000), whose baseline trials gave the item
+    or a break after challenging behavior. It waits for the BCBA's yes or no.
+  - sim139-test, check 10 (Form ABC-1: two loads of one record compare unequal in one of two comparisons); it fails
+    on v25.82 too.
+  The offline-copy test was not run (not enough free disk in this session).
+- **Not checked.** Safari on a real iPad.
 ### v25.82: Three handwashing chaining videos
 (the BCBA, 11/11: a real-life chain for the chaining videos, with a $30 limit; then "The handwashing video is great" and,
 after the teacher's voice was put into the room, "The handwashing videos are good")

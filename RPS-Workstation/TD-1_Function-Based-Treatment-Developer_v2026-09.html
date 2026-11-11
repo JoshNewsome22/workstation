@@ -815,6 +815,9 @@ table.plan-thin th{font-family:var(--sans);font-weight:600;background:#f3f6f5}ta
 .plan-step.td-k-opt{border-left-color:#6B4FA0;background:#EFE9F7}
 .plan-step .td-kn{display:block;font-weight:700;font-size:11px;color:#5C3D00}
 .plan-step.td-k-opt .td-kn{color:#3E2A6B}
+/* v25.83 a step marked EXTINCTION: */
+.plan-step.td-k-ext{border-left:4px solid #1F5C99;background:#E8F1FA;padding-left:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.plan-step.td-k-ext .td-kn{color:#17406B}
 .plan-comp{margin:10px 0 14px;page-break-inside:avoid}
 .plan-comp .ph{display:flex;align-items:baseline;gap:10px;margin:0 0 4px;padding-bottom:3px;border-bottom:1px solid var(--rule)}
 .plan-comp .ph b{font-family:var(--serif);font-size:14.5px;color:var(--ink)}
@@ -1217,6 +1220,14 @@ html.td9:not(.nbh-pr-measure) #compWrap ol.steps li.td9-opt::after{content:"Opti
 html.td9:not(.nbh-pr-measure) #compWrap .card .chd .td-kmarks{display:flex;flex-wrap:wrap;gap:6px 8px;grid-column:1/-1;flex-basis:100%;order:20;margin:4px 0 2px}
 html.td9:not(.nbh-pr-measure) #compWrap .card .td-kmark{display:inline-block;font:600 13px/1.4 var(--td9-sans);border-radius:6px;padding:4px 10px;background:#FFF3D3;border-left:4px solid #B07A00;color:#5C3D00}
 html.td9:not(.nbh-pr-measure) #compWrap .card .td-kmark-o{background:#EFE9F7;border-left-color:#6B4FA0;color:#3E2A6B}
+/* v25.83 a step written for another function than the plan's: kept on the card, greyed, and left out of the plan */
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li.td9-fnoff{background:#EEF1F4;border-left:4px solid #5B6B7A;padding-left:8px!important;margin-left:-12px!important}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li.td9-fnoff textarea{color:#4A5560!important}
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li.td9-fnoff::after{content:"Left out of this plan: this step is for another function than the plan's. To use it, take the “For …:” off its start.";grid-column:2/4;font:600 13px/1.4 var(--td9-sans);color:#2F3B46;margin:-2px 0 2px 2px}
+html.td9:not(.nbh-pr-measure) #compWrap .card .td-kmark-f{background:#EEF1F4;border-left-color:#5B6B7A;color:#2F3B46}
+/* v25.83 a step marked EXTINCTION: (its agreed / not yet agreed line is the td-exttag) */
+html.td9:not(.nbh-pr-measure) #compWrap ol.steps li.td9-ext{background:#E8F1FA;border-left:4px solid #1F5C99;padding-left:8px!important;margin-left:-12px!important}
+html.td9:not(.nbh-pr-measure) #compWrap .card .td-kmark-x{background:#E8F1FA;border-left-color:#1F5C99;color:#17406B}
 /* USWDS measure (45 to 90 characters): long text in a Build card stops at about 90 characters a line */
 html.td9:not(.nbh-pr-measure) #compWrap .card .param,html.td9:not(.nbh-pr-measure) #compWrap .card .td-ta,html.td9:not(.nbh-pr-measure) #compWrap .card ol.steps,html.td9:not(.nbh-pr-measure) #compWrap .card .td9-stepsh,html.td9:not(.nbh-pr-measure) #compWrap .card .td9-stepsh~.td9-hint{max-width:820px}
 
@@ -3026,6 +3037,15 @@ const TD_MFN=['escape','attention','tangible','automatic'],TD_MFNL={escape:'Esca
 const TD_MTOPO=['Was each topography graphed on its own in the functional analysis (Form EA-1)?','yes','no'];
 function tdMultiFns(){return TD_MFN.filter(f=>{const e=document.querySelector('[name="multi.'+f+'"]');return !!(e&&e.checked);});}
 function tdFns(){const fn=val('m.fn');return fn==='multiple'?tdMultiFns():TD_MFN.includes(fn)?[fn]:[];}
+/* v25.83 (the BCBA, 11/11, on the builder's question about the FCT card's "For escape: chain a work requirement" in a plan
+   for attention: "Follow your recommendations") a step written for one function, one that starts "For escape:", "For
+   attention:", "For tangibles:" or "For automatic:", is not part of a plan for another function. Its words stay on the card,
+   marked as left out, and it is left out of the plan, its counts and its fidelity list. While no function is chosen, or the
+   plan's functions include the step's, it stays in. To use such a step anyway, take the "For ...:" off its start. */
+const TD_FNSTEP=/^\s*For (escape|attention|tangibles?|items|access to items|automatic(?: reinforcement)?)\s*:/i;
+function tdStepFn(s){const m=TD_FNSTEP.exec(String(s||''));if(!m)return '';const w=m[1].toLowerCase();return w==='escape'||w==='attention'?w:/^auto/.test(w)?'automatic':'tangible';}
+function tdFnOff(s){const f=tdStepFn(s);if(!f)return false;const fns=tdFns();return fns.length>0&&!fns.includes(f);}
+window.__tdStepFn=tdStepFn;window.__tdFnOff=tdFnOff;
 function tdMultiRoute(){const out=[];tdMultiFns().forEach(f=>{const M=MODELS[f];const a=M.q.map((q,i)=>val('q.multi.'+f+'.'+i));(M.route(a,val('q.multi.'+f+'.who'))||[]).forEach(([c,why])=>out.push([c,TD_MFNL[f]+': '+why]));});return out;}
 /* v25.64 (L4) peer attention: adult ignoring alone cannot be extinction; NCR of peer attention (Jones et al., 2000) or a group contingency */
 function tdPeerRecs(out,who){out=out||[];if(who==='peers'||who==='both')out.push(['NCR',(who==='both'?'Adults and peers':'Peers')+' give the attention: NCR of peer attention (peers attend on a schedule; Jones et al., 2000 reduced peer-maintained disruption this way). Adult ignoring alone cannot be extinction while peers attend.'],['GRP_CON','Peer attention: a group contingency, so that peers gain from the student\u2019s appropriate behavior, not from attending to problem behavior.']);return out;}
@@ -3445,7 +3465,7 @@ const RB_XALL=/extinction|withhold(ing)? (the )?reinforcers?\b/i,
  RB_XFN={escape:/no break|prompt sequence|guided compliance|is not removed|not remove the (task|demand)/i,attention:/\bno (attention|comments?|reprimands?|eye contact)\b/i,tangible:/not returned|does not produce/i,automatic:/\bblock(ing)?( or (disrupt|interrupt))?( (every|each)\b| at onset)|neutral block or interruption/i},
  RB_XOK=/extinction is not used|not feasible|where feasible|if feasible|if viable|extinction (component|period|challenge|burst)s?\b|resistance to extinction|automatic extinction|extinction or DNRA/i,
  RB_XDEF={'DF.s3':'','FCT.s4':'','SBT_FCR.s1':'','SBT_TR.s2':'','RRB_RB.s1':'automatic'};
-const rbX=(t,fn)=>!!t&&(RB_XALL.test(t)||(fn==='multiple'?Object.values(RB_XFN):[RB_XFN[fn]]).some(r=>r&&r.test(t)))&&!RB_XOK.test(t);
+const rbX=(t,fn)=>!!t&&(/^\s*EXTINCTION:/i.test(t)||((RB_XALL.test(t)||(fn==='multiple'?Object.values(RB_XFN):[RB_XFN[fn]]).some(r=>r&&r.test(t)))&&!RB_XOK.test(t)));   /* v25.83 a step marked EXTINCTION: is one, whatever its words */
 const rbXdef=(key,fn)=>key in RB_XDEF&&(!RB_XDEF[key]||RB_XDEF[key]===fn||fn==='multiple');
 const rbSteps=card=>[...card.querySelectorAll('ol.steps textarea')].map(x=>+((/\.s(\d+)$/.exec(x.name)||[])[1])).filter(k=>!isNaN(k));
 const rbAnd=l=>l.length<2?l.join(''):l.slice(0,-1).join(', ')+' and '+l[l.length-1];
@@ -3995,7 +4015,7 @@ document.addEventListener('click',e=>{if(e.target.dataset.rm){e.target.closest('
 const TD_ASSESS=new Set(['C_CSA','C_ACSA','C_HELMET','C_MEDREF','P_ASSESS','E_ASSESS','VBMAPP','EFL','AFLS','PEAK']);
 const tdIsAssess=c=>TD_ASSESS.has(c&&c.code!==undefined?c.code:c);
 /* v23.88 steps: the every-session steps (the integrity items); setup: the steps marked set-up; who, when, where */
-function comps(){return $$('#compWrap .card').map(c=>{const i=+c.dataset.i;const rows=[...c.querySelectorAll('ol.steps li')].map(li=>{const t=li.querySelector('textarea'),cb=li.querySelector('input.td-su');return t&&/\.s\d+$/.test(t.name)?{s:val(t.name),su:!!(cb&&cb.checked)}:null;}).filter(r=>r&&r.s);
+function comps(){return $$('#compWrap .card').map(c=>{const i=+c.dataset.i;const rows=[...c.querySelectorAll('ol.steps li')].map(li=>{const t=li.querySelector('textarea'),cb=li.querySelector('input.td-su');return t&&/\.s\d+$/.test(t.name)?{s:val(t.name),su:!!(cb&&cb.checked)}:null;}).filter(r=>r&&r.s&&!tdFnOff(r.s));
  return {code:c.dataset.code,i,name:LIB[c.dataset.code].name,steps:rows.filter(r=>!r.su).map(r=>r.s),setup:rows.filter(r=>r.su).map(r=>r.s),bank:val(`cp[${i}].bank`),bsrc:val(`cp[${i}].bsrc`),ta:val(`cp[${i}].ta`),who:val(`cp[${i}].who`),when:val(`cp[${i}].when`),where:val(`cp[${i}].where`)};});}
 /* v23.87 the student's task analysis on a chaining card (cp[i].ta): its lines as lists, a line ending in a colon naming the part
    that follows, a leading number or bullet dropped; printed in the final plan as its own numbered list, apart from the staff steps */
@@ -4164,11 +4184,13 @@ const GROUPS=[
 /* v25.72 (TD-1 review T2) a step's kind, from the mark it starts with (the bank's and the BCBA's: RESTRICTIVE:, RESTRICTIVE:
    Punishment, OPTION:), and the note it keeps wherever the steps are read: the Build card (open and folded), the printed plan
    and the staff packet */
-function tdStepKind(s){const m=/^\s*(RESTRICTIVE|OPTION):/i.exec(String(s||''));if(!m)return '';return m[1].toUpperCase()==='OPTION'?'option':/^\s*RESTRICTIVE:\s*Punishment\b/i.test(s)?'punishment':'restrictive';}
-const TD_KNOTE={restrictive:'Restrictive procedure: follow your district\u2019s consent and review requirements',punishment:'Restrictive procedure: follow your district\u2019s consent and review requirements',option:'Optional step: in this plan because it was ticked in the protocol bank'};
+/* v25.83 (the BCBA, 11/11, on the builder's question: "Follow your recommendations") a third mark, EXTINCTION:, on a step that
+   prescribes extinction of the problem behavior: the step is known by its mark, not by its words, on any card */
+function tdStepKind(s){const m=/^\s*(RESTRICTIVE|OPTION|EXTINCTION):/i.exec(String(s||''));if(!m)return '';const w=m[1].toUpperCase();return w==='OPTION'?'option':w==='EXTINCTION'?'extinction':/^\s*RESTRICTIVE:\s*Punishment\b/i.test(s)?'punishment':'restrictive';}
+const TD_KNOTE={restrictive:'Restrictive procedure: follow your district\u2019s consent and review requirements',punishment:'Restrictive procedure: follow your district\u2019s consent and review requirements',option:'Optional step: in this plan because it was ticked in the protocol bank',extinction:'Extinction step: use it only once extinction is agreed (Responding to behavior sheet)'};
 const TD_PROPOSED='<div class="td-proposed"><b>Proposed: needs the less restrictive data first.</b> Staff do not run these steps until the escalation ladder (Least restrictive review) shows an earlier, less restrictive step run at or above the integrity criterion with the outcome still short of its goal.</div>';
 window.__tdStepKind=tdStepKind;window.__tdKindNote=k=>TD_KNOTE[k]||'';window.__tdProposedHtml=()=>TD_PROPOSED;
-function stepRow(n,s){const k=tdStepKind(s);return `<div class="plan-step${k?' td-k-'+(k==='option'?'opt':'restr'):''}"><div class="n">${n}</div><div class="t">${esc(s)}${k?`<span class="td-kn">${esc(TD_KNOTE[k])}</span>`:''}</div><div class="box"></div></div>`;}
+function stepRow(n,s){const k=tdStepKind(s);return `<div class="plan-step${k?' td-k-'+(k==='option'?'opt':k==='extinction'?'ext':'restr'):''}"><div class="n">${n}</div><div class="t">${esc(s)}${k?`<span class="td-kn">${esc(TD_KNOTE[k])}</span>`:''}</div><div class="box"></div></div>`;}
 /* v22.46 (I232): the treatment extras the final plan numbers after the cards, in one place, so the step list the other
    forms take (planSteps) is the list this sheet prints */
 function finalExtras(){const extras=[];
@@ -4312,7 +4334,7 @@ function tdLeast(cs){const rows=[];const pun=String(val('rb.punish')||'').trim()
   if(em==='ee'||cs.some(x=>x.code==='EXT')){rows.push([c==='pg'||c==='nopg'?'Agreed':c==='no'?'Declined':'Not yet consented',c==='no'?'Escape extinction: the parent or guardian did not agree. Take it out of the plan.':'Escape extinction: the parent’s and the team’s agreement recorded on the Responding sheet before it starts'+(val('ee.cwho')?' ('+val('ee.cwho')+')':'')+'.']);}
   if(em){rows.push([pg==='yes'?'Allowed, under the stop rule':pg==='no'?'Not used':'Not decided',pg==='yes'?'Physical guidance through a demand: gentle guidance only, under the stop rule and with the parent’s separate agreement.':pg==='no'?'Physical guidance through a demand: staff do not guide the student’s hands.':'Physical guidance through a demand: staff do not guide until the question is answered (Responding sheet).']);}
   /* v25.64 (H6) a restrictive card held back by the ladder is proposed, not "in the plan" */
-  const G=tdGated(cs),kw=x=>[x.name].concat((x.steps||[]).concat(x.setup||[]).filter(s=>tdStepKind(s)&&tdStepKind(s)!=='option')).join(' ').toLowerCase(),gn=G.map(kw).join(' | ');   /* v25.72 (B5) with its restrictive steps */
+  const G=tdGated(cs),kw=x=>[x.name].concat((x.steps||[]).concat(x.setup||[]).filter(s=>tdStepKind(s)&&tdStepKind(s)!=='option'&&tdStepKind(s)!=='extinction')).join(' ').toLowerCase(),gn=G.map(kw).join(' | ');   /* v25.72 (B5) with its restrictive steps */
   const names=cs.filter(x=>!G.includes(x)).map(kw).join(' | ')+' | '+val('rb.punish').toLowerCase();const R=[['time-out',/time-?out/],['response cost',/response cost/],['overcorrection',/overcorrection/],['reprimands',/reprimand/],['restraint',/restraint/],['seclusion',/seclusion/],['protective equipment',/protective (equipment|procedure)|helmet/]];
   const used=R.filter(r=>r[1].test(names)).map(r=>r[0]),not=R.filter(r=>!r[1].test(names)&&!r[1].test(gn)).map(r=>r[0]);
   if(used.length)rows.push(['In the plan, with review',used.join(', ')+': restrictive or protective; each needs review and consent under district rules, and is kept to what safety needs.']);
@@ -4897,11 +4919,13 @@ const TD_EXTC=new Set(['FCT','DRA','NCR','NCE','DNRA']),TD_EXTRX=/\bextinction\b
    may name extinction ("if FCT with extinction does not ...", "extinction was not workable"); a step that says it runs without
    extinction is not one either. The tag went to the first step whose words named extinction. */
 const TD_EXTNO=/\b(?:no|without)\s+(?:escape\s+)?extinction\b|\bextinction\s+(?:was|is)\s+not\b/i;
-const tdIsExtStep=s=>{s=String(s||'');return !tdStepKind(s)&&TD_EXTRX.test(s)&&!TD_EXTNO.test(s);};
+const tdIsExtStep=s=>{s=String(s||'');const k=tdStepKind(s);return k==='extinction'||(!k&&TD_EXTRX.test(s)&&!TD_EXTNO.test(s));};
+/* v25.83 a step marked EXTINCTION: is the extinction step on any card; on the five cards above the words still count */
+const tdIsExtOn=(code,s)=>tdStepKind(s)==='extinction'||(TD_EXTC.has(code)&&tdIsExtStep(s));
 const tdExtAgreed=()=>(val('rb.3')==='yes'&&!!val('rb.extdate'))||/^(pg|nopg)$/.test(val('ee.consent'));
-function tdExtPending(c){return TD_EXTC.has(c.code)&&(c.steps||[]).concat(c.setup||[]).some(tdIsExtStep)&&!tdExtAgreed();}
-function tdExtTags(){const ok=tdExtAgreed(),d=val('rb.extdate');$$('#compWrap .card').forEach(card=>{if(!TD_EXTC.has(card.dataset.code))return;
-  card.querySelectorAll('ol.steps li').forEach(li=>{const t=li.querySelector('textarea');let g=li.querySelector('.td-exttag');const on=t&&tdIsExtStep(t.value);
+function tdExtPending(c){return (c.steps||[]).concat(c.setup||[]).some(s=>tdIsExtOn(c.code,s))&&!tdExtAgreed();}
+function tdExtTags(){const ok=tdExtAgreed(),d=val('rb.extdate');$$('#compWrap .card').forEach(card=>{
+  card.querySelectorAll('ol.steps li').forEach(li=>{const t=li.querySelector('textarea');let g=li.querySelector('.td-exttag');const on=t&&tdIsExtOn(card.dataset.code,t.value);
     if(!on){if(g)g.remove();return;}if(!g){g=document.createElement('span');g.className='td-exttag noprint';li.appendChild(g);}
     g.classList.toggle('ok',ok);g.textContent=ok?'Extinction step: agreed'+(d&&val('rb.3')==='yes'?' on '+tdNiceD(d):''):'Extinction step: not yet agreed';});});}
 /* v25.65 (FCT-SR-M7, H5) the break holds what the student gets, and the wait says what the student does and has, in the printed steps */
@@ -6048,6 +6072,8 @@ window.__nbhFactsOut=function(){
 .fl-proc ol li.fl-k-opt{border-left-color:#6B4FA0;background:#EFE9F7}
 .fl-proc ol li .fl-kn{display:block;font-weight:700;font-size:10.5px;color:#5C3D00}
 .fl-proc ol li.fl-k-opt .fl-kn{color:#3E2A6B}
+.fl-proc ol li.fl-k-ext{border-left-color:#1F5C99;background:#E8F1FA}
+.fl-proc ol li.fl-k-ext .fl-kn{color:#17406B}
 .fl-proc .td-proposed{-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid;page-break-inside:avoid}
 .fl-never{border:1px solid #d9b9b9;background:#fbf3f3;border-radius:3px;padding:7px 10px;
   margin:7px 0 0;font-size:11px;line-height:1.5;color:#7a2222}
@@ -6182,7 +6208,7 @@ window.__nbhFactsOut=function(){
          step keeps its mark and its note */
       (p.proposed && window.__tdProposedHtml ? window.__tdProposedHtml() : '') +
       (p.steps.length ? '<ol>' + p.steps.map(function(s){ var k = window.__tdStepKind ? window.__tdStepKind(s) : '';
-          return '<li' + (k ? ' class="fl-k fl-k-' + (k === 'option' ? 'opt' : 'restr') + '"' : '') + '>' + fesc(s) + (k ? '<span class="fl-kn">' + fesc(window.__tdKindNote(k)) + '</span>' : '') + '</li>'; }).join('') + '</ol>'
+          return '<li' + (k ? ' class="fl-k fl-k-' + (k === 'option' ? 'opt' : k === 'extinction' ? 'ext' : 'restr') + '"' : '') + '>' + fesc(s) + (k ? '<span class="fl-kn">' + fesc(window.__tdKindNote(k)) + '</span>' : '') + '</li>'; }).join('') + '</ol>'
                       : '<div class="fl-none">No steps written on the card yet.</div>') +
       (p.extra.length ? '<div class="fl-par" style="margin-top:5px">' + p.extra.map(function(x){
         return '<span><b>' + fesc(x[0]) + ':</b> ' + fesc(x[1]) + '</span>'; }).join('') + '</div>' : '') +
@@ -7451,6 +7477,7 @@ button{font-size:15px;min-height:44px}
 .it .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
 .tg{display:inline-block;font-size:13px;font-weight:600;line-height:1.3;border-radius:999px;padding:2px 10px;border:1px solid #B07A00;background:#FFF3D3;color:#5C3D00}
 .tg-o{border-color:#6B4FA0;background:#EFE9F7;color:#3E2A6B}
+.tg-x{border-color:#1F5C99;background:#E8F1FA;color:#17406B}
 .nopun{display:flex;align-items:center;gap:10px;min-height:44px;margin:6px 0 0;font-size:15px;color:var(--nbh-ink,#1a2933)}
 .nopun input{width:22px;height:22px;margin:0}
 `;
@@ -7552,7 +7579,7 @@ ageFill();fnFill();
 let cur='',lastQ=null;
 /* v25.72 (TD-1 review T3, the BCBA's words) each row says what its steps hold, from the marks on the steps themselves (RESTRICTIVE:
    Punishment, RESTRICTIVE:, OPTION:), in words that are part of the row's name; the tick box leaves out the punishment ones */
-const RESX=/^\s*RESTRICTIVE:/i,tagsOf=p=>{const s=p.steps||[],o=[];if(hasPun(p))o.push(['p','Punishment step (can be left out)']);else if(s.some(x=>RESX.test(x)))o.push(['r','Restrictive step']);if(hasOpt(p))o.push(['o','Optional step']);return o;};
+const RESX=/^\s*RESTRICTIVE:/i,tagsOf=p=>{const s=p.steps||[],o=[];if(hasPun(p))o.push(['p','Punishment step (can be left out)']);else if(s.some(x=>RESX.test(x)))o.push(['r','Restrictive step']);if(hasOpt(p))o.push(['o','Optional step']);if(s.some(x=>/^\s*EXTINCTION:/i.test(x)))o.push(['x','Extinction step']);return o;};
 const nopun=$p('.nopunck');
 function draw(){const r=search(q.value,kind.value,fn.value,age.value),IN=inPlan();let list=r.list,left=0;if(nopun.checked){const keep=list.filter(p=>!hasPun(p));left=list.length-keep.length;list=keep;}
   const fil=[fn.value?(fn.value==='plan'&&planFn()?'this plan’s function ('+FN[planFn()].toLowerCase()+')':FN[fn.value]?FN[fn.value].toLowerCase():''):'',age.value?((AGE_BANDS.find(b=>b[0]===age.value)||[])[1]||'').toLowerCase():''].filter(Boolean);
@@ -8620,14 +8647,19 @@ window.__nbhDue=function(){const g=n=>{const e=document.querySelector('[name="'+
   }
   /* a step that starts RESTRICTIVE: reads as a warning (NHS warning callout); v25.72 (review T2) one that starts OPTION: keeps
      its own mark, and the card names both under its title, so a folded card says what it holds */
-  function restr(li){ if (!li) return; const t = li.querySelector('textarea'); const v = t ? t.value : ''; const on = !!t && /^\s*RESTRICTIVE:/.test(v), op = !!t && /^\s*OPTION:/i.test(v);
+  function restr(li){ if (!li) return; const t = li.querySelector('textarea'); const v = t ? t.value : ''; const on = !!t && /^\s*RESTRICTIVE:/.test(v), op = !!t && /^\s*OPTION:/i.test(v), ex = !!t && /^\s*EXTINCTION:/i.test(v);
+    if (li.classList.contains('td9-ext') !== ex) li.classList.toggle('td9-ext', ex);   /* v25.83 */
     if (li.classList.contains('td9-restr') !== on) li.classList.toggle('td9-restr', on); if (li.classList.contains('td9-opt') !== op) li.classList.toggle('td9-opt', op);
+    /* v25.83 a step for another function than the plan's: marked, and left out of the plan (tdFnOff) */
+    const off = !!t && !!window.__tdFnOff && window.__tdFnOff(v); if (li.classList.contains('td9-fnoff') !== off) li.classList.toggle('td9-fnoff', off);
     const c = li.closest('.card'); if (c) kmarks(c); }
   function kmarks(c){
     const hd = c.querySelector(':scope > .chd'); if (!hd) return;
     const m = []; $$('ol.steps li', c).forEach((li, k) => { const v = (li.querySelector('textarea') || {}).value || '';
       if (/^\s*RESTRICTIVE:/.test(v)) m.push(['r', 'Step ' + (k + 1) + ': restrictive procedure' + (/^\s*RESTRICTIVE:\s*Punishment\b/i.test(v) ? ' (punishment)' : '')]);
-      else if (/^\s*OPTION:/i.test(v)) m.push(['o', 'Step ' + (k + 1) + ': optional step']); });
+      else if (/^\s*OPTION:/i.test(v)) m.push(['o', 'Step ' + (k + 1) + ': optional step']);
+      else if (/^\s*EXTINCTION:/i.test(v)) m.push(['x', 'Step ' + (k + 1) + ': extinction step']);
+      else if (window.__tdFnOff && window.__tdFnOff(v)) m.push(['f', 'Step ' + (k + 1) + ': left out, for ' + window.__tdStepFn(v)]); });
     let box = hd.querySelector(':scope > .td-kmarks'); const key = JSON.stringify(m);
     if (!m.length) { if (box) box.remove(); return; }
     if (!box) { box = el('span', 'td-kmarks noprint'); hd.append(box); }
