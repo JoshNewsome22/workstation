@@ -9905,6 +9905,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.76: Count with a pocket clicker
+(the BCBA, 11/11: "Yes, build the pocket clicker"; the second research round's #21)
+- **What it is.** A Bluetooth presentation remote paired to the iPad counts for you, so the iPad can sit on a shelf
+  while you teach. It is off until you turn it on: **Count with a clicker**, in the settings row of Form DD-1's
+  Live Recording and beside Comparison peer in Form OB-1's Live Recorder.
+- **The buttons.** While a session runs, **Next** adds one, **Back** takes the last one off, and **Next held down**
+  moves the clicker on: in DD-1 to the next behavior measured by count or rate that is being observed, in OB-1
+  between the student and the peer. The press that began the hold adds nothing.
+- **What you see.** The behavior the clicker counts is marked **Clicker**. Each press shows the new count and the
+  behavior's name in large type for about two seconds, and the recorder's own line says the same.
+- **What it does not do.** It counts nothing before Start, while paused, after End, in a field, or with a dialog
+  open. In DD-1 it counts only behaviors measured by count or rate; the others keep their own buttons. It reads the
+  remote's Next and Back as Page Down / Page Up or the arrow keys, which is what most remotes send.
+- **Kept with.** In DD-1 the choice is kept with the record's settings, like Keyboard keys. In OB-1 it lasts until the
+  form is closed, like its alert switches.
+- **Limits, from the research.** While a remote is paired, an iPad may hide its on-screen keyboard: turn the remote
+  off to type. Some remotes send nothing a web page can read; those will not work, and nothing here can change that.
+- **The Good Behavior Game video** (the BCBA, 11/11: "Yes"). The video made on 11/10 is now in the app, at 1080p (2:17):
+  on Form TD-1's card "Good Behavior Game: team marks for rule breaks with privileges for winning teams" (Barrish et al.,
+  1969) and in the video library, as the 26th video, on a new shelf, **Group** (group contingencies). It has its Steps
+  and its Transcript. The step where a losing team keeps working through free time is punishment: it is named on the
+  closing card as needing approval and written consent, and it is not shown. The video adds 13 MB (the videos are now
+  308 MB). Nothing was generated or paid for in this version.
+- **The test run.** The whole run was not repeated for this version. Run on the final copy, and passing: the new clicker
+  test; every DD-1 and OB-1 test in the release list (18); wording-client and wording-rules; ipad-layout and
+  v2569-fx2-g5; budget; the six video and podcast tests; and the offline copy's first-visit scenario. Changed on
+  purpose: the video tests now expect 26 videos and the Group shelf; the library may be 4.0 screens long on an iPad
+  held sideways and 2.7 upright (it was 3.6 and 2.4) for the new shelf; the videos' size limit is 320 MB.
+  The offline test's other scenarios were not run: this machine did not have the disk room for their copies.
+- **Checks.** New test: v2576-clicker (17 checks: both forms, the hold, Back, fields, the saved setting).
+- **Not checked.** A real remote on a real iPad. The test presses the keys a remote sends. Please try yours: if Next
+  does nothing, it is one of the remotes a web page cannot read.
 ### v25.75: Every video re-drawn in the full-picture frame, at 1080p
 (the BCBA, 11/10: the pilot's small corner words and "a simulated example"; then "Yes" to all 24 at 1080p and the opening
 lines recorded again; then "Yes, both" to the three remaining lines and the choice-of-task video)
