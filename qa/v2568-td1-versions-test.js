@@ -1,6 +1,6 @@
 /* v25.68 (the BCBA, 11/6) Form TD-1: versions from the studies on a bank card, the high-p video, the BIP quality check.
    On an iPad Pro sideways (1376 x 1032, touch), with Chromium:
-   A. the bank: the 35 high-probability request sequence cards (A_HIGHP) carry cmp, their comparison rows, each quoted value
+   A. the bank: the 36 high-probability request sequence cards (A_HIGHP) carry cmp, their comparison rows, each quoted value
       a sentence of the card's own steps; no other card carries it; no other field of theirs is new
       (v25.72: 33 cards, then Planer et al., 2018, and Trejo & Fryling, 2018; both show the first video, so 12 became 14);
    B. the versions bar: on a card of every component (each has two or more cards) one chip per card, oldest first, in a list of
@@ -10,7 +10,7 @@
       and the note that the detailed rows are written for the high-p sequence so far; Start from this version; Side by side
       in two columns with the steps lined up (one column under 1000 px), Add this version to the plan adding the card exactly
       as Add to the plan does; the keyboard (Enter on a chip, the arrow keys); nothing of it saved;
-   C. the video: Watch the video on all 35 cards, with the line computed from the card's rows as the approved mockup does;
+   C. the video: Watch the video on all 36 cards, with the line computed from the card's rows as the approved mockup does;
       the file loaded only when asked, played from the device (2:49, 1080p since v25.75); the player's note; the FCT video as it was;
       the plan cards built from an A_HIGHP card (from the bank or the menu) carry the button and the line, nothing saved,
       nothing printed; the offline copy's list finds the file through the loadScript pattern;
@@ -40,7 +40,7 @@ const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const vline=c=>{const dd=Object.keys(LAB).filter(k=>norm(c[k])!==norm(VS[k])&&!/^not stated/i.test(c[k]||'')).map(k=>LAB[k].toLowerCase()+': '+c[k]);
  return 'The video shows TD-1’s steps for this card: '+VS.summary+'. '+(dd.length?'This version differs in '+dd.join('; ')+'.':'This version matches it on timing and reinforcers.');};
 /* (F) the four more versions: the card each was made from, the version named, and the cards that show it */
-const PRAISE=['a_highp-momentum-cooperation','a_highp-medium-p-substitute','a_highp-orienting-dtt','a_highp-momentum-compliance','a_highp-household','a_highp-interspersed-requests','a_highp-multiple-adults','a_highp-with-escape-extinction','a_highp-peer-social-initiations','a_highp-fade-sequence-do-requests','a_highp-short-5s-interval','a_highp-escape-extinction-instruction-pace','a_highp-four-quick-requests','a_highp-higher-quality-reinforcer','a_highp-medical-hold-still','a_highp-before-giving-up-toy','a_highp-medical-exam-requests','a_highp-varied-order-sequence'];
+const PRAISE=['a_highp-momentum-cooperation','a_highp-medium-p-substitute','a_highp-orienting-dtt','a_highp-momentum-compliance','a_highp-household','a_highp-interspersed-requests','a_highp-multiple-adults','a_highp-with-escape-extinction','a_highp-peer-social-initiations','a_highp-fade-sequence-do-requests','a_highp-short-5s-interval','a_highp-escape-extinction-instruction-pace','a_highp-four-quick-requests','a_highp-higher-quality-reinforcer','a_highp-medical-hold-still','a_highp-before-giving-up-toy','a_highp-medical-exam-requests','a_highp-varied-order-sequence','a_highp-medium-p-sequences-work-as-well-residential'];
 const XV={a_highp_praise:{src:'a_highp-momentum-cooperation',after:'Wilder, Sheppard, et al. (2025)',file:'nbh-td1-video-highp-praise.js',dur:105.9,cards:PRAISE},
  a_highp_class:{src:'a_highp-group-transition-fading',after:'Ardoin et al. (1999)',file:'nbh-td1-video-highp-class.js',dur:86.4,cards:['a_highp-group-transition-fading']},
  a_highp_seatwork:{src:'a_highp-math-seatwork-start',after:'Wehby & Hollahan (2000)',file:'nbh-td1-video-highp-seatwork.js',dur:88.7,cards:['a_highp-math-seatwork-start']},
@@ -62,7 +62,7 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
   const others=BANK.protocols.filter(p=>p.code!=='A_HIGHP'&&'cmp' in p).map(p=>p.id);
   const KEYS=new Set(['id','code','lab','fn','beh','age','kw','params','steps','data','mat','result','note','src','ta','ta_note','vol','scenes','cmp']);
   const extra=HP.filter(p=>Object.keys(p).some(k=>!KEYS.has(k))).map(p=>p.id);
-  ok('A the 35 high-p cards carry cmp (10 rows, the study, its year, what is special, the quoted steps) (v25.72: 33, then Planer et al., 2018, and Trejo & Fryling, 2018)',HP.length===35&&shape,{n:HP.length});
+  ok('A the 36 high-p cards carry cmp (10 rows, the study, its year, what is special, the quoted steps) (v25.72: 33, then Planer et al., 2018, and Trejo & Fryling, 2018; v25.79: Romano & Roll, 2000)',HP.length===36&&shape,{n:HP.length});
   ok('A every quoted value is a sentence of the card’s own steps; no other card carries cmp; no other new field',!qbad.length&&!others.length&&!extra.length,{qbad,others:others.slice(0,4),extra});}
  const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});
  const errs=[];
@@ -86,7 +86,7 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
     cur:ch.filter(c=>c.getAttribute('aria-current')==='true').map(c=>c.dataset.v),base:ch.filter(c=>/started here/.test(c.textContent)).map(c=>c.dataset.v),
     under:(()=>{const h=d.querySelector('h4'),v=d.querySelector('.vers');return !!(h&&v&&(h.compareDocumentPosition(v)&Node.DOCUMENT_POSITION_FOLLOWING));})(),
     cites:ch.slice(0,2).map(c=>c.querySelector('.vc').textContent+' / '+c.querySelector('.vs').textContent)};});
-  ok('B the high-p card: 35 chips (v25.72), oldest first, a list of buttons; the card opened marked "started here" and aria-current, under the title',r.n===35&&r.years.every((y,i)=>!i||y>=r.years[i-1])&&r.list&&r.lis===35&&r.cur.length===1&&r.cur[0]===BASE&&r.base.length===1&&r.base[0]===BASE&&r.under,r);
+  ok('B the high-p card: 36 chips (v25.79), oldest first, a list of buttons; the card opened marked "started here" and aria-current, under the title',r.n===36&&r.years.every((y,i)=>!i||y>=r.years[i-1])&&r.list&&r.lis===36&&r.cur.length===1&&r.cur[0]===BASE&&r.base.length===1&&r.base[0]===BASE&&r.under,r);
   ok('B a chip names the study and a short line of what is special',/Mace et al\., 1988/.test(r.cites[0])&&/'don't' requests/.test(r.cites[0]),r.cites);}
  /* filters */
  {const r=await p.evaluate(([base])=>{const R=document.getElementById('tdBankHost').shadowRoot,d=()=>R.querySelector('.detail');const by={};TD1_BANK.protocols.forEach(x=>by[x.id]=x);
@@ -96,7 +96,7 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
    d().querySelector('.vf[data-vf="praise"]').click();res.praise=[...d().querySelectorAll('.vchip')].map(c=>c.dataset.v).filter(i=>i!==base).every(i=>/praise/i.test(by[i].cmp.easy_reinforcer)&&!/edible|item|snack|treat|food|video/i.test(by[i].cmp.easy_reinforcer));
    d().querySelector('.vf[data-vf="all"]').click();res.all=d().querySelectorAll('.vchip').length;
    window.__tdBank.show('fct-practical-guide-thinning');res.fct=[...d().querySelectorAll('.vf')].map(x=>x.textContent);window.__tdBank.show(base);return res;},[BASE]);
-  ok('B the filters: all six for the high-p cards, a group of toggle buttons; Feeding and Praise only narrow the chips (the card opened stays); All brings them back',r.labs.join('|')==='All|Escape-maintained|Snack or item after each|Praise only|School or classroom|Feeding'&&r.group==='group'&&r.food&&r.foodN>=4&&r.foodN<35&&r.pressed==='true'&&r.base&&/of 35 shown/.test(r.cnt)&&r.praise&&r.all===35,r);   /* v25.72: 35 cards */
+  ok('B the filters: all six for the high-p cards, a group of toggle buttons; Feeding and Praise only narrow the chips (the card opened stays); All brings them back',r.labs.join('|')==='All|Escape-maintained|Snack or item after each|Praise only|School or classroom|Feeding'&&r.group==='group'&&r.food&&r.foodN>=4&&r.foodN<36&&r.pressed==='true'&&r.base&&/of 36 shown/.test(r.cnt)&&r.praise&&r.all===36,r);   /* v25.79: 36 cards */
   ok('B a filter that matches no card of a component is not shown (FCT: no snack or praise-only filter)',!r.fct.includes('Snack or item after each')&&!r.fct.includes('Praise only')&&r.fct.includes('All'),r.fct);}
  /* a chip */
  await p.evaluate(id=>{const d=document.getElementById('tdBankHost').shadowRoot.querySelector('.detail');d.querySelector('.vchip[data-v="'+id+'"]').click();},PICK);await sleep(200);
@@ -161,7 +161,7 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
  {const r=await p.evaluate(()=>{const out=[];TD1_BANK.protocols.filter(x=>x.code==='A_HIGHP').forEach(x=>{window.__tdBank.show(x.id);const d=document.getElementById('tdBankHost').shadowRoot.querySelector('.detail');
    const b=d.querySelector('.load button.vid'),l=d.querySelector('.load .vidln');out.push({id:x.id,btn:b?b.textContent:'',line:l?l.textContent:'',after:!!(b&&l&&(b.compareDocumentPosition(l)&Node.DOCUMENT_POSITION_FOLLOWING))});});return out;});
   const wrong=r.filter(x=>{const c=HP.find(h=>h.id===x.id).cmp;return x.btn!=='Watch how'||!x.after||x.line!==xline(HP.find(h=>h.id===x.id),SHOWS);});
-  ok('C Watch how (v25.70; it was Watch the video) on all 35 high-p cards (v25.72), and under it the line the mockup computes: what the video shows, how this version differs',r.length===35&&!wrong.length,wrong.slice(0,2));
+  ok('C Watch how (v25.70; it was Watch the video) on all 36 high-p cards (v25.79), and under it the line the mockup computes: what the video shows, how this version differs',r.length===36&&!wrong.length,wrong.slice(0,2));
   const m=r.find(x=>x.id==='a_highp-momentum-compliance');
   ok('C the line for Mace et al. (1988) names the praise-only version shown, and its own spacing and the hard request’s timing',m&&m.line==='The video shows the closest version, after Wilder, Sheppard, et al. (2025): 3 easy requests 1–2 s apart, brief praise only after each, the hard request 1–2 s after the last, nothing said if it is not done, a 15-s restart from the first after a missed one. This version differs in time between them: About 10 s; the hard request comes: Within 5 s (never over 10 s).',m&&m.line);
   const l=r.find(x=>x.id==='a_highp-edible-then-direct');
@@ -247,7 +247,7 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
  await view(p,'build');await sleep(300);
  {const r=await p.evaluate(()=>TD1_BANK.protocols.filter(x=>x.code==='A_HIGHP').map(x=>({id:x.id,k:window.__tdVideo.key(x.id)})));
   const wrong=r.filter(x=>x.k!==keyFor(x.id)),cnt={};r.forEach(x=>{cnt[x.k]=(cnt[x.k]||0)+1;});
-  ok('F each high-p card shows the closest video: praise only 18, the class 1, seatwork 1, peer 1, the first video 14 (v25.72: 12, then the Planer et al., 2018, and Trejo & Fryling, 2018, cards)',!wrong.length&&cnt.a_highp_praise===18&&cnt.a_highp_class===1&&cnt.a_highp_seatwork===1&&cnt.a_highp_peer===1&&cnt.a_highp===14,{wrong:wrong.slice(0,3),cnt});}
+  ok('F each high-p card shows the closest video: praise only 19 (v25.79: the Romano & Roll, 2000, card), the class 1, seatwork 1, peer 1, the first video 14 (v25.72: 12, then the Planer et al., 2018, and Trejo & Fryling, 2018, cards)',!wrong.length&&cnt.a_highp_praise===19&&cnt.a_highp_class===1&&cnt.a_highp_seatwork===1&&cnt.a_highp_peer===1&&cnt.a_highp===14,{wrong:wrong.slice(0,3),cnt});}
  for(const k of Object.keys(XV)){const x=XV[k];
   await p.evaluate(id=>{window.__tdBank.show(id);document.getElementById('tdBankHost').shadowRoot.querySelector('.detail .load button.vid').click();},x.src);
   await p.waitForFunction(k=>{const v=document.getElementById('tv-video');return v&&v.readyState>=1&&!v.hidden&&v.dataset.id===k;},k,{timeout:30000}).catch(()=>{});

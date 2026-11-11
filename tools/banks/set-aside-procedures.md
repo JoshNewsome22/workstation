@@ -5,7 +5,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Tier A** procedures could be considered only in rare cases, after a functional assessment, after less restrictive procedures have been tried, and with the review and consent the district requires.
 - **Tier B** procedures are never used in schools. They are listed only so the form can show them as prohibited.
 
-## Tier A: may be considered with approval (255)
+## Tier A: may be considered with approval (257)
 
 ### Response cost (67)
 
@@ -180,11 +180,12 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Rusch et al. (1976)** [rusch1976]: An adult's searching was also followed by hand-washing overcorrection. *Main procedure.* Bank: study skipped.
 - **calamari1990** [calamari1990]: The same program listed functional movement training, an overcorrection procedure, as a consequence for aggression. *Part of a package.* Reported: not separated from the package; the study evaluated the medicine. Bank: study skipped.
 
-### Positive practice (4)
+### Positive practice (5)
 
 - **Doleys et al. (1976)** [doleys1976]: Noncompliance led to forced hand guidance through the instruction (positive practice). *Main procedure.* Bank: study skipped.
 - **Duker et al., 1991** [duker1991]: In the second group (6 residents), each self-injury was followed by 2 minutes in which staff physically and verbally prompted the person to make one communicative gesture again and again. *Part of a package.* Reported: self-injury fell by about the same amount (about 40%) in the group without it, so it added nothing measurable. Bank: kept out of the steps; note flags it; left out of the objective; its note flags it.
 - **Epstein et al. (1974)** [epstein1974]: Self-stimulation was followed by positive-practice overcorrection: forced arm, hand and leg exercises with physical guidance. *Main procedure.* Bank: study skipped.
+- **Saloviita, 2000** [saloviita2000]: Dry Bed training for night-time wetting in a woman with profound intellectual disability, a package that includes blame and positive practice overcorrection after accidents. *Part of a package.* Reported: night wetting did not improve; daytime toilet use may have. Bank: study skipped.
 - **Wells et al. (1977)** [wells1977]: After each instance of stereotypy the adult physically stopped it and guided the child through 2.5 minutes of appropriate toy play, fading guidance only while the child played appropriately and releasing the child at the end regardless of protest. *Main procedure.* Reported: It reduced every targeted stereotypy for both boys, and one boy’s appropriate toy play rose. Bank: study skipped.
 
 ### Loss of privileges (30)
@@ -232,11 +233,12 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **paisey1989a** [paisey1989a]: In gentle teaching staff blocked hand-to-head hits with an open hand, and in graduated guidance staff met hand-to-head or other off-task hand movements with firm, continuous pressure until the arm could be guided back to the task. *Part of a package.* Reported: not separated from the packages; with graduated guidance head hitting fell to about no-demand levels for the escape case, while with gentle teaching it stayed near demand-baseline levels. Bank: study skipped.
 - **paisey1991b** [paisey1991b]: The mother was trained to stand to the side, parry and block blows and escape grabs, while wearing sports padding on her hands and forearms. *Part of a package.* Reported: not separated from the package. Bank: study skipped.
 
-### Physical guidance through a demand (11)
+### Physical guidance through a demand (12)
 
 - **Bachmeyer (2009)** [bachmeyer2009]: The feeding studies reviewed often added escape extinction, keeping the spoon at the lips or physically guiding the child to accept bites. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Bird et al., 1991** [bird1991]: After aggression, self-injury or destruction during a demand, staff used graduated guidance to make him finish the requested task. *Part of a package.* Reported: not separated from the package. Bank: study skipped.
 - **Buell et al. (1968)** [buell1968]: During priming, teachers lifted the girl onto play equipment and kept her there for up to 30 seconds even when she protested. *Part of a package.* Bank: kept out of the steps; note flags it.
+- **Didden et al., 1999** [didden1999]: For a 19-month-old tube-fed girl, when the mouth stayed closed the therapist or parent opened it with gentle pressure on the jaw, and when a bite was not swallowed within 5 s the spoon was placed at the back of the tongue until she swallowed. *Part of a package.* Reported: not separated from the package. Bank: kept out of the steps; note flags it.
 - **Fjellstedt & Sulzer-Azaroff (1973)** [fjellstedt1973]: If a routine step was not done within 5 minutes, the adult guided the boy through it by the arm (needed 5 times in 43). *Part of a package.* Bank: support kept for reinforcement part only.
 - **Goetz et al. (1975)** [goetz1975]: Teachers sometimes walked the child through a request with hands and words. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Jensen & Heidorn, 1993** [jensen1993]: In the 1979–80 treatment, when the man hit himself before doing a requested task, the trainer took his hand and guided him through the task at once so that self-injury did not end the demand, then gave food, praise and touch. *Part of a package.* Reported: not separated from the package. Bank: study skipped.
@@ -295,7 +297,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **taber2017** [taber2017]: Under her existing behavior plan, staff physically escorted an 18-year-old student after aggression (slapping, biting, pushing, hair pulling), and the study counted escorts per month from incident reports. *Part of a package.* Reported: Escorts fell to about 120 per month after staff were trained to give her preferred kinds of attention, a correlational result. Bank: study skipped.
 - **zencius1990b** [zencius1990b]: Each time the man swore in a therapy class, the clinician marked an X on a sheet headed with the word swearing held in front of him and said nothing else; later he was told his count when class ended. *Main procedure.* Reported: Swearing fell from about 5–6 to under 1 per class in all three classes and stayed low when he was told his count at the end of class. Bank: study skipped.
 
-## Tier B: never used (134)
+## Tier B: never used (141)
 
 ### Shock (13)
 
@@ -313,7 +315,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Wilson et al. (1975)** [wilson1975]: Adult men received electric shock for drinking in a laboratory setting. *Main procedure.* Bank: study skipped.
 - **ricketts1992** [ricketts1992]: A 28-year-old man wore the SIBIS device on an arm or leg, which gave a single electric stimulation after each self-injury, in hundreds of 5-minute sessions alone and combined with naltrexone (50 to 100 mg a day). *Main procedure.* Reported: Head hitting was 1.9 a minute with shock versus 26.7 without at baseline, but with naltrexone it rose dose-dependently to 12–15 a minute under shock. Bank: study skipped.
 
-### Aversive stimulation (14)
+### Aversive stimulation (15)
 
 - **Azrin et al. (1968)** [azrin1968]: A portable device sounded an unpleasant tone whenever an adult wearer slouched. *Main procedure.* Bank: study skipped.
 - **DeRicco et al. (1977)** [dericco1977]: In satiation sessions smokers had to smoke without stopping for 30 minutes in a dark room with anti-smoking posters, prompted to keep going if slower than one cigarette per 5 minutes, often until nauseated and on nine occasions vomiting. *Part of a package.* Reported: Satiation was not linked to clear or lasting decreases in smoking. Bank: study skipped.
@@ -321,6 +323,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Greene & Hoats (1969)** [greene1969]: Annoying distortion of a TV picture and sound served as escape-avoidance and as punishment for two young adults. *Main procedure.* Bank: study skipped.
 - **Griffin et al. (1975)** [griffin1975]: Self-injury was punished with a hair tug. *Part of a package.* Bank: study skipped.
 - **Linscheid & Cunningham (1977)** [linscheid1977]: The deposited full text compares concentrated lemon juice as an alternative aversive stimulus; the printed abstract gives no detail of how it was used. *Part of a package.* Reported: The printed abstract does not report the result of the comparison. Bank: study skipped.
+- **McGlynn & Locke, 1997** [mcglynn1997]: A 25-year follow-up of a punishment program (Griffin et al., 1975) in which hand raising, a precursor to severe self-injury, was punished for a 15-year-old with Down syndrome and profound intellectual disability. *Main procedure.* Reported: self-injury was absent 25 years later with no maintenance program. Bank: study skipped.
 - **Migan-Gandonou & Leon, 2020** [migangandonou2020]: The contingent toothbrushing was later replaced by a spray of mouthwash into the mouth after each episode of rumination. *Main procedure.* Reported: Rumination stayed near zero across settings and caregivers and over 4 years. Bank: study skipped.
 - **Sajwaj et al. (1974)** [sajwaj1974]: Lemon juice was squirted into a 6-month-old's mouth after rumination. *Main procedure.* Bank: study skipped.
 - **Stuart (1970)** [stuart1970]: A loud buzzer, which the author called aversive, sounded at family dinners until someone said something positive. *Main procedure.* Bank: study skipped.
@@ -383,25 +386,30 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **nord1991** [nord1991]: Of 654 controlled procedures proposed in 459 Minnesota program plans (October 1987 to January 1989) for aggression, self-injury or property destruction, 42 were room time-out. *Main procedure.* Reported: usage data only; no effects on behavior were reported. Bank: study skipped.
 - **sturmey1994** [sturmey1994]: When the man with moderate intellectual disability would not give a no-harm agreement after a suicide threat or gesture, staff took him to a bare infirmary room with a silent staff member and no contact with peers or other staff until he agreed the next day, a median of 25 hours (15 to 64) about once a week. *Part of a package.* Reported: Admissions to a distant hospital unit stopped for 7 months (against 5 admissions totaling 177 days in the 7 months before), the room was used 13 times, and he said he hated it. Bank: kept out of the steps; note flags it; study skipped.
 
-### Restraint (39)
+### Restraint (44)
 
 - **Azrin et al., 1988** [azrin1988]: After each self-injurious act, the trainer blocked it and guided and held the person’s hands in the lap for 2 minutes, extended until 5 seconds of calm, alone or combined with reinforcement of incompatible activities. *Part of a package.* Reported: Alone it lowered self-injury to about 25% of intervals versus 57% under ignoring, and combined with DRI to about 6%, with near-zero levels for up to 48 months under the combined package. Bank: kept out of the steps; note flags it; study skipped.
 - **Birnbrauer (1968)** [birnbrauer1968]: Restraint was also part of the boy's treatment program, as the GB-1 draft notes. *Part of a package.* Bank: study skipped.
 - **Blowers et al., 2020** [blowers2020]: In later phases of the multiple-schedule treatment for an 8-year-old boy's chase-maintained elopement, each elopement (and later each pass of a floor marker) was followed by a 30-s basket hold, chosen by the mother from a stimulus avoidance questionnaire. *Part of a package.* Reported: not separated from the package (the hold stayed in place through the later phases). Bank: kept out of the steps; note flags it.
 - **Cox et al., 2026** [cox2026]: A 15-year-old autistic student with dangerous aggression worked in a containment chair with limb straps and a lap belt inside a multifaceted program (tokens with response cost, breaks); straps were reapplied after problem behavior and the criteria reset, and the paper describes four protocols that faded the straps, the belt and finally the chair. *Main procedure.* Reported: restraint applications fell to zero and stayed at zero at a 4-month follow-up, with engagement kept up; the chair was removed from the setting. Bank: study skipped.
+- **Ellison, 1997** [ellison1997]: For two women with severe intellectual disability and psychiatric disorders, compliance training over five years had a team of three to four staff physically assist a refused task, with staff holding the other hand or the legs during hand-over-hand prompting and a helmet at times. *Main procedure.* Reported: noncompliance, aggression and self-injury decreased over five years, alongside medication changes. Bank: study skipped.
 - **Griffin et al. (1975)** [griffin1975]: Restraint was part of the self-injury treatment. *Part of a package.* Bank: study skipped.
 - **Hagopian et al. (2011)** [hagopian2011]: The thinning review notes that some programs added brief manual restraint as a punishment component. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Horner (1971)** [horner1971]: In the crutch phase the boy's hands were tied to the crutches with elastic bandages to stop him throwing them. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Jensen & Heidorn, 1993** [jensen1993]: Before behavioral treatment the man spent up to about 17 hours a day in mechanical restraints, on almost every day for several years, in an attempt to prevent self-injury. *Main procedure.* Reported: It did not prevent self-injury because he rubbed his head against objects, and it was not used during treatment or at any time in the 10 follow-up years. Bank: kept out of the steps; note flags it; study skipped.
+- **Kimmel, 1997** [kimmel1997]: For a 42-year-old woman who swallowed non-edible objects and was aggressive, contingent restraint was combined with weekly contracts and individual and group therapy over 49 months, and the restraint was later faded. *Main procedure.* Reported: no target behaviors in the last 16 months. Bank: study skipped.
 - **Koegel et al. (1974)** [koegel1974b]: After self-stimulation the body part was briefly held still. *Part of a package.* Bank: study skipped.
 - **Kohlenberg (1970)** [kohlenberg1970]: The young woman's shock treatment was followed by confinement to a chair. *Part of a package.* Bank: study skipped.
+- **Luiselli et al., 2000** [luiselli2000]: For two adolescents with severe aggression, two staff guided the student to a mat and held him face down with his hands at his sides until 15 s passed without struggling, first when staff judged the situation unmanageable and then at the first aggressive act after leaving a time-out chair or an area. *Part of a package.* Reported: applying the hold earlier lowered its use for one student and raised it for the other; the antecedent changes then lowered it for both. Bank: kept out of the steps; note flags it.
 - **Luiselli, 1991** [luiselli1991]: For about 2 years an 18-year-old wore rigid elbow restraints during waking hours to stop eye-pressing; they were put back on after each 3-hour study period until the final phase. *Part of a package.* Reported: Restraint use was faded out and ended for all waking hours as eye pressing stayed low. Bank: kept out of the steps; note flags it; study skipped.
 - **Montgomery, 1993** [montgomery1993]: Facility staff physically restrained the 28-year-old man after each aggressive episode, the standing consequence in his program for years before and throughout the study (a special chair and table had been built for it). *Part of a package.* Reported: Restraint stayed constant across phases while weekly aggression fell from 12.8 to 4.9 episodes during compliance training, so its effect was not separated from the package. Bank: kept out of the steps; note flags it; left out of the objective; its note flags it.
 - **Morgan et al., 2017** [morgan2017]: For a person with severe self-injury, arm splints with metal stays were faded to three stays a sleeve until self-injury came back; a belt behind the back was then joined to the splints, which kept self-injury at zero while it was on, and its length was faded to allow more movement. *Main procedure.* Reported: self-injury did not occur with the belt on and rose when it was removed. Bank: study skipped.
+- **Mudford, 1995** [mudford1995]: A case commentary: after a court refused an evaluation that included brief contingent shock for a 31-year-old man with severe developmental disability, he was managed with a long-term nasogastric tube and severely restrictive restraint. *Main procedure.* Bank: study skipped.
 - **O'Brien, Azrin & Bugle (1972)** [obrien1972b]: Each crawl was followed by holding the child still at the waist for 5 seconds before standing them up. *Main procedure.* Bank: study skipped.
 - **Paisey et al., 1993** [paisey1993]: In three separate sessions without teaching, custom thumb splints on both hands partly kept her from closing her hands. *Main procedure.* Reported: The splints reduced hand mouthing much less than teaching plus interruption and raised tongue thrusting about as much. Bank: left out of the objective; its note flags it.
 - **Repp & Deitz (1974)** [repp1974]: Some children got a 30-second time-out by physical restraint. *Part of a package.* Bank: study skipped.
 - **Russo & Koegel (1977)** [russo1977]: Early in treatment the therapist placed his hands on the girl’s hands to stop self-stimulation as it began, fading this until she went about 15 minutes without it. *Part of a package.* Reported: not separated from the package. Bank: kept out of the steps; note flags it; left out of the objective; its note flags it.
+- **Saunders et al., 1996** [saunders1996]: Before the prompting change in the first experiment, the teacher held the 18-year-old student's hands for 1 to 2 s after a face hit during the packaging routine. *Part of a package.* Reported: face hitting stayed at its baseline level in that phase. Bank: kept out of the steps; note flags it.
 - **Semino et al., 2025** [semino2025]: For four boys with autism aged 4 to 6 walking a motor path, each tiptoe step was followed by the therapist, standing behind, pressing on the legs or ankles until the heel touched the ground (after assent was checked), alongside praise for flat-footed steps and fluency timings. *Part of a package.* Reported: toe walking fell for all four; the pressure was not separated from the package. Bank: kept out of the steps; note flags it.
 - **Solnick et al. (1977)** [solnick1977]: After each tantrum the teacher held the girl’s self-stimulating body parts (such as her hands and fingers) still for 10 seconds, and in a comparison phase held other body parts still while leaving her free to self-stimulate. *Main procedure.* Reported: Holding the self-stimulating body parts still eliminated tantrums, while the version that left self-stimulation free increased them. Bank: study skipped.
 - **Thakore et al., 2024** [thakore2024]: For a 7-year-old girl with autism and severe developmental delay whose hand mouthing had been prevented with arm bands, each instance of hand mouthing was followed by a statement, removing and drying her hand, and snow mittens she disliked put on for 1 min, with removal attempts blocked and the strings fastened and the minute restarted; RIRD with toys followed chin touching. *Main procedure.* Reported: RIRD alone did not reduce hand mouthing; with the contingent mittens it fell to near zero and stayed low when the mittens were only in sight, and the arm bands were no longer needed. Bank: study skipped.
@@ -425,7 +433,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **spreat1986b** [spreat1986b]: In 45 approved programs for 29 institution residents aged 8 to 38, staff held the person on the ground for a set time or until calm (or used a restraint chair, transport jacket or restraint cylinder) after aggression, self-injury, property destruction, refusals, tantrums, cursing or sexual touching. *Main procedure.* Reported: Rates fell significantly overall, with clinically meaningful improvement in 53% of cases targeting aggression, self-injury or property destruction. Bank: study skipped.
 - **sturmey1994** [sturmey1994]: After he once walked off campus during the procedure, the written plan was changed to allow emergency restraint if he tried to leave. *Part of a package.* Reported: The report states restraint was never actually used. Bank: kept out of the steps; note flags it; study skipped.
 
-### Food or water deprivation (21)
+### Food or water deprivation (22)
 
 - **Alexander et al. (1976)** [alexander1976]: Full attendance earned cafeteria lunch money, and students who missed got a sack lunch instead. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Azrin & Foxx (1971)** [azrin1971]: After accidents, adults went without drinks and edibles for an hour, and meals were delayed. *Part of a package.* Bank: study skipped.
@@ -446,6 +454,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **R. F. Peterson (1968)** [peterson1968]: Imitation was reinforced with spoonfuls of the girl's own meal. *Part of a package.* Bank: study skipped.
 - **Risley (1968)** [risley1968]: The girl was given little to eat before sessions so that milk would work as the reward. *Part of a package.* Bank: study skipped.
 - **Stolz & Wolf (1969)** [stolz1969]: In the same young man's mealtime-manners phase, staff removed his plate after poor table manners. *Part of a package.* Bank: support kept for reinforcement part only.
+- **Wilder et al., 1997** [wilder1997]: As one of three treatments compared for an adult's rumination, liquids were withheld from 30 min before a meal until 1.5 h after it, watched by a dietitian. *Part of a package.* Reported: rumination in 24% of intervals, against 48% at baseline and 11% with timed spoonfuls of food. Bank: kept out of the steps; note flags it.
 - **Winkler (1970)** [winkler1970]: The ward locked the dining room 7 minutes after each meal call, so late patients missed the meal. *Part of a package.* Bank: draft dropped.
 - **dineen1977** [dineen1977]: During 20-minute peer-tutoring sessions the teacher checked the pair about 15 times at random and, if either child was off task, fined both a proportionate part of their regular morning or afternoon snack (or of recess, listed separately); fines made up 8.5% of these checks. *Part of a package.* Reported: not separated from the package. Bank: study skipped.
 
@@ -480,8 +489,10 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Curran, J. P., III, Himadi, B., & Donahue-Bennett, D. (1991). Conversational skills training with a chronically hospitalized psychiatric inpatient. Behavioral Residential Treatment, 6(2), 107–117.
 - Danforth, J. S. (2016). A flow chart of behavior management strategies for families of children with co-occurring attention-deficit hyperactivity disorder and conduct problem behavior. Behavior Analysis in Practice, 9(1), 64–76.
 - Daou, N. (2014). Conducting behavioral research with children attending nonbehavioral intervention programs for autism: The case of Lebanon. Behavior Analysis in Practice, 7(2), 78–90.
+- Didden, R., Seys, D., & Schouwink, D. (1999). Treatment of chronic food refusal in a young developmentally disabled child. Behavioral Interventions, 14(4), 213–222.
 - Drash, P. W., & Tudor, R. M. (1991). A standard methodology for the analysis, recording, and control of verbal behavior. The Analysis of Verbal Behavior, 9, 49–60.
 - Duker, P. C., Jol, K., & Palmen, A. (1991). The collateral decrease of self-injurious behavior with teaching communicative gestures to individuals who are mentally retarded. Behavioral Residential Treatment, 6(3), 183–196.
+- Ellison, D. M. (1997). Compliance training decreases maladaptive behaviors in two people with developmental disabilities: Report of five years' treatment. Behavioral Interventions, 12(4), 183–194.
 - Fixsen, D. L., Phillips, E. L., & Wolf, M. M. (1972). Achievement Place: The reliability of self-reporting and peer-reporting and their effects on behavior. Journal of Applied Behavior Analysis, 5(1), 19–30.
 - Fjellstedt, N., & Sulzer-Azaroff, B. (1973). Reducing the latency of a child's responding to instructions by means of a token system. Journal of Applied Behavior Analysis, 6(1), 125–130.
 - Foxx, R. M., McMorrow, M. J., Faw, G. D., Kyle, M. S., & Bittle, R. G. (1987). Cues-Pause-Point language training: Structuring trainer statements to provide students with correct answers to questions. Behavioral Residential Treatment, 2(2), 103–115.
@@ -507,6 +518,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Jones, F. H., & Eimers, R. C. (1975). Role playing to train elementary teachers to use a classroom management "skill package". Journal of Applied Behavior Analysis, 8(4), 421–433.
 - Kasson, E. M., & Wilson, A. N. (2017). Preliminary evidence on the efficacy of mindfulness combined with traditional classroom management strategies. Behavior Analysis in Practice, 10(3), 242–251.
 - Kaufman, K. F., & O'Leary, K. D. (1972). Reward, cost, and self-evaluation procedures for disruptive adolescents in a psychiatric hospital school. Journal of Applied Behavior Analysis, 5(3), 293–309.
+- Kimmel, C. M. (1997). Contingent restraint and positive procedures to eliminate life-threatening self-abuse and aggression: A 49 month evaluation. Behavioral Interventions, 12(4), 173–181.
 - Kolko, D. J. (1989). Inpatient intervention for chronic functional encopresis in psychiatrically disturbed children. Behavioral Residential Treatment, 4(3), 231–252.
 - Lambert, J. M., Lopano, S. E., Noel, C. R., & Ritchie, M. N. (2017). Teacher-conducted, latency-based functional analysis as basis for individualized levels system in a classroom setting. Behavior Analysis in Practice, 10(4), 422–426.
 - Leaf, J. A., Leaf, J. B., Milne, C., Townley-Cochran, D., Oppenheim-Leaf, M. L., Cihon, J. H., Taubman, M., McEachin, J., & Leaf, R. (2016). The effects of the cool versus not cool procedure to teach social game play to individuals diagnosed with autism spectrum disorder. Behavior Analysis in Practice, 9(1), 34–49.
@@ -515,6 +527,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Long, J. D., & Williams, R. L. (1973). The comparative effectiveness of group and individually contingent free time with inner-city junior high school students. Journal of Applied Behavior Analysis, 6(3), 465–474.
 - Luiselli, J. K. (1991). Functional assessment and treatment of self-injury in a pediatric, nursing-care resident. Behavioral Residential Treatment, 6(5), 311–319.
 - Luiselli, J. K., & Evans, T. P. (1987). Assessing pharmacological and contingency management interventions with mentally retarded adolescents in a residential treatment program. Behavioral Residential Treatment, 2(3), 139–152.
+- Luiselli, J. K., Kane, A., Treml, T., & Young, N. (2000). Behavioral intervention to reduce physical restraint of adolescents with developmental disabilities. Behavioral Interventions, 15(4), 317–330.
 - Lutzker, J. R., & Sherman, J. A. (1974). Producing generative sentence usage by imitation and reinforcement procedures. Journal of Applied Behavior Analysis, 7(3), 447–460.
 - Madsen, C. H., Jr., Madsen, C. K., & Thompson, F. (1974). Increasing rural Head Start children's consumption of middle-class meals. Journal of Applied Behavior Analysis, 7(2), 257–262.
 - Maeser, N. C., & Thyer, B. A. (1990). Teaching boys with severe mental retardation to serve themselves during family-style meals. Behavioural Residential Treatment, 5(4), 239–246.
@@ -522,6 +535,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Mansdorf, I. J., & Burstein, Y. (1986). Case manager: A clinical tool for training residential treatment staff. Behavioral Residential Treatment, 1(3), 155–168.
 - Marholin, D., II, & Steinman, W. M. (1977). Stimulus control in the classroom as a function of the behavior reinforced. Journal of Applied Behavior Analysis, 10(3), 465–478.
 - McAllister, L. W., Stachowiak, J. G., Baer, D. M., & Conderman, L. (1969). The application of operant conditioning techniques in a secondary school classroom. Journal of Applied Behavior Analysis, 2(4), 277–285.
+- McGlynn, A. P., & Locke, B. J. (1997). A 25-year follow-up of a punishment program for severe self-injury. Behavioral Interventions, 12(4), 203–207.
 - McKenzie, T. L., & Rushall, B. S. (1974). Effects of self-recording on attendance and performance in a competitive swimming training environment. Journal of Applied Behavior Analysis, 7(2), 199–206.
 - McLaughlin, T. F., & Malaby, J. (1972a). Intrinsic reinforcers in a classroom token economy. Journal of Applied Behavior Analysis, 5(3), 263–270.
 - McLaughlin, T., & Malaby, J. (1972b). Reducing and measuring inappropriate verbalizations in a token classroom. Journal of Applied Behavior Analysis, 5(3), 329–333.
@@ -529,6 +543,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Medland, M. B., & Stachnik, T. J. (1972). Good-behavior game: A replication and systematic analysis. Journal of Applied Behavior Analysis, 5(1), 45–51.
 - Montgomery, R. W. (1993). The collateral effect of compliance training on aggression. Behavioral Residential Treatment, 8(1), 9–20.
 - Morgan, A. C., Wilder, D. A., Podlesnik, C. A., & Kelley, M. E. (2017). Evaluation of an arm-splint belt to reduce self-injury. Behavioral Interventions, 32(3), 255–261.
+- Mudford, O. C. (1995). An intrusive and restrictive alternative to contingent shock. Behavioral Interventions, 10(2), 87–99.
 - Newsom, C. D., & Simon, K. M. (1977). A simultaneous discrimination procedure for the measurement of vision in nonverbal children. Journal of Applied Behavior Analysis, 10(4), 633–644.
 - O'Brien, F., & Azrin, N. H. (1972). Developing proper mealtime behaviors of the institutionalized retarded. Journal of Applied Behavior Analysis, 5(4), 389–399.
 - Osborne, J. G. (1969). Free-time as a reinforcer in the management of classroom behavior. Journal of Applied Behavior Analysis, 2(2), 113–118.
@@ -546,8 +561,10 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Sack, S. H., McLean, L. S., McLean, J. E., & Spradlin, J. E. (1992). Effects of increased opportunities within scripted activities on communication rates of individuals with severe retardation. Behavioral Residential Treatment, 7(3), 235–257.
 - Sailor, W., & Taman, T. (1972). Stimulus factors in the training of prepositional usage in three autistic children. Journal of Applied Behavior Analysis, 5(2), 183–190.
 - Sailor, W., Guess, D., Rutherford, G., & Baer, D. M. (1968). Control of tantrum behavior by operant techniques during experimental verbal training. Journal of Applied Behavior Analysis, 1(3), 237–243.
+- Saloviita, T. (2000). Generalized effects of dry bed training on day-time incontinence. Behavioral Interventions, 15(1), 79–81.
 - Salzberg, B. H., Wheeler, A. J., Devar, L. T., & Hopkins, B. L. (1971). The effect of intermittent feedback and intermittent contingent access to play on printing of kindergarten children. Journal of Applied Behavior Analysis, 4(3), 163–171.
 - Santogrossi, D. A., O'Leary, K. D., Romanczyk, R. G., & Kaufman, K. F. (1973). Self-evaluation by adolescents in a psychiatric hospital school token program. Journal of Applied Behavior Analysis, 6(2), 277–287.
+- Saunders, R. R., Saunders, M. D., Brewer, A., & Roach, T. (1996). The reduction of self injury in two adolescents with profound retardation by the establishment of a supported routine. Behavioral Interventions, 11(2), 59–86.
 - Schmidt, G. W., & Ulrich, R. E. (1969). Effects of group contingent events upon classroom noise. Journal of Applied Behavior Analysis, 2(3), 171–179.
 - Schreibman, L. (1975). Effects of within-stimulus and extra-stimulus prompting on discrimination learning in autistic children. Journal of Applied Behavior Analysis, 8(1), 91–112.
 - Schumaker, J. B., Hovell, M. F., & Sherman, J. A. (1977). An analysis of daily report cards and parent-managed privileges in the improvement of adolescents' classroom performance. Journal of Applied Behavior Analysis, 10(3), 449–464.
@@ -570,6 +587,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Wesolowski, M. D., & Zencius, A. H. (1992). Treatment of aggression in a brain injured adolescent. Behavioral Residential Treatment, 7(3), 205–210.
 - Wesolowski, M. D., Zencius, A., & Burke, W. H. (1993). Effects of feedback and behavior contracting on head trauma persons’ inappropriate sexual behavior. Behavioral Residential Treatment, 8(2), 89–96.
 - White-Blackburn, G., Semb, S., & Semb, G. (1977). The effects of a good-behavior contract on the classroom behaviors of sixth-grade students. Journal of Applied Behavior Analysis, 10(2), 312.
+- Wilder, D. A., Draper, R., Williams, W. L., & Higbee, T. S. (1997). A comparison of noncontingent reinforcement, other competing stimulation, and liquid rescheduling for the treatment of rumination. Behavioral Interventions, 12(2), 55–64.
 - Wilder, D. A., Ingram, G., & Hodges, A. C. (2022). Evaluation of shoe inserts to reduce toe walking in young children with autism. Behavioral Interventions, 37(3), 754–765.
 - Wilder, D. A., Sheppard, C., Izquierdo, F., & Flynn, K. (2024). Further evaluation of a hands-on-shoulder plus praise procedure to reduce toe walking. Behavioral Interventions, 39(2), e1991.
 - Winkler, R. C. (1970). Management of chronic psychiatric patients by a token reinforcement system. Journal of Applied Behavior Analysis, 3(1), 47–55.
