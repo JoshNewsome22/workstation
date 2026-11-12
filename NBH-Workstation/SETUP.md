@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.95: Daily data, a trend of the whole record and a trend of each school year
+(the BCBA, 11/12: "The trend line starting from the first data point until the last data point across both phases and
+then trend lines that are just based on the actual phase. For example, if a graph has three school years, there should
+be an option to show the trend line of all three years analyzed as one trend and or each individual year's trend line
+and if they are accelerating or decelerating")
+- **What there was.** One trend line for each condition (the days between two full phase changes). A record with no
+  full phase change is one condition, so three school years had one line, and its one word (zero-celerating, in the
+  record sent) hid a year that fell and a year that rose.
+- **Two more lines, each a box of its own** on Graphs & analysis, beside Show trend line:
+  - **Show the trend of the whole record:** one line fitted to every day shown, from the first to the last, across
+    every condition and school year. Ink, dash and dot.
+  - **Show the trend of each school year:** a line fitted to each school year's own days (August to July), whatever
+    conditions the year holds. The target's colour, long dashes.
+  Both are off until ticked, and are kept with the record's settings. The trend line of each condition is unchanged,
+  so all three can be shown together.
+- **Each is named.** At its line: "Whole record: zero-celerating", "2024-25: decelerating", "2026-27: accelerating"
+  (these are always written, whether or not Show trend labels is on, because the name says which line it is). In the
+  key under the graph. And in a sentence: "Trend of the whole record (90 days) flat (zero-celerating). Trend of each
+  school year: 2024-25 (30 days) decelerating, the improving direction; ...".
+- **How each is fitted and called.** As a condition's trend is: the method chosen under Trend line (least squares or
+  split-middle); flat (zero-celerating) when the line's change over its days stays inside its own stability envelope,
+  or its slope is under one percent of the mean a day; part-day samples left out. A school year's days are counted by
+  their dates, not by the "School year" markers, so a year is found whether or not it was marked.
+- **Not done:** a comparison of one year's trend with the next (a change of slope, as the across-condition cards give
+  for conditions); the lines are not drawn where conditions alternate. A school year with one day has no line.
+- **Still open, asked on 11/12:** the first condition is named "Baseline" unless another name is typed (Client &
+  behaviors, First condition name). Proposed: an empty box means no name, and a new record starts with it empty.
+- **Not seen on an iPad.**
+- **The test run.** The whole run was not repeated (it was run on v25.91). Run on the final copy, all passing: v2595-trend-test (7 checks), v2594-cmp-test, v2202-years-test, v2570-graphs-test, dd1-run-test, dd1-walk-test, dd123-test, budget-test, v2206-version-test and v2211-docs-test. The offline-copy test was not run (not enough free disk in this session); tools/pwa-sw.py --check passes (180 files).
 ### v25.94: Daily data, "School years compared", redrawn
 (the BCBA, 11/12, with a picture of the part for two targets: "Can this part of the graphs look better?")
 - **What was wrong with it.** The graph was half the width of its card while the table under it ran the whole width;

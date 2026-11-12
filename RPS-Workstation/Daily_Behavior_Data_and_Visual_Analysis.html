@@ -1669,7 +1669,8 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 .dd-ck>span:last-child{display:flex;align-items:center;gap:6px;min-height:44px;flex-wrap:wrap}#r_custom[hidden]{display:none!important}.dd-cmpn input{max-width:7em}.dd-ck>span:last-child{justify-content:flex-start}.dd-ck input[type=checkbox]{width:22px!important;height:22px!important;min-height:0!important;flex:0 0 22px;margin:0}.dd-ck input[type=number]{width:4.5em!important;min-width:0;flex:0 0 auto}.dd-sumbox{margin:0 0 10px}.dd-sumbox summary{cursor:pointer;font-weight:600;min-height:32px}
 .dd-sumlist{margin:6px 0;padding-left:18px}.dd-sumlist li{margin:4px 0}.dd-rng-l{margin:6px 0 10px}
 .dd-cmp h3{margin:0 0 8px}.dd-cmp-b{margin:14px 0 24px;break-inside:avoid}
-.dd-cmp-b h4{margin:0 0 6px}.dd-cmp-g{width:100%;max-width:760px;height:auto;display:block;touch-action:pan-y}
+.dd-cmp-b h4{margin:0 0 6px}
+.dd-trends{margin:8px 0 0;font-size:14px;line-height:1.45}.dd-cmp-g{width:100%;max-width:760px;height:auto;display:block;touch-action:pan-y}
 .dd-cmp-key{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;margin:2px 0 4px;font-size:13px}
 .dd-cmp-key svg{vertical-align:middle;margin-right:6px}.dd-cmp-key i{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}
 .dd-cmp-t{border-collapse:collapse;font-size:13px;margin:6px 0;width:auto!important;min-width:min(100%,340px)}.dd-cmp-t th,.dd-cmp-t td{border-bottom:1px solid #dfe5e8;padding:5px 16px 5px 10px;text-align:left}
@@ -2443,6 +2444,8 @@ window.FX2_CFG.step = { panes: 'main > section[data-panel="{v}"]',
         <label><input type="checkbox" id="c_level" checked> Show level line</label>
         <label><input type="checkbox" id="c_trend" checked> Show trend line</label>
         <label><input type="checkbox" id="c_tlab"> Show trend labels</label>
+            <label><input type="checkbox" id="c_trall"> Show the trend of the whole record</label>
+            <label><input type="checkbox" id="c_tryr"> Show the trend of each school year</label>
         <label><input type="checkbox" id="c_cond" checked> Show conditional-change lines</label>
         <label><input type="checkbox" id="c_labels"> Show value labels on points</label>
         <label class="iv-only hidden"><input type="checkbox" id="c_tod" checked> Show time-of-day analysis</label>
@@ -2839,6 +2842,24 @@ function splitMiddle(pts){
 function trendOf(pts){
   return S.settings.trend==="split" ? splitMiddle(pts) : ols(pts);
 }
+/* v25.95 (the BCBA, 11/12: "the trend line starting from the first data point until the last data point across both
+   phases and then trend lines that are just based on the actual phase ... if a graph has three school years, there should
+   be an option to show the trend line of all three years analyzed as one trend and or each individual year's trend line
+   and if they are accelerating or decelerating") Two more trend lines, each an option of its own beside the condition's:
+   one fitted to every day shown, and one to each school year's days (August to July, whatever conditions the year holds).
+   Each is fitted and named as a condition's trend is: the same method (least squares or split-middle), flat inside the
+   same stability envelope, part-day samples left out. */
+function ddTrendSegs(beh,rows){const st=S.settings,out={all:null,years:[]};if(!st.trendAll&&!st.trendYears)return out;
+  const pts=[];rows.forEach((r,i)=>{const v=plotValue(r,beh);if(v!==null&&isFinite(v)&&!(r.sample&&(beh.measure==="count"||beh.measure==="duration")))pts.push({x:i,y:v,date:r.date});});
+  const fit=(P,name)=>{if(P.length<2)return null;const t=trendOf(P);if(!t)return null;const vals=P.map(p=>p.y),m=mean(vals),hw=envelopeHalfWidth(vals);
+    return {name,pts:P,n:P.length,trend:t,word:trendDirection(t.slope,beh.direction,Math.max(0.01,(m||1)*0.01),P[P.length-1].x-P[0].x,hw)};};
+  if(st.trendAll)out.all=fit(pts,"All days");
+  if(st.trendYears){const by={};pts.forEach(p=>{const y=ddSY(p.date);if(y)(by[y]=by[y]||[]).push(p);});Object.keys(by).sort().forEach(y=>{const q=fit(by[y],y);if(q)out.years.push(q);});}
+  return out;}
+function ddTrendsNote(beh,rows){if(typeof ddAltNow!=="undefined"&&ddAltNow)return "";const T=ddTrendSegs(beh,rows);if(!T.all&&!T.years.length)return "";
+  const say=q=>`${esc(q.name==="All days"?"":q.name+" ")}(${q.n} days) ${esc(q.word.word)}${q.word.effect==="improve"?", the improving direction":q.word.effect==="worsen"?", the worsening direction":""}`;
+  return `<p class="dd-trends">${T.all?`<b>Trend of the whole record</b> ${say(T.all)}. `:""}${T.years.length?`<b>Trend of each school year:</b> ${T.years.map(say).join("; ")}. `:""}<span class="hint">Each is fitted as a condition's trend is (${st_trendName()}), and is called flat when its change stays inside its own stability envelope.</span></p>`;}
+function st_trendName(){return S.settings.trend==="split"?"split-middle":"least squares";}
 function envelopeHalfWidth(vals){
   const cfg=S.settings.env;
   const pctv=parseInt(cfg,10)/100;
@@ -3454,6 +3475,12 @@ function buildChart(beh,rows,conds,analyses){
     g.push(`<line class="dd-cdcl" data-cdcl="trend" x1="${X0.toFixed(1)}" y1="${ya.toFixed(1)}" x2="${X1.toFixed(1)}" y2="${yb.toFixed(1)}" stroke="#6B3FA0" stroke-width="1.4" stroke-dasharray="1.5 2.5"/>`);
     ob.segs.push([X0,ym,X1,ym],[X0,ya,X1,yb]); cdcL=true;
   }
+  /* v25.95 the trend of the whole record (ink, dash and dot) and of each school year (the target's colour, long dashes), each named at its line */
+  let trAll=false,trYr=false;
+  if(!alt){const TS=ddTrendSegs(beh,rows),cl=v=>Math.max(0,Math.min(top,v)),line=(q,kind)=>{const a=q.pts[0].x,b=q.pts[q.pts.length-1].x,xa=X(a),xb=X(b),ya=Y(cl(q.trend.slope*a+q.trend.intercept)),yb=Y(cl(q.trend.slope*b+q.trend.intercept));
+      g.push(`<line class="dd-tr-${kind}" x1="${xa.toFixed(1)}" y1="${ya.toFixed(1)}" x2="${xb.toFixed(1)}" y2="${yb.toFixed(1)}" stroke="${kind==="all"?"#16242E":esc(beh.color)}" stroke-width="1.6" stroke-dasharray="${kind==="all"?"11 4 2 4":"9 3"}"/>`);
+      ob.segs.push([xa,ya,xb,yb]);ends.push({kind:"trend",a:{trendWord:q.word},pre:q.name==="All days"?"Whole record":q.name,ink:kind==="all",x0:xa,x1:xb,ya,yb});};
+    if(TS.all){line(TS.all,"all");trAll=true;}TS.years.forEach(q=>{line(q,"year");trYr=true;});}
   // conditional change lines, over the data, and the criterion's label
   g.push(F.condLines,critTxt);
   // (P1) each level line's value at its right end; (P2) each trend's direction at the end of its line, when asked for
@@ -3463,14 +3490,15 @@ function buildChart(beh,rows,conds,analyses){
     const c=ddPlace(t,10.5,400,sans,ddAlong(e.xa,e.y,x,e.y,ddTextW(t,10.5,400,sans),[-5,13,-12,20,-19]),ob,lim);
     g.push(`<text class="dd-level" data-line="${e.xa.toFixed(1)} ${e.y.toFixed(1)} ${e.xb.toFixed(1)} ${e.y.toFixed(1)}" x="${c.x.toFixed(1)}" y="${c.y.toFixed(1)}" font-size="10.5" fill="#16242E" text-anchor="${c.anchor}" ${halo}>${esc(t)}<\/text>`);
   });
-  if(S.settings.trendLabels) ends.filter(e=>e.kind==="trend").forEach(e=>{
+  /* v25.95 a trend of the whole record or of a school year is always named at its line: its name says which line it is */
+  ends.filter(e=>e.kind==="trend"&&(S.settings.trendLabels||e.pre)).forEach(e=>{
     const w=e.a.trendWord?e.a.trendWord.word:""; if(!w||w==="not calculable") return;
-    const t=w.indexOf("flat")===0?"Zero-celerating":w.charAt(0).toUpperCase()+w.slice(1);
+    const t=(e.pre?e.pre+": ":"")+(w.indexOf("flat")===0?(e.pre?"zero-celerating":"Zero-celerating"):e.pre?w:w.charAt(0).toUpperCase()+w.slice(1));
     const c=ddPlace(t,10.5,700,sans,ddAlong(e.x0,e.ya,xr(e.x1),e.yb,ddTextW(t,10.5,700,sans),[-8,15,-15,22,-22,29]),ob,lim);
-    g.push(`<text class="dd-trend" data-line="${e.x0.toFixed(1)} ${e.ya.toFixed(1)} ${e.x1.toFixed(1)} ${e.yb.toFixed(1)}"x="${c.x.toFixed(1)}" y="${c.y.toFixed(1)}" font-size="10.5" font-weight="700" fill="${esc(beh.color)}" text-anchor="${c.anchor}" ${halo}>${esc(t)}<\/text>`);
+    g.push(`<text class="dd-trend" data-line="${e.x0.toFixed(1)} ${e.ya.toFixed(1)} ${e.x1.toFixed(1)} ${e.yb.toFixed(1)}"x="${c.x.toFixed(1)}" y="${c.y.toFixed(1)}" font-size="10.5" font-weight="700" fill="${e.ink?"#16242E":esc(beh.color)}" text-anchor="${c.anchor}" ${halo}>${esc(t)}<\/text>`);
   });
   ddNotes=F.notes;
-  ddDrawn={trend,level,env,crit,full:F.full.length>0,cond:F.marks.length>0,shade:F.used,clipped,top,rule:ax.rule,cdc:cdcL,alt,same:!!ax.same,zero:Z>0};
+  ddDrawn={trAll,trYr,trend,level,env,crit,full:F.full.length>0,cond:F.marks.length>0,shade:F.used,clipped,top,rule:ax.rule,cdc:cdcL,alt,same:!!ax.same,zero:Z>0};
   return `<svg class="graph" viewBox="0 0 ${W} ${H}" data-plot="${M.l} ${M.t} ${iw} ${ih}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Line graph of ${esc(beh.name)}">${g.join("")}<\/svg>`;
 }
 
@@ -4624,6 +4652,8 @@ function renderResults(){
     /* each legend entry only when the graph draws it */
     const legend=(ddAltNow?ddAltLegend(beh,analyses):`<span><i style="border-color:${esc(beh.color)}"><\/i>Data path<\/span>`)
       +(dr.trend?`<span><i style="border-color:${esc(beh.color)};border-top-style:solid;opacity:.85"><\/i>Trend line (${S.settings.trend==="split"?"split-middle":"least squares"})<\/span>`:"")
+      +(dr.trAll?`<span><svg width="30" height="8" viewBox="0 0 30 8" aria-hidden="true" style="vertical-align:middle;margin-right:6px"><line x1="0" y1="4" x2="30" y2="4" stroke="#16242E" stroke-width="1.6" stroke-dasharray="11 4 2 4"/><\/svg>Trend of the whole record<\/span>`:"")
+      +(dr.trYr?`<span><svg width="30" height="8" viewBox="0 0 30 8" aria-hidden="true" style="vertical-align:middle;margin-right:6px"><line x1="0" y1="4" x2="30" y2="4" stroke="${esc(beh.color)}" stroke-width="1.6" stroke-dasharray="9 3"/><\/svg>Trend of each school year<\/span>`:"")
       +(dr.level?`<span><i style="border-color:#16242E;border-top-style:dashed"><\/i>${S.settings.level==="median"?"Median":"Mean"} level<\/span>`:"")
       +(dr.env?`<span><span class="swatch" style="background:${esc(beh.color)};opacity:.25"><\/span>Stability envelope (${esc($("#r_env").selectedOptions[0].textContent.trim())})<\/span>`:"")
       +ddLegendExtra(dr);
@@ -4635,6 +4665,7 @@ function renderResults(){
       <div class="chartbox">${chart}<\/div>
       <div class="dd-graphsave noprint no-print"><button type="button" class="btn ghost sm" data-act="saveGraph" data-b="${esc(beh.id)}" title="Download this graph as a PNG image, at twice the screen resolution">Save graph as image<\/button>${dr.rule==="auto"?` <button type="button" class="btn ghost sm dd-axkeep" data-act="keepAxis" data-b="${esc(beh.id)}" data-top="${esc(String(dr.top))}" title="Writes this axis's top (${esc(r1(dr.top))}) into the behavior's Y-axis maximum on the first tab, so later reports keep the same scale">Keep this axis for later reports<\/button>`:""}<\/div>
       <div class="legend">${legend}<\/div>
+      ${ddTrendsNote(beh,rows)}
       ${dr.cond?`<p class="hint" style="margin-top:8px">Conditional changes marked: ${condMarks.map(m=>`${esc(m.label)} (${esc(fmtDate(rows[m.x].date))})`).join("; ")}. These events are annotated inside the condition and do not split it for analysis.<\/p>`:""}
       ${ddPlanNote(beh,bconds,rows)}${ddAltNow?ddAltNote(analyses,rows):""}${dr.same?`<p class="hint dd-samenote">The vertical axis is shared with the other behaviors measured as ${esc(MEASURES[beh.measure].label.toLowerCase())} (Same scale for the same unit).<\/p>`:""}
       ${ddNoteHtml(notes)}${ddClipHtml(dr)}<\/div>${keyAfter?"":(keyAfter=true,graphKey("after"))}
@@ -4960,7 +4991,7 @@ function syncResultControls(){
   [["#r_trend","trend","ols"],["#r_level","level","mean"],["#r_env","env","25full"],["#r_shade","shade","phase"],["#r_yrule","yRule","x1.5"]].forEach(([sel,key,d])=>{
     if($(sel).selectedIndex<0){ S.settings[key]=d; $(sel).value=d; } });
   $("#c_env").checked=S.settings.showEnv; $("#c_level").checked=S.settings.showLevel;
-  $("#c_trend").checked=S.settings.showTrend; $("#c_cond").checked=S.settings.showCond; $("#c_labels").checked=S.settings.showLabels;
+  $("#c_trend").checked=S.settings.showTrend; $("#c_trall").checked=!!S.settings.trendAll; $("#c_tryr").checked=!!S.settings.trendYears; $("#c_cond").checked=S.settings.showCond; $("#c_labels").checked=S.settings.showLabels;
   $("#c_tod").checked=S.settings.showTod; $("#c_heat").checked=S.settings.showHeat;
   $("#d_mode").value=S.settings.entryMode;
   $("#d_defs").checked=S.settings.showDefs!==false;
@@ -5580,7 +5611,7 @@ ctl.forEach(([sel,key])=>$(sel).addEventListener("change",e=>{ if(e.target.selec
 $("#r_crit").addEventListener("change",e=>{S.settings.crit=parseInt(e.target.value,10); renderResults();});
 $("#r_imm").addEventListener("change",e=>{S.settings.imm=parseInt(e.target.value,10); renderResults();});
 $("#r_behavior").addEventListener("change",renderResults);
-[["#c_env","showEnv"],["#c_level","showLevel"],["#c_trend","showTrend"],["#c_tlab","trendLabels"],["#c_cond","showCond"],["#c_labels","showLabels"],["#c_tod","showTod"],["#c_heat","showHeat"]]
+[["#c_env","showEnv"],["#c_level","showLevel"],["#c_trend","showTrend"],["#c_tlab","trendLabels"],["#c_trall","trendAll"],["#c_tryr","trendYears"],["#c_cond","showCond"],["#c_labels","showLabels"],["#c_tod","showTod"],["#c_heat","showHeat"]]
   .forEach(([sel,key])=>$(sel).addEventListener("change",e=>{S.settings[key]=e.target.checked; renderResults();}));
 $("#btnPrint").addEventListener("click",()=>{const g=$("#p_what")&&$("#p_what").value==="graphs";document.body.classList.toggle("dd-pr-graphs",g);printTab(g?"Graphs":"Graphs and visual analysis");});   /* v24.35 (E-38) */
 window.addEventListener("afterprint",()=>document.body.classList.remove("dd-pr-graphs"));
