@@ -80,11 +80,13 @@ const W=path.join(L.ROOT,'NBH-Workstation'),URL=L.BASE+'/NBH-Workstation/explain
 
   /* ---------- S: in the workstation ---------- */
   const s=await ctx.newPage();s.on('pageerror',e=>errs.push('shell: '+e.message));await s.goto(L.shellUrl());await sleep(1500);
-  const sh=await s.evaluate(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));const cmds=CMDS.filter(c=>/^Explainers:|^Practice counting:/.test(c.n)).map(c=>c.n);
-    CMDS.find(c=>/^Explainers:/.test(c.n)).go();await w(1500);const fr=window.__wsVideos.frame();const a=fr.contentWindow.location.pathname.split('/').pop(),open=window.__wsVideos.isOpen(),has=!!fr.contentWindow.NBHExplain;
-    window.__wsVideos.open('dro_resetting');await w(1800);const b=fr.contentWindow.location.pathname.split('/').pop()+fr.contentWindow.location.hash;
+  const sh=await s.evaluate(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));
+    /* v25.91: wait for the thing itself, up to 25 s, not a fixed time: the explainers now read the real-looking people as they open, which takes this software-drawn browser several seconds */
+    const until=async f=>{for(let i=0;i<125;i++){let ok=false;try{ok=!!f();}catch(e){}if(ok)return true;await w(200);}return false;};const cmds=CMDS.filter(c=>/^Explainers:|^Practice counting:/.test(c.n)).map(c=>c.n);
+    CMDS.find(c=>/^Explainers:/.test(c.n)).go();await w(1500);const fr=window.__wsVideos.frame();await until(()=>fr.contentWindow.NBHExplain);const a=fr.contentWindow.location.pathname.split('/').pop(),open=window.__wsVideos.isOpen(),has=!!fr.contentWindow.NBHExplain;
+    window.__wsVideos.open('dro_resetting');await until(()=>/videos\.html$/.test(fr.contentWindow.location.pathname)&&fr.contentDocument.querySelector('a.vl-explain'));await w(300);const b=fr.contentWindow.location.pathname.split('/').pop()+fr.contentWindow.location.hash;
     const link=fr.contentDocument.querySelector('a.vl-explain');const href=link&&link.getAttribute('href');
-    window.__wsVideos.open('page:practice');await w(1500);const c=fr.contentWindow.location.pathname.split('/').pop(),has2=!!fr.contentWindow.NBHPractice;window.__wsVideos.close();return {cmds,a,open,has,b,href,c,has2};});
+    window.__wsVideos.open('page:practice');await until(()=>fr.contentWindow.NBHPractice);await w(300);const c=fr.contentWindow.location.pathname.split('/').pop(),has2=!!fr.contentWindow.NBHPractice;window.__wsVideos.close();return {cmds,a,open,has,b,href,c,has2};});
   ok('S1 the command box lists Explainers and Practice counting; each opens in the Videos frame; a video asked for while one is showing brings the library back, and that video’s page offers "Step through it"',sh.cmds.length===2&&sh.a==='explain.html'&&sh.open&&sh.has&&sh.b==='videos.html#video=dro_resetting'&&sh.href==='explain.html#dro'&&sh.c==='practice.html'&&sh.has2,sh);
   await s.close();
   ok('Z no page error, and no request left the folder',!errs.length&&!outside.length,{errs,outside:outside.slice(0,4)});

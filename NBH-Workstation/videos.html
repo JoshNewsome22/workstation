@@ -132,7 +132,7 @@ body.vl-watching #vlClose{margin-left:auto}
 .vl-seen svg{width:13px;height:13px}
 .vl-info{display:flex;gap:12px;padding:10px 2px 0;align-items:flex-start}
 .vl-av{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 .6875rem/1 var(--sans);letter-spacing:.02em;background:var(--navy)}
-.vl-f-dro{background:#1D3A52}.vl-f-dra{background:#7a3b52}.vl-f-ncr{background:#2f6b37}.vl-f-rird{background:#6b4a7a}.vl-f-highp{background:#9b4e15}.vl-f-fct{background:#22657a}.vl-f-choice{background:#5a5a1e}.vl-f-group{background:#3d4f8a}.vl-f-chain{background:#6a4a2a}
+.vl-f-dro{background:#1D3A52}.vl-f-dra{background:#7a3b52}.vl-f-ncr{background:#2f6b37}.vl-f-rird{background:#6b4a7a}.vl-f-highp{background:#9b4e15}.vl-f-fct{background:#22657a}.vl-f-choice{background:#5a5a1e}.vl-f-group{background:#3d4f8a}.vl-f-chain{background:#6a4a2a}.vl-f-prompt{background:#3d4f8a}.vl-f-token{background:#7a5a16}
 .vl-txt{position:relative;min-width:0;display:flex;flex-direction:column;gap:3px}
 /* a title wraps and is never cut */
 .vl-t{font-weight:600;font-size:1rem;line-height:1.3;color:var(--ink);overflow-wrap:break-word}
@@ -180,6 +180,8 @@ body.vl-watching #vlClose{margin-left:auto}
 @media (max-width:1179px){.vl-w{grid-template-columns:minmax(0,1fr)}}
 .vl-player{position:relative;border-radius:var(--r);overflow:hidden;background:#0f1a22;aspect-ratio:16/9}
 .vl-player video{display:block;width:100%;height:100%;background:#0f1a22}
+/* v25.91 the small window: the workstation has shrunk this page to a corner because a video was playing when the library was left; only the picture shows */
+html.vl-mini,html.vl-mini body{overflow:hidden}html.vl-mini .vl-player{position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;border-radius:0;margin:0;aspect-ratio:auto;background:#000}html.vl-mini .vl-player video{object-fit:contain;background:#000}
 .vl-load{position:absolute;left:0;right:0;bottom:0;padding:30px 18px 14px;background:linear-gradient(to top,rgba(10,18,24,.86),rgba(10,18,24,0));color:#fff;font:600 1rem/1.3 var(--sans);pointer-events:none}
 .vl-load[hidden]{display:none}
 .vl-load .vl-lmb{font-weight:500;opacity:.9;margin-left:8px;font-size:.9375rem}
@@ -580,6 +582,7 @@ var OPEN_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="cu
 var PLAY_ICO='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
 var PAUSE_ICO='<svg class="vl-pz" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>';
 var CC_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10.5 10.2a2.4 2.4 0 1 0 0 3.6M17 10.2a2.4 2.4 0 1 0 0 3.6" stroke-linecap="round"/></svg>';
+var PIP_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="5.5" rx="1" fill="currentColor"/></svg>';
 var FULL_ICO='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
 /* the captions file (WebVTT) from a transcript: each spoken line in sentences, the people's lines with their role */
 function vttOf(lines,dur){var sp=lines.filter(function(l){return l[1]!=='O';}),out='WEBVTT\n',n=0;
@@ -620,7 +623,7 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
       '<div class="vl-play" id="vlPlay" hidden><button type="button" class="vl-btn" id="vlPlayBtn">'+PLAY_ICO+'Play</button></div></div>'+
     '<div class="vl-bar" id="vlBar" hidden><button type="button" class="vl-bb" id="vlBPlay" aria-label="Play">'+PLAY_ICO+PAUSE_ICO+'</button><span class="vl-btime" id="vlBTime" aria-hidden="true">0:00 / 0:00</span>'+
       '<input type="range" class="vl-bseek" id="vlBSeek" min="0" max="1" step="0.1" value="0" aria-label="Position in the video">'+
-      '<button type="button" class="vl-bb vl-bcc" id="vlBCC" aria-pressed="false" aria-label="Captions">'+CC_ICO+'</button><button type="button" class="vl-bb" id="vlBFull" aria-label="Full screen">'+FULL_ICO+'</button></div>'+
+      '<button type="button" class="vl-bb vl-bcc" id="vlBCC" aria-pressed="false" aria-label="Captions">'+CC_ICO+'</button><button type="button" class="vl-bb" id="vlBPip" aria-label="Picture in Picture: a small window that stays on top" hidden>'+PIP_ICO+'</button><button type="button" class="vl-bb" id="vlBFull" aria-label="Full screen">'+FULL_ICO+'</button></div>'+
     '<div id="vlStepsTop"></div>'+
     '<p class="vl-kick"><span class="vl-av vl-f-'+esc(f.key)+'" aria-hidden="true">'+esc(f.short)+'</span>'+esc(f.name)+'</p>'+
     '<h2 class="vl-wt" id="vlTitle" tabindex="-1">'+esc(v.title)+'</h2>'+
@@ -637,6 +640,11 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
     '</aside></div>';
   var vid=$('vlVideo'),my=++token,ld=$('vlLoad'),tap=openedByTap,seekTo=null,curCap=null;
   nbhKeepPlaying(vid);
+  /* v25.91 the workstation is told when a video is playing, so that leaving the library then keeps it on in a small window */
+  ['play','playing'].forEach(function(n){vid.addEventListener(n,function(){tellPlaying(true);});});['pause','ended','emptied'].forEach(function(n){vid.addEventListener(n,function(){tellPlaying(!vid.paused&&!vid.ended);});});
+  /* v25.91 Picture in Picture, where the device has it: the video in a small window of the device's own, over other apps */
+  (function(){var b=$('vlBPip');if(!b)return;var std=!!(document.pictureInPictureEnabled&&vid.requestPictureInPicture),wk=!std&&typeof vid.webkitSupportsPresentationMode==='function'&&vid.webkitSupportsPresentationMode('picture-in-picture');if(!std&&!wk)return;b.hidden=false;
+    b.addEventListener('click',function(){try{if(std){if(document.pictureInPictureElement)document.exitPictureInPicture();else vid.requestPictureInPicture().catch(function(){});}else vid.webkitSetPresentationMode(vid.webkitPresentationMode==='picture-in-picture'?'inline':'picture-in-picture');}catch(e){}});})();
   var pl=vid.parentNode,bar=$('vlBar'),tw=TRANS[v.key],hasT=!!(tw&&tw.length&&window.NBHTranscript),track=null,tr=null;
   var FULLF=v.frame==='full';
   var playFrom=function(t){if(vid.readyState>=1){try{vid.currentTime=t;}catch(x){}var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});$('vlPlay').hidden=true;}else seekTo=t;};
@@ -764,7 +772,8 @@ if(POD)POD.on(function(type){if(type==='time')return;epPaint();if(view==='home'&
 function openCard(id){pauseNow();
   if(WS){tell({nbh:'videos-card',card:id});return;}
   location.href=(D.form||'TD-1_Function-Based-Treatment-Developer_v2026-09.html')+'#card='+encodeURIComponent(id);}
-function pauseNow(){var vid=$('vlVideo');if(vid&&cur){try{if(vid.duration>0)setProg(cur,vid.currentTime,vid.duration,false);vid.pause();}catch(e){}}}
+function tellPlaying(on){try{if(window.parent!==window)window.parent.postMessage({nbh:'videos-playing',on:!!on},'*');}catch(e){}}
+function pauseNow(){tellPlaying(false);var vid=$('vlVideo');if(vid&&cur){try{if(vid.duration>0)setProg(cur,vid.currentTime,vid.duration,false);vid.pause();}catch(e){}}}
 
 /* ---------- the two views, from the address: #video=<key> a video's page, else the home page ---------- */
 function route(focus){var m=/^#video=([^&]+)/.exec(location.hash||''),k=m?decodeURIComponent(m[1]):'',v=BY[k];
@@ -799,6 +808,7 @@ function applyView(v){v=v||{};R.classList.toggle('nbh-tx-1',v.t===1);R.classList
 function viewFromStore(){try{applyView(JSON.parse(localStorage.getItem('nbh.view')||'{}'));}catch(e){}}
 addEventListener('message',function(e){var d=e.data;if(!d||e.source!==window.parent||window.parent===window)return;
   if(d.nbh==='view')applyView(d.v);else if(d.nbh==='videos-pause'){pauseNow();if(POD)POD.pause();}
+  else if(d.nbh==='videos-mini'){document.documentElement.classList.toggle('vl-mini',!!d.on);}
   else if(d.nbh==='videos-focus'){var t=view!=='home'?$('vlTitle'):document.querySelector('#vlChips [aria-checked=true]');if(t&&!t.offsetParent)t=$('vlSelFam');if(view==='home'){var c=lastKey&&document.querySelector('#vlList .vl-card[data-key="'+lastKey+'"]');if(c)t=c;}if(t)try{t.focus({preventScroll:view!=='home'||!!lastKey});}catch(x){}}});
 addEventListener('pagehide',pauseNow);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){var vid=$('vlVideo');if(vid&&cur&&vid.duration>0)setProg(cur,vid.currentTime,vid.duration,false);}});
 var head=$('vlHead');addEventListener('scroll',function(){head.classList.toggle('vl-stuck',(window.scrollY||0)>4);},{passive:true});

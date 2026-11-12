@@ -9905,6 +9905,40 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.91: Six videos, a small window for a playing video, and the real-looking people in all three explainers
+(the BCBA, 11/12, asked what was waiting on them and answered the list: "Go with your recommendations")
+- **Six videos into the app** (each was sent for review on 11/11; 37 videos now, 501 MB as saved by the offline copy):
+  - Token economies, three videos after the recommendations of degli Espinosa & Hackenberg (2024), a review:
+    **building it** (the exchange taught first, then the tokens tested), **the three schedules** (token production,
+    exchange production, token exchange, and which to thin first) and **running it** (the exchange, an open or closed
+    economy, response cost). They are not the procedure of any one card. Each opens from the card nearest to it
+    (Bonfonte et al., 2020; Argueta et al., 2019; LeBlanc et al., 2000), and its note says that it follows the review
+    and that the card's own steps are on the card. The narrator's reading of the first author's name was not checked
+    with the BCBA.
+  - Prompting, three videos made from TD-1 cards: **least-to-most** (Sy et al., 2014), **most-to-least** (Cengher et
+    al., 2016) and **time delay** (Striefel et al., 1974, and McKeown et al., 2025).
+  - The library has two new procedures in its filter, **Prompting** and **Tokens**. Each video has its steps, captions
+    and transcript, as the others do.
+- **A small window for a playing video** (the mini player asked about on 11/11). When a video is playing and you leave
+  the video library (the Videos button, a form, a card, Escape), the library shrinks to a small window at the bottom
+  right and the video goes on while you work. **Back to the video** opens the library where it was; **Close** stops
+  the video. A video that is not playing closes as before. The player also has a **Picture in Picture** button where
+  the device offers it: the video in a small window of the device's own. Sound with the screen locked is not part
+  of this.
+- **The real-looking people in all three explainers.** DRO and NCR now draw the same classroom and the same two
+  simulated people as FCT (v25.90), without waiting for the iPad check of that trial; `?clay=1` on the address still
+  shows the clay figures, and the counting practice and the drawn videos keep them. New in the scene: the fingers
+  close (lightly at rest, round the crayon, a first finger out to touch the signal), the light is warmer with a light
+  from behind, and a pack may give its people's heights. **A limit that shows in DRO and NCR:** the faces cannot
+  change, so at problem behavior the student says "No!" in a bubble with the same smile. The clay figures show a
+  frown there. A softer, blurred background was tried only on paper and is not in this version.
+- **An example, not in the app.** The same teacher and student were also made in an animated-film style and shown in
+  the scene beside the real-looking pair (pictures sent). The scene can take either pair: the choice is the BCBA's.
+- **Opening Explainers now reads the people at once** (a 7 MB file), where v25.90 read them only for FCT. On the
+  test computer, which draws in software, that takes several seconds, during which the clay figures show.
+- **Not seen on an iPad:** the small window (its place above the phone bar, and whether the iPad keeps playing a
+  video in a shrunken frame), Picture in Picture, and the people in DRO and NCR.
+- **The test run.** The whole run (every test but the offline-copy test) was started on this version after it was cut; its result is reported to the BCBA, and anything it finds is fixed in the next version. Run on the final copy before the release, all passing: v2591-mini-player-test (7 checks), v2590-real-scene-test (15), v2578-scene3d-test, v2578-explain-test, v2578-practice-test, v2579-ncr-test, v2568-td1-procvideos-test, v2569-video-library-test (82), v2572-transcript-test (29), v2572-videos-test (54), budget-test, v2206-version-test and v2211-docs-test. The offline-copy test was not run (not enough free disk in this session); tools/pwa-sw.py --check passes with the new files in its list (179 files).
 ### v25.90: A trial of real-looking people in one explainer (FCT: green and red)
 (the BCBA, 11/12, after seeing test clips of a real-looking teacher and student in a classroom, asked whether to
 build them into the explainers in place of the clay figures, "starting with the FCT thinning one as a trial you check

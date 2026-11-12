@@ -24,8 +24,8 @@ const W=path.join(L.ROOT,'NBH-Workstation'),U=L.BASE+'/NBH-Workstation/';
     return {step:q('#exStep').textContent,now:q('#exNow').textContent,timer:tm?tm.textContent:'',tally:[...document.querySelectorAll('#exTally dd')].map(d=>d.textContent).join('|'),bubbles:[...document.querySelectorAll('#exStage svg g[aria-hidden] text')].map(x=>x.textContent).join(' ')};},t);
   /* ---------- N: the explainer ---------- */
   const pg=await E(()=>({title:document.title,picks:[...document.querySelectorAll('#exPick [data-pick]')].map(b=>b.dataset.pick+':'+b.getAttribute('aria-pressed')).join(),sets:[...document.querySelectorAll('#exTry [data-set]')].map(b=>b.textContent+':'+b.getAttribute('aria-pressed')).join(),rule:document.querySelector('#exRule').textContent,src:document.querySelector('#exSrc').textContent}));
-  ok('N1 explain.html#ncr opens the NCR explainer: third in the list and pressed, the timer at 1 min of 1, 2 and 3 min, the rule from the card (a short neutral comment by name within 5 s; no praise, no reprimand), and the note that the people are drawn',
-    /^NCR: attention on a timer/.test(pg.title)&&pg.picks==='dro:false,fct:false,ncr:true'&&pg.sets==='1 min:true,2 min:false,3 min:false'&&/one short neutral comment by name within 5 s/.test(pg.rule)&&/no praise, no reprimand/.test(pg.rule)&&/The people are drawn/.test(pg.src)&&/Noel & Getch \(2016\)/.test(pg.src),pg);
+  ok('N1 explain.html#ncr opens the NCR explainer: third in the list and pressed, the timer at 1 min of 1, 2 and 3 min, the rule from the card (a short neutral comment by name within 5 s; no praise, no reprimand), and the note that the people are simulated (v25.91; "drawn" before)',
+    /^NCR: attention on a timer/.test(pg.title)&&pg.picks==='dro:false,fct:false,ncr:true'&&pg.sets==='1 min:true,2 min:false,3 min:false'&&/one short neutral comment by name within 5 s/.test(pg.rule)&&/no praise, no reprimand/.test(pg.rule)&&/The people are simulated, not real people/.test(pg.src)&&/Noel & Getch \(2016\)/.test(pg.src),pg);
   let T=await tl();
   ok('N2 the example: a buzz each minute on the clock (1:00, 2:00, 3:00), a comment in the 5 s after each, problem behavior at 0:25 and at 1:57',T.len===200&&T.segs==='wait:0.0-60.0 com:60.0-65.0 wait:65.0-120.0 com:120.0-125.0 wait:125.0-180.0 com:180.0-185.0 wait:185.0-200.0'&&T.marks==='pb@25.2 buzz@60.0 pb@117.0 buzz@120.0 buzz@180.0',T);
   const a10=await at(10),a26=await at(26),a61=await at(61),a64=await at(64),a118=await at(118),a121=await at(121);
@@ -39,7 +39,7 @@ const W=path.join(L.ROOT,'NBH-Workstation'),U=L.BASE+'/NBH-Workstation/';
   ok('N8 a 2-min timer: buzzes at 2:00, 4:00 and 6:00, and the example’s problem behavior moves with it',T3.len===380&&/^wait:0\.0-120\.0 com:120\.0-125\.0 wait:125\.0-240\.0/.test(T3.segs)&&T3.marks==='pb@50.4 buzz@120.0 pb@237.0 buzz@240.0 buzz@360.0',T3);
   await p.close();
   /* the lit 3D scene draws it too */
-  {const q=await ctx.newPage();q.on('pageerror',e=>errs.push('3d: '+e.message));await q.goto(U+'explain.html#ncr');await sleep(2500);
+  {const q=await ctx.newPage();q.on('pageerror',e=>errs.push('3d: '+e.message));await q.goto(U+'explain.html?clay=1#ncr');await sleep(2500);   /* v25.91: the clay scene (the real-looking one is the default now and has its own test, v2590) */
    const r=await q.evaluate(()=>({three:!!(window.NBHScene3D&&NBHScene3D.ok&&NBHScene3D.ok()),canvas:document.querySelectorAll('#exStage canvas').length,parts:document.querySelectorAll('#exStage .ns-part').length,step:document.querySelector('#exStep').textContent}));
    ok('L2 without ?flat=1 the NCR explainer is drawn in 3D where the browser can (else flat), with its parts to tap',r.three?(r.canvas===1&&r.parts>=5):r.parts>=5,r);await q.close();}
   /* ---------- P: the practice ---------- */

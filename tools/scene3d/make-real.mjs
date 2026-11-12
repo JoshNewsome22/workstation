@@ -8,6 +8,7 @@
 //
 // SOURCES_DIR holds the sources, which are NOT kept in the repository (see README.md, "The real-looking scene"):
 //   adult.glb, student.glb     simulated people with a 52-joint skeleton (names ending Hips, Spine, LeftArm, ...)
+//   sizes.json (optional)      their heights, where the scene's own are not right (see below)
 //   chair.gltf (+ its files)   Poly Haven "School Chair 01" (CC0)
 //   shelf.glb, cup.glb         a cubby shelf with bins and a cup of pencils
 //   floor.jpg, maple.jpg       Poly Haven "Laminate Floor 02" and "White Maple Veneer" colour pictures (CC0)
@@ -54,6 +55,9 @@ async function model(file, want, px) {
 const pack = { v: 1 };
 pack.adult = await model('adult.glb', 70000, { map: 2048, nor: 1024 });
 pack.student = await model('student.glb', 70000, { map: 2048, nor: 1024 });
+// sizes.json (optional): { "adult": { "height": 1.5, "whole": true }, "student": { ... } }: how tall each person stands,
+// and whether that is the whole figure (a drawn character with a large head) or an ordinary build (the scene's default)
+if (fs.existsSync(path.join(SRC, 'sizes.json'))) { const z = JSON.parse(fs.readFileSync(path.join(SRC, 'sizes.json'), 'utf8')); for (const k of ['adult', 'student']) if (z[k]) Object.assign(pack[k], z[k]); }
 pack.chair = await model('chair.gltf', 0, { map: 1024, nor: 512, arm: 512 });
 pack.shelf = await model('shelf.glb', 16000, { map: 1024 });
 pack.cup = await model('cup.glb', 6000, { map: 512 });

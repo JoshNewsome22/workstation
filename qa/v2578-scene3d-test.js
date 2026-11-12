@@ -14,8 +14,8 @@
    G  ?flat=1, and a device that cannot draw 3D, get the flat drawing and nothing breaks;
    H  a narrow screen: the picture fits, nothing is wider than the screen, the controls stay at least 44 px;
    I  drawing a moment is quick enough to scrub (a generous limit: this machine draws in software).
-   v25.90: the FCT explainer draws the real-looking scene by default (qa/v2590-real-scene-test.js); this test opens it with
-   ?clay=1, which keeps the clay scene tested here.
+   v25.90, v25.91: the explainers draw the real-looking scene by default (qa/v2590-real-scene-test.js); this test opens
+   them with ?clay=1, which keeps the clay scene tested here.
    Simulated people only. usage: node qa/v2578-scene3d-test.js   (WS_URL and WS_ROOT as in qa/lib.js) */
 const L=require(__dirname+'/lib.js');const {sleep}=L;const fs=require('fs'),path=require('path');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1400):''));if(!c)fails++;};
@@ -31,7 +31,7 @@ const W=path.join(L.ROOT,'NBH-Workstation'),EX=L.BASE+'/NBH-Workstation/explain.
   const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));p.on('request',r=>{const u=r.url();if(!u.startsWith(L.BASE)&&!u.startsWith('data:')&&!u.startsWith('blob:'))outside.push(u);});
   await p.emulateMedia({reducedMotion:'reduce'});
   const E=(f,a)=>p.evaluate(f,a);
-  await p.goto(EX+'#dro');await p.waitForFunction(()=>window.NBHExplain&&document.querySelector('#exStage .nbh-scene3d canvas'),null,{timeout:30000}).catch(()=>{});await sleep(500);
+  await p.goto(EX+'?clay=1#dro');await p.waitForFunction(()=>window.NBHExplain&&document.querySelector('#exStage .nbh-scene3d canvas'),null,{timeout:30000}).catch(()=>{});await sleep(500);
   /* the picture, read back: how many different colours, and how much of it is one colour */
   const look=t=>E(t=>{if(t!==null)NBHExplain.seek(t);const c=document.querySelector('#exStage canvas');if(!c)return null;const k=document.createElement('canvas');k.width=160;k.height=90;const x=k.getContext('2d');x.drawImage(c,0,0,160,90);const d=x.getImageData(0,0,160,90).data,seen={};let top=0;
     for(let i=0;i<d.length;i+=4){const key=(d[i]>>4)+','+(d[i+1]>>4)+','+(d[i+2]>>4);seen[key]=(seen[key]||0)+1;if(seen[key]>top)top=seen[key];}return {colours:Object.keys(seen).length,most:top/(160*90)};},t);

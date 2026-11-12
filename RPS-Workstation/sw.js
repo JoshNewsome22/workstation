@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = '77eacf2a1b65';
+const VERSION = '473c778e42a1';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -181,6 +181,12 @@ const FILES = [
   'nbh-td1-video-chain-hw-forward.js',
   'nbh-td1-video-chain-hw-backward.js',
   'nbh-td1-video-chain-hw-total.js',
+  'nbh-td1-video-token-build.js',
+  'nbh-td1-video-token-schedules.js',
+  'nbh-td1-video-token-running.js',
+  'nbh-td1-video-prompt-ltm.js',
+  'nbh-td1-video-prompt-mtl.js',
+  'nbh-td1-video-prompt-delay.js',
   'nbh-td1-poster-fct.jpg',
   'nbh-td1-poster-highp.jpg',
   'nbh-td1-poster-highp-praise.jpg',
@@ -212,6 +218,12 @@ const FILES = [
   'nbh-td1-poster-chain-hw-forward.jpg',
   'nbh-td1-poster-chain-hw-backward.jpg',
   'nbh-td1-poster-chain-hw-total.jpg',
+  'nbh-td1-poster-token-build.jpg',
+  'nbh-td1-poster-token-schedules.jpg',
+  'nbh-td1-poster-token-running.jpg',
+  'nbh-td1-poster-prompt-ltm.jpg',
+  'nbh-td1-poster-prompt-mtl.jpg',
+  'nbh-td1-poster-prompt-delay.jpg',
   'nbh-pod-romaniuk-2002.js',
   'nbh-gb1-bank.js',
   'nbh-sm1-narration.js',

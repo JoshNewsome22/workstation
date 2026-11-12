@@ -34,8 +34,14 @@ clay scene. Faces do not move: a mouth or brows in the state are not shown, the 
   and the floor and table-top pictures are Poly Haven's (CC0): "School Chair 01", "Laminate Floor 02", "White Maple
   Veneer". The shelf and the cup of pencils were made the same way as the people.
 - To change a person: put the new model in the sources as `adult.glb` or `student.glb`, run `make-real.mjs`, and check
-  the heights in `real.js` (the `Person(...)` lines: height in metres, seat height) and the words of the explainers
-  that show them (he or she).
+  the words of the explainers that show them (he or she). Heights: the scene stands an adult at 1.66 m and a student at
+  1.32 m, measured from the feet to the base of the head. A `sizes.json` beside the sources gives a pack its own:
+  `{"adult": {"height": 1.62, "whole": true}, "student": {"height": 1.3, "whole": true}}`. `whole` means the height is
+  of the whole figure, crown to sole: use it for a drawn character with a large head (an animated-film style), which the
+  ordinary rule would make far too big.
+- v25.91: the fingers close (`curl` in `real.js`: lightly at rest, round a thing held or a crayon, a first finger out
+  when the hand is held up), where the skeleton has finger joints (names ending HandIndex1..3, HandMiddle1..3, ...).
+  All three explainers use the scene (`REAL` in explain.html).
 
 The built file is committed, so `tools/build-release.sh` and `tools/check-build.py` never need node. After a change here:
 `bash tools/scene3d/build.sh`, then `bash tools/build-release.sh`, then `node qa/v2578-scene3d-test.js` and

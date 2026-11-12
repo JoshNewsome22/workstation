@@ -3055,7 +3055,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v25.90';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v25.91';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -12750,6 +12750,13 @@ window.__wsW1={where,askWhere,findings:async()=>findings(await stuList()),events
 <style id="ws-videos-css">
 #vlLayer{position:fixed;left:0;top:0;right:0;bottom:0;z-index:8000;background:#F2F6F5;display:flex}
 #vlLayer[hidden]{display:none!important}
+/* v25.91 the small window: a video that was playing when the library was left keeps playing in a corner, over the page */
+#vlMiniBar{display:none}
+#vlLayer.vl-mini{left:auto!important;top:auto!important;right:12px;width:min(360px,calc(100vw - 24px));aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 10px 30px rgba(15,26,34,.4),0 0 0 1px rgba(15,26,34,.25)}
+#vlLayer.vl-mini iframe{background:#000}
+#vlLayer.vl-mini #vlMiniBar{display:flex;position:absolute;left:0;top:0;right:0;z-index:2;justify-content:space-between;gap:6px;padding:5px;pointer-events:none}
+#vlMiniBar button{pointer-events:auto;min-width:44px;min-height:44px;border:0;border-radius:10px;background:rgba(15,26,34,.78);color:#fff;font:600 .8125rem/1.1 Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;padding:0 12px;cursor:pointer}
+#vlMiniBar button:focus-visible{outline:3px solid #fff;outline-offset:-3px}
 #vlLayer iframe{flex:1 1 auto;width:100%;height:100%;border:0;display:block;background:#F2F6F5}
 #wsNav #wsVideos[aria-pressed=true]{background:#2a4b61!important;box-shadow:inset 0 -3px 0 #8fd0ee!important}
 body.ws-a.ws-navrail #wsNav #wsVideos[aria-pressed=true]{box-shadow:inset 3px 0 0 #8fd0ee!important}
@@ -12777,8 +12784,14 @@ if(nav){const after=$('#readDoc')&&nav.contains($('#readDoc'))?$('#readDoc'):($(
 /* the layer: a region over the page below the bar (beside the rail); what it covers takes no taps or keys meanwhile */
 const layer=document.createElement('div');layer.id='vlLayer';layer.hidden=true;layer.setAttribute('role','region');layer.setAttribute('aria-label','Video library');
 document.body.appendChild(layer);
-let fr=null,opener=null,held=[];
-const isOpen=()=>!layer.hidden;
+let fr=null,opener=null,held=[],mini=false,playing=false;
+const isOpen=()=>!layer.hidden&&!mini;
+/* v25.91 the small window (the BCBA, 11/12: the in-app mini player): leaving the library while a video plays shrinks the
+   library's frame to a corner and frees the page; the same video goes on, with a way back and a way to close it */
+const mbar=document.createElement('div');mbar.id='vlMiniBar';mbar.innerHTML='<button type="button" id="vlMiniBack">Back to the video</button><button type="button" id="vlMiniClose" aria-label="Close the video">Close</button>';layer.appendChild(mbar);
+function toMini(){mini=true;layer.classList.add('vl-mini');hold(false);btn.setAttribute('aria-pressed','false');B.classList.remove('vl-open');let bottom=12;const ph=$('#phoneBar');if(seen(ph)){const r=ph.getBoundingClientRect();if(r.top>innerHeight/2)bottom+=Math.max(0,Math.round(innerHeight-r.top));}
+  layer.style.top='auto';layer.style.left='auto';layer.style.bottom=bottom+'px';layer.setAttribute('aria-label','Video, playing in a small window');tell({nbh:'videos-mini',on:true});try{if(typeof say==='function')say('The video keeps playing in a small window');}catch(e){}}
+function endMini(stop){if(!mini)return;mini=false;layer.classList.remove('vl-mini');layer.setAttribute('aria-label','Video library');tell({nbh:'videos-mini',on:false});layer.hidden=true;if(stop){tell({nbh:'videos-pause'});playing=false;}}
 const seen=el=>!!el&&el.getClientRects().length>0&&getComputedStyle(el).visibility!=='hidden';   /* a fixed bar has no offsetParent */
 function place(){let top=0,left=0,bottom=0;
   if(seen(nav)){const r=nav.getBoundingClientRect();if(B.classList.contains('ws-navrail')&&r.height>r.width)left=Math.max(0,Math.round(r.right));else top=Math.max(0,Math.round(r.bottom));}
@@ -12799,10 +12812,13 @@ function open(key,from){if(typeof EMBED!=='undefined'&&EMBED){try{wsUI.toast('Th
   else if(key!==undefined){try{const w=fr.contentWindow,here=String(w.location.pathname||'').split('/').pop();
     if(pg||here!=='videos.html')w.location.replace(url);
     else if(w.location.hash!==hash){if(hash)w.location.hash=hash.slice(1);else w.location.hash='';}}catch(e){}}
+  endMini(false);
   if(!isOpen()){opener=from||document.activeElement;place();layer.hidden=false;hold(true);btn.setAttribute('aria-pressed','true');B.classList.add('vl-open');
     try{if(typeof say==='function')say('Video library');}catch(e){}}
   setTimeout(()=>{try{fr.focus();}catch(e){}tell({nbh:'videos-focus'});},60);}
-function close(focusBack){if(!isOpen())return;tell({nbh:'videos-pause'});layer.hidden=true;hold(false);btn.setAttribute('aria-pressed','false');B.classList.remove('vl-open');
+function close(focusBack){if(!isOpen())return;
+  if(playing){toMini();if(focusBack!==false){const t=opener&&opener.isConnected&&opener.offsetParent!==null?opener:btn;try{t.focus({preventScroll:true});}catch(e){}}opener=null;return;}
+  tell({nbh:'videos-pause'});layer.hidden=true;hold(false);btn.setAttribute('aria-pressed','false');B.classList.remove('vl-open');
   if(focusBack!==false){const t=opener&&opener.isConnected&&opener.offsetParent!==null?opener:btn;try{t.focus({preventScroll:true});}catch(e){}}opener=null;}
 /* a card from the library: Form TD-1 opens (as from the list) and shows the card in its bank panel */
 function card(id){if(!/^[A-Za-z0-9_-]{1,80}$/.test(String(id||'')))return;close(false);
@@ -12814,13 +12830,16 @@ window.addEventListener('message',ev=>{const d=ev.data;if(!d||typeof d.nbh!=='st
   if(d.nbh==='videos-open'){let from='';try{from=relayFrom(ev.source);}catch(e){}if(!from)return;const k=typeof d.video==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(d.video)?d.video:'';
     const f=!k&&typeof d.family==='string'&&/^[a-z]{2,12}$/.test(d.family)?'family:'+d.family:'';open(k||f,null);return;}   /* v25.70 a form's Watch how: a video, or a procedure's videos */
   if(!fr||ev.source!==fr.contentWindow)return;
+  if(d.nbh==='videos-playing'){playing=!!d.on;return;}
   if(d.nbh==='videos-close')close();else if(d.nbh==='videos-card')card(d.card);});
+mbar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='vlMiniBack')open(undefined,null);else endMini(true);});
 /* anything else chosen in the bar, a form opened, Escape: the library steps aside */
 if(nav)nav.addEventListener('click',e=>{if(!isOpen())return;const b=e.target.closest('button');if(!b||b===btn||b.closest('#wsVideos')||b.dataset.wnMenu||b.id==='wsStat')return;close(false);},true);
 document.addEventListener('click',e=>{if(!isOpen())return;const b=e.target.closest('#wsNavMenu [data-wn-for],#phoneBar button');if(b&&b.dataset.wnFor!=='wsVideos')close(false);},true);
 {const of=openForm;openForm=function(){if(isOpen())close(false);return of.apply(this,arguments);};}
 document.addEventListener('keydown',e=>{if(e.key!=='Escape'||!isOpen()||e.defaultPrevented)return;if(document.querySelector('dialog[open]'))return;const m=$('#wsNavMenu');if(m&&!m.hidden)return;e.preventDefault();close();});
 addEventListener('resize',()=>{if(isOpen())place();});
+addEventListener('pagehide',()=>{playing=false;});
 try{new MutationObserver(()=>{if(isOpen())place();}).observe(B,{attributes:true,attributeFilter:['class']});}catch(e){}
 /* the command box, and More on a phone */
 try{CMDS.push({k:'videos video library watch procedure dro ncr rird high-p fct youtube',n:'Videos: watch the procedure videos of the protocol bank',s:'command',go:()=>open(undefined,null)});}catch(e){}
@@ -12828,7 +12847,7 @@ try{if(!(typeof EMBED!=='undefined'&&EMBED)){   /* v25.78 the drawn pages: not i
   CMDS.push({k:'explainers explainer step through drag timeline dro fct ncr noncontingent attention timer green red signal interval drawn',n:'Explainers: step through a procedure in a drawn scene',s:'command',go:()=>open('page:explain',null)});
   CMDS.push({k:'practice practise counting count data collection ioa agreement observer training duration interval clicker fidelity ncr comments timer',n:'Practice counting: record a drawn scene and see your agreement',s:'command',go:()=>open('page:practice',null)});}}catch(e){}
 try{const g=PH_MORE.find(x=>x[0]==='The workstation');if(g&&!(typeof EMBED!=='undefined'&&EMBED))g[1].splice(1,0,['wsVideos','Videos']);}catch(e){}
-window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr};
+window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr,isMini:()=>mini,stop:()=>{if(mini)endMini(true);else{playing=false;close();}}};
 })();
 </script>
 <style id="ws-v2570-css">
@@ -12896,13 +12915,13 @@ window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr};
 })();
 </script>
 <script type="application/json" id="ws-whatsnew">
-{"v": "v25.90",
+{"v": "v25.91",
 "title": "What's new in this version",
 "notes": "SETUP.md",
 "items":[
-"A trial: the explainer \"FCT: green and red\" now shows real-looking people in a classroom in place of the clay figures. They are simulated people, not real ones. The other explainers and the counting practice are unchanged.",
-"Their faces do not move and their fingers do not grip: the heads turn, the arms reach, and what is said is shown in a bubble.",
-"Printing from the workstation installed on an iPad: when the iPad shows no print options, Print offers to make a PDF of the pages (v25.89)."]}
+"Six new videos in the video library and on their TD-1 cards: three on token economies (building it, the three schedules, running it) and three on prompting (least-to-most, most-to-least, time delay).",
+"A video that is playing when you leave the video library keeps playing in a small window in the corner. Back to the video opens it again; Close stops it. Where the device has Picture in Picture, the player has a button for it.",
+"The explainers for DRO and NCR now show the real-looking people too, as the FCT one does, and their hands close around what they hold. They are simulated people, not real ones; their faces do not move."]}
 </script>
 <script id="ws-v2570">
 /* v25.70 (the BCBA, 11/9; S/research/NEXT.md and NEXT2.md #2). The release step edits the list above (ws-whatsnew): its v is

@@ -93,9 +93,12 @@ function table(w,d,top,x,z){const g=new THREE.Group();g.position.set(x,0,z);scen
   box(w-.3,.05,.02,steel,0,top-.06,-(d/2-.08),g);box(w-.3,.05,.02,steel,0,top-.06,(d/2-.08),g);return g;}
 table(1.9,.9,TY,0,-.22);table(1.3,.6,.72,-2.0,-1.45);
 
-/* ---------- light: the room's own light and one window's worth of sun ---------- */
-roomLight(renderer,scene,.62,2.2);
-const key=new THREE.DirectionalLight('#fff1dc',2.0);key.position.set(2.6,3.4,2.2);key.castShadow=true;key.shadow.mapSize.set(SH,SH);
+/* ---------- light: the room's own light, a warm sun through a window, a soft warm fill from the other side, and a
+   light from behind that picks the heads and shoulders out from the wall ---------- */
+roomLight(renderer,scene,.5,2.2);
+{const fill=new THREE.DirectionalLight('#ffd9b4',.5);fill.position.set(-3,2.2,2.6);scene.add(fill);
+ const rim=new THREE.DirectionalLight('#fff3e0',1.3);rim.position.set(-1.6,3,-3.2);scene.add(rim);}
+const key=new THREE.DirectionalLight('#ffe7c6',2.3);key.position.set(2.6,3.4,2.2);key.castShadow=true;key.shadow.mapSize.set(SH,SH);
 key.shadow.camera.left=-4;key.shadow.camera.right=4;key.shadow.camera.top=4;key.shadow.camera.bottom=-2;key.shadow.camera.near=.5;key.shadow.camera.far=12;key.shadow.bias=-.0004;key.shadow.normalBias=.02;scene.add(key);
 
 /* ---------- the flat scene's units (1600 x 900), carried to this table: across it, toward the viewer, and up above it ---------- */
@@ -156,7 +159,12 @@ function buildTokens(of){if(of===tokOf)return;tokOf=of;while(tokens.children.len
 function Person(node,o){scene.add(node);const B={},all=[];
   node.traverse(n=>{if(n.isMesh)n.frustumCulled=false;if(n.isBone){all.push(n);for(const k in NAMES)if(!B[k]&&NAMES[k].test(n.name.replace(/[^A-Za-z0-9]/g,'')))B[k]=n;}});
   for(const k in NAMES)if(!B[k])throw new Error('nbh-scene3d: a person in the pack has no joint for '+k);
-  node.updateWorldMatrix(true,true);const h0=(wp(B.head).y-Math.min(wp(B.lFoot).y,wp(B.rFoot).y))/.84;node.scale.multiplyScalar(o.height/h0);
+  /* the fingers, where the skeleton has them: each hand's four fingers and thumb, three joints each, from the knuckle out */
+  const FING={l:{},r:{}};all.forEach(b=>{const m=/(left|right)hand(index|middle|ring|pinky|thumb)([123])$/i.exec(b.name.replace(/[^A-Za-z0-9]/g,''));if(m){const side=m[1].toLowerCase()==='left'?'l':'r',f=m[2].toLowerCase();(FING[side][f]=FING[side][f]||[])[+m[3]-1]=b;}});
+  /* the height asked for: of a person of ordinary build it is taken from the feet to the base of the head (hair and
+     shoes vary); of a drawn character with a large head (whole) it is the whole figure, crown to sole */
+  node.updateWorldMatrix(true,true);const made=new THREE.Box3().setFromObject(node),h0=o.whole?made.max.y-made.min.y:(wp(B.head).y-Math.min(wp(B.lFoot).y,wp(B.rFoot).y))/.84,k0=o.height/h0;
+  const top=Math.max(.12,(made.max.y-wp(B.head).y)*k0);node.scale.multiplyScalar(k0);   /* from the base of the head to the crown, in the room's measure */
   node.rotation.y=o.face;node.position.set(o.x,0,o.z);node.updateWorldMatrix(true,true);
   const hipSeat=o.seat+.09*o.height/1.7,hipStand=o.height*.53,y0=hipSeat-wp(B.hips).y;node.position.y=y0;node.updateWorldMatrix(true,true);
   const f=v(Math.sin(o.face),0,Math.cos(o.face)),left=UP.clone().cross(f).normalize();
@@ -173,11 +181,19 @@ function Person(node,o){scene.add(node);const B={},all=[];
     const n3=palm(k),ax=wp(B[k+'Mid']).sub(H2).normalize(),n4=n3.clone().addScaledVector(ax,-ax.dot(n3)),d4=v(0,-1,0).addScaledVector(ax,ax.y);
     if(n4.lengthSq()>1e-6&&d4.lengthSq()>1e-6){n4.normalize();d4.normalize();turn(B[k+'Hand'],new THREE.Quaternion().setFromAxisAngle(ax,Math.atan2(ax.dot(n4.clone().cross(d4)),n4.dot(d4))));}
     return short;}
-  const P={node,B,f,left,o,tall,restHead:null,
+  /* close a hand by an amount (0 open, 1 a fist): every finger joint bends toward the palm about the line across the
+     knuckles, the little finger a little more than the first; the thumb comes in across the palm. `point` leaves the
+     first finger out. */
+  function curl(k,amount,point){const F=FING[k];if(!amount||!F.index||!F.pinky)return;const H=wp(B[k+'Hand']),along=wp(B[k+'Mid']).sub(H).normalize(),n=palm(k),axis=wp(B[k+'Pky']).sub(wp(B[k+'Idx'])).normalize();
+    const sgn=axis.clone().cross(along).dot(n)>=0?1:-1;
+    ['index','middle','ring','pinky'].forEach((name,i)=>{const js=F[name];if(!js)return;const a=(name==='index'&&point?.12:amount*(1+i*.08));[1.0,1.15,.8].forEach((w,j)=>{if(js[j])turn(js[j],new THREE.Quaternion().setFromAxisAngle(axis,sgn*a*w));});});
+    const T=F.thumb;if(T&&T[0]){const td=wp(T[1]||T[0]).sub(wp(T[0])).normalize(),s2=along.clone().cross(td).dot(n)>=0?1:-1;T.forEach((b,j)=>{if(b)turn(b,new THREE.Quaternion().setFromAxisAngle(along,s2*amount*(j?.35:.55)));});}}
+  const P={node,B,f,left,o,tall,top,restHead:null,
     /* the head turns toward a place: the neck a little, the head most of the rest (its facing is followed from its made pose) */
     look(target){for(const [bone,part] of [[B.neck,.35],[B.head,.9]]){const cur=f.clone().applyQuaternion(wq(B.head).multiply(headBind)).normalize();
       const want=target.clone().sub(wp(B.head)).normalize();turn(bone,new THREE.Quaternion().slerp(new THREE.Quaternion().setFromUnitVectors(cur,want),part));}},
-    /* p: l, r (places for the person's own left and right wrist), lFlat, rFlat, lean -1..1, up 0..1 */
+    /* p: l, r (places for the person's own left and right wrist), lFlat, rFlat, lCurl, rCurl (how closed each hand is, 0..1;
+       'point' for a first finger held out), lean -1..1, up 0..1 */
     pose(p){all.forEach((b,i)=>b.quaternion.copy(bind[i]));const up=p.up||0;node.position.set(o.x+up*.3,y0+up*(hipStand-hipSeat),o.z);node.updateWorldMatrix(true,true);
       [['lUp','lLeg','lFoot',1],['rUp','rLeg','rFoot',-1]].forEach(([a,b,c,sg])=>{const hip=wp(B[a]);
         const ank=hip.clone().addScaledVector(f,(.36*o.k+.06)*(1-up)).addScaledVector(left,sg*.02);ank.y=.1;reach(B[a],B[b],B[c],ank,f.clone().add(v(0,.9,0)));});
@@ -186,9 +202,10 @@ function Person(node,o){scene.add(node);const B={},all=[];
       let lean=.1*(1-up),done=false;const saved=all.map(b=>b.quaternion.clone());
       for(let step=0;step<8&&!done;step++){all.forEach((b,i)=>b.quaternion.copy(saved[i]));node.updateWorldMatrix(true,true);
         turn(B.spine,new THREE.Quaternion().setFromAxisAngle(left,lean));
-        const s=Math.max(p.l?hand('l',p.l,p.lFlat):0,p.r?hand('r',p.r,p.rFlat):0);if(s<.004||lean>.36)done=true;else lean+=Math.min(.09,s*1.2+.03);}},
+        const s=Math.max(p.l?hand('l',p.l,p.lFlat):0,p.r?hand('r',p.r,p.rFlat):0);if(s<.004||lean>.36)done=true;else lean+=Math.min(.09,s*1.2+.03);}
+      [['l',p.lCurl],['r',p.rCurl]].forEach(([k,c])=>{const pt=c==='point';curl(k,pt?.9:(c===undefined?.22:c),pt);});},
     /* the places the picture's control and the bubble are worked out from */
-    points(){const h=wp(B.head),s=.2*tall;return [h.clone().add(v(0,.25*tall,0)),h.clone().addScaledVector(left,s),h.clone().addScaledVector(left,-s),wp(B.lArm),wp(B.rArm),wp(B.lMid),wp(B.rMid),wp(B.hips).addScaledVector(left,s),wp(B.hips).addScaledVector(left,-s)];}};
+    points(){const h=wp(B.head),s=.2*tall;return [h.clone().add(v(0,top,0)),h.clone().addScaledVector(left,s),h.clone().addScaledVector(left,-s),wp(B.lArm),wp(B.rArm),wp(B.lMid),wp(B.rMid),wp(B.hips).addScaledVector(left,s),wp(B.hips).addScaledVector(left,-s)];}};
   P.pose({});P.restHead=wp(B.head);return P;}
 let A=null,S=null,lastSt={};
 
@@ -207,7 +224,9 @@ function resize(){const w=root.clientWidth||960,h=Math.round(w*9/16);if(w===CW&&
 /* one person from the state: the picture's left hand is the person's own right one */
 function pose(P,st,rest,who,held){const tl=W3(st.l||rest.l),tr=W3(st.r||rest.r),look=st.look||[0,0],lx=clamp(look[0],-1,1),ly=clamp(look[1],-1,1);
   if(held.l)tl.y+=.03;if(held.r)tr.y+=.03;
-  P.pose({r:tl,l:tr,rFlat:tl.y<TY+.11,lFlat:tr.y<TY+.11,lean:clamp(st.lean||0,-1,1),up:who==='student'?clamp(st.up||0,0,1):0});
+  /* how closed each hand is: lightly curled at rest, closed round a thing it holds (1) or a crayon (2), a first finger out to touch something held up */
+  const shut=(h,y)=>h===2?.62:h?.7:y>=TY+.11?'point':.22;
+  P.pose({r:tl,l:tr,rFlat:tl.y<TY+.11,lFlat:tr.y<TY+.11,rCurl:shut(held.l,tl.y),lCurl:shut(held.r,tr.y),lean:clamp(st.lean||0,-1,1),up:who==='student'?clamp(st.up||0,0,1):0});
   /* where the head turns: by the state's look; toward the other person it turns all the way to them, as people do */
   const h=wp(P.B.head),yaw=lx*.6,pit=.1+ly*.34,dir=v(Math.sin(yaw)*Math.cos(pit),-Math.sin(pit),Math.cos(yaw)*Math.cos(pit)),other=who==='adult'?S:A,to=who==='adult'?lx:-lx;
   if(ly>.4)dir.lerp(v(P.o.x+lx*.2,TY,-.1).sub(h).normalize(),.75*ease((ly-.4)/.4)).normalize();   /* looking down: toward the work on the table in front of them, the face still in view */
@@ -219,7 +238,7 @@ let shown={};
 function set(st){lastSt=st=st||{};if(!A)return;   /* the people are not read yet: the state is drawn when they are */
   const a=st.adult||{},s=st.student||{},cd=st.card||{},it=st.item||{},sh=st.sheet||{},sg=st.signal||{},tm=st.timer||{},tk=st.tokens||{},n=st.note||{};
   const ch=cd.show?hand(cd.at):null,ih=it.show?hand(it.at):null,held={adult:{},student:{}};if(ch)held[ch.who][ch.side]=1;if(ih)held[ih.who][ih.side]=1;
-  const showSheet=sh.show!==false,sr=s.r||REST.student.r,drawing=showSheet&&!held.student.r&&sr[1]>=640&&!(s.up>0.02);
+  const showSheet=sh.show!==false,sr=s.r||REST.student.r,drawing=showSheet&&!held.student.r&&sr[1]>=640&&!(s.up>0.02);if(drawing)held.student.r=2;
   pose(A,a,REST.adult,'adult',held.adult);pose(S,s,REST.student,'student',held.student);
   /* the crayon in the hand that colours: its point on the page under the knuckles, its body up toward the wrist */
   crayon.visible=drawing;if(drawing){const k=wp(S.B.lMid),w=wp(S.B.lHand),tip=v(k.x,TY+.003,k.z).addScaledVector(k.clone().sub(w).setY(0).normalize(),.012),up=w.clone().sub(k).setY(0).normalize().multiplyScalar(.45).add(v(0,.9,0)).normalize();
@@ -247,7 +266,7 @@ function draw(){resize();renderer.render(scene,cam);if(!A)return;
   place('tokens',tokens.visible?tokens:null,6);place('card',card.visible?card:null,8);place('item',item.visible?item:null,8);
   parts.timer.firstChild.textContent=shown.tText||'';parts.signal.firstChild.textContent=sig.visible?((shown.sg||{}).color||'off'):'';parts.tokens.firstChild.textContent=tokens.visible?Math.floor(clamp((shown.tk||{}).n||0,0,tokOf))+' of '+tokOf:'';
   [['adult',A,shown.a||{}],['student',S,shown.s||{}]].forEach(q=>{const b=bubbles[q[0]],text=q[2].say;if(!text){b.style.display='none';if(b.textContent)b.textContent='';return;}if(b.textContent!==text)b.textContent=text;b.style.display='';
-    const hp=wp(q[1].B.head);hp.y+=.3*q[1].tall;const p2=toScreen(hp);b.style.left=clamp(p2[0],CW*.02+b.offsetWidth/2,CW*.98-b.offsetWidth/2).toFixed(1)+'px';const floorY=(parts.note.style.display==='none'?CH*.02:parts.note.offsetTop+parts.note.offsetHeight+CH*.012)+b.offsetHeight;b.style.top=Math.max(floorY,p2[1]-CH*.01).toFixed(1)+'px';});}
+    const hp=wp(q[1].B.head);hp.y+=q[1].top+.05;const p2=toScreen(hp);b.style.left=clamp(p2[0],CW*.02+b.offsetWidth/2,CW*.98-b.offsetWidth/2).toFixed(1)+'px';const floorY=(parts.note.style.display==='none'?CH*.02:parts.note.offsetTop+parts.note.offsetHeight+CH*.012)+b.offsetHeight;b.style.top=Math.max(floorY,p2[1]-CH*.01).toFixed(1)+'px';});}
 const ro=window.ResizeObserver?new ResizeObserver(()=>{if(resize())draw();}):null;if(ro)ro.observe(root);
 let gone=false;
 /* the models: the two people, the chairs they sit on and two more at a desk behind, the shelf by the wall, the cup of pencils */
@@ -258,7 +277,8 @@ const ready=Promise.all([model(PK.adult,skin(PK.adult)),model(PK.student,skin(PK
   [[1,AX,-.86,.3],[.93,SX,-.82,-.3],[.9,-1.7,-1.9,0],[.9,-2.3,-1.9,0]].forEach(([k,x,z,ry])=>{const c=gChair.clone(true);c.scale.multiplyScalar(k);c.rotation.y=ry;c.position.set(x,0,z);scene.add(c);});
   if(gShelf){const c=thing(gShelf,1.5,-Math.PI/2);c.position.set(1.72,0,WZ+.24);}
   if(gCup){const c=thing(gCup,.16,0);c.position.set(SX+.36,TY,-.58);}
-  const a=Person(ga,{x:AX,z:-.78,k:1,height:1.66,face:.3,seat:CS}),s=Person(gs,{x:SX,z:-.74,k:.86,height:1.32,face:-.3,seat:CS*.93});
+  /* a pack may say how tall each person is (height, in metres) and that the height is of the whole figure (whole) */
+  const a=Person(ga,{x:AX,z:-.78,k:1,height:+PK.adult.height||1.66,whole:!!PK.adult.whole,face:.3,seat:CS}),s=Person(gs,{x:SX,z:-.74,k:.86,height:+PK.student.height||1.32,whole:!!PK.student.whole,face:-.3,seat:CS*.93});
   A=a;S=s;set(lastSt);});
 ready.catch(()=>{});
 resize();renderer.render(scene,cam);

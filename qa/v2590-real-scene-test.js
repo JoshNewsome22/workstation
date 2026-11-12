@@ -1,6 +1,7 @@
 /* v25.90 (the BCBA, 11/12: real-looking people in the explainers, "starting with the FCT thinning one as a trial")
    the real-looking scene: simulated people with skeletons in a classroom of real-looking things (nbh-scene3d.js,
-   createReal) drawn from a pack carried as one script (nbh-scene3d-real.js), used by the FCT explainer only.
+   createReal) drawn from a pack carried as one script (nbh-scene3d-real.js). v25.90 used it for the FCT explainer only;
+   v25.91 (the BCBA, 11/12: "Go with your recommendations") for DRO and NCR as well, with fingers that close.
    0  the pack is in the folder and the offline list, carries its notice, names no address, and the page asks for it by
       name only when an explainer that uses it is opened; the page says the people are simulated;
    A  explain.html#fct draws the real-looking scene once the people have been read: the clay scene is hidden, the
@@ -11,7 +12,7 @@
    D  speech is a bubble of text over the picture;
    E  the picture is a function of the moment: going away and coming back puts every control where it was;
    F  the people move with the procedure: his arm goes to the card when he asks, hers to the signal when it changes;
-   G  the other explainers keep the clay scene, and coming back to FCT shows the real-looking one again at once;
+   G  DRO and NCR draw the real-looking scene too, each with its own parts; the pack is read once for all three;
    H  ?clay=1 and ?flat=1 never ask for the pack; where the pack cannot be read the clay scene stays and nothing breaks;
    I  opened from a folder (no server) the real-looking scene still draws;
    J  a phone's width: the picture fits and nothing is wider than the screen;
@@ -27,7 +28,7 @@ const W=path.join(L.ROOT,'NBH-Workstation'),EX=L.BASE+'/NBH-Workstation/explain.
   ok('0a the pack is in the folder and the offline list, under 9 MB, with its notice (simulated people, nothing about a student, Poly Haven CC0), and it names no address',
     sw.includes("'"+PACK+"'")&&pk.length<9e6&&/simulated/.test(head)&&/no real person/.test(head)&&/Nothing here is about a student/.test(head)&&/Poly Haven \(CC0\)/.test(head)&&!/https?:\/\//.test(pk),{len:pk.length,head:head.slice(0,200)});
   ok('0b explain.html asks for the pack by name, with no script tag for it (it is read only when an explainer that uses it is opened); practice.html does not name it; the scene script offers createReal',
-    /loadScript\('nbh-scene3d-real\.js'/.test(ex)&&!/<script[^>]+nbh-scene3d-real/.test(ex)&&!pr.includes(PACK)&&/createReal/.test(js)&&/REAL=\{fct:1\}/.test(ex));
+    /loadScript\('nbh-scene3d-real\.js'/.test(ex)&&!/<script[^>]+nbh-scene3d-real/.test(ex)&&!pr.includes(PACK)&&/createReal/.test(js)&&/REAL=\{fct:1,dro:1,ncr:1\}/.test(ex));
   ok('0c the page says the people are simulated, and its words fit the student shown (he asks, his card)',/The people are simulated, not real people/.test(ex)&&/He asks now \(touches his card\)/.test(ex)&&!/She asks/.test(ex));
 
   const ctx=await br.newContext({viewport:{width:1180,height:860},serviceWorkers:'block'});
@@ -35,10 +36,7 @@ const W=path.join(L.ROOT,'NBH-Workstation'),EX=L.BASE+'/NBH-Workstation/explain.
   await p.emulateMedia({reducedMotion:'reduce'});
   const E=(f,a)=>p.evaluate(f,a);
   const ready=pg=>pg.waitForFunction(()=>window.NBHExplain&&/^(ready|failed)$/.test(NBHExplain.get().realState),null,{timeout:90000}).then(()=>true,()=>false);
-  await p.goto(EX+'#dro');await sleep(900);
-  const before=await E(()=>({state:NBHExplain.get().realState,scenes:document.querySelectorAll('#exStage .nbh-scene3d').length}));
-  const askedBefore=asked.filter(u=>u.includes('nbh-scene3d-real')).length;
-  await p.click('[data-pick="fct"]');const got=await ready(p);await sleep(300);
+  await p.goto(EX+'#fct');const got=await ready(p);await sleep(300);
   const seek=t=>E(t=>{NBHExplain.seek(t);},t);
   const facts=()=>E(()=>{const g=NBHExplain.get(),R=document.querySelector('#exStage .nbh-scene3d-real'),C=document.querySelector('#exStage .nbh-scene3d:not(.nbh-scene3d-real)'),st=document.querySelector('#exStage').getBoundingClientRect();
     const parts={};if(R)[...R.querySelectorAll('.ns-part')].forEach(b=>{if(b.style.display==='none')return;const r=b.getBoundingClientRect();parts[b.dataset.part]={x:Math.round(r.left-st.left),y:Math.round(r.top-st.top),w:Math.round(r.width),h:Math.round(r.height),role:b.getAttribute('role'),tab:b.tabIndex,name:b.getAttribute('aria-label'),val:b.firstChild&&b.firstChild.textContent||'',inside:r.left>=st.left-1&&r.right<=st.right+1&&r.top>=st.top-1&&r.bottom<=st.bottom+1};});
@@ -48,8 +46,8 @@ const W=path.join(L.ROOT,'NBH-Workstation'),EX=L.BASE+'/NBH-Workstation/explain.
   const picture=()=>E(()=>{const c=document.querySelector('#exStage .nbh-scene3d-real canvas');NBHExplain.scene().redraw();const o=document.createElement('canvas');o.width=160;o.height=90;const x=o.getContext('2d');x.drawImage(c,0,0,160,90);const d=x.getImageData(0,0,160,90).data,seen={};let top=0;
     for(let i=0;i<d.length;i+=4){const key=(d[i]>>4)+','+(d[i+1]>>4)+','+(d[i+2]>>4);seen[key]=(seen[key]||0)+1;if(seen[key]>top)top=seen[key];}return {colours:Object.keys(seen).length,most:top/(160*90)};});
   await seek(2);const a=await facts(),pic=await picture();
-  ok('A the pack is asked for only when FCT is opened (not on the DRO explainer), the people are read, and the real-looking scene is on show with the clay one hidden: a named picture of many colours',
-    before.state===''&&before.scenes===1&&askedBefore===0&&got&&a.state==='ready'&&a.real&&a.realShown&&!a.clayShown&&a.role==='img'&&/simulated adult and student/.test(a.label||'')&&pic.colours>150&&pic.most<.5&&asked.filter(u=>u.includes('nbh-scene3d-real')).length===1,{before,askedBefore,a:{state:a.state,real:a.real,realShown:a.realShown,clayShown:a.clayShown,label:a.label},pic});
+  ok('A the pack is asked for once, the people are read, and the real-looking scene is on show with the clay one hidden: a named picture of many colours',
+    got&&a.state==='ready'&&a.real&&a.realShown&&!a.clayShown&&a.role==='img'&&/simulated adult and student/.test(a.label||'')&&pic.colours>150&&pic.most<.5&&asked.filter(u=>u.includes('nbh-scene3d-real')).length===1,{a:{state:a.state,real:a.real,realShown:a.realShown,clayShown:a.clayShown,label:a.label},pic});
   const need=['adult','student','signal','timer','papers','sheet','card'],bad=need.filter(k=>{const q=a.parts[k];return !q||q.w<44||q.h<44||!q.inside||q.role!=='button'||q.tab!==0||!q.name;});
   await seek(53);const red=await facts();
   ok('B at a moment on green the adult, the student, the signal, the timer, her papers, his picture and the request card each have a control (a name, a button, a tab stop, 44 px or more, inside the picture); the timer’s control carries the time on the page’s line and the signal’s its colour, on green and on red',
@@ -68,8 +66,12 @@ const W=path.join(L.ROOT,'NBH-Workstation'),EX=L.BASE+'/NBH-Workstation/explain.
   const minX=a2=>Math.min.apply(null,a2.map(q=>q.x)),maxY=a2=>Math.max.apply(null,a2.map(q=>q.y));
   ok('F the people move with the procedure: when he asks, his nearer hand goes toward the middle of the table (to his card); when the signal changes, one of her hands is up at the signal card, well above the table',
     h0.student&&h0.student.length===2&&h0.adult.length===2&&minX(h1.student)<minX(h0.student)-.06&&minX(h1.student)<.34&&maxY(h2.adult)>maxY(h0.adult)+.12,{h0,h1,h2});
-  await p.click('[data-pick="dro"]');await sleep(400);const g1=await facts();await p.click('[data-pick="ncr"]');await sleep(400);const g2=await facts();await p.click('[data-pick="fct"]');await sleep(300);const g3=await facts();
-  ok('G DRO and NCR keep the clay scene (the real-looking one hidden and unmarked), and FCT shows the real-looking scene again at once',g1.cur==='dro'&&g1.clayShown&&!g1.realShown&&!g1.real&&g1.on===''&&g2.cur==='ncr'&&g2.clayShown&&!g2.realShown&&g3.cur==='fct'&&g3.realShown&&!g3.clayShown&&g3.real,{g1:[g1.clayShown,g1.realShown,g1.on],g2:[g2.clayShown,g2.realShown],g3:[g3.clayShown,g3.realShown]});
+  await p.click('[data-pick="dro"]');await sleep(400);await seek(5);const g1=await facts(),gh0=await hands();await seek(26.6);const g1b=await facts(),gh1=await hands();
+  await p.click('[data-pick="ncr"]');await sleep(400);await seek(62);const g2=await facts();await p.click('[data-pick="fct"]');await sleep(300);const g3=await facts();
+  const minZ=a2=>Math.min.apply(null,a2.map(q=>q.z)),gp=g1.parts;
+  ok('G DRO draws the real-looking scene with its own parts (the sign, the timer, her papers, his work; no signal, no card), and at problem behavior his hands pull back from the work and what he says is a bubble; NCR draws it too, with her comment after the buzz as a bubble; FCT comes back at once, and the pack was read once for all three',
+    g1.cur==='dro'&&g1.realShown&&!g1.clayShown&&!!gp.note&&!!gp.timer&&!!gp.papers&&!!gp.sheet&&!gp.signal&&!gp.card&&/^student: No!$/.test(g1b.bubble)&&minZ(gh1.student)<minZ(gh0.student)-.08&&g2.cur==='ncr'&&g2.realShown&&!g2.clayShown&&/^adult: \(Name\)/.test(g2.bubble)&&g3.cur==='fct'&&g3.realShown&&!g3.clayShown&&asked.filter(u=>u.includes('nbh-scene3d-real')).length===1,
+    {g1:[g1.realShown,g1.clayShown,Object.keys(gp).join(',')],g1b:g1b.bubble,z:[minZ(gh0.student),minZ(gh1.student)],g2:[g2.realShown,g2.bubble],g3:[g3.realShown,g3.clayShown]});
   /* K speed */
   const times=await E(()=>{const ts=[];for(let i=0;i<24;i++){const t0=performance.now();NBHExplain.seek(3+i*5.3);ts.push(performance.now()-t0);}ts.sort((x,y)=>x-y);return {median:Math.round(ts[12]),worst:Math.round(ts[23])};});
   ok('K a moment is drawn quickly enough to scrub (median under 200 ms, worst under 800 ms, drawing in software here)',times.median<200&&times.worst<800,times);

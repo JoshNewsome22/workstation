@@ -135,7 +135,7 @@ function talk(t){return .35+.65*Math.abs(Math.sin(t*9.5));}
    interval from zero. The timeline is worked out from the interval, the break and the moments of problem behavior. */
 var DRO={key:'dro',name:'DRO, resetting',title:'DRO, resetting: a break for each interval of calm work',
   lead:'Each interval of work with no problem behavior earns a short break. Problem behavior restarts the interval from zero. Play it, drag it to any moment, change the interval, and add problem behavior where you like to see what the timer does.',
-  src:'Follows the steps of Form TD-1’s card <b>Earn a short break from work after each interval without problem behavior</b>, after Kodak et al. (2003). The people are drawn: it shows the rule, not a real session. The study ran with two 4-year-olds at home; timed breaks worked as well and need no reset. The card’s physical prompt and guiding back to the chair are restrictive and are not shown: they need district review and written consent first. Adapt every step to the student’s plan.',
+  src:'Follows the steps of Form TD-1’s card <b>Earn a short break from work after each interval without problem behavior</b>, after Kodak et al. (2003). The people are simulated, not real people: it shows the rule, not a real session. The study ran with two 4-year-olds at home; timed breaks worked as well and need no reset. The card’s physical prompt and guiding back to the chair are restrictive and are not shown: they need district review and written consent first. Adapt every step to the student’s plan.',
   params:{interval:10,brk:10},
   intervals:[10,20,30,60,90,120],
   example:function(P){return [{k:'pb',t:P.interval+P.brk+Math.min(6,P.interval*.6)}];},
@@ -259,7 +259,7 @@ function segAt(T,t){for(var i=0;i<T.segs.length;i++)if(t<T.segs[i].t1-1e-9||i===
 var NCR_SAY=['(Name), your book is open.','(Name), we are on page four.','(Name), that is the blue folder.','(Name), your pencil is on the desk.'];
 var NCR={key:'ncr',name:'NCR: attention on a timer',title:'NCR for attention: a comment each time the timer buzzes',
   lead:'A timer buzzes on a fixed schedule. At each buzz the adult gives the student one short neutral comment within 5 s, whatever the student is doing. Problem behavior does not move the timer. Play it, change the timer, and add problem behavior where you like to see that the schedule stays where it is.',
-  src:'Follows the steps of Form TD-1’s card <b>Fixed-time attention every minute, cued by a vibrating timer, for attention-maintained disruption during group lessons</b>, after Noel &amp; Getch (2016). The people are drawn: it shows the rule, not a real session. The study had two boys aged 10 and 12 in an after-school program, in 10-min lessons; the function was judged from interview and observation only, and the schedule was never thinned, so add a thinning plan and teach an appropriate way to ask for attention. The card does not say how adults respond to problem behavior between buzzes, or what to do when it comes just before a buzz: set both in the plan. Here the comment is given on time, as the card’s steps say. Adapt every step to the student’s plan.',
+  src:'Follows the steps of Form TD-1’s card <b>Fixed-time attention every minute, cued by a vibrating timer, for attention-maintained disruption during group lessons</b>, after Noel &amp; Getch (2016). The people are simulated, not real people: it shows the rule, not a real session. The study had two boys aged 10 and 12 in an after-school program, in 10-min lessons; the function was judged from interview and observation only, and the schedule was never thinned, so add a thinning plan and teach an appropriate way to ask for attention. The card does not say how adults respond to problem behavior between buzzes, or what to do when it comes just before a buzz: set both in the plan. Here the comment is given on time, as the card’s steps say. Adapt every step to the student’s plan.',
   params:{interval:60},
   intervals:[60,120,180],
   example:function(P){return [{k:'pb',t:P.interval*.42},{k:'pb',t:P.interval*2-3}];},
@@ -318,7 +318,7 @@ document.documentElement.classList.toggle('nbh-3d',USE3D);
    with skeletons in a classroom of real-looking things, for the explainers named in REAL. Its models are one script
    (nbh-scene3d-real.js), asked for only when such an explainer is opened; until it has been read, and wherever it
    cannot be (or with ?clay=1), the clay scene stays. Only the scene on show is drawn. */
-var REAL={fct:1},CLAY=/[?&]clay=1\b/.test(location.search),clay=scene,real=null,realState='';
+var REAL={fct:1,dro:1,ncr:1},CLAY=/[?&]clay=1\b/.test(location.search),clay=scene,real=null,realState='';
 function loadScript(src,ok,bad){var sc=document.createElement('script');sc.src=src;sc.onload=ok;sc.onerror=bad;document.head.appendChild(sc);}
 /* show the other scene; quiet: the caller draws (the explainer has just changed and its timeline is not built yet) */
 function useScene(s,quiet){if(scene===s)return;Object.keys(scene.parts).forEach(function(k){scene.parts[k].classList.remove('on');});scene.el.style.display='none';scene=s;scene.el.style.display='';if(!quiet){showPart(shownPart);draw(true);}}
