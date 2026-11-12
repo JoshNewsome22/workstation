@@ -50,3 +50,19 @@ The built file is committed, so `tools/build-release.sh` and `tools/check-build.
 Two rules learned the hard way:
 - No very large polygon. One 30 m floor was drawn across the whole picture at some camera angles; big surfaces are divided.
 - The lighting numbers are half-size floats, which every WebGL 2 device can smooth; full-size ones cannot be on some tablets.
+
+### v25.92: a second cast, and what the practice asks of a person
+
+- **A second cast.** `make-real.mjs SOURCES_DIR OUT.js NAME NOTICE` writes a pack under another name with another
+  notice: `NBH-Workstation/nbh-scene3d-style.js` (`window.NBHSceneStyle`, `banner-style.txt`) is the pair in the
+  style of an animated film, with a `sizes.json` that gives their heights as whole figures. `practice.html` hands it
+  to `createReal(host, {pack})`; `?cast=real` there asks for the explainers' own pack, `?clay=1` for the clay scene.
+- **A hand raised.** A place for a hand well above the table (35 cm and more) is read as a hand raised: the arm goes
+  up beside the head, where a short arm can reach and the hand shows, the hand open and in line with the forearm.
+  The flat scene's own place (far above the head) is not followed.
+- **Out of seat.** With `up` (the student only) the person stands and moves along, and the arms hang at the sides.
+- **Where the face points.** A made person's head is seldom square to the body. The face's direction is taken from
+  the head joint's own forward as the person was made, not from the body's front (the two teachers were 29 and 46
+  degrees off before this).
+- **A drawn character's proportions.** A `whole` figure leans less far to reach and tips its head less far down, so
+  that large hair does not cover the face.

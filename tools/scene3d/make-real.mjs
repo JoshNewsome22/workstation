@@ -4,7 +4,11 @@
 // window.NBHSceneReal to models and pictures carried as text. Each model is a small .glb with its pictures taken out
 // (the engine gives it its surface from the pictures beside it, so nothing has to be fetched while the model is read).
 //
-//   node make-real.mjs SOURCES_DIR OUT.js
+//   node make-real.mjs SOURCES_DIR OUT.js [NAME] [NOTICE]
+//
+// NAME is the name the pack is set under (window.NBHSceneReal unless given: a second cast is a second pack under its own
+// name, as nbh-scene3d-style.js is under NBHSceneStyle); NOTICE is the file beside this one that opens the pack
+// (banner-real.txt unless given).
 //
 // SOURCES_DIR holds the sources, which are NOT kept in the repository (see README.md, "The real-looking scene"):
 //   adult.glb, student.glb     simulated people with a 52-joint skeleton (names ending Hips, Spine, LeftArm, ...)
@@ -21,8 +25,8 @@ import { weld, simplify, quantize, prune, dedup } from '@gltf-transform/function
 import { MeshoptSimplifier } from 'meshoptimizer';
 import sharp from 'sharp';
 
-const [SRC, OUT] = process.argv.slice(2);
-if (!SRC || !OUT) { console.error('usage: node make-real.mjs SOURCES_DIR OUT.js'); process.exit(2); }
+const [SRC, OUT, NAME = 'NBHSceneReal', NOTICE = 'banner-real.txt'] = process.argv.slice(2);
+if (!SRC || !OUT || !/^[A-Za-z]\w*$/.test(NAME)) { console.error('usage: node make-real.mjs SOURCES_DIR OUT.js [NAME] [NOTICE]'); process.exit(2); }
 await MeshoptSimplifier.ready;
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
 const jpg = async (buf, px, q) => 'data:image/jpeg;base64,' + (await sharp(Buffer.from(buf)).resize(px, px, { fit: 'inside' }).jpeg({ quality: q, mozjpeg: true }).toBuffer()).toString('base64');
@@ -63,6 +67,6 @@ pack.shelf = await model('shelf.glb', 16000, { map: 1024 });
 pack.cup = await model('cup.glb', 6000, { map: 512 });
 pack.floor = await jpg(fs.readFileSync(path.join(SRC, 'floor.jpg')), 1024, 78);
 pack.maple = await jpg(fs.readFileSync(path.join(SRC, 'maple.jpg')), 512, 80);
-const banner = fs.readFileSync(new URL('./banner-real.txt', import.meta.url), 'utf8');
-fs.writeFileSync(OUT, banner + 'window.NBHSceneReal=' + JSON.stringify(pack) + ';\n');
+const banner = fs.readFileSync(new URL('./' + path.basename(NOTICE), import.meta.url), 'utf8');
+fs.writeFileSync(OUT, banner + 'window.' + NAME + '=' + JSON.stringify(pack) + ';\n');
 console.log(path.basename(OUT) + ': ' + fs.statSync(OUT).size + ' bytes');

@@ -9905,6 +9905,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.92: The people in the style of an animated film, in Practice counting
+(the BCBA, 11/12, after the example of 11/12: "Why isn't it possible to have the stylized people in the practice?" It is.)
+- **Practice counting draws the new scene, with the second cast.** The classroom of the explainers, with the teacher
+  and student in the style of an animated film that were sent as an example on 11/12 (they are now in the app, as
+  `nbh-scene3d-style.js`, 6.9 MB). Both practices use it: counting (a count, a duration, intervals) and "Comments on a
+  timer (you are the adult)". The clay figures show until the people have been read and wherever they cannot be;
+  `?clay=1` on the page's address keeps the clay figures, `?cast=real` shows the explainers' real-looking pair
+  there. The scene changes only between visits, never while one is being scored. The explainers keep the
+  real-looking pair: which pair they show is still the BCBA's choice.
+- **What the practice asks of a student that the explainers did not.**
+  - **A raised hand** goes up beside the head, open, where it shows. Before this the scene sent the hand to a place
+    above the head that a short arm could not reach, and it was hidden behind the head.
+  - **Out of seat:** the student stands, moves along the table, and the arms hang at the sides.
+  - **Calling out** is a speech bubble and a turn of the head, as before. **The faces do not move:** the clay
+    student opens the mouth to call out and frowns at problem behavior; these people do neither. In the NCR
+    practice the student says "I don't want to!" with the same smile.
+- **The teacher's face points where she looks, in the explainers too.** The head of each made person is turned a
+  little on the body (the real-looking teacher's by 29 degrees, the other teacher's by 46). The scene took the
+  body's front for the face, so she looked that far to one side of what she was looking at, and with the larger hair
+  of the second cast the face was hidden. The face's direction is now taken from the head itself.
+- **Not seen on an iPad:** this scene in the practice. The page now reads a 7 MB file when it opens (several
+  seconds on the test computer, which draws in software; the clay figures show meanwhile).
+- **The whole run on v25.91** (it was started after that version was cut): 525 tests, every test but the
+  offline-copy test. 23 did not pass at first run, none from a fault in the app as released: 13 were not passing
+  at v25.78, 4 are known since (the OPTION card count twice, one TD-1 alignment check, IA-1's flush), 4 pass when run
+  alone, link-te1-test also fails on v25.90 (a timing fault in its own comparison), and v2568-td1-versions-test
+  still expected 31 videos (corrected to 37).
+- **The test run.** The whole run was not repeated (it was run on v25.91, above). Run on the final copy, all passing: v2592-practice-real-test (11 checks), v2590-real-scene-test (15), v2578-scene3d-test, v2578-explain-test, v2578-practice-test, v2579-ncr-test, budget-test, v2206-version-test and v2211-docs-test. The offline-copy test was not run (not enough free disk in this session); tools/pwa-sw.py --check passes with the new file in its list (180 files).
 ### v25.91: Six videos, a small window for a playing video, and the real-looking people in all three explainers
 (the BCBA, 11/12, asked what was waiting on them and answered the list: "Go with your recommendations")
 - **Six videos into the app** (each was sent for review on 11/11; 37 videos now, 501 MB as saved by the offline copy):

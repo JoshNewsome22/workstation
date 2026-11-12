@@ -27,8 +27,8 @@ const W=path.join(L.ROOT,'NBH-Workstation'),EX=L.BASE+'/NBH-Workstation/explain.
   const head=pk.slice(0,pk.indexOf('window.NBHSceneReal='));
   ok('0a the pack is in the folder and the offline list, under 9 MB, with its notice (simulated people, nothing about a student, Poly Haven CC0), and it names no address',
     sw.includes("'"+PACK+"'")&&pk.length<9e6&&/simulated/.test(head)&&/no real person/.test(head)&&/Nothing here is about a student/.test(head)&&/Poly Haven \(CC0\)/.test(head)&&!/https?:\/\//.test(pk),{len:pk.length,head:head.slice(0,200)});
-  ok('0b explain.html asks for the pack by name, with no script tag for it (it is read only when an explainer that uses it is opened); practice.html does not name it; the scene script offers createReal',
-    /loadScript\('nbh-scene3d-real\.js'/.test(ex)&&!/<script[^>]+nbh-scene3d-real/.test(ex)&&!pr.includes(PACK)&&/createReal/.test(js)&&/REAL=\{fct:1,dro:1,ncr:1\}/.test(ex));
+  ok('0b explain.html asks for the pack by name, with no script tag for it (it is read only when an explainer that uses it is opened); practice.html asks for it the same way since v25.92 (v2592-practice-real-test); the scene script offers createReal',
+    /loadScript\('nbh-scene3d-real\.js'/.test(ex)&&!/<script[^>]+nbh-scene3d-real/.test(ex)&&!/<script[^>]+nbh-scene3d-real/.test(pr)&&/loadScript\('nbh-scene3d-real\.js'/.test(pr)&&/createReal/.test(js)&&/REAL=\{fct:1,dro:1,ncr:1\}/.test(ex));
   ok('0c the page says the people are simulated, and its words fit the student shown (he asks, his card)',/The people are simulated, not real people/.test(ex)&&/He asks now \(touches his card\)/.test(ex)&&!/She asks/.test(ex));
 
   const ctx=await br.newContext({viewport:{width:1180,height:860},serviceWorkers:'block'});

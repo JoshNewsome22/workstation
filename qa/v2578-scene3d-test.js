@@ -19,7 +19,7 @@
    Simulated people only. usage: node qa/v2578-scene3d-test.js   (WS_URL and WS_ROOT as in qa/lib.js) */
 const L=require(__dirname+'/lib.js');const {sleep}=L;const fs=require('fs'),path=require('path');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1400):''));if(!c)fails++;};
-const W=path.join(L.ROOT,'NBH-Workstation'),EX=L.BASE+'/NBH-Workstation/explain.html',PR=L.BASE+'/NBH-Workstation/practice.html';
+const W=path.join(L.ROOT,'NBH-Workstation'),EX=L.BASE+'/NBH-Workstation/explain.html',PR=L.BASE+'/NBH-Workstation/practice.html?clay=1';   /* the clay scene: since v25.92 the practice draws the real-looking people where it can (v2592-practice-real-test) */
 (async()=>{const br=await L.chromium.launch();const errs=[],outside=[];
  try{
   const js=fs.readFileSync(path.join(W,'nbh-scene3d.js'),'utf8'),sw=fs.readFileSync(path.join(W,'sw.js'),'utf8'),ex=fs.readFileSync(path.join(W,'explain.html'),'utf8'),pr=fs.readFileSync(path.join(W,'practice.html'),'utf8');

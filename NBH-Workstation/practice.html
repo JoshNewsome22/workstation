@@ -95,7 +95,7 @@ button,input,select{font:inherit;color:inherit}
     <a class="pr-btn" href="explain.html" id="prToExplain">Explainers</a>
     <a class="pr-btn" href="videos.html" id="prToVideos">Videos</a>
   </header>
-  <p class="pr-lead">A drawn student works at a table. Record the target behavior as you would in a classroom; when the scene ends, this page shows how closely your record agrees with what happened, and what you missed. Speech is shown as a bubble; there is no sound. Nothing here is a real student, and nothing you record is kept.</p>
+  <p class="pr-lead">A simulated student works at a table. Record the target behavior as you would in a classroom; when the scene ends, this page shows how closely your record agrees with what happened, and what you missed. Speech is shown as a bubble; there is no sound. Nothing here is a real student, and nothing you record is kept.</p>
   <div class="pr-grid">
     <main>
       <div class="pr-stage" id="prStage"><div class="pr-veil" id="prVeil"><div><small>Read the definition, then press Start.</small></div></div><div class="pr-tag" id="prTag" hidden></div></div>
@@ -227,13 +227,26 @@ var USE3D=!/[?&]flat=1\b/.test(location.search)&&!!window.NBHScene3D&&NBHScene3D
 if(USE3D){try{scene=NBHScene3D.create($('#prStage'),{label:'The practice scene: a drawn student at a table with an adult',tap:false});}catch(er){scene=null;var h3=document.querySelector('#prStage .nbh-scene3d');if(h3)h3.parentNode.removeChild(h3);}}
 if(!scene){USE3D=false;scene=N.create($('#prStage'),{label:'The practice scene: a drawn student at a table with an adult',tap:false});}
 document.documentElement.classList.toggle('nbh-3d',USE3D);
+/* v25.92 (the BCBA, 11/12, asked for the new people in the practice, in the animated-film style) the real-looking scene of
+   the explainers with its second cast: the people are one script (nbh-scene3d-style.js; ?cast=real asks for the
+   explainers' own, nbh-scene3d-real.js), read after the page has opened. Until then, and wherever it cannot be read or
+   drawn (or with ?clay=1), the clay scene stays. It is taken up only between visits, never while a scene is being scored. */
+var CLAY=/[?&]clay=1\b/.test(location.search),CAST=/[?&]cast=real\b/.test(location.search)?'real':'style',realState='',realNew=null;
+function loadScript(src,ok,bad){var sc=document.createElement('script');sc.src=src;sc.onload=ok;sc.onerror=bad;document.head.appendChild(sc);}
+function takeReal(){if(!realNew||phase==='ready'||phase==='run'||phase==='review')return;scene.el.style.display='none';scene=realNew;realNew=null;scene.el.style.display='';realState='ready';scene.set(stateAt(EV,t));}
+function gotCast(){var r=null,pack=CAST==='real'?window.NBHSceneReal:window.NBHSceneStyle;try{if(!pack)throw new Error('no cast');
+    r=NBHScene3D.createReal($('#prStage'),{pack:pack,label:'The practice scene: a simulated student at a table with an adult, in a classroom',tap:false});r.el.style.display='none';
+    r.ready.then(function(){realNew=r;realState='waiting';takeReal();},function(){realState='failed';try{r.destroy();}catch(e){}});
+  }catch(er){realState='failed';var h=document.querySelector('#prStage .nbh-scene3d-real');if(h)h.parentNode.removeChild(h);}}
+function noCast(){realState='failed';}
+if(USE3D&&!CLAY&&NBHScene3D.createReal){realState='loading';if(CAST==='real')loadScript('nbh-scene3d-real.js',gotCast,noCast);else loadScript('nbh-scene3d-style.js',gotCast,noCast);}
 var mode='count',len=60,pace='class',seed=1000+Math.floor(Math.random()*9000),EV=[],phase='idle',t=0,t0=0,raf=0,presses=[],spans=[],marks={},LOG=[],review=null,lastIv=-1;
 function seg(el,items,cur,attr){el.innerHTML=items.map(function(x){return '<button type="button" class="pr-btn" data-'+attr+'="'+x[0]+'" aria-pressed="'+(x[0]===cur)+'">'+esc(x[1])+'</button>';}).join('');}
 function setup(){seg($('#prModes'),Object.keys(MODES).map(function(k){return [k,MODES[k].name];}),mode,'mode');
   seg($('#prLens'),LENS.map(function(v){return [v,(v/60)+' min'];}),len,'len');seg($('#prPaces'),Object.keys(PACES).map(function(k){return [k,PACES[k]];}),pace,'pace');
   var M=MODES[mode];$('#prDef').innerHTML=M.def+'<ul>'+M.not.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';$('#prSeed').value=seed;$('#prCountL').textContent=M.unit;
   EV=mode==='ncr'?makeNcr(seed,len,pace):makeScene(seed,len,pace);if(phase==='idle'||phase==='done'){t=0;scene.set(stateAt(EV,0));}}
-function idle(msg){phase='idle';cancelAnimationFrame(raf);$('#prVeil').hidden=false;$('#prVeil').innerHTML='<div><small>'+esc(msg||'Read the definition, then press Start.')+'</small></div>';$('#prTag').hidden=true;
+function idle(msg){phase='idle';cancelAnimationFrame(raf);takeReal();$('#prVeil').hidden=false;$('#prVeil').innerHTML='<div><small>'+esc(msg||'Read the definition, then press Start.')+'</small></div>';$('#prTag').hidden=true;
   $('#prRec').disabled=true;$('#prRec').className='pr-rec';$('#prRec').textContent='Start the scene first';$('#prUndo').disabled=true;$('#prStart').textContent='Start';$('#prBar').style.width='0';$('#prIvs').hidden=true;$('#prCount').textContent='0';
   [].forEach.call(document.querySelectorAll('.pr-setup button,.pr-setup input'),function(b){b.disabled=false;});}
 function begin(){presses=[];spans=[];marks={};lastIv=-1;review=null;$('#prResult').hidden=true;phase='ready';var n=3,v=$('#prVeil');v.hidden=false;
@@ -291,7 +304,7 @@ function score(){var T=truth(EV,len,mode),L=looks(EV,mode),nb=Math.ceil(len/BIN)
     o.rows=[['Intervals you marked',o.yours+' of '+nb],['Intervals with a call-out',o.true_+' of '+nb],['Interval-by-interval agreement',o.main+'%','intervals where you and the true record agree, over all intervals'],['Scored-interval agreement',sT?pct(sA,sT)+'%':'–','of the intervals either record marked'],['Unscored-interval agreement',uT?pct(uA,uT)+'%':'–','of the intervals either record left blank']];
     o.lanes=[['What happened',la],['Your record',lb]];}
   o.items.sort(function(a,b){return a.t-b.t;});return o;}
-function finish(){phase='done';cancelAnimationFrame(raf);if(mode==='dur'&&spans.length&&spans[spans.length-1].t1===null)spans[spans.length-1].t1=len;
+function finish(){phase='done';cancelAnimationFrame(raf);takeReal();if(mode==='dur'&&spans.length&&spans[spans.length-1].t1===null)spans[spans.length-1].t1=len;
   var o=score();review=o;LOG.unshift(o);$('#prBar').style.width='100%';$('#prVeil').hidden=true;$('#prCount').textContent=mode==='count'?presses.length:o.yours;$('#prRec').disabled=true;$('#prRec').className='pr-rec';$('#prRec').textContent='The scene has ended';$('#prUndo').disabled=true;$('#prStart').textContent='Start again';
   [].forEach.call(document.querySelectorAll('.pr-setup button,.pr-setup input'),function(b){b.disabled=false;});
   $('#prResH').textContent=mode==='ncr'?'Your comments and the timer':'Your record and what happened';
@@ -332,7 +345,7 @@ document.addEventListener('keydown',function(e){if(phase!=='run'||e.altKey||e.ct
   var next=['PageDown','ArrowRight','ArrowDown',' ','Enter'].indexOf(e.key)>=0,back=['PageUp','ArrowLeft','ArrowUp','Backspace'].indexOf(e.key)>=0;if(!next&&!back)return;
   if((e.key===' '||e.key==='Enter')&&tg&&tg.tagName==='BUTTON'&&tg.id!=='prRec')return;   /* a button that has the focus keeps its own press */
   e.preventDefault();if(e.repeat)return;if(next)press();else undo();});
-window.NBHPractice={get:function(){return {mode:mode,len:len,pace:pace,seed:seed,EV:EV,phase:phase,t:t,presses:presses,spans:spans,marks:marks,review:review,LOG:LOG};},
+window.NBHPractice={scene:function(){return scene;},show:function(x){t=x;scene.set(stateAt(EV,t));},get:function(){return {real:!!scene.real,realState:realState,cast:CAST,mode:mode,len:len,pace:pace,seed:seed,EV:EV,phase:phase,t:t,presses:presses,spans:spans,marks:marks,review:review,LOG:LOG};},
   makeScene:makeScene,truth:truth,looks:looks,set:function(o){if(o.mode)mode=o.mode;if(o.len)len=o.len;if(o.pace)pace=o.pace;if(o.seed)seed=o.seed;setup();idle();},
   /* for the tests: record at given moments without waiting for the scene */
   run:function(rec){presses=[];spans=[];marks={};t=len;if(mode==='count')presses=rec.slice();else if(mode==='dur')spans=rec.map(function(x){return {t0:x[0],t1:x[1]};});else rec.forEach(function(i){marks[i]=true;});finish();return review;}};
