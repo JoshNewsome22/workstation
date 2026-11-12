@@ -9905,6 +9905,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.94: Daily data, "School years compared", redrawn
+(the BCBA, 11/12, with a picture of the part for two targets: "Can this part of the graphs look better?")
+- **What was wrong with it.** The graph was half the width of its card while the table under it ran the whole width;
+  the scale had two numbers (0 and the highest value) and no lines; the days had no numbers between the first and the
+  last; the two years were a thin dark blue line and a black one, hard to tell apart, with nothing on the days
+  themselves; and equal averages read "average 0 occurrences the same than 2025-26's (0%)".
+- **The graph now.** Wider (760 against 640). A faint line and a number at each round step of the scale (whole numbers
+  for a count). The school days numbered along the foot (1, 5, 10, 15, 20; by tens or more for a longer comparison). A
+  marker on each day, up to 40 days; a longer comparison is lines only.
+- **Telling the years apart.** Each school year has a colour and a marker shape of its own, and keeps them from one
+  year to the next: they follow the year it starts in, four in turn (a circle, a square, a triangle, a diamond; blue,
+  orange, green, yellow). The four colours were checked against each other, every pairing, for the three colour-vision
+  types and for ordinary sight. The yellow is pale on white, so no year depends on colour alone: besides the marker,
+  each line has its name at its end and in the key over the graph, and the table has the numbers. This school
+  year's markers are filled and its line is drawn last; an earlier year's markers are open.
+- **One day's values.** A tap or the pointer on the graph draws a line at the nearest school day and writes each year's
+  value for that day under the graph.
+- **The words and the numbers.** On a wide screen the sentence and the table stand beside the graph; the table is as
+  wide as its numbers need, and its numbers line up on the right. The sentence gives both averages: "2026-27's first 20
+  school days average 0.5 occurrences, 0.25 higher than 2025-26's 0.25 (100% higher), which is worse for this target."
+  Averages equal to two places read "the same as 2025-26's, which is no change for this target".
+- **On a phone** the graph keeps a readable size and moves sideways inside its own box. It used to make the whole page
+  wider than the screen.
+- **Not changed:** which days are compared, the rate per hour when the minutes observed differ, the numbers in the
+  table, and the caution under it. On paper it prints as on a narrow screen: the graph, then the sentence and the table.
+- **Not seen on an iPad.**
+- **The test run.** The whole run was not repeated (it was run on v25.91). Run on the final copy, all passing: v2594-cmp-test (8 checks), v2202-years-test, v2570-graphs-test, dd1-run-test, dd1-walk-test, budget-test, v2206-version-test and v2211-docs-test. The offline-copy test was not run (not enough free disk in this session); tools/pwa-sw.py --check passes (180 files).
 ### v25.93: The haze over the top bar of the installed app on an iPad
 (the BCBA, 11/12, with a picture of the top of the installed app: "Still has the white tint at the top of the page")
 - **What the picture showed.** The strip above the top bar (the iPad's status bar) is now the bar's dark colour, so the

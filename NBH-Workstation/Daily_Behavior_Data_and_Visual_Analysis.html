@@ -1668,9 +1668,23 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 .gsp-t{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}.gsp-t th,.gsp-t td{border-bottom:1px solid #dfe5e8;padding:6px 8px;text-align:left;vertical-align:top}
 .dd-ck>span:last-child{display:flex;align-items:center;gap:6px;min-height:44px;flex-wrap:wrap}#r_custom[hidden]{display:none!important}.dd-cmpn input{max-width:7em}.dd-ck>span:last-child{justify-content:flex-start}.dd-ck input[type=checkbox]{width:22px!important;height:22px!important;min-height:0!important;flex:0 0 22px;margin:0}.dd-ck input[type=number]{width:4.5em!important;min-width:0;flex:0 0 auto}.dd-sumbox{margin:0 0 10px}.dd-sumbox summary{cursor:pointer;font-weight:600;min-height:32px}
 .dd-sumlist{margin:6px 0;padding-left:18px}.dd-sumlist li{margin:4px 0}.dd-rng-l{margin:6px 0 10px}
-.dd-cmp h3{margin:0 0 8px}.dd-cmp-b{margin:10px 0 16px;break-inside:avoid}.dd-cmp-g{width:100%;max-width:640px;height:auto}
-.dd-cmp-key{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0;font-size:13px}.dd-cmp-key i{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}
-.dd-cmp-t{border-collapse:collapse;font-size:13px;margin:6px 0}.dd-cmp-t th,.dd-cmp-t td{border-bottom:1px solid #dfe5e8;padding:4px 10px;text-align:left}
+.dd-cmp h3{margin:0 0 8px}.dd-cmp-b{margin:14px 0 24px;break-inside:avoid}
+.dd-cmp-b h4{margin:0 0 6px}.dd-cmp-g{width:100%;max-width:760px;height:auto;display:block;touch-action:pan-y}
+.dd-cmp-key{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;margin:2px 0 4px;font-size:13px}
+.dd-cmp-key svg{vertical-align:middle;margin-right:6px}.dd-cmp-key i{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}
+.dd-cmp-t{border-collapse:collapse;font-size:13px;margin:6px 0;width:auto!important;min-width:min(100%,340px)}.dd-cmp-t th,.dd-cmp-t td{border-bottom:1px solid #dfe5e8;padding:5px 16px 5px 10px;text-align:left}
+.dd-cmp-t th:nth-child(n+2),.dd-cmp-t td:nth-child(n+2){text-align:right;font-variant-numeric:tabular-nums}
+.dd-cmp-read{font-size:13px;color:#3d4a55;min-height:1.5em;margin:2px 0 0;font-variant-numeric:tabular-nums}
+.dd-cmp-say{margin:2px 0 10px;font-size:15px;line-height:1.45;max-width:46em}
+/* v25.94 a wide screen: the graph on the left, what it says and its numbers beside it (the graph was half the width of
+   the card and the table ran the whole width under it) */
+@media screen and (min-width:1000px){.dd-cmp-2{display:grid;grid-template-columns:minmax(0,760px) minmax(300px,1fr);gap:8px 36px;align-items:start}.dd-cmp-r{padding-top:24px}}
+@media print{.dd-cmp-read{display:none}}
+/* a narrow screen: the graph keeps a readable size and moves sideways inside its own box (it used to make the whole page
+   wider than the screen), and the table's columns close up so that it fits */
+.dd-cmp-l{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dd-cmp-g{min-width:min(560px,100%)}
+@media screen and (max-width:700px){.dd-cmp-g{min-width:560px!important}.dd-cmp-t{min-width:0}.dd-cmp-t th,.dd-cmp-t td{padding:5px 8px 5px 6px}}
 </style>
 <style id="dd123-css">
 /* v24.23 the direction chip, the part-day sample, the decision line, the blank week's minutes and assent columns */
@@ -7573,25 +7587,55 @@ function ddRangeRows(rows){const s=S.settings||{},r=s.rng||"all",sum=s.rngSummer
 function ddCmpHtml(behs){const s=S.settings,N=Math.max(3,Math.min(180,parseInt(s.cmpN,10)||20)),sum=s.rngSummer!==false;
   const rows=[...S.rows].filter(r=>/^\d{4}-\d\d-\d\d$/.test(r.date||"")&&(sum||!ddSum(r.date))).sort((a,b)=>a.date.localeCompare(b.date));
   const years=[...new Set(rows.map(r=>ddSY(r.date)))].sort().slice(-4);if(years.length<2)return `<div class="panel dd-cmp"><h3>School years compared</h3><p class="hint">The record holds one school year so far. Link an earlier year's sheet (Daily data, Earlier school years) to compare.</p></div>`;
-  const COL=["#9AA5AE","#7A5B0B","#1F4E8C","#16242E"];let html=`<div class="panel dd-cmp"><h3>School years compared: the first ${N} school days</h3>`;
+  /* v25.94 (the BCBA, 11/12, with a picture: "Can this part of the graphs look better?") redrawn. A school year keeps its
+     colour and its marker from one year to the next (by the year it starts in, four in turn); the four colours were
+     checked against each other for the three colour-vision types and for ordinary sight, and the yellow, which is pale on
+     white, is why every line also carries a marker's shape, its name at its end, and the table. This school year's line
+     has filled markers and is drawn last; earlier years' markers are open. Whole steps on the scale, a faint line at
+     each; the days numbered along the foot. A tap or the pointer reads one day's values under the graph. */
+  const COL=["#184f95","#e0561f","#16a070","#d59a00"],slot=y=>((parseInt(y,10)||0)%4+4)%4,INK="#16242E",MUTE="#3d4a55";
+  const mark=(k,x,y,c,fill,r)=>{const a=`fill="${fill?c:"#fff"}" stroke="${fill?"#fff":c}" stroke-width="${fill?1.5:1.75}"`,p=n=>n.toFixed(1);
+    return k===0?`<circle cx="${p(x)}" cy="${p(y)}" r="${r}" ${a}/>`:k===1?`<rect x="${p(x-r*.9)}" y="${p(y-r*.9)}" width="${p(r*1.8)}" height="${p(r*1.8)}" ${a}/>`
+      :k===2?`<path d="M${p(x)} ${p(y-r*1.3)}L${p(x+r*1.25)} ${p(y+r*.95)}L${p(x-r*1.25)} ${p(y+r*.95)}Z" ${a}/>`:`<path d="M${p(x)} ${p(y-r*1.2)}L${p(x+r*1.2)} ${p(y)}L${p(x)} ${p(y+r*1.2)}L${p(x-r*1.2)} ${p(y)}Z" ${a}/>`;};
+  let html=`<div class="panel dd-cmp"><h3>School years compared: the first ${N} school days</h3>`;
   behs.forEach(b=>{const per=years.map(y=>{const R=rows.filter(r=>ddSY(r.date)===y).map(r=>({r,v:plotValue(r,b)})).filter(x=>x.v!==null&&isFinite(x.v)).slice(0,N);return {y,R};});
     if(per.filter(q=>q.R.length).length<2)return;
     /* counts are made comparable as a rate per hour when the minutes observed differ by more than a fifth between years */
     let rate=false;if(b.measure==="count"){const om=per.map(q=>{const m=q.R.map(x=>effObsMin(x.r)).filter(v=>v!==null&&v>0);return m.length>=0.8*q.R.length&&m.length?m.reduce((a,c)=>a+c,0)/m.length:null;});
       if(om.every(v=>v!==null)&&Math.max(...om)>1.2*Math.min(...om))rate=true;}
     const val=x=>rate?x.v/effObsMin(x.r)*60:x.v;per.forEach(q=>{q.V=q.R.map(val);q.mean=q.V.length?q.V.reduce((a,c)=>a+c,0)/q.V.length:null;});
-    const W=640,H=200,M={l:44,r:12,t:12,b:28},iw=W-M.l-M.r,ih=H-M.t-M.b,mx=Math.max(1,...per.map(q=>Math.max(0,...q.V))),X=i=>M.l+(N===1?0:i*iw/(N-1)),Y=v=>M.t+ih-v/mx*ih;
-    const g=[`<line x1="${M.l}" y1="${M.t+ih}" x2="${M.l+iw}" y2="${M.t+ih}" stroke="#16242E"/>`,`<line x1="${M.l}" y1="${M.t}" x2="${M.l}" y2="${M.t+ih}" stroke="#16242E"/>`,
-      `<text x="${M.l-6}" y="${M.t+8}" text-anchor="end" font-size="11" fill="#3d4a55">${r1(mx)}</text>`,`<text x="${M.l-6}" y="${M.t+ih}" text-anchor="end" font-size="11" fill="#3d4a55">0</text>`,
-      `<text x="${M.l}" y="${H-8}" font-size="11" fill="#3d4a55">School day 1</text>`,`<text x="${M.l+iw}" y="${H-8}" text-anchor="end" font-size="11" fill="#3d4a55">School day ${N}</text>`];
-    per.forEach((q,k)=>{if(!q.V.length)return;const c=COL[COL.length-per.length+k]||"#16242E";g.push(`<polyline fill="none" stroke="${c}" stroke-width="${k===per.length-1?2.2:1.6}" points="${q.V.map((v,i)=>X(i).toFixed(1)+","+Y(v).toFixed(1)).join(" ")}"/>`);});
+    const W=760,H=250,M={l:42,r:76,t:14,b:42},iw=W-M.l-M.r,ih=H-M.t-M.b,top=Math.max(1,...per.map(q=>Math.max(0,...q.V)));
+    /* the scale: round steps (1, 2, 5 and their tens), never less than 1 for a count, four or five of them */
+    const raw=top/4,p10=Math.pow(10,Math.floor(Math.log10(raw))),st0=[1,2,5,10].map(k=>k*p10).find(k=>k>=raw-1e-9)||10*p10,stp=b.measure==="count"&&!rate?Math.max(1,st0):st0,nt=Math.max(1,Math.ceil(top/stp-1e-9)),mx=nt*stp;
+    const X=i=>M.l+(N===1?0:i*iw/(N-1)),Y=v=>M.t+ih-v/mx*ih,g=[];
+    for(let k=0;k<=nt;k++){const y=Y(k*stp).toFixed(1);g.push(`<line x1="${M.l}" y1="${y}" x2="${M.l+iw}" y2="${y}" stroke="${k?"#e3e8ec":"#8f9ba5"}"/>`,`<text x="${M.l-8}" y="${(+y+4).toFixed(1)}" text-anchor="end" font-size="11" fill="${MUTE}">${r1(k*stp)}</text>`);}
+    const xs=N<=10?1:N<=24?5:N<=60?10:N<=120?20:30,days=[1];for(let d=xs;d<=N;d+=xs)if(d>1)days.push(d);if(N-days[days.length-1]>=xs*.6)days.push(N);
+    days.forEach(d=>{const x=X(d-1).toFixed(1);g.push(`<line x1="${x}" y1="${M.t+ih}" x2="${x}" y2="${M.t+ih+4}" stroke="#8f9ba5"/>`,`<text x="${x}" y="${M.t+ih+17}" text-anchor="middle" font-size="11" fill="${MUTE}">${d}</text>`);});
+    g.push(`<text x="${M.l+iw/2}" y="${H-6}" text-anchor="middle" font-size="11" fill="${MUTE}">School day</text>`,`<line class="dd-cmp-x" x1="0" y1="${M.t}" x2="0" y2="${M.t+ih}" stroke="#8f9ba5" style="visibility:hidden"/>`);
+    const dots=N<=40,ends=[];
+    per.forEach((q,k)=>{if(!q.V.length)return;const c=COL[slot(q.y)],cur=k===per.length-1,pts=q.V.map((v,i)=>X(i).toFixed(1)+","+Y(v).toFixed(1)).join(" ");
+      if(cur)g.push(`<path d="M${pts.split(" ").join("L")}" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>`);   /* a white edge where this year's line crosses another */
+      g.push(`<polyline fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts}"/>`);
+      /* this year's marker sits on a white disc, so an earlier year's marker at the same value does not show round its edges */
+      if(dots)q.V.forEach((v,i)=>g.push((cur?`<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="6.5" fill="#fff"/>`:"")+mark(slot(q.y),X(i),Y(v),c,cur,4)));
+      ends.push({y:Y(q.V[q.V.length-1]),x:X(q.V.length-1),t:q.y,cur});});
+    /* each line's name at its end, in the text's own colour, moved apart where two lines end together */
+    ends.sort((a,c)=>a.y-c.y);ends.forEach((e,k)=>{e.ly=k&&e.y-ends[k-1].ly<14?ends[k-1].ly+14:e.y;});
+    const over=ends.length?ends[ends.length-1].ly-(M.t+ih+4):0;if(over>0)ends.forEach(e=>{e.ly-=over;});
+    ends.forEach(e=>g.push(`<text x="${(e.x+10).toFixed(1)}" y="${(e.ly+4).toFixed(1)}" font-size="12" fill="${INK}"${e.cur?' font-weight="700"':""}>${esc(e.t)}</text>`));
     const last=per[per.length-1],prev=per[per.length-2],diff=last.mean!==null&&prev.mean!==null?last.mean-prev.mean:null;
-    const unit=rate?"per hour":(MEASURES[b.measure].unit||"");
+    const unit=rate?"per hour":(MEASURES[b.measure].unit||""),un=unit?" "+esc(unit):"";
+    /* what it says: the same to two places is "the same as", not "0 higher than" */
+    const same=diff!==null&&Math.round(Math.abs(diff)*100)===0,dir=diff<0?"lower":"higher",good=diff!==null&&!same&&(diff<0)===(b.direction==="decrease");
+    const say=diff===null?"":`<p class="dd-cmp-say">${esc(last.y)}'s first ${Math.min(N,last.V.length)} school days average ${r1(last.mean)}${un}, ${same?`the same as ${esc(prev.y)}'s`:`${r1(Math.abs(diff))} ${dir} than ${esc(prev.y)}'s ${r1(prev.mean)}${prev.mean?" ("+Math.round(Math.abs(diff)/prev.mean*100)+"% "+dir+")":""}`}, which is ${same?"no change":good?"better":"worse"} for this target.</p>`;
+    const data=encodeURIComponent(JSON.stringify({n:N,W,l:M.l,iw,u:unit,s:per.filter(q=>q.V.length).map(q=>[q.y,q.V.map(v=>Math.round(v*100)/100)])}));
     html+=`<div class="dd-cmp-b"><h4>${esc(b.name)}${rate?" <span class=\"hint\">(as a rate per hour: the minutes observed differ between the years)</span>":""}</h4>
-      <svg class="graph dd-cmp-g" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(b.name)}: the first ${N} school days of each school year">${g.join("")}</svg>
-      <p class="dd-cmp-key">${per.map((q,k)=>`<span><i style="background:${COL[COL.length-per.length+k]}"></i>${esc(q.y)}</span>`).join("")}</p>
-      <table class="dd-cmp-t"><thead><tr><th>School year</th><th>Days</th><th>Mean</th><th>Lowest</th><th>Highest</th></tr></thead><tbody>${per.map(q=>`<tr><td>${esc(q.y)}</td><td>${q.V.length}</td><td>${q.mean===null?"—":r1(q.mean)}</td><td>${q.V.length?r1(Math.min(...q.V)):"—"}</td><td>${q.V.length?r1(Math.max(...q.V)):"—"}</td></tr>`).join("")}</tbody></table>
-      ${diff===null?"":`<p>${esc(last.y)}'s first ${Math.min(N,last.V.length)} school days average ${r1(Math.abs(diff))} ${esc(unit)} ${diff<0?"lower":diff>0?"higher":"the same"} than ${esc(prev.y)}'s${prev.mean?" ("+Math.round(Math.abs(diff)/prev.mean*100)+"%)":""}, which is ${(diff<0)===(b.direction==="decrease")&&diff!==0?"better":diff===0?"no change":"worse"} for this target.</p>`}</div>`;});
+      <div class="dd-cmp-2"><div class="dd-cmp-l">
+      <p class="dd-cmp-key">${per.filter(q=>q.V.length).map(q=>{const c=COL[slot(q.y)],cur=q===last;return `<span><svg width="34" height="12" viewBox="0 0 34 12" aria-hidden="true"><line x1="1" y1="6" x2="33" y2="6" stroke="${c}" stroke-width="2" stroke-linecap="round"/>${mark(slot(q.y),17,6,c,cur,4)}</svg>${esc(q.y)}${cur?" (this school year)":""}</span>`;}).join("")}</p>
+      <svg class="graph dd-cmp-g" viewBox="0 0 ${W} ${H}" role="img" data-cmp="${data}" aria-label="${esc(b.name)}: the first ${N} school days of each school year">${g.join("")}</svg>
+      <div class="dd-cmp-read">Tap or point at the graph to read one day.</div></div>
+      <div class="dd-cmp-r">${say}
+      <table class="dd-cmp-t"><thead><tr><th>School year</th><th>Days</th><th>Mean</th><th>Lowest</th><th>Highest</th></tr></thead><tbody>${per.map(q=>`<tr><td>${esc(q.y)}</td><td>${q.V.length}</td><td>${q.mean===null?"—":r1(q.mean)}</td><td>${q.V.length?r1(Math.min(...q.V)):"—"}</td><td>${q.V.length?r1(Math.max(...q.V)):"—"}</td></tr>`).join("")}</tbody></table></div></div></div>`;});
   return html+`<p class="caution">A difference between school years can come from new staff, a new plan, a new classroom or schedule, not only from the student. Read it beside the graphs and the phase changes.</p></div>`;}
 {const rr0=renderResults;renderResults=function(){const s=S.settings;S.summer=S.summer||[];ddRangeOn=true;try{rr0.apply(this,arguments);}finally{ddRangeOn=false;}
   const set=(id,v,ck)=>{const e=document.getElementById(id);if(e){if(ck)e.checked=!!v;else e.value=v;}};
@@ -7600,6 +7644,12 @@ function ddCmpHtml(behs){const s=S.settings,N=Math.max(3,Math.min(180,parseInt(s
   const out=document.getElementById("resultsOut");if(!out)return;const info=`<p class="hint dd-rng-l">Showing: ${esc(ddRangeLabel())}${(S.summer||[]).length?(s.rngSummer!==false?" · summer school in":" · summer school left out"):""}.</p>`;
   const first=out.querySelector(".behavior-report,.kind-head");const sel=document.getElementById("r_behavior"),behs=sel&&sel.value!=="all"?S.behaviors.filter(b=>b.id===sel.value):orderedBehaviors();
   const add=info+(s.cmp?ddCmpHtml(behs):"");if(first)first.insertAdjacentHTML("beforebegin",add);else out.insertAdjacentHTML("beforeend",add);};}
+/* v25.94 a tap or the pointer on a comparison graph: a line at the nearest school day, and that day's value of each year under the graph */
+function ddCmpRead(e){const g=e.target&&e.target.closest&&e.target.closest("svg.dd-cmp-g");if(!g||!g.dataset.cmp)return;let d;try{d=JSON.parse(decodeURIComponent(g.dataset.cmp));}catch(x){return;}
+  const r=g.getBoundingClientRect();if(!r.width)return;const x=(e.clientX-r.left)/r.width*d.W,i=Math.max(0,Math.min(d.n-1,Math.round((x-d.l)/d.iw*(d.n-1)))),cx=d.l+(d.n===1?0:i*d.iw/(d.n-1));
+  const ln=g.querySelector(".dd-cmp-x");if(ln){ln.setAttribute("x1",cx.toFixed(1));ln.setAttribute("x2",cx.toFixed(1));ln.style.visibility="visible";}
+  const out=g.parentNode.querySelector(".dd-cmp-read");if(out)out.textContent="School day "+(i+1)+": "+d.s.map(q=>q[0]+" "+(q[1][i]===undefined||q[1][i]===null?"no day":r1(q[1][i]))).join(" · ")+(d.u?" ("+d.u+")":"");}
+document.addEventListener("pointermove",ddCmpRead);document.addEventListener("pointerdown",ddCmpRead);
 function ddSumPaint(){const L=document.getElementById("r_sumList");if(!L)return;const Q=S.summer||[];
   L.innerHTML=Q.length?Q.map((q,i)=>`<li>${esc(q.from?fmtDate(q.from):"?")} to ${esc(q.to?fmtDate(q.to):"?")} <button type="button" class="btn ghost sm" data-sumdel="${i}">Remove</button></li>`).join(""):"<li class=\"hint\">No summer school dates yet.</li>";}
 document.addEventListener("change",e=>{const t=e.target;if(!t||!t.id)return;const s=S.settings;
