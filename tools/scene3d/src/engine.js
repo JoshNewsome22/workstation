@@ -17,26 +17,10 @@
    carried inside this file. Source: tools/scene3d/. */
 import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
-import {ENV_W,ENV_H,ENV_RGBE} from './env.js';
+import {ok,LABEL,FONT,style,roomLight} from './shared.js';
+import {createReal} from './real.js';
+export {ok,createReal};
 
-export function ok(){try{const c=document.createElement('canvas');return !!(window.WebGL2RenderingContext&&c.getContext('webgl2'));}catch(e){return false;}}
-const LABEL={adult:'The adult',student:'The student',note:'The sign on the wall',signal:'The signal card',timer:'The timer',papers:'The adult’s papers',sheet:'The student’s work',tokens:'The token board',card:'The request card',item:'The item'};
-const FONT='Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif';
-let styled=false;
-function style(){if(styled)return;styled=true;const s=document.createElement('style');s.id='nbh-scene3d-css';s.textContent=
-'.nbh-scene3d{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#d9e3e1;font-family:'+FONT+';-webkit-user-select:none;user-select:none;touch-action:manipulation}'+
-'.nbh-scene3d canvas{display:block;width:100%;height:100%}'+
-'.ns3-over{position:absolute;inset:0;pointer-events:none}'+
-'.ns3-over .ns-part{position:absolute;box-sizing:border-box;pointer-events:auto;cursor:pointer;border-radius:14px;outline:none;-webkit-tap-highlight-color:transparent}'+
-'.ns3-over .ns-part:focus-visible{box-shadow:0 0 0 3px #fff,0 0 0 6px #2f7fa8}'+
-'.ns3-over .ns-part.on{box-shadow:0 0 0 3px #fff,0 0 0 6px #E2A93B}'+
-'.ns3-over .ns-part.on:focus-visible{box-shadow:0 0 0 3px #fff,0 0 0 6px #E2A93B,0 0 0 9px #2f7fa8}'+
-'.ns3-val{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}'+
-'.ns3-bubble{position:absolute;transform:translate(-50%,-100%);box-sizing:border-box;width:max-content;max-width:46%;background:#fff;border:.16em solid #1D3A52;border-radius:.9em;padding:.4em .8em;font-weight:600;font-size:1em;line-height:1.25;color:#16242e;text-align:center;pointer-events:none}'+
-'.ns3-bubble:after{content:"";position:absolute;left:50%;top:100%;margin-left:-.5em;border:.5em solid transparent;border-top-color:#1D3A52}'+
-'.ns3-over .ns3-note{left:50%;top:3.2%;transform:translateX(-50%);max-width:62%;min-height:44px;display:flex;align-items:center;background:#fbfaf5;border:.16em solid #1D3A52;border-radius:.6em;padding:.28em .9em;font-weight:700;font-size:.95em;line-height:1.25;color:#1D3A52;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 .12em .3em rgba(22,36,46,.25)}'+
-'.ns3-dim{position:absolute;inset:0;background:#16242e;opacity:0;pointer-events:none}';
-document.head.appendChild(s);}
 
 export function create(host,opt){
 opt=opt||{};style();
@@ -230,11 +214,8 @@ const bounce=new THREE.PointLight('#ffc27a',.07,1.6,2);bounce.position.set(0,TY+
 const gobo=canvasTex(256,256,(x,w,h)=>{x.fillStyle='#000';x.fillRect(0,0,w,h);x.filter='blur(5px)';x.fillStyle='#fff';for(let r=0;r<3;r++)for(let c=0;c<2;c++)x.fillRect(46+c*86,30+r*68,74,58);});
 const win=new THREE.SpotLight('#ffe0b0',230,0,.25,.35,2);win.position.set(-4.6,3.4,1.2);win.target.position.set(.15,1.5,-2.6);win.map=gobo;win.castShadow=true;win.shadow.mapSize.set(1024,1024);win.shadow.bias=-.0005;scene.add(win,win.target);
 
-/* the light of a real room, carried in this file: red, green, blue and a shared exponent, unpacked to numbers */
-/* half-size numbers: every device that draws WebGL 2 can smooth those, which is not so for full-size ones on some tablets */
-{const bin=atob(ENV_RGBE),n=ENV_W*ENV_H,f=new Uint16Array(n*4),H=x=>THREE.DataUtils.toHalfFloat(Math.min(x,65000)),one=H(1);for(let i=0;i<n;i++){const e=bin.charCodeAt(i*4+3),s=e?Math.pow(2,e-136):0;f[i*4]=H(bin.charCodeAt(i*4)*s);f[i*4+1]=H(bin.charCodeAt(i*4+1)*s);f[i*4+2]=H(bin.charCodeAt(i*4+2)*s);f[i*4+3]=one;}
-  const t=new THREE.DataTexture(f,ENV_W,ENV_H,THREE.RGBAFormat,THREE.HalfFloatType);t.mapping=THREE.EquirectangularReflectionMapping;t.colorSpace=THREE.LinearSRGBColorSpace;t.magFilter=t.minFilter=THREE.LinearFilter;t.flipY=true;t.needsUpdate=true;
-  const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromEquirectangular(t).texture;scene.environmentIntensity=.5;scene.environmentRotation.y=2.2;pm.dispose();t.dispose();}
+/* the light of a real room, carried in this file (unpacked in shared.js) */
+roomLight(renderer,scene,.5,2.2);
 function face(P,o){P.head.rotation.set(o.pitch||0,o.yaw||0,o.roll||0);const open=Math.min(1,Math.max(0,o.talk||0)),talking=open>.1;P.mouth.visible=talking;P.smile.visible=!talking;
   const wide=o.wide===undefined?-.5*open:o.wide;if(talking)P.mouth.scale.set(1+.3*wide,.3+.85*open,1+Math.max(0,-wide)*.9);P.smile.scale.setScalar(o.smile===undefined?1:o.smile);
   const lid=-.85+(o.lid||0)+(o.blink||0)*(1.95-(o.lid||0));P.lids.forEach(l=>l.rotation.x=lid);const sm=o.smile===undefined?1:o.smile;P.lids2.forEach(l=>l.rotation.x=1.0-(sm>1?.28:0)-(o.blink||0)*.25);P.balls.forEach(b=>b.rotation.set(o.gp||0,o.gy||0,0));

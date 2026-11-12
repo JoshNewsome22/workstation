@@ -194,7 +194,7 @@ var DRO={key:'dro',name:'DRO, resetting',title:'DRO, resetting: a break for each
    reinforcer is being given (the card does not say; the page says so). */
 var FCT={key:'fct',name:'FCT: green and red',title:'FCT schedule thinning: green for ask now, red for not now',
   lead:'While the signal is green every request is honored at once. While it is red a request gets no answer. Red starts very short and is lengthened only when the student is asking on green. Play it, add requests on green and on red, and lengthen red to see what changes.',
-  src:'Follows the steps of Form TD-1’s card <b>Functional communication training thinned with signals showing when requests will be honored</b>, after Greer et al. (2016b), with attention as the reinforcer, as in its video. The people are drawn: it shows the rule, not a real session. The study was a record review of clinic cases, with no data from home or school. Here the schedule’s clock waits while the reinforcer is being given; the card does not say, so set it in the plan. The card’s time-out and response blocking are restrictive and are not shown. For escape, withholding the break after problem behavior is escape extinction: complete TD-1’s consent block first. Adapt every step to the student’s plan.',
+  src:'Follows the steps of Form TD-1’s card <b>Functional communication training thinned with signals showing when requests will be honored</b>, after Greer et al. (2016b), with attention as the reinforcer, as in its video. The people are simulated, not real people: it shows the rule, not a real session. The study was a record review of clinic cases, with no data from home or school. Here the schedule’s clock waits while the reinforcer is being given; the card does not say, so set it in the plan. The card’s time-out and response blocking are restrictive and are not shown. For escape, withholding the break after problem behavior is escape extinction: complete TD-1’s consent block first. Adapt every step to the student’s plan.',
   params:{green:30,red:10,rf:20,away:false},
   reds:[2,5,10,20,30,60,120,240],
   example:function(P){var a=[{k:'req',t:5}];a.push({k:'req',t:P.green+P.rf+Math.min(P.red*.5,6)});a.push({k:'req',t:P.green+P.rf+P.red+4});return a;},
@@ -210,8 +210,8 @@ var FCT={key:'fct',name:'FCT: green and red',title:'FCT schedule thinning: green
       segs.push({t0:t,t1:end,k:ph,left0:left});t=end;ph=ph==='green'?'red':'green';left=ph==='green'?G:Rd;marks.push({t:t,k:ph,sw:1});}
     return {len:len,segs:segs,marks:marks};},
   can:function(T,t,kind,P){var seg=segAt(T,t);if(!seg)return false;if(seg.k==='rf')return false;if(seg.k==='red'&&P.away)return false;return true;},
-  why:function(kind,T,t,P){var seg=segAt(T,t);return seg&&seg.k==='rf'?'She already has what the request asks for.':'On red the card has been taken away, so she cannot ask with it.';},
-  buttons:[['req','She asks now (touches her card)','']],
+  why:function(kind,T,t,P){var seg=segAt(T,t);return seg&&seg.k==='rf'?'He already has what the request asks for.':'On red the card has been taken away, so he cannot ask with it.';},
+  buttons:[['req','He asks now (touches his card)','']],
   tally:function(T,t,P){var h=0,g=0;T.marks.forEach(function(m){if(m.t<=t+1e-9){if(m.k==='honored')h++;else if(m.k==='ignored')g++;}});var n=h+g;
     return [['Requests on green (honored)',h],['Requests on red (no answer)',g],['Asked on green',n?Math.round(100*h/n)+'%':'–'],['Red lasts',secs(P.red)]];},
   rule:['Show the “available” signal while requests are honored and the “unavailable” signal while they are not.','Honor every request on green, at once, with 20 or 30 s of the reinforcer. Give no reinforcer for destructive behavior.','Lengthen red from about 2 s toward 4 min when problem behavior is at least 90% below baseline and at least 70% of requests are made on green.','If the student keeps asking on red, take the request card away during red.','If problem behavior stays high, add a preferred item during red.'],
@@ -220,7 +220,7 @@ var FCT={key:'fct',name:'FCT: green and red',title:'FCT schedule thinning: green
     card:['The request card','The request taught in the first steps: touching it or handing it over. On green it is honored at once. If the student keeps asking on red, the card is taken away during red and put back on green.'],
     adult:['The adult','On green she answers a request at once and gives 20 or 30 s of her attention. On red she gives no answer and no look, and stays with her papers.'],
     student:['The student','Colors, and asks with the card. The aim is asking on green and waiting on red.'],
-    sheet:['Her picture','What she does between requests, and what the adult talks with her about when a request is honored.'],
+    sheet:['His picture','What he does between requests, and what the adult talks with him about when a request is honored.'],
     papers:['The adult’s papers','What the adult is busy with on red, and where she records requests on green and on red (Form DD-1).'],
     item:['The item','A preferred item added during red when problem behavior stays high: the study needed it in 6 of 25 applications.']},
   state:function(T,t,P){var seg=segAt(T,t),st={signal:{show:true},timer:{show:true},card:{show:true,label:'Talk'},papers:{show:true},sheet:{show:true,marks:clamp(.2+t/T.len,0,1)},adult:{},student:{}},A=st.adult,S=st.student,now='',step='',cls='';
@@ -239,14 +239,14 @@ var FCT={key:'fct',name:'FCT: green and red',title:'FCT schedule thinning: green
       S.look=[-.85,-.1];S.mouth=(Math.floor(t/2.4)%2===1)?'talk':'smile';S.talk=talk(t+.4);S.r=[1300,726];
       if(d2<3.4)A.say='Hi! Tell me about your picture.';
       if(e2<1){A.lean=tw(e2,1,0,.8,0);A.mouth='smile';S.mouth='smile';}
-      step='Green: request honored, '+N.clock(e2)+' with her';cls='green';now='<b>She asks on green: honored at once.</b> '+secs(P.rf)+' of the adult’s attention. The schedule’s clock waits.';
+      step='Green: request honored, '+N.clock(e2)+' with her';cls='green';now='<b>He asks on green: honored at once.</b> '+secs(P.rf)+' of the adult’s attention. The schedule’s clock waits.';
     }else if(ph==='green'){step='Green: '+N.clock(left)+' left';cls='green';now='<b>Green.</b> Every request is honored now, at once.';
-      if(sw&&t>=sw.t&&t-sw.t<2.5)now='<b>Red is over: back to green.</b> Her next request will be honored.';
+      if(sw&&t>=sw.t&&t-sw.t<2.5)now='<b>Red is over: back to green.</b> His next request will be honored.';
     }else{step='Red: '+N.clock(left)+' left';cls='red';now='<b>Red.</b> Not now: a request gets no answer and no look.'+(P.away?' The card is taken away until green.':'');
       var ig=null;T.marks.forEach(function(m){if(m.k==='ignored'&&m.t<=t+1e-9&&t-m.t<3)ig=m;});
       if(ig){var d3=t-ig.t;S.l=d3<1.4?N.tweenP(d3,0,.35,R.student.l,[990,712]):N.tweenP(d3,1.4,2,[990,712],R.student.l);st.card.lift=tw(d3,.25,.45,0,1)-tw(d3,1.2,1.4,0,1);
         S.look=d3<1.8?[-.85,-.1]:[.15,.9];S.mouth=d3<1.8?'flat':'rest';if(d3<1.8)S.r=[1300,726];
-        now='<b>She asks on red: no answer and no look.</b> The adult stays with her papers. It is counted as a request on red.';}
+        now='<b>He asks on red: no answer and no look.</b> The adult stays with her papers. It is counted as a request on red.';}
     }
     return {st:st,now:now,step:step,cls:cls};}
 };
@@ -314,6 +314,22 @@ var USE3D=!/[?&]flat=1\b/.test(location.search)&&!!window.NBHScene3D&&NBHScene3D
 if(USE3D){try{scene=NBHScene3D.create($('#exStage'),{label:'A drawn scene of the procedure: an adult and a student at a table'});}catch(er){scene=null;var h3=document.querySelector('#exStage .nbh-scene3d');if(h3)h3.parentNode.removeChild(h3);}}
 if(!scene){USE3D=false;scene=N.create($('#exStage'),{label:'A drawn scene of the procedure: an adult and a student at a table'});}
 document.documentElement.classList.toggle('nbh-3d',USE3D);
+/* v25.90 (the BCBA, 11/12: a trial on one explainer before the others change) the real-looking scene: simulated people
+   with skeletons in a classroom of real-looking things, for the explainers named in REAL. Its models are one script
+   (nbh-scene3d-real.js), asked for only when such an explainer is opened; until it has been read, and wherever it
+   cannot be (or with ?clay=1), the clay scene stays. Only the scene on show is drawn. */
+var REAL={fct:1},CLAY=/[?&]clay=1\b/.test(location.search),clay=scene,real=null,realState='';
+function loadScript(src,ok,bad){var sc=document.createElement('script');sc.src=src;sc.onload=ok;sc.onerror=bad;document.head.appendChild(sc);}
+/* show the other scene; quiet: the caller draws (the explainer has just changed and its timeline is not built yet) */
+function useScene(s,quiet){if(scene===s)return;Object.keys(scene.parts).forEach(function(k){scene.parts[k].classList.remove('on');});scene.el.style.display='none';scene=s;scene.el.style.display='';if(!quiet){showPart(shownPart);draw(true);}}
+function wantReal(quiet){var want=USE3D&&!CLAY&&!!REAL[cur.key]&&!!NBHScene3D.createReal;
+  if(!want||realState==='failed'){useScene(clay,quiet);return;}
+  if(realState==='ready'){useScene(real,quiet);return;}
+  if(realState)return;
+  realState='loading';
+  loadScript('nbh-scene3d-real.js',function(){var r=null;try{r=NBHScene3D.createReal($('#exStage'),{label:'A scene of the procedure: a simulated adult and student at a table in a classroom'});r.el.style.display='none';
+      r.ready.then(function(){real=r;realState='ready';if(REAL[cur.key])useScene(real);},function(){realState='failed';try{r.destroy();}catch(e){}});
+    }catch(er){realState='failed';var h=document.querySelector('#exStage .nbh-scene3d-real');if(h)h.parentNode.removeChild(h);}},function(){realState='failed';});}
 var reduce=false;try{reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
 
 function rebuild(keepT){T=cur.build(P,EV);var s=$('#exScrub');s.max=T.len;if(!keepT||t>T.len)t=Math.min(t,T.len);
@@ -349,7 +365,7 @@ function pick(key,keep){cur=EX[key]||DRO;P=JSON.parse(JSON.stringify(cur.params)
   document.title=cur.name+' · Explainers · FBA and BIP Workstation';$('#exLead').textContent=cur.lead;$('#exSrc').innerHTML=cur.src;
   $('#exRule').innerHTML=cur.rule.map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
   $('#exKey').innerHTML=cur.key_.map(function(k){return '<li><i class="'+k[0]+'" style="background:'+({work:'#BFD4D2','break':'#E8C873',green:'#7DBE96',red:'#DE8F7F',rf:'#E8C873',pb:'#8a2f1d',ignored:'#8a2f1d',earn:'#2E7A4B',honored:'#2E7A4B',wait:'#BFD4D2',com:'#E8C873',buzz:'#2E7A4B'}[k[0]])+(k[2]?';width:4px;height:16px':'')+'"></i>'+esc(k[1])+'</li>';}).join('');
-  showPart('');tryPanel();rebuild();try{if(location.hash.slice(1)!==cur.key)history.replaceState(null,'','#'+cur.key);}catch(e){}}
+  wantReal(true);showPart('');tryPanel();rebuild();try{if(location.hash.slice(1)!==cur.key)history.replaceState(null,'','#'+cur.key);}catch(e){}}
 function showPart(name){shownPart=name;var info=name&&cur.parts[name];Object.keys(scene.parts).forEach(function(k){scene.parts[k].classList.toggle('on',k===name&&!!info);});
   $('#exPart').innerHTML=info?'<b>'+esc(info[0])+'</b>'+esc(info[1]):'<span class="ex-hint">'+(name?'That part has no job of its own in this procedure.':'The timer, the signal, the card, the adult, the student: each says what it is for here.')+'</span>';}
 
@@ -367,7 +383,7 @@ document.addEventListener('keydown',function(e){var p=e.target.closest&&e.target
 $('#exScrub').addEventListener('input',function(e){t=+e.target.value;if(playing)play(false);draw();});
 window.addEventListener('hashchange',function(){var k=location.hash.slice(1);if(EX[k]&&EX[k]!==cur)pick(k);});
 /* in the workstation's Videos frame the links stay in the frame; on its own they are ordinary links */
-window.NBHExplain={EX:EX,get:function(){return {cur:cur.key,P:P,EV:EV,T:T,t:t,playing:playing};},seek:function(x){t=clamp(x,0,T.len);draw(true);},segAt:segAt};
+window.NBHExplain={EX:EX,get:function(){return {cur:cur.key,P:P,EV:EV,T:T,t:t,playing:playing,real:scene===real,realState:realState};},scene:function(){return scene;},seek:function(x){t=clamp(x,0,T.len);draw(true);},segAt:segAt};
 pick(EX[location.hash.slice(1)]?location.hash.slice(1):'dro');
 })();
 </script>

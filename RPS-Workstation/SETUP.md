@@ -9905,6 +9905,42 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.90: A trial of real-looking people in one explainer (FCT: green and red)
+(the BCBA, 11/12, after seeing test clips of a real-looking teacher and student in a classroom, asked whether to
+build them into the explainers in place of the clay figures, "starting with the FCT thinning one as a trial you check
+on your iPad before any others change": "Yes the explainer")
+- **What changed.** The explainer **FCT: green and red** (Explainers, in the video library) draws a classroom with two
+  real-looking people at a school table: a teacher and a boy of about eight, a whiteboard with the day on it, school
+  chairs, a shelf with bins, a cup of pencils. The timer, the signal card, the request card, his picture, her
+  clipboard and the item answer the page exactly as before: play, drag to any moment, add a request on green or on
+  red, lengthen red, take the card away on red, add an item on red, tap a part to read what it is for.
+- **Who the people are.** Nobody. Both are simulated: a picture made from a written description, turned into a 3D
+  model and given a skeleton so the arms, the back and the head can move. No real person was photographed or copied,
+  and nothing in the scene is about a student. The page says so ("The people are simulated, not real people").
+- **What they cannot do.** Their faces do not move: no talking mouth, no brows, no blink; the head turns to where the
+  clay figure's eyes went, and what is said is a bubble over the head as before. Their fingers do not close on a
+  thing: a hand lies on the card or beside the crayon. The teacher's face is less true at some angles than the
+  student's. These are limits of how the people were made, not settings.
+- **The words of that explainer** now fit the student shown: "He asks now (touches his card)", "His picture". The
+  procedure, its numbers and its sources are unchanged.
+- **Only this explainer.** DRO, NCR and the counting practice keep the clay figures, as do the drawn videos. Add
+  `?clay=1` to the explainer's address to see FCT with the clay figures again for comparison.
+- **How it is carried.** The people, the chair, the shelf, the cup and the two surface pictures are one file beside
+  the pages, nbh-scene3d-real.js (7 MB), read only when the FCT explainer is opened and saved with the offline copy.
+  Until it has been read (a moment on first opening) the clay figures show, and then the picture changes. If the file
+  cannot be read, or the device cannot draw 3D, the page keeps what it showed before (clay, or the flat drawing).
+  The one-file edition does not carry the file: there the explainers are as they were. Nothing is loaded from the
+  internet. The chair and the floor and table-top pictures are from Poly Haven (CC0).
+- **For whoever maintains it.** tools/scene3d/README.md, "The real-looking scene": the scene is
+  tools/scene3d/src/real.js (NBHScene3D.createReal, same state as the clay scene), the pack is written by
+  tools/scene3d/make-real.mjs, and the explainers that use it are the REAL list in explain.html.
+- **Not seen on an iPad.** Checked in Chromium on a computer, drawing in software: qa/v2590-real-scene-test.js
+  (15 checks: the parts and their controls, the bubble, the moments, the other explainers, no pack, from a folder, a
+  phone's width, speed). On the iPad three things could differ: how long the first opening takes before the picture
+  changes from clay, how smoothly it plays, and how the people look at the iPad's sharpness.
+- **The test run.** The whole run was not repeated. Run on the final copy: the new test and the tests named in the
+  commit. The offline-copy test was not run (not enough free disk in this session); tools/pwa-sw.py --check passes
+  with the new file in its list (167 files).
 ### v25.89: A PDF made by the page, where the installed app on an iPad gets no print options
 (the BCBA, 11/11, of the workstation opened from the Home Screen of an iPad: "it is not allowing me to select print";
 asked on 11/12 whether to build a Save as PDF for it: "yes")

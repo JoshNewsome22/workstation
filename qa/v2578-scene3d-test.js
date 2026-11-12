@@ -14,6 +14,8 @@
    G  ?flat=1, and a device that cannot draw 3D, get the flat drawing and nothing breaks;
    H  a narrow screen: the picture fits, nothing is wider than the screen, the controls stay at least 44 px;
    I  drawing a moment is quick enough to scrub (a generous limit: this machine draws in software).
+   v25.90: the FCT explainer draws the real-looking scene by default (qa/v2590-real-scene-test.js); this test opens it with
+   ?clay=1, which keeps the clay scene tested here.
    Simulated people only. usage: node qa/v2578-scene3d-test.js   (WS_URL and WS_ROOT as in qa/lib.js) */
 const L=require(__dirname+'/lib.js');const {sleep}=L;const fs=require('fs'),path=require('path');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1400):''));if(!c)fails++;};
@@ -45,7 +47,7 @@ const W=path.join(L.ROOT,'NBH-Workstation'),EX=L.BASE+'/NBH-Workstation/explain.
    ['adult','student','timer','papers','sheet','note'].every(n=>by(d5,n).shown)&&['signal','card','tokens','item'].every(n=>!by(d5,n).shown)&&shown(d5).every(q=>q.role==='button'&&q.tab===0&&q.label&&q.w>=44&&q.h>=44&&q.inside),d5.parts);
   const tm=by(d5,'timer').val,m=/(\d+:\d\d) left/.exec(d5.now);
   ok('B2 the timer’s control carries the time the timer shows, and it is the time in the page’s own line',/^\d+:\d\d$/.test(tm)&&m&&m[1]===tm,{tm,now:d5.now});
-  await p.goto(EX+'#fct');await p.reload();await p.waitForFunction(()=>window.NBHExplain&&document.querySelector('#exStage .nbh-scene3d canvas'),null,{timeout:30000}).catch(()=>{});await sleep(400);
+  await p.goto(EX+'?clay=1#fct');await p.reload();await p.waitForFunction(()=>window.NBHExplain&&document.querySelector('#exStage .nbh-scene3d canvas'),null,{timeout:30000}).catch(()=>{});await sleep(400);
   const f37=await parts(37);
   ok('B3 FCT on green: the signal shows and its control says green, the request card has a control, and the timer agrees with the page’s line',by(f37,'signal').shown&&by(f37,'signal').val==='green'&&by(f37,'card').shown&&/^Green/.test(f37.now)&&f37.now.includes(by(f37,'timer').val),{now:f37.now,sig:by(f37,'signal'),tm:by(f37,'timer').val});
   /* a red moment: find one from the page's own line */
