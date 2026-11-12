@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.93: The haze over the top bar of the installed app on an iPad
+(the BCBA, 11/12, with a picture of the top of the installed app: "Still has the white tint at the top of the page")
+- **What the picture showed.** The strip above the top bar (the iPad's status bar) is now the bar's dark colour, so the
+  fix of v25.84 for the pale strip works. What remains is a different thing: the top bar's own contents (the logo, the
+  places, Save case, Build packet, Finish PDF) are blurred, as if behind frosted glass, while the iPad's clock above
+  them and the row under the bar are sharp.
+- **Why.** Since iPadOS 26 the device draws a blur of its own over the top of a web app that is on the Home Screen:
+  the status bar and about 40 points under it, which is where the workstation's top bar is. It is meant for pages that
+  scroll under the status bar. No tag or style turns it off. By the reports of other developers it is not drawn where
+  a solid bar, the full width of the screen, is fixed to the top edge; the device then takes that bar's colour for the
+  status bar and leaves it alone. The workstation's top bar was solid and full width, but it was the first row of the
+  page's column, not fixed.
+- **The change.** In the installed app on an iPad or iPhone, the dark top bar is fixed to the top edge, and an empty
+  row of its height keeps everything under it where it was. Nothing on the page moves: the test compares the start
+  screen, an open menu and an open form with and without the change. In a browser tab, and on a computer, nothing
+  changes. `?edge=0` on the address turns the change off, `?edge=1` turns it on in any browser.
+- **Not seen on an iPad.** There is no iPad here and the blur cannot be reproduced without one, so this is the fix
+  others report, not one that was watched working. If the bar is still hazy after the update: the side-rail layout
+  (the places down the left) is not covered by this, and the next thing to try is a taller solid strip at the top edge.
+- **The test run.** The whole run was not repeated (it was run on v25.91). Run on the final copy, all passing: v2593-edge-test (7 checks), v2584-tint-test, v2591-mini-player-test, v2592-practice-real-test, shell-ui-test, budget-test, v2206-version-test and v2211-docs-test. The offline-copy test was not run (not enough free disk in this session); tools/pwa-sw.py --check passes (180 files).
 ### v25.92: The people in the style of an animated film, in Practice counting
 (the BCBA, 11/12, after the example of 11/12: "Why isn't it possible to have the stylized people in the practice?" It is.)
 - **Practice counting draws the new scene, with the second cast.** The classroom of the explainers, with the teacher
