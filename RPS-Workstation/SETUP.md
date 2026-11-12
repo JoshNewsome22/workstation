@@ -9905,6 +9905,27 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.88: Form TD-1, Versions from the studies as a list
+(the BCBA, 11/11, with three pictures of a response blocking card whose versions bar says "60 of 60 shown": "can this
+be designed better?")
+- **What was wrong with it.** The bar was drawn for the high-probability sequence when a component had a handful of
+  cards: one sideways row of chips. The bank has grown since: the largest component now has 217 cards, the one in the
+  pictures 60. A row showed four chips at a time, each cut to about 30 letters with dots, "started here" was cut off
+  at the chip's edge, there was no way to find a study but to swipe, and two greyed buttons sat under it before
+  anything could be compared.
+- **Now a list.** A row a study: the study and year, the whole line of what is special about it (never cut), and its
+  ages and function at the right. About six rows show, the rest by scrolling down; the row of the card opened is
+  brought into view and marked, with "started here" as a tag. On a phone a row stacks in one column.
+- **Finding a study.** Past 8 versions a box takes words (an author, a year, a word of the title, the behavior, the
+  ages or the function; every word must match) and the count says how many of how many; a button turns the order to
+  newest first and back. The filters are as they were. Opening a card from the bank's list empties the words.
+- **The buttons.** Before another study is picked there are none, only "Tap a study to compare it with this one".
+  After a pick: Side by side, Start from this version, and Back to the study it started from.
+- **Not changed:** what a pick does, What's different, Side by side, the saved case (nothing of the bar is saved).
+  The arrow keys move along the rows (Down and Up as well as Right and Left).
+- **The test run.** The whole run was not repeated. Run on the final copy: the new test
+  (qa/v2588-td1-versions-list-test.js, 15 checks), the versions test of v25.68 unchanged, and the Form TD-1 tests named
+  in the commit. The offline-copy test was not run (not enough free disk in this session).
 ### v25.87: Leaving full screen, made sturdier, with a Diagnostics line; the change line's label on Publication graphs
 (the BCBA, 11/11, two pictures of an iPad with no words: a video playing in the device's full-screen player, and the
 same video paused in the video library a second later)

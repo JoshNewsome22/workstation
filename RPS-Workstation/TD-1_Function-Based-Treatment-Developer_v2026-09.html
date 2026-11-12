@@ -7418,13 +7418,27 @@ ol.steps li.opt{color:#4a3a6b;background:#f3f0fa;border-radius:6px;padding:2px 6
 .vfil{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
 .vf{padding:5px 12px;border-radius:999px;font-weight:500;font-size:12.5px}
 .vf[aria-pressed=true],.vf[aria-pressed=true]:hover,.vsbs[aria-pressed=true],.vsbs[aria-pressed=true]:hover{background:var(--nbh-slate,#254657);border-color:var(--nbh-slate,#254657);color:#fff}
-.vchips{display:flex;gap:8px;margin:0;padding:2px 2px 8px;list-style:none;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
-.vchips li{flex:none;scroll-snap-align:start;margin:0}
-.vchip{display:block;min-height:44px;max-width:232px;padding:6px 11px;border-radius:8px;text-align:left;font-weight:400;font-size:12.5px;line-height:1.3}
-.vchip .vc{display:block;font-weight:600;color:var(--nbh-navy,#182e43);white-space:nowrap}
-.vchip .vbh{font-weight:400;color:var(--nbh-muted,#54676f)}
-.vchip .vs{display:block;max-width:208px;color:var(--nbh-muted,#54676f);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vchip[aria-current=true],.vchip[aria-current=true]:hover{background:var(--nbh-mist,#eaf2f0);border-color:var(--nbh-slate,#254657);box-shadow:inset 0 0 0 2px var(--nbh-slate,#254657)}
+/* v25.88 (the BCBA, 11/11, with pictures of a card that has 60 versions: "can this be designed better?") The versions were
+   one sideways row of chips: four in view of 60, each cut to 30 letters, "started here" cut off, and no way to find a
+   study but to swipe. Now a list: a row a study, with its year, the whole line of what is special, the ages and the
+   function; about six rows in view, the rest by scrolling; a box to find a study in (shown past 8 versions) and the
+   order turned round on request. The class names are the chips' (.vchips, .vchip), which the tests and the keys use. */
+.vfind{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 8px}
+.vfq{flex:1 1 240px;min-width:0;padding:7px 10px;border:1px solid var(--nbh-rule2,#93aead);border-radius:var(--nbh-radius,6px);background:#fff;color:var(--nbh-ink,#1a2933)}
+.vord{flex:none;font-weight:500}
+.vchips{margin:0 0 8px;padding:0;list-style:none;max-height:288px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border:1px solid var(--nbh-rule,#cfdad8);border-radius:6px;background:#fff}
+.vchips li{margin:0}
+.vchip{display:grid;grid-template-columns:minmax(150px,27%) minmax(0,1fr) auto;column-gap:14px;align-items:baseline;width:100%;min-height:44px;margin:0;padding:10px 12px 10px 14px;border:0;border-bottom:1px solid #eef2f1;border-radius:0;background:#fff;box-shadow:none;color:var(--nbh-ink,#1a2933);font-weight:400;line-height:1.35;text-align:left;transition:none}
+.vchips li:last-child .vchip{border-bottom:0}
+.vchip .vc{font-weight:600;color:var(--nbh-navy,#182e43)}
+.vchip .vbh{display:inline-block;margin-left:7px;padding:0 6px;border:1px solid var(--nbh-rule2,#93aead);border-radius:4px;background:#fff;font-size:12px;font-weight:600;color:var(--nbh-slate,#254657);white-space:nowrap}
+.vchip .vs{color:var(--nbh-ink,#1a2933)}
+.vchip .vm{color:var(--nbh-muted,#54676f);white-space:nowrap;text-align:right}
+.vchip[aria-current=true],.vchip[aria-current=true]:hover{background:var(--nbh-mist,#eaf2f0);box-shadow:inset 4px 0 0 var(--nbh-slate,#254657)}
+.vnone{margin:0;padding:12px 14px;color:var(--nbh-muted,#54676f)}
+.vchip:focus-visible{outline:3px solid var(--nbh-focus,#2f7fa8);outline-offset:-3px}
+.vtools [hidden]{display:none}
+@media (max-width:760px){.vchip{grid-template-columns:1fr;row-gap:1px}.vchip .vm{text-align:left;white-space:normal}}
 .vtools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .vnote{font-size:12.5px;color:var(--nbh-muted,#54676f)}
 .vdiff{margin:0 0 12px}
@@ -7472,7 +7486,7 @@ button{font-size:15px;min-height:44px}
 .gh{font-size:12px}
 .v,.tx,.steps,.as,.tan,.vtab,ol.vsteps,.punnote,.optnote,.rulenote{font-size:15px}
 .list{max-height:max(340px,60vh)}
-.vchips{padding-left:4px;scroll-padding-left:4px}
+.vchip .vs{font-size:14px}.vchip .vm,.vnone{font-size:13px}.vfq{font-size:16px;min-height:44px}
 /* v25.72 (T3) the row's tags: words in a box with a border, the colour only a help */
 .it .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
 .tg{display:inline-block;font-size:13px;font-weight:600;line-height:1.3;border-radius:999px;padding:2px 10px;border:1px solid #B07A00;background:#FFF3D3;color:#5C3D00}
@@ -7614,7 +7628,7 @@ function bankRule(p){
    versions in two columns, their sections and steps lined up (one column under 1000 px), each with Add this version to
    the plan, which adds that card exactly as Add to the plan does. Start from this version moves "started here". Nothing
    of it is saved: the bar, the filter and the columns are the panel's own state. */
-let base='',two=false,vfilt='all';
+let base='',two=false,vfilt='all',vfind='',vnew=false;   /* v25.88 vfind: the words typed to find a version; vnew: newest first */
 const PCODE={};ok.forEach(p=>{(PCODE[p.code]=PCODE[p.code]||[]).push(p);});
 const yearOf=p=>{const y=p.cmp&&+p.cmp.year;if(y)return y;const m=/\b(1[89]\d\d|20\d\d)/.exec(cites(p).join(' '));return m?+m[1]:9999;};
 const versOf=p=>(PCODE[p.code]||[]).map((x,i)=>[x,yearOf(x),i]).sort((a,b)=>a[1]-b[1]||a[2]-b[2]).map(x=>x[0]);
@@ -7637,14 +7651,20 @@ function vRows(a,b){if(a.cmp&&b.cmp)return {cmp:true,rows:CROWS.map(([k,l])=>({l
  const fnL=p=>fnWords(p)==='any function'?'Any function':fnWords(p).replace(/^./,c=>c.toUpperCase());
  return {cmp:false,rows:ks.map(k=>({l:k,a:(a.params||{})[k]||'Not given',b:(b.params||{})[k]||'Not given'})).concat([{l:'The study',a:vCite(a),b:vCite(b)},{l:'In the study',a:a.beh,b:b.beh},{l:'Ages',a:a.age||'Not given',b:b.age||'Not given'},{l:'Function',a:fnL(a),b:fnL(b)}])};}
 const vDiffN=(a,b)=>a.id===b.id?0:vRows(a,b).rows.filter(r=>vnorm(r.a)!==vnorm(r.b)).length;
+/* v25.88 the versions shown: the filter and the words typed (every word, in the study, the title, the behavior, the ages or the
+   function); the card shown and the one started from always stay; a row of the list; the count line */
+const vHay=x=>(vCite(x)+' '+x.lab+' '+(x.beh||'')+' '+(x.age||'')+' '+fnWords(x)).toLowerCase();
+function vShown(V){const ws=vfind.toLowerCase().split(/\s+/).filter(Boolean),S=V.filter(x=>x.id===cur||x.id===base||(vMatch(x,vfilt)&&ws.every(w=>vHay(x).includes(w))));return vnew?S.slice().reverse():S;}
+const vRow=x=>`<li><button type="button" class="vchip${x.id===base?' vbase':''}" data-v="${esc(x.id)}" aria-current="${x.id===cur?'true':'false'}"><span class="vc">${esc(vCite(x))}${x.id===base?'<span class="vbh">started here</span>':''}</span><span class="vs">${esc(vSpecial(x))}</span><span class="vm">${esc([x.age,fnWords(x)].filter(Boolean).join(' · '))}</span></button></li>`;
+const vCnt=(n,N)=>(n===N?N+' studies':n+' of '+N+' shown')+', '+(vnew?'newest':'oldest')+' first';
 function vBar(p){const V=versOf(p);if(V.length<2)return '';const b=byId[base]||p;
  const fl=VF.filter(([k])=>k==='all'||V.some(x=>vMatch(x,k)));if(!fl.some(x=>x[0]===vfilt))vfilt='all';
- const shown=V.filter(x=>vMatch(x,vfilt)||x.id===cur||x.id===base);
- const chips=shown.map(x=>`<li><button type="button" class="vchip${x.id===base?' vbase':''}" data-v="${esc(x.id)}" aria-current="${x.id===cur?'true':'false'}" title="${esc(x.lab)}"><span class="vc">${esc(vCite(x))}${x.id===base?'<span class="vbh"> · started here</span>':''}</span><span class="vs">${esc(vSpecial(x))}</span></button></li>`).join('');
- return `<section class="vers" aria-labelledby="tdVersH"><div class="vhd"><h5 class="vt" id="tdVersH">Versions from the studies</h5><span class="vcnt">${shown.length} of ${V.length} shown, oldest first</span></div>`+
+ const shown=vShown(V),pick=cur!==base;
+ return `<section class="vers" aria-labelledby="tdVersH"><div class="vhd"><h5 class="vt" id="tdVersH">Versions from the studies</h5><span class="vcnt">${esc(vCnt(shown.length,V.length))}</span></div>`+
+  (V.length>8?`<div class="vfind"><input type="search" class="vfq" value="${esc(vfind)}" placeholder="Find a study: an author, a year or a word" aria-label="Find a version among these ${V.length}" autocomplete="off" enterkeyhint="search"><button type="button" class="vord">${vnew?'Oldest first':'Newest first'}</button></div>`:'')+
   (fl.length>1?`<div class="vfil" role="group" aria-label="Show versions">${fl.map(([k,l])=>`<button type="button" class="vf" data-vf="${k}" aria-pressed="${k===vfilt?'true':'false'}">${esc(l)}</button>`).join('')}</div>`:'')+
-  `<ul class="vchips" role="list" aria-label="Versions from the studies, oldest first">${chips}</ul>`+
-  `<div class="vtools"><button type="button" class="vsbs" aria-pressed="${two&&cur!==base?'true':'false'}"${cur===base?' disabled':''}>Side by side</button><button type="button" class="vre"${cur===base?' disabled':''}>Start from this version</button><span class="vnote">${cur===base?'Pick a study to compare.':'Comparing with '+esc(vCite(b))+'.'}</span></div></section>`;}
+  `<ul class="vchips" role="list" aria-label="Versions from the studies">${shown.map(vRow).join('')}</ul>`+
+  `<div class="vtools"><button type="button" class="vsbs" aria-pressed="${two&&pick?'true':'false'}"${pick?'':' disabled hidden'}>Side by side</button><button type="button" class="vre"${pick?'':' disabled hidden'}>Start from this version</button>${pick?`<button type="button" class="vback">Back to ${esc(vCite(b))}</button>`:'<span class="vnote">Tap a study to compare it with this one.</span>'}</div></section>`;}
 function vTable(a,b){const same=a.id===b.id,R=vRows(a,b);let nd=0;
  const cell=(v,q)=>esc(v||'Not stated')+(q?'<span class="vq">“'+esc(q.length>220?q.slice(0,217)+'…':q)+'”</span>':'');
  const body=R.rows.map(r=>{const d=!same&&vnorm(r.a)!==vnorm(r.b);if(d)nd++;
@@ -7672,18 +7692,18 @@ const vMotion=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').mat
 const vLive=document.createElement('p');vLive.className='vh-sr';vLive.setAttribute('aria-live','polite');$p('.body').appendChild(vLive);
 function vSay(t){if(!vLive)return;vLive.textContent='';setTimeout(()=>{vLive.textContent=t;},60);}
 let vKeep=false;
-function vRender(focus){const ch=det.querySelector('.vchips'),sl=ch?ch.scrollLeft:0;vKeep=true;try{show(cur,true);}finally{vKeep=false;}const ch2=det.querySelector('.vchips');if(ch2)ch2.scrollLeft=sl;
+function vRender(focus){const ch=det.querySelector('.vchips'),sl=ch?ch.scrollTop:0;vKeep=true;try{show(cur,true);}finally{vKeep=false;}const ch2=det.querySelector('.vchips');if(ch2)ch2.scrollTop=sl;
  const f=focus?det.querySelector(focus):null;if(f){try{f.focus({preventScroll:true});}catch(e){}try{if(f.classList.contains('vchip'))f.scrollIntoView({block:'nearest',inline:'nearest'});}catch(e){}}}
 function vPick(id){const p=byId[id],b=byId[base];if(!p)return;cur=id;vRender('.vchip[aria-current="true"]');
  if(!b||b.id===p.id){vSay('Showing '+vCite(p)+', the version this started from.');return;}
  vSay('Showing '+vCite(p)+': '+p.lab+'. '+vDiffN(b,p)+' of '+vRows(b,p).rows.length+' rows differ from '+vCite(b)+'.');}
 function show(id,keep){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
-  if(!cur){base='';two=false;}else if(!keep||!byId[base]||byId[base].code!==p.code){base=cur;two=false;vfilt='all';}
+  if(!cur){base='';two=false;}else if(!keep||!byId[base]||byId[base].code!==p.code){base=cur;two=false;vfilt='all';vfind='';vnew=false;}
   listEl.querySelectorAll('.it').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===cur?'true':'false'));
   det.hidden=!cur;if(!cur){det.innerHTML='';return;}
   const L=LIBOF[p.code],refs=(p.src||[]).map(k=>REF[k]).filter(Boolean),prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
   const bar=vBar(p),bp=byId[base]||p,head=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>`+(bar?bar+vTable(bp,p):'');
-  if(!vKeep)setTimeout(()=>{const ch=det.querySelector('.vchips'),cc=ch&&ch.querySelector('.vchip[aria-current="true"]');if(ch&&cc){const d0=cc.getBoundingClientRect().left-ch.getBoundingClientRect().left;if(d0<0||d0+cc.offsetWidth>ch.clientWidth)ch.scrollLeft+=d0-8;}},0);   /* the card opened shows in the bar */
+  if(!vKeep)setTimeout(()=>{const ch=det.querySelector('.vchips'),cc=ch&&ch.querySelector('.vchip[aria-current="true"]');if(ch&&cc){const d0=cc.getBoundingClientRect().top-ch.getBoundingClientRect().top;if(d0<0||d0+cc.offsetHeight>ch.clientHeight)ch.scrollTop+=d0-(ch.scrollTop+d0>30?26:0);}},0);   /* the card opened shows in the list, with the foot of the row before it in view when there is one */
   if(bar&&two&&bp.id!==p.id){const M=Math.max(1,(bp.steps||[]).length,(p.steps||[]).length);det.innerHTML=head+`<div class="vsbs2">${vPane(bp,'Started from',M)}${vPane(p,'This version',M)}</div>`;sameNote();return;}
   det.innerHTML=head+loadHtml(p)+`
 <div class="vh">In the study</div><p class="tx">${esc(p.beh)}</p>
@@ -7756,6 +7776,8 @@ det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)retu
   if(b.classList.contains('vsbs')){two=!two;vRender('.vsbs');const bp=byId[base],p=byId[cur],g=det.querySelector('.vsbs2');vSay(two&&bp&&p?'Side by side: '+vCite(bp)+' and '+vCite(p)+'.':'One version shown: '+(p?vCite(p):'')+'.');
    /* the two columns come into view, the first column's heading taking the focus */
    if(two&&g){try{g.scrollIntoView({block:'start',behavior:vMotion()});}catch(x){g.scrollIntoView();}const h=g.querySelector('.vcolhd');if(h){h.tabIndex=-1;try{h.focus({preventScroll:true});}catch(x){}}}return;}
+  if(b.classList.contains('vback')){vPick(base);return;}
+  if(b.classList.contains('vord')){vnew=!vnew;vRender('.vord');const cc=det.querySelector('.vchips');if(cc)cc.scrollTop=0;vSay((vnew?'Newest':'Oldest')+' first.');return;}
   if(b.classList.contains('vre')){base=cur;two=false;vRender('.vchip[aria-current="true"]');vSay('Started from '+vCite(byId[cur])+' now.');return;}
   if(b.classList.contains('td-bshow')){show(b.dataset.show,true);return;}   /* a card the rule names: of the same component it reads as another version */
   const ld=b.closest('.load'),pid=(ld&&ld.dataset.id)||cur;
@@ -7763,9 +7785,12 @@ det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)retu
   else if(b.classList.contains('show')&&window.__tdScenes)window.__tdScenes.play(pid);
   else if(b.classList.contains('vid')&&window.__tdVideo)window.__tdVideo.play(pid,b);
   else if(b.classList.contains('pod')&&window.__tdPod)window.__tdPod.play(pid,b);});
-/* the chips: Left and Right move along them */
-det.addEventListener('keydown',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('.vchip');if(!b||(ev.key!=='ArrowRight'&&ev.key!=='ArrowLeft'))return;
-  const all=[...det.querySelectorAll('.vchip')],n=all[all.indexOf(b)+(ev.key==='ArrowRight'?1:-1)];if(n){ev.preventDefault();n.focus();try{n.scrollIntoView({block:'nearest',inline:'nearest'});}catch(x){}}});
+/* v25.88 the words typed to find a version: only the list and its count are drawn again, so the box keeps the keyboard */
+det.addEventListener('input',ev=>{const t=ev.target;if(!t||!t.classList||!t.classList.contains('vfq'))return;vfind=t.value;const p=byId[cur];if(!p)return;
+  const V=versOf(p),S=vShown(V),ul=det.querySelector('.vchips'),c=det.querySelector('.vcnt');if(ul){ul.innerHTML=S.map(vRow).join('');ul.scrollTop=0;}if(c)c.textContent=vCnt(S.length,V.length);});
+/* the rows: the arrow keys move along them */
+det.addEventListener('keydown',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('.vchip'),fw=ev.key==='ArrowRight'||ev.key==='ArrowDown';if(!b||(!fw&&ev.key!=='ArrowLeft'&&ev.key!=='ArrowUp'))return;
+  const all=[...det.querySelectorAll('.vchip')],n=all[all.indexOf(b)+(fw?1:-1)];if(n){ev.preventDefault();n.focus();try{n.scrollIntoView({block:'nearest',inline:'nearest'});}catch(x){}}});
 /* the function choices follow the plan's function; the note on cards already in the plan follows the cards */
 document.addEventListener('change',ev=>{if(ev.target&&ev.target.name==='m.fn'){fnFill();draw();}});
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;try{if(f&&f.student&&typeof f.student==='object')CASE.student=f.student;ageFill();fnFill();draw();}catch(x){}return r;};}
