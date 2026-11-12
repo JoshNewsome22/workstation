@@ -9905,6 +9905,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.96: three procedure videos on extinction
+(the BCBA, 11/12: "Yes" to the three extinction videos, and after seeing them: "Raise it. Also, the lip syncing is the
+only thing that's kind of off but the rest of the stuff from the videos is good.")
+- **The three videos**, each after one card of TD-1's protocol bank, in the full-picture frame with the step's name and
+  a panel of the steps in the picture, narrated, the adult's own lines voiced:
+  - **Escape extinction: the wait out** (3:05), card ext-wait-out-task-removal, after Ward et al. (2017). Work at her
+    level with reinforcement; at a protest one short sentence and the materials slid away; the adult turns away and
+    offers nothing else; after five seconds of calm and a look, the materials come closer and "Are you ready?"; the
+    work and the attention come back when she is ready.
+  - **Attention extinction: planned ignoring** (2:23), card ext-planned-ignoring-whining, after R. V. Hall et al.
+    (1972). A definition and tally sheets; a baseline of how adults answer; turning away without comment and going on
+    with another activity; no comfort, arguing or "stop"; every adult the same, all day.
+  - **Kind extinction: comfort, not the item or the break** (3:14), card ext-kind-extinction, after C. Tarbox et al.
+    (2026). A quick choice of items; teaching with no physical prompts; 30 seconds with the item for a request or a
+    response without problem behavior; at a tantrum comfort and validation at once, but not the item or the break;
+    the item after a calm response.
+- **Where they are.** The video library, under a new procedure, **Extinction** (a filter chip and a shelf of its own),
+  and Watch how on each of the three cards in Form TD-1. 40 videos in all (37 until now).
+- **The cautions are in the picture.** Each video ends with "Before you start": the study's numbers, and the card's
+  cautions (the wait out is restrictive and needs the escape-extinction consent block; ignoring alone was what the
+  study used, so pair it with attention for calm speech and plan for a burst, and never ignore unsafe behavior; kind
+  extinction is only for behavior shown not to be maintained by attention).
+- **Problem behavior is shown mildly:** a page pushed away, folded arms, a whining face, a reach for the item. No
+  hitting and no self-injury. The people and the room are simulated.
+- **The adult's lips.** The pictures were made without sound and her lines were voiced separately, so her lips do not
+  form the words. For this release each line was fitted to the stretch in which her lips move (its start, and its pace
+  by up to a fifth; in one shot the stretch itself was shortened). The narrator's voice is the recording as it was
+  made, unchanged. A lip-sync pass that redraws her mouth to the words is possible but is a paid job, not run.
+- **The size.** The three add about 47 MB to the folder (a video is kept as text so the offline copy saves it whole,
+  which is a third larger than the file). The limit the release check allows for the videos was raised from 520 MB to
+  560 MB, as approved.
+- **Not seen on an iPad.**
+- **The test run.** Targeted tests only, all passing: the video library's list and filters (v2569), the library page's layout (v2572-videos), captions and transcripts (v2572-transcript), TD-1's Watch how (v2568-td1-versions), the mini player (v2591) and the size budget. The whole run was not repeated (the last whole run was at v25.91).
 ### v25.95: Daily data, a trend of the whole record and a trend of each school year
 (the BCBA, 11/12: "The trend line starting from the first data point until the last data point across both phases and
 then trend lines that are just based on the actual phase. For example, if a graph has three school years, there should

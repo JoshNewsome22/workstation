@@ -1,6 +1,6 @@
 """v22.12 (review I258, F507): the shipped forms are exactly what the tools make.
 
-Copies NBH-Workstation and tools/ to a scratch folder, runs every patcher that keeps the forms current (the polish and
+Copies NBH-Workstation (the procedure videos as links, v25.96) and tools/ to a scratch folder, runs every patcher that keeps the forms current (the polish and
 writing help, the shared blocks, the case flow, the bridge's csv verb, the field names, the letterhead, the TB-1
 library and its replacement-behavior library, the TK-1/TE-1 link and the per-form hooks), plus the --check of the ones
 that have one (v25.67: the fx2 screen layout, patch-fx2.py), and compares the result with the folder, byte for byte. A
@@ -20,7 +20,16 @@ folder = sys.argv[1] if len(sys.argv) > 1 else 'NBH-Workstation'
 src = os.path.join(ROOT, folder)
 tmp = tempfile.mkdtemp(prefix='nbh-check-build-')
 try:
-    shutil.copytree(src, os.path.join(tmp, 'NBH-Workstation'))
+    def cp(a, b):
+        # v25.96 the procedure videos (nbh-td1-video-*.js, about 550 MB of the folder's 680) are linked, not copied: no tool
+        # writes them, and a second copy did not fit the disk of a small build machine. Copied where a link cannot be made.
+        if os.path.basename(a).startswith('nbh-td1-video-'):
+            try:
+                os.symlink(a, b); return b
+            except OSError:
+                pass
+        return shutil.copy2(a, b)
+    shutil.copytree(src, os.path.join(tmp, 'NBH-Workstation'), copy_function=cp)
     shutil.copytree(os.path.join(ROOT, 'tools'), os.path.join(tmp, 'tools'), ignore=shutil.ignore_patterns('__pycache__'))
     os.chdir(tmp)
     forms = sorted(f for f in glob.glob('NBH-Workstation/[A-Z]*.html'))

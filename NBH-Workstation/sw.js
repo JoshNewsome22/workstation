@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = '1dceefcdacff';
+const VERSION = '949630072e0d';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -187,6 +187,9 @@ const FILES = [
   'nbh-td1-video-prompt-ltm.js',
   'nbh-td1-video-prompt-mtl.js',
   'nbh-td1-video-prompt-delay.js',
+  'nbh-td1-video-ext-wait-out.js',
+  'nbh-td1-video-ext-planned-ignoring.js',
+  'nbh-td1-video-ext-kind.js',
   'nbh-td1-poster-fct.jpg',
   'nbh-td1-poster-highp.jpg',
   'nbh-td1-poster-highp-praise.jpg',
@@ -224,6 +227,9 @@ const FILES = [
   'nbh-td1-poster-prompt-ltm.jpg',
   'nbh-td1-poster-prompt-mtl.jpg',
   'nbh-td1-poster-prompt-delay.jpg',
+  'nbh-td1-poster-ext-wait-out.jpg',
+  'nbh-td1-poster-ext-planned-ignoring.jpg',
+  'nbh-td1-poster-ext-kind.jpg',
   'nbh-pod-romaniuk-2002.js',
   'nbh-gb1-bank.js',
   'nbh-sm1-narration.js',
