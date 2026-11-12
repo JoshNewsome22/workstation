@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = 'fbe7f8124378';
+const VERSION = '0fcd5f87f7c6';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -126,6 +126,8 @@ const FILES = [
   'apple-touch-icon.png',
   'nbh-media.js',
   'nbh-shell-docread.js',
+  'nbh-html2canvas.js',
+  'nbh-pdf-make.js',
   'nbh-respond.js',
   'nbh-pictos.js',
   'nbh-pictures.js',

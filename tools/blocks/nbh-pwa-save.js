@@ -5,7 +5,8 @@
      finished PDF) goes to the share sheet, where Save to Files keeps it on the device and Mail or AirDrop send it on.
    - A window the page opens for a page of its own making (the master print, the respondent page's preview, the pop-up
      test): the app cannot show a second window, so it opens inside the app, over the page, with Print and Close.
-   - Printing. When the print options have not appeared a few seconds after Print, a notice says how to print instead.
+   - Printing. When the print options have not appeared a few seconds after Print, the page offers to make a PDF of its
+     printed pages itself (v25.89), which the share sheet prints, keeps or sends.
    Everywhere else nothing changes: in a Safari tab, on a computer, installed on a Mac or with Chrome or Edge, this block
    stops at its first test and touches nothing; on an iPad that cannot share files only the saving part stays off.
    Every save in the forms and the shell is a link with a download name, clicked from script, so the link's click is
@@ -62,18 +63,103 @@
   /* ---------------- printing: the print options should appear within moments of Print */
   var NOPRINT = 'If no print options appeared, this iPad does not print from the installed app. Save the case (or the ' +
     'form’s data), open the workstation in Safari, open the file there and print from Safari, or print on a computer.';
+  /* v25.89 (the BCBA, 11/11: "it is not allowing me to select print") Where the print options do not appear, the page
+     offers to make a PDF of its printed pages itself (nbh-pdf-make.js, with nbh-html2canvas.js, both beside the forms and
+     loaded only when asked for): the PDF goes to the share sheet, which prints it, keeps it in Files or sends it. That
+     the device gave no print options is remembered on the device (localStorage nbh.noprint, no student), so the next
+     Print goes straight to the offer; "Try Print again" asks the device once more, and forgets it when the options come. */
+  var NOKEY = 'nbh.noprint';
+  function noPrint() { try { return W.localStorage.getItem(NOKEY) === '1'; } catch (e) { return false; } }
+  function setNoPrint(v) { try { if (v) W.localStorage.setItem(NOKEY, '1'); else W.localStorage.removeItem(NOKEY); } catch (e) {} }
+  function loadScript(src) {
+    return new Promise(function (res, rej) {
+      var s = document.createElement('script'); s.src = src;
+      s.onload = function () { res(); }; s.onerror = function () { rej(new Error(src + ' did not load')); };
+      (document.head || document.documentElement).appendChild(s);
+    });
+  }
+  function pdfReady() {
+    return (typeof window.html2canvas === 'function' ? Promise.resolve() : loadScript('nbh-html2canvas.js'))
+      .then(function () { return typeof window.nbhPdfMake === 'function' ? null : loadScript('nbh-pdf-make.js'); });
+  }
+  var pdfBox = null;   /* the offer's window while it is open (the name offer is the saving part's) */
+  function offerPdf(win, said, native) {
+    if (pdfBox) return;
+    if (!document.body) { (said || toast)(NOPRINT, 'warn'); return; }
+    var modal = typeof HTMLDialogElement === 'function', before = document.activeElement, file = null, busy = false;
+    var box = pdfBox = document.createElement(modal ? 'dialog' : 'div');
+    box.id = 'nbhPdfOffer'; box.setAttribute('data-html2canvas-ignore', 'true'); box.setAttribute('aria-labelledby', 'nbhPdfOfferT');
+    if (!modal) { box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); }
+    box.style.cssText = 'position:fixed;left:50%;right:auto;top:auto;bottom:18px;transform:translateX(-50%);z-index:2147483200;box-sizing:border-box;' +
+      'width:min(580px,calc(100% - 28px));max-height:calc(100% - 36px);overflow:auto;margin:0;padding:16px 18px 14px;border:1px solid #c9d4d2;border-radius:10px;' +
+      'background:#fff;color:#16242e;font:15px/1.45 system-ui,-apple-system,sans-serif;box-shadow:0 18px 44px -14px rgba(22,36,46,.55)';
+    var el = function (tag, text, css) { var x = document.createElement(tag); if (text) x.textContent = text; if (css) x.style.cssText = css; return x; };
+    var t = el('b', 'Print or save these pages', 'display:block;margin:0 0 6px;color:#182e43;font:600 17px/1.3 Georgia,serif'); t.id = 'nbhPdfOfferT';
+    var p1 = el('p', 'This iPad does not show print options inside the installed app. The workstation can make a PDF of these pages. From the PDF you can print, save to Files or send it.', 'margin:0 0 6px');
+    var p2 = el('p', 'The PDF is a picture of each page: it prints as it looks, and its words cannot be searched.', 'margin:0 0 10px;color:#54676f;font-size:13.5px');
+    var st = el('p', '', 'margin:0 0 10px;min-height:1.45em;color:#182e43;font-weight:600'); st.setAttribute('role', 'status');
+    var row = el('div', '', 'display:flex;flex-wrap:wrap;gap:8px');
+    var mk = button('Make the PDF', true), again = native ? button('Try Print again') : null, cl = button('Close');
+    row.appendChild(mk); if (again) row.appendChild(again); row.appendChild(cl);
+    var ps = el('style', '@media print{#nbhPdfOffer{display:none!important}}');   /* never on paper */
+    box.appendChild(ps); box.appendChild(t); box.appendChild(p1); box.appendChild(p2); box.appendChild(st); box.appendChild(row);
+    document.body.appendChild(box);
+    if (modal) { try { box.showModal(); } catch (e) { box.setAttribute('open', ''); } }
+    function close() {
+      if (busy || !pdfBox) return; pdfBox = null;
+      try { if (modal && box.open) box.close(); } catch (e) {}
+      if (box.parentNode) box.parentNode.removeChild(box);
+      try { if (before && before.focus) before.focus(); } catch (e) {}
+    }
+    function lock(v) { busy = v; mk.disabled = v; cl.disabled = v; if (again) again.disabled = v; mk.style.opacity = v ? '.55' : ''; }
+    function share() {
+      var can = false; try { can = typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] }); } catch (e) {}
+      if (!can) {   /* no share sheet for files here: the PDF as a file the browser saves or shows */
+        try { var u = URL.createObjectURL(file), a = document.createElement('a'); a.href = u; a.download = file.name; a.target = '_blank'; document.body.appendChild(a); a.click(); a.parentNode.removeChild(a); st.textContent = 'The PDF was handed to the device.'; }
+        catch (e) { st.textContent = 'This iPad could not take the PDF. ' + NOPRINT; }
+        return;
+      }
+      navigator.share({ files: [file] }).then(function () { st.textContent = 'Done. Tap the button to print or share it again, or Close.'; },
+        function (e) { st.textContent = e && e.name === 'AbortError' ? 'Nothing was chosen. The PDF is still here.' : 'The share sheet did not open. Tap the button once more.'; });
+    }
+    mk.addEventListener('click', function () {
+      if (busy) return;
+      if (file) { share(); return; }
+      lock(true); st.textContent = 'Getting ready\u2026';
+      pdfReady().then(function () {
+        return window.nbhPdfMake(win, { progress: function (i, n) { st.textContent = 'Drawing page ' + i + ' of ' + n + '\u2026'; } });
+      }).then(function (r) {
+        try { file = new File([r.blob], r.name, { type: 'application/pdf' }); } catch (e) { file = r.blob; file.name = r.name; }
+        NS.pdf = { name: r.name, pages: r.pages, bytes: r.blob.size, at: Date.now() };
+        lock(false); st.textContent = 'The PDF is ready: ' + r.pages + (r.pages === 1 ? ' page.' : ' pages.'); mk.textContent = 'Print or share the PDF';
+        try { mk.focus(); } catch (e) {}
+      }, function (e) {
+        lock(false); st.textContent = 'The PDF could not be made' + (e && e.message ? ' (' + String(e.message).slice(0, 80) + ')' : '') + '. ' + NOPRINT;
+      });
+    });
+    if (again) again.addEventListener('click', function () { if (busy) return; close(); try { native(); } catch (e) {} });
+    cl.addEventListener('click', close);
+    box.addEventListener('cancel', function (e) { e.preventDefault(); close(); });
+    try { mk.focus(); } catch (e) {}
+  }
+  NS.offerPdf = offerPdf;
   function watchPrint(win, said) {
-    var fired = false, mark = function () { fired = true; };
+    var fired = false, mark = function (e) { if (!e || !e.nbhPdf) fired = true; };   /* the PDF maker's own beforeprint is not the device's */
     try { win.addEventListener('beforeprint', mark); } catch (e) {}
     try { if (W !== win) W.addEventListener('beforeprint', mark); } catch (e) {}
     setTimeout(function () {
       try { win.removeEventListener('beforeprint', mark); } catch (e) {}
       try { if (W !== win) W.removeEventListener('beforeprint', mark); } catch (e) {}
-      if (!fired) (said || toast)(NOPRINT, 'warn');
+      if (fired) { setNoPrint(false); return; }
+      setNoPrint(true);
+      offerPdf(win, said, null);
     }, 3500);
   }
   var wprint = window.print;
-  window.print = function () { watchPrint(window); return wprint.apply(window, arguments); };
+  window.print = function () {
+    if (noPrint()) { offerPdf(window, null, function () { watchPrint(window); wprint.call(window); }); return; }
+    watchPrint(window); return wprint.apply(window, arguments);
+  };
 
   /* ---------------- a window for a page of the page's own making: opened inside the app, over the page */
   var wopen = window.open, seq = 0;
@@ -125,8 +211,8 @@
     function doPrint() {
       var w = ifr.contentWindow; if (!w) return;
       note.textContent = '';
-      watchPrint(w, said);
-      try { w.focus(); nprint(w).call(w); } catch (e) { said(NOPRINT); }
+      var go = function () { watchPrint(w, said); try { w.focus(); nprint(w).call(w); } catch (e) { offerPdf(w, said, null); } };
+      if (noPrint()) offerPdf(w, said, go); else go();
     }
     /* the page that opened it may call close() and print() on the window it was given: keep both pointing here */
     function patch() {

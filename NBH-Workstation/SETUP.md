@@ -9905,6 +9905,43 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.89: A PDF made by the page, where the installed app on an iPad gets no print options
+(the BCBA, 11/11, of the workstation opened from the Home Screen of an iPad: "it is not allowing me to select print";
+asked on 11/12 whether to build a Save as PDF for it: "yes")
+- **Why.** iPadOS gives an installed (Home Screen) app no print options: Print did nothing, and a notice said to save
+  the case, open the website in Safari and print there. Four steps for every printout.
+- **Now.** In the installed app on an iPad or iPhone, when the print options have not appeared 3.5 s after Print (a
+  form's own Print / Save as PDF, or Print in the window the master print opens inside the app), a small window offers
+  **Make the PDF**. It draws the pages ("Drawing page 3 of 12"), then the button reads **Print or share the PDF** and
+  opens the share sheet with the file: Print, Save to Files, Mail, AirDrop. That the device gave no options is
+  remembered on the device (localStorage nbh.noprint, no student), so the next Print goes straight to the offer; **Try
+  Print again** asks the device once more, and the memory is cleared when the options do come. In Safari, on a
+  computer, and everywhere outside the installed app, nothing is changed and nothing new is loaded.
+- **How the pages are made** (nbh-pdf-make.js, new, beside the forms; loaded only when asked for). The form is told it
+  is about to print (its own beforeprint work runs), and is copied at the paper's width with its print rules switched
+  on: the paper, its turn and its margins are the form's own @page rule. The copy is cut into pages where a cut harms
+  nothing: never through a line of words, a table row, a picture, a box to type in, or a block the form keeps whole; a
+  new page where the form asks for one; a heading stays with what follows. A wide table the form shrinks to fit is
+  shrunk the same. Each page is drawn to a picture at 192 dots to the inch (144 past 60 pages), with the words the form
+  sets in the page margins (the practice, the student line, the form, the confidentiality line, "Page 2 of 11"), and
+  the pictures are put into a PDF written by the page itself. What the form does not print is not drawn.
+- **What it is not.** The words in the PDF are a picture of the words: it prints as it looks, and cannot be searched,
+  selected or read aloud by a screen reader. A page is about 300 KB, so a 20-page form is about 6 MB. A table that
+  runs over a page does not repeat its heading row. Where the form's print is exact to the browser (Form IC-1's wider
+  margins after its first page), the PDF uses the form's general margins.
+- **The drawing library** is html2canvas-pro 2.5.0 (MIT licence, kept at the top of nbh-html2canvas.js, 282 KB, new,
+  beside the forms). Both new files are in the offline copy's list, so the PDF is made without the internet. The
+  one-file edition does not carry them: there the old notice stays.
+- **Checked against the browser's own print, in Chromium:** every form, empty, made by the page and printed by the
+  browser, and the page counts compared: of 50 pages of forms, 39 gave the same number of pages, 8 were one page apart and 3 were two or three apart (Form AD-1 and the Delay Tolerance toolkit three more, the Variable Isolation protocol two more, all three over 20 pages); none failed, and the longest took 39 s here. Forms IC-1, TD-1, Daily data and PA-1 were also filled with invented
+  entries and looked at page by page beside the print.
+- **Not seen on an iPad.** Chromium played the installed iPad (qa/v2589-ipad-pdf-test.js, 15 checks). On the device
+  three things could differ: whether the offer appears (it follows the same 3.5 s watch the old notice did), how long
+  the drawing takes (seconds here; several times that on an iPad for a long form), and whether the share sheet takes
+  the file after the second tap. If the PDF cannot be made the window says so and gives the Safari route as before.
+- **The test run.** The whole run was not repeated. Run on the final copy: the new test and the tests named in the
+  commit. The offline-copy test was not run (not enough free disk in this session); tools/pwa-sw.py --check passes
+  with the two new files in its list (166 files).
 ### v25.88: Form TD-1, Versions from the studies as a list
 (the BCBA, 11/11, with three pictures of a response blocking card whose versions bar says "60 of 60 shown": "can this
 be designed better?")
