@@ -9905,6 +9905,61 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.13: Guide me, "What do you need to do today?" and the steps one at a time
+(asked for by the BCBA on 11/13: "an interactive mode that starts by asking you a question such as what do you need to do
+today? And then guide you through all the steps of doing it one at a time ... then a next set of questions conditionally
+based on the previous answer.")
+- **What existed.** The Case map (which form when, as one page to read), Today (what one case needs), the search, and
+  the step-by-step mode inside a form. Nothing asked what the person came to do, and nothing led from one form to the
+  next.
+- **What is new.** The start screen opens with "What do you need to do today?" and a button for each of 13 kinds of
+  work: start with a new student; find out why a behavior happens; write or change a behavior plan; set up a reward
+  system; train the people who run the plan; collect data or read the data; check the plan is run as written; decide
+  whether the plan is working; get ready for a meeting; record something that happened; supervise an RBT or trainee;
+  learn or refresh a procedure; hand over or close a case. With students kept on the device the question sits under
+  the caseload, which stays as approved in v25.72.
+- **The questions.** One to four for each kind of work, each asked only when the answers before it call for it. For
+  the assessment: is consent signed, can the behavior hurt someone, how far is the assessment, and then either when
+  the behavior happens (just starting) or what it seems to get the student (results unclear). The answers choose the
+  steps: with danger the interim crisis plan comes first, and the step for the experimental analysis names the
+  safeguards; "it happens alone too" puts the medical record and the medication check before any test; "at meals"
+  adds the feeding record and the advice to have a doctor rule out a medical cause. For a plan, "Is the function
+  known? Not yet" sends to the assessment first, and can be overruled. In all there are 128 answer paths, of 1 to 12
+  steps, and every one of the 49 forms is reached by at least one.
+- **Taken from the case.** A question the open case already answers is not asked: consent on file (Form IC-1) and a
+  function on file (Form FS-1). The list of steps says so ("Taken from the case"). Beside a step, the list shows what
+  the case holds: consent on file, how many target behaviors are defined, a function, goals, crisis stages, a plan,
+  or that the form is started. With a case open, the first screen also proposes the kind of work the case seems to
+  need next, with its reason (no consent, no target behavior, no function, no plan, no training recorded, no
+  integrity check recorded).
+- **The steps.** They run in a strip at the foot of the work area, over nothing: the form above it is shorter by the
+  strip's height. The strip shows the step's number, its name, one or two sentences on why it is done, and the buttons
+  Back, Open (the form, the command or the video), Skip, "Done: next step" and an X that ends the guide. "Done: next
+  step" opens the next form; Skip and Back wait for the Open button. "All steps" shows the list with the done and the
+  skipped marked, and any step can be gone to. After the last step the guide names what often comes next.
+- **Where else it is.** Tools, "Guide me"; the search ("guide"); More on a phone. The top bar has no new item: at an
+  iPad's width there was no room for one beside the case's state. On a phone the start screen shows one button,
+  "Show the 13 kinds of work", in place of the 13: the start screen's length is budgeted there.
+- **Where it lives.** The guide's script is its own file, nbh-shell-guide.js (51 KB), loaded by the page and held in
+  the offline copy; its styles are in the page. The page itself stays under its size budget (1,473 KB of 1,500). The
+  one-file edition carries the script inline, as it does Read a document.
+- **What it keeps.** The kind of work, the answers chosen and the place in the steps, in the tab's session storage
+  (nbh.guide.v1): it is there after a reload and gone when the tab is closed. Nothing about a student is in it, and
+  the guide writes nothing into a form: it opens them.
+- **The words are mine, not the BCBA's.** The 13 kinds of work, the questions and the reasons beside the steps were
+  written for this release from general practice in the field and have not been reviewed by the BCBA. They are in one
+  place, the file nbh-shell-guide.js beside the page, as a list that can be edited: the reasons most worth a reading are the
+  ones on safety (the experimental analysis of dangerous behavior, holding steady through a rise after a plan starts,
+  a restraint, feeding).
+- **Limits.** Steps that open the video viewer are left out of the one-file edition, which has no videos (not run
+  there). While the video viewer or a dialog is open, the strip is behind it and returns when that is closed. The
+  guide does not know that a step's work is finished: "Done" is the person's own mark.
+- **Test.** `qa/v2613-guide-test.js` (new, in the release list): the start screen and the other ways in; every answer
+  path (steps, forms that exist, all forms reached, a reason for each); the conditional questions and Back; the run
+  of the steps with Done, Skip, Open, Back and "All steps"; a case's facts passed over and shown; what is kept and
+  that a reload returns to the step; the end; a phone's width.
+- **The test run.** On the built folder: the new test in both editions, the start screen's, the phone's and the
+  search's tests, the size budgets and the build test. Not seen on an iPad or a phone.
 ### v26.12: Share view, one graph on the whole screen with initials for the name
 (approved by the BCBA on 11/12 with the list of ten ideas, idea 4: "A full-screen graph for a Meet with the student's
 name replaced by initials, and a 'start a Meet now' button on a case." The first half is built; the second is below.)

@@ -3081,7 +3081,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v26.12';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v26.13';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -11147,7 +11147,7 @@ bar.parentNode.insertBefore(nav,bar);
 /* the menus: each item runs the bar's own button (left in the bar, out of sight), so its work and its id are unchanged */
 const MENUS={   /* v25.68 (design review H7) the Packet menu is gone: "packet" is the printed document only; the student's details file is in Case */
   case:[['openCase','Open case'],['closeCase','Close case'],['saveFile','Save case to a file'],['saveWhole','Save a case that opens on its own'],['shareEdit','Share for editing'],'hr',['caseXlsx','Case as spreadsheet'],['hxBtn','History'],'hr',['savePacket','Save student details'],['openPacket','Open student details']],
-  tools:[['pushPacket','Fill open forms'],['readDoc','Read a document','wn-narrow'],['caseMap','Case map','wn-narrow'],['wsVideos','Videos','wn-narrow'],'hr',['dirBtn','Staff directory'],['diag','Diagnostics'],['bookmarkPdf','Finish PDF','wn-narrow'],
+  tools:[['wsGuideBtn','Guide me'],'hr',['pushPacket','Fill open forms'],['readDoc','Read a document','wn-narrow'],['caseMap','Case map','wn-narrow'],['wsVideos','Videos','wn-narrow'],'hr',['dirBtn','Staff directory'],['diag','Diagnostics'],['bookmarkPdf','Finish PDF','wn-narrow'],
     'hr',['aNavTop','Navigation: Top bar'],['aNavRail','Navigation: Side rail']]};   /* v25.65 top bar A: where the places sit (top bar or side rail) */
 const M=document.createElement('div');M.className='wn-menu';M.id='wsNavMenu';M.setAttribute('role','menu');M.hidden=true;document.body.appendChild(M);
 let openFor=null;
@@ -13001,6 +13001,87 @@ try{const g=PH_MORE.find(x=>x[0]==='The workstation');if(g&&!(typeof EMBED!=='un
 window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr,isMini:()=>mini,stop:()=>{if(mini)endMini(true);else{playing=false;close();}}};
 })();
 </script>
+<style id="ws-guide-css">
+/* v26.13 Guide me */
+.gd-start{margin:0 0 22px;padding:0 0 20px;border-bottom:1px solid var(--rule,#dfe6e4);text-align:left}
+.gd-start h2{margin:0 0 4px;text-align:left}
+.gd-start>p{margin:0 0 12px;color:var(--ink-2,#4a5a66);font-size:14.5px;line-height:1.45;max-width:none}
+.gd-pills{display:flex;flex-wrap:wrap;gap:8px}
+.gd-pills button{min-height:44px;padding:0 14px;border:1px solid var(--rule2,#c5d1d0);border-radius:999px;background:#fff;color:var(--navy,#182e43);font-weight:600;font-size:14px;line-height:1.2;font-family:inherit;cursor:pointer}
+.gd-pills button:hover{background:var(--mist,#eaf2f0)}
+.gd-pills button[hidden],#gdBar [hidden]{display:none!important}
+.gd-pills button.gd-narrow{display:none}
+.gd-pills button.gd-on{background:var(--navy,#182e43);border-color:var(--navy,#182e43);color:#fff}
+#blank .card.has-gd{margin:auto}
+#blank .card.has-cl .gd-start{margin-top:6px}
+#dlg .gd{text-align:left}
+#dlg .gd p{margin:0 0 10px;line-height:1.5}
+#dlg .gd .gd-lead{font-size:15px;color:var(--ink,#16242e)}
+#dlg .gd .gd-sm{font-size:13.5px;color:var(--ink-2,#4a5a66)}
+#dlg .gd h3{font-weight:700;font-size:13px;line-height:1.3;font-family:inherit;color:var(--ink-2,#4a5a66);margin:16px 0 6px}
+#dlg .gd-list{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:8px}
+#dlg .gd-list.two{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+#dlg .gd-opt{display:block;width:100%;min-height:52px;padding:9px 14px;border:1px solid var(--rule2,#c5d1d0);border-radius:10px;background:#fff;color:var(--ink,#16242e);font:inherit;text-align:left;cursor:pointer;line-height:1.35}
+#dlg .gd-opt b{display:block;font-weight:600;color:var(--navy,#182e43);font-size:15px}
+#dlg .gd-opt small{display:block;color:var(--ink-2,#4a5a66);font-size:13.5px;margin-top:1px}
+#dlg .gd-opt:hover{background:var(--mist,#eaf2f0)}
+#dlg .gd-opt.gd-was{border-color:var(--navy,#182e43);box-shadow:inset 3px 0 0 var(--navy,#182e43)}
+#dlg .gd-sug{border:1px solid var(--rule2,#c5d1d0);border-left:4px solid #2f7f6f;border-radius:10px;padding:10px 14px;margin:0 0 14px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;background:#f6faf8}
+#dlg .gd-sug p{margin:0;flex:1 1 280px}
+#dlg .gd-sug button,#dlg .gd-foot button{min-height:44px;padding:0 16px}
+#dlg .gd-q{font-weight:700;font-size:19px;line-height:1.3;font-family:inherit;color:var(--navy,#182e43);margin:2px 0 6px}
+#dlg .gd-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+#dlg .gd-foot .sp{flex:1 1 auto}
+#dlg .gd-foot.gd-top{margin:6px 0 10px}
+#dlg .gd-steps{list-style:none;margin:8px 0 4px;padding:0;counter-reset:gd}
+#dlg .gd-steps li{counter-increment:gd;border-top:1px solid var(--rule,#dfe6e4)}
+#dlg .gd-steps li:first-child{border-top:0}
+#dlg .gd-steps button{display:grid;grid-template-columns:30px 1fr;gap:2px 10px;width:100%;min-height:52px;padding:9px 6px;border:0;background:none;font:inherit;text-align:left;color:var(--ink,#16242e);cursor:pointer;border-radius:8px}
+#dlg .gd-steps button:hover{background:var(--mist,#eaf2f0)}
+#dlg .gd-steps button::before{content:counter(gd);grid-row:1/span 2;align-self:start;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--rule2,#c5d1d0);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy,#182e43);background:#fff}
+#dlg .gd-steps li.gd-d button::before{content:"\2713";background:#2f7f6f;border-color:#2f7f6f;color:#fff}
+#dlg .gd-steps li.gd-s button::before{color:var(--ink-2,#4a5a66);border-style:dashed}
+#dlg .gd-steps li.gd-cur button::before{background:var(--navy,#182e43);border-color:var(--navy,#182e43);color:#fff}
+#dlg .gd-steps b{font-weight:600;font-size:15px}
+#dlg .gd-steps .gd-id{font-weight:600;color:var(--ink-2,#4a5a66);font-size:13px;margin-left:6px}
+#dlg .gd-steps small{grid-column:2;color:var(--ink-2,#4a5a66);font-size:13.5px;line-height:1.4}
+#dlg .gd-chip{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:999px;background:var(--mist,#eaf2f0);color:var(--slate,#254657);font-size:12.5px;font-weight:600;vertical-align:1px}
+#dlg .gd-said{margin:0 0 4px;padding:0;list-style:none;font-size:13.5px;color:var(--ink-2,#4a5a66)}
+#dlg .gd-said li{margin:1px 0}
+/* the strip: the step in hand, at the foot of the work area while a guide runs */
+#gdBar{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:10px max(14px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:#fff;border-top:1px solid var(--rule2,#c5d1d0);box-shadow:0 -6px 18px -12px rgba(24,46,67,.45);position:relative;z-index:5}
+#gdBar[hidden]{display:none}
+#gdBar .gd-txt{flex:1 1 380px;min-width:0}
+#gdBar p{margin:0}
+#gdBar .gd-n{font-weight:700;font-size:12.5px;line-height:1.3;font-family:inherit;color:#2f6f62;display:flex;flex-wrap:wrap;gap:2px 10px;align-items:center}
+#gdBar .gd-t{font-weight:700;font-size:16px;line-height:1.3;font-family:inherit;color:var(--navy,#182e43)}
+#gdBar .gd-t span{font-weight:600;color:var(--ink-2,#4a5a66);font-size:13.5px;margin-left:6px}
+#gdBar .gd-why{font-size:14px;line-height:1.45;color:var(--ink,#16242e);margin-top:2px;max-width:92ch}
+#gdBar .gd-link{border:0;background:none;padding:0 2px;min-height:24px;font-weight:600;font-size:12.5px;font-family:inherit;color:var(--navy,#182e43);text-decoration:underline;cursor:pointer}
+#gdBar .gd-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:none}
+#gdBar .gd-btns button{min-height:44px;min-width:44px;padding:0 14px}
+#gdBar #gdEnd{padding:0;font-size:20px;line-height:1}
+#gdBar #gdWhyBtn,#gdBar .gd-s{display:none}
+@media (max-width:720px){
+  .gd-pills button:not(.gd-on):not(.gd-narrow){display:none}
+  .gd-pills button.gd-narrow{display:inline-block;border-color:var(--navy,#182e43)}
+  .gd-start{margin-bottom:16px;padding-bottom:14px}
+  #gdBar{gap:6px 10px;padding-top:8px}
+  #gdBar .gd-txt{flex-basis:100%}
+  #gdBar:not(.gd-open) .gd-why{display:none}
+  #gdBar #gdWhyBtn,#gdBar .gd-s{display:inline}
+  #gdBar .gd-w{display:none}
+  #gdBar .gd-t{font-size:15px}
+  #gdBar .gd-btns{flex:1 1 100%}
+  #gdBar .gd-btns #gdNext{flex:1 1 auto}
+  #gdBar .gd-btns{flex-wrap:nowrap;gap:6px}
+  #gdBar .gd-btns button{padding:0 10px;white-space:nowrap}
+  #gdBar .gd-btns #gdGo{min-width:0;overflow:hidden;text-overflow:ellipsis}
+}
+@media print{#gdBar,.gd-start{display:none!important}}
+</style>
+<!-- v26.13 Guide me: its script is its own file beside this page (the page's size budget) -->
+<script id="nbh-guide" src="nbh-shell-guide.js"></script>
 <style id="ws-v2570-css">
 /* v25.70 (the BCBA, 11/9) Undo after an action that takes work away, What's new on Today, case progress rings, and Back
    where you left off. Screen only: none of it prints, and none of it enters a case file. */
@@ -13089,13 +13170,14 @@ window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr,is
 })();
 </script>
 <script type="application/json" id="ws-whatsnew">
-{"v": "v26.12",
+{"v": "v26.13",
 "title": "What's new in this version",
 "notes": "SETUP.md",
 "items":[
-"Daily data, Graphs & analysis: each graph has \"Share view\". It shows that one graph on the whole screen, under the student's initials and the behavior's name, with the sentence that reads the graph. Made for sharing your screen in a meeting: the name and the rest of the form are not on it.",
-"Close it with Close or the Escape key. \"Whole screen\" hides the browser's own bars where the browser allows it.",
-"Nothing is saved or sent by it."]}
+"Guide me. The start screen asks \"What do you need to do today?\" with 13 kinds of work to choose from: a new student, finding out why a behavior happens, writing or changing a plan, training, data, a meeting, an incident and more.",
+"A question or two follows, each chosen by your last answer. What the open case already shows, such as consent on file, is not asked again.",
+"The steps then come one at a time in a strip at the foot of the screen: what to do, why, and a button that opens the form, the command or the video for it. Done, Skip and Back move through them; \"All steps\" shows the list.",
+"Also under Tools, in the search (\"guide\") and in More on a phone. The guide keeps only your answers, for this tab; it holds nothing about a student and changes nothing in a form."]}
 </script>
 <script id="ws-v2570">
 /* v25.70 (the BCBA, 11/9; S/research/NEXT.md and NEXT2.md #2). The release step edits the list above (ws-whatsnew): its v is

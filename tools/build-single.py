@@ -41,6 +41,12 @@ if idx.count(DOCREAD_TAG) != 1:
     sys.exit('index.html does not load nbh-shell-docread.js once')
 _dr = open(os.path.join(SRC, 'nbh-shell-docread.js'), encoding='utf-8').read()
 idx = idx.replace(DOCREAD_TAG, '<script id="nbh-docread">\n' + _dr.replace('</script', '<\\/script') + '</script>', 1)
+# v26.13 Guide me, the same way: its script is nbh-shell-guide.js beside the page; a one-file edition carries it inline
+GUIDE_TAG = '<script id="nbh-guide" src="nbh-shell-guide.js"></script>'
+if idx.count(GUIDE_TAG) != 1:
+    sys.exit('index.html does not load nbh-shell-guide.js once')
+_gd = open(os.path.join(SRC, 'nbh-shell-guide.js'), encoding='utf-8').read()
+idx = idx.replace(GUIDE_TAG, '<script id="nbh-guide">\n' + _gd.replace('</script', '<\\/script') + '</script>', 1)
 if re.search(r'<link rel="(manifest|apple-touch-icon)"', idx):
     sys.exit('index.html links the manifest or the touch icon outside its nbh-pwa-head block')
 logo = re.search(r'<img id="logo" alt="[^"]*" src="(data:image/[a-z]+;base64,[A-Za-z0-9+/=]+)"', idx).group(1)
