@@ -61,8 +61,8 @@ async function pagesOf(browser, buf) {
     const z = await during(p, () => [...document.querySelectorAll('[data-nbh-fit]')].map(e => parseFloat(e.style.zoom))); const pages = await pagesOf(browser, await pdf(p)); const left = await p.evaluate(() => [...document.querySelectorAll('*')].filter(e => e.style && e.style.zoom && e.hasAttribute('data-nbh-fit')).length); await p.context().close(); return { z, pages, left }; };
   const e1 = await fitOf('SM-1', false), e2 = await fitOf('EB-1', true);
   const zs = e1.z.concat(e2.z);
-  ok('E a run of one page and a few lines is brought back onto its page: Form SM-1 prints 1 page (was 2; tightened to 88% at the least, type kept), Form EB-1 2 (was 3; nothing scaled below 92%), and no scale is left on the screen',
-    e1.pages === 1 && e2.pages === 2 && zs.length >= 2 && Math.min(...e2.z) >= 0.92 && Math.min(...e1.z) >= 0.88 && Math.max(...zs) < 1 && e1.left + e2.left === 0, { e1, e2 });
+  ok('E a run of one page and a few lines is brought back onto its page: Form EB-1 prints 2 pages (was 3; nothing scaled below 92%); Form SM-1, at 10 point since v26.19, is tightened only where that fits (88% at the least, type kept; ' + e1.pages + ' pages); no scale is left on the screen',
+    e1.pages <= 2 && e2.pages === 2 && e2.z.length >= 2 && Math.min(...e2.z) >= 0.92 && (!e1.z.length || Math.min(...e1.z) >= 0.88) && Math.max(...zs) < 1 && e1.left + e2.left === 0,   /* v26.19 at 10 point Form SM-1's setup is too far over a page to be brought back (2 pages); Form EB-1 keeps its sizes and its fit */ { e1, e2 });
 
   /* F */
   ok('F after printing Form FS-1 the screen holds no mark, wrapper, scale or left-off part', after.keep === 0 && after.bare === 0 && after.fit === 0 && after.split === 0, after);

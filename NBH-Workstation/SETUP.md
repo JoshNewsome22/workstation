@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.19: 10 point on paper
+(the BCBA, 11/13: "Let's try to get 10 point", after the measured comparison of v26.17: the Pearson and PAR sample
+reports print their body at 10 to 11 point, these forms printed at 9)
+- **The floor is 10 point** (`nbh-polish.js`, `PR_MIN`, `PR_MINH`; the packet's window in `index.html`). Text that would
+  print under 10 point prints at 10, and a heading (h1 to h4) under 11 at 11. Everything else of the floor is as in
+  v26.17 and v26.18: the designed sheets (SP-1, ABC-1, TK-1, VS-1) are left wholly; Forms IC-1, QS-1, EB-1 and DD-1 and
+  Form SM-1's student sheets keep their sizes when printed alone; the two guards; the ink; paragraphs the width of
+  their column. The screen is not changed.
+- **What it costs, measured** (all 49 forms, each with its simulation; the school edition).
+
+  | | v26.16 | v26.18 (9 point) | v26.19 (10 point) |
+  |---|---|---|---|
+  | Pages | 483 | 486 | 517 |
+  | Characters at 10 point or more | 22% | 20% | 96% |
+  | Characters under 9 point | 19% | 2% | 2% |
+  | Text near black | 43% | 98% | 98% |
+  | Nearly empty pages | 21 | 15 | 19 |
+
+  31 pages more than at 9 point (6%). Longer: SR-1 34 to 39 pages; PA-1 16 to 18, RR-1 15 to 17, SV-1 13 to 15 and TD-1 23 to 25; one page each in AD-1, BC-1, CF-1, CN-1, CR-1, CT-1, DM-1, DT-1, FD-1, GC-1, IA-1, PD-1, PR-1, RM-1, SM-1, TB-1, TI-1 and VI-1. The 2% under 9 point and the 2% between 9 and 10 are the designed sheets, Form DD-1's data sheets and tables scaled to the page. The whole packet (47 forms of one simulated case, `qa/master33.js`): 774 pages at 9 point, 841 at 10 (9% more; 742 in v26.15); 87% of its characters at 10 point or more; its References section 25 pages to 30.
+- **Where the larger type shows, and is not solved.** Each was looked at; the browser does not take the hints that
+  would move them (a tie to the block above, a block that asks not to start a page, letting the next card break were
+  each tried and taken out again).
+  - Form SM-1's setup page, which fitted one page at 9 point (tightened), is a page and an eighth: its last two rows
+    print on a second page.
+  - In Forms AD-1 and BC-1 (as their examples stand) the sign-off prints alone on a page: the block it signs fills
+    the page before and may not be cut.
+  - In the fullest example of Form TB-1 (`qa/pp131-test.js`) two pages are light: a cluster card a little taller
+    than a page ends a few lines into the next, and the card after it starts the page after.
+  - The rest of the new nearly empty pages are the last rows of a table or an empty log on a last page (Forms CF-1,
+    CN-1, GC-1, SR-1).
+- **Where this leaves the comparison.** Type level with the Pearson reports' 10 point (theirs and PAR's run to 11);
+  ink level; lines as long as theirs. The file is still a browser print without tags or fields; bookmarks and contents
+  page numbers through Finish PDF.
+- **Going back.** One line: `PR_MIN = 12, PR_MINH = 13.34` in `tools/polish/nbh-polish.js` and `13.34 : 12` in the
+  packet's window, then the build; the tests' limits of v26.18 are in that commit.
+- **Not done.** Safari on the iPad was not checked, and nothing was printed on paper.
+- **Budget.** The seven shared scripts measure 699.3 KB of 700.
+- **Test.** `qa/v2616-print-floor-test.js` and `qa/v2617-print-ink-test.js` read 10 point (11 for headings) where they
+  read 9 (10), and the mark `data-nbh-floor="10"`. Form SM-1's setup is allowed its second page there and in
+  `qa/v2615-print-test.js`. `qa/pp131-test.js`: Form DA-1's fullest example 18 to 19 pages, Form TD-1's 54 to 58, and
+  the two light pages of Form TB-1's. `qa/v2196-packet-test.js` finds a title that now breaks after its hyphen. The 24
+  print, packet, budget, build and Finish PDF tests pass; the whole release run was not repeated.
+
 ### v26.18: paragraphs print the full width of their column
 (the BCBA, 11/13, on the pictures of v26.17: "Why is the text field length so short on this images you sent? It looks
 weird for the paragraphs to be stopping so short of the right edge of the paper")

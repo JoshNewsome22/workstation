@@ -27,8 +27,8 @@ const READ = `(function (root) {
       if (!own) for (var t = c.firstChild; t; t = t.nextSibling) if (t.nodeType === 3 && /\\S/.test(t.nodeValue)) { own = true; break; }
       if (own && c.getClientRects().length) { var pt = parseFloat(cs.fontSize) * zc * 0.75; count++;
         if (sc) least = Math.min(least, pt);
-        else if (/^H[1-4]$/.test(c.tagName)) { if (pt < 9.95) heads.push(c.tagName + ' ' + pt.toFixed(2) + ' ' + c.textContent.trim().slice(0, 24)); }
-        else if (pt < 8.95) small.push(c.tagName + '.' + String(c.className).slice(0, 18) + ' ' + pt.toFixed(2) + ' ' + (c.textContent || c.value || '').trim().slice(0, 24)); }
+        else if (/^H[1-4]$/.test(c.tagName)) { if (pt < 10.95) heads.push(c.tagName + ' ' + pt.toFixed(2) + ' ' + c.textContent.trim().slice(0, 24)); }
+        else if (pt < 9.95) small.push(c.tagName + '.' + String(c.className).slice(0, 18) + ' ' + pt.toFixed(2) + ' ' + (c.textContent || c.value || '').trim().slice(0, 24)); }
       walk(c, zc, sc); } })(root, 1, false);
   return { small: small.slice(0, 6), nSmall: small.length, heads: heads.slice(0, 4), least: least === 99 ? null : +least.toFixed(2), count: count };
 })`;
@@ -55,8 +55,8 @@ const READ = `(function (root) {
     if (id === 'RS-1') { const cssOk = await p.evaluate(() => { const e = document.querySelector('.rs-paper .p-inner > .p-foot'); return e ? getComputedStyle(e).breakBefore : 'none'; }); rsPages = pagesOf(await p.pdf({ preferCSSPageSize: true, printBackground: true })); res.rsBreak = cssOk; }
     res[id] = { before, during, read, wide, after }; await p.context().close();
   }
-  const A = SEVEN.filter(id => { const r = res[id]; return !(r.during.floor === '9' && r.during.sized > 20 && r.read.nSmall === 0 && r.read.heads.length === 0 && r.read.count > 100); });
-  ok('A in Forms ' + SEVEN.join(', ') + ' no text prints under 9 point and no heading under 10 (outside a drawing and a table scaled to the page); ' + SEVEN.map(id => id + ' ' + res[id].during.sized + ' raised').join(', '), A.length === 0, A.map(id => ({ id, during: res[id].during, read: res[id].read })));
+  const A = SEVEN.filter(id => { const r = res[id]; return !(r.during.floor === '10' && r.during.sized > 20 && r.read.nSmall === 0 && r.read.heads.length === 0 && r.read.count > 100); });
+  ok('A in Forms ' + SEVEN.join(', ') + ' no text prints under 10 point and no heading under 11 (v26.19; 9 and 10 before; outside a drawing and a table scaled to the page); ' + SEVEN.map(id => id + ' ' + res[id].during.sized + ' raised').join(', '), A.length === 0, A.map(id => ({ id, during: res[id].during, read: res[id].read })));
   const B = SEVEN.filter(id => res[id].wide.sw > res[id].wide.w + 2 || (res[id].read.least !== null && res[id].read.least < 7.5));
   ok('B none of the seven runs past the page at the new size (a table too wide is scaled alone: Form RA-1 has ' + res['RA-1'].wide.scaled + ' scaled, its smallest type ' + res['RA-1'].read.least + ' pt), and nothing scaled falls under 7.5 point', B.length === 0 && res['RA-1'].wide.scaled >= 1, B.map(id => ({ id, wide: res[id].wide, least: res[id].read.least })));
   const C = SEVEN.filter(id => { const r = res[id]; return !(r.after.sized === r.before.sized && r.after.floor === null && r.after.tight === 0); });
@@ -85,8 +85,8 @@ const READ = `(function (root) {
   const pk = await pp.evaluate(`(function () { var R = ${READ}; var o = { floor: window.__nbhFloor, sw: document.documentElement.scrollWidth, w: document.documentElement.clientWidth, secs: {} };
     ['DM-1', 'FS-1', 'SP-1'].forEach(function (id) { var s = document.getElementById('sec-' + id); o.secs[id] = s ? { mark: s.getAttribute('data-mp-floor'), read: R(s), sized: [].filter.call(s.querySelectorAll('*'), function (e) { return e.style && e.style.getPropertyPriority('font-size') === 'important'; }).length } : null; }); return o; })()`);
   const f = pk.secs;
-  ok('F in a packet of Forms DM-1, FS-1 and SP-1 the first two print nothing under 9 point (' + (f['DM-1'] ? f['DM-1'].sized : '?') + ' and ' + (f['FS-1'] ? f['FS-1'].sized : '?') + ' pieces raised) and Form SP-1\'s sheet is left as it is',
-    !!f['DM-1'] && !!f['FS-1'] && !!f['SP-1'] && f['DM-1'].mark === '9' && f['FS-1'].mark === '9' && f['SP-1'].mark === null && f['DM-1'].read.nSmall === 0 && f['FS-1'].read.nSmall === 0 && f['DM-1'].read.heads.length === 0 && f['FS-1'].read.heads.length === 0 && f['DM-1'].sized > 20 && f['FS-1'].sized > 20 && f['SP-1'].sized === 0 && pk.floor > 40, pk);
+  ok('F in a packet of Forms DM-1, FS-1 and SP-1 the first two print nothing under 10 point (' + (f['DM-1'] ? f['DM-1'].sized : '?') + ' and ' + (f['FS-1'] ? f['FS-1'].sized : '?') + ' pieces raised) and Form SP-1\'s sheet is left as it is',
+    !!f['DM-1'] && !!f['FS-1'] && !!f['SP-1'] && f['DM-1'].mark === '10' && f['FS-1'].mark === '10' && f['SP-1'].mark === null && f['DM-1'].read.nSmall === 0 && f['FS-1'].read.nSmall === 0 && f['DM-1'].read.heads.length === 0 && f['FS-1'].read.heads.length === 0 && f['DM-1'].sized > 20 && f['FS-1'].sized > 20 && f['SP-1'].sized === 0 && pk.floor > 40, pk);
   ok('G no page error in any form or in the packet', !errs.length, errs);
   await browser.close();
   console.log('RESULT: ' + (bad ? bad + ' failed' : 'all passed')); process.exit(bad ? 1 : 0);

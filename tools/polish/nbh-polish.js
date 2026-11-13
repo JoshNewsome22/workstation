@@ -705,7 +705,7 @@
      coloured text a dark tone of its own colour, a light grey rule a mid grey). (v26.18: the 5.5-inch measure v26.17 gave
      running paragraphs is taken out, and a paragraph the form caps prints the width of its column.) Left wholly: SP-1, ABC-1, TK-1, VS-1. Ink only: IC-1, QS-1, EB-1, DD-1 (its
      data sheet is fitted to the page) and Form SM-1's student sheets. */
-  var PR_SHEETS = /^(SP-1|ABC-1|TK-1|VS-1)$/, PR_OWNSIZE = /^(IC-1|QS-1|EB-1|DD-1)$/, PR_ASIS_SEL = '#sheetOut,#mmOut,#bcOut,#smExtraOut', PR_MIN = 12, PR_MINH = 13.34;
+  var PR_SHEETS = /^(SP-1|ABC-1|TK-1|VS-1)$/, PR_OWNSIZE = /^(IC-1|QS-1|EB-1|DD-1)$/, PR_ASIS_SEL = '#sheetOut,#mmOut,#bcOut,#smExtraOut', PR_MIN = 13.34, PR_MINH = 14.67;   /* v26.19 (the BCBA, 11/13: "Let's try to get 10 point"): 10 point, headings 11; it was 9 and 10 */
   function prFormId() { var m = /Form\s+([A-Z]{2,3}-\d+)/.exec(document.title || ''); return m ? m[1] : ''; }
   function prRgb(v) { var m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+%?))?/.exec(v || ''); if (!m) return null;
     var a = m[4] === undefined ? 1 : (/%$/.test(m[4]) ? parseFloat(m[4]) / 100 : parseFloat(m[4])); return [+m[1], +m[2], +m[3], a]; }
@@ -776,7 +776,7 @@
       prUndo.push(function () { tas.forEach(function (x) { if (x[0].style.height !== x[1]) x[0].style.height = x[1]; if (!x[2] && !x[0].getAttribute('style')) x[0].removeAttribute('style'); }); });
       try { if (fc && fc.unfit) fc.unfit(); if (fc && fc.clear) fc.clear(); } catch (e) {}   /* the printed copies of long entries are made again too: a field with a copy is off the paper, and would keep its small size */
       var back0 = prRules(pg); try { var un = prFloor(null, { floor: floor, ink: true, measure: floor && !ownMode, page: pg.h });
-        if (floor) de0.setAttribute('data-nbh-floor', '9'); de0.setAttribute('data-nbh-ink', un.n.ink + ',' + un.n.rule + ',' + un.n.measure);
+        if (floor) de0.setAttribute('data-nbh-floor', '10'); de0.setAttribute('data-nbh-ink', un.n.ink + ',' + un.n.rule + ',' + un.n.measure);
         prUndo.push(function () { un(); de0.removeAttribute('data-nbh-floor'); de0.removeAttribute('data-nbh-ink'); }); } catch (e) {} finally { back0(); }
       try { if (fc && fc.prepare) fc.prepare(); } catch (e) {} }
     if (ownMode) return;
@@ -814,7 +814,7 @@
           if (!(now.pages === 2 && now.tail <= PAGE * 0.085)) continue;
           for (var zz = 0.985; zz >= 0.92; zz -= 0.013) { if (prSim(mine, y0, y1, PAGE - 6, zz).pages < now.pages) { z = zz - 0.006; break; } }
           /* v26.17 in a floored form the run is tightened, not shrunk: its boxes, gaps and row padding take the scale and its
-             type is set back to 9 point after (below), so the scale is taken a step further than the estimate asks */
+             type is set back to the floor after (below), so the scale is taken a step further than the estimate asks */
           if (z && floor) z = Math.max(0.88, z - 0.035);
           if (!z) continue;
           /* the blocks that lie wholly in the run: the largest ones, found from the top down */

@@ -30,10 +30,12 @@ const FORMS={'TB-1':'TB-1_Target-Behavior-Development_v2026-09.html','IA-1':'IA-
    changes made DD-1 21 (commit 898a2d8: the dual-criterion check, the effect-size tiles and the layouts) and SP-1 15 (514c4ba:
    the measurement review), and OB-1's three observations 12 (b929cb2, below); v25.65's approved TD-1 changes made it 51
    (fdccb89, as in td130-test). Each was found by printing the commit before and the commit itself. */
-const BEFORE={'TB-1':22,'IA-1':33,'PA-1':29,'RA-1':16,'EA-1':22,'DA-1':18,'DD-1':21,'SM-1':30,'SP-1':15,'ABC-1':18,'OB-1':13,'TD-1':54,'TK-1':13,'RS-1':4};   /* v26.16: TD-1 51 to 54, its text raised to 9 point on paper (the BCBA, 11/13); v26.17: 56 at the narrower measure; v26.18: 54 again, the measure taken out */
-/* v26.17 allowed one light page each in the fullest examples of Forms TB-1 and TD-1 (a sheet's closing source lines alone
-   after a card that fills the page before). v26.18: with paragraphs the width of their column both are gone; none is allowed. */
-const KNOWN_LIGHT={};
+const BEFORE={'TB-1':22,'IA-1':33,'PA-1':29,'RA-1':16,'EA-1':22,'DA-1':19,'DD-1':21,'SM-1':30,'SP-1':15,'ABC-1':18,'OB-1':13,'TD-1':58,'TK-1':13,'RS-1':4};   /* v26.19 at 10 point (the BCBA, 11/13): DA-1 18 to 19, TD-1 54 to 58 */   /* v26.16: TD-1 51 to 54, its text raised to 9 point on paper (the BCBA, 11/13); v26.17: 56 at the narrower measure; v26.18: 54 again, the measure taken out */
+/* v26.17 allowed one light page each in the fullest examples of Forms TB-1 and TD-1; v26.18 had none. v26.19, at 10 point:
+   Form TB-1's fullest example has two (a cluster card a little taller than a page ends a few lines into the next one, and the
+   card after it, nearly a page tall and kept whole, starts the page after; the sheet's closing source lines likewise). Tried
+   and not solved: the browser does not take the hints that would move them. Two are allowed in Form TB-1; any other fails. */
+const KNOWN_LIGHT={'TB-1':2};
 const GUIDE_SHEETS=['TB-1','IA-1','PA-1','RA-1','EA-1','OB-1'],GUIDE_SECTIONS=['SM-1','DA-1'];
 (async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});const ctx=await b.newContext({viewport:{width:1300,height:950}});
  const open=async(F)=>{const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));await p.goto(BASE+'/NBH-Workstation/'+FORMS[F]);await sleep(1500);
@@ -56,7 +58,7 @@ const GUIDE_SHEETS=['TB-1','IA-1','PA-1','RA-1','EA-1','OB-1'],GUIDE_SECTIONS=['
   if(F==='SM-1')await p.evaluate(()=>document.documentElement.classList.add('sm-all'));   /* the record, as Print / Save as PDF prints it; the tab print is checked below */
   const P=pdfPages(await PDF(p),'pp131-'+F+'.pdf');
   const light=lightOf(P);
-  ok(F+': the whole-form printout is no longer than before ('+BEFORE[F]+' pages) and no page but the last is under 12% of its rows inked'+(KNOWN_LIGHT[F]?' (one known: the closing source lines after a full-page card)':''),P.length<=BEFORE[F]&&light.length<=(KNOWN_LIGHT[F]||0),{pages:P.length,light,ink:brief(P)});
+  ok(F+': the whole-form printout is no longer than before ('+BEFORE[F]+' pages) and no page but the last is under 12% of its rows inked'+(KNOWN_LIGHT[F]?' ('+KNOWN_LIGHT[F]+' known at 10 point: the end of a card taller than a page)':''),P.length<=BEFORE[F]&&light.length<=(KNOWN_LIGHT[F]||0),{pages:P.length,light,ink:brief(P)});
   if(GUIDE_SHEETS.includes(F)||GUIDE_SECTIONS.includes(F)){
    const gi=gt?hasText(P,gre(gt)):-1;
    ok(F+': the policy is on, no control was added to the toolbar, and the Guide (the choice off) is not in the printout',tb.api&&tb.style&&!tb.opts&&gi<0,{tb,gt,gi});
