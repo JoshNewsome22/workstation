@@ -10,9 +10,8 @@
 - `mark-proposals.md` and `.json` (after v26.06, commit 9c2b1ab): a proposal, not a record of anything done. 254 steps of Form TD-1's
   bank that describe extinction, escape extinction, guidance through a demand, or blocking or a hold without carrying
   the "EXTINCTION:" or "RESTRICTIVE:" mark the reader rules ask for (rules 3, 3a and 4), each with its card, its
-  source and the proposed mark, and 26 of them as questions. It waits for the BCBA's approval; the bank is unchanged
-  until then. When the approved marks are applied, this entry and the page are updated to say which and in what
-  version.
+  source and the proposed mark, and 26 of them as questions. The BCBA approved the 228 proposed marks on 11/13 and they were applied in v26.11; the 26 questions wait for an
+  answer each.
 - `grade-evidence.py` and `evidence-overrides.json` (v26.07): the evidence letters on every card of Form TD-1's bank,
   read by rule from the card's note and result, and the corrections that win over the rule. The head of the tool
   gives the rubric; reader rule 17 says when to run it.

@@ -9905,6 +9905,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.11: the approved marks on 228 steps of Form TD-1's bank
+(the BCBA, 11/13, on the proposal of 254 steps sent that day: "Yes I approve." The question put was whether to approve
+the 228 proposed marks; the 26 steps listed as questions need an answer each and were not changed.)
+- **What changed in the bank.** 228 steps on 219 cards gained a mark in front, with the first letter after it made a
+  capital. Nothing else of a step was reworded.
+  - *152 now start "EXTINCTION:"*: the attention, the item or the activity is withheld after the problem behavior
+    (reader rule 3a). The bank had 37 such steps; it has 189. By component: FCT 51, NCR 24, DRA 20, DRO 11, multiple
+    schedules 11, and smaller numbers elsewhere.
+  - *76 now start "RESTRICTIVE:"* (reader rules 3 and 4): 66 escape extinction (the task stays, no break follows the
+    behavior), 3 guidance through a demand, 7 blocking or a hold of the hands inside teaching. The bank's restrictive
+    steps that are not punishment went from 623 to 699.
+  - *12 notes gained a sentence.* On the cards whose note did not yet say it: that the marked step needs district
+    review and written consent, and for escape extinction and guidance through a demand, TD-1's escape-extinction
+    consent block. The other 64 cards with a new restrictive step already said so in their notes.
+- **What a person sees.** On a card with an EXTINCTION step, Form TD-1 shows "Extinction step: not yet agreed" until
+  extinction is agreed on the Responding to behavior sheet, and the printed plan carries the note. A card with a
+  RESTRICTIVE step carries the "Restrictive step" tag in the bank's list. Plans already written are not altered: a
+  card in a saved plan keeps the steps it was added with.
+- **Not changed.** The 26 steps of section 5 of the proposal (the card names no function, or the step could be
+  extinction, escape extinction or neither). About 210 steps that withhold something without naming a behavior in
+  the same sentence were never read; the proposal page says so.
+- **The records.** `tools/banks/mark-proposals.md` and `.json` now say what was applied and in which version; each
+  applied item carries it. `tools/banks/reader-rules.md` (rule 3a) records the second reading.
+- **The evidence letters** (v26.07) were computed again after the notes changed; no card's letters changed.
+- **Test.** `qa/v2583-td1-marks-test.js`: the bank's count of EXTINCTION steps is 189. The bank tests, the
+  versions and procedure-video tests and the evidence test ran on the built folder in the workstation, and the bank
+  tests in the school edition.
 ### v26.10: the start screen's search also finds videos, lessons and readings
 (approved by the BCBA on 11/12 with the list of ten ideas: "One search box across students, forms, bank cards, videos
 and readings." What existed was checked first, as promised.)

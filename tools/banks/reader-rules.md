@@ -35,7 +35,9 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
    RESTRICTIVE step); a step on an Extinction card (the card itself is extinction); the extinction component of a
    multiple or chained schedule (requests go unanswered while the signal is off); a step that says the study used no
    extinction; and a step that only refers to extinction (a precondition, a caution, a next step). One mark for a
-   step: a step that is RESTRICTIVE or OPTION keeps that mark.
+   step: a step that is RESTRICTIVE or OPTION keeps that mark. v26.11: a second reading of every unmarked step that
+   withholds something after a named problem behavior added the mark to 152 steps, and RESTRICTIVE (rule 3 or 4) to
+   76 (the BCBA approved the list on 11/13; `mark-proposals.md`); 26 steps wait for the BCBA's answer.
 4. **Holds inside a teaching procedure** (the hands held down or at the sides, the hand held to the table for a few
    seconds after an error): their own step starting "RESTRICTIVE:", and the note says it needs district review and
    written consent, stops if the student resists, and is never used as a consequence for problem behavior or to make

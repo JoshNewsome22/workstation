@@ -1,6 +1,6 @@
 # Marks proposed for 254 steps of Form TD-1's bank
 
-For the BCBA's approval. **Nothing here has been applied**: the bank is as it was in v26.06. The record behind this page is `mark-proposals.json`.
+**Applied in v26.11.** The BCBA approved the 228 proposed marks on 11/13 ("Yes I approve."): sections 1 to 4 below are now in the bank as proposed. **The 26 questions of section 5 are still open**: none of those steps was changed, and each needs an answer by its number (extinction, restrictive, or no mark). The record behind this page is `mark-proposals.json`; each applied item carries the version.
 
 ## Why this page
 

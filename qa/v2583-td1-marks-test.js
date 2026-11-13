@@ -6,7 +6,7 @@
       line, the card's mark, the printed plan's note), and counts as extinction for the "not feasible" check whatever
       its words. The same words without the mark on a card outside the five (FCT, DRA, NCR, NCE, DNRA) carry no line,
       as before. RESTRICTIVE: and OPTION: read as they did.
-   C  the bank: 37 steps start "EXTINCTION:", none of them on an Extinction card, each on a card of 3,290; the reader
+   C  the bank: 189 steps start "EXTINCTION:" (37 until v26.11, when the approved second reading added 152), none of them on an Extinction card, each on a card of 3,290; the reader
       rules name the mark (rule 3a).
    The two questions left as they are (the thinning table once for each card; the Responding to behavior sheet's button
    adds the consequence protocol only) have no check here: nothing changed.
@@ -62,8 +62,8 @@ const ROOT=path.join(__dirname,'..');
   /* ---- C */
   const src=fs.readFileSync(path.join(ROOT,'NBH-Workstation','nbh-td1-bank.js'),'utf8');const B=new Function(src+';return TD1_BANK;')();
   const X=[];B.protocols.forEach(q=>(q.steps||[]).forEach((s,i)=>{if(/^\s*EXTINCTION:/.test(s))X.push([q.id,q.code,i,s]);}));
-  ok('C1 the bank: 3,290 protocols; 37 steps start "EXTINCTION: " followed by a capital letter; none on an Extinction card; none marked twice',
-    B.protocols.length===3290&&X.length===37&&X.every(x=>/^EXTINCTION: [A-Z]/.test(x[3]))&&!X.some(x=>x[1]==='EXT')&&!X.some(x=>/RESTRICTIVE:|OPTION:/.test(x[3])),{n:X.length,ext:X.filter(x=>x[1]==='EXT').map(x=>x[0])});
+  ok('C1 the bank: 3,290 protocols; 189 steps start "EXTINCTION: " followed by a capital letter; none on an Extinction card; none marked twice',
+    B.protocols.length===3290&&X.length===189&&X.every(x=>/^EXTINCTION: [A-Z]/.test(x[3]))&&!X.some(x=>x[1]==='EXT')&&!X.some(x=>/RESTRICTIVE:|OPTION:/.test(x[3])),{n:X.length,ext:X.filter(x=>x[1]==='EXT').map(x=>x[0])});
   const marks={};B.protocols.forEach(q=>(q.steps||[]).forEach(s=>{const m=/^\s*([A-Z]{4,}):/.exec(s);if(m)marks[m[1]]=(marks[m[1]]||0)+1;}));
   ok('C2 the marks a step can start with: RESTRICTIVE, OPTION and EXTINCTION, and no other',Object.keys(marks).sort().join(',')==='EXTINCTION,OPTION,RESTRICTIVE',marks);
   r=await p.evaluate(()=>{const e=window.__tdBank.entry('ncr-topic-talk-time');return e?{k:e.steps.map(s=>window.__tdStepKind(s)).filter(Boolean)}:null;});
