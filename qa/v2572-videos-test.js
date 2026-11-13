@@ -78,7 +78,8 @@ let AXE=null;try{AXE=fs.readFileSync(require.resolve('axe-core/axe.min.js',{path
 /* v25.91: 37 videos (31 until then, at most 5.1 screens): at most 5.75, 3.85 and 6.1 screens, the same length for each */
 /* v25.96: 40 videos, an eleventh shelf (Extinction, three videos): one more row on an iPad sideways, three more list rows on a phone: 5.99, 3.92 and 6.27 screens (at most 6.05, 3.95 and 6.3) */
 /* v25.97: 43 videos, a twelfth shelf (Antecedents, three videos): 6.35, 4.19 and 6.66 screens (at most 6.4, 4.25 and 6.7) */
-const WANT={ipadL:{cols:4,cards:4,screens:6.75,lines:3},ipadP:{cols:4,cards:8,screens:4.45,lines:4},phone:{cols:1,cards:2,screens:7.1,lines:3}};   /* v25.99: 46 videos, a thirteenth shelf (Calming, three videos): 6.72, 4.42 and 7.05 screens */
+/* v26.00: the row under the shelves gains a third button (Learning: RBT training and BCBA study), which wraps to a row of its own on an iPad upright and on a phone: 4.47 and 7.12 screens (at most 4.5 and 7.15) */
+const WANT={ipadL:{cols:4,cards:4,screens:6.75,lines:3},ipadP:{cols:4,cards:8,screens:4.5,lines:4},phone:{cols:1,cards:2,screens:7.15,lines:3}};   /* v25.99: 46 videos, a thirteenth shelf (Calming, three videos): 6.72, 4.42 and 7.05 screens */
  for(const size of Object.keys(SZ)){const {ctx,p}=await mk(size);await home(p);
   await p.waitForFunction(()=>[...document.querySelectorAll('#vlList .vl-card img')].every(i=>i.complete),null,{timeout:20000}).catch(()=>{});
   const r=await p.evaluate(()=>{const g=document.querySelector('#vlList .vl-fam .vl-grid'),cards=[...document.querySelectorAll('#vlList .vl-card')];

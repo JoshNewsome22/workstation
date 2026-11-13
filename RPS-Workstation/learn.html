@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Learning · FBA and BIP Workstation</title>
+<!-- v26.00 (the BCBA, 11/13: "a place that goes over everything that a person who is studying to become a RBT can go and
+     learn all the materials they need to know based on the BACB ... content and course sequence topics. Also, a person
+     studying to be a BCBA ... a full fledge curriculum space where the information that is already in the workstation can
+     be pulled into as well as additional information and trainings that I present as well as videos"; and, asked whether
+     the RBT track should count as the 40-hour training: "Yes, with me as the Responsible Trainer.")
+     The Learning page. Two tracks, from the map in nbh-learn.js:
+       RBT training   the eight sections of the BACB's RBT 2026 40-hour curriculum outline, their minimum hours, and
+                      the units under each. A written unit (nbh-learn-units.js) teaches on the page: a lesson in short
+                      segments, each closed by a question; the workstation's videos; examples and non-examples to sort;
+                      a session to run by decisions; a quiz; and the role-plays and discussion the trainer leads.
+       BCBA study     the nine domains and 104 tasks of the BCBA test content outline, each with what the workstation
+                      has for it and the learner's own rating.
+     The time. The page counts time only while a part of a unit is open, the page is in view, and the learner is doing
+     something (a touch, a key, a scroll within the last 90 seconds), or a video is playing. Each part of a unit counts
+     up to a limit, so a page left open adds nothing. Further reading is not counted. The trainer's sessions (role-play
+     with feedback, discussion, modeling) are logged by the trainer, on the trainer's device.
+     Where it is kept. On the device, in this browser: the learner's record in localStorage nbh.learn.v1 (a name and a
+     BACB ID if the learner types them, the seconds counted by day, section and kind, the answers' scores); the
+     trainer's records in nbh.learn.trainer.v1 (the trainer's name and number, the trainees' names and BACB IDs, the
+     sessions, the records the trainees sent). A learner sends the record to the trainer as a file. Nothing here is
+     about a student, and nothing is sent anywhere by the page.
+     The certificate. Made on the trainer's device, for one trainee, and only when the whole training is in place
+     (NBH_LEARN.rbt.ready), every unit is passed, each section's hours and the 40 hours are met, and the dates span 5 to
+     180 days. Until the training is whole the page says so and does not carry the BACB's statement. -->
+<script>
+(function(){var R=document.documentElement;try{if(window.parent!==window)R.classList.add('nbh-framed');}catch(e){}
+ try{var v=JSON.parse(localStorage.getItem('nbh.view')||'{}')||{};R.classList.toggle('nbh-tx-1',v.t===1);R.classList.toggle('nbh-tx-2',v.t===2);R.classList.toggle('nbh-hc',!!v.hc);R.classList.toggle('nbh-dark',!!v.dark);}catch(e){}})();
+</script>
+<style>
+:root{--ink:#1F2D36;--navy:#1D3A52;--wash:#F2F6F5;--paper:#fff;--rule:#D9E2E0;--box:#B9C7C4;--muted:#55656C;--chip:#E5EDEB;
+  --focus:#2f7fa8;--go:#1f6b4a;--go-bg:#e3f3ea;--wait:#7a4f00;--wait-bg:#fff4dc;--wait-rule:#e7c27a;--no:#9b2c2c;--no-bg:#fbeaea;--fill:#2f6f8f;
+  --sans:"Inter","Helvetica Neue","Segoe UI",Arial,system-ui,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --gut:24px;font-size:16px}
+html.nbh-tx-1{font-size:18px}html.nbh-tx-2{font-size:20px}
+html.nbh-hc{--ink:#000;--muted:#263238;--rule:#5e7673;--box:#3f5654;--focus:#0a4f75;--chip:#dbe5e3}
+@media screen{html.nbh-dark:not(.nbh-framed){filter:invert(1) hue-rotate(180deg);background:#fff}
+  html.nbh-dark img{filter:invert(1) hue-rotate(180deg)}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--wash);color:var(--ink);font:400 1rem/1.5 var(--sans);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1,h2,h3{font-family:var(--serif);color:var(--navy);line-height:1.2;margin:0}
+h1{font-size:2rem;font-weight:600;letter-spacing:-.01em}
+h2{font-size:1.375rem;font-weight:600}
+h3{font-size:1.0625rem;font-weight:600}
+p{margin:0 0 .75em}
+a{color:#1b5d82}
+.ln-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;margin:-1px;padding:0;border:0}
+.ln-skip{position:absolute;left:8px;top:-60px;z-index:50;display:inline-flex;align-items:center;min-height:44px;background:var(--navy);color:#fff;padding:0 14px;border-radius:8px;font-weight:600;text-decoration:none}
+.ln-skip:focus{top:8px}
+.ln-wrap{max-width:1120px;margin:0 auto;padding:0 var(--gut)}
+.ln-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;min-width:44px;padding:0 16px;border:1px solid var(--box);border-radius:10px;
+  background:var(--paper);color:var(--navy);font-weight:600;font-size:.9375rem;cursor:pointer;text-decoration:none;text-align:center}
+.ln-btn:hover{background:#eef3f5;border-color:#93aead}
+.ln-btn.ln-pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.ln-btn.ln-pri:hover{background:#16304a}
+.ln-btn[disabled]{opacity:.5;cursor:default}
+.ln-btn.ln-wrapok{white-space:normal;padding:8px 16px;line-height:1.3}
+/* the bar */
+.ln-top{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--rule)}
+.ln-top .ln-wrap{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.ln-brand{font-family:var(--serif);font-size:1.25rem;font-weight:600;color:var(--navy);text-decoration:none;margin-right:auto;min-height:44px;display:inline-flex;align-items:center}
+.ln-nav{display:flex;gap:4px;flex-wrap:wrap}
+.ln-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;color:var(--navy);font-weight:600;font-size:.9375rem;text-decoration:none}
+.ln-nav a:hover{background:var(--chip)}
+.ln-nav a[aria-current="page"]{background:var(--navy);color:#fff}
+.ln-clock{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 12px;border-radius:16px;background:var(--chip);font-size:.875rem;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ln-clock i{width:10px;height:10px;border-radius:50%;background:#8a9a9f;flex:none}
+.ln-clock.on i{background:var(--go)}
+.ln-clock.on{background:var(--go-bg)}
+main{padding:28px 0 80px}
+main:focus{outline:none}
+.ln-lead{font-size:1.125rem;color:var(--muted);max-width:68ch;margin-top:8px}
+.ln-note{color:var(--muted);font-size:.9375rem;max-width:72ch}
+.ln-card{background:var(--paper);border:1px solid var(--rule);border-radius:14px;padding:20px}
+.ln-grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px}
+.ln-track{display:flex;flex-direction:column;gap:10px}
+.ln-track .ln-btn{align-self:flex-start;margin-top:auto}
+.ln-facts{display:flex;gap:6px 18px;flex-wrap:wrap;margin:0;padding:0;list-style:none;font-size:.9375rem;color:var(--muted)}
+.ln-facts b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ln-state{border:1px solid var(--wait-rule);background:var(--wait-bg);color:var(--wait);border-radius:12px;padding:12px 16px;margin-top:20px;max-width:80ch}
+.ln-state.ok{border-color:#9fd0b5;background:var(--go-bg);color:#14432f}
+.ln-state p:last-child{margin:0}
+.ln-you{display:flex;gap:10px 20px;align-items:center;flex-wrap:wrap;margin-top:20px}
+/* the ledger: eight segments, as wide as the hours the outline gives each section */
+.ln-ledger{display:flex;gap:3px;margin:14px 0 6px}
+.ln-seg{flex-basis:0;min-width:26px;position:relative;height:38px;border-radius:6px;background:var(--chip);overflow:hidden;border:1px solid var(--rule);text-decoration:none}
+.ln-seg b{position:absolute;left:0;top:0;bottom:0;background:var(--fill)}
+.ln-seg.full b{background:var(--go)}
+.ln-seg span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.875rem;color:var(--navy);mix-blend-mode:normal}
+.ln-seg.has span{color:#fff;text-shadow:0 0 3px rgba(0,0,0,.45)}
+.ln-ledcap{display:flex;justify-content:space-between;gap:12px;font-size:.875rem;color:var(--muted);flex-wrap:wrap}
+/* sections and units */
+.ln-sec{margin-top:28px}
+.ln-sechead{display:flex;align-items:baseline;gap:8px 16px;flex-wrap:wrap;border-bottom:2px solid var(--navy);padding-bottom:6px}
+.ln-sechead .k{font-family:var(--serif);font-size:1.75rem;font-weight:600;color:var(--navy);width:1.2em}
+.ln-sechead h2{flex:1;min-width:12em}
+.ln-sechead .h{font-size:.9375rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.ln-units{list-style:none;margin:0;padding:0}
+.ln-unit{display:grid;grid-template-columns:1fr auto;gap:4px 16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule)}
+.ln-unit a.t{font-weight:600;color:var(--navy);text-decoration:none;font-size:1.0625rem}
+.ln-unit a.t:hover{text-decoration:underline}
+.ln-unit .m{grid-column:1;font-size:.875rem;color:var(--muted);display:flex;gap:4px 12px;flex-wrap:wrap;align-items:center}
+.ln-unit .s{grid-row:1/3;grid-column:2}
+.ln-code{display:inline-block;padding:1px 8px;border-radius:10px;background:var(--chip);color:var(--navy);font-size:.8125rem;font-weight:600;font-variant-numeric:tabular-nums}
+.ln-pill{display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:13px;font-size:.8125rem;font-weight:600;white-space:nowrap}
+.ln-pill.w{background:var(--wait-bg);color:var(--wait);border:1px solid var(--wait-rule)}
+.ln-pill.g{background:var(--go-bg);color:var(--go);border:1px solid #9fd0b5}
+.ln-pill.n{background:var(--chip);color:var(--navy)}
+/* a unit */
+.ln-crumb{font-size:.9375rem;margin-bottom:10px}
+.ln-crumb a{display:inline-flex;align-items:center;min-height:44px}
+.ln-uhead{display:flex;gap:8px 16px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.ln-two{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;margin-top:22px;align-items:start}
+/* each link is positioned, so its words for a screen reader (placed out of sight) stay inside the row that scrolls on a phone and do not widen the page */
+.ln-parts{list-style:none;margin:0;padding:0;position:sticky;top:76px}
+.ln-parts a{position:relative;display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 12px;border-radius:10px;color:var(--ink);text-decoration:none;font-weight:600;border:1px solid transparent}
+.ln-parts a:hover{background:var(--chip)}
+.ln-parts a[aria-current="step"]{background:var(--paper);border-color:var(--navy);color:var(--navy)}
+.ln-parts .d{width:22px;height:22px;border-radius:50%;border:2px solid var(--box);flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff}
+.ln-parts .d.done{background:var(--go);border-color:var(--go)}
+.ln-parts .d.part{border-color:var(--fill);background:linear-gradient(90deg,var(--fill) 50%,transparent 50%)}
+.ln-parts small{display:block;font-weight:400;color:var(--muted);font-size:.8125rem}
+.ln-body{min-width:0}
+.ln-body h2{margin-bottom:10px}
+.ln-prose{max-width:66ch;font-size:1.0625rem;line-height:1.6}
+.ln-prose p{margin-bottom:.9em}
+.ln-key{margin:0 0 1em;padding:12px 16px 12px 34px;background:var(--paper);border-left:4px solid var(--fill);border-radius:0 10px 10px 0;max-width:66ch}
+.ln-key li{margin:.2em 0}
+.ln-steps{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;padding:0;list-style:none}
+.ln-steps button{width:44px;height:44px;border-radius:50%;border:2px solid var(--box);background:var(--paper);font-weight:700;color:var(--navy);cursor:pointer}
+.ln-steps button.done{background:var(--go-bg);border-color:var(--go);color:var(--go)}
+.ln-steps button[aria-current="true"]{border-color:var(--navy);background:var(--navy);color:#fff}
+.ln-q{background:var(--paper);border:1px solid var(--rule);border-radius:14px;padding:18px 20px;margin-top:16px;max-width:72ch}
+.ln-q legend,.ln-q .q{font-weight:600;font-size:1.0625rem;padding:0;margin-bottom:10px;color:var(--ink)}
+fieldset.ln-q{min-width:0;margin-left:0;margin-right:0}
+.ln-opts{display:grid;gap:8px}
+.ln-opt{display:flex;align-items:flex-start;gap:10px;min-height:48px;padding:10px 14px;border:1px solid var(--box);border-radius:10px;background:var(--paper);cursor:pointer;text-align:left;width:100%;font-weight:500}
+.ln-opt:hover{border-color:var(--navy);background:#f7faf9}
+.ln-opt.right{border-color:var(--go);background:var(--go-bg);color:#14432f}
+.ln-opt.wrong{border-color:var(--no);background:var(--no-bg);color:#6d1f1f}
+.ln-opt[disabled]{cursor:default;opacity:1}
+.ln-opt input{margin:4px 0 0;width:20px;height:20px;flex:none}
+.ln-why{margin-top:12px;padding:10px 14px;border-radius:10px;background:var(--chip);max-width:70ch}
+.ln-why.right{background:var(--go-bg);color:#14432f}
+.ln-why.wrong{background:var(--no-bg);color:#6d1f1f}
+.ln-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.ln-vids{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.ln-vid{display:grid;grid-template-columns:168px 1fr auto;gap:14px;align-items:center;background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:10px}
+.ln-vid img{width:168px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block;background:#dfe7e5}
+.ln-vid .tt{font-weight:600;color:var(--navy)}
+.ln-vid .lk{font-size:.9375rem;color:var(--muted);margin-top:2px}
+.ln-vid .mt{font-size:.8125rem;color:var(--muted);margin-top:4px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ln-plan{background:var(--paper);border:1px solid var(--navy);border-radius:12px;padding:14px 18px;max-width:72ch}
+.ln-plan ul{margin:6px 0 0;padding-left:20px}
+.ln-scene{font-size:1.125rem;max-width:66ch;margin:14px 0 4px}
+.ln-when{font-family:var(--serif);font-size:1.25rem;font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums}
+.ln-score{font-family:var(--serif);font-size:2.25rem;font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums}
+.ln-list{margin:0 0 1em;padding-left:22px;max-width:70ch}
+.ln-list li{margin:.3em 0}
+.ln-role{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:14px 18px;margin-top:12px;max-width:76ch}
+.ln-role ol{margin:8px 0 0;padding-left:22px}
+/* tables */
+.ln-tablewrap{overflow-x:auto;margin-top:12px}
+table.ln-t{border-collapse:collapse;width:100%;font-size:.9375rem;background:var(--paper);border:1px solid var(--rule);border-radius:10px}
+.ln-t th,.ln-t td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top}
+.ln-t thead th{font-size:.8125rem;color:var(--muted);font-weight:600;background:#f7faf9}
+.ln-t td.n,.ln-t th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ln-t tr:last-child td{border-bottom:0}
+.ln-t tfoot td{font-weight:700;border-top:2px solid var(--navy)}
+/* forms */
+.ln-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 16px;margin-top:12px;max-width:820px}
+.ln-f{display:flex;flex-direction:column;gap:4px;font-size:.9375rem;font-weight:600}
+.ln-f input,.ln-f select,.ln-f textarea{min-height:44px;padding:8px 12px;border:1px solid var(--box);border-radius:8px;background:var(--paper);font-weight:400}
+.ln-f textarea{min-height:88px;resize:vertical}
+.ln-f small{font-weight:400;color:var(--muted)}
+.ln-checks{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px;max-width:86ch}
+.ln-checks label{display:flex;gap:12px;align-items:flex-start;min-height:44px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.ln-checks label:hover{background:var(--chip)}
+.ln-checks input{width:22px;height:22px;flex:none;margin:2px 0 0}
+.ln-rate{display:inline-flex;border:1px solid var(--box);border-radius:10px;overflow:hidden;background:var(--paper)}
+.ln-rate button{min-height:44px;padding:0 12px;border:0;border-right:1px solid var(--box);background:transparent;font-size:.875rem;font-weight:600;color:var(--navy);cursor:pointer}
+.ln-rate button:last-child{border-right:0}
+.ln-rate button[aria-pressed="true"]{background:var(--navy);color:#fff}
+.ln-task{display:grid;grid-template-columns:4.2em 1fr auto;gap:6px 14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule)}
+.ln-task .mat{grid-column:2/4;display:flex;gap:6px;flex-wrap:wrap}
+.ln-task .mat .ln-btn{min-height:36px;font-size:.8125rem;padding:0 10px;font-weight:600}
+.ln-mat{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ln-dom{display:grid;grid-template-columns:2.2em 1fr auto;gap:4px 14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--rule);text-decoration:none;color:inherit}
+.ln-dom .k{font-family:var(--serif);font-size:1.5rem;font-weight:600;color:var(--navy)}
+.ln-dom .nm{font-weight:600;color:var(--navy);font-size:1.0625rem}
+.ln-dom:hover .nm{text-decoration:underline}
+.ln-meter{height:8px;border-radius:4px;background:var(--chip);overflow:hidden;grid-column:2/4}
+.ln-meter b{display:block;height:100%;background:var(--go)}
+/* the player */
+dialog.ln-dlg{width:min(1180px,calc(100vw - 16px));height:min(92vh,900px);max-width:none;max-height:none;padding:0;border:0;border-radius:14px;overflow:hidden;background:var(--paper)}
+dialog.ln-dlg::backdrop{background:rgba(16,28,38,.6)}
+.ln-dlgbar{display:flex;align-items:center;gap:12px;padding:6px 8px 6px 16px;border-bottom:1px solid var(--rule);height:58px}
+.ln-dlgbar strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--navy)}
+dialog.ln-dlg iframe{display:block;width:100%;height:calc(100% - 58px);border:0}
+/* the certificate */
+.ln-cert{background:#fff;border:3px double var(--navy);padding:40px 48px;max-width:860px;margin:20px 0;color:#111}
+.ln-cert h2{font-size:1.75rem;text-align:center;margin-bottom:6px}
+.ln-cert .sub{text-align:center;color:var(--muted);margin-bottom:26px}
+.ln-cert dl{display:grid;grid-template-columns:max-content 1fr;gap:10px 24px;margin:0 0 20px}
+.ln-cert dt{color:var(--muted);font-size:.9375rem}
+.ln-cert dd{margin:0;font-weight:600;border-bottom:1px solid #9aa;min-height:1.6em}
+.ln-cert .sig{height:84px;border-bottom:1px solid #111;display:flex;align-items:flex-end;max-width:420px}
+.ln-cert .sig img{max-height:80px;max-width:100%}
+.ln-cert .stmt{margin-top:26px;padding-top:14px;border-top:1px solid var(--rule);font-family:var(--serif);font-size:1.0625rem;text-align:center}
+.ln-pad{border:1px solid var(--box);border-radius:8px;background:#fff;touch-action:none;width:100%;max-width:420px;height:120px;display:block}
+.ln-foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-size:.875rem;color:var(--muted);max-width:86ch}
+@media (max-width:820px){:root{--gut:16px}h1{font-size:1.625rem}
+  .ln-grid2{grid-template-columns:1fr}
+  .ln-two{grid-template-columns:minmax(0,1fr);gap:14px}
+  .ln-parts{position:static;display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;min-width:0}
+  .ln-parts li{flex:none}
+  .ln-parts a{border-color:var(--rule);background:var(--paper)}
+  .ln-parts small{display:none}
+  .ln-vid{grid-template-columns:112px 1fr}
+  .ln-vid img{width:112px}
+  .ln-vid .go{grid-column:1/3}
+  .ln-vid .go .ln-btn{width:100%}
+  .ln-unit{grid-template-columns:1fr}
+  .ln-unit .s{grid-row:auto;grid-column:1}
+  .ln-task{grid-template-columns:3.6em 1fr}
+  .ln-task .ln-rate{grid-column:1/3}
+  .ln-task .mat{grid-column:1/3}
+  .ln-cert{padding:22px 18px}
+  .ln-cert dl{grid-template-columns:1fr;gap:2px}
+  .ln-cert dd{margin-bottom:10px}
+  dialog.ln-dlg{width:100vw;height:100vh;height:100dvh;border-radius:0}
+  .ln-nav a{padding:0 9px;white-space:nowrap}
+  .ln-top{position:static}.ln-top .ln-wrap{gap:4px 10px}.ln-brand{min-height:36px}
+  .ln-nav{flex-wrap:nowrap;overflow-x:auto;width:100%;order:3}}
+@media print{.ln-top,.ln-noprint,.ln-skip{display:none!important}body{background:#fff}main{padding:0}.ln-cert{margin:0 auto;border-width:3px}
+  .ln-card,.ln-t{break-inside:avoid}}
+@media (prefers-reduced-motion:no-preference){.ln-seg b,.ln-meter b{transition:width .4s ease}}
+</style>
+</head>
+<body>
+<a class="ln-skip" href="#lnMain">Skip to the page</a>
+<header class="ln-top"><div class="ln-wrap">
+  <a class="ln-brand" href="#home">Learning</a>
+  <nav class="ln-nav" aria-label="Learning"><a href="#rbt" data-nav="rbt">RBT training</a><a href="#bcba" data-nav="bcba">BCBA study</a><a href="#record" data-nav="record">My record</a><a href="#trainer" data-nav="trainer">For the trainer</a></nav>
+  <span class="ln-clock" id="lnClock" role="status" aria-live="off" hidden><i aria-hidden="true"></i><span id="lnClockT"></span></span>
+  <a class="ln-btn" id="lnToVideos" href="videos.html" hidden>Video library</a>
+  <button type="button" class="ln-btn" id="lnClose" hidden>Close</button>
+</div></header>
+<main id="lnMain" tabindex="-1"><div class="ln-wrap" id="lnView"></div></main>
+<div class="ln-sr" id="lnSay" role="status" aria-live="polite"></div>
+<dialog class="ln-dlg" id="lnDlg" aria-labelledby="lnDlgT"><div class="ln-dlgbar"><strong id="lnDlgT"></strong><button type="button" class="ln-btn" id="lnDlgX">Back to the unit</button></div></dialog>
+<input type="file" id="lnFile" accept="application/json,.json" hidden>
+<script src="nbh-videos.js"></script>
+<script src="nbh-learn.js"></script>
+<script src="nbh-learn-units.js"></script>
+<script>
+(function(){'use strict';
+const L=window.NBH_LEARN,U=window.NBH_LEARN_UNITS||{},VD=window.NBH_VIDEOS||{list:[],families:[]};
+const $=id=>document.getElementById(id),view=$('lnView');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const VBY={},FAM={},SEC={},UNIT={};
+VD.list.forEach(v=>{VBY[v.key]=v;});VD.families.forEach(f=>{FAM[f[0]]=f[2]||f[1];});
+L.rbt.sections.forEach(s=>{SEC[s.k]=s;s.units.forEach(u=>{u.sec=s.k;UNIT[u.id]=u;});});
+let WS=false;try{WS=window.parent!==window&&!!window.parent.__wsVideos;}catch(e){WS=false;}
+const tell=m=>{try{window.parent.postMessage(m,'*');}catch(e){}};
+const say=t=>{const n=$('lnSay');n.textContent='';setTimeout(()=>{n.textContent=t;},30);};
+
+/* ---- what is kept, on this device ---- */
+const KEY='nbh.learn.v1',TKEY='nbh.learn.trainer.v1';
+const read=(k,d)=>{try{const o=JSON.parse(localStorage.getItem(k)||'null');return o&&o.v===1?o:d;}catch(e){return d;}};
+let S=read(KEY,{v:1,who:{name:'',bacb:''},tr:null,days:{},u:{},b:{}});
+let T=read(TKEY,{v:1,me:{name:'',cred:'BCBA',cert:'',org:'',sig:''},chk:{},assist:[],trainees:[]});
+S.who=S.who||{name:'',bacb:''};S.days=S.days||{};S.u=S.u||{};S.b=S.b||{};T.me=T.me||{};T.chk=T.chk||{};T.assist=T.assist||[];T.trainees=T.trainees||[];
+let kept=true;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));kept=true;}catch(e){kept=false;}};
+const saveT=()=>{try{localStorage.setItem(TKEY,JSON.stringify(T));kept=true;}catch(e){kept=false;}};
+const pad=n=>(n<10?'0':'')+n;
+const dayOf=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>dayOf(new Date());
+const niceDay=s=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(s||'');if(!m)return'';return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});};
+const hm=sec=>{sec=Math.max(0,Math.floor(sec||0));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h+':'+pad(m);};
+const hmWords=sec=>{sec=Math.max(0,Math.floor(sec||0));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h+(h===1?' hour':' hours')+' and '+m+(m===1?' minute':' minutes');};
+const mins=m=>m>=60?(Math.floor(m/60)+' h'+(m%60?' '+m%60+' min':'')):m+' min';
+const uState=id=>S.u[id]||(S.u[id]={les:[],t:{}});
+const KINDS={lesson:'Lesson',video:'Videos',examples:'Examples',practice:'Practice',quiz:'Quiz'};
+const LED={roleplay:'Role-play with feedback',discussion:'Discussion led by a trainer',modeling:'Modeling in person',other:'Other trainer-led activity'};
+
+/* ---- the time: counted while a part is open, the page in view and the learner active, or a video playing ---- */
+const IDLE=90000;
+const clock={sec:null,unit:null,kind:null,playing:false,last:Date.now(),prev:Date.now(),n:0,full:false};
+function capOf(u,kind){const c=U[u.id];
+  if(kind==='video'){let d=0;(u.v||[]).forEach(k=>{d+=(VBY[k]&&VBY[k].dur)||0;});return Math.round(d*1.5)+(u.x?u.x.length*600:0)+(u.p?900:0);}
+  if(!c)return 0;
+  if(kind==='lesson')return c.lesson.length*240;
+  if(kind==='examples')return c.examples.items.length*90;
+  if(kind==='practice')return c.practice.steps.length*120;
+  if(kind==='quiz')return c.quiz.draw*90*3;
+  return 0;}
+function setClock(unit,kind){if(clock.unit!==unit||clock.kind!==kind){clock.playing=false;}clock.unit=unit||null;clock.kind=unit?kind:null;clock.sec=unit?UNIT[unit].sec:null;clock.last=Date.now();clock.full=false;paintClock(false);}
+function todaySec(){const d=S.days[today()]||{};let n=0;Object.keys(d).forEach(s=>Object.keys(d[s]).forEach(k=>{n+=d[s][k];}));return n;}
+function paintClock(on){const c=$('lnClock');c.hidden=!clock.kind&&!todaySec();c.classList.toggle('on',!!on);
+  $('lnClockT').textContent=(on?'Counting':clock.full?'This part is full':clock.kind?'Paused':'Today')+' · '+hm(todaySec())+' today';}
+function tick(){const now=Date.now();let dt=(now-clock.prev)/1000;clock.prev=now;if(dt>5||dt<0)dt=0;   /* a sleeping tab adds nothing */
+  const on=!!clock.kind&&document.visibilityState==='visible'&&(clock.kind==='video'?clock.playing:(now-clock.last<IDLE));
+  if(!on||!dt){paintClock(false);return;}
+  const us=uState(clock.unit),had=us.t[clock.kind]||0,cap=capOf(UNIT[clock.unit],clock.kind);
+  if(had>=cap){clock.full=true;paintClock(false);return;}
+  us.t[clock.kind]=had+dt;const d=S.days[today()]||(S.days[today()]={}),ds=d[clock.sec]||(d[clock.sec]={});ds[clock.kind]=(ds[clock.kind]||0)+dt;
+  paintClock(true);if(++clock.n>=10){clock.n=0;save();}}
+setInterval(tick,1000);
+['pointerdown','keydown','scroll','input'].forEach(ev=>window.addEventListener(ev,()=>{clock.last=Date.now();},{passive:true,capture:true}));
+window.addEventListener('pagehide',save);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')save();});
+
+/* seconds by section from a learner's days, and the trainer's sessions for a trainee */
+function selfBySec(days){const o={};Object.keys(days||{}).forEach(d=>{const x=days[d]||{};Object.keys(x).forEach(s=>{if(!SEC[s])return;Object.keys(x[s]||{}).forEach(k=>{const n=+x[s][k];if(isFinite(n)&&n>0)o[s]=(o[s]||0)+n;});});});return o;}
+function ledBySec(ses){const o={};(ses||[]).forEach(x=>{const u=UNIT[x.unit];if(!u)return;o[u.sec]=(o[u.sec]||0)+(+x.min||0)*60;});return o;}
+function ledger(self,led,link){let tot=0;const segs=L.rbt.sections.map(s=>{const got=(self[s.k]||0)+((led||{})[s.k]||0),need=s.min*3600,pct=Math.min(100,got/need*100);tot+=got;
+  const tag=link?'a href="#rbt" data-sec="'+s.k+'"':'div';
+  return '<'+tag+' class="ln-seg'+(pct>=100?' full':'')+(pct>=45?' has':'')+'" style="flex-grow:'+s.min+'" title="'+esc(s.k+'. '+s.name+': '+hm(got)+' of '+s.min+' h')+'"><b style="width:'+pct.toFixed(1)+'%"></b><span>'+s.k+'</span></'+(link?'a':'div')+'>';}).join('');
+  return '<div class="ln-ledger" role="img" aria-label="'+esc('Time counted by section: '+L.rbt.sections.map(s=>s.k+' '+hm((self[s.k]||0)+((led||{})[s.k]||0))+' of '+s.min+' hours').join(', '))+'">'+segs+'</div>'+
+    '<div class="ln-ledcap"><span>Each block is a section of the outline, as wide as its minimum hours.</span><span><b>'+hm(tot)+'</b> of '+L.rbt.total+':00 hours</span></div>';}
+
+/* ---- a unit's parts and how far each is ---- */
+function watched(k){try{const v=JSON.parse(localStorage.getItem('nbh.videos.v1')||'null');return !!(v&&v.items&&v.items[k]&&v.items[k].w);}catch(e){return false;}}
+function partsOf(u){const c=U[u.id],us=S.u[u.id]||{les:[],t:{}},out=[];
+  if(c){const n=c.lesson.length,d=c.lesson.filter((x,i)=>us.les&&us.les[i]).length;out.push({k:'lesson',n:'Lesson',sub:d+' of '+n+' parts',st:d>=n?2:d?1:0});}
+  if((u.v&&u.v.length)||u.x||u.p){const core=c?c.watch.filter(w=>w.c).map(w=>w.k):(u.v||[]),d=core.filter(watched).length;
+    out.push({k:'watch',n:c?'Watch':'Watch now',sub:core.length?d+' of '+core.length+(c?' core videos':' videos'):'Explainers and practice',st:core.length&&d>=core.length?2:d?1:0});}
+  if(c){const ex=us.ex;out.push({k:'examples',n:'Sort the examples',sub:ex?ex.right+' of '+ex.n+' right':c.examples.items.length+' scenes',st:ex?2:0});
+    const pr=us.pr;out.push({k:'practice',n:'Run a session',sub:pr?pr.right+' of '+pr.n+' right':c.practice.steps.length+' decisions',st:pr?(pr.right/pr.n>=.8?2:1):0});
+    const best=(us.quiz||[]).reduce((m,q)=>Math.max(m,q.pct),-1);out.push({k:'quiz',n:'Quiz',sub:best<0?'Pass at '+c.quiz.pass+'%':'Best: '+best+'%',st:best>=c.quiz.pass?2:best>=0?1:0});
+    out.push({k:'trainer',n:'With your trainer',sub:'Role-play and discussion',st:0});}
+  return out;}
+function unitDone(u){const p=partsOf(u).filter(x=>x.k!=='trainer');return !!U[u.id]&&p.length>0&&p.every(x=>x.st===2);}
+function unitPill(u){if(!U[u.id])return '<span class="ln-pill w">Lesson to come</span>';
+  if(unitDone(u))return '<span class="ln-pill g">Your part is done</span>';
+  const any=partsOf(u).some(x=>x.st>0);return '<span class="ln-pill n">'+(any?'Started':'Ready')+'</span>';}
+function written(){let n=0,all=0;L.rbt.sections.forEach(s=>s.units.forEach(u=>{all++;if(U[u.id])n++;}));return [n,all];}
+function stateBox(){const w=written();
+  if(L.rbt.ready)return '<div class="ln-state ok"><p>'+esc(L.rbt.statementPages)+'</p></div>';
+  return '<div class="ln-state" id="lnBuilding"><p><strong>This training is being built.</strong> '+w[0]+' of '+w[1]+' units are written. It is not yet a complete 40-hour training, and it cannot yet be used toward RBT certification. No certificate can be made until every unit is in place.</p></div>';}
+function docs(list){return '<ul class="ln-list">'+list.map(d=>'<li><a href="'+esc(d[1])+'" target="_blank" rel="noopener">'+esc(d[0])+'</a> (bacb.com)</li>').join('')+'</ul>';}
+
+/* ---- the pages ---- */
+function vHome(){const w=written(),self=selfBySec(S.days),tr=S.tr;
+  let nb=0,rated=0;L.bcba.domains.forEach(d=>d.tasks.forEach(t=>{nb++;if(S.b[t[0]]===2)rated++;}));
+  view.innerHTML='<h1>Learning</h1><p class="ln-lead">Study for the RBT and BCBA examinations with the workstation’s own lessons, videos and practice, laid out as the BACB’s outlines lay the content out.</p>'+
+   '<div class="ln-grid2">'+
+    '<section class="ln-card ln-track" aria-labelledby="hRbt"><h2 id="hRbt">RBT training</h2><p>The eight sections of the 40-hour curriculum outline. Each unit teaches on the page, then you practice it with your trainer.</p>'+
+      '<ul class="ln-facts"><li><b>'+L.rbt.sections.length+'</b> sections</li><li><b>'+w[1]+'</b> units</li><li><b>'+w[0]+'</b> written so far</li><li><b>43</b> tasks of the test outline</li></ul>'+
+      ledger(self,null,false)+'<a class="ln-btn ln-pri" href="#rbt">Open the RBT training</a></section>'+
+    '<section class="ln-card ln-track" aria-labelledby="hBcba"><h2 id="hBcba">BCBA study</h2><p>The nine domains and 104 tasks of the test content outline, each with what the workstation has for it. Rate yourself on each task and see where to study next.</p>'+
+      '<ul class="ln-facts"><li><b>9</b> domains</li><li><b>'+nb+'</b> tasks</li><li><b>'+rated+'</b> you can explain</li></ul>'+
+      '<a class="ln-btn ln-pri" href="#bcba">Open the BCBA study map</a></section>'+
+   '</div>'+stateBox()+
+   '<div class="ln-you">'+(tr&&tr.n?'<p style="margin:0"><strong>Your Responsible Trainer:</strong> '+esc(tr.n)+(tr.cr?', '+esc(tr.cr):'')+(tr.c?', certification number '+esc(tr.c):'')+(tr.o?' · '+esc(tr.o):'')+'</p>':'<p class="ln-note" style="margin:0">No trainer is named on this device yet. Your trainer gives you a link that names them.</p>')+'</div>'+
+   '<p class="ln-foot">The time you spend is counted only while a part of a unit is open and you are working in it, or a video is playing. It is kept on this device. The people in every example and video are simulated.</p>';}
+
+function vRbt(){const self=selfBySec(S.days);
+  view.innerHTML='<h1>RBT training</h1><p class="ln-lead">Eight sections, as the BACB’s curriculum outline for the 40-hour training sets them out, with the minimum hours for each. The sections can be taken in any order.</p>'+
+   stateBox()+'<div class="ln-card" style="margin-top:20px"><h2 class="ln-sr">Your time</h2>'+ledger(self,null,false)+'</div>'+
+   L.rbt.sections.map(s=>{let plan=0;s.units.forEach(u=>{plan+=u.self+u.led;});
+    return '<section class="ln-sec" id="sec'+s.k+'" aria-labelledby="sh'+s.k+'"><div class="ln-sechead"><span class="k" aria-hidden="true">'+s.k+'</span><h2 id="sh'+s.k+'"><span class="ln-sr">Section '+s.k+': </span>'+esc(s.name)+'</h2>'+
+     '<span class="h">At least '+s.min+(s.min===1?' hour':' hours')+' · planned '+mins(plan)+' · yours '+hm(self[s.k]||0)+'</span></div><ul class="ln-units">'+
+     s.units.map(u=>{const nv=(u.v||[]).length;
+      return '<li class="ln-unit"><a class="t" href="#rbt/'+u.id+'">'+esc(u.t)+'</a><span class="s">'+unitPill(u)+'</span><span class="m">'+
+       u.codes.map(c=>'<span class="ln-code" title="RBT Test Content Outline (3rd ed.), task '+c+'">'+c+'</span>').join('')+
+       '<span>'+mins(u.self)+' on the page, '+mins(u.led)+' with your trainer</span>'+(nv?'<span>'+nv+(nv===1?' video':' videos')+'</span>':'')+'</span></li>';}).join('')+'</ul></section>';}).join('')+
+   '<h2 style="margin-top:36px">The BACB’s documents</h2><p class="ln-note">The task codes on this page are those of the RBT Test Content Outline (3rd ed.). The titles are the workstation’s own short ones; the BACB’s wording is in its documents.</p>'+docs(L.rbt.docs);}
+
+function matButtons(u){let h='';
+  (u.x||[]).forEach(k=>{h+='<button type="button" class="ln-btn" data-open="explain.html#'+esc(k)+'" data-title="'+esc('Explainer: '+(L.explainers[k]||k))+'">Step through: '+esc(L.explainers[k]||k)+'</button>';});
+  if(u.p)h+='<button type="button" class="ln-btn" data-open="practice.html" data-title="Practice counting">Practice counting</button>';
+  (u.f||[]).forEach(f=>{h+=WS?'<button type="button" class="ln-btn" data-form="'+esc(f)+'">Form '+esc(f)+': '+esc(L.forms[f]||'')+'</button>':'<span class="ln-pill n" title="A form of the workstation, opened by your trainer">Form '+esc(f)+': '+esc(L.forms[f]||'')+'</span>';});
+  return h?'<div class="ln-mat">'+h+'</div>':'';}
+function vidRow(k,look,core){const v=VBY[k];if(!v)return'';const w=watched(k),d=Math.round(v.dur||0);
+  return '<li class="ln-vid"><img src="'+esc(v.poster)+'" alt="" loading="lazy" width="168" height="95"><div><div class="tt">'+esc(v.title)+'</div>'+(look?'<div class="lk"><strong>Look for:</strong> '+esc(look)+'</div>':'')+
+   '<div class="mt"><span>'+Math.floor(d/60)+':'+pad(d%60)+'</span>'+(core?'<span class="ln-pill n">Core</span>':'')+(w?'<span class="ln-pill g">Watched</span>':'')+'</div></div>'+
+   '<div class="go"><button type="button" class="ln-btn'+(w?'':' ln-pri')+'" data-open="videos.html#video='+encodeURIComponent(k)+'" data-title="'+esc(v.title)+'" data-video="1">'+(w?'Watch again':'Watch')+'</button></div></li>';}
+
+let cur={};   /* the page's passing state: the lesson part shown, an activity under way */
+function vUnit(id,part){const u=UNIT[id];if(!u){location.hash='#rbt';return;}
+  const c=U[id],s=SEC[u.sec],parts=partsOf(u);
+  if(!part||!parts.some(p=>p.k===part))part=parts.length?(parts.find(p=>p.st<2&&p.k!=='trainer')||parts[0]).k:'';
+  const head='<p class="ln-crumb"><a href="#rbt">RBT training</a> › Section '+s.k+': '+esc(s.name)+'</p><h1>'+esc(u.t)+'</h1>'+
+   '<div class="ln-uhead">'+u.codes.map(x=>'<span class="ln-code" title="RBT Test Content Outline (3rd ed.), task '+x+'">'+x+'</span>').join('')+'<span class="ln-note">'+mins(u.self)+' on the page, '+mins(u.led)+' with your trainer</span>'+unitPill(u)+'</div>';
+  if(!c){setClock(parts.length?id:null,'video');
+    view.innerHTML=head+'<div class="ln-state"><p><strong>The lesson for this unit is still to be written.</strong> '+(parts.length?'What the workstation already has for it is below, and can be watched now.':'The workstation has no video for it yet.')+'</p></div>'+
+     ((u.v||[]).length?'<h2 style="margin-top:24px">Videos</h2><ul class="ln-vids" style="margin-top:12px">'+u.v.map(k=>vidRow(k,'',false)).join('')+'</ul>':'')+matButtons(u);return;}
+  const nav='<ol class="ln-parts" aria-label="The parts of this unit">'+parts.map(p=>'<li><a href="#rbt/'+id+'/'+p.k+'"'+(p.k===part?' aria-current="step"':'')+'><span class="d'+(p.st===2?' done':p.st===1?' part':'')+'" aria-hidden="true">'+(p.st===2?'✓':'')+'</span><span>'+esc(p.n)+'<small>'+esc(p.sub)+'</small><span class="ln-sr">'+(p.st===2?', done':p.st===1?', started':'')+'</span></span></a></li>').join('')+'</ol>';
+  view.innerHTML=head+'<div class="ln-two">'+nav+'<div class="ln-body" id="lnBody"></div></div>';
+  const body=$('lnBody');if(part==='trainer')setClock(null);else setClock(id,part==='watch'?'video':part);
+  ({lesson:pLesson,watch:pWatch,examples:pExamples,practice:pPractice,quiz:pQuiz,trainer:pTrainer})[part](u,c,body);}
+
+function optBtns(opts,name){return '<div class="ln-opts">'+opts.map((o,i)=>'<button type="button" class="ln-opt" data-pick="'+i+'">'+esc(o)+'</button>').join('')+'</div>';}
+function pLesson(u,c,body){const us=uState(u.id);let i=cur.seg;if(cur.unit!==u.id||i==null||i>=c.lesson.length){i=c.lesson.findIndex((x,k)=>!us.les[k]);if(i<0)i=0;}cur={unit:u.id,seg:i};
+  const g=c.lesson[i],done=!!us.les[i];
+  body.innerHTML='<h2>Lesson</h2>'+(i===0?'<p class="ln-note" style="margin-bottom:4px">After this unit you can:</p><ul class="ln-list">'+c.aim.map(a=>'<li>'+esc(a)+'</li>').join('')+'</ul>':'')+
+   '<ol class="ln-steps" aria-label="Parts of the lesson">'+c.lesson.map((x,k)=>'<li><button type="button" data-seg="'+k+'" class="'+(us.les[k]?'done':'')+'"'+(k===i?' aria-current="true"':'')+' aria-label="Part '+(k+1)+': '+esc(x.h)+(us.les[k]?', done':'')+'">'+(k+1)+'</button></li>').join('')+'</ol>'+
+   '<article class="ln-prose"><h3 style="font-size:1.375rem;margin-bottom:10px">'+esc(g.h)+'</h3>'+g.p.map(p=>'<p>'+esc(p)+'</p>').join('')+'</article>'+(g.key?'<ul class="ln-key">'+g.key.map(k=>'<li>'+esc(k)+'</li>').join('')+'</ul>':'')+
+   '<div class="ln-q" id="lnCheck"><p class="q">Check: '+esc(g.check.q)+'</p>'+optBtns(g.check.opts)+'<div id="lnWhy" aria-live="polite"></div></div>'+
+   '<div class="ln-row"><button type="button" class="ln-btn" data-seg="'+(i-1)+'"'+(i?'':' disabled')+'>Back</button><button type="button" class="ln-btn ln-pri" id="lnNext" '+(done?'':'disabled')+'>'+(i<c.lesson.length-1?'Next part':'On to the videos')+'</button></div>';
+  if(done)showCheck(g.check,g.check.a,true);
+  body.onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.seg!=null&&!b.disabled){cur.seg=+b.dataset.seg;pLesson(u,c,body);focusBody();return;}
+    if(b.dataset.pick!=null&&!b.disabled){const k=+b.dataset.pick,ok=k===g.check.a;showCheck(g.check,k,ok);
+      if(ok&&!us.les[i]){us.les[i]=1;save();$('lnNext').disabled=false;paintParts(u);const sb=body.querySelector('.ln-steps [data-seg="'+i+'"]');if(sb){sb.classList.add('done');sb.setAttribute('aria-label',sb.getAttribute('aria-label')+', done');}}return;}
+    if(b.id==='lnNext'){if(i<c.lesson.length-1){cur.seg=i+1;pLesson(u,c,body);focusBody();}else location.hash='#rbt/'+u.id+'/watch';}};}
+function showCheck(ch,k,ok){const box=$('lnCheck');box.querySelectorAll('.ln-opt').forEach((b,j)=>{b.classList.remove('right','wrong');if(j===k)b.classList.add(ok?'right':'wrong');if(ok)b.disabled=true;});
+  $('lnWhy').innerHTML='<p class="ln-why '+(ok?'right':'wrong')+'"><strong>'+(ok?'Right. ':'Not that one. ')+'</strong>'+(ok?esc(ch.why):'Read the part again and choose another answer.')+'</p>';}
+function focusBody(){const b=$('lnBody');if(b){const h=b.querySelector('h2');if(h){h.tabIndex=-1;h.focus({preventScroll:true});}window.scrollTo(0,Math.max(0,b.getBoundingClientRect().top+window.scrollY-90));}}
+function paintParts(u){const ol=view.querySelector('.ln-parts');if(!ol)return;
+  partsOf(u).forEach((p,i)=>{const a=ol.children[i]&&ol.children[i].firstChild;if(!a)return;const d=a.querySelector('.d');d.className='d'+(p.st===2?' done':p.st===1?' part':'');d.textContent=p.st===2?'✓':'';a.querySelector('small').textContent=p.sub;});
+  const pill=view.querySelector('.ln-uhead .ln-pill');if(pill)pill.outerHTML=unitPill(u);}
+
+function pWatch(u,c,body){const core=c.watch.filter(w=>w.c),more=c.watch.filter(w=>!w.c);
+  body.innerHTML='<h2>Watch</h2><p class="ln-note">Each video shows the procedure with simulated people. Watch the core ones; the rest show the same procedure in other situations. Time is counted while a video plays.</p>'+
+   '<h3 style="margin:16px 0 10px">Core videos</h3><ul class="ln-vids">'+core.map(w=>vidRow(w.k,w.look,true)).join('')+'</ul>'+
+   (more.length?'<h3 style="margin:22px 0 10px">More to watch</h3><ul class="ln-vids">'+more.map(w=>vidRow(w.k,w.look,false)).join('')+'</ul>':'')+
+   ((u.x||u.p||u.f)?'<h3 style="margin:22px 0 4px">Also in the workstation</h3>'+matButtons(u):'')+
+   '<div class="ln-row"><a class="ln-btn ln-pri" href="#rbt/'+u.id+'/examples">On to the examples</a></div>';body.onclick=null;}
+
+/* examples and practice: one scene at a time, an answer, the reason, the next */
+function runSet(u,body,o){let i=0,right=0;const n=o.items.length;
+  const draw=()=>{const it=o.items[i];
+    body.innerHTML='<h2>'+esc(o.title)+'</h2>'+(o.top||'')+'<p class="ln-note" aria-live="polite">'+esc(o.word)+' '+(i+1)+' of '+n+'</p>'+
+     '<div class="ln-q" id="lnCheck">'+(it.t?'<p class="ln-when">'+esc(it.t)+'</p>':'')+'<p class="ln-scene">'+esc(it.s)+'</p>'+(o.ask?'<p class="q">'+esc(o.ask)+'</p>':'')+optBtns(it.opts||o.opts)+'<div id="lnWhy" aria-live="polite"></div></div>'+
+     '<div class="ln-row"><button type="button" class="ln-btn ln-pri" id="lnNext" disabled>'+(i<n-1?'Next':'See the result')+'</button></div>';};
+  const end=()=>{const pct=Math.round(right/n*100);o.done(right,n);save();paintParts(u);
+    body.innerHTML='<h2>'+esc(o.title)+'</h2><p class="ln-score" id="lnScore">'+right+' of '+n+'</p><p class="ln-prose">'+esc(o.verdict(pct))+'</p>'+
+     '<div class="ln-row"><button type="button" class="ln-btn" id="lnAgain">Do it again</button><a class="ln-btn ln-pri" href="#rbt/'+u.id+'/'+o.next[0]+'">'+esc(o.next[1])+'</a></div>';say(right+' of '+n+' right');};
+  body.onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
+    if(b.dataset.pick!=null){const it=o.items[i],k=+b.dataset.pick,ok=k===it.a;if(ok)right++;
+      body.querySelectorAll('.ln-opt').forEach((x,j)=>{x.disabled=true;if(j===it.a)x.classList.add('right');else if(j===k)x.classList.add('wrong');});
+      $('lnWhy').innerHTML='<p class="ln-why '+(ok?'right':'wrong')+'"><strong>'+(ok?'Right. ':'Not quite. ')+'</strong>'+esc(it.why)+'</p>';$('lnNext').disabled=false;$('lnNext').focus();return;}
+    if(b.id==='lnNext'){i++;if(i<n){draw();focusBody();}else end();return;}
+    if(b.id==='lnAgain'){i=0;right=0;draw();focusBody();}};
+  draw();}
+function pExamples(u,c,body){const us=uState(u.id);
+  runSet(u,body,{title:'Sort the examples',top:'<p class="ln-prose">'+esc(c.examples.intro)+'</p>',word:'Scene',ask:'Which procedure is this?',opts:c.examples.opts,
+    items:c.examples.items,done:(r,n)=>{us.ex={right:r,n:n,at:today()};},verdict:p=>p>=80?'You can tell the procedures apart. Go on to run a session.':'Read the reasons again, then try once more: the non-examples are the ones that catch people.',next:['practice','Run a session']});}
+function pPractice(u,c,body){const us=uState(u.id),P=c.practice;
+  runSet(u,body,{title:P.title,top:'<p class="ln-prose">'+esc(P.intro)+'</p><div class="ln-plan"><strong>The plan</strong><ul>'+P.plan.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>',word:'Decision',ask:'What do you do?',
+    items:P.steps.map(s=>({t:s.t,s:s.see,opts:s.opts,a:s.a,why:s.why})),done:(r,n)=>{if(!us.pr||r>=us.pr.right)us.pr={right:r,n:n,at:today()};},
+    verdict:p=>p>=80?'You ran the plan as written. The quiz is next.':'Run it again. The plan answers every one of these decisions: read it before each choice.',next:['quiz','Take the quiz']});}
+
+function shuffle(a,rnd){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function pQuiz(u,c,body){const us=uState(u.id),Q=c.quiz,past=us.quiz||[];
+  const start=()=>{const set=shuffle(Q.items.map((x,i)=>i),Math.random).slice(0,Q.draw);
+    body.innerHTML='<h2>Quiz</h2><form id="lnQuiz" novalidate>'+set.map((qi,n)=>{const q=Q.items[qi];
+      return '<fieldset class="ln-q" data-q="'+qi+'"><legend>'+(n+1)+'. '+esc(q.q)+'</legend><div class="ln-opts">'+q.opts.map((o,i)=>'<label class="ln-opt"><input type="radio" name="q'+qi+'" value="'+i+'"><span>'+esc(o)+'</span></label>').join('')+'</div><div class="w"></div></fieldset>';}).join('')+
+     '<p class="ln-why wrong" id="lnQMiss" hidden></p><div class="ln-row"><button type="submit" class="ln-btn ln-pri">Hand in the quiz</button></div></form>';
+    $('lnQuiz').onsubmit=e=>{e.preventDefault();const f=e.target,sets=[...f.querySelectorAll('fieldset')],blank=sets.filter(s=>!s.querySelector('input:checked'));
+      if(blank.length){const m=$('lnQMiss');m.hidden=false;m.textContent=blank.length+(blank.length===1?' question has':' questions have')+' no answer yet.';blank[0].querySelector('input').focus();return;}
+      let right=0;sets.forEach(s=>{const q=Q.items[+s.dataset.q],k=+s.querySelector('input:checked').value,ok=k===q.a;if(ok)right++;
+        s.querySelectorAll('.ln-opt').forEach((l,j)=>{l.querySelector('input').disabled=true;if(j===q.a)l.classList.add('right');else if(j===k)l.classList.add('wrong');});
+        s.querySelector('.w').innerHTML='<p class="ln-why '+(ok?'right':'wrong')+'"><strong>'+(ok?'Right. ':'Not quite. ')+'</strong>'+esc(q.why)+'</p>';});
+      const pct=Math.round(right/sets.length*100),pass=pct>=Q.pass;(us.quiz=us.quiz||[]).push({at:today(),right:right,n:sets.length,pct:pct,pass:pass?1:0});save();paintParts(u);
+      $('lnQMiss').hidden=true;const row=f.querySelector('.ln-row');
+      row.innerHTML='<div><p class="ln-score" id="lnScore">'+pct+'%</p><p class="ln-prose">'+(pass?'Passed, with '+right+' of '+sets.length+'. Your part of this unit is '+(unitDone(u)?'done':'nearly done: see the list of parts')+'. The role-plays with your trainer come next.':'Not yet: '+right+' of '+sets.length+', and the pass mark is '+Q.pass+'%. Read the reasons above, then take it again with a new set of questions.')+'</p>'+
+        '<div class="ln-row"><button type="button" class="ln-btn" id="lnAgain">Take it again</button>'+(pass?'<a class="ln-btn ln-pri" href="#rbt/'+u.id+'/trainer">With your trainer</a>':'')+'</div></div>';
+      $('lnAgain').onclick=()=>{start();focusBody();};$('lnScore').tabIndex=-1;$('lnScore').focus();say(pct+' percent. '+(pass?'Passed.':'Not passed yet.'));};};
+  if(past.length&&!cur.quizNow){const best=past.reduce((m,q)=>Math.max(m,q.pct),0);
+    body.innerHTML='<h2>Quiz</h2><p class="ln-prose">'+Q.draw+' questions, drawn anew each time from a larger set. Pass at '+Q.pass+'%.</p>'+
+     '<div class="ln-tablewrap"><table class="ln-t" style="max-width:420px"><thead><tr><th>Attempt</th><th>Date</th><th class="n">Score</th><th>Result</th></tr></thead><tbody>'+
+     past.map((q,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(niceDay(q.at))+'</td><td class="n">'+q.right+' of '+q.n+' ('+q.pct+'%)</td><td>'+(q.pass?'Passed':'Not yet')+'</td></tr>').join('')+'</tbody></table></div>'+
+     '<div class="ln-row"><button type="button" class="ln-btn'+(best>=Q.pass?'':' ln-pri')+'" id="lnAgain">Take it again</button>'+(best>=Q.pass?'<a class="ln-btn ln-pri" href="#rbt/'+u.id+'/trainer">With your trainer</a>':'')+'</div>';
+    $('lnAgain').onclick=()=>{start();focusBody();};body.onclick=null;return;}
+  body.onclick=null;start();}
+
+function pTrainer(u,c,body){const us=uState(u.id),fb=us.fb||{};
+  body.innerHTML='<h2>With your trainer</h2><p class="ln-prose">These are done with your trainer, in person or on a call. Your trainer plays the student, scores each step, gives you feedback, and keeps the record of the time.</p>'+
+   '<h3 style="margin-top:18px">Role-plays</h3><p class="ln-note">'+esc(c.roleRule)+'</p>'+
+   c.role.map(r=>'<div class="ln-role"><strong>'+esc(r.t)+'</strong><p class="ln-note" style="margin:4px 0 0">'+esc(r.setup)+'</p><ol>'+r.steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol></div>').join('')+
+   '<h3 style="margin-top:22px">To talk through</h3><ol class="ln-list">'+c.discuss.map(d=>'<li>'+esc(d)+'</li>').join('')+'</ol>'+
+   '<h3 style="margin-top:22px">Tell your trainer about this unit</h3><div class="ln-form"><label class="ln-f">How clear was it?<select id="lnFbR"><option value="">Choose</option><option value="3">Clear</option><option value="2">Mostly clear</option><option value="1">Hard to follow</option></select></label>'+
+   '<label class="ln-f" style="grid-column:1/-1">What would make it better? <small>Your trainer reads this when you send your record. Do not write about a student.</small><textarea id="lnFbC" maxlength="600"></textarea></label></div>'+
+   '<h3 style="margin-top:22px">Further reading</h3><p class="ln-note">Reading is not counted in the training time.</p><ul class="ln-list">'+c.read.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul>'+
+   '<div class="ln-row"><a class="ln-btn" href="#rbt">Back to the sections</a><a class="ln-btn ln-pri" href="#record">My record</a></div>';
+  $('lnFbR').value=fb.r||'';$('lnFbC').value=fb.c||'';
+  const keep=()=>{us.fb={r:$('lnFbR').value,c:$('lnFbC').value.slice(0,600)};save();};$('lnFbR').onchange=keep;$('lnFbC').oninput=keep;body.onclick=null;}
+
+/* ---- BCBA study ---- */
+const RATE=['Not yet','Getting there','Can explain it'];
+function domStat(d){let n=0,sum=0;d.tasks.forEach(t=>{const r=S.b[t[0]];if(r===2)n++;sum+=r||0;});return {n:n,pct:sum/(d.tasks.length*2)*100};}
+function vBcba(k){setClock(null);const D=L.bcba.domains;
+  if(k){const d=D.find(x=>x.k===k);if(!d){location.hash='#bcba';return;}
+    view.innerHTML='<p class="ln-crumb"><a href="#bcba">BCBA study</a> › Domain '+d.k+'</p><h1>'+esc(d.name)+'</h1><p class="ln-lead">'+d.tasks.length+' tasks, about '+d.q+' of the 175 scored questions. Rate yourself on each, and open what the workstation has for it.</p>'+
+     '<div id="lnTasks" style="margin-top:14px">'+d.tasks.map(t=>{const m=t[2]||{},r=S.b[t[0]];let mat='';
+       (m.v||[]).forEach(f=>{mat+='<button type="button" class="ln-btn" data-open="videos.html#family='+esc(f)+'" data-title="'+esc('Videos: '+(FAM[f]||f))+'">Videos: '+esc(FAM[f]||f)+'</button>';});
+       (m.x||[]).forEach(x=>{mat+='<button type="button" class="ln-btn" data-open="explain.html#'+esc(x)+'" data-title="'+esc('Explainer: '+(L.explainers[x]||x))+'">Explainer: '+esc(L.explainers[x]||x)+'</button>';});
+       if(m.p)mat+='<button type="button" class="ln-btn" data-open="practice.html" data-title="Practice counting">Practice counting</button>';
+       (m.f||[]).forEach(f=>{mat+=WS?'<button type="button" class="ln-btn" data-form="'+esc(f)+'">Form '+esc(f)+'</button>':'<span class="ln-pill n" title="'+esc(L.forms[f]||'')+'">Form '+esc(f)+'</span>';});
+       return '<div class="ln-task" data-task="'+t[0]+'"><span class="ln-code">'+t[0]+'</span><strong>'+esc(t[1])+'</strong><span class="ln-rate" role="group" aria-label="'+esc('Your rating for '+t[0])+'">'+RATE.map((x,i)=>'<button type="button" data-rate="'+i+'" aria-pressed="'+(r===i?'true':'false')+'">'+x+'</button>').join('')+'</span>'+(mat?'<span class="mat">'+mat+'</span>':'')+'</div>';}).join('')+'</div>'+
+     '<p class="ln-foot">Study notes and practice questions for each task are still to be written. The codes are those of the BCBA Test Content Outline (6th ed.); the titles are the workstation’s own short ones.</p>';
+    $('lnTasks').onclick=e=>{const b=e.target.closest('[data-rate]');if(!b)return;const row=b.closest('[data-task]'),t=row.dataset.task,v=+b.dataset.rate;
+      if(S.b[t]===v)delete S.b[t];else S.b[t]=v;save();row.querySelectorAll('[data-rate]').forEach(x=>x.setAttribute('aria-pressed',S.b[t]===+x.dataset.rate?'true':'false'));};return;}
+  view.innerHTML='<h1>BCBA study</h1><p class="ln-lead">The nine domains of the BCBA Test Content Outline (6th ed.), with the number of scored questions each carries. Open a domain to rate yourself on its tasks and to find the workstation’s videos, explainers and forms for them.</p>'+
+   '<div style="margin-top:16px">'+D.map(d=>{const st=domStat(d);return '<a class="ln-dom" href="#bcba/'+d.k+'"><span class="k" aria-hidden="true">'+d.k+'</span><span class="nm"><span class="ln-sr">Domain '+d.k+': </span>'+esc(d.name)+'</span><span class="ln-note">'+d.tasks.length+' tasks · '+d.q+' questions · '+st.n+' you can explain</span><span class="ln-meter" aria-hidden="true"><b style="width:'+st.pct.toFixed(0)+'%"></b></span></a>';}).join('')+'</div>'+
+   '<h2 style="margin-top:32px">The BACB’s documents</h2><p class="ln-note">Coursework for the BCBA is taken at a university. This page is for study alongside it, and does not replace it.</p>'+docs(L.bcba.docs);}
+
+/* ---- my record ---- */
+function timeTable(days,ses){const self=selfBySec(days),led=ledBySec(ses);let ts=0,tl=0;
+  return '<div class="ln-tablewrap"><table class="ln-t"><thead><tr><th>Section</th><th class="n">On the page</th>'+(ses?'<th class="n">With the trainer</th><th class="n">Total</th>':'')+'<th class="n">At least</th></tr></thead><tbody>'+
+   L.rbt.sections.map(s=>{const a=self[s.k]||0,b=led[s.k]||0;ts+=a;tl+=b;return '<tr><td>'+s.k+'. '+esc(s.name)+'</td><td class="n">'+hm(a)+'</td>'+(ses?'<td class="n">'+hm(b)+'</td><td class="n">'+hm(a+b)+'</td>':'')+'<td class="n">'+s.min+':00</td></tr>';}).join('')+
+   '</tbody><tfoot><tr><td>All sections</td><td class="n">'+hm(ts)+'</td>'+(ses?'<td class="n">'+hm(tl)+'</td><td class="n">'+hm(ts+tl)+'</td>':'')+'<td class="n">'+L.rbt.total+':00</td></tr></tfoot></table></div>';}
+function quizRows(u){const out=[];Object.keys(u||{}).forEach(id=>{const un=UNIT[id];if(!un)return;const x=u[id]||{},q=x.quiz||[];if(!q.length&&!x.ex&&!x.pr)return;
+  const best=q.reduce((m,a)=>Math.max(m,+a.pct||0),0);out.push('<tr><td>'+esc(un.t)+'</td><td class="n">'+(x.ex?(+x.ex.right||0)+' of '+(+x.ex.n||0):'')+'</td><td class="n">'+(x.pr?(+x.pr.right||0)+' of '+(+x.pr.n||0):'')+'</td><td class="n">'+q.length+'</td><td class="n">'+(q.length?best+'%':'')+'</td><td>'+(q.some(a=>a.pass)?'Passed':q.length?'Not yet':'')+'</td></tr>');});
+  return out.length?'<div class="ln-tablewrap"><table class="ln-t"><thead><tr><th>Unit</th><th class="n">Examples</th><th class="n">Session</th><th class="n">Quiz attempts</th><th class="n">Best</th><th>Quiz</th></tr></thead><tbody>'+out.join('')+'</tbody></table></div>':'<p class="ln-note">No unit started yet.</p>';}
+function exportRec(){return {kind:'nbh-learn-record',v:1,made:new Date().toISOString(),who:{name:S.who.name||'',bacb:S.who.bacb||''},tr:S.tr||null,days:S.days,u:S.u};}
+function vRecord(){setClock(null);const ds=Object.keys(S.days).sort();
+  view.innerHTML='<h1>My record</h1><p class="ln-lead">What this device has counted for you, and how your quizzes went. Send it to your trainer, who adds the time you spent with them and keeps the training record.</p>'+
+   '<div class="ln-form"><label class="ln-f">Your name<input id="lnName" autocomplete="name" maxlength="80"></label><label class="ln-f">Your BACB ID <small>From your BACB account. Leave empty if you have none yet.</small><input id="lnBacb" maxlength="20" autocomplete="off"></label></div>'+
+   '<h2 style="margin-top:26px">Time on the page</h2>'+(ds.length?'<p class="ln-note">From '+esc(niceDay(ds[0]))+' to '+esc(niceDay(ds[ds.length-1]))+', on '+ds.length+(ds.length===1?' day.':' days.')+'</p>':'')+timeTable(S.days,null)+
+   '<h2 style="margin-top:26px">Units</h2>'+quizRows(S.u)+
+   '<div class="ln-row ln-noprint"><button type="button" class="ln-btn ln-pri" id="lnSend">Send my record to my trainer</button><button type="button" class="ln-btn" id="lnPrint">Print</button></div>'+
+   '<p class="ln-note" id="lnSendNote" aria-live="polite" style="margin-top:10px"></p>'+
+   '<p class="ln-foot">The record is a file made on this device. Sending it is yours to do: by mail, a message or a shared folder. It holds your name and BACB ID if you typed them, the time counted, your scores and what you wrote to your trainer. '+(kept?'':'<strong>This browser is not keeping what the page saves; the record will be lost when the page closes.</strong>')+'</p>';
+  $('lnName').value=S.who.name||'';$('lnBacb').value=S.who.bacb||'';
+  $('lnName').oninput=e=>{S.who.name=e.target.value.slice(0,80);save();};$('lnBacb').oninput=e=>{S.who.bacb=e.target.value.slice(0,20);save();};
+  $('lnPrint').onclick=()=>window.print();
+  $('lnSend').onclick=async()=>{save();const txt=JSON.stringify(exportRec()),name='training-record-'+today()+'.json',note=$('lnSendNote');
+    try{const f=new File([txt],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Training record'});note.textContent='Shared.';return;}}catch(e){if(e&&e.name==='AbortError')return;}
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.parentNode.removeChild(a);},500);
+    note.textContent='Saved as '+name+'. Send that file to your trainer.';};}
+
+/* ---- for the trainer ---- */
+const CHK=[['c1','I hold an active BCaBA, BCBA or BCBA-D certification and have completed the 8-hour supervision training.'],
+ ['c2','I am not related to, subordinate to, or employed by any trainee. (A fee the trainee pays for the training is not employment.)'],
+ ['c3','I have read the BACB’s requirements for the 40-hour training and will run this training to them.'],
+ ['c4','I have reviewed every unit and stand behind its content as my training.'],
+ ['c5','I keep a record of every training (dates, each trainee’s time, the trainers) and will keep it for at least 7 years.'],
+ ['c6','I have a way to hear from trainees about the training.'],
+ ['c7','I provide this training within the BACB’s jurisdiction.']];
+const CHKA=[['a1','Each assistant trainer holds an RBT certification or higher.'],['a2','I have checked each assistant trainer’s skills against my own criteria before they train.'],
+ ['a3','Each has my materials: the units, the role-play steps, the videos.'],['a4','I check that every training is run the same way.'],
+ ['a5','No assistant trainer is related to, subordinate to, or employed by a trainee.']];
+const newId=()=>'t'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);
+function trainee(id){return T.trainees.find(x=>x.id===id);}
+/* what the BACB's requirements ask of one trainee's record, and what this trainee has */
+function req(t){const rec=t.rec||{days:{},u:{}},self=selfBySec(rec.days),led=ledBySec(t.ses);let tot=0;const short=[];
+  L.rbt.sections.forEach(s=>{const got=(self[s.k]||0)+(led[s.k]||0);tot+=got;if(got<s.min*3600)short.push(s.k);});
+  const ds=Object.keys(rec.days||{}).concat((t.ses||[]).map(x=>x.d)).filter(d=>/^\d{4}-\d\d-\d\d$/.test(d)).sort();
+  /* the first and the last day are days with a record: time the trainee's device counted, or a session the trainer logged. The day the trainer typed for a new trainee only stands in until there is one */
+  const start=ds[0]||(t.start&&/^\d{4}-\d\d-\d\d$/.test(t.start)?t.start:''),end=ds.length?ds[ds.length-1]:'';
+  const span=start&&end?Math.round((Date.parse(end+'T12:00:00')-Date.parse(start+'T12:00:00'))/864e5)+1:0;
+  const need=[];let units=0,done=0;
+  L.rbt.sections.forEach(s=>s.units.forEach(u=>{units++;const c=U[u.id];if(!c){need.push(u.id);return;}
+    const x=(rec.u||{})[u.id]||{},quiz=(x.quiz||[]).some(q=>q.pass),roles=c.role.every((r,i)=>(t.ses||[]).some(z=>z.unit===u.id&&z.kind==='roleplay'&&z.role===i&&z.met)),disc=(t.ses||[]).some(z=>z.unit===u.id&&z.kind==='discussion');
+    if(quiz&&roles&&disc)done++;else need.push(u.id);}));
+  const o={self:self,led:led,tot:tot,short:short,start:start,end:end,span:span,days:new Set(ds).size,units:units,done:done,need:need};
+  o.okHours=tot>=L.rbt.total*3600&&!short.length;o.okDays=span>=L.rbt.days[0]&&span<=L.rbt.days[1];o.okUnits=done===units;
+  o.okMe=!!(T.me.name&&T.me.cert)&&CHK.every(c=>T.chk[c[0]])&&(!T.assist.length||CHKA.every(c=>T.chk[c[0]]));o.okWho=!!(t.name&&t.bacb);
+  o.ok=!!L.rbt.ready&&o.okHours&&o.okDays&&o.okUnits&&o.okMe&&o.okWho;return o;}
+function inviteUrl(){const me=T.me;if(!me.name||!me.cert)return'';const j=JSON.stringify({n:me.name,c:me.cert,cr:me.cred||'',o:me.org||''});
+  const b=btoa(unescape(encodeURIComponent(j))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');return location.href.split('#')[0]+'#t='+b;}
+function unitOptions(sel){return L.rbt.sections.map(s=>'<optgroup label="'+esc(s.k+'. '+s.name)+'">'+s.units.map(u=>'<option value="'+u.id+'"'+(u.id===sel?' selected':'')+'>'+esc(u.t)+'</option>').join('')+'</optgroup>').join('');}
+function vTrainer(){setClock(null);const me=T.me,w=written();
+  view.innerHTML='<h1>For the trainer</h1><p class="ln-lead">The Responsible Trainer designs and oversees the 40-hour training, is named to each trainee at the start, and keeps the record of every training. This page is where that is done.</p>'+stateBox()+
+   '<section style="margin-top:26px" aria-labelledby="tMe"><h2 id="tMe">The Responsible Trainer</h2><div class="ln-form">'+
+    '<label class="ln-f">Name<input id="tName" maxlength="80" autocomplete="name"></label>'+
+    '<label class="ln-f">Certification<select id="tCred"><option>BCBA</option><option>BCBA-D</option><option>BCaBA</option></select></label>'+
+    '<label class="ln-f">Certification number<input id="tCert" maxlength="20" autocomplete="off"></label>'+
+    '<label class="ln-f">Organization <small>If any.</small><input id="tOrg" maxlength="80" autocomplete="organization"></label></div>'+
+    '<h3 style="margin-top:18px">Assistant trainers</h3><p class="ln-note">Anyone who leads part of the training for you. Each holds an RBT certification or higher.</p><div id="tAssist"></div>'+
+    '<div class="ln-form" style="max-width:640px"><label class="ln-f">Name<input id="aName" maxlength="80"></label><label class="ln-f">Certification number<input id="aCert" maxlength="20"></label></div><div class="ln-row"><button type="button" class="ln-btn" id="aAdd">Add an assistant trainer</button></div></section>'+
+   '<section style="margin-top:30px" aria-labelledby="tChk"><h2 id="tChk">Before the first trainee</h2><p class="ln-note">A self-check, in the workstation’s words, after the BACB’s checklist for Responsible Trainers. The BACB’s own text is in its document.</p>'+
+    '<ul class="ln-checks" id="tChecks">'+CHK.map(c=>'<li><label><input type="checkbox" data-chk="'+c[0]+'"'+(T.chk[c[0]]?' checked':'')+'><span>'+esc(c[1])+'</span></label></li>').join('')+
+    '<li><strong style="display:block;margin:10px 10px 2px">If assistant trainers lead any part</strong></li>'+CHKA.map(c=>'<li><label><input type="checkbox" data-chk="'+c[0]+'"'+(T.chk[c[0]]?' checked':'')+'><span>'+esc(c[1])+'</span></label></li>').join('')+'</ul></section>'+
+   '<section style="margin-top:30px" aria-labelledby="tCov"><h2 id="tCov">How much of the training is in place</h2><p class="ln-note">'+w[0]+' of '+w[1]+' units are written. The plan gives each unit its minutes on the page and with a trainer; a section’s plan has to reach the outline’s minimum.</p>'+
+    '<div class="ln-tablewrap"><table class="ln-t" id="tCovT"><thead><tr><th>Section</th><th class="n">Units written</th><th class="n">Planned on the page</th><th class="n">Planned with a trainer</th><th class="n">Planned in all</th><th class="n">At least</th></tr></thead><tbody>'+
+    L.rbt.sections.map(s=>{let a=0,b=0,n=0;s.units.forEach(u=>{a+=u.self;b+=u.led;if(U[u.id])n++;});return '<tr><td>'+s.k+'. '+esc(s.name)+'</td><td class="n">'+n+' of '+s.units.length+'</td><td class="n">'+mins(a)+'</td><td class="n">'+mins(b)+'</td><td class="n">'+mins(a+b)+'</td><td class="n">'+s.min+' h</td></tr>';}).join('')+'</tbody></table></div></section>'+
+   '<section style="margin-top:30px" aria-labelledby="tInv"><h2 id="tInv">The link for your trainees</h2><p class="ln-note">Opened on the trainee’s own phone or computer, it names you as the Responsible Trainer on their page from the first screen.</p>'+
+    '<div class="ln-row"><input id="tLink" readonly aria-label="The link for your trainees" style="flex:1;min-width:240px;min-height:44px;padding:8px 12px;border:1px solid var(--box);border-radius:8px;background:var(--paper)"><button type="button" class="ln-btn" id="tCopy">Copy the link</button></div><p class="ln-note" id="tLinkNote" aria-live="polite"></p></section>'+
+   '<section style="margin-top:30px" aria-labelledby="tTr"><h2 id="tTr">Trainees</h2><div id="tList"></div>'+
+    '<h3 style="margin-top:18px">Add a trainee</h3><div class="ln-form"><label class="ln-f">Name<input id="nName" maxlength="80"></label><label class="ln-f">BACB ID<input id="nBacb" maxlength="20"></label><label class="ln-f">First day of training <small>Planned. The record’s own first day is used once there is one.</small><input id="nStart" type="date"></label></div>'+
+    '<div class="ln-row"><button type="button" class="ln-btn ln-pri" id="nAdd">Add the trainee</button></div><p class="ln-why wrong" id="nMiss" hidden></p></section>'+
+   '<section style="margin-top:30px" aria-labelledby="tKeep"><h2 id="tKeep">Keep the records</h2><p class="ln-note">The records are on this device, in this browser. Clearing the browser’s data removes them. Save them to a file, and put the file where you keep records for 7 years.</p>'+
+    '<div class="ln-row"><button type="button" class="ln-btn" id="tSave">Save all training records to a file</button><button type="button" class="ln-btn" id="tLoad">Load records from a file</button></div><p class="ln-note" id="tKeepNote" aria-live="polite"></p></section>'+
+   '<h2 style="margin-top:30px">The BACB’s documents</h2>'+docs(L.rbt.docs);
+  $('tName').value=me.name||'';$('tCred').value=me.cred||'BCBA';$('tCert').value=me.cert||'';$('tOrg').value=me.org||'';
+  const link=()=>{const u=inviteUrl();$('tLink').value=u;$('tCopy').disabled=!u;$('tLinkNote').textContent=u?'':'Type your name and certification number above to make the link.';};
+  [['tName','name',80],['tCert','cert',20],['tOrg','org',80]].forEach(a=>{$(a[0]).oninput=e=>{me[a[1]]=e.target.value.slice(0,a[2]);saveT();link();};});$('tCred').onchange=e=>{me.cred=e.target.value;saveT();link();};link();
+  $('tCopy').onclick=async()=>{const u=$('tLink').value;try{await navigator.clipboard.writeText(u);$('tLinkNote').textContent='Copied.';}catch(e){$('tLink').select();$('tLinkNote').textContent='Select the link and copy it.';}};
+  const assist=()=>{$('tAssist').innerHTML=T.assist.length?'<ul class="ln-list">'+T.assist.map((a,i)=>'<li>'+esc(a.name)+', '+esc(a.cert)+' <button type="button" class="ln-btn" data-arm="'+i+'" style="min-height:36px;margin-left:8px">Remove<span class="ln-sr"> '+esc(a.name)+'</span></button></li>').join('')+'</ul>':'<p class="ln-note">None.</p>';};assist();
+  $('tAssist').onclick=e=>{const b=e.target.closest('[data-arm]');if(!b)return;T.assist.splice(+b.dataset.arm,1);saveT();assist();};
+  $('aAdd').onclick=()=>{const n=$('aName').value.trim(),c=$('aCert').value.trim();if(!n||!c){$('aName').focus();return;}T.assist.push({name:n.slice(0,80),cert:c.slice(0,20)});saveT();$('aName').value='';$('aCert').value='';assist();};
+  $('tChecks').onchange=e=>{const k=e.target.dataset.chk;if(!k)return;if(e.target.checked)T.chk[k]=today();else delete T.chk[k];saveT();};
+  const list=()=>{$('tList').innerHTML=T.trainees.length?T.trainees.map(t=>{const r=req(t);return '<div class="ln-card" style="margin-top:12px" data-tid="'+t.id+'"><h3>'+esc(t.name)+'</h3><p class="ln-note" style="margin:2px 0 0">BACB ID '+esc(t.bacb||'not given')+(r.start?' · started '+esc(niceDay(r.start)):'')+(t.recAt?' · record received '+esc(niceDay(t.recAt)):' · no record received yet')+'</p>'+
+     ledger(r.self,r.led,false)+'<div class="ln-row"><a class="ln-btn ln-pri" href="#trainer/'+t.id+'">Open</a><button type="button" class="ln-btn" data-rec="'+t.id+'">Add the record they sent</button><a class="ln-btn" href="#trainer/'+t.id+'/log">Log a session</a></div></div>';}).join(''):'<p class="ln-note">No trainee yet.</p>';};list();
+  $('nAdd').onclick=()=>{const n=$('nName').value.trim(),m=$('nMiss');if(!n){m.hidden=false;m.textContent='Type the trainee’s name.';$('nName').focus();return;}m.hidden=true;
+    T.trainees.push({id:newId(),name:n.slice(0,80),bacb:$('nBacb').value.trim().slice(0,20),start:$('nStart').value||'',rec:null,recAt:'',ses:[]});saveT();$('nName').value='';$('nBacb').value='';$('nStart').value='';list();say('Trainee added');};
+  $('tList').onclick=e=>{const b=e.target.closest('[data-rec]');if(b)pickFile(txt=>{const m=takeRecord(b.dataset.rec,txt);list();say(m);alertNote(m);});};
+  $('tSave').onclick=()=>{const txt=JSON.stringify({kind:'nbh-learn-trainer',v:1,made:new Date().toISOString(),data:T}),a=document.createElement('a'),name='training-records-'+today()+'.json';
+    a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.parentNode.removeChild(a);},500);$('tKeepNote').textContent='Saved as '+name+'.';};
+  $('tLoad').onclick=()=>pickFile(txt=>{let o=null;try{o=JSON.parse(txt);}catch(e){}if(!o||o.kind!=='nbh-learn-trainer'||!o.data||o.data.v!==1||!Array.isArray(o.data.trainees)){$('tKeepNote').textContent='That file is not a set of training records saved by this page.';return;}
+    if(T.trainees.length&&!window.confirm('Replace the '+T.trainees.length+' trainee record(s) on this device with the file’s '+o.data.trainees.length+'?'))return;T=cleanT(o.data);saveT();vTrainer();say('Records loaded');});}
+function alertNote(m){const n=$('tKeepNote');if(n)n.textContent=m;}
+function pickFile(done){const f=$('lnFile');f.value='';f.onchange=()=>{const x=f.files&&f.files[0];if(!x)return;if(x.size>2e6){done('');return;}const r=new FileReader();r.onload=()=>done(String(r.result||''));r.readAsText(x);};f.click();}
+/* a record a trainee sent: only what the page knows is taken from it */
+const str=(s,n)=>typeof s==='string'?s.slice(0,n):'';
+const num=x=>{x=+x;return isFinite(x)&&x>=0?x:0;};
+function cleanRec(o){if(!o||o.kind!=='nbh-learn-record'||o.v!==1)return null;const r={who:{name:str(o.who&&o.who.name,80),bacb:str(o.who&&o.who.bacb,20)},made:str(o.made,30),days:{},u:{}};
+  Object.keys(o.days||{}).slice(0,400).forEach(d=>{if(!/^\d{4}-\d\d-\d\d$/.test(d))return;const x=o.days[d]||{};Object.keys(x).forEach(s=>{if(!SEC[s])return;Object.keys(x[s]||{}).forEach(k=>{if(!KINDS[k])return;const n=Math.min(86400,num(x[s][k]));if(n){(r.days[d]=r.days[d]||{});(r.days[d][s]=r.days[d][s]||{})[k]=n;}});});});
+  Object.keys(o.u||{}).forEach(id=>{if(!UNIT[id])return;const x=o.u[id]||{},y={quiz:[]};
+    (Array.isArray(x.quiz)?x.quiz:[]).slice(0,50).forEach(q=>{y.quiz.push({at:str(q.at,10),right:num(q.right),n:num(q.n),pct:Math.min(100,num(q.pct)),pass:q.pass?1:0});});
+    if(x.ex)y.ex={right:num(x.ex.right),n:num(x.ex.n)};if(x.pr)y.pr={right:num(x.pr.right),n:num(x.pr.n)};if(x.fb)y.fb={r:str(x.fb.r,1),c:str(x.fb.c,600)};r.u[id]=y;});return r;}
+function cleanT(d){const o={v:1,me:{name:str(d.me&&d.me.name,80),cred:str(d.me&&d.me.cred,8)||'BCBA',cert:str(d.me&&d.me.cert,20),org:str(d.me&&d.me.org,80),sig:/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test((d.me&&d.me.sig)||'')?d.me.sig:''},chk:{},assist:[],trainees:[]};
+  Object.keys(d.chk||{}).forEach(k=>{if(/^[ac]\d$/.test(k))o.chk[k]=str(d.chk[k],10);});
+  (d.assist||[]).slice(0,20).forEach(a=>{o.assist.push({name:str(a.name,80),cert:str(a.cert,20)});});
+  (d.trainees||[]).slice(0,500).forEach(t=>{const rec=t.rec?cleanRec(Object.assign({kind:'nbh-learn-record',v:1},t.rec)):null;
+    o.trainees.push({id:/^t[a-z0-9]{4,24}$/.test(t.id||'')?t.id:newId(),name:str(t.name,80),bacb:str(t.bacb,20),start:/^\d{4}-\d\d-\d\d$/.test(t.start||'')?t.start:'',rec:rec,recAt:str(t.recAt,10),
+      ses:(t.ses||[]).slice(0,2000).filter(x=>UNIT[x.unit]&&LED[x.kind]&&/^\d{4}-\d\d-\d\d$/.test(x.d||'')).map(x=>({d:x.d,kind:x.kind,unit:x.unit,min:Math.min(600,num(x.min)),by:str(x.by,80),role:x.role==null?null:num(x.role),steps:Array.isArray(x.steps)?x.steps.map(s=>s?1:0).slice(0,30):null,met:x.met?1:0,note:str(x.note,400)}))});});return o;}
+function takeRecord(id,txt){const t=trainee(id);if(!t)return'';let o=null;try{o=JSON.parse(txt);}catch(e){}const r=cleanRec(o);
+  if(!r)return 'That file is not a training record made by the Learning page.';
+  if(r.who.bacb&&t.bacb&&r.who.bacb.trim().toLowerCase()!==t.bacb.trim().toLowerCase())return 'Not added: the record’s BACB ID ('+r.who.bacb+') is not '+t.name+'’s ('+t.bacb+').';
+  t.rec=r;t.recAt=today();if(!t.bacb&&r.who.bacb)t.bacb=r.who.bacb;saveT();return 'Record added for '+t.name+'.';}
+
+function vTrainee(id,sub){setClock(null);const t=trainee(id);if(!t){location.hash='#trainer';return;}
+  if(sub==='log')return vLog(t);if(sub==='cert')return vCert(t);
+  const r=req(t),rec=t.rec||{u:{}};
+  const yes=(ok,txt)=>'<li>'+(ok?'<span class="ln-pill g">Met</span> ':'<span class="ln-pill w">Not yet</span> ')+txt+'</li>';
+  view.innerHTML='<p class="ln-crumb"><a href="#trainer">For the trainer</a> › Trainee</p><h1>'+esc(t.name)+'</h1><p class="ln-lead">BACB ID '+esc(t.bacb||'not given')+(r.start?' · started '+esc(niceDay(r.start)):'')+(r.end?' · last activity '+esc(niceDay(r.end)):'')+'</p>'+
+   '<div class="ln-card" style="margin-top:16px">'+ledger(r.self,r.led,false)+'</div>'+
+   '<h2 style="margin-top:26px">Against the requirements</h2><ul class="ln-list" style="list-style:none;padding:0" id="rqList">'+
+    yes(!!L.rbt.ready,'The training is whole: every unit written and reviewed by the Responsible Trainer.')+
+    yes(r.okHours,'At least 40 hours, and each section’s minimum. Now '+hm(r.tot)+(r.short.length?'; short in section'+(r.short.length>1?'s ':' ')+r.short.join(', '):'')+'.')+
+    yes(r.okDays,'Completed in no fewer than 5 and no more than 180 days. Now '+(r.span||0)+(r.span===1?' day':' days')+' from the first day to the last, with activity on '+r.days+'.')+
+    yes(r.okUnits,'Every unit: the quiz passed, each role-play met, the discussion held. Now '+r.done+' of '+r.units+'.')+
+    yes(r.okWho,'The trainee’s name and BACB ID.')+yes(r.okMe,'The Responsible Trainer’s name and number, and the self-check ticked.')+'</ul>'+
+   '<div class="ln-row"><a class="ln-btn ln-pri" href="#trainer/'+t.id+'/log">Log a session</a><button type="button" class="ln-btn" id="rAdd">Add the record they sent</button><a class="ln-btn" href="#trainer/'+t.id+'/cert">Certificate</a><button type="button" class="ln-btn ln-noprint" id="rPrint">Print this record</button></div><p class="ln-note" id="tKeepNote" aria-live="polite"></p>'+
+   '<h2 style="margin-top:26px">Time</h2>'+timeTable(rec.days||{},t.ses||[])+
+   '<h2 style="margin-top:26px">Sessions with a trainer</h2>'+((t.ses||[]).length?'<div class="ln-tablewrap"><table class="ln-t"><thead><tr><th>Date</th><th>What</th><th>Unit</th><th class="n">Minutes</th><th>Led by</th><th>Result</th><th></th></tr></thead><tbody id="rSes">'+
+     t.ses.map((x,i)=>{const c=U[x.unit];return '<tr><td>'+esc(niceDay(x.d))+'</td><td>'+esc(LED[x.kind])+(x.kind==='roleplay'&&c&&c.role[x.role]?': '+esc(c.role[x.role].t):'')+'</td><td>'+esc(UNIT[x.unit].t)+'</td><td class="n">'+x.min+'</td><td>'+esc(x.by)+'</td><td>'+(x.kind==='roleplay'?(x.met?'Met':'Not yet')+(x.steps?' ('+x.steps.filter(Boolean).length+' of '+x.steps.length+')':''):'')+(x.note?'<br><span class="ln-note">'+esc(x.note)+'</span>':'')+'</td><td><button type="button" class="ln-btn" data-del="'+i+'" style="min-height:36px">Remove<span class="ln-sr"> the session of '+esc(niceDay(x.d))+'</span></button></td></tr>';}).join('')+'</tbody></table></div>':'<p class="ln-note">None logged yet.</p>')+
+   '<h2 style="margin-top:26px">Their units, from the record they sent</h2>'+(t.rec?quizRows(rec.u):'<p class="ln-note">No record received yet. The trainee sends it from My record on their device.</p>')+
+   (t.rec&&Object.keys(rec.u).some(k=>rec.u[k].fb&&(rec.u[k].fb.r||rec.u[k].fb.c))?'<h2 style="margin-top:26px">What they told you</h2><ul class="ln-list">'+Object.keys(rec.u).filter(k=>rec.u[k].fb&&(rec.u[k].fb.r||rec.u[k].fb.c)).map(k=>'<li><strong>'+esc(UNIT[k].t)+':</strong> '+esc(({3:'Clear',2:'Mostly clear',1:'Hard to follow'})[rec.u[k].fb.r]||'')+(rec.u[k].fb.c?' · '+esc(rec.u[k].fb.c):'')+'</li>').join('')+'</ul>':'')+
+   '<div class="ln-row ln-noprint" style="margin-top:30px"><button type="button" class="ln-btn" id="rGone">Remove this trainee</button></div>'+
+   '<p class="ln-foot">The time on the page is what the trainee’s device counted and they sent: the workstation cannot prove it. The sessions are what you logged. You review both before you sign.</p>';
+  $('rAdd').onclick=()=>pickFile(txt=>{const m=takeRecord(id,txt);vTrainee(id);alertNote(m);say(m);});$('rPrint').onclick=()=>window.print();
+  const ses=$('rSes');if(ses)ses.onclick=e=>{const b=e.target.closest('[data-del]');if(!b)return;if(!window.confirm('Remove this session from the record?'))return;t.ses.splice(+b.dataset.del,1);saveT();vTrainee(id);};
+  $('rGone').onclick=()=>{if(!window.confirm('Remove '+t.name+' and their training record from this device? Save the records to a file first if you must keep them.'))return;T.trainees=T.trainees.filter(x=>x.id!==id);saveT();location.hash='#trainer';};}
+
+function vLog(t){const first=L.rbt.sections[0].units[0].id;
+  view.innerHTML='<p class="ln-crumb"><a href="#trainer">For the trainer</a> › <a href="#trainer/'+t.id+'">'+esc(t.name)+'</a> › Log a session</p><h1>Log a session</h1><p class="ln-lead">Time you or an assistant trainer spent training '+esc(t.name)+': a role-play with feedback, a discussion, modeling in person.</p>'+
+   '<form id="lgForm" novalidate><div class="ln-form"><label class="ln-f">Date<input type="date" id="lgD" required></label>'+
+   '<label class="ln-f">What<select id="lgK">'+Object.keys(LED).map(k=>'<option value="'+k+'">'+esc(LED[k])+'</option>').join('')+'</select></label>'+
+   '<label class="ln-f">Unit<select id="lgU">'+unitOptions(cur.logUnit||'e8')+'</select></label>'+
+   '<label class="ln-f">Minutes<input type="number" id="lgM" min="1" max="600" inputmode="numeric" required></label>'+
+   '<label class="ln-f">Led by<select id="lgBy"><option>'+esc(T.me.name||'The Responsible Trainer')+'</option>'+T.assist.map(a=>'<option>'+esc(a.name)+'</option>').join('')+'</select></label></div>'+
+   '<div id="lgRole"></div><div class="ln-form"><label class="ln-f" style="grid-column:1/-1">Note <small>Feedback given, what to practice next. Do not write about a student.</small><textarea id="lgN" maxlength="400"></textarea></label></div>'+
+   '<p class="ln-why wrong" id="lgMiss" hidden></p><div class="ln-row"><button type="submit" class="ln-btn ln-pri">Save the session</button><a class="ln-btn" href="#trainer/'+t.id+'">Cancel</a></div></form>';
+  $('lgD').value=today();
+  const role=()=>{const c=U[$('lgU').value],box=$('lgRole');if($('lgK').value!=='roleplay'){box.innerHTML='';return;}
+    if(!c){box.innerHTML='<p class="ln-note" style="margin-top:12px">This unit’s role-play steps are not written yet. The time can be logged; the role-play cannot be marked as met.</p>';return;}
+    const i=Math.min(+(box.dataset.i||0),c.role.length-1);
+    box.innerHTML='<div class="ln-form"><label class="ln-f">Role-play<select id="lgR">'+c.role.map((r,k)=>'<option value="'+k+'"'+(k===i?' selected':'')+'>'+esc(r.t)+'</option>').join('')+'</select></label></div><p class="ln-note" style="margin-top:8px">'+esc(c.role[i].setup)+' Tick each step done correctly, without help.</p>'+
+     '<ul class="ln-checks" id="lgSteps">'+c.role[i].steps.map((s,k)=>'<li><label><input type="checkbox" data-step="'+k+'"><span>'+esc(s)+'</span></label></li>').join('')+'</ul>';
+    $('lgR').onchange=e=>{box.dataset.i=e.target.value;role();};};
+  $('lgK').onchange=role;$('lgU').onchange=()=>{$('lgRole').dataset.i=0;role();};role();
+  $('lgForm').onsubmit=e=>{e.preventDefault();const d=$('lgD').value,m=Math.round(+$('lgM').value),miss=$('lgMiss');
+    if(!/^\d{4}-\d\d-\d\d$/.test(d)||d>today()){miss.hidden=false;miss.textContent='Choose the date of the session, today or earlier.';$('lgD').focus();return;}
+    if(!(m>=1&&m<=600)){miss.hidden=false;miss.textContent='Type the minutes, from 1 to 600.';$('lgM').focus();return;}
+    const x={d:d,kind:$('lgK').value,unit:$('lgU').value,min:m,by:$('lgBy').value,role:null,steps:null,met:0,note:$('lgN').value.slice(0,400)};
+    const st=$('lgSteps');if(x.kind==='roleplay'&&st){x.role=+$('lgR').value;x.steps=[...st.querySelectorAll('input')].map(i=>i.checked?1:0);x.met=x.steps.every(Boolean)?1:0;}
+    (t.ses=t.ses||[]).push(x);t.ses.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);saveT();cur.logUnit=x.unit;location.hash='#trainer/'+t.id;};}
+
+function vCert(t){const r=req(t),me=T.me;
+  const head='<p class="ln-crumb ln-noprint"><a href="#trainer">For the trainer</a> › <a href="#trainer/'+t.id+'">'+esc(t.name)+'</a> › Certificate</p>';
+  if(!r.ok){const why=[];if(!L.rbt.ready)why.push('The training is not whole yet: '+written()[0]+' of '+written()[1]+' units are written. Until every unit is in place this page makes no certificate for anyone.');
+    if(!r.okHours)why.push('The hours: '+hm(r.tot)+' of 40:00'+(r.short.length?', and short in section'+(r.short.length>1?'s ':' ')+r.short.join(', '):'')+'.');
+    if(!r.okDays)why.push('The days: '+(r.span||0)+' from the first day to the last; the training takes no fewer than 5 and no more than 180.');
+    if(!r.okUnits)why.push('The units: '+r.done+' of '+r.units+' have the quiz passed, every role-play met and the discussion held.');
+    if(!r.okWho)why.push('The trainee’s name and BACB ID are needed.');if(!r.okMe)why.push('Your name and certification number, and the self-check, are needed.');
+    view.innerHTML=head+'<h1>Certificate</h1><div class="ln-state" id="certNo"><p><strong>No certificate can be made for '+esc(t.name)+' yet.</strong></p><ul class="ln-list" style="margin-bottom:0">'+why.map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul></div><div class="ln-row"><a class="ln-btn" href="#trainer/'+t.id+'">Back to the trainee</a></div>';return;}
+  view.innerHTML=head+'<h1 class="ln-noprint">Certificate</h1><p class="ln-note ln-noprint">Read it against your records before you sign. Sign on the screen below, or print it and sign by hand.</p>'+
+   '<div class="ln-cert" id="certSheet"><h2>RBT 2026 40-Hour Training Certificate</h2><p class="sub">'+esc(me.org||'')+'</p><dl>'+
+    '<dt>Name of RBT applicant</dt><dd>'+esc(t.name)+'</dd><dt>RBT applicant BACB ID</dt><dd>'+esc(t.bacb)+'</dd>'+
+    '<dt>Training start date</dt><dd>'+esc(niceDay(r.start))+'</dd><dt>Training end date</dt><dd>'+esc(niceDay(r.end))+'</dd>'+
+    '<dt>Time engaged in the training</dt><dd>'+esc(hmWords(r.tot))+'</dd>'+
+    '<dt>Responsible Trainer</dt><dd>'+esc(me.name)+', '+esc(me.cred||'')+'</dd><dt>Responsible Trainer certification number</dt><dd>'+esc(me.cert)+'</dd>'+
+    '<dt>Assistant trainers</dt><dd>'+(T.assist.length?T.assist.map(a=>esc(a.name)+', '+esc(a.cert)).join('; '):'None')+'</dd></dl>'+
+    '<p style="margin:0 0 4px;color:var(--muted);font-size:.9375rem">Responsible Trainer’s signature</p><div class="sig">'+(me.sig?'<img src="'+esc(me.sig)+'" alt="Signature of '+esc(me.name)+'">':'')+'</div>'+
+    '<p class="stmt">'+esc(L.rbt.statement)+'</p></div>'+
+   '<div class="ln-noprint"><h2 style="margin-top:20px">Sign</h2><canvas class="ln-pad" id="sigPad" width="840" height="240" aria-label="Sign here with a finger, a pencil or the mouse"></canvas><div class="ln-row"><button type="button" class="ln-btn" id="sigUse">Use this signature</button><button type="button" class="ln-btn" id="sigClr">Clear</button><button type="button" class="ln-btn ln-pri" id="certPrint">Print or save as PDF</button></div></div>';
+  const cv=$('sigPad'),g=cv.getContext('2d');let down=false,drew=false;g.lineWidth=3.2;g.lineCap='round';g.lineJoin='round';g.strokeStyle='#10202c';
+  const pt=e=>{const b=cv.getBoundingClientRect();return [(e.clientX-b.left)*cv.width/b.width,(e.clientY-b.top)*cv.height/b.height];};
+  cv.onpointerdown=e=>{down=true;drew=true;cv.setPointerCapture(e.pointerId);const p=pt(e);g.beginPath();g.moveTo(p[0],p[1]);};
+  cv.onpointermove=e=>{if(!down)return;const p=pt(e);g.lineTo(p[0],p[1]);g.stroke();};cv.onpointerup=cv.onpointercancel=()=>{down=false;};
+  $('sigClr').onclick=()=>{g.clearRect(0,0,cv.width,cv.height);drew=false;me.sig='';saveT();vCert(t);};
+  $('sigUse').onclick=()=>{if(!drew)return;me.sig=cv.toDataURL('image/png');saveT();vCert(t);};$('certPrint').onclick=()=>window.print();}
+
+/* ---- the player: a video, an explainer or the counting practice, over the unit ---- */
+const dlg=$('lnDlg');let frame=null,back=null;
+function openIn(url,title,isVideo,from){back=from||document.activeElement;$('lnDlgT').textContent=title||'';
+  if(frame)frame.remove();frame=document.createElement('iframe');frame.title=title||'Video';frame.setAttribute('allow','fullscreen; autoplay');frame.setAttribute('allowfullscreen','');frame.src=url;dlg.appendChild(frame);
+  clock.playing=!isVideo&&clock.kind==='video';clock.inFrame=!isVideo;   /* an explainer or the practice counts while it is open and used */
+  if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');}
+function closeIn(){clock.playing=false;clock.inFrame=false;if(frame){frame.remove();frame=null;}if(dlg.open){if(dlg.close)dlg.close();else dlg.removeAttribute('open');}route(true);if(back&&back.isConnected)try{back.focus();}catch(e){}}
+$('lnDlgX').onclick=closeIn;dlg.addEventListener('cancel',e=>{e.preventDefault();closeIn();});
+window.addEventListener('message',e=>{const d=e.data;if(!d||typeof d.nbh!=='string'||!frame||e.source!==frame.contentWindow)return;
+  if(d.nbh==='videos-playing')clock.playing=!!d.on;});
+/* an explainer or the practice in the frame: its touches are not seen here, so the open frame counts for 90 seconds at a time while the page has the focus inside it */
+setInterval(()=>{if(frame&&clock.inFrame&&document.visibilityState==='visible'&&document.activeElement===frame)clock.playing=true;else if(frame&&clock.inFrame)clock.playing=false;},1000);
+view.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){openIn(o.dataset.open,o.dataset.title,!!o.dataset.video,o);return;}
+  const f=e.target.closest('[data-form]');if(f&&WS)tell({nbh:'learn-form',form:f.dataset.form});});
+
+/* ---- the address ---- */
+function invite(h){try{const b=h.slice(2).replace(/-/g,'+').replace(/_/g,'/'),o=JSON.parse(decodeURIComponent(escape(atob(b))));
+  if(o&&typeof o.n==='string'&&o.n.trim()){S.tr={n:o.n.slice(0,80),c:str(o.c,20),cr:/^(BCBA|BCBA-D|BCaBA)$/.test(o.cr||'')?o.cr:'',o:str(o.o,80)};save();}}catch(e){}
+  try{history.replaceState(null,'','#home');}catch(e){location.hash='#home';}}
+function route(keep){let h=location.hash.replace(/^#/,'');if(/^t=/.test(h)){invite(h);h='home';}
+  const a=h.split('/'),top=a[0]||'home';if(!keep)cur={quizNow:false,logUnit:cur.logUnit};
+  document.querySelectorAll('.ln-nav a').forEach(x=>{if(x.dataset.nav===top)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current');});
+  if(top==='rbt'&&a[1])vUnit(a[1],a[2]);else if(top==='rbt'){setClock(null);vRbt();}
+  else if(top==='bcba')vBcba(a[1]);else if(top==='record')vRecord();
+  else if(top==='trainer'&&a[1])vTrainee(a[1],a[2]);else if(top==='trainer')vTrainer();
+  else{setClock(null);vHome();}
+  const names={home:'Learning',rbt:'RBT training',bcba:'BCBA study',record:'My record',trainer:'For the trainer'};
+  document.title=((view.querySelector('h1')||{}).textContent||names[top]||'Learning')+' · Learning · FBA and BIP Workstation';
+  if(!keep){window.scrollTo(0,0);const m=$('lnMain');try{m.focus({preventScroll:true});}catch(e){}}}
+window.addEventListener('hashchange',()=>route(false));
+$('lnClose').hidden=!WS;$('lnToVideos').hidden=!WS;$('lnClose').onclick=()=>{save();tell({nbh:'videos-close'});};
+window.addEventListener('message',e=>{const d=e.data;if(!d||e.source!==window.parent||window.parent===window)return;if(d.nbh==='videos-focus'){try{$('lnMain').focus({preventScroll:true});}catch(x){}}});
+window.NBHLearn={store:()=>JSON.parse(JSON.stringify(S)),trainer:()=>JSON.parse(JSON.stringify(T)),req:id=>{const t=trainee(id);return t?req(t):null;},clock:()=>({unit:clock.unit,kind:clock.kind,playing:clock.playing}),framed:()=>WS};
+route(false);
+})();
+</script>
+</body>
+</html>

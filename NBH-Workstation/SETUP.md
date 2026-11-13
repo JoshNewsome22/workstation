@@ -9905,6 +9905,69 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.00: Learning, a place to study for the RBT and BCBA examinations (first part: the map and one whole unit)
+(the BCBA, 11/13: "a place that goes over everything that a person who is studying to become a RBT can go and learn all the
+materials they need to know based on the BACB ... content and course sequence topics. Also, a person studying to be a BCBA
+can also go and learn ... a full fledge curriculum space where the information that is already in the workstation can be
+pulled into as well as additional information and trainings that I present as well as videos"; and, asked whether the RBT
+track should count as the 40-hour training: "Yes, with me as the Responsible Trainer.")
+- **Where it is.** `learn.html`, a page of the folder like the video library. In the workstation it opens in the Videos
+  layer: from the video library's row of buttons (**Learning: RBT training and BCBA study**) or from the command list
+  (type *learning*). On the website it has its own address, so a trainee opens it on a phone.
+- **What it was built from.** The BACB's *RBT 2026 40-Hour Training Requirements and Curriculum Outline* (version
+  03/2026), the *RBT Test Content Outline (3rd ed.)* and the *BCBA Test Content Outline (6th ed.)*. The page carries the
+  task codes and short titles in the workstation's own words and links to the BACB's documents for the wording; it does
+  not copy them. ABAI's Verified Course Sequence system closed at the end of 2025, so the BCBA track follows the BACB's
+  outline; this was learned from a web search, not from ABAI's own pages.
+- **RBT training.** The outline's eight sections with their minimum hours (A 2, B 1, C 3, D 3, E 20, F 3, G 5, H 1: 38,
+  with 2 more to place anywhere) and **46 units** under them (the map is `nbh-learn.js`). Every one of the 43 tasks of
+  the test outline is taught by a unit, and every one of the 46 videos is placed in a unit. Each unit plans its minutes
+  on the page and with a trainer; the plan is 41 h 30 min in all and reaches each section's minimum.
+- **One unit is written whole, for review: differential reinforcement** (section E, task D.3; `nbh-learn-units.js`).
+  - *Lesson*: seven short parts (the idea; DRA, DRI and FCT; DRO; DRL; with and without extinction; doing it well; what
+    to tell the supervisor), each closed by one question. A wrong answer does not give the reason away.
+  - *Watch*: the twelve DRA, DRO and FCT videos, six of them core, each with what to look for; the DRO and FCT
+    explainers.
+  - *Sort the examples*: ten scenes, four of them not differential reinforcement at all (a timer, a bargain, response
+    cost), with the reason for each.
+  - *Run a session*: a 2-minute resetting DRO with a simulated student, eight decisions, each answered by the plan.
+  - *Quiz*: 10 questions drawn anew each time from 18; pass at 80%; every attempt recorded.
+  - *With your trainer*: three role-plays with their steps (a resetting DRO, DRA for attention, the FCT break request),
+    four questions to talk through, a word from the trainee to the trainer, further reading.
+  The other 45 units say **Lesson to come** and list what can be watched now.
+- **The time.** Counted only while a part of a unit is open, the page is in view and the learner did something in the
+  last 90 seconds, or a video is playing. Each part of a unit counts up to a limit (the lesson: 4 minutes a part), so a
+  page left open adds nothing. Reading is not counted. A chip in the bar says Counting or Paused and the day's time.
+  **A decision for the Responsible Trainer:** the lesson's time is counted because it is taught on the page with a
+  question in each part, not assigned as reading; if lesson time should not count, say so and it is one line.
+- **My record** (the learner): name and BACB ID if typed, time by section, each unit's scores; **Send my record to my
+  trainer** makes a file to send.
+- **For the trainer.** The Responsible Trainer's name, certification and number, and assistant trainers; a self-check in
+  the workstation's words after the BACB's checklist; how much of the training is in place, section by section; **the
+  link for your trainees**, which names the trainer on the trainee's first screen; trainees (name, BACB ID); **Add the
+  record they sent** (refused when the BACB ID is another person's; only what the page knows is taken from a file);
+  **Log a session** (role-play with feedback, discussion, modeling: date, unit, minutes, who led it, the role-play's
+  steps ticked, a note); each trainee against the requirements (the training whole; 40 hours and each section's minimum;
+  5 to 180 days from the first recorded day to the last; every unit's quiz, role-plays and discussion); **Save all
+  training records to a file** and load them, for the 7 years they are kept.
+- **The certificate** is made on the trainer's device for one trainee: the applicant's name and BACB ID, the start and
+  end dates, the time in hours and minutes, the Responsible Trainer's name and number, a signature drawn on the screen
+  or by hand on paper, the assistant trainers, and the BACB's statement. **It is locked.** `NBH_LEARN.rbt.ready` is
+  false: 1 of 46 units is written, so the page says on the home page, the track and the trainer's page that the
+  training is being built and cannot yet be used toward RBT certification, makes no certificate for anyone, and does
+  not carry the BACB's statement anywhere. The test makes a whole training by cutting the map down, to prove the
+  certificate and the refusals.
+- **What the workstation cannot prove.** The time on the page is what the trainee's own device counted and the trainee
+  sent; a file can be edited. The Responsible Trainer reviews it, with the sessions they logged themself, before
+  signing. The page says so on each trainee's record.
+- **BCBA study.** The nine domains and 104 tasks; for each task the workstation's videos by procedure, explainers,
+  counting practice and forms; the learner's own rating (Not yet, Getting there, Can explain it), counted by domain.
+  Study notes and questions for the tasks are still to be written. University coursework is not replaced.
+- **Where the records go.** Nowhere: they stay in the browser of the device (HOSTING.md's table has the two lines). No
+  student is in them.
+- **Still to do.** The other 45 units; a look on an iPad and a phone; the BCBA's review of the unit's content and of
+  the plan's minutes; a slot for the BCBA's own trainings in a unit.
+- **The test run.** On the built folder: the new qa/v2600-learn-test.js (15 checks) in both editions; the video library's layout test (54; its page-length limits for an iPad upright and a phone raised by one button row, to 4.5 and 7.15 screens), the library test (82), the players (9), the calendar (11), the start screen, the size budget and the build test, all passing. The whole run of the release list was not repeated for this version; the whole run of v25.99 was still going when this was written (first third: 117 tests, 4 not passing, to be gone through when it ends). Not seen on an iPad or a phone.
 ### v25.99: today's Google Calendar on the start screen, and three videos on calming routines
 (the BCBA, 11/13: "connecting my Google Calendar to somewhere in the workstation so that I can keep track of days events,
 log into Google meet or click and go straight to the upcoming Google meet on the calendar" ... "Yes to all"; and the
