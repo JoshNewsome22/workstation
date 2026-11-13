@@ -91,6 +91,16 @@ pass over the earlier banks v25.43; 2011 v25.44, 2012 v25.45, 2013 v25.46, 2014 
     fct-three-requests-break-items-attention (Ghaemmaghami et al., 2016: items and attention after problem behavior during a
     break, in the first two teaching phases).
 
+17. **The evidence letters** (v26.07). Every card of Form TD-1's bank carries `ev`, three letters that
+    `tools/banks/grade-evidence.py` reads from the card's own note and result: the design (c a comparison that shows the
+    effect, n not named, u no comparison, t described and not tested), the students (3 six or more, 2 two to five, 1 one,
+    0 not stated) and the setting (s a school, e children elsewhere, n not stated, a adults, t not tested). A reader does
+    not write them by hand. After cards are added or a note or result is changed, run
+    `python3 tools/banks/grade-evidence.py REPO --write`; `--show ID` prints how one card was read. To help the rule, a
+    note states the evidence in its own sentence near the start: how many students, of what age, where, and the design
+    ("Three students in one classroom, in a multiple baseline across students"). When the rule reads a card wrongly,
+    put the right letters in `tools/banks/evidence-overrides.json`.
+
 ## When each rule started
 
 | Rule | Started | Banks read before it |

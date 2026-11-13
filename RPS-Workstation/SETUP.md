@@ -9905,6 +9905,53 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.07: an evidence line on every card of Form TD-1's bank, and an order by it
+(approved by the BCBA on 11/12 in the list of next steps: "grade the evidence on every bank card by one plain rubric
+(design, number of students, replication, closeness to a school setting) so TD-1 can rank options and say why".)
+- **The rubric.** Four parts, 0 to 2 points each, 0 to 8 in all.
+  - *Design:* 2 when the card reports a comparison that shows the procedure made the change (a return to baseline, a
+    staggered start, alternated conditions, a control group); 1 when the card does not say; 0 when the card says the
+    report had no such comparison (a case example, before and after); and "described, not tested" when the source
+    gives no data, which shows no points at all.
+  - *Students:* 2 for six or more, 1 for two to five, 0 for one or when the card does not say.
+  - *Studies:* 0 for one study on the card, 1 for two, 2 for three or more.
+  - *Setting:* 2 in a school or classroom; 1 for children or teenagers somewhere else (a clinic, a home, a hospital)
+    or when the card does not say; 0 for adults.
+- **Where the points come from.** From each card's own note and result, the words a person reads on the card. No
+  study was read again. `tools/banks/grade-evidence.py` reads them by rule and writes three letters (`ev`) on the
+  card; TD-1 turns the letters into points and into the sentence. `tools/banks/evidence-overrides.json` holds
+  corrections by card and wins over the rule; it is empty today.
+- **How good the reading is.** Four samples of 22 to 40 cards were read by hand while the rule was written, and the
+  rule was corrected after each; every card read as 12 students or more (133) was listed and looked at. In the last
+  sample of 40, the number of students fell in the right group on about nine cards in ten, and the setting and the
+  design were right or "not stated" on about as many. So about one card in ten carries a part that a person would
+  read differently. The wrong readings found were mostly these: a count of something else taken for students; a
+  study done partly with adults; a setting named only in a later sentence.
+- **What the bank holds now** (3,290 cards). Design: a comparison 1,360, not named 1,633, no comparison 136, not
+  tested 161. Students: six or more 444, two to five 1,702, one 661, not stated 483. Setting: a school 747,
+  elsewhere 772, not stated 1,064, adults 546. Points: 0 on 168 cards, 1 on 158, 2 on 573, 3 on 1,051, 4 on 925,
+  5 on 338, 6 on 77; none has 7 or 8, because only 34 cards name more than one study.
+- **What "not named" means.** Most cards were written to be used, not to describe the study's design, so half of
+  them do not name it. The journals these studies come from publish experimental single-case work, so "not named"
+  is given 1 point, not 0. A card whose note names its design gains a point over one that does not; that favors the
+  cards with fuller notes, which is a limit of the method.
+- **In Form TD-1.** Each row of the bank's list ends "Evidence N of 8" (or "Not tested"). The open card shows
+  "Evidence on this card: N of 8 points." with the four parts and their points, and "How the points are counted".
+  Above the list, "Order of the list" offers "As the bank lists them" (the default: nothing changes for anyone who
+  does not touch it) and "Most evidence first", which orders each group by the points, with ties in the bank's
+  order. This plan's function and behavior still come first. The choice is not saved with the form.
+- **What it does not do.** The points do not enter the plan, the printed pages or the compare screen, and no card is
+  hidden by them. They say nothing about whether a procedure suits a student.
+- **For the next bank reading.** `tools/banks/reader-rules.md` has a rule 17: after cards are added or a note is
+  changed, run the tool with `--write`; the release test fails when a card's letters are not the ones the tool
+  gives.
+- **Also in this release's commit history, not in the app:** `tools/banks/mark-proposals.md`, 254 steps of the bank
+  proposed for the extinction or restrictive mark, waiting for the BCBA's approval. No step was changed.
+- **Test.** `qa/v2607-evidence-test.js` (new, in the release list): every card carries the letters the tool gives;
+  nine cards whose notes state the evidence plainly read as expected; every row and the open card show the points
+  the letters give; the two orders; a card not tested; the control's size; nothing saved; no page error.
+- **The test run.** On the built folder: the new test, the bank tests in both editions, the versions, procedure
+  videos, marks and feeding tests, the size budgets and the build test. Not seen on an iPad.
 ### v26.06: Device check, a page that tests the device it is opened on
 (approved by the BCBA on 11/12 with the list of next steps: "a Device check page that runs on the iPad itself and shows
 a one-screen pass or fail report you can screenshot".)

@@ -7449,6 +7449,13 @@ details.about>p{margin:6px 0 0;padding:8px 12px;border-left:3px solid var(--nbh-
 .detail{margin:12px 0 0;padding:12px 14px 14px;border:1px solid var(--nbh-rule,#cfdad8);border-radius:6px;background:#fff;scroll-margin-top:84px}
 .detail h4{margin:0;font-family:var(--nbh-serif,"Iowan Old Style",Palatino,Georgia,serif);font-size:17px;line-height:1.25;color:var(--nbh-navy,#182e43)}
 .dm{margin:3px 0 10px;font-size:12px;color:var(--nbh-muted,#54676f)}
+.evl{margin:0 0 10px;padding:8px 12px;border-left:3px solid var(--nbh-teal,#76a2a3);background:var(--nbh-shade,#f5f8f7);font-size:13px;line-height:1.45;color:var(--nbh-ink,#1a2933)}
+.evl p{margin:0}.evl .evp{font-weight:600;color:var(--nbh-navy,#182e43)}
+.evhow{margin:2px 0 0;font-size:12.5px;color:var(--nbh-muted,#54676f)}
+.evhow>summary{display:inline-block;min-height:32px;padding:6px 0;cursor:pointer;color:var(--nbh-slate,#254657);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.evhow>p{margin:2px 0 4px}
+.ordl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-height:44px;margin:0;font-size:15px;color:var(--nbh-ink,#1a2933)}
+.ordl select{min-height:44px;max-width:100%;font:inherit;font-size:15px}
 .load{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border:1px solid var(--nbh-rule,#cfdad8);border-radius:6px;background:var(--nbh-shade,#f5f8f7);scroll-margin-top:84px}
 .btns{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
 .punnote{flex:1 1 100%;margin:2px 0 0;font-size:13px;line-height:1.45;color:#7a3b00;background:#fff5e6;border:1px solid #e7c27a;border-radius:8px;padding:8px 10px}
@@ -7627,8 +7634,21 @@ const has=(list,w)=>list.some(x=>x.startsWith(w));
 /* v23.88 (screen E) ranked for this plan: protocols for this plan's function whose words match the target behavior first, then this
    function's, then the rest, each tier in the bank's order */
 const planBeh=()=>words([val('m.beh'),val('m.prec')].join(' ')).filter(w=>w.length>3&&!/^(student|behavior|behaviour|with|that|this|when|than|from|into|after|before|other|their)$/.test(w));
-function rankPlan(list){const pf=planFn(),bw=planBeh();if(!pf&&!bw.length)return list;const sc=p=>{let n=0;if(pf&&p.fn&&p.fn.includes(pf))n+=2;if(bw.length&&bw.some(w=>has(H[p.id].top,w)))n+=1;return n;};
-  return list.map((p,i)=>[p,sc(p),i]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]).map(x=>x[0]);}
+/* v26.07 the evidence line. Each card carries three letters (ev: design, students, setting) that tools/banks/grade-evidence.py
+   reads from the card's own note and result; with the number of studies the card names they make 0 to 8 points and a sentence.
+   The points order the list only when the user chooses "Most evidence first"; the plan's function and behavior still come first. */
+const EV_D={c:[2,'a comparison that shows the effect'],n:[1,'the design is not named on the card'],u:[0,'no comparison (a case report or before and after)'],t:[0,'described, not tested']},
+  EV_N={3:[2,'6 or more students'],2:[1,'2 to 5 students'],1:[0,'one student'],0:[0,'the number of students is not stated']},
+  EV_S={s:[2,'in a school'],e:[1,'outside a school (a clinic, a home or a hospital)'],n:[1,'the setting is not stated'],a:[0,'adults'],t:[0,'']};
+const evOf=p=>{const e=p&&p.ev;if(!e||!EV_D[e[0]]||!EV_N[e[1]]||!EV_S[e[2]])return null;const k=(p.src||[]).length,ks=k<=1?0:k===2?1:2,st=[ks,k<=1?'one study':k+' studies'];
+  if(e[0]==='t')return {pts:ks,parts:[EV_D.t,st],tested:false};
+  return {pts:EV_D[e[0]][0]+EV_N[e[1]][0]+EV_S[e[2]][0]+ks,parts:[EV_D[e[0]],EV_N[e[1]],EV_S[e[2]],st],tested:true};};
+const evPts=p=>{const e=evOf(p);return e?e.pts:-1;};
+const evTag=p=>{const e=evOf(p);return e?(e.tested?'Evidence '+e.pts+' of 8':'Not tested'):'';};
+const evSay=p=>{const e=evOf(p);if(!e)return '';const t=e.parts.map(x=>x[1]+' ('+x[0]+')').join(', ');return t.charAt(0).toUpperCase()+t.slice(1)+'.';};
+let ordBy='';
+function rankPlan(list){const pf=planFn(),bw=planBeh(),ev=ordBy==='ev';if(!pf&&!bw.length&&!ev)return list;const sc=p=>{let n=0;if(pf&&p.fn&&p.fn.includes(pf))n+=2;if(bw.length&&bw.some(w=>has(H[p.id].top,w)))n+=1;return n;};
+  return list.map((p,i)=>[p,sc(p),i]).sort((a,b)=>b[1]-a[1]||(ev?evPts(b[0])-evPts(a[0]):0)||a[2]-b[2]).map(x=>x[0]);}
 function search(q,kind,fn,band){const ws=words(q),pool=ok.filter(p=>(!kind||kindOf(p.code)===kind)&&fnOk(p,fn)&&ageOk(p,band));
   if(!ws.length)return {list:rankPlan(pool),tier:1};
   let l=pool.filter(p=>ws.every(w=>has(H[p.id].top,w)));if(l.length)return {list:rankPlan(l),tier:1};
@@ -7652,6 +7672,7 @@ d.innerHTML=`<summary><span class="t">Protocol bank</span> <span class="n">(${N}
 <div class="row"><input type="search" class="q" placeholder="Search: break card, delay, high-p, token, elopement…" aria-label="Search the protocol bank" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
 <select class="kind" aria-label="Kind of component"></select><select class="fn" aria-label="Function of the problem behavior"></select><select class="age" aria-label="Grade band"></select></div>
 <label class="nopun"><input type="checkbox" class="nopunck"> Leave out protocols with a punishment step</label>
+<label class="ordl"><span>Order of the list</span> <select class="ord"><option value="">As the bank lists them</option><option value="ev">Most evidence first</option></select></label>
 <div class="cnt" aria-live="polite"></div><div class="list"></div><div class="detail" hidden></div></div>`;
 R.appendChild(d);
 const $p=s=>d.querySelector(s),q=$p('.q'),kind=$p('.kind'),fn=$p('.fn'),age=$p('.age'),cntEl=$p('.cnt'),listEl=$p('.list'),det=$p('.detail');
@@ -7680,15 +7701,17 @@ let cur='',lastQ=null;
 /* v25.72 (TD-1 review T3, the BCBA's words) each row says what its steps hold, from the marks on the steps themselves (RESTRICTIVE:
    Punishment, RESTRICTIVE:, OPTION:), in words that are part of the row's name; the tick box leaves out the punishment ones */
 const RESX=/^\s*RESTRICTIVE:/i,tagsOf=p=>{const s=p.steps||[],o=[];if(hasPun(p))o.push(['p','Punishment step (can be left out)']);else if(s.some(x=>RESX.test(x)))o.push(['r','Restrictive step']);if(hasOpt(p))o.push(['o','Optional step']);if(s.some(x=>/^\s*EXTINCTION:/i.test(x)))o.push(['x','Extinction step']);return o;};
-const nopun=$p('.nopunck');
+const nopun=$p('.nopunck'),ord=$p('.ord');
 function draw(){const r=search(q.value,kind.value,fn.value,age.value),IN=inPlan();let list=r.list,left=0;if(nopun.checked){const keep=list.filter(p=>!hasPun(p));left=list.length-keep.length;list=keep;}
   const fil=[fn.value?(fn.value==='plan'&&planFn()?'this plan’s function ('+FN[planFn()].toLowerCase()+')':FN[fn.value]?FN[fn.value].toLowerCase():''):'',age.value?((AGE_BANDS.find(b=>b[0]===age.value)||[])[1]||'').toLowerCase():''].filter(Boolean);
-  cntEl.textContent=(list.length===N?N+' protocols':list.length+' of '+N+' protocols')+(fil.length?' for '+fil.join(', '):'')+(nopun.checked?' ('+left+' with a punishment step left out)':'')+(!list.length?'':r.tier===2?', found in the protocols’ text':r.tier===3?': no protocol has every word, so the closest are listed':'')+(list.length&&!fn.value&&(planFn()||planBeh().length)?'; the ones for this plan’s function and behavior first':'')+(fil.length?'. Any function and Any grade show the rest.':'');
+  cntEl.textContent=(list.length===N?N+' protocols':list.length+' of '+N+' protocols')+(fil.length?' for '+fil.join(', '):'')+(nopun.checked?' ('+left+' with a punishment step left out)':'')+(!list.length?'':r.tier===2?', found in the protocols’ text':r.tier===3?': no protocol has every word, so the closest are listed':'')+(list.length&&!fn.value&&(planFn()||planBeh().length)?'; the ones for this plan’s function and behavior first':'')+(list.length&&ordBy==='ev'&&r.tier!==3?'; '+(planFn()||planBeh().length?'within those, ':'')+'the cards with the most evidence first':'')+(fil.length?'. Any function and Any grade show the rest.':'');
   let h='';groups(list).forEach(([g,L])=>{h+=`<div class="grp" role="group" aria-label="${esc(g)}"><div class="gh" aria-hidden="true">${esc(g)}</div>`+
-    L.map(p=>`<button type="button" class="it" data-id="${esc(p.id)}" aria-pressed="${p.id===cur?'true':'false'}"><span class="l">${esc(p.lab)}${IN.has(p.id)?'<span class="inp">in this plan</span>':''}</span><span class="m">${esc([comp(p),fnWords(p)==='any function'?'Any function':'Function: '+fnWords(p),p.age,(cites(p)[0]||'')].filter(Boolean).join(' · '))}</span>${tagsOf(p).length?'<span class="tags">'+tagsOf(p).map(t=>`<span class="tg tg-${t[0]}">${esc(t[1])}</span>`).join('')+'</span>':''}</button>`).join('')+'</div>';});
+    L.map(p=>`<button type="button" class="it" data-id="${esc(p.id)}" aria-pressed="${p.id===cur?'true':'false'}"><span class="l">${esc(p.lab)}${IN.has(p.id)?'<span class="inp">in this plan</span>':''}</span><span class="m">${esc([comp(p),fnWords(p)==='any function'?'Any function':'Function: '+fnWords(p),p.age,(cites(p)[0]||''),evTag(p)].filter(Boolean).join(' · '))}</span>${tagsOf(p).length?'<span class="tags">'+tagsOf(p).map(t=>`<span class="tg tg-${t[0]}">${esc(t[1])}</span>`).join('')+'</span>':''}</button>`).join('')+'</div>';});
   listEl.innerHTML=h||'<div class="none">Nothing matches. Try another word, All kinds of component, or Any function.</div>';
   const k=q.value+'|'+kind.value+'|'+fn.value;if(k!==lastQ){listEl.scrollTop=0;lastQ=k;}}
 const row=(k,v)=>v?`<div class="r"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`:'';
+const EV_HOW='The points are read by rule from this card’s own note and result, not from the study, so they can be wrong on a card: the note and “What happened in the study” are the account to trust. Design: 2 when the card reports a comparison that shows the procedure made the change (a return to baseline, a staggered start, alternated conditions or a control group), 1 when the card does not say, 0 for a report with no comparison. Students: 2 for six or more, 1 for two to five, 0 for one or not stated. Setting: 2 in a school, 1 for children somewhere else or not stated, 0 for adults. Studies: 1 when the card names two, 2 for three or more. The points order the list when you choose “Most evidence first”. They do not say whether the procedure suits this student.';
+const evLine=p=>{const e=evOf(p);if(!e)return '';return `<div class="evl"><p><span class="evp">${e.tested?'Evidence on this card: '+e.pts+' of 8 points.':'Evidence on this card: described, not tested.'}</span> ${esc(e.tested?evSay(p):'The source reports no data for this procedure.')}</p><details class="evhow"><summary>How the points are counted</summary><p>${esc(EV_HOW)}</p></details></div>`;};
 const sameCards=p=>$$('#compWrap .card').filter(c=>c.dataset.code===p.code);
 /* v25.65 the card-level rules the bank prints above a study's own steps: competing items chosen by the measured reduction (PREF-H1),
    high-p at meals for selectivity only, with the step ladder as the default form (FEED-M6), the rapid-eating pathway in order (FEED-M5),
@@ -7788,7 +7811,7 @@ function show(id,keep){const p=byId[id];cur=p&&LIBOF[p.code]?id:'';
   listEl.querySelectorAll('.it').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===cur?'true':'false'));
   det.hidden=!cur;if(!cur){det.innerHTML='';return;}
   const L=LIBOF[p.code],refs=(p.src||[]).map(k=>REF[k]).filter(Boolean),prm=L.params.map(x=>x[0]).filter(k=>p.params&&p.params[k]);
-  const bar=vBar(p),bp=byId[base]||p,head=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>`+(bar?bar+vTable(bp,p):'');
+  const bar=vBar(p),bp=byId[base]||p,head=`<h4>${esc(p.lab)}</h4><div class="dm">${esc([comp(p),fnWords(p)==='any function'?'for any function':'for behavior maintained by '+fnWords(p),p.age].filter(Boolean).join(' · '))}</div>`+evLine(p)+(bar?bar+vTable(bp,p):'');
   if(!vKeep)setTimeout(()=>{const ch=det.querySelector('.vchips'),cc=ch&&ch.querySelector('.vchip[aria-current="true"]');if(ch&&cc){const d0=cc.getBoundingClientRect().top-ch.getBoundingClientRect().top;if(d0<0||d0+cc.offsetHeight>ch.clientHeight)ch.scrollTop+=d0-(ch.scrollTop+d0>30?26:0);}},0);   /* the card opened shows in the list, with the foot of the row before it in view when there is one */
   if(bar&&two&&bp.id!==p.id){const M=Math.max(1,(bp.steps||[]).length,(p.steps||[]).length);det.innerHTML=head+`<div class="vsbs2">${vPane(bp,'Started from',M)}${vPane(p,'This version',M)}</div>`;sameNote();return;}
   det.innerHTML=head+loadHtml(p)+`
@@ -7850,7 +7873,7 @@ function doAdd(p,ld){p=p||byId[cur];if(!p)return;const same=sameCards(p);if(same
   u.addEventListener('click',()=>{const done=undo();u.remove();sameNote();say([done?(r.replaced?'Undone: the card’s words are back.':'Undone: the card is removed.'):'The card has been edited since, so it is kept as it is.'],ld);});
   const pn=(hasPun(p)?(withPun?' The punishment steps are on the card, labeled: they need district review and written consent before they are used.':' The punishment steps were left off.'):'')+(hasOpt(p)?(withOpt?' The optional step that reinforces problem behavior on purpose is on the card, marked OPTION: run it only with a safety plan.':' The optional step that reinforces problem behavior on purpose was left off.'):'');
   say([b,pn,' Adapt every step, setting and criterion to this student, and complete the other sheets (Responding to behavior, with its consent for escape extinction) as the plan needs. ',go,' · ',u],ld);}
-q.addEventListener('input',draw);kind.addEventListener('change',draw);nopun.addEventListener('change',draw);fn.addEventListener('change',()=>{fnTouched=true;draw();});age.addEventListener('change',()=>{ageTouched=true;draw();});
+q.addEventListener('input',draw);kind.addEventListener('change',draw);nopun.addEventListener('change',draw);ord.addEventListener('change',()=>{ordBy=ord.value;listEl.scrollTop=0;draw();});fn.addEventListener('change',()=>{fnTouched=true;draw();});age.addEventListener('change',()=>{ageTouched=true;draw();});
 d.addEventListener('toggle',()=>{if(d.open){try{ageFill();fnFill();draw();}catch(x){}}});   /* v24.30 the filters follow the plan and the case when the bank opens */
 q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();const f=listEl.querySelector('.it');if(f){show(f.dataset.id);f.focus();}}});
 listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);

@@ -60,7 +60,7 @@ SHOWS.a_highp_peer.summary='a classmate gives 3 easy play requests with a play c
  {const shape=HP.every(p=>p.cmp&&ROWK.every(k=>typeof p.cmp[k]==='string'&&p.cmp[k])&&p.cmp.cite&&+p.cmp.year>1900&&typeof p.cmp.special==='string'&&p.cmp.quotes&&typeof p.cmp.quotes==='object');
   const qbad=[];HP.forEach(p=>Object.entries(p.cmp.quotes||{}).forEach(([k,q])=>{if(q&&!(p.steps||[]).includes(q))qbad.push(p.id+':'+k);}));
   const others=BANK.protocols.filter(p=>p.code!=='A_HIGHP'&&'cmp' in p).map(p=>p.id);
-  const KEYS=new Set(['id','code','lab','fn','beh','age','kw','params','steps','data','mat','result','note','src','ta','ta_note','vol','scenes','cmp']);
+  const KEYS=new Set(['id','code','lab','fn','beh','age','kw','params','steps','data','mat','result','note','src','ta','ta_note','vol','scenes','cmp','ev']);   /* v26.07: ev, the evidence letters every card carries */
   const extra=HP.filter(p=>Object.keys(p).some(k=>!KEYS.has(k))).map(p=>p.id);
   ok('A the 36 high-p cards carry cmp (10 rows, the study, its year, what is special, the quoted steps) (v25.72: 33, then Planer et al., 2018, and Trejo & Fryling, 2018; v25.79: Romano & Roll, 2000)',HP.length===36&&shape,{n:HP.length});
   ok('A every quoted value is a sentence of the card’s own steps; no other card carries cmp; no other new field',!qbad.length&&!others.length&&!extra.length,{qbad,others:others.slice(0,4),extra});}
