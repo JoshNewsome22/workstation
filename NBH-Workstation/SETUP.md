@@ -9905,6 +9905,74 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.16: the print review, part two: no type under 9 point in the seven forms that printed smallest
+(the BCBA, 11/13, to the question left open by v26.15, "raise them to 9 point (the recommendation), to 10, or leave
+them?": "Yes. Raise them." The recommendation was followed: 9 point. The same day the session's network was given the
+sites of the standards, so they were read in full, not from search summaries.)
+- **What the standards say, read in full.**
+  - *ABS, Forms Design Standards, paper forms, typography and lines and boxes* (read whole): questions in 12 point;
+    instructions, notes and the column headings of a table in 10; section headings in 14 bold; the smallest size it
+    uses for anything is 9 point (processing codes and office-use boxes); no line of text over 115 mm; answer boxes
+    ruled at half a point, 8 mm for a line of writing, tick boxes 4 mm square. v26.15's figures hold.
+  - *New Zealand government, Designing documents for print* (read whole): 12 point at the least for a general reader,
+    16 for low vision; line spacing 1.2 times the size at the least; lines of about 60 characters; a table row is never
+    split across two pages and a table's header row is repeated on each page; tick boxes before their labels; in a
+    contents list the page number stands close to its title; page numbers in the same place on every page.
+  - *Not read:* the WACHS guideline's address now answers "not found" (the document has moved); the QMUL and CoxHealth
+    files and the UTMB policy did not answer from here (UTMB sends the reader to its intranet). What v26.15 took from
+    them rests on the search summaries, as said there.
+  - *What this means for 9 point.* It is the smallest size the ABS uses for anything and is under its 10 point for
+    notes and the New Zealand guide's 12. It was chosen as the size that makes these seven forms readable with the
+    fewest added pages; 10 point is the next step if the BCBA wants it, form by form.
+- **What printed small.** Share of the printed characters under 9 point, each form with its simulation: Form IA-1 69%
+  (source lines at 7.5 point, table headings at 7.5 to 8, question text at 8.25), PA-1 62%, RA-1 58%, TD-1 49%, DM-1
+  70%, TB-1 64%, RS-1 89%.
+- **What is changed.**
+  - *The floor* (`nbh-polish.js`, the print policy; `prFloor`). When one of the seven forms is printed, the form is
+    read with the paper's own rules on, and every piece of text that would print under 9 point is set to 9; a heading
+    (h1 to h4) under 10 point is set to 10, so it still stands above what it heads; a line set tighter than the new
+    size allows is opened. Text inside a drawing keeps the drawing's scale; a superscript stays small. It is undone
+    after printing: the screen is not changed.
+  - *A table too wide for the page at the new size.* The forms already scale anything wider than the page when they
+    print (`nbh-field-care.js`). That fit is now taken off, the type raised, a table that runs past the page given
+    narrower side padding, and the fit made again. Only what cannot fit is scaled: Form RA-1's progressive-ratio table
+    (23 columns) prints at about 8.2 point where it printed at about 7. The printed copies of long entries (a long
+    entry is printed as text so it can wrap) are made again at the new size too.
+  - *A form of this list is not scaled to save a page* (v26.15's fit would take the type under 9 again). Form RS-1's
+    record, fitted onto 2 pages in v26.15, takes 3 at 9 point; its year summary's closing lines now take the block
+    above them along, so the third page is not three lines (a rule in Form RS-1's own print styles).
+  - *A closing note longer than a page* (Form IA-1's reference list at 9 point) is no longer held in one piece by the
+    rule that keeps closing lines with what is above them (v24.31): held whole it left the signature lines alone on
+    the page before it. A note longer than the rule's limit breaks on its own.
+  - *A closing note under a long block* (every form). The same rule kept a closing note only with itself when the
+    block above it was long (a table, or a wrapper that holds the sheet's parts): filled with more data, Forms TB-1 and
+    TD-1 ended a sheet with one row and the source line on a page of their own (`qa/pp131-test.js` caught both). The
+    end of the long block now comes along: a table's last three rows, or the wrapper's last short parts, up to about a
+    third of a page.
+  - *The packet.* The packet's window gives the seven forms the same floor before its own fit to the page's width,
+    and does not scale their sheets to save a page.
+- **The numbers.** Under 9 point after: Forms IA-1, PA-1, TD-1, TB-1 and DM-1 0%, RA-1 3% (the scaled table), RS-1 5%
+  (a chart's labels). Pages: IA-1 21 to 23, PA-1 14 to 16, TD-1 21 to 23, DM-1 9 to 10, RS-1 2 to 3,
+  RA-1 12 and TB-1 10 as before: the seven, 89 to 97. All 49 forms, 475 to 483; no other form's pages changed, and no
+  new nearly empty page. In the packet of 47 forms the seven's sections take 8 pages more (IA-1 34 to 38, PA-1 21 to 22, TD-1 45 to 46, TB-1 16 to 17, DM-1 8 to 9, RA-1 as before; Form RS-1 is not in the packet): 742 pages become 750, counted like for like (in the run that measured it Form ABC-1's example did not load into the test case, so its section was short and the run's own total, 729, is not the figure to keep).
+- **Not done, and said so.**
+  - The other 42 forms are not changed. Several print part of their text under 9 point: Form SP-1's scatter plot sheet
+    by design (its grid), Forms GB-1, EB-1, OB-1, DD-1 and SM-1 about half their characters at 8 to 8.5 point (some at 7.5). Raising
+    them is the same switch (a form's number added to the list): the BCBA's choice.
+  - The packet's own References and Sources section prints at 7 point (ten pages in a packet of seven forms). It is
+    not one of the seven forms and was left.
+  - Labels inside graphs are not raised; Form SM-1's were set to 9 point in v22.20, the others are as drawn.
+  - 9 point is under the 10 to 12 point of the standards above.
+- **How it was checked.** Every form printed to PDF before and after and the type sizes read from the PDFs; the pages
+  looked at. Chromium only: Safari on the iPad was not checked, and nothing was printed on paper.
+- **Budget.** None raised: the seven shared scripts measure 686 KB of 700.
+- **Test.** `qa/v2616-print-floor-test.js` (new, in the release list): in each of the seven nothing under 9 point and
+  no heading under 10; none runs past the page; nothing left on the screen after printing; Form FS-1 untouched; Form
+  RS-1 three pages with its closing lines held; a packet of Forms DM-1, TB-1 and FS-1 floors the first two only.
+  `qa/v2615-print-test.js` no longer expects Form RS-1 on 2 pages; `qa/pp131-test.js` allows Form TD-1's fullest
+  example 54 pages (51 before) and `qa/pp135-test.js` allows Form IA-1's summary print a third of the whole form (5
+  pages of 18; a quarter before).
+
 ### v26.15: the print review, part one: no stray pages, and what paper should not carry
 (asked for by the BCBA on 11/13: "do a in-depth research of how the pdf printing packet of the entire workstation should
 look in comparison to the top pdf form design print for clinical printing ... look at the entire printing and make

@@ -514,6 +514,7 @@
       '.nbh-pr-blank{display:none!important}' +
       '[data-nbh-keep]{break-inside:avoid!important;page-break-inside:avoid!important}' +
       '[data-nbh-keep="2"]{break-before:avoid!important;page-break-before:avoid!important}' +
+      '[data-nbh-keep="3"]{break-before:avoid!important;page-break-before:avoid!important;break-after:avoid!important;page-break-after:avoid!important}' +
       '[data-nbh-keep="1"]{break-before:auto!important;page-break-before:auto!important}' +
       '.nbh-keep{display:inline-block;width:100%;vertical-align:top;box-sizing:border-box;break-before:avoid;page-break-before:avoid}' +
       'h1,h2,h3,h4,.bar,.sumhead{break-after:avoid;page-break-after:avoid}' +
@@ -531,7 +532,7 @@
       ':is(h2,h3,h4,.nbh-band,.bar,.sumhead)+:is(p,.method,.hint,.note,.sub,small){break-after:avoid;page-break-after:avoid}' +
       '[data-nbh-split]{break-inside:auto!important;page-break-inside:auto!important}' +
       /* left off the paper whatever the form's own rules say (the two :not()s outweigh a rule written for an id) */
-      '[data-nbh-bare]:not(#nbh-a):not(#nbh-b){display:none!important}}' +
+      '[data-nbh-bare]:not(#nbh-a):not(#nbh-b){display:none!important}table[data-nbh-tight] th,table[data-nbh-tight] td{padding-left:2px!important;padding-right:2px!important}}' +
       '@media print{::placeholder{color:transparent!important;opacity:0!important}}' +
       '@media print{input.nbh-pr-nodate::-webkit-datetime-edit{color:transparent!important}}';
     document.head.appendChild(st);
@@ -571,7 +572,7 @@
     return /signature|sign-?off\b|\bsigned\b/i.test(t) || (t.match(/date\b/gi) || []).length >= 2; }   /* a table's cells run together in its text ("BCBADate") */
   /* v26.15 the sign-off goes into one block with its own heading and the short blocks just above it (about 3.5 inches in all
      at the most: a block a page cannot cut, in any browser); a long table above it is tied on by its last three rows. */
-  function prTie(el) { if (el.hasAttribute('data-nbh-keep')) return; el.setAttribute('data-nbh-keep', '2'); prUndo.push(function () { el.removeAttribute('data-nbh-keep'); }); }
+  function prTie(el, v) { if (el.hasAttribute('data-nbh-keep')) return; el.setAttribute('data-nbh-keep', v || '2'); prUndo.push(function () { el.removeAttribute('data-nbh-keep'); }); }
   function prSignKeep(real, wraps) { var chain = [real[0]], i = 1, tot = real[0].getBoundingClientRect().height, acc = 0;
     while (i < real.length && chain.length < 3 && (/^(H2|H3|H4|H5|LEGEND)$/.test(real[i].tagName) || /\b(bar|nbh-band|sumhead)\b/.test(real[i].className || '') || (real[i].tagName === 'P' && real[i].getBoundingClientRect().height <= 44))) { tot += real[i].getBoundingClientRect().height; chain.push(real[i]); i++; }
     for (; i < real.length && acc < 120; i++) { var el = real[i], h = el.getBoundingClientRect().height, t = el.tagName === 'TABLE' ? el : (el.children.length === 1 && el.firstElementChild.tagName === 'TABLE' ? el.firstElementChild : null);
@@ -579,6 +580,19 @@
       if (t) { var rows = t.rows; for (var r = Math.max(1, rows.length - 3); r < rows.length; r++) prTie(rows[r]); }   /* a long table: its last rows */
       break; }
     chain.reverse(); wraps.push(chain); }
+  /* v26.16 a closing note under a long block (a table, or a wrapper that holds the sheet's parts) was kept only with itself:
+     at 9 point Forms TB-1 and TD-1 ended a sheet with one table row and the source line on a page of their own. The end of
+     the long block now comes along: a table's last three rows, or a wrapper's last short part (looked for three levels down). */
+  function prTieEnd(el, room) {
+    for (var d = 0; d < 4 && el; d++) {
+      if (el.tagName === 'TABLE') { var rows = el.rows; for (var r = Math.max(1, rows.length - 3); r < rows.length; r++) prTie(rows[r], r === rows.length - 1 ? '3' : '2'); return; }   /* '3': no break after it either (the closing block is an inline block, which cannot ask for that itself) */
+      var kids = []; for (var c = el.lastElementChild; c; c = c.previousElementSibling) { if (c.hidden || /\bnoprint\b|\bnbh-pr-blank\b/.test(c.className || '') || getComputedStyle(c).display === 'none' || c.getBoundingClientRect().height < 2) continue; kids.push(c); if (kids.length >= 4) break; }
+      if (!kids.length) return;
+      if (kids[0].tagName === 'TABLE' || kids[0].getBoundingClientRect().height > 260) { el = kids[0]; continue; }
+      /* the last short parts, until about a third of a page comes along with the note */
+      for (var k = 0; k < kids.length && room > 0; k++) { var h = kids[k].getBoundingClientRect().height; if (kids[k].tagName === 'TABLE' || h > 260) break; prTie(kids[k], '3'); room -= h; }
+      return; }
+  }
   function prTails() {
     var TAIL = /\b(cite|method|foot|note|hint|sig|sigcite|src|cap)\b/, HIDE = /\bnoprint\b|\bnbh-pr-blank\b/;
     var sheets = document.querySelectorAll('.sheet,section[class*="only-"]'), html = document.documentElement, wraps = [];
@@ -603,7 +617,8 @@
         else if (!(TAIL.test(last.className || '') || last.tagName === 'P' || last.tagName === 'SMALL')) continue;
         var acc = 0, chain = [];
         for (var k = 0; k < kids.length; k++) { var el = kids[k], h = el.getBoundingClientRect().height;
-          if (chain.length && (h > PR_LONG || acc + h > most)) break;   /* a long block above the tail stays breakable */
+          if (!chain.length && h > most) break;   /* v26.16 a closing note longer than the chain may hold (a reference list at 9 point) breaks on its own: held whole it left the page before it nearly empty */
+          if (chain.length && (h > PR_LONG || acc + h > most)) { if (acc < need) prTieEnd(el, need - acc); break; }   /* a long block above the tail stays breakable; v26.16 its end comes along */
           chain.push(el); acc += h; if (acc >= need) break; }
         if (!chain.length) continue;
         chain.reverse(); wraps.push(chain); }
@@ -666,12 +681,46 @@
       if (b - start > PAGE) { if (t - start > 0.5 && b - t <= PAGE) { start = t; pages++; } else while (b - start > PAGE) { start += PAGE; pages++; } } }
     var end = (y1 - y0) * z; while (end - start > PAGE) { start += PAGE; pages++; }
     return { pages: pages, tail: end - start }; }
+  /* v26.16 (the BCBA, 11/13: "Yes. Raise them."): the smallest type on paper. Forms IA-1, PA-1, RA-1, TD-1, DM-1, TB-1 and
+     RS-1 printed most of their text under 9 point (source lines at 7.5, table headings at 7.5 to 8, labels at 8). Read with
+     the paper's own rules on, every piece of text in these forms that would print under 9 point is set to 9, and a heading
+     (h1 to h4) under 10 point to 10, so it still stands above what it heads; a line set tighter than the new size allows is
+     opened. Text inside a drawing keeps the drawing's scale, and a superscript stays small. Undone after printing.
+     A form of this list is not scaled to save a page (prPaper's fit), which would take the type under 9 again. */
+  var PR_FLOOR = /^(IA-1|PA-1|RA-1|TD-1|DM-1|TB-1|RS-1)$/, PR_MIN = 12, PR_MINH = 13.34;
+  function prFormId() { var m = /Form\s+([A-Z]{2,3}-\d+)/.exec(document.title || ''); return m ? m[1] : ''; }
+  function prFloor(root) {
+    var todo = [], XH = 'http://www.w3.org/1999/xhtml';
+    (function walk(el, z) { var kids = el.children; for (var i = 0; i < kids.length; i++) { var c = kids[i]; if (c.namespaceURI !== XH || /^(SCRIPT|STYLE|TEMPLATE|SUP|SUB|OPTION)$/.test(c.tagName)) continue;
+        var cs = getComputedStyle(c); if (cs.display === 'none') continue; var zc = z * (parseFloat(cs.zoom) || 1), own = /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(c.tagName) && c.type !== 'hidden' && c.type !== 'checkbox' && c.type !== 'radio';
+        if (!own) for (var n = c.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && /\S/.test(n.nodeValue)) { own = true; break; }
+        if (own) { var fs = parseFloat(cs.fontSize) * zc, min = /^H[1-4]$/.test(c.tagName) ? PR_MINH : PR_MIN;
+          if (fs && fs < min - 0.05) todo.push([c, min / zc, parseFloat(cs.lineHeight) || 0]); }
+        walk(c, zc); } })(root || document.body, 1);
+    var was = todo.map(function (t) { var st = t[0].style; return [st.getPropertyValue('font-size'), st.getPropertyPriority('font-size'), st.getPropertyValue('line-height'), st.getPropertyPriority('line-height')]; });
+    todo.forEach(function (t) { t[0].style.setProperty('font-size', t[1].toFixed(2) + 'px', 'important'); if (t[2] && t[2] < t[1] * 1.18) t[0].style.setProperty('line-height', '1.25', 'important'); });
+    /* a table the larger type pushes past the page gives up its side padding; what is still too wide is scaled to the page
+       by the fit the forms already have (nbh-field-care.js), made again after this at the new sizes */
+    var base = root || document.body, tabs = base.getElementsByTagName('table'), wide = [];
+    for (var k = 0; k < tabs.length; k++) { var t = tabs[k]; if (!t.offsetWidth || (t.parentElement && t.parentElement.closest('table'))) continue;
+      var sh = t.closest('.sheet,.nbh-page,.mp-sec') || base, cs2 = getComputedStyle(sh), lim = sh.getBoundingClientRect().right - (parseFloat(cs2.paddingRight) || 0) - (parseFloat(cs2.borderRightWidth) || 0);
+      if (t.getBoundingClientRect().right > lim + 1.5) { t.setAttribute('data-nbh-tight', ''); wide.push(t); } }
+    return function () { todo.forEach(function (t, i) { var st = t[0].style, w = was[i];
+      if (w[0]) st.setProperty('font-size', w[0], w[1]); else st.removeProperty('font-size');
+      if (w[2]) st.setProperty('line-height', w[2], w[3]); else st.removeProperty('line-height'); });
+      wide.forEach(function (x) { x.removeAttribute('data-nbh-tight'); }); return todo.length; };
+  }
   function prPaper() {
     var d = document.querySelectorAll('input[type="date"],input[type="time"],input[type="month"],input[type="week"],input[type="datetime-local"]');
     for (var i = 0; i < d.length; i++) if (!d[i].value && !d[i].classList.contains('nbh-pr-nodate')) (function (e) { e.classList.add('nbh-pr-nodate'); prUndo.push(function () { e.classList.remove('nbh-pr-nodate'); }); })(d[i]);
     /* a form's own print modes (one sheet, a packet of its own, a paper data sheet) arrange their own paper */
+    var pg = prPage(), floor = PR_FLOOR.test(prFormId());
+    if (floor) { var fc = window.nbhFieldCare, de0 = document.documentElement;
+      try { if (fc && fc.unfit) fc.unfit(); if (fc && fc.clear) fc.clear(); } catch (e) {}   /* the printed copies of long entries are made again too: a field with a copy is off the paper, and would keep its small size */
+      var back0 = prRules(pg); try { var un = prFloor(); de0.setAttribute('data-nbh-floor', '9'); prUndo.push(function () { un(); de0.removeAttribute('data-nbh-floor'); }); } catch (e) {} finally { back0(); }
+      try { if (fc && fc.prepare) fc.prepare(); } catch (e) {} }
     if (/\bprint-|-only\b|-printing\b|\bsp-printall\b|\bprint\b/.test(document.body.className + ' ' + document.documentElement.className)) return;
-    var pg = prPage(), back = prRules(pg);
+    var back = prRules(pg);
     try {
       var sheets = document.querySelectorAll('.sheet,section[class*="only-"]'), bare = [], tall = [], fit = [], PAGE = pg.h;
       for (var s = 0; s < sheets.length; s++) { if (sheets[s].querySelector('.sheet')) continue; if (prBare(sheets[s])) bare.push(sheets[s]); }
@@ -701,7 +750,7 @@
         for (var k2 = 0; k2 + 1 < bounds.length; k2++) { var y0 = bounds[k2], y1 = bounds[k2 + 1], H = y1 - y0; if (H < 4) continue;
           var mine = atoms.filter(function (a) { return a[0] >= y0 - 1 && a[1] <= y1 + 1; }), now = prSim(mine, y0, y1, PAGE, 1), z = 0;
           /* only a run of one page and a little: over more pages the estimate drifts from what the browser does (Form VI-1, 11/13) */
-          if (!(now.pages === 2 && now.tail <= PAGE * 0.085)) continue;
+          if (floor || !(now.pages === 2 && now.tail <= PAGE * 0.085)) continue;
           for (var zz = 0.985; zz >= 0.92; zz -= 0.013) { if (prSim(mine, y0, y1, PAGE - 6, zz).pages < now.pages) { z = zz - 0.006; break; } }
           if (!z) continue;
           /* the blocks that lie wholly in the run: the largest ones, found from the top down */
@@ -748,7 +797,7 @@
   /* registered once the form's own scripts have run, so the policy sees what they render for paper */
   function prArm() { window.addEventListener('beforeprint', prBefore); window.addEventListener('afterprint', prAfter); }
   if (document.readyState === 'complete') prArm(); else window.addEventListener('load', prArm);
-  window.nbhPrint = { before: prBefore, after: prAfter, paper: prPaper, guideOn: prGuideOn, blankOn: prBlankOn, inject: prInject, set: prSetChoice };
+  window.nbhPrint = { before: prBefore, after: prAfter, paper: prPaper, floor: prFloor, guideOn: prGuideOn, blankOn: prBlankOn, inject: prInject, set: prSetChoice };
 
   /* v24.39 (review R-121, R-122, E-02) the simulation, seeded and marked. nbhSim.rnd() is a seeded random source (mulberry32):
      seed 1 unless "New example" asked for another, so a form's worked example is the same at every load and a test can read

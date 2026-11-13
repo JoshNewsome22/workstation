@@ -30,7 +30,7 @@ const FORMS={'TB-1':'TB-1_Target-Behavior-Development_v2026-09.html','IA-1':'IA-
    changes made DD-1 21 (commit 898a2d8: the dual-criterion check, the effect-size tiles and the layouts) and SP-1 15 (514c4ba:
    the measurement review), and OB-1's three observations 12 (b929cb2, below); v25.65's approved TD-1 changes made it 51
    (fdccb89, as in td130-test). Each was found by printing the commit before and the commit itself. */
-const BEFORE={'TB-1':22,'IA-1':33,'PA-1':29,'RA-1':16,'EA-1':22,'DA-1':18,'DD-1':21,'SM-1':30,'SP-1':15,'ABC-1':18,'OB-1':13,'TD-1':51,'TK-1':13,'RS-1':4};
+const BEFORE={'TB-1':22,'IA-1':33,'PA-1':29,'RA-1':16,'EA-1':22,'DA-1':18,'DD-1':21,'SM-1':30,'SP-1':15,'ABC-1':18,'OB-1':13,'TD-1':54,'TK-1':13,'RS-1':4};   /* v26.16: TD-1 51 to 54, its text raised to 9 point on paper (the BCBA, 11/13) */
 const GUIDE_SHEETS=['TB-1','IA-1','PA-1','RA-1','EA-1','OB-1'],GUIDE_SECTIONS=['SM-1','DA-1'];
 (async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});const ctx=await b.newContext({viewport:{width:1300,height:950}});
  const open=async(F)=>{const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));await p.goto(BASE+'/NBH-Workstation/'+FORMS[F]);await sleep(1500);
