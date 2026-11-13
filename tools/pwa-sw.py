@@ -103,7 +103,7 @@ def check_page(name, s):
             fail('%s names %s: the worker cuts the host\'s snippet by that name, so no page of the workstation may' % (name, word))
     # v25.69 the video library (videos.html) saves no file, as respond.html saves none: neither carries the save block
     # v25.78 nor do the drawn pages (explain.html, practice.html)
-    if name not in ('respond.html', 'videos.html', 'explain.html', 'practice.html', 'learn.html') and s.count(SAVE_TAG) != 1:   # v26.00 nor the Learning page
+    if name not in ('respond.html', 'videos.html', 'explain.html', 'practice.html', 'learn.html', 'check.html') and s.count(SAVE_TAG) != 1:   # v26.00 nor the Learning page; v26.06 nor the Device check
         fail('%s holds %d copies of %s, not one: run python3 tools/blocks/patch-pwa.py on the folder'
              % (name, s.count(SAVE_TAG), SAVE_TAG))
 
@@ -136,7 +136,7 @@ def files_of(folder):
         fail('index.html has no <script id="nbh-pwa"> part')
     out = ['index.html'] + forms
     # v25.69 the video library (videos.html, the workstation's Videos) is a page of the folder like respond.html
-    extra = [x for x in ('respond.html', 'videos.html', 'explain.html', 'practice.html', 'learn.html') if os.path.isfile(os.path.join(folder, x))]
+    extra = [x for x in ('respond.html', 'videos.html', 'explain.html', 'practice.html', 'learn.html', 'check.html') if os.path.isfile(os.path.join(folder, x))]
     pages = ['index.html'] + forms + extra
     for p in pages:
         s = read(os.path.join(folder, p))
@@ -171,6 +171,9 @@ def files_of(folder):
             if need not in read(os.path.join(folder, 'learn.html')):
                 fail('learn.html does not name ' + need)
         out.append('learn.html')
+    # v26.06 the Device check page: it loads nothing of its own and tests what the others load
+    if 'check.html' in pages:
+        out.append('check.html')
     try:
         man = json.loads(read(os.path.join(folder, 'manifest.json')))
     except (OSError, ValueError) as e:

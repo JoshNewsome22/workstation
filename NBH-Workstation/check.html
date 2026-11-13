@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Device check · FBA and BIP Workstation</title>
+<!-- v26.06 The Device check page (approved by the BCBA, 11/12: "a Device check page that runs on the iPad itself and
+     shows a one-screen pass or fail report you can screenshot").
+     What it does. It runs on the device that opens it, in the browser or the installed app that opens it, and tests
+     what the workstation needs there: that the start page and the forms arrive whole, that the offline copy is in
+     place, that work can be kept and files saved, that a video plays, that the bank reads, that the pages the forms
+     sit in can talk to each other, and which optional features this browser has. Each line ends in one of four words:
+     pass, attention, note, or not run.
+     What it does not do. It opens no case and reads no saved work: it writes one test value of its own and deletes it.
+     It sends nothing anywhere; the report leaves the device only if the person copies, shares or photographs it.
+     How it is reached. From the start screen's search ("Device check"), which shows it in the viewer the videos use,
+     or by its own address (check.html), which is the better test of an installed app. The build keeps it in the
+     offline copy (tools/pwa-sw.py). Test: qa/v2606-check-test.js. -->
+<script>
+(function(){var R=document.documentElement;try{if(window.parent!==window)R.classList.add('nbh-framed');}catch(e){R.classList.add('nbh-framed');}
+ try{var v=JSON.parse(localStorage.getItem('nbh.view')||'{}')||{};R.classList.toggle('nbh-tx-1',v.t===1);R.classList.toggle('nbh-tx-2',v.t===2);R.classList.toggle('nbh-dark',!!v.dark);}catch(e){}})();
+</script>
+<style>
+:root{--ink:#1F2D36;--navy:#1D3A52;--wash:#F2F6F5;--paper:#fff;--rule:#D9E2E0;--muted:#55656C;--focus:#2f7fa8;
+  --go:#1f6b4a;--go-bg:#e3f3ea;--wait:#7a4f00;--wait-bg:#fff4dc;--no:#9b2c2c;--no-bg:#fbeaea;--chip:#E5EDEB;
+  --sans:"Inter","Helvetica Neue","Segoe UI",Arial,system-ui,sans-serif;font-size:16px}
+html.nbh-tx-1{font-size:18px}html.nbh-tx-2{font-size:20px}
+html.nbh-dark{--ink:#E8EEF0;--navy:#CFE0EC;--wash:#12191E;--paper:#1B252C;--rule:#33434C;--muted:#A9B8BE;--chip:#27343C;
+  --go:#7fd3a8;--go-bg:#17382a;--wait:#f0c670;--wait-bg:#3a2d10;--no:#f2a3a3;--no-bg:#40201f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--wash);color:var(--ink);font-family:var(--sans);line-height:1.4;
+  padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+main{max-width:1120px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;justify-content:space-between}
+h1{font-size:1.5rem;margin:0;color:var(--navy);letter-spacing:-.01em}
+.dc-about{margin:2px 0 0;color:var(--muted);font-size:.9rem;max-width:80ch}
+.dc-links{margin:0;display:flex;gap:14px;align-items:center}.dc-links a{color:var(--focus);font-weight:600;font-size:.92rem}
+#dcSum{margin:12px 0 10px;padding:12px 16px;border-radius:12px;background:var(--paper);border:1px solid var(--rule);display:grid;gap:2px}
+#dcSum.is-pass{background:var(--go-bg);border-color:var(--go)}#dcSum.is-warn{background:var(--wait-bg);border-color:var(--wait)}#dcSum.is-fail{background:var(--no-bg);border-color:var(--no)}
+#dcVerdict{font-size:1.3rem;font-weight:700;margin:0}
+#dcLine{margin:0;font-size:.92rem;color:var(--ink)}
+#dcRows{columns:3 320px;column-gap:26px;margin:0;padding:0;list-style:none}
+#dcRows li{display:grid;grid-template-columns:5.4rem 1fr;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--rule);font-size:.9rem;break-inside:avoid}
+#dcRows li.dc-group{grid-template-columns:1fr;border-bottom:0;padding:8px 0 1px;font-weight:700;color:var(--navy);font-size:.82rem;break-after:avoid}
+#dcRows li.dc-group:first-child{padding-top:0}
+.dc-mark{font-weight:700;font-size:.78rem;padding:1px 0;border-radius:6px;text-align:center}
+.is-pass>.dc-mark{background:var(--go-bg);color:var(--go)}.is-fail>.dc-mark{background:var(--no-bg);color:var(--no)}
+.is-warn>.dc-mark{background:var(--wait-bg);color:var(--wait)}.is-note>.dc-mark,.is-wait>.dc-mark,.is-skip>.dc-mark{background:var(--chip);color:var(--muted)}
+.dc-name{font-weight:600}.dc-detail{color:var(--muted)}
+.dc-bar{display:flex;flex-wrap:wrap;gap:8px 10px;margin:12px 0 4px;align-items:center}.dc-bar .dc-about{margin:0}
+button{font:inherit;font-weight:600;min-height:44px;padding:8px 16px;border-radius:10px;border:1px solid var(--navy);background:var(--navy);color:var(--paper);cursor:pointer}
+html.nbh-dark button{color:#12191E}
+button.dc-quiet{background:var(--paper);color:var(--navy)}html.nbh-dark button.dc-quiet{color:var(--navy)}
+button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+#dcSaid{font-size:.9rem;color:var(--muted)}
+details{margin-top:6px}summary{cursor:pointer;font-weight:600;color:var(--navy);min-height:32px}
+textarea{width:100%;min-height:9rem;font:12px/1.35 ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--rule);border-radius:8px;padding:8px;background:var(--paper);color:var(--ink)}
+#dcVideoBox{position:absolute;width:2px;height:2px;overflow:hidden;opacity:.01;pointer-events:none}
+@media (max-width:420px){#dcRows li{grid-template-columns:4.8rem 1fr}}
+@media print{button,.dc-links{display:none !important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div>
+    <h1>Device check</h1>
+    <p class="dc-about">Tests this device and browser for what the workstation needs. It opens no case, reads no saved work and sends nothing.</p>
+  </div>
+  <p class="dc-links"><a id="dcAlone" href="check.html" target="_top" hidden>Open this page by itself</a><a id="dcBack" href="index.html" hidden>Back to the workstation</a> <button type="button" id="dcClose" class="dc-quiet" hidden>Close</button></p>
+</header>
+<section id="dcSum" role="status" aria-live="polite">
+  <p id="dcVerdict">Checking…</p>
+  <p id="dcLine"></p>
+</section>
+<ul id="dcRows" aria-label="The checks"></ul>
+<div class="dc-bar">
+  <button type="button" id="dcCopy">Copy the report</button>
+  <button type="button" id="dcShare" class="dc-quiet" hidden>Share the report</button>
+  <button type="button" id="dcAgain" class="dc-quiet">Run again</button>
+  <span id="dcSaid" role="status" aria-live="polite"></span>
+  <span class="dc-about">To send the result, take a picture of this screen, or copy the report and paste it into a message.</span>
+</div>
+<details><summary>The report as text</summary><textarea id="dcText" readonly aria-label="The report as text"></textarea></details>
+<div id="dcVideoBox" aria-hidden="true"></div>
+</main>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+var WORD={pass:'Pass',fail:'Attention',warn:'Check',note:'Note',wait:'…',skip:'Not run'};
+var rows=[],framed=document.documentElement.classList.contains('nbh-framed'),runNo=0;
+var REL_FILE='release'+'.json',BANK_TD='nbh-td1-bank'+'.js',BANK_GB='nbh-gb1-bank'+'.js',VIDEO_FILE='nbh-td1-video-ncr-attention.js',VIDEO_KEY='ncr_attention';
+function withTime(p,ms,what){return Promise.race([p,new Promise(function(_,no){setTimeout(function(){no(new Error((what||'no answer')+' in '+Math.round(ms/1000)+' s'));},ms);})]);}
+function mb(n){return n>=1073741824?(n/1073741824).toFixed(1)+' GB':Math.round(n/1048576)+' MB';}
+function group(t){rows.push({group:t});}
+function row(id,name){var r={id:id,name:name,state:'wait',detail:''};rows.push(r);return r;}
+function set(r,state,detail){r.state=state;r.detail=detail||'';paint();}
+function paint(){
+  var ul=$('dcRows');ul.textContent='';
+  rows.forEach(function(r){var li=document.createElement('li');
+    if(r.group){li.className='dc-group';li.textContent=r.group;ul.appendChild(li);return;}
+    li.className='is-'+r.state;li.id='dc-'+r.id;li.dataset.state=r.state;
+    var m=document.createElement('span');m.className='dc-mark';m.textContent=WORD[r.state];
+    var b=document.createElement('span');var n=document.createElement('span');n.className='dc-name';n.textContent=r.name;b.appendChild(n);
+    if(r.detail){var d=document.createElement('span');d.className='dc-detail';d.textContent=' '+r.detail;b.appendChild(d);}
+    li.appendChild(m);li.appendChild(b);ul.appendChild(li);});
+}
+function device(){
+  var u=navigator.userAgent||'',touch=navigator.maxTouchPoints||0,kind='Computer',os='',br='';
+  if(/iPad/.test(u)||(/Macintosh/.test(u)&&touch>1))kind='iPad';else if(/iPhone/.test(u))kind='iPhone';else if(/Android/.test(u))kind=/Mobile/.test(u)?'Android phone':'Android tablet';
+  else if(/Macintosh/.test(u))kind='Mac';else if(/Windows/.test(u))kind='Windows computer';else if(/CrOS/.test(u))kind='Chromebook';
+  var m=/OS (\d+)[_.](\d+)/.exec(u);if(m&&/iP(ad|hone)/.test(u))os='iOS '+m[1]+'.'+m[2];
+  var s=/Version\/(\d+(?:\.\d+)?)/.exec(u);
+  if(/CriOS\/(\d+)/.test(u))br='Chrome '+RegExp.$1;else if(/FxiOS\/(\d+)/.test(u))br='Firefox '+RegExp.$1;else if(/EdgiOS\/(\d+)|Edg\/(\d+)/.test(u))br='Edge '+(RegExp.$1||RegExp.$2);
+  else if(/Firefox\/(\d+)/.test(u))br='Firefox '+RegExp.$1;else if(/Chrome\/(\d+)/.test(u))br='Chrome '+RegExp.$1;else if(/Safari/.test(u)&&s)br='Safari '+s[1];
+  return [kind,os,br].filter(Boolean).join(', ');
+}
+function installed(){try{return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;}catch(e){return false;}}
+function stamp(){var d=new Date(),p=function(n){return (n<10?'0':'')+n;};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
+
+/* ---- the checks: each sets its own row and never throws */
+async function cVersion(r,ctx){
+  try{var t=await withTime(fetch('index.html',{cache:'no-cache'}).then(function(x){if(!x.ok)throw new Error('answer '+x.status);return x.text();}),20000,'the start page did not arrive');
+    var m=/const WS_REL='(v[0-9.]+)'/.exec(t);ctx.version=m?m[1]:'';
+    if(!m)return set(r,'fail','The start page arrived ('+Math.round(t.length/1024)+' KB) but names no version.');
+    if(!/<\/html>\s*$/i.test(t))return set(r,'fail',m[1]+', but the start page arrived cut short ('+Math.round(t.length/1024)+' KB).');
+    set(r,'pass',m[1]+'; the start page arrived whole ('+Math.round(t.length/1024)+' KB).');
+  }catch(e){set(r,'fail','The start page could not be read: '+e.message+'.');}
+}
+async function cOpened(r){
+  var a=installed()?'as the installed app (Home Screen)':'in a browser tab';
+  set(r,'note',a+(framed?', inside the workstation\'s viewer':'')+'; '+(navigator.onLine===false?'offline now':'online now')+'.');
+}
+async function swStatus(){
+  var c=navigator.serviceWorker&&navigator.serviceWorker.controller;if(!c)return null;
+  return withTime(new Promise(function(ok){var ch=new MessageChannel();ch.port1.onmessage=function(ev){ok(ev.data&&ev.data.status||null);};c.postMessage({nbh:'offline',cmd:'status'},[ch.port2]);}),6000,'the offline copy did not answer');
+}
+async function cOffline(r,ctx){
+  if(!('serviceWorker' in navigator))return set(r,'fail','This browser cannot keep an offline copy (no service worker). In a private window that is expected.');
+  try{var reg=await withTime(navigator.serviceWorker.getRegistration(),5000);
+    if(!reg)return set(r,'warn','No offline copy has been set up in this browser yet. Open the workstation\'s start page once while online.');
+    if(!navigator.serviceWorker.controller)return set(r,'warn','An offline copy is being set up but does not serve this page yet. Close the page, open it again and run the check again.');
+    var s=await swStatus();ctx.sw=s;
+    if(!s)return set(r,'warn','The offline copy is there but gave no account of itself.');
+    var miss=(s.missing||[]).length;
+    if(s.live&&!miss&&s.files===s.total)return set(r,'pass',s.files+' files, '+mb(s.bytes||0)+', all in place'+(s.staged?'; a newer release is waiting to take over':'')+'.');
+    if(s.busy)return set(r,'warn','Still saving: '+(s.busy.done||0)+' of '+(s.busy.total||'?')+' files. Leave the workstation open and run the check again.');
+    if(!s.live)return set(r,'warn','Not saved on this device yet'+(s.phase?' (it reports: '+String(s.phase).slice(0,40)+')':'')+'. Open the start page while online, leave it open until it says Saved for offline use, and run the check again.');
+    set(r,'warn',(s.files||0)+' of '+(s.total||'?')+' files saved'+(miss?'; '+miss+' missing':'')+'. Open the start page online and let it finish.');
+  }catch(e){set(r,'warn','The offline copy could not be asked: '+e.message+'.');}
+}
+async function cForms(r,ctx){
+  try{var rel=await withTime(fetch(REL_FILE,{cache:'no-cache'}).then(function(x){if(!x.ok)throw new Error('answer '+x.status);return x.json();}),15000,'the list of files did not arrive');
+    ctx.release=rel.release||'';
+    var pages=Object.keys(rel.files||{}).filter(function(n){return /\.html$/.test(n);}),bad=[];
+    if(navigator.onLine===false)return set(r,'skip','Offline now: the offline copy line above answers for the '+pages.length+' pages. Run the check again when online.');
+    await Promise.all(pages.map(function(n){return withTime(fetch(n,{method:'HEAD'}),20000).then(function(x){if(!x.ok)bad.push(n);},function(){bad.push(n);});}));
+    if(bad.length)return set(r,'fail',bad.length+' of '+pages.length+' pages did not answer, the first: '+bad[0]+'.');
+    set(r,'pass','All '+pages.length+' pages of this release answer.');
+  }catch(e){
+    if(navigator.onLine===false)return set(r,'skip','Offline now: the list of files is read from the website. Run the check again when online.');
+    set(r,'warn','The list of this release\'s files could not be read: '+e.message+'.');}
+}
+async function cBank(r){
+  try{var t0=Date.now(),txt=await withTime(fetch(BANK_TD).then(function(x){if(!x.ok)throw new Error('answer '+x.status);return x.text();}),30000,'the bank did not arrive');
+    var i=txt.indexOf('const TD1_BANK=');if(i<0)throw new Error('the bank file has another form');
+    var d=JSON.parse(txt.slice(i+15,txt.lastIndexOf('};')+1)),n=(d.protocols||[]).length,ms=Date.now()-t0;
+    var g=0;try{var gt=await withTime(fetch(BANK_GB).then(function(x){return x.text();}),20000);var k=gt.indexOf('const GB1_BANK=');g=(JSON.parse(gt.slice(k+15,gt.lastIndexOf('};')+1)).entries||[]).length;}catch(e){}
+    if(n<1000)return set(r,'fail','The treatment bank arrived with only '+n+' cards.');
+    set(r,ms>6000?'warn':'pass',n.toLocaleString('en-US')+' treatment cards'+(g?' and '+g+' goals':'')+' read in '+(ms/1000).toFixed(1)+' s'+(ms>6000?': slow on this device':'')+'.');
+  }catch(e){set(r,'fail','The treatment bank could not be read: '+e.message+'.');}
+}
+async function cLocal(r){
+  var k='nbh.devicecheck.tmp',v='t'+Date.now();
+  try{localStorage.setItem(k,v);var back=localStorage.getItem(k);localStorage.removeItem(k);
+    if(back!==v)return set(r,'fail','A value written to this browser did not read back.');
+    set(r,'pass','The browser keeps what the workstation writes (settings, lists).');
+  }catch(e){set(r,'fail','This browser refuses to keep anything ('+(e&&e.name||'error')+'). Private browsing does that: saved work would be lost.');}
+}
+function idb(){return new Promise(function(ok,no){var name='nbh-devicecheck',q;try{q=indexedDB.open(name,1);}catch(e){return no(e);}
+  q.onupgradeneeded=function(){q.result.createObjectStore('t');};q.onerror=function(){no(q.error||new Error('open refused'));};
+  q.onsuccess=function(){var db=q.result;try{var tx=db.transaction('t','readwrite');tx.objectStore('t').put({at:Date.now(),blob:new Blob(['x'])},'k');
+    tx.oncomplete=function(){var g=db.transaction('t').objectStore('t').get('k');g.onsuccess=function(){var had=!!g.result;db.close();try{indexedDB.deleteDatabase(name);}catch(e){}had?ok():no(new Error('the record did not read back'));};g.onerror=function(){db.close();no(g.error);};};
+    tx.onerror=function(){db.close();no(tx.error);};}catch(e){db.close();no(e);}};});}
+async function cStore(r){
+  if(!('indexedDB' in window))return set(r,'fail','No place for the caseload and the automatic copies in this browser (no IndexedDB).');
+  try{await withTime(idb(),8000);set(r,'pass','The caseload, the automatic copies and the history can be kept here.');}
+  catch(e){set(r,'fail','The store for the caseload and the copies could not be written: '+(e&&(e.message||e.name)||'error')+'.');}
+}
+async function cSpace(r){
+  try{if(!navigator.storage||!navigator.storage.estimate)return set(r,'note','This browser does not say how much room it gives.');
+    var e=await withTime(navigator.storage.estimate(),5000),q=e.quota||0,u=e.usage||0,kept=false;
+    try{kept=navigator.storage.persisted?await navigator.storage.persisted():false;}catch(x){}
+    var d=mb(u)+' used of about '+mb(q)+' allowed'+(kept?'; marked to be kept':'; the browser may clear it if the device runs short')+'.';
+    if(q&&q<314572800)return set(r,'warn',d+' That is little: a private window, or a nearly full device.');
+    set(r,'pass',d);
+  }catch(e){set(r,'note','The room allowed could not be read.');}
+}
+async function cSave(r){
+  var ok=false;try{var u=URL.createObjectURL(new Blob(['x'],{type:'text/plain'}));ok=/^blob:/.test(u);URL.revokeObjectURL(u);}catch(e){}
+  var dl='download' in document.createElement('a'),pick=typeof window.showSaveFilePicker==='function',share=false;
+  try{share=!!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'x.txt',{type:'text/plain'})]}));}catch(e){}
+  if(!ok)return set(r,'fail','This browser cannot make a file to save.');
+  set(r,dl||share?'pass':'warn',(dl?'Save case downloads a file':'No direct download')+(share?'; the share sheet takes files':'')+(pick?'; can save into a chosen folder':'')+'.');
+}
+function loadScript(src){return new Promise(function(ok,no){var s=document.createElement('script');s.src=src;s.onload=function(){ok();};s.onerror=function(){no(new Error('the video file did not arrive'));};document.head.appendChild(s);});}
+async function cVideo(r,ctx){
+  var probe=document.createElement('video'),can='';try{can=probe.canPlayType('video/mp4; codecs="avc1.640028, mp4a.40.2"')||probe.canPlayType('video/mp4');}catch(e){}
+  if(!can)return set(r,'fail','This browser says it cannot play the videos\' format (MP4, H.264).');
+  if(!ctx.sw&&navigator.onLine===false)return set(r,'skip','Offline and no offline copy: the test video cannot be fetched.');
+  try{await withTime(loadScript(VIDEO_FILE),60000,'the video file did not arrive');
+    var b64=(window.NBH_TD1_VIDEO||{})[VIDEO_KEY];if(!b64)throw new Error('the video file is empty');
+    var bin=atob(b64),n=bin.length,a=new Uint8Array(n);for(var i=0;i<n;i++)a[i]=bin.charCodeAt(i);
+    var url=URL.createObjectURL(new Blob([a],{type:'video/mp4'})),v=document.createElement('video');
+    v.muted=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';$('dcVideoBox').appendChild(v);
+    var got=await withTime(new Promise(function(ok,no){var meta=false;
+      v.addEventListener('loadedmetadata',function(){meta=true;});
+      ['loadeddata','playing'].forEach(function(ev){v.addEventListener(ev,function(){ok('frames');});});
+      v.addEventListener('error',function(){no(new Error('the player refused it'+(v.error?' (code '+v.error.code+')':'')));});
+      setTimeout(function(){if(meta)ok('opened');},9000);
+      v.src=url;try{var p=v.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}),20000,'the video did not open');
+    var d=v.videoWidth+' by '+v.videoHeight+', '+Math.round(v.duration||0)+' s, '+mb(n);
+    try{v.pause();v.removeAttribute('src');v.load();URL.revokeObjectURL(url);$('dcVideoBox').textContent='';window.NBH_TD1_VIDEO[VIDEO_KEY]='';}catch(e){}
+    set(r,'pass','A whole video '+(got==='frames'?'opened and showed a picture':'opened')+' ('+d+').');
+  }catch(e){set(r,navigator.onLine===false?'skip':'fail','The test video: '+e.message+'.');}
+}
+async function cFrames(r){
+  try{var f=document.createElement('iframe');f.hidden=true;f.setAttribute('aria-hidden','true');
+    f.srcdoc='<!doctype html><script>addEventListener("message",function(e){if(e.data&&e.data.dc==="ping")e.source.postMessage({dc:"pong",n:e.data.n},"*");});parent.postMessage({dc:"ready"},"*");<\/script>';
+    var n=Math.random(),t0=Date.now();
+    await withTime(new Promise(function(ok){function h(e){var d=e.data||{};if(e.source!==f.contentWindow)return;
+      if(d.dc==='ready')f.contentWindow.postMessage({dc:'ping',n:n},'*');else if(d.dc==='pong'&&d.n===n){removeEventListener('message',h);ok();}}
+      addEventListener('message',h);document.body.appendChild(f);}),6000,'the inner page did not answer');
+    var ms=Date.now()-t0;document.body.removeChild(f);set(r,'pass','A form and the workstation can talk ('+ms+' ms).');
+  }catch(e){set(r,'fail','A page inside the page did not answer: '+e.message+'. The forms hand their work to the workstation this way.');}
+}
+async function cScreen(r){
+  var w=window.innerWidth,h=window.innerHeight,dpr=Math.round((window.devicePixelRatio||1)*100)/100,t=navigator.maxTouchPoints||0;
+  var p=document.createElement('div');p.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+  document.body.appendChild(p);var cs=getComputedStyle(p),ins=[cs.paddingTop,cs.paddingRight,cs.paddingBottom,cs.paddingLeft].map(function(x){return Math.round(parseFloat(x)||0);});document.body.removeChild(p);
+  var view={};try{view=JSON.parse(localStorage.getItem('nbh.view')||'{}')||{};}catch(e){}
+  var d=w+' by '+h+' at '+dpr+'x, '+(w>=h?'wide':'tall')+'; '+(t?'touch':'no touch')+'; edges kept clear '+ins.join('/')+' px'+(view.t?'; larger text '+view.t:'')+(view.dark?'; dark':'')+'.';
+  set(r,w<320?'warn':'pass',d+(w<320?' Narrower than the forms are built for.':''));
+}
+async function cCss(r){
+  var S=function(a,b){try{return CSS.supports(a,b);}catch(e){return false;}},sel=function(s){try{return CSS.supports('selector('+s+')');}catch(e){return false;}};
+  var need=[['sticky bars',S('position','sticky')||S('position','-webkit-sticky')],['screen-height units',S('height','100dvh')],['grid',S('display','grid')]];
+  var nice=[['container queries',S('container-type','inline-size')],[':has()',sel(':has(a)')],['blur behind bars',S('backdrop-filter','blur(2px)')||S('-webkit-backdrop-filter','blur(2px)')]];
+  var miss=need.filter(function(x){return !x[1];}).map(function(x){return x[0];}),soft=nice.filter(function(x){return !x[1];}).map(function(x){return x[0];});
+  if(miss.length)return set(r,'warn','This browser lacks '+miss.join(', ')+': some layouts will look wrong. Update the device\'s software if it can be.');
+  set(r,'pass','The layout features the forms use are here'+(soft.length?' (not here, and done another way: '+soft.join(', ')+')':'')+'.');
+}
+async function cWasm(r){
+  var w=typeof WebAssembly==='object',simd=false;
+  try{simd=w&&WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11]));}catch(e){}
+  if(!w)return set(r,'warn','Read a document cannot read scanned pages or photos of pages here (no WebAssembly).');
+  set(r,simd?'pass':'warn',simd?'Scanned pages and photos of pages can be read on this device.':'Scanned pages cannot be read here: the recognizer needs a feature this browser lacks. Typed PDFs still work.');
+}
+async function cGl(r){
+  var ok='';try{var c=document.createElement('canvas');ok=c.getContext('webgl2')?'WebGL 2':(c.getContext('webgl')||c.getContext('experimental-webgl'))?'WebGL':'';}catch(e){}
+  set(r,ok?'pass':'note',ok?'The drawn scenes of the explainers can be lit and shaded ('+ok+').':'The explainers will use their flat drawing here.');
+}
+async function cExtras(r){
+  var say=[];
+  say.push((window.SpeechRecognition||window.webkitSpeechRecognition)?'dictation by the browser':'no dictation by the browser (the keyboard\'s microphone still works)');
+  say.push((navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)?'camera and microphone can be asked for':'no camera access from a page');
+  say.push(navigator.clipboard&&navigator.clipboard.writeText?'copy works':'copy by hand');
+  say.push(typeof window.print==='function'?'print is offered':'no print');
+  var tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
+  set(r,'note',say.join('; ')+'; clock '+stamp()+(tz?' ('+tz+')':'')+'.');
+}
+
+/* ---- the run */
+function report(ctx){
+  var c={pass:0,fail:0,warn:0,note:0,skip:0,wait:0};rows.forEach(function(r){if(!r.group)c[r.state]++;});
+  var sum=$('dcSum'),v=$('dcVerdict'),need=c.fail+c.warn;
+  sum.className=c.wait?'':c.fail?'is-fail':c.warn?'is-warn':'is-pass';
+  v.textContent=c.wait?'Checking… '+(rows.filter(function(r){return !r.group;}).length-c.wait)+' done':need?need+(need===1?' thing needs':' things need')+' a look: '+c.pass+' passed':'All '+c.pass+' checks passed';
+  var line=[ctx.version||'version not read',ctx.device,(installed()?'installed app':'browser tab')+(framed?', in the viewer':''),stamp()].join(' · ');
+  $('dcLine').textContent=line;
+  var txt=['FBA and BIP Workstation, Device check','Workstation '+(ctx.version||'?')+(ctx.release?' (release '+ctx.release+')':''),'Device: '+ctx.device,'Opened: '+(installed()?'installed app':'browser tab')+(framed?', in the viewer':''),'When: '+stamp(),
+    'Result: '+c.pass+' passed, '+c.fail+' attention, '+c.warn+' to check, '+c.note+' notes, '+c.skip+' not run',''];
+  rows.forEach(function(r){txt.push(r.group?'['+r.group+']':(WORD[r.state].toUpperCase()+'  '+r.name+' '+r.detail));});
+  txt.push('','Browser: '+(navigator.userAgent||''));
+  $('dcText').value=txt.join('\n');
+  document.documentElement.dataset.dcDone=c.wait?'':'1';
+}
+async function run(){
+  var mine=++runNo,ctx={device:device()};rows=[];document.documentElement.dataset.dcDone='';$('dcSaid').textContent='';
+  group('The workstation');
+  var a=row('version','Version.'),b=row('opened','Opened'),f=row('forms','The forms.'),k=row('bank','The banks.');
+  group('Keeping work');
+  var o=row('offline','Offline copy.'),l=row('settings','Settings.'),s=row('store','Caseload and copies.'),sp=row('space','Room.'),sv=row('save','Saving a file.');
+  group('What the pages use');
+  var fr=row('frames','Forms in the workstation.'),vi=row('video','Videos.'),sc=row('screen','Screen.'),cs=row('layout','Layout.'),wa=row('reading','Reading scans.'),gl=row('scenes','Drawn scenes.'),ex=row('extras','Also:');
+  paint();report(ctx);
+  var step=function(fn,r){return fn(r,ctx).catch(function(e){set(r,'fail','The check itself stopped: '+(e&&e.message||e)+'.');}).then(function(){if(mine===runNo)report(ctx);});};
+  await step(cVersion,a);await step(cOpened,b);
+  await Promise.all([step(cOffline,o),step(cLocal,l),step(cStore,s),step(cSpace,sp),step(cSave,sv),step(cFrames,fr),step(cScreen,sc),step(cCss,cs),step(cWasm,wa),step(cGl,gl),step(cExtras,ex)]);
+  await step(cForms,f);await step(cBank,k);await step(cVideo,vi);
+  if(mine===runNo)report(ctx);
+}
+$('dcAgain').addEventListener('click',function(){run();});
+$('dcCopy').addEventListener('click',function(){var t=$('dcText').value,said=$('dcSaid');
+  var hand=function(){var d=$('dcText').closest('details');d.open=true;$('dcText').focus();$('dcText').select();var ok=false;try{ok=document.execCommand('copy');}catch(e){}said.textContent=ok?'Copied.':'Select the text below and copy it.';};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){said.textContent='Copied.';},hand);else hand();});
+if(navigator.share){$('dcShare').hidden=false;$('dcShare').addEventListener('click',function(){navigator.share({title:'Device check',text:$('dcText').value}).catch(function(){});});}
+if(framed){$('dcAlone').hidden=false;$('dcClose').hidden=false;$('dcClose').addEventListener('click',function(){try{window.parent.postMessage({nbh:'videos-close'},'*');}catch(e){}});}else $('dcBack').hidden=false;
+run();
+})();
+</script>
+</body>
+</html>

@@ -9905,6 +9905,45 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.06: Device check, a page that tests the device it is opened on
+(approved by the BCBA on 11/12 with the list of next steps: "a Device check page that runs on the iPad itself and shows
+a one-screen pass or fail report you can screenshot".)
+- **Why.** Nothing since v25.92 has been seen on a real iPad, and the tests here run in a desktop browser. This page
+  moves the looking to the device: it runs there, in the browser or the installed app that opened it, and its one
+  screen can be photographed or copied into a message.
+- **Where.** `check.html`, beside the forms. From the start screen: the search, "Device check" (it opens in the viewer
+  the videos use, with Close). By its own address it is the better test of an installed app; it then offers Back to
+  the workstation.
+- **What it checks** (16 lines in three groups, each ending in Pass, Check, Attention, Note or Not run):
+  - *The workstation:* the version, read from the start page, and that the start page arrived whole; how it was
+    opened (installed app or browser tab, online or not); that every page of the release answers; that the treatment
+    bank and the goal bank read whole, with their counts and the time it took.
+  - *Keeping work:* the offline copy, asked for its own account (files saved, size, anything missing, a newer
+    release waiting); that the browser keeps settings; that the store for the caseload, the automatic copies and the
+    history can be written; the room the browser allows; that a file can be saved (download, share sheet, chosen
+    folder).
+  - *What the pages use:* that a form inside the workstation and the workstation can talk; that a whole video opens
+    and shows a picture (the smallest one, 6 MB, loaded as the forms load it); the screen (size, sharpness, touch,
+    the edges an iPad keeps clear, larger text, dark); the layout features the forms use; whether scanned pages can
+    be read on the device; whether the drawn scenes can be lit; and a line of extras (dictation, camera, copy,
+    print, the clock and time zone).
+- **What it does not do.** It opens no case and reads no saved work. It writes one test value and one test record of
+  its own and deletes both. It sends nothing: the report leaves the device only when the person copies, shares or
+  photographs it. The report names the browser's own description of itself (the user agent) and nothing about any
+  person.
+- **Honest limits.** A pass says the feature works in that browser at that moment; it does not show how a form
+  looks. The offline copy line can only pass once the start page has finished saving the copy ("Saved for offline
+  use") and the page has been opened again. The video line plays without sound and judges only that a picture came.
+- **The build.** `tools/pwa-sw.py` keeps the page in the offline copy; `tools/apply-polish.py` knows it is not a
+  form. The start page's command list has one more entry.
+- **Test.** `qa/v2606-check-test.js` (new, in the release list): the run finishes with 16 lines and none in
+  Attention; the version and the banks' counts are the release's own; the report fits 1,180 by 820 without
+  scrolling; Copy works; nothing is left in storage; a phone's width holds it; it opens and closes in the viewer.
+  On this build computer the offline copy does not finish saving within the test's two minutes, so that one line is
+  not judged here.
+- **The test run.** On the built folder: the new test, the bank tests and the Learning tests in both editions, and
+  the versions, marks and feeding tests, the size budgets and the build test in the workstation. Not seen on an iPad:
+  that is what the page is for.
 ### v26.05: Behavior Modification, fourth and last part: the 1977 volume read from scans; eight cards
 (the BCBA's folder of 11/13, finished; see v26.02 for the folder and the method.)
 - **How the scans were read.** The 41 files of volume 1 are pictures of pages with no text in them. Each page was
