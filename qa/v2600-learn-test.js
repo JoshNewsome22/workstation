@@ -24,6 +24,7 @@
       library links to the page;
    K  a phone: none of the 13 views is wider than the screen; a tapped answer is taken; the choices are 44 px high;
    L  with a file of units kept from the page: the page says it is being built, and such a unit says so and still lists its videos;
+   R  (v26.02) the reading list: articles under the BCBA tasks and the units they bear on, each with a note and its reference;
    N  (v26.01) every one of the 46 units opens each of its parts; the answers are shown in an order drawn anew, and the right
       one is taken by what it says;
    M  a record file with markup in the name and wild numbers: the name is shown as text and the time is capped;
@@ -234,6 +235,20 @@ const NOW='2026-11-13T15:00:00Z';
     !n.bad.length&&n.parts>=46*5&&n.kinds>=2&&n.perm&&n.wrong===String(wrongPick)&&n.right===g1.a+':'+g1.opts[g1.a]&&/^Right\./.test(n.why||'')&&/120 hours/.test(n.numQ||'')&&n.num==='2 hours|5 hours|6 hours|12 hours'&&n.quiz==='100%'&&n.marks,
     {bad:n.bad.slice(0,6),parts:n.parts,kinds:n.kinds,perm:n.perm,wrong:n.wrong,right:n.right,num:n.num,quiz:n.quiz,marks:n.marks});
   await NN.ctx.close();
+
+  /* ---------------- R (v26.02) the reading list: articles under the BCBA tasks and the units they bear on ---------------- */
+  require(path.join(DIR,'nbh-learn-readings.js'));const RDL=global.window.NBH_LEARN_READINGS.list;
+  const RR=await open({viewport:{width:1180,height:820}},PAGE);const rp=RR.p,r={};
+  await go(rp,'#bcba/C');r.det=await rp.$$eval('.ln-task details.ln-read',x=>x.length);r.want=M.bcba.domains.find(d=>d.k==='C').tasks.filter(t=>RDL.some(x=>x.t.indexOf(t[0])>=0)).length;
+  r.sum=await txt(rp,'[data-task="C.11"] .ln-read summary');r.n11=RDL.filter(x=>x.t.indexOf('C.11')>=0).length;r.shut=await rp.$eval('[data-task="C.11"] .ln-read',d=>d.open);
+  await rp.click('[data-task="C.11"] .ln-read summary');r.items=await rp.$$eval('[data-task="C.11"] .ln-rd li',x=>x.length);r.first=await txt(rp,'[data-task="C.11"] .ln-rd li .ra');r.pill=await rp.$$eval('[data-task="C.11"] .ln-rd .ln-pill',x=>x.length);
+  r.none=await rp.$$eval('[data-task="C.1"] .ln-read',x=>x.length);r.foot=await txt(rp,'.ln-foot');r.sumH=await rp.$eval('[data-task="C.11"] .ln-read summary',x=>Math.round(x.getBoundingClientRect().height));
+  await rp.setViewportSize({width:390,height:800});await sleep(150);r.wide=await rp.evaluate(()=>document.documentElement.scrollWidth-390);await rp.setViewportSize({width:1180,height:820});
+  await go(rp,'#rbt/c7/trainer');r.unit=await rp.$$eval('#lnBody .ln-rd li',x=>x.length);r.uwant=RDL.filter(x=>x.u.indexOf('c7')>=0).length;r.h=await rp.$$eval('#lnBody h3',x=>x.map(h=>h.textContent).join('|'));
+  await go(rp,'#rbt/a1/trainer');r.a1=await rp.$$eval('#lnBody .ln-rd',x=>x.length);
+  ok('R the reading list: in domain C every task that has articles carries a closed "articles to read" line ('+r.want+' tasks) and a task without any carries none; C.11 opens to its '+r.n11+' articles, each a note with the reference under it and the forms it bears on; the line is 44 px high and the open list fits a 390 px screen; the page says the notes come from abstracts; unit C7 lists its articles under "From the journals" and a unit without any has no such part',
+    r.det===r.want&&r.want>0&&new RegExp('^'+r.n11+' articles to read$').test(r.sum||'')&&r.shut===false&&r.items===r.n11&&/Behavior Modification, \d+\(/.test(r.first||'')&&r.pill>0&&r.none===0&&/taken from its abstract/.test(r.foot||'')&&r.sumH>=44&&r.wide<=0&&r.unit===r.uwant&&r.uwant>0&&/From the journals/.test(r.h)&&r.a1===0,r);
+  await RR.ctx.close();
 
 
   /* ---------------- J in the workstation ---------------- */

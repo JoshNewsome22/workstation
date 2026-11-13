@@ -9905,6 +9905,69 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.02: the journal Behavior Modification, first part: 14 cards in TD-1's bank, 5 source lines in GB-1's, and a reading list in Learning
+(the BCBA, 11/13: "Here is the next batch of articles for the TD bank, video considerations, Goal bank, RBT and BCBA
+training information, data analysis, experimtal analysis, all relevant forms and parts in the workstation etc.")
+- **The folder.** 303 PDFs of *Behavior Modification*: volume 1 (1977, 42 files) and volumes 44 to 50 (2020 to 2026,
+  261 files). 257 have text; the 1977 files and a few others are scans without text and have not been read. Read newest
+  volume first, under the reader rules (`tools/banks/reader-rules.md`), each card checked against the article's method
+  and results. Reference details were looked up by DOI and compared with the typed references.
+- **This journal is mostly not about school procedures.** Much of it is clinical psychology for adults (anxiety,
+  trauma, firefighters, cognitive remediation), reviews and statistics. By rule 14 those are not read for the banks;
+  the method and review papers that bear on the BCBA's work went to the reading list below.
+- **TD-1, 14 new cards** (3,254 in all):
+  - 2025: eating with a spoon instead of the fingers, with a blocking test that tells a motivation problem from a
+    skill problem, then backward chaining (Bernstein et al.; the blocking is a marked restrictive step).
+  - 2024: a behavior routine built into small-group reading: schedule, three expectations, points with specific praise
+    and a goal sheet the student scores (Roberts et al.); a request for one toy on a speech device or a picture card,
+    then a check that it is not over-used (Chezan et al.); competing items for stereotypy offered in turn, or one item
+    with prompted play (Rosenzweig et al.; the prompted play is a marked restrictive step); a spotting game that teaches
+    a young student to notice their own repetitive movements, then a bracelet-signaled DRO in the places the student
+    chooses (Edelstein et al.).
+  - 2023: CW-FIT for a preschool class with team cars on a road in place of a point chart (Layman et al.); an activity
+    schedule on a tablet in a slides app (Aguilar et al.); math taught with on-screen manipulatives, then drawings, then
+    numbers (Bouck et al.).
+  - 2022: tokens for each instruction followed, traded for time with an item, with no escape extinction (Andzik et
+    al.); the Color Wheel in inclusion classes with rules the teachers chose and colors with no history (Aspiranti);
+    break requests thinned by work done or by the clock (Nuhu & Pence; escape extinction marked restrictive); a
+    wristband the student asks for, and under it separate requests for a break, attention or an activity (Falcomata et
+    al., 2013: the folder holds this older article beside its corrigendum; escape extinction marked restrictive);
+    wearing a face mask for an hour by timed steps with skip-ahead probes (Ertel et al.); written questions for a
+    partner who looks bored or confused, self-checked (Cohen et al.).
+- **GB-1:** no new objective; 5 source lines added to objectives the bank holds (break request, face mask, changing
+  the topic when a partner looks bored, picture activity schedule, eating with a spoon).
+- **Two steps wait for the BCBA.** Andzik et al.'s treatment kept giving a 30-s break after problem behavior, and
+  Falcomata et al.'s baseline gave all three consequences after challenging behavior. Both reinforce problem behavior
+  on purpose. They are named in the cards' notes and left off the steps until the BCBA approves each as an OPTION
+  step, as with the earlier cards of that kind.
+- **Left out and recorded.** Nuhu & Pence added extra demands after problem behavior for two children: a punishment
+  element, not described in the part read; it is in the set-aside record (`tools/banks/set-aside-procedures.md`).
+- **Already in the bank** from an earlier reading: Erhard et al. (2026) and Bohan & Smyth (2023).
+- **Read and not banked:** Izquierdo et al. (2024; a functional analysis only) and Knopp et al. (2023; the same
+  discrete-trial teaching by video call and in person, which the bank already has).
+- **Not yet read (procedure studies):** 2023: Kishel & Vollmer (conversation cues), Williams et al. (a deposit
+  contract for phone use), Alaimo et al. (telehealth feeding), McMahon et al. (bolus placement), Taylor et al.
+  (medication); 2022: Cariveau et al. (two studies), Lee et al. (gaze), Moore et al. (anxiety in autism). **Not yet
+  looked at:** the 2021 and 2020 volumes (85 articles) and the 1977 volume (scans; they need text recognition first).
+- **The reading list** (`nbh-learn-readings.js`, new): 53 method and review articles from the 2022 to 2026 volumes.
+  Each has one or two sentences **taken from its abstract**, in the workstation's words, its full reference, and the
+  BCBA tasks, RBT units and forms it bears on. The articles were not read in full for this list, and the page says so.
+  In Learning, a BCBA task that has articles shows "N articles to read" (domain C: 6 tasks; C.11, interpreting graphed
+  data, has 12), and a unit that has any lists them under "From the journals" on its With your trainer page. By domain:
+  measurement and data display 21, experimental design 21, selecting interventions 20, assessment 12, procedures 12,
+  supervision 6, concepts 4, ethics 3 (an article can sit under more than one).
+- **What the folder did not give.** Nothing in it bore on the videos. For the forms, the reading list names the form
+  beside each article (Daily Data, Experimental Analysis, Preference Assessment, Token Board Book, Staff Training and
+  others); no form was changed from an abstract alone. Three papers are worth the BCBA's eye for Form DD-1: ratio
+  against linear graphs (Kubina et al., 2023), axis scaling (Peltier et al., 2024) and effect measures (Peart et al.,
+  2024).
+- **Tests.** `td1-bank-test`, `gb1-bank-test`, `v2565-feed-test`, `v2568-td1-versions-test` pass;
+  `v2568-td1-procvideos-test` and `v2583-td1-marks-test` pass with their hand-kept counts raised (DRO 97; 3,254 cards);
+  `v2601-learn-units-test` has a new check of the reading list and `v2600-learn-test` a new check of it in the page.
+  `v2564-optstep-test` fails as it did before this release (three checks, unchanged).
+- **The test run.** On the built folder: the two Learning tests and the two bank tests in the workstation and the school
+  edition, and in the workstation also the feeding, versions, procedure-video and marks tests of TD-1, the size budgets
+  and the build test: all pass. The whole run of about 530 tests was not repeated. Not seen on an iPad or a phone.
 ### v26.01: Learning, all 46 units of the RBT training written (not released: they wait for the Responsible Trainer's review)
 (the BCBA, 11/13: "Write the other 45 units"; and, asked whether the time in lessons should count toward the 40 hours:
 "Count it".)

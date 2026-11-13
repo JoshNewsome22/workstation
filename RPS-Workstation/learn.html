@@ -192,6 +192,11 @@ table.ln-t{border-collapse:collapse;width:100%;font-size:.9375rem;background:var
 .ln-rate button[aria-pressed="true"]{background:var(--navy);color:#fff}
 .ln-task{display:grid;grid-template-columns:4.2em 1fr auto;gap:6px 14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule)}
 .ln-task .mat{grid-column:2/4;display:flex;gap:6px;flex-wrap:wrap}
+/* v26.02 the articles to read for a task or a unit: a note from the abstract, then the reference */
+.ln-task .ln-read{grid-column:2/4}
+.ln-read summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;font-size:.875rem}
+.ln-rd li{margin-bottom:10px}
+.ln-rd .ra{display:block;font-size:.8125rem;opacity:.8;margin-top:2px;overflow-wrap:anywhere}
 .ln-task .mat .ln-btn{min-height:36px;font-size:.8125rem;padding:0 10px;font-weight:600}
 .ln-mat{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .ln-dom{display:grid;grid-template-columns:2.2em 1fr auto;gap:4px 14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--rule);text-decoration:none;color:inherit}
@@ -234,6 +239,7 @@ dialog.ln-dlg iframe{display:block;width:100%;height:calc(100% - 58px);border:0}
   .ln-task{grid-template-columns:3.6em 1fr}
   .ln-task .ln-rate{grid-column:1/3}
   .ln-task .mat{grid-column:1/3}
+  .ln-task .ln-read{grid-column:1/3}
   .ln-cert{padding:22px 18px}
   .ln-cert dl{grid-template-columns:1fr;gap:2px}
   .ln-cert dd{margin-bottom:10px}
@@ -276,6 +282,7 @@ dialog.ln-dlg iframe{display:block;width:100%;height:calc(100% - 58px);border:0}
 <script src="nbh-learn-units-g.js"></script>
 <script src="nbh-learn-units-g2.js"></script>
 <script src="nbh-learn-units-h.js"></script>
+<script src="nbh-learn-readings.js"></script>
 <script>
 (function(){'use strict';
 const L=window.NBH_LEARN,U=window.NBH_LEARN_UNITS||{},VD=window.NBH_VIDEOS||{list:[],families:[]};
@@ -420,6 +427,8 @@ function vUnit(id,part){const u=UNIT[id];if(!u){location.hash='#rbt';return;}
 /* the order of the answers is drawn anew each time they are shown, so that no place on the screen is the right one more often;
    answers that are numbers, or that speak of "above", keep the order they were written in. data-pick is the answer's own index. */
 function mixIdx(opts){const ix=opts.map((x,i)=>i);return (opts.every(o=>/^[\d$]/.test(o))||opts.some(o=>/\b(above|below)\b/i.test(o)))?ix:shuffle(ix,Math.random);}
+const RD=(window.NBH_LEARN_READINGS&&window.NBH_LEARN_READINGS.list)||[];
+function readList(items){return '<ul class="ln-list ln-rd">'+items.map(r=>'<li><span class="rn">'+esc(r.note)+'</span>'+(r.f||[]).map(f=>' <span class="ln-pill n" title="'+esc(L.forms[f]||'')+'">Form '+esc(f)+'</span>').join('')+'<span class="ra">'+esc(r.apa)+'</span></li>').join('')+'</ul>';}
 function optBtns(opts,mix){const ix=mix?mixIdx(opts):opts.map((x,i)=>i);return '<div class="ln-opts">'+ix.map(i=>'<button type="button" class="ln-opt" data-pick="'+i+'">'+esc(opts[i])+'</button>').join('')+'</div>';}
 function pLesson(u,c,body){const us=uState(u.id);let i=cur.seg;if(cur.unit!==u.id||i==null||i>=c.lesson.length){i=c.lesson.findIndex((x,k)=>!us.les[k]);if(i<0)i=0;}cur={unit:u.id,seg:i};
   const g=c.lesson[i],done=!!us.les[i],hasWatch=partsOf(u).some(x=>x.k==='watch');
@@ -503,7 +512,7 @@ function pTrainer(u,c,body){const us=uState(u.id),fb=us.fb||{};
    '<h3 style="margin-top:22px">To talk through</h3><ol class="ln-list">'+c.discuss.map(d=>'<li>'+esc(d)+'</li>').join('')+'</ol>'+
    '<h3 style="margin-top:22px">Tell your trainer about this unit</h3><div class="ln-form"><label class="ln-f">How clear was it?<select id="lnFbR"><option value="">Choose</option><option value="3">Clear</option><option value="2">Mostly clear</option><option value="1">Hard to follow</option></select></label>'+
    '<label class="ln-f" style="grid-column:1/-1">What would make it better? <small>Your trainer reads this when you send your record. Do not write about a student.</small><textarea id="lnFbC" maxlength="600"></textarea></label></div>'+
-   '<h3 style="margin-top:22px">Further reading</h3><p class="ln-note">Reading is not counted in the training time.</p><ul class="ln-list">'+c.read.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul>'+
+   '<h3 style="margin-top:22px">Further reading</h3><p class="ln-note">Reading is not counted in the training time.</p><ul class="ln-list">'+c.read.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul>'+(RD.some(x=>x.u.indexOf(u.id)>=0)?'<h3 style="margin-top:22px">From the journals</h3><p class="ln-note">Recent articles that bear on this unit, each with one or two sentences taken from its abstract. The articles were not read in full for this list.</p>'+readList(RD.filter(x=>x.u.indexOf(u.id)>=0)):'')+
    '<div class="ln-row"><a class="ln-btn" href="#rbt">Back to the sections</a><a class="ln-btn ln-pri" href="#record">My record</a></div>';
   $('lnFbR').value=fb.r||'';$('lnFbC').value=fb.c||'';
   const keep=()=>{us.fb={r:$('lnFbR').value,c:$('lnFbC').value.slice(0,600)};save();};$('lnFbR').onchange=keep;$('lnFbC').oninput=keep;body.onclick=null;}
@@ -514,13 +523,13 @@ function domStat(d){let n=0,sum=0;d.tasks.forEach(t=>{const r=S.b[t[0]];if(r===2
 function vBcba(k){setClock(null);const D=L.bcba.domains;
   if(k){const d=D.find(x=>x.k===k);if(!d){location.hash='#bcba';return;}
     view.innerHTML='<p class="ln-crumb"><a href="#bcba">BCBA study</a> › Domain '+d.k+'</p><h1>'+esc(d.name)+'</h1><p class="ln-lead">'+d.tasks.length+' tasks, about '+d.q+' of the 175 scored questions. Rate yourself on each, and open what the workstation has for it.</p>'+
-     '<div id="lnTasks" style="margin-top:14px">'+d.tasks.map(t=>{const m=t[2]||{},r=S.b[t[0]];let mat='';
+     '<div id="lnTasks" style="margin-top:14px">'+d.tasks.map(t=>{const m=t[2]||{},r=S.b[t[0]],rd=RD.filter(x=>x.t.indexOf(t[0])>=0);let mat='';
        (m.v||[]).forEach(f=>{mat+='<button type="button" class="ln-btn" data-open="videos.html#family='+esc(f)+'" data-title="'+esc('Videos: '+(FAM[f]||f))+'">Videos: '+esc(FAM[f]||f)+'</button>';});
        (m.x||[]).forEach(x=>{mat+='<button type="button" class="ln-btn" data-open="explain.html#'+esc(x)+'" data-title="'+esc('Explainer: '+(L.explainers[x]||x))+'">Explainer: '+esc(L.explainers[x]||x)+'</button>';});
        if(m.p)mat+='<button type="button" class="ln-btn" data-open="practice.html" data-title="Practice counting">Practice counting</button>';
        (m.f||[]).forEach(f=>{mat+=WS?'<button type="button" class="ln-btn" data-form="'+esc(f)+'">Form '+esc(f)+'</button>':'<span class="ln-pill n" title="'+esc(L.forms[f]||'')+'">Form '+esc(f)+'</span>';});
-       return '<div class="ln-task" data-task="'+t[0]+'"><span class="ln-code">'+t[0]+'</span><strong>'+esc(t[1])+'</strong><span class="ln-rate" role="group" aria-label="'+esc('Your rating for '+t[0])+'">'+RATE.map((x,i)=>'<button type="button" data-rate="'+i+'" aria-pressed="'+(r===i?'true':'false')+'">'+x+'</button>').join('')+'</span>'+(mat?'<span class="mat">'+mat+'</span>':'')+'</div>';}).join('')+'</div>'+
-     '<p class="ln-foot">Study notes and practice questions for each task are still to be written. The codes are those of the BCBA Test Content Outline (6th ed.); the titles are the workstation’s own short ones.</p>';
+       return '<div class="ln-task" data-task="'+t[0]+'"><span class="ln-code">'+t[0]+'</span><strong>'+esc(t[1])+'</strong><span class="ln-rate" role="group" aria-label="'+esc('Your rating for '+t[0])+'">'+RATE.map((x,i)=>'<button type="button" data-rate="'+i+'" aria-pressed="'+(r===i?'true':'false')+'">'+x+'</button>').join('')+'</span>'+(mat?'<span class="mat">'+mat+'</span>':'')+(rd.length?'<details class="ln-read"><summary>'+rd.length+(rd.length===1?' article':' articles')+' to read</summary>'+readList(rd)+'</details>':'')+'</div>';}).join('')+'</div>'+
+     '<p class="ln-foot">Study notes and practice questions for each task are still to be written. Where a task has articles to read, each comes with one or two sentences taken from its abstract; the articles were not read in full for this list, so read one before relying on it. The codes are those of the BCBA Test Content Outline (6th ed.); the titles are the workstation’s own short ones.</p>';
     $('lnTasks').onclick=e=>{const b=e.target.closest('[data-rate]');if(!b)return;const row=b.closest('[data-task]'),t=row.dataset.task,v=+b.dataset.rate;
       if(S.b[t]===v)delete S.b[t];else S.b[t]=v;save();row.querySelectorAll('[data-rate]').forEach(x=>x.setAttribute('aria-pressed',S.b[t]===+x.dataset.rate?'true':'false'));};return;}
   view.innerHTML='<h1>BCBA study</h1><p class="ln-lead">The nine domains of the BCBA Test Content Outline (6th ed.), with the number of scored questions each carries. Open a domain to rate yourself on its tasks and to find the workstation’s videos, explainers and forms for them.</p>'+

@@ -12,6 +12,7 @@
    F  the right answer does not sit in one place in more than half of a unit's questions (the page also draws the order anew);
    G  the words: no dash used as punctuation, and none of the words the workstation does not use;
    H  every unit of section G (ethics) and H names the BACB's own document to read.
+   I  (v26.02) the reading list: every article names tasks, units and forms the map has, with a note and a whole reference.
    usage: node qa/v2601-learn-units-test.js   (WS_ROOT and WS_EDITION as in qa/lib.js) */
 const path=require('path'),fs=require('fs');
 const ROOT=process.env.WS_ROOT||path.resolve(__dirname,'..'),DIR=path.join(ROOT,process.env.WS_EDITION||'NBH-Workstation');
@@ -67,4 +68,11 @@ ok('E the time the page can count for a unit reaches the minutes the map plans f
 ok('F in no unit does the right answer sit in one place in more than half of the questions',!bad.place.length,bad.place);
 ok('G no dash used as punctuation, and none of the words the workstation does not use',!bad.words.length,bad.words);
 ok('H every unit of sections G and H names the BACB’s own document, at bacb.com, to read',!bad.read.length,bad.read);
+/* v26.02 the reading list (nbh-learn-readings.js): every article names tasks, units and forms the map has, carries a note and a whole reference */
+require(path.join(DIR,'nbh-learn-readings.js'));
+{const RL=(global.window.NBH_LEARN_READINGS||{}).list||[],T={},UN={},rb=[];L.bcba.domains.forEach(d=>d.tasks.forEach(t=>{T[t[0]]=1;}));L.rbt.sections.forEach(s=>s.units.forEach(u=>{UN[u.id]=1;}));
+ RL.forEach(r=>{if(!str(r.note)||r.note.length<40)rb.push(r.k+': note');if(!/^[^()]+ \(20\d\d\)\. .+ Behavior Modification, \d+\([\d–]+\), \d+–\d+\.$/.test(r.apa||''))rb.push(r.k+': reference');if(!/^10\.1177\//.test(r.doi||''))rb.push(r.k+': doi');
+   if(!(r.t||[]).length)rb.push(r.k+': no task');(r.t||[]).forEach(t=>{if(!T[t])rb.push(r.k+': task '+t);});(r.u||[]).forEach(u=>{if(!UN[u])rb.push(r.k+': unit '+u);});(r.f||[]).forEach(f=>{if(!L.forms[f])rb.push(r.k+': form '+f);});
+   if(BAN.test(r.note)||/\s—\s|--/.test(r.note))rb.push(r.k+': words');});
+ ok('I the reading list: '+RL.length+' articles, each with a note, a whole reference with its DOI, at least one BCBA task, and only tasks, units and forms the map has; no article twice',RL.length>=50&&new Set(RL.map(r=>r.doi)).size===RL.length&&!rb.length,rb.slice(0,10));}
 console.log(fails?fails+' FAILED':'all passed');process.exit(fails?1:0);

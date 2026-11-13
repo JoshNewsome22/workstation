@@ -5,7 +5,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Tier A** procedures could be considered only in rare cases, after a functional assessment, after less restrictive procedures have been tried, and with the review and consent the district requires.
 - **Tier B** procedures are never used in schools. They are listed only so the form can show them as prohibited.
 
-## Tier A: may be considered with approval (257)
+## Tier A: may be considered with approval (258)
 
 ### Response cost (67)
 
@@ -248,12 +248,13 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **paisey1989a** [paisey1989a]: Gentle teaching and graduated guidance guided each man's hand hand-over-hand to press the panel, and the demand baseline guided a press every 30 seconds whatever the man did. *Part of a package.* Reported: For the escape-maintained man head hitting fell to no-demand levels but panel pressing did not improve over baseline; the authors suggest it worked partly through avoidance of physical help. Bank: study skipped.
 - **paisey1991b** [paisey1991b]: In the morning routine, refusal or problem behavior led to three spoken prompts, then gestures, then protective equipment and a picture prompt, then full guidance through the task by one or two people (escape extinction). *Part of a package.* Reported: the phase 2 package cut tantrums and aggression for a few months but gains were lost at 1- and 6-month follow-up; not separated. Bank: study skipped.
 
-### Contingent effort (7)
+### Contingent effort (8)
 
 - **Bailey et al. (1970)** [bailey1970]: A boy whose card carried a "no" had to do extra chores to win back that day's privileges. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Hagopian et al. (2011)** [hagopian2011]: The schedule-thinning review also describes contingent work as a punishment add-on to FCT. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Kolko, 1989** [kolko1989]: After every accident, staff had the child take off and rinse the soiled clothes, wash, put the clothes in the laundry and dress again, in every phase including baseline. *Part of a package.* Reported: not separated from the package; it ran in every phase, including baseline. Bank: kept out of the steps; note flags it.
 - **MacPherson et al. (1974)** [macpherson1974]: Lunchroom aides assigned essay copying as a consequence. *Part of a package.* Bank: study skipped.
+- **Nuhu & Pence, 2022** [nuhu2022]: For two of three young children, extra demands were given after problem behavior ("contingent demands") when functional communication training with escape extinction alone did not bring problem behavior down; the part of the article read for the card names the procedure and does not describe it. *Added component.* Reported: With contingent demands added, one child's screaming fell to near zero; the study does not report the procedure apart from the rest. Bank: kept out of the steps; note flags it.
 - **calamari1990** [calamari1990]: In her day-training program, self-injury or aggression could be followed by required relaxation. *Part of a package.* Reported: not separated from the package. Bank: study skipped.
 - **hohnhorst1992** [hohnhorst1992]: Each instance of 'rude talk' about peers or staff at dinner, study hour or group led to a posted 5-minute work chore (for example sweeping the basement) for youths aged 12 to 17, with a warning and then a second chore if the youth did not start within 15 seconds. *Main procedure.* Reported: Put-downs dropped in each setting as chores were introduced in a multiple baseline across settings. Bank: study skipped.
 - **lewis1986** [lewis1986]: After every leg-pounding episode in social-skill sessions he had to go on pounding for 1 minute or for 15 seconds (compared in alternating sessions). *Main procedure.* Reported: Both durations cut pounding from about 2.3 to about 0.7 episodes per minute in sessions, but the effect did not generalize to lunch until the contingency was applied there. Bank: study skipped.
@@ -545,6 +546,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Morgan, A. C., Wilder, D. A., Podlesnik, C. A., & Kelley, M. E. (2017). Evaluation of an arm-splint belt to reduce self-injury. Behavioral Interventions, 32(3), 255–261.
 - Mudford, O. C. (1995). An intrusive and restrictive alternative to contingent shock. Behavioral Interventions, 10(2), 87–99.
 - Newsom, C. D., & Simon, K. M. (1977). A simultaneous discrimination procedure for the measurement of vision in nonverbal children. Journal of Applied Behavior Analysis, 10(4), 633–644.
+- Nuhu, N. N., & Pence, S. T. (2022). Schedule thinning following functional communication training: Effects of chained and multiple schedules. Behavior Modification, 46(5), 1075–1108.
 - O'Brien, F., & Azrin, N. H. (1972). Developing proper mealtime behaviors of the institutionalized retarded. Journal of Applied Behavior Analysis, 5(4), 389–399.
 - Osborne, J. G. (1969). Free-time as a reinforcer in the management of classroom behavior. Journal of Applied Behavior Analysis, 2(2), 113–118.
 - Packard, R. G. (1970). The control of "classroom attention": A group contingency for complex behavior. Journal of Applied Behavior Analysis, 3(1), 13–28.

@@ -4,7 +4,7 @@
    thinning) and every FCT card (162) shows the closest of the four FCT videos. Simulated data only.
    A. the eighteen files: each beside the forms, a header that says what it is (AI-generated, simulated people), MP4 data
       whose size and SHA-256 match the header; each in pwa-test's list of files kept offline; this test in the release list.
-   B. the mapping: every card of DRO (96), NCR (78), NCE (14), A_NCA (11), RIRD (60), DRA (165) and FCT (164) shows the video this test expects
+   B. the mapping: every card of DRO (97), NCR (78), NCE (14), A_NCA (11), RIRD (60), DRA (165) and FCT (164) shows the video this test expects
       (the lists below, read from each card's fields), the counts by video; the 6 RIRD cards none fits have none.
    C. the lines: the card a video was made from says "The video shows this card's steps: ..."; every other card "The video
       shows the closest version, after <its studies>: <what it shows>.", with at most one clause, and the clauses this test
@@ -75,7 +75,7 @@ const WANT={};Object.keys(EXP).forEach(k=>EXP[k].split(' ').forEach(id=>{WANT[id
    approval, attention, peers, self-monitoring: each read from its fields), FCT the first FCT video (a growing work
    requirement, or escape) */
 CARDS.forEach(p=>{if(p.id in WANT)return;WANT[p.id]=p.code==='DRO'?'dro_resetting':p.code==='NCE'?'ncr_work':p.code==='A_NCA'?'ncr_attention':p.code==='NCR'?'ncr_attention':p.code==='RIRD'?'rird_vocal':p.code==='DRA'?'dra_attention':p.code==='FCT'?'fct-practical-guide-thinning':'?';});
-const COUNTS={dro_resetting:45,dro_tokens:26,dro_class:14,dro_momentary:11,ncr_attention:37,ncr_items:28,ncr_work:33,ncr_between:5,rird_vocal:17,rird_motor:16,rird_pica:21,dra_attention:80,dra_escape:59,dra_tangible:11,dra_automatic:15,'fct-practical-guide-thinning':67,fct_attention:30,fct_tangible:47,fct_thinning_mult:20,'':6};
+const COUNTS={dro_resetting:46,dro_tokens:26,dro_class:14,dro_momentary:11,ncr_attention:37,ncr_items:28,ncr_work:33,ncr_between:5,rird_vocal:17,rird_motor:16,rird_pica:21,dra_attention:80,dra_escape:59,dra_tangible:11,dra_automatic:15,'fct-practical-guide-thinning':67,fct_attention:30,fct_tangible:47,fct_thinning_mult:20,'':6};
 /* the clause this test expects on named cards (every other card: none, or one of these forms) */
 const CLAUSE={'dro-sticker-chart-assault':'This card does not restart the interval after the behavior.','dro-hourly-token-rules':'This card does not restart the interval after the behavior.',
  'ncr-preferred-item-substitute':'This card is for behavior maintained by attention.','a_nca-praise-during-hard-work':'This card is for behavior maintained by escape from tasks.',
@@ -105,7 +105,7 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
   ok('A pwa-test lists each file to be kept offline; the release list runs this test',!miss.length&&/^v2568-td1-procvideos-test$/m.test(rl),miss);}
  {const ids=new Set(BANK.protocols.map(p=>p.id)),miss=[].concat(...Object.values(VID).map(v=>v.src)).concat(Object.keys(WANT)).filter(id=>!ids.has(id));
   const by={};CARDS.forEach(p=>{by[p.code]=(by[p.code]||0)+1;});
-  ok('A the cards: DRO 96, NCR 78, NCE 14, A_NCA 11, RIRD 60, DRA 165, FCT 164; every card a video was made from is in the bank',by.DRO===96&&by.NCR===78&&by.NCE===14&&by.A_NCA===11&&by.RIRD===60&&by.DRA===165&&by.FCT===164&&!miss.length,{by,miss});}
+  ok('A the cards: DRO 97, NCR 78, NCE 14, A_NCA 11, RIRD 60, DRA 165, FCT 164; every card a video was made from is in the bank',by.DRO===97&&by.NCR===78&&by.NCE===14&&by.A_NCA===11&&by.RIRD===60&&by.DRA===165&&by.FCT===164&&!miss.length,{by,miss});}
  const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});
  const errs=[];
  const ctxOf=(w,h)=>b.newContext({viewport:{width:w||1376,height:h||1032},hasTouch:true,isMobile:true,deviceScaleFactor:1,userAgent:IPAD});
@@ -117,8 +117,8 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
  /* ---------------- B. the mapping ---------------- */
  const R=await p.evaluate(C=>TD1_BANK.protocols.filter(x=>C.includes(x.code)).map(x=>({id:x.id,code:x.code,k:window.__tdVideo.key(x.id),has:window.__tdVideo.has(x.id),line:window.__tdVideo.line(x.id)})),CODES);
  {const wrong=R.filter(x=>x.k!==WANT[x.id]),cnt={};R.forEach(x=>{cnt[x.k]=(cnt[x.k]||0)+1;});
-  ok('B every card of the seven codes shows the video this test expects',R.length===CARDS.length&&R.length===588&&!wrong.length,wrong.slice(0,6));
-  ok('B the counts: DRO resetting 45, tokens 26, class 14, momentary 11; NCR, NCE and A_NCA attention 37, items 28, during work 33, before and between 5; RIRD vocal 17, motor 16, pica 21, none 6; DRA attention 80, escape 59, items 11, automatic 15; FCT the first video 67, attention 30, items 47, signaled thinning 20',Object.keys(COUNTS).every(k=>cnt[k]===COUNTS[k]),cnt);
+  ok('B every card of the seven codes shows the video this test expects',R.length===CARDS.length&&R.length===589&&!wrong.length,wrong.slice(0,6));
+  ok('B the counts: DRO resetting 46, tokens 26, class 14, momentary 11; NCR, NCE and A_NCA attention 37, items 28, during work 33, before and between 5; RIRD vocal 17, motor 16, pica 21, none 6; DRA attention 80, escape 59, items 11, automatic 15; FCT the first video 67, attention 30, items 47, signaled thinning 20',Object.keys(COUNTS).every(k=>cnt[k]===COUNTS[k]),cnt);
   const nv=R.filter(x=>!x.k);ok('B the 6 RIRD cards none fits (overcorrection, the awareness device, exposure and response prevention, the chin cue) have no video and no line',nv.length===6&&nv.every(x=>x.code==='RIRD'&&!x.has&&!x.line),nv);}
  /* ---------------- C. the lines ---------------- */
  {const VS=await p.evaluate(K=>{const o={};K.forEach(k=>{o[k]=window.__tdVideo.line(k);});return o;},Object.keys(VID));
