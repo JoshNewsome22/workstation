@@ -5,7 +5,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Tier A** procedures could be considered only in rare cases, after a functional assessment, after less restrictive procedures have been tried, and with the review and consent the district requires.
 - **Tier B** procedures are never used in schools. They are listed only so the form can show them as prohibited.
 
-## Tier A: may be considered with approval (259)
+## Tier A: may be considered with approval (260)
 
 ### Response cost (67)
 
@@ -249,9 +249,10 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **paisey1989a** [paisey1989a]: Gentle teaching and graduated guidance guided each man's hand hand-over-hand to press the panel, and the demand baseline guided a press every 30 seconds whatever the man did. *Part of a package.* Reported: For the escape-maintained man head hitting fell to no-demand levels but panel pressing did not improve over baseline; the authors suggest it worked partly through avoidance of physical help. Bank: study skipped.
 - **paisey1991b** [paisey1991b]: In the morning routine, refusal or problem behavior led to three spoken prompts, then gestures, then protective equipment and a picture prompt, then full guidance through the task by one or two people (escape extinction). *Part of a package.* Reported: the phase 2 package cut tantrums and aggression for a few months but gains were lost at 1- and 6-month follow-up; not separated. Bank: study skipped.
 
-### Contingent effort (8)
+### Contingent effort (9)
 
 - **Bailey et al. (1970)** [bailey1970]: A boy whose card carried a "no" had to do extra chores to win back that day's privileges. *Part of a package.* Bank: kept out of the steps; note flags it.
+- **Cividini-Motta et al., 2020** [cividinimotta2020]: After each instance of masturbation in a shared room the student was directed to stand and do one minute of two-handed physical tasks (catching and tossing a ball, stacking books, moving boxes, pushing in a chair), prompted from words to a model to hand-over-hand guidance; one student who dropped to the floor was lifted to standing by two adults. *One of two compared procedures.* Reported: It lowered the behavior as much as a 3- to 5-second interruption did, and took far more time (for one student about 9 minutes a session against a few seconds) and sometimes two or three adults. Bank: kept out of the steps; note flags it.
 - **Hagopian et al. (2011)** [hagopian2011]: The schedule-thinning review also describes contingent work as a punishment add-on to FCT. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Kolko, 1989** [kolko1989]: After every accident, staff had the child take off and rinse the soiled clothes, wash, put the clothes in the laundry and dress again, in every phase including baseline. *Part of a package.* Reported: not separated from the package; it ran in every phase, including baseline. Bank: kept out of the steps; note flags it.
 - **MacPherson et al. (1974)** [macpherson1974]: Lunchroom aides assigned essay copying as a consequence. *Part of a package.* Bank: study skipped.
@@ -484,6 +485,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Buell, J., Stoddard, P., Harris, F. R., & Baer, D. M. (1968). Collateral social development accompanying reinforcement of outdoor play in a preschool child. Journal of Applied Behavior Analysis, 1(2), 167–173.
 - Bushell, D., Jr., Wrobel, P. A., & Michaelis, M. L. (1968). Applying "group" contingencies to the classroom study behavior of preschool children. Journal of Applied Behavior Analysis, 1(1), 55–61.
 - Christophersen, E. R., Arnold, C. M., Hill, D. W., & Quilitch, H. R. (1972). The home point system: Token reinforcement procedures for application by parents of children with behavior problems. Journal of Applied Behavior Analysis, 5(4), 485–497.
+- Cividini-Motta, C., Moore, K., Fish, L. M., Priehs, J. C., & Ahearn, W. H. (2020). Reducing public masturbation in individuals with ASD: An assessment of response interruption procedures. Behavior Modification, 44(3), 429–448.
 - Clark, H. B., & Sherman, J. A. (1975). Teaching generative use of sentence answers to three forms of questions. Journal of Applied Behavior Analysis, 8(3), 321–330.
 - Clark, H. B., Boyd, S. B., & Macrae, J. W. (1975). A classroom program teaching disadvantaged youths to write biographic information. Journal of Applied Behavior Analysis, 8(1), 67–75.
 - Clark, H. B., Greene, B. F., Macrae, J. W., McNees, M. P., Davis, J. L., & Risley, T. R. (1977). A parent advice package for family shopping trips: Development and evaluation. Journal of Applied Behavior Analysis, 10(4), 605–624.

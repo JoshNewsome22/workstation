@@ -9905,6 +9905,68 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.04: Behavior Modification, third part: 19 more cards in TD-1's bank; the 2020 to 2026 volumes are finished
+(the BCBA's folder of 11/13, continued; see v26.02 for the folder and the method.)
+- **TD-1, 19 new cards** (3,282 in all; 42 from this journal), each read from the article's method and results:
+  - 2023 (2): a five-step check, by video call, of which sign of a listener's lost interest the student responds
+    to, then instructions, role-play and feedback for a student who responds to none (Kishel & Vollmer); tasting new
+    foods without escape extinction: a crumb-size bite on offer for up to 3 min, a break with favorite things for a
+    bite eaten and a plain break otherwise, run by parents coached by video call (Alaimo et al.).
+  - 2022 (4): which communication system a student prefers, with a blank control card and a test of whether the
+    choice follows the payoff (Cariveau et al.); constant time delay in which prompted answers keep earning the item
+    until the student answers 40% of trials alone (Cariveau & La Cruz Montilla); looking at a speaker and following a
+    look, taught with a favorite item, then a finger, then nothing (Lee et al.); a picture list of calm actions,
+    taught when calm and then used during the warning before a feared event and during it, the event brought in a
+    small step at a time (Moore et al.).
+  - 2021 (8): a 13-minute persuasive paragraph about a text, with a reading strategy and a planning strategy (Ciullo
+    et al.); a small-group reading lesson with a key word, a "right there" question, a three-step main idea and a
+    choice of text one day in four (Solis et al.); a picture book of the steps for asking for an accommodation and
+    using it (Hall Pistorio et al.); stranger safety, then a check that the student still goes with a police officer
+    and a five-step lesson when not (Ledbetter-Cho et al.); a short calm acknowledgment of a direction or a
+    correction, role-played to mastery and then practiced with the student's own staff (Brogan et al.); up to three
+    class rules reviewed at the start of each lesson and nothing else (Hamrick et al.); pretending with no objects,
+    from six videos of one routine (Lee et al.); play with a brother or sister around an activity built from both
+    children's interests (Watkins et al.).
+  - 2020 (5): touching private parts in shared rooms: a brief neutral interruption, with the place and time that
+    are private taught beside it (Cividini-Motta et al.); showing things to an adult, taught with recorded comments
+    faded word by word (Gomes et al.); an older sibling taught to prompt and praise sharing, helping and compromising
+    (Daffner et al.); first listening lessons in which the named item is itself the reward (Eldevik et al.); an adult
+    who joins in for as long as the child keeps running or climbing (Gonzales et al.).
+- **Marks.** Alaimo et al. carries one RESTRICTIVE step (a bite that comes back out is offered again until the 3-min
+  timer; the card works without it) and one EXTINCTION step (36 in the bank now). Cividini-Motta et al. carries one
+  RESTRICTIVE step (the hand moved aside for 3 to 5 s). No new punishment step and no new OPTION step.
+- **Where the card departs from the study, and says so.** Cividini-Motta et al. also tested a longer version, one
+  minute of two-handed physical tasks after each instance; it worked no better, took far longer, and for one student
+  meant lifting him from the floor. It is left out of the steps and is in the set-aside record under contingent
+  effort. Gomes et al. turned the student toward the adult by guiding the head; the card guides at the hand and
+  shoulder and stops at any resistance. Lee et al. (2022) taught a 5-second look on instruction; the card's first
+  step is the family's agreement that this is a goal, and its note says why the goal is contested.
+- **TD-1, the video picker:** the card on touching private parts shows no video. The picker would have offered the
+  clip on blocking pica as the closest one; a rule now leaves a card with "private parts" in its name without a clip.
+- **GB-1, 9 source lines** (no new objective): Change the topic when the other person looks bored (Kishel &
+  Vollmer); Accept and swallow bites of new foods (Alaimo et al.); Follow an adult's gaze (Lee et al., 2022); Use
+  relaxation to stay calm (Moore et al.); Say no and get away from a stranger's lure (Ledbetter-Cho et al.); Accept a
+  correction calmly (Brogan et al.); Comment during play with a sibling or peer (Watkins et al.); Follow and share
+  attention (Gomes et al.); Point to the picture the teacher names (Eldevik et al.).
+- **Looked at and not banked** (from the abstract, or from the part needed to decide): 2023: Williams et al. (a
+  deposit contract for college students' phone use: adults staking their own money), McMahon et al. (a clinic's
+  records on where the spoon places the bite, for children with oral-motor delays) and Taylor et al. (medicine
+  taking, treated with non-removal of the cup in an intensive feeding program). 2021: Bryant et al. (a group trial of
+  a second-grade numeracy program: a curriculum, not a procedure) and Icht et al. (a memory technique tested in groups
+  of adults). 2020: Viefhaus et al. (a group study of habit reversal for tics; the bank has that procedure) and
+  Sivaraman & Rapp (what happens after response interruption ends; no new procedure).
+- **Not yet read:** the 1977 volume (41 scans without text; they need text recognition first). The method and review
+  papers of 2020 and 2021 are not in the reading list.
+- **Tests.** The two bank tests and the versions test pass; the procedure-video test and the marks test pass with
+  their hand-kept counts raised (RIRD 61, DRA 166, 7 response-interruption cards without a video; 3,282 cards, 36
+  EXTINCTION steps).
+- **The test run.** On the built folder: the bank tests and the Learning tests in both editions, and the versions,
+  procedure-video, marks and feeding tests, the size budgets and the build test in the workstation. Not seen on an iPad.
+- **The whole run of v25.99, closed** (532 tests; 25 not passing at first run). 18 were known before the run. Five
+  passed when run alone afterward. The last two were run again alone: `v2570-stepper-test` passes; `autosave-test`
+  passes in full when run alone (102 of 102 checks; its one failing check, the unsaved mark after Open case, was
+  printed with the saved state beside it and passed six times alone and once in the whole test). Both failures came from the load of four
+  lanes running at once, not from the app.
 ### v26.03: Behavior Modification, second part: nine more cards in TD-1's bank (2020 and 2021)
 (the BCBA's folder of 11/13, continued; see v26.02 for the folder and the method.)
 - **TD-1, 9 new cards** (3,263 in all; 23 from this journal):

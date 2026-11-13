@@ -8213,7 +8213,7 @@ function pvKey(p){if(PSRC[p.id])return PSRC[p.id];if(PVX[p.id])return PVX[p.id];
   if(f==='attention')return 'fct_attention';if(f==='tangible')return 'fct_tangible';if(f==='escape')return 'fct-practical-guide-thinning';
   const T=String(p.lab||'');return /attention|play with me|praise|talk|life skills/i.test(T)?'fct_attention':/item|toy|tangible|wait|delay/i.test(T)?'fct_tangible':'fct-practical-guide-thinning';}
  if(p.code==='RIRD'){const D=prm(p,/interruption demands/i),no=/^(none|no )/i.test(D);
-  if(/overcorrection|awareness|exposure and response prevention|\bchin\b/i.test(p.lab))return '';
+  if(/overcorrection|awareness|exposure and response prevention|\bchin\b|private parts/i.test(p.lab))return '';   /* v26.04 no clip of another behavior beside a card on touching private parts */
   if(!no&&/motor|direction/i.test(D))return 'rird_motor';
   if(!no&&/vocal|question|echo|spell|imitation|framed|\bsay\b|sight-word|counting|song/i.test(D))return 'rird_vocal';
   if(!no&&/instruction|task|activity|redirect/i.test(D)&&!/block/i.test(p.lab))return 'rird_motor';
