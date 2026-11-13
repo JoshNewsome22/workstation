@@ -528,6 +528,8 @@
          a box's grey example words; the browser's own "mm/dd/yyyy" in a date left empty (marked when printing starts) */
       'textarea{resize:none!important}' +
       'input.nbh-pr-nodate{color:transparent!important}' +
+      /* v26.18 an empty date with a note beside it printed as a gap and a note adrift (Form CT-1): it prints a line to write on */
+      'input.nbh-pr-nodate:has(+.hint){border:0!important;border-bottom:1px solid #7b858d!important;border-radius:0!important;background:none!important}' +
       /* a heading keeps the sentence under it */
       /* v26.17 taken out: v26.15 asked that a paragraph under a heading not be followed by a page break; with a block kept whole after it the three made a chain the browser answered by moving the whole part to the next page (Form CR-1's first page held only the masthead) */
       '[data-nbh-split]{break-inside:auto!important;page-break-inside:auto!important}' +
@@ -700,16 +702,15 @@
      drawing keeps the drawing's scale, and a superscript stays small. A floored form is not scaled to save a page. */
   /* v26.17 (the BCBA, 11/13: "Make all these improvements"; SETUP.md has the measures). Read with the paper's own rules on
      and undone after printing: the floor (v26.16) in every form but the designed sheets; ink (grey text near black,
-     coloured text a dark tone of its own colour, a light grey rule a mid grey); measure (a running paragraph wider than
-     5.5 inches is set to 5.5, outside tables). Left wholly: SP-1, ABC-1, TK-1, VS-1. Ink only: IC-1, QS-1, EB-1, DD-1 (its
+     coloured text a dark tone of its own colour, a light grey rule a mid grey). (v26.18: the 5.5-inch measure v26.17 gave
+     running paragraphs is taken out, and a paragraph the form caps prints the width of its column.) Left wholly: SP-1, ABC-1, TK-1, VS-1. Ink only: IC-1, QS-1, EB-1, DD-1 (its
      data sheet is fitted to the page) and Form SM-1's student sheets. */
-  var PR_SHEETS = /^(SP-1|ABC-1|TK-1|VS-1)$/, PR_OWNSIZE = /^(IC-1|QS-1|EB-1|DD-1)$/, PR_ASIS_SEL = '#sheetOut,#mmOut,#bcOut,#smExtraOut', PR_MIN = 12, PR_MINH = 13.34, PR_MEASURE = 528;
+  var PR_SHEETS = /^(SP-1|ABC-1|TK-1|VS-1)$/, PR_OWNSIZE = /^(IC-1|QS-1|EB-1|DD-1)$/, PR_ASIS_SEL = '#sheetOut,#mmOut,#bcOut,#smExtraOut', PR_MIN = 12, PR_MINH = 13.34;
   function prFormId() { var m = /Form\s+([A-Z]{2,3}-\d+)/.exec(document.title || ''); return m ? m[1] : ''; }
   function prRgb(v) { var m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+%?))?/.exec(v || ''); if (!m) return null;
     var a = m[4] === undefined ? 1 : (/%$/.test(m[4]) ? parseFloat(m[4]) / 100 : parseFloat(m[4])); return [+m[1], +m[2], +m[3], a]; }
   function prLum(c) { return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255; }
   function prChroma(c) { return Math.max(c[0], c[1], c[2]) - Math.min(c[0], c[1], c[2]); }
-  var PR_INLINE = /^(B|I|EM|STRONG|SPAN|A|CODE|SUP|SUB|BR|U|SMALL|MARK|ABBR|CITE|Q|KBD|VAR|WBR)$/;
   function prFloor(root, opt, z0) {
     opt = opt || { floor: true };
     var XH = 'http://www.w3.org/1999/xhtml', set = [], n = { floor: 0, ink: 0, rule: 0, measure: 0, kept: 0 }, ones = [], PAGEH = opt.page || 0;
@@ -729,9 +730,11 @@
           for (var b = 0; b < 4; b++) { var w = parseFloat(cs['border' + sides[b] + 'Width']) || 0; if (!w || w >= 3 || cs['border' + sides[b] + 'Style'] === 'none' || cs['border' + sides[b] + 'Style'] === 'hidden') continue;   /* 3 px and more is a mark of the design (a band's coloured bar), not a rule: it keeps its colour */
             var bc = prRgb(cs['border' + sides[b] + 'Color']); if (!bc || bc[3] < 0.5) continue; var bl = prLum(bc);
             if (prChroma(bc) <= 48 && bl > 0.55 && bl < 0.95) { put(c, 'border-' + sides[b].toLowerCase() + '-color', '#7b858d'); n.rule++; } } }
-        if (opt.measure && !asIs && own && !inTable && !field && len >= 180 && /^(P|DIV|LI|DD|BLOCKQUOTE|SMALL|SECTION)$/.test(c.tagName) && /^(block|list-item|flow-root)$/.test(cs.display) && c.offsetWidth * zc > PR_MEASURE + 40) {
-          var plain = true; for (var e = c.firstElementChild; e; e = e.nextElementSibling) if (!PR_INLINE.test(e.tagName)) { plain = false; break; }
-          if (plain) { put(c, 'max-width', (PR_MEASURE / zc).toFixed(0) + 'px'); n.measure++; } }
+        /* v26.18 (the BCBA, 11/13: "It looks weird for the paragraphs to be stopping so short of the right edge of the paper"):
+           a paragraph of running text the form caps at a reading width (78 characters, say) prints the width of its column */
+        if (opt.measure && !asIs && own && !inTable && !field && len >= 90 && cs.maxWidth !== 'none' && /^(P|LI|DD|BLOCKQUOTE|SMALL|DIV)$/.test(c.tagName) && /^(block|list-item|flow-root)$/.test(cs.display) && /^(block|list-item|flow-root)$/.test(getComputedStyle(c.parentElement).display)) {
+          var plain = true; for (var e = c.firstElementChild; e; e = e.nextElementSibling) if (!INLINE.test(e.tagName)) { plain = false; break; }
+          if (plain) { put(c, 'max-width', 'none'); n.measure++; } }
         walk(c, zc, inTable || c.tagName === 'TABLE', false, asIs); } })(root || document.body, z0 || 1, false, !!(opt.self && root), !!(root && root.closest && root.closest(PR_ASIS_SEL)));
     var SIZE = { 'font-size': 1, 'line-height': 1, 'max-width': 1 }, base0 = root || document.body;
     function boxOf(el) { for (var e = el; e && e !== base0; e = e.parentElement) { if (/^(block|table-cell|list-item|flex|grid|inline-block|flow-root)$/.test(getComputedStyle(e).display)) return e; } return el; }

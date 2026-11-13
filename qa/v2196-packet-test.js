@@ -53,7 +53,7 @@ const frameOf=(page,file)=>page.frames().find(f=>f.url().indexOf(encodeURI(file)
   ok('4 each form prints its letterhead once (a section has at most one), after its section line',letter.every(n=>n<=1)&&letter.filter(n=>n===1).length>=10,letter);
   const all=tA.map(p=>p.body).join(' ');
   ok('5 no Guide, no reference sheet and no on-screen note is in the record: nothing about the simulation, the toolbar or Apply to empty fields',
-    !/Guide: /.test(all)&&!/References and Sources/.test(tA.slice(1,-14).map(p=>p.body).join(' '))/* v26.17: the References section, at 9 point where it was 7, takes up to 14 pages of this packet (8 before) */&&!/Load simulation|About the simulation|in the toolbar|Apply to empty fields|Press Apply/.test(all)&&A.dom.secs.every(s=>s.noprint===0),
+    !/Guide: /.test(all)&&!/References and Sources/.test(tA.slice(1,-14).map(p=>p.body).join(' '))/* v26.17: the References section, at 9 point where it was 7, takes up to 14 pages of this packet (8 before; v26.18, at the full width, between 11 and 14) */&&!/Load simulation|About the simulation|in the toolbar|Apply to empty fields|Press Apply/.test(all)&&A.dom.secs.every(s=>s.noprint===0),
     {guide:(all.match(/Guide: [^.]{0,40}/)||[])[0],sim:(all.match(/.{30}(Load simulation|About the simulation|in the toolbar).{30}/)||[])[0]});
   const refPages=tA.filter(p=>/\d+ · References and Sources/.test(p.top));const refText=refPages.map(p=>p.body).join(' ');
   const refLines=refText.split(/(?<=\))\s(?=[A-Z])/).length;

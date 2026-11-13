@@ -4,8 +4,8 @@
    A  ink: in Form FS-1 no grey text is left on paper (it prints near black) and most of the text is near black; before
       printing the form does hold grey text, and after printing the screen has it back;
    B  rules: no light grey rule is left on a table cell or a box to write in (they print a mid grey);
-   C  measure: no paragraph of running text outside a table prints wider than about 5.5 inches (Forms FS-1 and AD-1; read
-      at the window's width, where a list item the page holds under the limit can stand a little over it: 6.25 inches is the test's line);
+   C  measure (v26.18): running text prints the width of its column: v26.17's 5.5 inches are taken out, and a paragraph the
+      form caps at a reading width is let out to its column on paper;
    D  the floor is for every form but the designed sheets: Forms FS-1, GB-1, OB-1, PR-1 and AD-1 print nothing under 9
       point outside a drawing, a scaled table and what the guards kept at its own size;
    E  the designed sheets are left as they are: Form SP-1 takes no mark at all; Form IC-1 takes the ink and keeps its sizes
@@ -23,7 +23,7 @@ let n = 0, bad = 0; const ok = (t, c, d) => { n++; if (!c) bad++; console.log((c
 const pagesOf = buf => (buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
 /* what the page holds as it prints: grey text, near-black share, light rules, wide paragraphs, small type, marks */
 const READ = `(function () {
-  var XH = 'http://www.w3.org/1999/xhtml', o = { text: 0, black: 0, grey: [], rules: 0, cells: 0, wide: [], small: [], least: 99 };
+  var XH = 'http://www.w3.org/1999/xhtml', o = { text: 0, black: 0, grey: [], rules: 0, cells: 0, wide: [], capped: [], small: [], least: 99 };
   function rgb(v) { var m = /rgba?\\(\\s*([\\d.]+)[,\\s]+([\\d.]+)[,\\s]+([\\d.]+)(?:[,\\s/]+([\\d.]+))?/.exec(v || ''); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; }
   function lum(c) { return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255; } function chr(c) { return Math.max(c[0], c[1], c[2]) - Math.min(c[0], c[1], c[2]); }
   (function walk(el, z, inTable, scaled) { var kids = el.children; for (var i = 0; i < kids.length; i++) { var c = kids[i]; if (c.namespaceURI !== XH || /^(SCRIPT|STYLE|TEMPLATE|OPTION)$/.test(c.tagName)) continue;
@@ -33,11 +33,12 @@ const READ = `(function () {
       var shows = c.getClientRects().length > 0;
       if (own && shows) { o.text++; var col = rgb(cs.color); if (col && col[3] > 0.5) { var l = lum(col); if (l <= 0.16) o.black++; if (chr(col) <= 48 && l > 0.16 && l < 0.72) o.grey.push(c.tagName + '.' + String(c.className).slice(0, 14) + ' ' + cs.color); }
         if (!/^(SUP|SUB)$/.test(c.tagName)) { var pt = parseFloat(cs.fontSize) * zc * 0.75; if (sc) o.least = Math.min(o.least, pt); else if (pt < (/^H[1-4]$/.test(c.tagName) ? 9.95 : 8.95)) o.small.push(c.tagName + '.' + String(c.className).slice(0, 14) + ' ' + pt.toFixed(2)); }
+        if (!inTable && !field && len >= 90 && cs.maxWidth !== 'none' && /^(P|LI|DD|BLOCKQUOTE|SMALL|DIV)$/.test(c.tagName) && /^(block|list-item|flow-root)$/.test(cs.display) && /^(block|list-item|flow-root)$/.test(getComputedStyle(c.parentElement).display) && !c.closest('#sheetOut,#mmOut,#bcOut,#smExtraOut')) { var pl = true; for (var e2 = c.firstElementChild; e2; e2 = e2.nextElementSibling) if (!/^(A|B|I|EM|STRONG|SPAN|KBD|CODE|BR|SMALL|SUB|SUP|ABBR|MARK|U|S|Q|CITE|TIME|WBR|SVG|INPUT|SELECT|BUTTON|LABEL)$/.test(e2.tagName)) { pl = false; break; } var pcs = getComputedStyle(c.parentElement), pw = c.parentElement.clientWidth - (parseFloat(pcs.paddingLeft) || 0) - (parseFloat(pcs.paddingRight) || 0); if (pl && c.offsetWidth < pw - 40) o.capped.push(c.tagName + '.' + String(c.className).slice(0, 14) + ' ' + Math.round(c.offsetWidth) + '/' + Math.round(pw)); }
         if (!inTable && !field && len >= 180 && /^(P|DIV|LI|DD|BLOCKQUOTE|SMALL|SECTION)$/.test(c.tagName) && /^(block|list-item|flow-root)$/.test(cs.display) && c.offsetWidth * zc > 600) { var plain = true; for (var e = c.firstElementChild; e; e = e.nextElementSibling) if (!/^(B|I|EM|STRONG|SPAN|A|CODE|SUP|SUB|BR|U|SMALL|MARK|ABBR|CITE|Q|KBD|VAR|WBR)$/.test(e.tagName)) { plain = false; break; } if (plain) o.wide.push(c.tagName + '.' + String(c.className).slice(0, 14) + ' ' + Math.round(c.offsetWidth * zc)); } }
       if (shows && /^(TD|TH|INPUT|TEXTAREA|SELECT)$/.test(c.tagName)) { o.cells++; ['Top', 'Right', 'Bottom', 'Left'].forEach(function (s) { var w = parseFloat(cs['border' + s + 'Width']) || 0, st = cs['border' + s + 'Style']; if (!w || st === 'none' || st === 'hidden') return; var bc = rgb(cs['border' + s + 'Color']); if (bc && bc[3] > 0.5 && chr(bc) <= 48 && lum(bc) > 0.55 && lum(bc) < 0.95) o.rules++; }); }
       walk(c, zc, inTable || c.tagName === 'TABLE', sc); } })(document.body, 1, false, false);
   var de = document.documentElement;
-  return { text: o.text, black: o.black, nGrey: o.grey.length, grey: o.grey.slice(0, 5), rules: o.rules, cells: o.cells, nWide: o.wide.length, wide: o.wide.slice(0, 4), nSmall: o.small.length, small: o.small.slice(0, 5), least: o.least === 99 ? null : +o.least.toFixed(2),
+  return { text: o.text, black: o.black, nGrey: o.grey.length, grey: o.grey.slice(0, 5), rules: o.rules, cells: o.cells, nWide: o.wide.length, wide: o.wide.slice(0, 4), nCapped: o.capped.length, capped: o.capped.slice(0, 4), nSmall: o.small.length, small: o.small.slice(0, 5), least: o.least === 99 ? null : +o.least.toFixed(2),
     floor: de.getAttribute('data-nbh-floor'), ink: de.getAttribute('data-nbh-ink'), inl: [].filter.call(document.querySelectorAll('body *'), function (e) { return e.style && (e.style.getPropertyPriority('color') === 'important' || e.style.getPropertyPriority('font-size') === 'important' || e.style.getPropertyPriority('max-width') === 'important'); }).length };
 })()`;
 (async () => {
@@ -59,8 +60,12 @@ const READ = `(function () {
     fs1.before.nGrey > 20 && fs1.during.nGrey === 0 && fs1.during.black >= fs1.during.text * 0.8, { before: fs1.before.nGrey, during: fs1.during });
   ok('B rules: of the light grey rules Form FS-1 shows on its cells and boxes (' + fs1.before.rules + ' sides) none is left on paper',
     fs1.before.rules > 50 && fs1.during.rules === 0, { before: fs1.before.rules, during: fs1.during.rules, cells: fs1.during.cells });
-  ok('C measure: no paragraph of running text outside a table prints wider than about 5.5 inches (Form FS-1 had ' + fs1.before.nWide + ', Form AD-1 ' + ad1.before.nWide + ')',
-    fs1.before.nWide + ad1.before.nWide >= 5 && fs1.during.nWide === 0 && ad1.during.nWide === 0, { fs1: fs1.during.wide, ad1: ad1.during.wide });
+  /* v26.18 (the BCBA, 11/13: "It looks weird for the paragraphs to be stopping so short of the right edge of the paper"):
+     v26.17 set running paragraphs to 5.5 inches; beside tables and rules that run the full width they stopped two inches
+     short. Taken out, and a paragraph the form itself caps at a reading width (78 characters, say) prints the width of
+     its column: on screen Forms FS-1 and AD-1 hold such paragraphs, on paper none stops short of its column. */
+  ok('C measure: running text prints the width of its column: of the paragraphs a form caps short of it (Form FS-1 ' + fs1.before.nCapped + ', Form AD-1 ' + ad1.before.nCapped + ' on screen) none is left on paper',
+    fs1.before.nCapped + ad1.before.nCapped >= 3 && fs1.during.nCapped === 0 && ad1.during.nCapped === 0 && fs1.during.nWide + ad1.during.nWide >= 5, { fs1: [fs1.before.nCapped, fs1.during.capped, fs1.during.nWide], ad1: [ad1.before.nCapped, ad1.during.capped, ad1.during.nWide] });
   const D = { 'FS-1': fs1, 'GB-1': gb1, 'OB-1': ob1, 'PR-1': pr1, 'AD-1': ad1 }, dBad = Object.keys(D).filter(k => !(D[k].during.floor === '9' && D[k].during.nSmall === 0 && (D[k].during.least === null || D[k].during.least >= 7.5)));
   ok('D the floor is for every form: Forms FS-1, GB-1, OB-1, PR-1 and AD-1 print nothing under 9 point outside a drawing and a scaled table (on screen: ' + Object.keys(D).map(k => k + ' ' + D[k].before.nSmall).join(', ') + ' pieces)',
     dBad.length === 0 && gb1.before.nSmall > 10, dBad.map(k => ({ k, floor: D[k].during.floor, small: D[k].during.small, least: D[k].during.least })));

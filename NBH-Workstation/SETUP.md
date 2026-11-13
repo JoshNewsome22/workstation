@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.18: paragraphs print the full width of their column
+(the BCBA, 11/13, on the pictures of v26.17: "Why is the text field length so short on this images you sent? It looks
+weird for the paragraphs to be stopping so short of the right edge of the paper")
+- **What was wrong.** v26.17's third improvement set a paragraph of running text to 5.5 inches on paper, after the
+  readability guidance read for the review (lines of 115 mm). The tables, the heading rules and the boxes around the
+  paragraphs still ran the full 7.3 inches, so each paragraph stopped about two inches short of everything near it.
+  The reports the prints were measured beside (Pearson, PAR) run their paragraphs the full width as well: the change
+  had moved the forms away from them.
+- **Taken out, and one step further** (`nbh-polish.js`, `prFloor`; the packet's window in `index.html`). The 5.5
+  inches are gone from the forms and from the packet. The forms' own caps are lifted on paper too: a form sets its
+  instruction text to a reading width for the screen (78 characters, say), and on paper that left a paragraph an inch
+  short of its column in some forms (Form AD-1, Form SA-1). A paragraph of running text (90 characters or more, in a
+  block, outside a table) now prints the width of its column. Left as they are: the designed sheets (SP-1, ABC-1,
+  TK-1, VS-1), the forms that keep their own sizes (IC-1, QS-1, EB-1, DD-1), Form SM-1's student sheets and a form's
+  own one-sheet prints; a paragraph set beside something else (a two-column list) keeps its column. The screen is not
+  changed.
+- **An empty date with a note beside it prints a line to write on** (Forms CT-1, PD-1, SV-1, TI-1; five cells). Since
+  v26.15 an empty date prints nothing in place of the browser's "mm/dd/yyyy"; where a note follows the date in the
+  same cell, that left a gap and a note adrift in the middle of the cell ("the summer break, or a change of
+  placement", Form CT-1).
+- **Kept from v26.17:** the 9-point floor, the ink, Form RS-1's look, the page-break corrections, the second ask in
+  Build packet.
+- **The numbers** (all 49 forms, each with its simulation; the school edition).
+
+  | | v26.16 | v26.17 | v26.18 |
+  |---|---|---|---|
+  | Pages | 483 | 507 | 486 |
+  | Characters under 9 point | 19% | 2% | 2% |
+  | Text near black | 43% | 98% | 98% |
+  | Running lines, median | 174 mm, 110 characters | 135 mm, 88 | 178 mm, 114 characters |
+  | Nearly empty pages | 21 | 15 | 15 |
+
+  Against v26.16 (the same width, smaller type): Forms CR-1 12 to 13 pages, EA-1 11 to 13, SA-1 5 to 6 and SI-1 10 to 11 are longer; AD-1 24 to 23 and SR-1 35 to 34 are shorter; the other 43 have the pages they had. The whole packet (47 forms of one simulated case, `qa/master33.js`): 742 pages in v26.15, 811 in v26.17, 774 now; its References section 20, 31 and 25 pages; 7% of its characters under 9 point (the designed sheets and Form DD-1's data sheets) and 94% of its text near black, as in v26.17.
+- **Where this leaves the comparison.** Type 9 point against the reports' 10 to 11; ink level with theirs; lines as
+  long as theirs (and longer than the ABS's 115 mm, as theirs are).
+- **The two light pages v26.17 left are gone.** In the fullest examples of Forms TB-1 and TD-1 a sheet's closing source
+  lines stood alone on a page; with paragraphs the width of their column neither does, and the test allows none again.
+- **Not done.** Safari on the iPad was not checked, and nothing was printed on paper.
+- **Budget.** The seven shared scripts measure 699.2 KB of 700.
+- **Test.** `qa/v2617-print-ink-test.js`, check C rewritten: of the paragraphs a form caps short of their column
+  (Form AD-1 holds 39 on screen) none is left short on paper. Limits put back to their v26.16 values, each tried and passing: `qa/pp131-test.js` Form TD-1's fullest example 54 pages (56 in v26.17) and no known light page; `qa/pp135-test.js` Form IA-1's Summary sheet 5 pages (6). `qa/v2196-packet-test.js` keeps its 14 pages for the References section (10 was tried and is too few). The 24 print, packet, budget, build and
+  Finish PDF tests pass; the whole release run was not repeated.
+
 ### v26.17: the print review, part three: every form at 9 point, near-black ink, a readable measure; measured beside industry reports
 (the BCBA, 11/13, to the five improvements listed after "How does the design of the pdf document look in comparison to
 top other pdfs": "Make all these improvements also do some research and see if there are websites that I can give you
