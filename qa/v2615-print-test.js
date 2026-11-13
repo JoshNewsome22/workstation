@@ -9,7 +9,9 @@
       "Goal Sheet" (it printed 4 pages; it prints 3);
    E  a run of one page and a few lines is brought back onto the page: Form SM-1's setup (2 pages to 1), Form EB-1's
       brief (3 to 2); nothing is scaled below 92%. (Form RS-1 was the third until v26.16: it now prints at 9 point, is
-      not scaled, and takes 3 pages; qa/v2616-print-floor-test.js reads it.)
+      not scaled, and takes 3 pages; qa/v2616-print-floor-test.js reads it. Since v26.17 Form SM-1, floored like every
+      form, is tightened instead: its boxes and gaps take a scale of 88% at the least and its type stays at 9 point;
+      qa/v2617-print-ink-test.js reads the type.)
    F  after printing, the form on screen is as it was: no mark, no scale, no wrapper left behind;
    G  the forms with paper of their own are left alone: Form SP-1's scatter plot sheet and Form IC-1 print the pages
       they printed before; no page error anywhere.
@@ -59,8 +61,8 @@ async function pagesOf(browser, buf) {
     const z = await during(p, () => [...document.querySelectorAll('[data-nbh-fit]')].map(e => parseFloat(e.style.zoom))); const pages = await pagesOf(browser, await pdf(p)); const left = await p.evaluate(() => [...document.querySelectorAll('*')].filter(e => e.style && e.style.zoom && e.hasAttribute('data-nbh-fit')).length); await p.context().close(); return { z, pages, left }; };
   const e1 = await fitOf('SM-1', false), e2 = await fitOf('EB-1', true);
   const zs = e1.z.concat(e2.z);
-  ok('E a run of one page and a few lines is brought back onto its page: Form SM-1 prints 1 page (was 2), Form EB-1 2 (was 3); nothing is scaled below 92%, and no scale is left on the screen',
-    e1.pages === 1 && e2.pages === 2 && zs.length >= 2 && Math.min(...zs) >= 0.92 && Math.max(...zs) < 1 && e1.left + e2.left === 0, { e1, e2 });
+  ok('E a run of one page and a few lines is brought back onto its page: Form SM-1 prints 1 page (was 2; tightened to 88% at the least, type kept), Form EB-1 2 (was 3; nothing scaled below 92%), and no scale is left on the screen',
+    e1.pages === 1 && e2.pages === 2 && zs.length >= 2 && Math.min(...e2.z) >= 0.92 && Math.min(...e1.z) >= 0.88 && Math.max(...zs) < 1 && e1.left + e2.left === 0, { e1, e2 });
 
   /* F */
   ok('F after printing Form FS-1 the screen holds no mark, wrapper, scale or left-off part', after.keep === 0 && after.bare === 0 && after.fit === 0 && after.split === 0, after);

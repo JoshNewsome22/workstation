@@ -9905,6 +9905,124 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.17: the print review, part three: every form at 9 point, near-black ink, a readable measure; measured beside industry reports
+(the BCBA, 11/13, to the five improvements listed after "How does the design of the pdf document look in comparison to
+top other pdfs": "Make all these improvements also do some research and see if there are websites that I can give you
+access to that can give you top pdfs from industry leaders to compare to." The sites were asked for and allowed the
+same day.)
+- **The comparison, measured.** Eight published PDFs were downloaded and read with the same yardstick as the
+  workstation's prints (type size by share of characters, how dark the text is, the width of running lines, tags,
+  bookmarks, fields): Pearson's sample reports for the Vineland-3 (two), the Conners 4 and the BASC-3; PAR's BRIEF2
+  sample report; Washington State's Functional Assessment and Positive Behavior Support Plan manual; the IRS's Forms
+  W-9 and 1040.
+  - *Type.* The four Pearson reports and the PAR report set their body at 10 or 11 point (71 to 93% of their
+    characters at 10 to 11.5); the Washington manual at 12. The workstation printed 30% of its characters under 9 point
+    before this review and 19% after v26.16.
+  - *Ink.* Their text is 92 to 100% near black (the Conners 4: 47% near black, 32% dark). The workstation printed 45%
+    of its text in a mid grey.
+  - *Line length.* Their running lines are as long as the workstation's were: 158 to 172 mm and 100 to 108 characters
+    at the median for the Pearson and PAR reports (128 to 130 mm for the BASC-3 and the Washington manual). None meets
+    the ABS's 115 mm. The workstation's ran 171 mm and 105 characters.
+  - *The file.* The PAR report and the Washington manual carry bookmarks (49 and 23); the Conners 4, the PAR report,
+    the Washington manual and the IRS forms are tagged; only the IRS forms have fields to fill. A form printed from the
+    browser has none of the three; Finish PDF already adds the bookmarks and the contents page numbers to a saved
+    packet (v21.83), which the comparison of 11/13 had not counted.
+  - *Not compared:* no behavior-analysis product's own printouts (none is published to download); the Australian
+    medication chart's page did not answer; the VA and PaTTAN addresses tried were wrong.
+- **1. The floor is for every form** (`nbh-polish.js`, `prFloor`). Text under 9 point prints at 9 and a heading under 10
+  at 10 in every form but the designed sheets. Left as they are: the scatter plot sheet (SP-1), the ABC data sheet
+  (ABC-1), the token boards (TK-1) and the visual supports (VS-1) wholly; the consent form (IC-1, 12 point for
+  families), the quick start (QS-1, which has its own large print), the one-page brief (EB-1) and the daily data sheets
+  (DD-1) keep their sizes when printed alone, and so do the student sheets Form SM-1 makes (the self-monitoring sheet,
+  the MotivAider sheet, the behavior contract). In the packet Forms IC-1, QS-1 and EB-1 are floored (Form IC-1 printed
+  62% of its characters under 9 point there), and so is the References section (it printed at 7 point); Form DD-1 keeps
+  its sizes there too.
+  - *Why Form DD-1 is left.* Its data sheet is a grid drawn to the page: at 9 point the dates no longer fitted their
+    columns, three pages held one line each and the graph left the results page.
+  - *Two guards, for every form and the packet.* A raised piece of text that no longer fits a box that clips (a narrow
+    column of a fixed table) goes back to its own size. A block the form says may not be cut, that fitted one page and
+    would not fit it any more, keeps its own sizes. Each is marked (`data-nbh-asis`, `data-mp-asis`) so a test can
+    tell it from a miss.
+- **2. Ink.** Grey text prints near black; coloured text prints no lighter than a dark tone of its own colour; a light
+  grey rule (a table's lines, a box to write in, a field's underline) prints a mid grey that survives a photocopy. A
+  side of 3 px or more is a mark of the design, not a rule, and keeps its colour (the teal bar of a heading band had
+  printed grey). The designed sheets SP-1, ABC-1, TK-1 and VS-1 are not touched; every other form and the packet take
+  it.
+- **3. Measure.** A paragraph of running text outside a table that would print wider than about 5.5 inches is set to
+  5.5 inches (140 mm, about 90 characters at 9 point). Not inside tables, and not in a form's own one-sheet prints.
+- **4. Bookmarks and contents page numbers.** Already there: Finish PDF (Tools) writes the bookmark panel and the
+  contents page numbers into a packet saved as PDF, and the page header and footer into one saved from Safari. A
+  browser cannot put either into the print itself. Nothing was built; the two tests that cover it were run again.
+- **5. One look.** Form RS-1's papers take the shared look: the title as the tinted band, headings in the serif face
+  in sentence case, labels in sentence case. Form IC-1's family handout was looked at and left: its own design (12
+  point, the key-information page) was made for parents and approved in v25.68, and in the packet the form already
+  prints in the shared look.
+- **What the longer forms needed** (page breaks; every form).
+  - A sign-off is known when its table's cells run together in the text ("CaregiverDateTrainerDate", Form CT-1) and
+    by a "Sign-off" heading above it.
+  - A part that starts a page inside a sheet (a panel, a section) is read as a sheet for its ending, and any short
+    ending takes about a quarter of a page of what is above it along (it was notes and sign-offs only): Forms SM-1,
+    AD-1 and CT-1 ended a row or a box into a new page.
+  - What may not be parted from a kept block (a heading, a hint under a heading) joins it; a block they cannot join
+    whole is not made. v26.15's rule that a paragraph under a heading may not be followed by a page break is taken
+    out. Together they had sent a whole part to the next page: Form CR-1's first page held only its masthead.
+  - A run of one page and a few lines in a floored form is tightened, not shrunk: its boxes, gaps and row padding
+    take a scale (88% at the least) and its type is set back to 9 point; the result is checked as made, and taken off
+    if the run still does not fit. Form SM-1's setup stays on one page.
+  - The block before a forced page start gives up its bottom padding on paper: 18 px of it under a signature row at
+    the foot of a page made a blank page in Form AD-1.
+- **The page after printing is the page before it.** What the print sets on an element is taken off again, and the
+  element's style attribute reads as it was written, to the letter (a browser rewrites `margin:0 0 6px` when a
+  property is set beside it); a text box keeps the height it had. Form IC-1's own test of this found both.
+- **A packet is never short of a form without a word** (`index.html`, `masterRun`). The packet asks each ticked form
+  for its pages and waits 4 seconds. A form that had not answered by then was left out silently: in one test run of
+  this release, on a busy machine, the packet came without Form ABC-1. A form that misses the 4 seconds is now
+  asked once more, alone, with 12 seconds; one that still does not answer is named in a notice ("Not in this packet:
+  Form … did not answer in time. Build the packet again to include it."). This fault is older than the print review.
+- **The numbers** (all 49 forms, each with its simulation, printed before and after; the school edition).
+
+  | | Before the review (v26.14) | v26.16 | v26.17 |
+  |---|---|---|---|
+  | Pages | 479 | 483 | 507 |
+  | Characters under 9 point | 30% | 19% | 2% |
+  | Text near black | 47% | 43% | 98% |
+  | Running lines, median | 171 mm, 105 characters | 174 mm, 110 | 135 mm, 88 |
+  | Nearly empty pages | 27 | 21 | 15 |
+
+  The 2% under 9 point is the designed sheets, Form DD-1's data sheets and the tables scaled to the page. Forms a page
+  or more longer than in v26.16: PA-1 16 to 19, CR-1 12 to 14, DT-1 32 to 34, EA-1 11 to 13, SR-1 35 to 37, and one
+  page each in AD-1, CT-1, DM-1, PR-1, RA-1, RM-1, RR-1, SA-1, SI-1, SV-1, TD-1, TI-1 and VI-1. Of the 15 nearly empty
+  pages, 9 are the designed sheets' own (token boards, visual supports, an empty ABC sheet, Form TV-1); the last pages
+  of Forms CT-1 and RM-1 hold a sign-off with the rows it signs. The whole packet (47 forms of one simulated case, `qa/master33.js`): 742 pages in v26.15, 811 now (9% more); characters under 9 point 36% to 7% (the designed sheets and Form DD-1's data sheets); text near black 47% to 94%; running lines 172 mm and 107 characters to 135 mm and 89; the References section 20 pages to 31.
+- **Where this leaves the comparison.** Ink: level with the reports measured. Line length: shorter than theirs, still
+  over the ABS's 115 mm. Type: 9 point against their 10 to 11; 10 point is the next step and the BCBA's choice (it adds
+  pages). The file: a browser print, without tags or fields; bookmarks and page numbers through Finish PDF.
+- **Not done, and said so.**
+  - Two light pages are known and not solved: in the fullest examples of Forms TB-1 and TD-1 (`qa/pp131-test.js`) a
+    sheet's closing source lines stand alone on a page, after a card that fills the page before and may not be cut.
+    The test allows that one page in each and no other.
+  - Labels inside graphs are as drawn. The running head and foot of a form's page are set by the browser's page boxes
+    and keep their colour.
+  - Safari on the iPad was not checked, and nothing was printed on paper.
+- **Budget.** The seven shared scripts measure 698.7 KB of 700 (two long comments of `nbh-polish.js` were
+  shortened to stay under it; their detail is in these notes). The budget is nearly full: the next change to the
+  shared scripts needs a trim or a reasoned raise.
+- **Test.** `qa/v2617-print-ink-test.js` (new, in the release list): no grey text and no light rule on paper in Form
+  FS-1; no running paragraph wider than the measure; Forms FS-1, GB-1, OB-1, PR-1 and AD-1 nothing under 9 point; Form
+  SP-1 untouched, Forms IC-1 and DD-1 ink only, Form EB-1 as before; no kept block under a hint that hangs on a
+  heading; Form SM-1 on one page at 9 point; Form RS-1's shared look; the screen as it was after printing.
+  `qa/v2617-packet-late-test.js` (new, in the release list): a form whose first answer does not come is asked again
+  and is in the packet in its place; one that never answers is named. `qa/v2616-print-floor-test.js` reads Form SP-1
+  as the form left alone and a packet of Forms DM-1, FS-1 and SP-1, and reads a piece the guards marked as scaled.
+  `qa/v2615-print-test.js` allows Form SM-1's tightening (88% at the least, type kept). Limits moved, each with its
+  reason in the test: `qa/pp131-test.js` Form TD-1's fullest example 54 to 56 pages (the narrower measure) and the two
+  known light pages; `qa/pp135-test.js` Form IA-1's Summary sheet 5 to 6 pages (of 19); `qa/v2196-packet-test.js` the
+  References section up to 14 pages of its packet (8 before; 9 point where it was 7). Run for this release: these and
+  the other print, packet, budget, build and Finish PDF tests, 24 in all, every one passing; the whole release run
+  was not repeated. `qa/master33.js` (the whole-packet print, not a release test) now waits for each form's example
+  to load before it opens the next: 900 ms had not always been enough, and in two runs of five the packet held 3 pages
+  of Form ABC-1 for 24.
+
 ### v26.16: the print review, part two: no type under 9 point in the seven forms that printed smallest
 (the BCBA, 11/13, to the question left open by v26.15, "raise them to 9 point (the recommendation), to 10, or leave
 them?": "Yes. Raise them." The recommendation was followed: 9 point. The same day the session's network was given the

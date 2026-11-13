@@ -14,7 +14,10 @@ const FORMS=()=>L.forms().filter(f=>f.id!=='RS-1'&&f.id!=='PD-1');
     await page.evaluate(id=>openForm(id),f.id);
     await page.waitForFunction(id=>!!state.status[id],f.id,{timeout:20000}).catch(()=>{});
     const fr=page.frames().find(x=>x.url().endsWith('/'+f.file));
-    if(fr){ await fr.evaluate(()=>{window.confirm=()=>true;try{nbhUI.confirm=async()=>true;}catch(e){}const b=document.querySelector('#simBtn,#btnSim,#load-demo,#btnLoadExample');if(b)b.click();}); await L.sleep(900); }   /* v21.34 most forms ask with their own dialog */
+    if(fr){ await fr.evaluate(()=>{window.confirm=()=>true;try{nbhUI.confirm=async()=>true;}catch(e){}const b=document.querySelector('#simBtn,#btnSim,#load-demo,#btnLoadExample');if(b)b.click();}); await L.sleep(900);   /* v21.34 most forms ask with their own dialog */
+      /* v26.17 the 900 ms were not always enough on a busy machine: in two runs of five Form ABC-1's example had not loaded when the next
+         form was opened, and the packet held 3 pages of it for 24. The form's own mark of simulated data is waited for (8 seconds at the most). */
+      await fr.waitForFunction(()=>{const m=document.querySelector('#nbhSimulated');return !m||m.checked===true||m.value==='true'||m.value==='1';},null,{timeout:8000}).catch(()=>{}); }
     process.stderr.write(f.id+' ');
   }
   await L.sleep(2000);
@@ -41,6 +44,9 @@ const FORMS=()=>L.forms().filter(f=>f.id!=='RS-1'&&f.id!=='PD-1');
   console.log(JSON.stringify({restored,sections:secs,appendix:apps,pagenavInMaster:bars,fitted:await popup.evaluate(()=>window.__nbhFitted),bytes:buf.length,log:log.slice(0,5)}));
   await browser.close();
   /* v21.86 the checks: every form back from the case file, a section for each in the master print, no page error */
-  const n=FORMS().length,bad=[];if(restored!==n)bad.push('restored '+restored+' of '+n);if(secs!==n)bad.push('sections '+secs+' of '+n);if(log.length)bad.push('errors '+JSON.stringify(log.slice(0,3)));
+  const n=FORMS().length,bad=[];if(restored!==n)bad.push('restored '+restored+' of '+n);if(secs!==n)bad.push('sections '+secs+' of '+n);/* v26.17 not an error of the app: Chromium's own line when this script reloads the workstation with several forms holding
+     unsaved examples (each asks before it is left; one question is shown) */
+  const errs=log.filter(l=>!/Blocked attempt to show multiple 'beforeunload' confirmation panels/.test(l&&l.text||String(l)));
+  if(errs.length)bad.push('errors '+JSON.stringify(errs.slice(0,3)));
   console.log(bad.length?'FAIL '+bad.join('; '):'PASS every form restored and printed ('+n+' sections, '+buf.length+' bytes)');process.exit(bad.length?1:0);
 })().catch(e=>{console.error('FAIL',e);process.exit(1);});

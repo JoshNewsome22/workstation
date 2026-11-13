@@ -6,10 +6,11 @@
    B  a table too wide for the page at the new size is scaled alone (Form RA-1's 23-column table), so the form does not
       run past the page's width (the browser would shrink every page to fit it); what is scaled stays at 7.5 point or more;
    C  after printing nothing is left on the screen: no raised size, no mark, no tightened table;
-   D  a form outside the list is not touched (Form FS-1);
+   D  a designed sheet is not touched (Form SP-1's scatter plot sheet; until v26.17 this read Form FS-1, which is floored now
+      with every other form: qa/v2617-print-ink-test.js);
    E  Form RS-1's year summary, longer than a page at 9 point, takes its closing block along: its closing lines may not
       start a page (3 pages);
-   F  the packet does the same for the seven forms and for no other: a packet of Forms DM-1, TB-1 and FS-1.
+   F  the packet does the same for every form but the designed sheets: a packet of Forms DM-1, FS-1 and SP-1.
    usage: node qa/v2616-print-floor-test.js   (WS_URL, WS_ROOT and WS_EDITION as in qa/lib.js) */
 const L = require(__dirname + '/lib.js');
 const { sleep } = L;
@@ -21,7 +22,7 @@ const SEVEN = ['IA-1', 'PA-1', 'RA-1', 'TD-1', 'DM-1', 'TB-1', 'RS-1'];
 const READ = `(function (root) {
   var small = [], heads = [], least = 99, count = 0, XH = 'http://www.w3.org/1999/xhtml';
   (function walk(el, z, scaled) { var kids = el.children; for (var i = 0; i < kids.length; i++) { var c = kids[i]; if (c.namespaceURI !== XH || /^(SCRIPT|STYLE|TEMPLATE|SUP|SUB|OPTION)$/.test(c.tagName)) continue;
-      var cs = getComputedStyle(c); if (cs.display === 'none' || cs.visibility === 'hidden') continue; var zo = parseFloat(cs.zoom) || 1, zc = z * zo, sc = scaled || zo < 0.999;
+      var cs = getComputedStyle(c); if (cs.display === 'none' || cs.visibility === 'hidden') continue; var zo = parseFloat(cs.zoom) || 1, zc = z * zo, sc = scaled || zo < 0.999 || c.hasAttribute('data-nbh-asis') || c.hasAttribute('data-mp-asis');   /* v26.17 what the guards kept at its own size (it would be clipped, or its one-page block would not fit) is read with the scaled */
       var own = /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(c.tagName) && c.type !== 'hidden' && c.type !== 'checkbox' && c.type !== 'radio';
       if (!own) for (var t = c.firstChild; t; t = t.nextSibling) if (t.nodeType === 3 && /\\S/.test(t.nodeValue)) { own = true; break; }
       if (own && c.getClientRects().length) { var pt = parseFloat(cs.fontSize) * zc * 0.75; count++;
@@ -61,13 +62,13 @@ const READ = `(function (root) {
   const C = SEVEN.filter(id => { const r = res[id]; return !(r.after.sized === r.before.sized && r.after.floor === null && r.after.tight === 0); });
   ok('C after printing the screen is as it was in all seven: no raised size, no mark, no tightened table', C.length === 0, C.map(id => ({ id, before: res[id].before, after: res[id].after })));
 
-  const fs1 = await open('FS-1', true); await fs1.emulateMedia({ media: 'print' }); await sleep(300);
+  const fs1 = await open('SP-1', true); await fs1.emulateMedia({ media: 'print' }); await sleep(300);
   const d0 = await fs1.evaluate(marks); await fs1.evaluate(() => window.dispatchEvent(new Event('beforeprint'))); const d1 = await fs1.evaluate(marks); await fs1.evaluate(() => window.dispatchEvent(new Event('afterprint'))); await fs1.context().close();
-  ok('D Form FS-1, outside the list, is not touched: no mark and no raised size while it prints', d1.floor === null && d1.sized === d0.sized && d1.tight === 0, { d0, d1 });
+  ok('D Form SP-1, a designed sheet, is not touched: no mark and no raised size while it prints', d1.floor === null && d1.sized === d0.sized && d1.tight === 0, { d0, d1 });
   ok('E Form RS-1 prints 3 pages at 9 point, and its closing lines may not start a page (they take the block above them along)', rsPages === 3 && res.rsBreak === 'avoid', { rsPages, rsBreak: res.rsBreak });
 
   /* F: a packet of three forms, built from their simulations as qa/v2196-packet-test.js builds it */
-  const FORMS = ['DM-1', 'TB-1', 'FS-1'];
+  const FORMS = ['DM-1', 'FS-1', 'SP-1'];
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, serviceWorkers: 'block' }); const page = await ctx.newPage(); page.on('pageerror', e => errs.push('shell: ' + String(e).slice(0, 160)));
   await page.goto(`${L.BASE}/${ED}/index.html`); await sleep(1200);
   await page.evaluate(() => { wsUI.confirm = async () => true; wsUI.alert = async () => {}; window.alert = () => {}; const set = (q, v) => { const e = document.querySelector(q); e.value = v; e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true })); };
@@ -82,10 +83,10 @@ const READ = `(function (root) {
   const pp = await ctx.newPage(); pp.on('pageerror', e => errs.push('packet: ' + String(e).slice(0, 160))); await pp.setViewportSize({ width: 730, height: 900 });
   await pp.setContent(html, { waitUntil: 'load' }); await sleep(2500); await pp.emulateMedia({ media: 'print' }); await sleep(400);
   const pk = await pp.evaluate(`(function () { var R = ${READ}; var o = { floor: window.__nbhFloor, sw: document.documentElement.scrollWidth, w: document.documentElement.clientWidth, secs: {} };
-    ['DM-1', 'TB-1', 'FS-1'].forEach(function (id) { var s = document.getElementById('sec-' + id); o.secs[id] = s ? { mark: s.getAttribute('data-mp-floor'), read: R(s), sized: [].filter.call(s.querySelectorAll('*'), function (e) { return e.style && e.style.getPropertyPriority('font-size') === 'important'; }).length } : null; }); return o; })()`);
+    ['DM-1', 'FS-1', 'SP-1'].forEach(function (id) { var s = document.getElementById('sec-' + id); o.secs[id] = s ? { mark: s.getAttribute('data-mp-floor'), read: R(s), sized: [].filter.call(s.querySelectorAll('*'), function (e) { return e.style && e.style.getPropertyPriority('font-size') === 'important'; }).length } : null; }); return o; })()`);
   const f = pk.secs;
-  ok('F in a packet of Forms DM-1, TB-1 and FS-1 the first two print nothing under 9 point (' + (f['DM-1'] ? f['DM-1'].sized : '?') + ' and ' + (f['TB-1'] ? f['TB-1'].sized : '?') + ' pieces raised) and Form FS-1 is left as it is',
-    !!f['DM-1'] && !!f['TB-1'] && !!f['FS-1'] && f['DM-1'].mark === '9' && f['TB-1'].mark === '9' && f['FS-1'].mark === null && f['DM-1'].read.nSmall === 0 && f['TB-1'].read.nSmall === 0 && f['DM-1'].read.heads.length === 0 && f['TB-1'].read.heads.length === 0 && f['DM-1'].sized > 20 && f['TB-1'].sized > 20 && f['FS-1'].sized === 0 && pk.floor > 40, pk);
+  ok('F in a packet of Forms DM-1, FS-1 and SP-1 the first two print nothing under 9 point (' + (f['DM-1'] ? f['DM-1'].sized : '?') + ' and ' + (f['FS-1'] ? f['FS-1'].sized : '?') + ' pieces raised) and Form SP-1\'s sheet is left as it is',
+    !!f['DM-1'] && !!f['FS-1'] && !!f['SP-1'] && f['DM-1'].mark === '9' && f['FS-1'].mark === '9' && f['SP-1'].mark === null && f['DM-1'].read.nSmall === 0 && f['FS-1'].read.nSmall === 0 && f['DM-1'].read.heads.length === 0 && f['FS-1'].read.heads.length === 0 && f['DM-1'].sized > 20 && f['FS-1'].sized > 20 && f['SP-1'].sized === 0 && pk.floor > 40, pk);
   ok('G no page error in any form or in the packet', !errs.length, errs);
   await browser.close();
   console.log('RESULT: ' + (bad ? bad + ' failed' : 'all passed')); process.exit(bad ? 1 : 0);
