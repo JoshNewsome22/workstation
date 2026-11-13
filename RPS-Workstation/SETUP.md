@@ -9905,6 +9905,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.03: Behavior Modification, second part: nine more cards in TD-1's bank (2020 and 2021)
+(the BCBA's folder of 11/13, continued; see v26.02 for the folder and the method.)
+- **TD-1, 9 new cards** (3,263 in all; 23 from this journal):
+  - 2020: the Good Behavior Game played daily and then on one or two unannounced days a week, with the rules reviewed
+    on the other days (Dadakhodjaeva et al.); a red card for "not now" and a green card for "talk is welcome", with
+    red-card time lengthened from 1 to 30 min (Niedfeld et al.); a few class rules, an unnamed tally on the board and
+    one sentence of praise and one of advice at the end, with no rewards (Chinnappan et al.); a staged check of what
+    stereotypy needs during lessons: ordinary teaching, then music, then richer rewards for correct answers (Cook &
+    Rapp); matched sets taught with a gesture, a model or a guided hand to find the fastest prompt, and the student's
+    own choice (Markham et al.); tokens saved up for one longer play time against a short play time after each
+    response (Weston et al.).
+  - 2021: recess partners trained to prompt and praise, then a signed weekly contract for each classmate and the
+    student (Alwahbi & Hua); small talk coached by an unseen voice on a video call, a hint and then a direct line
+    (Joseph et al.); tolerance training for adolescents: the rule stated, a calm "Okay" modeled, the wait doubled
+    after three successes (O'Rourke et al.; its restart of the wait after problem behavior is a marked EXTINCTION
+    step, which makes 35 in the bank).
+- **Left out and recorded:** Cook & Rapp used positive practice overcorrection for one of five children; it is named
+  in the card's note and in the set-aside record.
+- **GB-1:** nothing new in this part; the nine cards were not yet matched to objectives.
+- **Not yet read (procedure studies), 2020:** Viefhaus et al. (habit reversal for tics), Cividini-Motta et al.
+  (response interruption), the joint attention study, Daffner et al. (sibling-mediated social skills), Eldevik et al.
+  (receptive language), Sivaraman et al. (RIRD), Gonzales et al. (physical activity). **2021:** Bryant et al. (early
+  numeracy), Ciullo et al. (quick-writing), Solis et al. (vocabulary and main idea), Hall Pistorio et al. (literacy-
+  based behavioral intervention), Ledbetter-Cho et al. (abduction prevention), Brogan et al. (behavioral skills
+  training), Hamrick et al. (observation and rules), Icht et al. (vocal production and memory), Lee et al. (video
+  modeling of play), the sibling interaction study. With the nine of 2022 and 2023 named in v26.02, 26 in all, and the
+  1977 volume (scans). The method and review papers of 2020 and 2021 are not yet in the reading list.
+- **Tests.** The two bank tests, the versions and procedure-video tests pass; the marks test passes with its counts
+  raised (3,263 cards, 35 EXTINCTION steps).
+- **The test run.** On the built folder: the Learning tests and the bank tests in both editions, and the versions,
+  procedure-video, marks and feeding tests, the size budgets and the build test in the workstation. Not seen on an iPad.
 ### v26.02: the journal Behavior Modification, first part: 14 cards in TD-1's bank, 5 source lines in GB-1's, and a reading list in Learning
 (the BCBA, 11/13: "Here is the next batch of articles for the TD bank, video considerations, Goal bank, RBT and BCBA
 training information, data analysis, experimtal analysis, all relevant forms and parts in the workstation etc.")

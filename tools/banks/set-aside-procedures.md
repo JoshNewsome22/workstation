@@ -5,7 +5,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Tier A** procedures could be considered only in rare cases, after a functional assessment, after less restrictive procedures have been tried, and with the review and consent the district requires.
 - **Tier B** procedures are never used in schools. They are listed only so the form can show them as prohibited.
 
-## Tier A: may be considered with approval (258)
+## Tier A: may be considered with approval (259)
 
 ### Response cost (67)
 
@@ -168,10 +168,11 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **paisey1991a** [paisey1991a]: In one assessment condition the therapist said things like 'No hitting!' or 'That hurts!' with brief eye contact after each aggressive act by three men during group-home meals. *Part of a package.* Reported: aggression in this condition suggested that reprimands added to aggression for 2 of the 3 men. Bank: study skipped.
 - **steuartwatson1994** [steuartwatson1994]: Each time the 52-year-old man began to ruminate during a meal, the trainer shouted "No!" and struck the table with both hands. *Part of a package.* Reported: not separated from the package. Bank: kept out of the steps; note flags it; study skipped.
 
-### Overcorrection (9)
+### Overcorrection (10)
 
 - **Azrin & Foxx (1971)** [azrin1971]: After an accident the person had to clean up and shower (forced cleanup). *Part of a package.* Bank: study skipped.
 - **Azrin & Wesolowski (1974)** [azrin1974]: Stealing was followed by returning the item plus giving the victim another one (theft reversal). *Main procedure.* Bank: study skipped.
+- **Cook & Rapp, 2020** [cook2020]: In the last stage of a staged assessment of stereotypy during lessons, one of five young children with autism received positive practice overcorrection after motor stereotypy, when ordinary instruction, music and richer rewards for correct answers had not been enough; the part of the article read for the card names the procedure and does not describe it. *Last stage, one participant.* Reported: For that child motor stereotypy decreased and correct responding increased. Bank: kept out of the steps; note flags it.
 - **Foxx & Azrin (1973)** [foxx1973]: Mouthing, head-weaving and hand-clapping were followed by overcorrection with forced manual guidance and cleaning the mouth with antiseptic. *Main procedure.* Bank: study skipped.
 - **Foxx (1977)** [foxx1977b]: When a child did not look at the therapist within 5 seconds of “Look at me”, the child was manually guided to hold the head up, down or straight for 15 seconds at a time for 2 and later 5 minutes (functional movement training), which looking on time avoided. *Main procedure.* Reported: With it, edibles and praise, eye contact reached about 90% for each of the three children, compared with no more than 55% under edibles and praise only. Bank: study skipped.
 - **Lomas Mevers et al., 2017** [lomasmevers2017]: Each time the other twin eloped, he was guided back and forth between the place he had run to and where he started, three times. *Part of a package.* Reported: The authors state their treatment analyses showed he needed it, but its effect is not separated in the data shown. Bank: kept out of the steps; note flags it; study skipped.
@@ -486,6 +487,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Clark, H. B., & Sherman, J. A. (1975). Teaching generative use of sentence answers to three forms of questions. Journal of Applied Behavior Analysis, 8(3), 321–330.
 - Clark, H. B., Boyd, S. B., & Macrae, J. W. (1975). A classroom program teaching disadvantaged youths to write biographic information. Journal of Applied Behavior Analysis, 8(1), 67–75.
 - Clark, H. B., Greene, B. F., Macrae, J. W., McNees, M. P., Davis, J. L., & Risley, T. R. (1977). A parent advice package for family shopping trips: Development and evaluation. Journal of Applied Behavior Analysis, 10(4), 605–624.
+- Cook, J. L., & Rapp, J. T. (2020). To what extent do practitioners need to treat stereotypy during academic tasks? Behavior Modification, 44(2), 228–264.
 - Cox, A. D., Savard, A., Thillainathan, T., Ayvaci, A., & Dunnet, M. (2026). A clinical demonstration of individualized restraint fading. Behavior Analysis in Practice, 19(3), 1198–1212.
 - Curran, J. P., III, Himadi, B., & Donahue-Bennett, D. (1991). Conversational skills training with a chronically hospitalized psychiatric inpatient. Behavioral Residential Treatment, 6(2), 107–117.
 - Danforth, J. S. (2016). A flow chart of behavior management strategies for families of children with co-occurring attention-deficit hyperactivity disorder and conduct problem behavior. Behavior Analysis in Practice, 9(1), 64–76.
