@@ -9905,6 +9905,40 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.12: Share view, one graph on the whole screen with initials for the name
+(approved by the BCBA on 11/12 with the list of ten ideas, idea 4: "A full-screen graph for a Meet with the student's
+name replaced by initials, and a 'start a Meet now' button on a case." The first half is built; the second is below.)
+- **What existed.** Daily data had "Full screen" only for its narrated walkthrough. The caseload has "Initials only"
+  for its own list. No graph could be shown alone.
+- **What is new.** In Daily data (Form DD-1), Graphs & analysis, each behavior's graph has a button "Share view"
+  beside "Save graph as image". It opens that graph alone over the whole window: the student's initials and the
+  behavior's name at the top (with the kind of target and the measure), the graph as large as the window allows,
+  and under it the sentence that reads the graph (the same sentence a screen reader hears). "Whole screen" asks the
+  browser for its full screen, where it has one (an iPad does; an iPhone does not, and the button is not shown
+  there). Close, or the Escape key, puts everything back, with the focus on the button that opened it.
+- **What is not on that screen.** The student's name, ID, school and the rest of the form. The initials come from
+  the name box ("Rivera, Ana Lucia" gives A.L.R.; a name already typed as initials stays as typed; no name, no
+  initials). The graphs themselves have never carried the name; were one ever to, the view replaces it.
+- **What it does not do.** It saves nothing, sends nothing and changes no setting: it is a copy of the picture
+  already drawn, with the display options chosen on the page (trend, level, publication style and the rest). It is
+  not printed.
+- **Not built: "start a Meet now" on a case.** A Meet is made in the BCBA's Google account. The calendar connection
+  of v25.99 reads events and offers Join; making a meeting needs permission to write to the calendar, which has not
+  been asked for or given.
+- **Two more of the ten ideas, checked and not built.**
+  - *Follow-ups as a list (idea 9):* already there. Form CN-1's next steps (an owner and a date) are gathered into
+    "what is due" on the start screen and stay there until the note marks them done.
+  - *Unanswered questionnaires (idea 10):* partly there. The caseload counts the students with questionnaires or
+    staff phone links waiting and has "Collect replies". It does not list who has not answered: a reply is known only
+    once collected, and who was asked sits inside each form. A list with a reminder email needs a change in each of
+    those forms; not started.
+- **Also.** The start screen's sidebar button now reads "Find a form, a video, a lesson", as the box it opens does
+  since v26.10.
+- **Test.** `qa/v2612-share-view-test.js` (new, in the release list): one button on every graph, also after the
+  graphs are drawn again; the view's heading, size, sentence and focus; the name nowhere on it; Escape, Close and
+  Tab; the initials from two forms of a name and from none; a phone's width.
+- **The test run.** On the built folder: the new test in both editions, Daily data's own tests, the size budgets and
+  the build test. Not seen on an iPad or in a real meeting.
 ### v26.11: the approved marks on 228 steps of Form TD-1's bank
 (the BCBA, 11/13, on the proposal of 254 steps sent that day: "Yes I approve." The question put was whether to approve
 the 228 proposed marks; the 26 steps listed as questions need an answer each and were not changed.)

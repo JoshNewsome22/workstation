@@ -24172,6 +24172,63 @@ window.__dd2570.zoomTo=zoomTo;
 try{if(document.getElementById("resultsOut")&&document.getElementById("resultsOut").children.length)renderResults();}catch(e){}
 })();
 </script>
+<style>
+/* v26.12 Share view */
+.dd-graphsave button[data-share]{min-height:44px}
+#ddShare{position:fixed;inset:0;z-index:2147483000;background:#fff;color:#16242e;display:flex;flex-direction:column;padding:max(14px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));box-sizing:border-box}
+#ddShare .ddsh-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 8px}
+#ddShare .ddsh-who{font:700 22px/1.2 Inter,system-ui,sans-serif;color:#182e43;margin:0;flex:1 1 320px;min-width:0}
+#ddShare .ddsh-who small{display:block;font:400 15px/1.35 Inter,system-ui,sans-serif;color:#54676f;margin-top:2px}
+#ddShare .ddsh-btns{display:flex;gap:8px;flex:none}
+#ddShare .ddsh-btns button{min-height:44px;min-width:44px;padding:0 16px;border:1px solid #b9c7c4;border-radius:8px;background:#fff;color:#182e43;font:600 15px Inter,system-ui,sans-serif;cursor:pointer}
+#ddShare .ddsh-btns button:focus-visible{outline:3px solid #2f7fa8;outline-offset:2px}
+#ddShare .ddsh-fig{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
+#ddShare .ddsh-fig{min-width:0}#ddShare .ddsh-fig svg{width:100%!important;min-width:0!important;max-width:100%!important;height:100%;max-height:100%}
+#ddShare .ddsh-cap{margin:8px 0 0;font:400 16px/1.45 Inter,system-ui,sans-serif;color:#16242e}
+body.dd-sharing{overflow:hidden}
+@media print{#ddShare{display:none!important}}
+</style>
+<script>
+/* v26.12 Share view (the BCBA's list of 11/12, idea 4: "a full-screen graph for a Meet with the student's name replaced by
+   initials"). Each graph of Graphs & analysis has "Share view": that graph alone fills the screen, under the student's
+   initials and the behavior's name, with the sentence that reads the graph below it. The name, the ID, the school and the
+   rest of the form are not on that screen. Nothing is saved, sent or changed: the view is a copy of the picture already drawn.
+   Close with the button or Escape. "Whole screen" asks the browser for its full screen where it has one. */
+(function(){
+  function ini(){var el=document.getElementById('m_client'),c=String(el&&el.value||'').replace(/^\s*SIMULATED\b\s*[–—-]?\s*/i,'').trim(),m=/^([^,]+),\s*(.+)$/.exec(c);if(m)c=m[2]+' '+m[1];
+    var p=c.split(/\s+/).filter(function(w){return /^[A-Za-zÀ-ɏ]/.test(w);});return p.length?p.slice(0,3).map(function(w){return w.charAt(0).toUpperCase()+'.';}).join(''):'';}
+  function fullName(){var el=document.getElementById('m_client');return String(el&&el.value||'').replace(/^\s*SIMULATED\b\s*[–—-]?\s*/i,'').trim();}
+  var busy=false;
+  function decorate(){var out=document.getElementById('resultsOut');if(!out||busy)return;busy=true;
+    try{[].forEach.call(out.querySelectorAll('.behavior-report'),function(rep){var bar=rep.querySelector('.dd-graphsave'),svg=rep.querySelector('.chartbox svg.graph');if(!bar||!svg||bar.querySelector('[data-share]'))return;
+      var b=document.createElement('button');b.type='button';b.className='btn ghost sm';b.setAttribute('data-share','1');b.title='This graph alone on the whole screen, with initials in place of the name: for a shared screen in a meeting';b.textContent='Share view';
+      bar.insertBefore(document.createTextNode(' '),bar.firstChild);bar.insertBefore(b,bar.firstChild);});}finally{busy=false;}}
+  var from=null;
+  function close(){var o=document.getElementById('ddShare');if(!o)return;try{if(document.fullscreenElement===o&&document.exitFullscreen)document.exitFullscreen();}catch(e){}
+    o.parentNode.removeChild(o);document.body.classList.remove('dd-sharing');if(from&&document.contains(from))try{from.focus();}catch(e){}from=null;}
+  function open(btn){var rep=btn.closest('.behavior-report'),svg=rep&&rep.querySelector('.chartbox svg.graph');if(!svg)return;close();from=btn;
+    var h=rep.querySelector('.sec-title h3'),sub=rep.querySelector('.sec-title span:not(.swatch)'),name=h?h.textContent.trim():'This behavior',who=ini(),full=fullName();
+    var label=svg.getAttribute('aria-label')||'',cap=label.replace(/^Line graph of [^.]*\.\s*/,'');
+    var o=document.createElement('div');o.id='ddShare';o.className='noprint no-print';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Share view: '+(who?who+' ':'')+name);
+    var head=document.createElement('div');head.className='ddsh-head';var t=document.createElement('p');t.className='ddsh-who';t.textContent=(who?who+'  ':'')+name;
+    if(sub&&sub.textContent.trim()){var sm=document.createElement('small');sm.textContent=sub.textContent.trim();t.appendChild(sm);}
+    var bx=document.createElement('div');bx.className='ddsh-btns';var fs=document.createElement('button');fs.type='button';fs.id='ddShareFull';fs.textContent='Whole screen';
+    var req=o.requestFullscreen||o.webkitRequestFullscreen;if(!req)fs.hidden=true;fs.addEventListener('click',function(){try{var r=req.call(o);if(r&&r.catch)r.catch(function(){});}catch(e){}});
+    var cl=document.createElement('button');cl.type='button';cl.id='ddShareClose';cl.textContent='Close';cl.addEventListener('click',close);bx.appendChild(fs);bx.appendChild(cl);head.appendChild(t);head.appendChild(bx);
+    var fig=document.createElement('div');fig.className='ddsh-fig';var c=svg.cloneNode(true);c.removeAttribute('width');c.removeAttribute('height');c.setAttribute('preserveAspectRatio','xMidYMid meet');
+    /* the name is not in a graph today; were it ever, it is not shown here */
+    if(full&&full.length>2){[].forEach.call(c.querySelectorAll('text,title,desc'),function(n){if(n.textContent.indexOf(full)>=0)n.textContent=n.textContent.split(full).join(who||'the student');});if(label.indexOf(full)>=0)c.setAttribute('aria-label',label.split(full).join(who||'the student'));if(cap.indexOf(full)>=0)cap=cap.split(full).join(who||'the student');}
+    fig.appendChild(c);o.appendChild(head);o.appendChild(fig);if(cap){var p=document.createElement('p');p.className='ddsh-cap';p.textContent=cap;o.appendChild(p);}
+    o.addEventListener('keydown',function(e){if(e.key==='Escape'){e.preventDefault();close();return;}
+      if(e.key==='Tab'){var f=[fs,cl].filter(function(x){return !x.hidden;}),i=f.indexOf(document.activeElement);e.preventDefault();f[(i+(e.shiftKey?f.length-1:1))%f.length].focus();}});
+    document.body.appendChild(o);document.body.classList.add('dd-sharing');cl.focus();}
+  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.dd-graphsave [data-share]');if(b){e.preventDefault();open(b);}});
+  function start(){var out=document.getElementById('resultsOut');if(!out)return;decorate();
+    try{var tm=0;new MutationObserver(function(){if(busy)return;clearTimeout(tm);tm=setTimeout(decorate,60);}).observe(out,{childList:true,subtree:true});}catch(e){}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+  window.__ddShare={open:function(i){var b=document.querySelectorAll('.dd-graphsave [data-share]')[i||0];if(b)open(b);},close:close,isOpen:function(){return !!document.getElementById('ddShare');}};
+})();
+</script>
 <script id="fx2-v2492-js">
 /* v24.92 Forms DM-1, IC-1 and RR-1 on screen (the 10/28 design review); v24.95 the six forms refined from the BCBA's
    iPad screenshots (boxes in line across a row, an example gone once its box is filled, the toolbar on one row). It arranges what the sheets already hold:
