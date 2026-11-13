@@ -9905,6 +9905,36 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.98: six additions to the video players
+(the BCBA, 11/13: "are there any other player feature that the top player feature have that can also be added?" and, to
+the list of six, "Add all those features")
+- **Speed.** A box under the picture: 0.5×, 0.75×, Normal, 1.25×, 1.5×, 2×. The choice is kept on the device (with the
+  library's other choices, under `nbh.videos.pref`) and is used for every video opened after it, in the video library and
+  in Watch how on Form TD-1. The browser's own speed menu changes the same setting.
+- **Press and hold for 2×.** With a finger or a pen on the picture while the video plays: after half a second it plays at
+  2× for as long as the hold lasts, with a note at the top of the picture ("2× speed while you hold"); letting go puts
+  the speed back. The Speed box and the kept speed are not changed by it. In the library and in Watch how. Not for a
+  mouse, and not on the strip of the player's own controls at the foot. The end of a hold is not taken as a tap or as
+  half of a double tap.
+- **The strip of steps** (library). Under the picture, one piece for the opening and one for each step that has a moment
+  of its own, each as wide as it is long. The pieces fill in as the video plays, and a tap on a piece goes to its step.
+  It is left out for a screen reader, which has the same thing in the Steps list beside it.
+- **Repeat this step** (library). Switched on, the part the video is in plays again and again, and the button says which
+  ("Repeating step 4"); the piece is ringed on the strip. Going to another step (the list, the strip, the seek bar)
+  moves the repeat there. Switched off, the video plays on.
+- **Play the next one** (library). On when first used. At the end of a video, "Up next" names the following video of the
+  same procedure (after the last, the first) and counts down 8 seconds, with **Play now** and **Cancel**. The button
+  under the picture switches it off, and that is kept on the device. It does not act while a step is repeating or in
+  the small floating window. A screen reader is told once, not each second.
+- **Keys.** Anywhere on a video's page except in a box that is typed in: K play and pause; J and L back and forward 10
+  seconds; < and > slower and faster; 0 to 9 through the video in tenths; R repeat this step; C captions; M mute; F full
+  screen; Shift+N the next video. Space and the arrow keys (5 seconds) act with the player selected, as before. In
+  Watch how: K, J, L, < and >, M. The list is under **Shortcuts** below the picture.
+- **Not changed:** the videos themselves, their narration and their captions. 43 videos, as in v25.97.
+- **Not seen on an iPad.** Tested in a desktop browser set to an iPad's and a phone's screen and touch. On an iPad, a
+  long press on a video may bring up the device's own menu; the page asks it not to, and that needs a look on the
+  device. None of this reaches the device's own full-screen player.
+- **The test run.** The new test v2598-player (9 checks) and the tests of the players and the library passed on the built folder: v2597-skip 9, v2569-video-library 82, v2572-videos 54, v2572-transcript 29, v2568-td1-versions 44, v2568-td1-procvideos 51, v2591 7, the size budget 5 and the build check 8. The whole test run was not repeated.
 ### v25.97: double-tap to skip in the video players, and three videos on escape antecedents
 (the BCBA, 11/13: "is there a quick rewind and fast forward feature like YouTube has where you can double click the screen
 on the left side to rewind 10 or 15 seconds and on the right side to fast forward" ... "Yes"; and "Yes" to the next

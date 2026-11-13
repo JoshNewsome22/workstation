@@ -7978,6 +7978,8 @@ window.__tdScenes={has:id=>!!byId[id],play,close,count:()=>Object.keys(byId).len
   #tdVideo #tv-close svg{display:block;width:24px;height:24px}
   #tdVideo #tv-close .tv-cl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
   #tdVideo .tv-box video{width:100%;margin:0;border-radius:0}}
+#tdVideo .tv-sp{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:15px;font-weight:600;color:#1D3A52}
+#tdVideo .tv-sp select{min-height:44px;font:inherit;color:inherit;border:1px solid #b9c7c4;border-radius:8px;background:#fff;padding:0 6px}
 #tdVideo .tv-ai{font-size:13px;font-weight:700;color:#8a5a00;background:#fff4dc;border:1px solid #e7c27a;border-radius:999px;padding:3px 10px;white-space:nowrap}
 #tdVideo video{display:block;width:calc(100% - 24px);margin:0 12px;border-radius:10px;background:#1f2f3f;aspect-ratio:16/9}
 /* v25.72 (captions and transcript) the browser's control bar in a 92 px band below the picture, clear of its caption strip */
@@ -8327,6 +8329,7 @@ function nbhSkipTap(vid,host){
   }
   function tap(e){
     if(e.pointerType==='mouse')return;
+    if(vid.__nbhHeld&&Date.now()-vid.__nbhHeld<350){last=null;return;}   /* v25.98 the end of a press-and-hold is not a tap */
     if(!(vid.duration>0)||!vid.getAttribute('src'))return;
     var p=e.changedTouches&&e.changedTouches[0]||e,r=vid.getBoundingClientRect();if(!r.width||!r.height)return;
     var x=(p.clientX-r.left)/r.width,y=(p.clientY-r.top)/r.height;
@@ -8341,18 +8344,55 @@ function nbhSkipTap(vid,host){
   }
   if(window.PointerEvent)vid.addEventListener('pointerup',tap);else if('ontouchend' in window)vid.addEventListener('touchend',tap);
 }
+/* v25.98 (the BCBA, 11/13: "Add all those features") press and hold on the picture while it plays: 2x speed for as long as the
+   finger or pen stays down, with a note at the top of the picture; letting go puts the speed back. Not for a mouse (a mouse
+   press is the browser's own play and pause). The strip of the player's own controls at the foot is left alone. */
+function nbhHoldFast(vid,host){
+  var T=0,on=false,was=1,badge=null,sx=0,sy=0;
+  function foot(r,y){return vid.controls&&r.bottom-y<Math.max(56,r.height*.16);}
+  function show(b){
+    if(!badge){badge=document.createElement('div');badge.className='nbh-fast';badge.setAttribute('role','status');badge.textContent='2\u00d7 speed while you hold';
+      badge.style.cssText='position:fixed;z-index:2147483000;pointer-events:none;padding:8px 14px;border-radius:999px;background:rgba(15,26,34,.8);color:#fff;font:700 15px/1 -apple-system,Helvetica,Arial,sans-serif;transform:translateX(-50%);opacity:0;transition:opacity .12s;white-space:nowrap';
+      host.appendChild(badge);}
+    if(b){var r=vid.getBoundingClientRect();badge.style.left=(r.left+r.width/2)+'px';badge.style.top=(r.top+14)+'px';}
+    badge.style.opacity=b?'1':'0';}
+  function end(){clearTimeout(T);T=0;if(!on)return;on=false;vid.__nbhFast=false;try{vid.playbackRate=was;}catch(e){}vid.__nbhHeld=Date.now();show(false);}
+  if(!window.PointerEvent)return;
+  vid.addEventListener('pointerdown',function(e){if(e.pointerType==='mouse'||vid.paused||!(vid.duration>0))return;var r=vid.getBoundingClientRect();if(foot(r,e.clientY))return;
+    sx=e.clientX;sy=e.clientY;clearTimeout(T);
+    T=setTimeout(function(){T=0;if(vid.paused||vid.ended)return;on=true;was=vid.playbackRate;vid.__nbhFast=true;try{vid.playbackRate=2;}catch(x){}show(true);},500);});
+  vid.addEventListener('pointermove',function(e){if((T||on)&&Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy)>24)end();});
+  ['pointerup','pointercancel','pointerleave'].forEach(function(n){vid.addEventListener(n,end);});
+  vid.addEventListener('contextmenu',function(e){if(on||T)e.preventDefault();});
+  vid.addEventListener('pause',end);
+}
 function build(){box=document.createElement('div');box.id='tdVideo';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby','tv-title');
  box.innerHTML='<div class="tv-box"><div class="tv-hd"><h3 id="tv-title"></h3><button type="button" id="tv-close"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="tv-cl">Close</span></button></div>'+
-  '<video id="tv-video" controls playsinline preload="metadata"></video><div class="tv-row"><span class="tv-ai">AI-generated · simulated people</span><button type="button" id="tv-tr" style="margin-left:auto">Transcript</button><button type="button" id="tv-lib">Open in the video library</button></div>'+
+  '<video id="tv-video" controls playsinline preload="metadata"></video><div class="tv-row"><span class="tv-ai">AI-generated · simulated people</span><label class="tv-sp">Speed <select id="tv-speed">'+[0.5,0.75,1,1.25,1.5,2].map(r=>'<option value="'+r+'"'+(r===1?' selected':'')+'>'+(r===1?'Normal':r+'\u00d7')+'</option>').join('')+'</select></label><button type="button" id="tv-tr" style="margin-left:auto">Transcript</button><button type="button" id="tv-lib">Open in the video library</button></div>'+
   '<p class="tv-msg" id="tv-msg" aria-live="polite"></p><p class="tv-note" id="tv-note"></p></div>';
  document.body.appendChild(box);
  $('tv-close').addEventListener('click',close);$('tv-lib').addEventListener('click',()=>{const k=cur;close();library(k);});
  nbhSkipTap($('tv-video'),box);   /* v25.97 a double tap on the left or the right half of the picture: back or forward 10 s */
+ /* v25.98 (the BCBA, 11/13: "Add all those features") in Watch how: speed (kept on the device with the library's), press and
+    hold for 2x, and the keys K (play, pause), J and L (10 seconds), < and > (slower, faster), M (mute) */
+ nbhHoldFast($('tv-video'),box);
+ (function(){const v=$('tv-video'),sp=$('tv-speed'),R=[0.5,0.75,1,1.25,1.5,2],PK='nbh.videos.pref';
+  const get=()=>{try{const o=JSON.parse(localStorage.getItem(PK)||'{}')||{};return R.indexOf(+o.rate)>=0?+o.rate:1;}catch(e){return 1;}};
+  const set=(r,quiet)=>{r=R.indexOf(r)>=0?r:1;try{v.defaultPlaybackRate=r;v.playbackRate=r;}catch(e){}sp.value=String(r);if(!quiet){try{const o=JSON.parse(localStorage.getItem(PK)||'{}')||{};o.rate=r;localStorage.setItem(PK,JSON.stringify(o));}catch(e){}}};
+  sp.addEventListener('change',()=>set(+sp.value));v.addEventListener('loadedmetadata',()=>set(get(),true));set(get(),true);
+  v.addEventListener('ratechange',()=>{if(v.__nbhFast)return;const r=v.playbackRate;if(R.indexOf(r)>=0&&String(r)!==sp.value)set(r);});
+  box.addEventListener('keydown',ev=>{if(ev.altKey||ev.ctrlKey||ev.metaKey||box.hidden||!(v.duration>0))return;const t=ev.target,k=ev.key;if(t.closest&&t.closest('input,textarea,select,[contenteditable]'))return;let done=true;
+   if(!ev.shiftKey&&(k==='k'||k==='K')){if(v.paused){const p=v.play();if(p&&p.catch)p.catch(()=>{});}else v.pause();}
+   else if(!ev.shiftKey&&(k==='j'||k==='J'||k==='l'||k==='L')){try{v.currentTime=Math.max(0,Math.min(v.duration,v.currentTime+(/l/i.test(k)?10:-10)));}catch(e){}}
+   else if(k==='<'||k==='>'||(!ev.shiftKey&&(k===','||k==='.'))){let i=R.indexOf(v.playbackRate);if(i<0)i=2;set(R[Math.max(0,Math.min(R.length-1,i+(k==='>'||k==='.'?1:-1)))]);}
+   else if(!ev.shiftKey&&(k==='m'||k==='M'))v.muted=!v.muted;
+   else done=false;
+   if(done){ev.preventDefault();ev.stopPropagation();}});})();
  /* v25.72 Transcript: the video's page in the library on its Transcript tab (the tab the library keeps in nbh.videos.pref) */
  $('tv-tr').addEventListener('click',()=>{const k=cur;try{const o=JSON.parse(localStorage.getItem('nbh.videos.pref')||'{}')||{};o.tab='transcript';localStorage.setItem('nbh.videos.pref',JSON.stringify(o));}catch(e){}close();library(k);});box.addEventListener('click',ev=>{if(ev.target===box)close();});
  document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&box&&!box.hidden)close();});
  /* the focus stays inside the player while it is open */
- box.addEventListener('keydown',ev=>{if(ev.key!=='Tab')return;const f=[...box.querySelectorAll('button,video[controls],[href],[tabindex]:not([tabindex="-1"])')].filter(e=>!e.hidden&&e.getClientRects().length);if(!f.length)return;
+ box.addEventListener('keydown',ev=>{if(ev.key!=='Tab')return;const f=[...box.querySelectorAll('button,select,video[controls],[href],[tabindex]:not([tabindex="-1"])')].filter(e=>!e.hidden&&e.getClientRects().length);if(!f.length)return;
   const a=f[0],z=f[f.length-1],at=document.activeElement;if(!box.contains(at)){ev.preventDefault();a.focus();}else if(ev.shiftKey&&at===a){ev.preventDefault();z.focus();}else if(!ev.shiftKey&&at===z){ev.preventDefault();a.focus();}});
  const vid=$('tv-video'),keep=(force,ended)=>{const k=vid.dataset.id;if(!k||!(vid.duration>0))return;const now=Date.now();if(!force&&now-saveT<2000)return;saveT=now;keepProg(k,vid.currentTime,vid.duration,ended);};
  vid.addEventListener('timeupdate',()=>keep(false));vid.addEventListener('pause',()=>keep(true));vid.addEventListener('seeked',()=>keep(true));vid.addEventListener('ended',()=>keep(true,true));
