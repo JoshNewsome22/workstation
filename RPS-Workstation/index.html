@@ -781,6 +781,32 @@ body.bar-folded #barSum{display:flex}
 #todayBtn{position:relative}.tbadge{position:absolute;top:-5px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:#5b6b75;color:#fff;font:700 11px/18px Inter,system-ui,sans-serif;padding:0 5px;text-align:center;pointer-events:none}.tbadge.red{background:#c0392b}.tbadge[hidden]{display:none}
 #blankCl h2{margin-top:0}
 /* v23.71 What's due, by when: a row a student and a date (its date and days, the student, what is due, the forms) */
+/* v25.99 today's Google Calendar on the start screen: a row for each event (when, what, Join), like What's due */
+.gc{margin:2px 0 18px;text-align:left}
+.gc[hidden]{display:none}
+.gc-sub{font-size:13.5px;color:var(--ink-soft,#46606b)}
+.gc-rows{list-style:none;margin:6px 0 0;padding:0;border-top:1px solid var(--rule,#dfe6e4)}
+.gc-row{display:grid;grid-template-columns:10.4em minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:9px 4px 9px 10px;border-bottom:1px solid var(--rule,#dfe6e4);border-left:3px solid transparent}
+.gc-row.gc-now{border-left-color:var(--navy,#1D3A52);background:#f3f7f8}
+.gc-row.gc-past .gc-when,.gc-row.gc-past .gc-what{color:var(--ink-soft,#46606b)}
+.gc-when{font-variant-numeric:tabular-nums;font-size:13.5px;white-space:nowrap;color:var(--ink,#16242e)}
+.gc-what{font-weight:600;overflow-wrap:anywhere;line-height:1.35;color:var(--ink,#16242e)}
+.gc-what small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-soft,#46606b)}
+.gc-pill{display:inline-block;margin-right:8px;padding:1px 8px;border-radius:999px;font:700 11.5px/1.6 var(--sans,system-ui,sans-serif);background:var(--navy,#1D3A52);color:#fff;vertical-align:1px}
+.gc-pill.gc-soon{background:#e3ecea;color:var(--navy,#1D3A52)}
+.gc-act{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;align-items:center}
+.gc-join{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--navy,#1D3A52);color:var(--navy,#1D3A52);background:#fff;font-weight:700;font-size:13.5px;text-decoration:none}
+.gc-join:hover{background:#eef3f5}
+.gc-join.gc-hot{background:var(--navy,#1D3A52);color:#fff}
+.gc-none,.gc-err{margin:8px 0 0;font-size:13.5px;text-align:left}
+.gc-err{color:#8a1c14}
+.gc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:8px 0 0;font-size:13px;color:var(--ink-soft,#46606b)}
+.gc-foot a{color:var(--navy,#1D3A52)}
+.gc-offer{margin:14px 0 0;text-align:left}
+.gc-offer[hidden]{display:none}
+@media (max-width:640px){.gc-row{grid-template-columns:1fr;gap:2px}.gc-act{justify-content:flex-start}}
+@media (pointer:coarse){.gc-join{min-height:44px}}
+@media print{.gc,.gc-offer{display:none}}
 .due-board{margin:4px 0 16px}.due-cal{margin:8px 0 2px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}.due-cal button{min-height:44px}.cl-fba input[type=number]{width:4.5em;font-size:16px}.cl-fba select{font-size:16px}.due-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:0 0 2px}
 .due-head h3{margin:0;font-size:19px}.due-sum{font-size:13.5px;color:var(--ink-soft,#46606b)}.due-sum b{color:var(--ink,#1c2733)}.due-sum .now b,.due-sum .od b{color:#b03a2e}
 .due-grp{display:flex;align-items:center;gap:8px;margin:14px 0 0;padding-bottom:4px;font:700 11.5px var(--sans,system-ui,sans-serif);letter-spacing:.07em;text-transform:uppercase;color:var(--slate,#46606b);border-bottom:1px solid var(--rule,#dfe6e4)}
@@ -3055,7 +3081,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v25.98';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v25.99';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5147,11 +5173,11 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Back up the caseload</b> (Caseload) writes one file holding every student kept on this '+HERE+', locked with a passphrase if you choose one; <b>Restore</b> puts a backup back, keeping the newer copy of each student. <b>Save packet</b> and <b>Open packet</b> (the <b>Packet</b> menu) carry the student’s details and photo to another device or another case; <b>Fill open forms</b> (Go to) puts them into the forms open now.</p>'+
      '<p><b>Walkthroughs</b>: a form with a <b>Walkthrough</b> button shows, with narration and captions, how it is filled in. <b>Diagnostics</b> (the <b>Tools</b> menu) shows the version, this '+HERE+'’s storage and what its browser supports: the place to look first when something does not work.</p>')+
    fold('Google, set up once',   /* v23.56 (review F514, I263) one checklist, and the keys kept here */
-     '<p>Four parts of the workstation use Google with your school account: Form DD-1 reading the team’s Google Sheet, sending questionnaires from your school Gmail, keeping the caseload in your school Google Drive, and opening a case a colleague shared with you there. All four use one Google Cloud project and one sign-in key. Set up only what you will use; each part can be added later to the same project.</p>'+
+     '<p>Five parts of the workstation use Google with your school account: Form DD-1 reading the team’s Google Sheet, sending questionnaires from your school Gmail, keeping the caseload in your school Google Drive, opening a case a colleague shared with you there, and showing today’s Google Calendar on the start screen. All five use one Google Cloud project and one sign-in key. Set up only what you will use; each part can be added later to the same project.</p>'+
      '<ol class="hp-steps"><li><b>The project.</b> At console.cloud.google.com (with the school account if it may create projects), create one project, for example “FBA-BIP Workstation”.</li>'+
-     '<li><b>The APIs.</b> APIs &amp; Services, Library: turn on (Enable) each one you will use: <b>Google Sheets API</b> (DD-1’s sheet), <b>Gmail API</b> (questionnaires), <b>Google Drive API</b> (the caseload in Drive), <b>Google Picker API</b> (a case shared with you).</li>'+
+     '<li><b>The APIs.</b> APIs &amp; Services, Library: turn on (Enable) each one you will use: <b>Google Sheets API</b> (DD-1’s sheet), <b>Gmail API</b> (questionnaires), <b>Google Drive API</b> (the caseload in Drive), <b>Google Picker API</b> (a case shared with you), <b>Google Calendar API</b> (today’s calendar on the start screen).</li>'+
      '<li><b>The sign-in screen.</b> Google Auth Platform (formerly OAuth consent screen): an app name and a support email. Audience: <i>Internal</i> if the project belongs to the school’s Google organization; otherwise <i>External</i>, with your school address under Test users.</li>'+
-     '<li><b>What it may do.</b> Google Auth Platform, Data access, Add or remove scopes: <i>spreadsheets.readonly</i> (read the sheet you link; it cannot change it), <i>gmail.send</i> (send what you press Send for; it cannot read your mail), <i>userinfo.email</i> (your address, to say which account sends and syncs), <i>drive.file</i> (only the files the workstation makes, or that you pick for it).</li>'+
+     '<li><b>What it may do.</b> Google Auth Platform, Data access, Add or remove scopes: <i>spreadsheets.readonly</i> (read the sheet you link; it cannot change it), <i>gmail.send</i> (send what you press Send for; it cannot read your mail), <i>userinfo.email</i> (your address, to say which account sends and syncs), <i>drive.file</i> (only the files the workstation makes, or that you pick for it), <i>calendar.events.readonly</i> (see your calendar’s events; it cannot change them).</li>'+
      '<li><b>The sign-in key.</b> Clients, Create client, Web application; under Authorized JavaScript origins add the workstation’s web address (for example https://newsomebh.com). Copy the <b>Client ID</b>: it ends in .apps.googleusercontent.com and is not a secret. Keep it on each device, below.</li>'+
      '<li><b>The API key</b>, only for a case shared with you: Credentials, Create credentials, API key; limit it to the Google Picker API and to the workstation’s web address. Keep it below on the devices that open shared cases.</li>'+
      '<li><b>If Google says “Access blocked”</b> or that your administrator has not approved the app, the school’s IT can allow it: Admin console, Security, Access and data control, API controls, Manage third-party app access, Add app, OAuth App Name Or Client ID; paste the Client ID and set it to <i>Trusted</i> (or <i>Limited</i> to the services above).</li></ol>'+
@@ -10756,6 +10782,105 @@ document.addEventListener('submit',async e=>{if(!e.target||e.target.id!=='dyForm
 {const cc=clCard;clCard=function(r,w){const h=cc.apply(this,arguments);if(isStaffRec(r))return h;
   return h.replace(/(<div class="cl-card-acts"><button type="button" class="primary" data-clopen="[^"]*"[^>]*>Open<\/button>)/,'$1<button type="button" data-clday="'+esc(r.key)+'" aria-label="Today’s numbers for '+esc(clName(r))+'">Today’s numbers<\/button>');};}
 {const pb7=paintBlank;paintBlank=async function(){const r=await pb7.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blDay'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blDay">Today’s numbers<\/button>');}catch(e){}return r;};}
+/* v25.99 (the BCBA, 11/13: "connecting my Google Calendar to somewhere in the workstation so that I can keep track of days
+   events ... click and go straight to the upcoming Google meet on the calendar") Today's Google Calendar on the start screen.
+   Turned on by the person (Show today's Google Calendar here), with the Google key and the sign-in window the other Google
+   parts use, and one permission of its own: calendar.events.readonly, which lets the workstation READ events and nothing else.
+   What is read: today's events of the account's own calendar (title, times, place, the meeting link). Where it goes: this
+   screen. It is kept in this tab's session store so a reload does not ask again, and is gone when the workstation is closed;
+   nothing is written to the calendar, to Drive or to a case. An event with a meeting link (Google Meet, or a Zoom or Teams
+   link in its place or notes) has a Join link that opens it; an event whose title names a student kept here has Open.
+   With Initials only on, a student's name in a title is shown as initials. */
+const GCAL={ev:null,at:0,tried:0,day:'',busy:false,err:'',reask:false,h:''};
+const GCAL_SCOPE='https://www.googleapis.com/auth/calendar.events.readonly';
+const gcalAvail=()=>!EMBED&&!!window.isSecureContext&&/^https?:$/.test(location.protocol)&&!!clGid();
+const gcalOn=()=>gcalAvail()&&kvGet('nbh.gcal.on')==='1';
+const gcalTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.cal')||'null');return t&&t.tok&&t.exp>Date.now()+60000?t:null;}catch(e){return null;}};
+const gcalDay=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+function gcalKeep(){try{sessionStorage.setItem('nbh.gcal.ev',JSON.stringify({day:GCAL.day,at:GCAL.at,ev:GCAL.ev}));}catch(e){}}
+function gcalBack(){if(GCAL.ev)return;try{const j=JSON.parse(sessionStorage.getItem('nbh.gcal.ev')||'null');if(j&&j.day===gcalDay()&&Array.isArray(j.ev)){GCAL.ev=j.ev;GCAL.at=+j.at||0;GCAL.day=j.day;}}catch(e){}}
+function gcalForget(){GCAL.ev=null;GCAL.at=0;GCAL.tried=0;GCAL.day='';GCAL.err='';GCAL.h='';try{sessionStorage.removeItem('nbh.gcal.ev');sessionStorage.removeItem('nbh.google.cal');}catch(e){}}
+/* the sign-in opens Google's window, so it is called in the tap itself */
+function gcalSignIn(){return new Promise((res,rej)=>{const id=clGid();if(!id){rej(new Error('The Google key is not on this device yet (Help, Google, set up once).'));return;}
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){rej(new Error('Google’s sign-in is still loading. Try again in a moment.'));return;}
+  try{google.accounts.oauth2.initTokenClient({client_id:id,scope:GCAL_SCOPE,
+      callback:r=>{if(!(r&&r.access_token)){rej(new Error(r&&(r.error_description||r.error)||'The sign-in was not completed.'));return;}
+        let ok=true;try{if(google.accounts.oauth2.hasGrantedAllScopes)ok=google.accounts.oauth2.hasGrantedAllScopes(r,GCAL_SCOPE);}catch(e){}
+        if(!ok){GCAL.reask=true;rej(new Error('Google’s window did not allow the workstation to see your calendar’s events. Tap again and allow “View events on all your calendars”.'));return;}
+        GCAL.reask=false;const t={tok:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000};try{sessionStorage.setItem('nbh.google.cal',JSON.stringify(t));}catch(e){}res(t);},
+      error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'The Google window was closed before the sign-in finished.':e&&e.type==='popup_failed_to_open'?'The Google window could not open. Allow pop-ups for this site and try again.':'The sign-in did not finish.'))}).requestAccessToken({prompt:GCAL.reask?'consent':''});}
+  catch(e){rej(e);}});}
+/* the meeting link of an event: the calendar's own video link first, else a Meet, Zoom or Teams address in its place or notes; https only */
+function gcalJoin(it){let u='';const ep=(it.conferenceData&&it.conferenceData.entryPoints)||[];const v=ep.find(p=>p&&p.entryPointType==='video'&&p.uri);if(v)u=String(v.uri);
+  if(!u&&it.hangoutLink)u=String(it.hangoutLink);
+  if(!u){const m=/https:\/\/(?:meet\.google\.com|[\w-]+\.zoom\.us|zoom\.us|teams\.microsoft\.com|teams\.live\.com)\/[^\s<>"')\]]+/.exec(String(it.location||'')+' '+String(it.description||''));if(m)u=m[0];}
+  return /^https:\/\/[\w.-]+\//.test(u)?u:'';}
+async function gcalFetch(){const t=gcalTok();if(!t)throw Object.assign(new Error('signin'),{signin:true});
+  const d0=new Date();d0.setHours(0,0,0,0);const d1=new Date(d0.getTime());d1.setDate(d1.getDate()+1);
+  const u='https://www.googleapis.com/calendar/v3/calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=50&timeMin='+encodeURIComponent(d0.toISOString())+'&timeMax='+encodeURIComponent(d1.toISOString())+
+    '&fields='+encodeURIComponent('items(id,status,summary,start,end,hangoutLink,conferenceData/entryPoints(entryPointType,uri),location,description,eventType,attendees(self,responseStatus))');
+  const r=await fetch(u,{headers:{Authorization:'Bearer '+t.tok}});
+  if(r.status===401){try{sessionStorage.removeItem('nbh.google.cal');}catch(e){}throw Object.assign(new Error('signin'),{signin:true});}
+  if(!r.ok){let j=null;try{j=await r.json();}catch(e){}const er=(j&&j.error)||{},m=String(er.message||''),why=JSON.stringify(er.errors||er.details||'');
+    if(r.status===403&&/has not been used|is disabled|accessNotConfigured|SERVICE_DISABLED/i.test(m+why))throw new Error('The Google Calendar API is not turned on for your Google key yet. Help, “Google, set up once”, has the step (APIs, turn on Google Calendar API).');
+    if(r.status===403&&/insufficient|scope/i.test(m+why)){try{sessionStorage.removeItem('nbh.google.cal');}catch(e){}GCAL.reask=true;throw new Error('Google did not give the workstation leave to see your calendar’s events. Tap Refresh and allow “View events on all your calendars”.');}
+    throw new Error(m||('Google Calendar answered '+r.status));}
+  const j=await r.json(),ev=[];
+  (j.items||[]).forEach(it=>{if(!it||it.status==='cancelled'||it.eventType==='workingLocation')return;
+    if((it.attendees||[]).some(a=>a&&a.self&&a.responseStatus==='declined'))return;
+    const all=!!(it.start&&it.start.date&&!it.start.dateTime),s=all?null:Date.parse((it.start||{}).dateTime||''),e=all?null:Date.parse((it.end||{}).dateTime||'');
+    if(!all&&!(s>0))return;
+    let where=String(it.location||'').trim();if(/^https?:\/\//i.test(where))where='';
+    ev.push({id:String(it.id||''),t:String(it.summary||'').trim()||'Busy',all:all,s:s,e:e>0?e:s,link:gcalJoin(it),where:where.slice(0,90)});});
+  ev.sort((a,b)=>(a.all?0:1)-(b.all?0:1)||(a.s||0)-(b.s||0));
+  GCAL.ev=ev;GCAL.at=Date.now();GCAL.day=gcalDay();GCAL.err='';gcalKeep();return ev;}
+const gcalT=ms=>new Date(ms).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+const gcalIni=r=>(typeof clIniOf==='function'?clIniOf(r):clInitials(r));   /* initials without the note in brackets */
+const gcalStu=r=>String((r&&r.client)||'').replace(/^SIMULATED\s*[–-]\s*/,'').replace(/\(.*?\)/g,'').trim();
+function gcalHtml(L){const now=Date.now(),ini=(typeof clIni==='function')&&clIni(),ev=GCAL.ev;
+  const stu=(L||[]).filter(r=>!(typeof isStaffRec==='function'&&isStaffRec(r))).map(r=>({r:r,n:gcalStu(r)})).filter(x=>x.n.length>=4);
+  let h='<div class="bl-head"><h2>Today’s calendar<\/h2><span class="gc-sub">'+esc(new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'}))+'<\/span><\/div>';
+  if(GCAL.err)h+='<p class="gc-err" role="alert">'+esc(GCAL.err)+'<\/p>';
+  if(!ev){h+='<p class="gc-none">'+(GCAL.busy?'Getting today’s events from Google Calendar…':'<button type="button" id="gcSign">Show today’s events<\/button> <span class="hint">Signed out of Google Calendar on this '+esc(HERE)+'.<\/span>')+'<\/p>';
+    return h+'<p class="gc-foot"><button type="button" id="gcOff">Hide the calendar<\/button><\/p>';}
+  if(!ev.length)h+='<p class="gc-none">Nothing on your Google Calendar today.<\/p>';
+  else{const nextI=ev.findIndex(x=>!x.all&&x.s>now);
+    h+='<ul class="gc-rows" aria-label="Today’s events">'+ev.map((x,i)=>{const past=!x.all&&x.e<=now,on=!x.all&&x.s<=now&&x.e>now,nx=i===nextI,min=nx?Math.round((x.s-now)/60000):0;
+      let title=x.t;const hit=stu.find(q=>title.toLowerCase().indexOf(q.n.toLowerCase())>=0);
+      if(hit&&ini){const re=new RegExp(hit.n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'ig');title=title.replace(re,gcalIni(hit.r));}
+      const when=x.all?'All day':gcalT(x.s)+(x.e>x.s?' – '+gcalT(x.e):''),pill=on?'<span class="gc-pill">Now<\/span>':(nx&&min<=60?'<span class="gc-pill gc-soon">In '+(min<1?'under a minute':min+' min')+'<\/span>':'');
+      const host=x.link?(/meet\.google\.com/.test(x.link)?'Google Meet':/zoom\.us/.test(x.link)?'Zoom':/teams\./.test(x.link)?'Teams':'the meeting'):'';
+      const join=x.link&&!past?'<a class="gc-join'+(on||(nx&&min<=10)?' gc-hot':'')+'" href="'+esc(x.link)+'" target="_blank" rel="noopener noreferrer" aria-label="'+esc('Join '+host+': '+title)+'">Join'+(host==='Google Meet'?' Meet':'')+'<\/a>':'';
+      const open=hit?'<button type="button" data-clopen="'+esc(hit.r.key)+'" aria-label="'+esc('Open the case of '+(ini?gcalIni(hit.r):hit.n))+'">Open '+esc(ini?gcalIni(hit.r):hit.n.split(/\s+/)[0])+'<\/button>':'';
+      return '<li class="gc-row'+(on?' gc-now':'')+(past?' gc-past':'')+'"><span class="gc-when">'+esc(when)+'<\/span><span class="gc-what">'+pill+esc(title)+(x.where?'<small>'+esc(x.where)+'<\/small>':'')+'<\/span><span class="gc-act">'+join+open+'<\/span><\/li>';}).join('')+'<\/ul>';}
+  h+='<p class="gc-foot"><span>'+(GCAL.busy?'Getting the latest…':'As of '+esc(gcalT(GCAL.at))+(gcalTok()?'':' (signed out since)'))+'<\/span><button type="button" id="gcRefresh">Refresh<\/button><a href="https://calendar.google.com/calendar/r/day" target="_blank" rel="noopener noreferrer">Open Google Calendar<\/a><button type="button" id="gcOff">Hide the calendar<\/button><\/p>';
+  return h;}
+async function gcalPaint(){const card=$('#blank .card');if(!card)return;let c=card.querySelector('#blankCal'),o=card.querySelector('#blankCalOffer');
+  if(!c){c=document.createElement('div');c.id='blankCal';c.className='gc';c.hidden=true;const x=card.querySelector('#blankCl');card.insertBefore(c,x||card.firstChild);}
+  if(!o){o=document.createElement('p');o.id='blankCalOffer';o.className='gc-offer';o.hidden=true;card.appendChild(o);}
+  if(!gcalAvail()){c.hidden=true;c.innerHTML='';o.hidden=true;o.innerHTML='';GCAL.h='';return;}
+  if(!gcalOn()){c.hidden=true;c.innerHTML='';GCAL.h='';o.hidden=false;
+    if(!o.firstChild)o.innerHTML='<button type="button" id="gcOn">Show today’s Google Calendar here<\/button> <span class="hint">Today’s events, with a Join button where one has a Google Meet. Read-only: the workstation cannot change your calendar, and the events are forgotten when it is closed.<\/span>';return;}
+  o.hidden=true;o.innerHTML='';gcalBack();if(GCAL.day&&GCAL.day!==gcalDay()){GCAL.ev=null;GCAL.at=0;GCAL.day='';}
+  let L=[];try{L=await clList()||[];}catch(e){}
+  const h=gcalHtml(L);if(h!==GCAL.h||c.hidden){GCAL.h=h;c.innerHTML=h;c.hidden=false;}
+  if(gcalTok()&&!GCAL.busy&&Date.now()-Math.max(GCAL.at,GCAL.tried)>300000)gcalLoad(false);}
+async function gcalLoad(loud){if(GCAL.busy)return;GCAL.busy=true;GCAL.tried=Date.now();let bad=null;try{await gcalFetch();}catch(e){bad=e;}
+  GCAL.busy=false;if(bad&&!bad.signin){GCAL.err=bad.message;if(loud)try{wsUI.toast(bad.message,{kind:'warn',ms:10000});}catch(e){}}
+  try{await gcalPaint();}catch(e){}return !bad;}
+/* a tap that needs Google: the sign-in window first (in the tap), then today's events */
+/* turned on from the offer at the foot of the start screen: the calendar is at its top, so the screen goes there */
+function gcalShow(){try{const c=$('#blankCal');if(c&&!c.hidden){c.scrollIntoView({block:'start'});const b=c.querySelector('a.gc-join,button');if(b)b.focus({preventScroll:true});}}catch(e){}}
+function gcalGo(turnOn){if(gcalTok()){if(turnOn)kvSet('nbh.gcal.on','1');gcalLoad(true).then(()=>{if(turnOn)gcalShow();});return;}
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){try{clGsiLoad().catch(()=>{});}catch(e){}wsUI.toast('Loading Google’s sign-in. Tap again in a moment.');return;}
+  gcalSignIn().then(()=>{if(turnOn)kvSet('nbh.gcal.on','1');GCAL.err='';return gcalLoad(true);}).then(()=>{if(turnOn)gcalShow();}).catch(err=>{try{wsUI.toast(err.message,{kind:'warn',ms:10000});}catch(e){}});}
+$('#blank').addEventListener('click',e=>{const t=e.target.closest('#gcOn,#gcSign,#gcRefresh,#gcOff');if(!t)return;
+  if(t.id==='gcOff'){kvDel('nbh.gcal.on');gcalForget();gcalPaint().then(()=>{const b=$('#gcOn');if(b)try{b.focus({preventScroll:true});}catch(x){}});try{wsUI.toast('The calendar is hidden, and today’s events are forgotten on this '+HERE+'.',{kind:'ok'});}catch(x){}return;}
+  gcalGo(t.id==='gcOn');});
+{const pbCal=paintBlank;paintBlank=async function(){const r=await pbCal.apply(this,arguments);try{await gcalPaint();}catch(e){}return r;};}
+/* the pills (Now, In 12 min) and the Join button's emphasis follow the clock; nothing is redrawn while a control in it has the focus */
+setInterval(()=>{try{if(document.hidden||!gcalOn()||!GCAL.ev)return;const c=$('#blankCal');if(!c||c.hidden||!c.offsetParent||c.contains(document.activeElement))return;gcalPaint();}catch(e){}},30000);
+document.addEventListener('visibilitychange',()=>{try{if(!document.hidden&&gcalOn())gcalPaint();}catch(e){}});
 {const to7=todayOpen;todayOpen=async function(){const r=await to7.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdDay')){const l=row.querySelector('#tdLog');if(l)l.insertAdjacentHTML('afterend',' <button type="button" id="tdDay">Today’s numbers<\/button>');else row.insertAdjacentHTML('afterbegin','<button type="button" id="tdDay">Today’s numbers<\/button> ');}}catch(e){}return r;};}
 CMDS.push({k:'today numbers data count tally record day staff',n:'Today’s numbers: counts into Form DD-1',s:'command',go:()=>dayNumbersOpen('')});
 /* v23.78 the iPhone layout's labels below (v23.74). Wording approved by the BCBA, October 2026. */
@@ -12937,16 +13062,16 @@ window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr,is
 })();
 </script>
 <script type="application/json" id="ws-whatsnew">
-{"v": "v25.98",
+{"v": "v25.99",
 "title": "What's new in this version",
 "notes": "SETUP.md",
 "items":[
-"Videos: a Speed box under the picture, from 0.5× to 2×. Your choice is kept on this device. Also in Watch how on Form TD-1.",
-"Videos: press and hold on the picture to play at 2× for as long as you hold.",
-"Video library: a strip under the picture shows the video's steps. Tap a piece to go to that step.",
-"Video library: Repeat this step plays one step again and again until you switch it off.",
-"Video library: Play the next one starts the next video of the same procedure 8 seconds after the end. Cancel stops it, and the button switches it off.",
-"With a keyboard: K plays and pauses, J and L go back and forward 10 seconds. The full list is under Shortcuts in the video library."]}
+"Today's Google Calendar on the start screen: today's events in order, with Now and In 8 min marks, and a Join button where an event has a Google Meet (or a Zoom or Teams link).",
+"Turn it on with Show today's Google Calendar here, at the foot of the start screen. It is read-only: the workstation cannot change your calendar, and the events are forgotten when it is closed.",
+"It needs one more step in your Google project, once: turn on the Google Calendar API and add its permission. The steps are in Help, Google, set up once.",
+"An event that names a student kept on the device has an Open button for that case.",
+"Three new procedure videos on calming routines, under a new procedure in the library, Calming, and from Watch how on their TD-1 cards.",
+"Belly breathing at the first signs (2:10). Muscle relaxation: tense and release (2:37). A three-step calm-down plan (2:38). The people are simulated."]}
 </script>
 <script id="ws-v2570">
 /* v25.70 (the BCBA, 11/9; S/research/NEXT.md and NEXT2.md #2). The release step edits the list above (ws-whatsnew): its v is

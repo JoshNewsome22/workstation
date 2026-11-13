@@ -9905,6 +9905,57 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.99: today's Google Calendar on the start screen, and three videos on calming routines
+(the BCBA, 11/13: "connecting my Google Calendar to somewhere in the workstation so that I can keep track of days events,
+log into Google meet or click and go straight to the upcoming Google meet on the calendar" ... "Yes to all"; and the
+calming routine set, approved with its pair of simulated people)
+- **Today's calendar.** With a Google key on the device, the foot of the start screen offers **Show today's Google
+  Calendar here**. A tap opens Google's window (the same one Sheets, Gmail and Drive use) and asks for one permission,
+  *calendar.events.readonly*: the workstation may read events and can change nothing. The start screen then shows, above
+  the caseload, today's events of the account's own calendar in order: the all-day ones first, then each with its times,
+  its title and its place.
+  - **Now** marks the event going on; the next one says how soon it starts ("In 8 min", within the hour). The marks
+    follow the clock.
+  - **Join.** An event with a video link has a Join button that opens it in a new tab (on an iPad, in the Meet app when
+    it is installed): the calendar's own Google Meet link, or a Meet, Zoom or Teams address in the event's place or
+    notes. The button is filled for the event going on and for one starting within 10 minutes. Only https addresses are
+    ever made a link. A past event has no button.
+  - **Open.** An event whose title holds the name of a student kept on the device has **Open** for that case. With
+    *Initials only* on, the name in the title is shown as initials.
+  - Cancelled events, events the person declined and working-location entries are left out.
+  - **Refresh** reads the day again (it asks Google for the sign-in when the hour's sign-in has ended; until then the
+    events stay, marked "signed out since"). **Open Google Calendar** opens the calendar itself. **Hide the calendar**
+    turns it off and forgets the events and the sign-in.
+- **Where the events go.** To the screen of the device. They are kept in the tab's session store so a reload does not ask
+  again, and are gone when the workstation is closed. Nothing is written to the calendar, to Drive, to a case or to the
+  device's lasting store. HOSTING.md's table *Where the student's data goes* has the line.
+- **Set up once, in the Google project** (Help, *Google, set up once*, and HOSTING.md, *Google sign-in*): turn on the
+  **Google Calendar API**, and add the scope `.../auth/calendar.events.readonly` under Data access. If the API is not on,
+  the start screen says so in words and names the step.
+- **Not seen with a real Google account.** Google's sign-in and its answers are simulated in the test; the first sign-in
+  with the school account, and Join on the iPad, need a look on the device.
+- **Three procedure videos**, each after one card of TD-1's protocol bank, with a new pair of simulated people (a
+  teacher and a teenage student):
+  - **Belly breathing at the first signs** (2:10), card relax-diaphragmatic-breathing-at-precursors, after Phillips et
+    al. (2019). The early signs from the assessment; the breathing taught when calm, by model and practice with praise;
+    during work, "Let's breathe." at a first sign, and praise. No extinction in the card; in the study breathing alone
+    worked for one of three, and the others needed DRO or FCT.
+  - **Muscle relaxation: tense and release** (2:37), card relax-prt-eating-sounds, after Gardner et al. (2026). A quiet
+    room when calm; the adult's model; large muscle groups first, then face and hands; learned when done alone in 2
+    sessions in a row; then prompts and praise about every 2 minutes in the hard setting. The person eating nearby is
+    not shown (the picture says so). One student, no clear experimental control.
+  - **A three-step calm-down plan** (2:38), card relax-three-step-stress-plan, after Zencius & Wesolowski (1990). Her
+    own list of early signs; an agreed calm-down area she may go to without asking; the steps modeled and role-played;
+    a practice log and a weekly review. The area must be safe and within staff view. One adult, no reversal.
+- **Where they are.** The video library, under a new procedure, **Calming** (a filter chip and a shelf), and Watch how on
+  each of the three cards. 46 videos in all (43 until now).
+- **The teacher's lips are drawn to her words** in the nine shots in which she speaks; the room sound on her lines is the
+  lighter setting. The narrator's voice is the recording as made. In two of the videos the pair sit facing each other
+  across a small desk, so the teacher is seen from the side.
+- **The size.** The three add about 44 MB to the folder; the limit the release check allows for the videos was raised
+  from 600 MB to 650 MB (the BCBA, 11/13). The start page grew by about 13 KB with the calendar (1,463 KB); its limit went from
+  1,450 KB to 1,500 KB.
+- **The test run.** The new test v2599-calendar (11 checks, Google simulated) and the tests of the videos and the library passed on the built folder: v2598-player 9, v2597-skip 9, v2569-video-library 82, v2572-videos 54, v2572-transcript 29, v2568-td1-versions 44, v2568-td1-procvideos 51, v2591 7, the start screen's tests (due-board, v2572-start-screen), the size budget 5 and the build check 8. The whole test run was not repeated before this release: it is run on this version afterwards and reported separately.
 ### v25.98: six additions to the video players
 (the BCBA, 11/13: "are there any other player feature that the top player feature have that can also be added?" and, to
 the list of six, "Add all those features")

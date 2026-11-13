@@ -133,6 +133,7 @@ offline copy finishes sooner. It changes nothing in the forms or in what they sa
   | Questionnaire answers and staff phone entries (the reply box, below) | Locked on the sender's phone so only the form's file can open them; this website holds the locked copy | Until the form collects and removes it, or 60 days |
   | Short questionnaire links (below) | The questionnaire (behavior, definition, initials, due date), locked, on this website; the key stays in the link | 60 days |
   | Form DD-1's Google Sheet link | Read from Google to the device; nothing is written to the sheet | - |
+  | Today's Google Calendar (only when turned on, on the start screen; v25.99) | Read from Google to the device: today's events of the account signed in (title, times, place, meeting link); nothing is written to the calendar, to Drive or to a case | Until the workstation is closed, or *Hide the calendar* |
   | Rewrite with Claude (practice edition only; off in the school edition since v22.07) | The text in its preview, with the student's name and ID replaced, through the relay on this site to Anthropic's API | The relay keeps no text |
   | Check wording, Dictate, Read a document, My pictures, TK-1's video | Stay on the device | - |
 
@@ -147,18 +148,18 @@ offline copy finishes sooner. It changes nothing in the forms or in what they sa
   Save to Files) and run Finish PDF: since v21.90 it adds the page header and
   footer, the bookmarks and the contents page numbers, on the iPad.
 
-## Google sign-in (once, for Sheets, Gmail and Drive)
+## Google sign-in (once, for Sheets, Gmail, Drive and Calendar)
 
-Four features use Google with your school account: Form DD-1 reading the team's Google Sheet, sending questionnaires
-from your school Gmail, keeping the caseload in your school Google Drive, and opening a case a colleague shared with you
-there (v23.54). All four use **one** Google Cloud project and **one** sign-in key (the Client ID); the fourth also needs
-an API key. The same checklist is in the workstation: Help, *Google, set up once*. Set up only what you will use; each part can be added later to the same project.
+Five features use Google with your school account: Form DD-1 reading the team's Google Sheet, sending questionnaires
+from your school Gmail, keeping the caseload in your school Google Drive, opening a case a colleague shared with you
+there (v23.54), and showing today's Google Calendar on the start screen (v25.99). All five use **one** Google Cloud
+project and **one** sign-in key (the Client ID); the fourth also needs an API key. The same checklist is in the workstation: Help, *Google, set up once*. Set up only what you will use; each part can be added later to the same project.
 
 1. **The project.** Go to console.cloud.google.com and sign in (with the school account if it may create projects;
    otherwise a personal Google account). Create one project, for example "FBA-BIP Workstation".
 2. **The APIs.** *APIs & Services > Library*: find and *Enable* each one you will use:
    **Google Sheets API** (DD-1's sheet link), **Gmail API** (sending questionnaires), **Google Drive API** (the caseload in Drive),
-   **Google Picker API** (a case shared with you).
+   **Google Picker API** (a case shared with you), **Google Calendar API** (today's calendar on the start screen).
 3. **The sign-in screen.** *Google Auth Platform* (formerly *OAuth consent screen*): an app name and a support email.
    Audience: *Internal* if the project belongs to the school's Google organization; otherwise *External*, and add your
    school address under *Test users*.
@@ -170,6 +171,7 @@ an API key. The same checklist is in the workstation: Help, *Google, set up once
    | `.../auth/gmail.send` | Send email you press Send for; it cannot read your mail | Questionnaires |
    | `.../auth/userinfo.email` | Your address, to say which account sends and syncs | Gmail and Drive |
    | `.../auth/drive.file` | Only the files the workstation itself made in your Drive, or that you pick for it | The caseload in Drive, a case shared with you |
+   | `.../auth/calendar.events.readonly` | See the events on your calendars; it cannot add, change or remove any | Today's calendar on the start screen |
 
 5. **The key.** *Clients > Create client > Web application*. Under *Authorized JavaScript origins* add
    `https://newsomebh.com` (one origin covers both editions). *Create*, and copy the **Client ID**: it ends in

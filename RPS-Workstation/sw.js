@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = 'c911c1fc74c1';
+const VERSION = '7db2d6a0c481';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -193,6 +193,9 @@ const FILES = [
   'nbh-td1-video-ante-demand-fading.js',
   'nbh-td1-video-ante-task-aid.js',
   'nbh-td1-video-ante-interspersal.js',
+  'nbh-td1-video-calm-belly-breathing.js',
+  'nbh-td1-video-calm-muscle-relaxation.js',
+  'nbh-td1-video-calm-three-step-plan.js',
   'nbh-td1-poster-fct.jpg',
   'nbh-td1-poster-highp.jpg',
   'nbh-td1-poster-highp-praise.jpg',
@@ -236,6 +239,9 @@ const FILES = [
   'nbh-td1-poster-ante-demand-fading.jpg',
   'nbh-td1-poster-ante-task-aid.jpg',
   'nbh-td1-poster-ante-interspersal.jpg',
+  'nbh-td1-poster-calm-belly-breathing.jpg',
+  'nbh-td1-poster-calm-muscle-relaxation.jpg',
+  'nbh-td1-poster-calm-three-step-plan.jpg',
   'nbh-pod-romaniuk-2002.js',
   'nbh-gb1-bank.js',
   'nbh-sm1-narration.js',
