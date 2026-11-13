@@ -203,12 +203,30 @@ function stepsOf(s){const t=task(s.task);let L=[];try{L=(t.steps(s.a,s.au||{})||
 function nextQ(s,F){const t=task(s.task);for(const q of t.q){if(s.a[q.k]!==undefined)continue;if(q.when&&!q.when(s.a))continue;
     const v=q.auto?q.auto(F):undefined;if(v!==undefined){s.a[q.k]=v;s.au[q.k]=1;continue;}return q;}return null;}
 const asked=s=>task(s.task).q.filter(q=>s.a[q.k]!==undefined&&!s.au[q.k]);
+/* ---- read aloud (v26.14; the BCBA, 11/13: "an option that reads the question to you as you go") ----
+   The device's own speech (speechSynthesis): a voice kept on the device is chosen where there is one. What is read is the
+   guide's own words: the question, its choices, the step and its reason. The choice is kept on the device
+   (nbh.guide.voice). Nothing is read until Read aloud is turned on, and nothing on a page that has just loaded. */
+const VK='nbh.guide.voice',CAN=typeof window.speechSynthesis!=='undefined'&&typeof window.SpeechSynthesisUtterance!=='undefined';
+let voice=false;try{voice=CAN&&localStorage.getItem(VK)==='1';}catch(e){}
+let lastSaid='',saidBy='',primed=false;
+function hush(){if(CAN)try{speechSynthesis.cancel();}catch(e){}}
+function prime(){if(!voice||primed||!CAN)return;primed=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}}   /* inside the tap: an iPhone or iPad lets a page speak only after one */
+function say(t,by){lastSaid=t||'';saidBy=by||'dlg';if(!voice||!CAN||!t)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';
+    const vs=speechSynthesis.getVoices()||[],v=vs.find(x=>x.localService&&/^en[-_]US/i.test(x.lang))||vs.find(x=>x.localService&&/^en/i.test(x.lang));if(v)u.voice=v;
+    primed=true;speechSynthesis.speak(u);}catch(e){}}
+function paintVoice(){document.querySelectorAll('[data-gd="voice"],#gdVoice').forEach(b=>b.setAttribute('aria-pressed',voice?'true':'false'));document.querySelectorAll('[data-gd="again"],#gdAgain').forEach(b=>{b.hidden=!voice;});}
+function setVoice(on,text,by){voice=!!on&&CAN;try{localStorage.setItem(VK,voice?'1':'0');}catch(e){}paintVoice();if(voice)say(text===undefined?lastSaid:text,by||saidBy);else hush();}
+const SPK='<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.2h2.3L8 3.5v9L4.8 9.8H2.5z"/><path d="M10.5 6a2.8 2.8 0 0 1 0 4M12.3 4.2a5.3 5.3 0 0 1 0 7.6"/><\/svg>';
+const vRow=()=>CAN?'<div class="gd-vrow"><button type="button" class="gd-again" data-gd="again"'+(voice?'':' hidden')+'>Say it again<\/button><button type="button" class="gd-voice" data-gd="voice" aria-pressed="'+(voice?'true':'false')+'" title="Reads each question, its choices and each step to you">'+SPK+'<span>Read aloud<\/span><\/button><\/div>':'';
+const list=a=>a.length?' The choices are: '+a.join('. ')+'.':'';
 /* ---- the dialog ---- */
 const dlg=()=>$('#dlg');
-function show(title,html,screen){const d=dlg(),body='<div class="gd" data-gdscreen="'+screen+'">'+html+'<\/div>';
+function show(title,html,screen,speak){const d=dlg(),body='<div class="gd" data-gdscreen="'+screen+'">'+vRow()+html+'<\/div>';
   if(d.open){$('#dlgTitle').innerHTML=title;$('#dlgBody').innerHTML=body;$('#dlgBody').scrollTop=0;}else dialog(title,body);
   const b=$('#dlgBody');if(b.scrollHeight>b.clientHeight+2)b.tabIndex=0;else b.removeAttribute('tabindex');
-  const first=b.querySelector('[data-gdfocus]')||b.querySelector('.gd button');if(first)try{first.focus();}catch(e){}}
+  const first=b.querySelector('[data-gdfocus]')||b.querySelector('.gd button:not(.gd-voice):not(.gd-again)');if(first)try{first.focus();}catch(e){}
+  say(speak||'','dlg');}
 const isOpen=()=>{const d=dlg();return !!(d&&d.open&&$('#dlgBody .gd'));};
 const shut=()=>{const d=dlg();if(d&&d.open)try{d.close();}catch(e){}};
 async function fresh(){try{if(typeof gatherFacts==='function')await gatherFacts(false);}catch(e){}return facts();}
@@ -217,17 +235,17 @@ async function openTasks(){const F=await fresh(),sg=suggest(F),run=S&&S.run?S:nu
   else if(sg){h+='<div class="gd-sug"><p><b>For the case that is open:<\/b> '+E(task(sg[0]).t)+'. In this case, '+E(sg[1])+'.<\/p><button type="button" class="primary" data-gd="task" data-id="'+sg[0]+'" data-gdfocus>Start there<\/button><\/div>';}
   h+='<p class="gd-lead">Choose one. A question or two follows, then the steps come one at a time.<\/p>';
   GROUPS.forEach((g,gi)=>{h+='<h3>'+E(g)+'<\/h3><ul class="gd-list two">'+TASKS.filter(t=>t.g===gi).map(t=>'<li><button type="button" class="gd-opt" data-gd="task" data-id="'+t.id+'"><b>'+E(t.t)+'<\/b><small>'+E(t.d)+'<\/small><\/button><\/li>').join('')+'<\/ul>';});
-  show('What do you need to do today?',h,'tasks');}
+  show('What do you need to do today?',h,'tasks','What do you need to do today?'+(run?' In hand: '+task(run.task).t+', step '+(run.i+1)+'.':sg?' For the case that is open: '+task(sg[0]).t+'.':'')+list(TASKS.map(t=>t.t)));}
 function begin(id){const t=task(id);if(!t)return;S={task:id,a:{},au:{},keys:[],i:0,mark:{},went:{},run:false};keep();ask();}
 async function ask(){const F=await fresh(),q=nextQ(S,F),t=task(S.task);keep();if(!q){plan(F);return;}
   const nAsked=asked(S).length;
   let h='<p class="gd-sm">Question '+(nAsked+1)+'<\/p><p class="gd-q" id="gdQ">'+E(q.t)+'<\/p>'+(q.help?'<p class="gd-sm">'+E(q.help)+'<\/p>':'');
   h+='<ul class="gd-list" role="group" aria-labelledby="gdQ">'+q.o.map((o,i)=>'<li><button type="button" class="gd-opt" data-gd="ans" data-k="'+q.k+'" data-v="'+o[0]+'"'+(i?'':' data-gdfocus')+'><b>'+E(o[1])+'<\/b><\/button><\/li>').join('')+'<\/ul>';
   h+='<div class="gd-foot"><button type="button" data-gd="back">Back<\/button><\/div>';
-  show(E(t.t),h,'q');}
+  show(E(t.t),h,'q',q.t+(q.help?' '+q.help:'')+list(q.o.map(o=>o[1])));}
 function answer(k,v){const t=task(S.task),q=t.q.find(x=>x.k===k);if(!q||!q.o.some(o=>o[0]===v))return;
   if(q.go&&q.go[v]){const to=task(q.go[v][0]);
-    show(E(t.t),'<p class="gd-q">'+E(to.t)+' comes first<\/p><p class="gd-lead">'+E(q.go[v][1])+'<\/p><div class="gd-foot"><button type="button" class="primary" data-gd="task" data-id="'+to.id+'" data-gdfocus>Go to “'+E(to.t)+'”<\/button><button type="button" data-gd="anyway" data-k="'+k+'">Carry on with the plan anyway<\/button><span class="sp"><\/span><button type="button" data-gd="back0">Back<\/button><\/div>','go');return;}
+    show(E(t.t),'<p class="gd-q">'+E(to.t)+' comes first<\/p><p class="gd-lead">'+E(q.go[v][1])+'<\/p><div class="gd-foot"><button type="button" class="primary" data-gd="task" data-id="'+to.id+'" data-gdfocus>Go to “'+E(to.t)+'”<\/button><button type="button" data-gd="anyway" data-k="'+k+'">Carry on with the plan anyway<\/button><span class="sp"><\/span><button type="button" data-gd="back0">Back<\/button><\/div>','go',to.t+' comes first. '+q.go[v][1]+list(['Go to that guide','Carry on with the plan anyway']));return;}
   S.a[k]=v;delete S.au[k];ask();}
 /* Back, in the questions: the last one asked is asked again; from the first, back to the list */
 function back(){const A=asked(S);if(!A.length){S=null;keep();openTasks();return;}const last=A[A.length-1],t=task(S.task);
@@ -239,28 +257,31 @@ function plan(F){F=F||facts();const t=task(S.task),L=stepsOf(S);
   h+='<p class="gd-lead">'+(L.length===1?'One step.':L.length+' steps, one at a time.')+' Each opens what it needs; the guide stays at the foot of the screen while you work.<\/p>';
   h+='<div class="gd-foot gd-top"><button type="button" class="primary" data-gd="start" data-gdfocus>'+(S.run?'Carry on with step '+(S.i+1):L.length===1?'Start':'Start with step 1')+'<\/button><button type="button" data-gd="redo">Change the answers<\/button><span class="sp"><\/span><button type="button" data-gd="tasks">Something else<\/button>'+(S.run?'<button type="button" data-gd="end">End the guide<\/button>':'')+'<\/div>';
   h+='<ol class="gd-steps">'+L.map((s,i)=>{const m=S.mark[s.k],hi=hint(s,F);return '<li class="'+(m==='d'?'gd-d':m==='s'?'gd-s':'')+(S.run&&i===S.i?' gd-cur':'')+'"><button type="button" data-gd="jump" data-i="'+i+'"'+(S.run&&i===S.i?' aria-current="step"':'')+'><span><b>'+E(s.t)+'<\/b>'+(s.form?'<span class="gd-id">Form '+E(s.form)+'<\/span>':'')+(hi?'<span class="gd-chip">'+E(hi)+'<\/span>':'')+(m==='s'?'<span class="gd-chip">Skipped<\/span>':'')+'<\/span><small>'+E(s.why)+'<\/small><\/button><\/li>';}).join('')+'<\/ol>';
-  show(E(t.t),h,'plan');}
+  show(E(t.t),h,'plan',t.t+'. '+(L.length===1?'One step: ':L.length+' steps, one at a time. '+(S.run?'You are at step '+(S.i+1)+': ':'The first is: '))+(L[S.run?S.i:0]||{t:''}).t+'.');}
 function finish(){const t=task(S.task),L=stepsOf(S),done=L.filter(s=>S.mark[s.k]==='d').length,sk=L.filter(s=>S.mark[s.k]==='s');
   let h='<p class="gd-q">That was the last step<\/p><p class="gd-lead">'+E(t.t)+': '+done+' of '+L.length+' step'+(L.length===1?'':'s')+' done'+(sk.length?', '+sk.length+' skipped':'')+'.<\/p>';
   if(sk.length)h+='<p class="gd-sm">Skipped: '+sk.map(s=>E(s.t)).join('; ')+'.<\/p>';
   const nx=(t.next||[]).map(task).filter(Boolean);
   if(nx.length)h+='<h3>What often comes next<\/h3><ul class="gd-list">'+nx.map((x,i)=>'<li><button type="button" class="gd-opt" data-gd="task" data-id="'+x.id+'"'+(i?'':' data-gdfocus')+'><b>'+E(x.t)+'<\/b><small>'+E(x.d)+'<\/small><\/button><\/li>').join('')+'<\/ul>';
   h+='<div class="gd-foot"><button type="button" data-gd="tasks">Something else<\/button><span class="sp"><\/span><button type="button" data-gd="shut">Close<\/button><\/div>';
-  S=null;keep();paintBar();show('The guide',h,'end');}
+  S=null;keep();paintBar();show('The guide',h,'end','That was the last step. '+(nx.length?'What often comes next: '+nx.map(x=>x.t).join('. ')+'.':''));}
 /* ---- the strip ---- */
 let bar=null;
 function mkBar(){if(bar)return bar;const host=document.querySelector('section.stagew');if(!host)return null;
   bar=document.createElement('div');bar.id='gdBar';bar.hidden=true;bar.setAttribute('role','region');bar.setAttribute('aria-label','Guide: the step in hand');
-  bar.innerHTML='<div class="gd-txt"><p class="gd-n"><span id="gdCount"><\/span><button type="button" class="gd-link" id="gdAll">All steps<\/button><button type="button" class="gd-link" id="gdWhyBtn" aria-expanded="false" aria-controls="gdWhy">Why this step<\/button><\/p><div aria-live="polite"><p class="gd-t" id="gdT"><\/p><p class="gd-why" id="gdWhy"><\/p><\/div><\/div>'+
+  bar.innerHTML='<div class="gd-txt"><p class="gd-n"><span id="gdCount"><\/span><button type="button" class="gd-link" id="gdAll">All steps<\/button><button type="button" class="gd-link" id="gdWhyBtn" aria-expanded="false" aria-controls="gdWhy">Why this step<\/button>'+(CAN?'<button type="button" class="gd-link" id="gdVoice" aria-pressed="'+(voice?'true':'false')+'" title="Reads each step and its reason to you">Read aloud<\/button><button type="button" class="gd-link" id="gdAgain"'+(voice?'':' hidden')+'>Say it again<\/button>':'')+'<\/p><div aria-live="polite"><p class="gd-t" id="gdT"><\/p><p class="gd-why" id="gdWhy"><\/p><\/div><\/div>'+
     '<div class="gd-btns"><button type="button" id="gdBack">Back<\/button><button type="button" id="gdGo"><\/button><button type="button" id="gdSkip">Skip<\/button><button type="button" id="gdNext"><\/button><button type="button" id="gdEnd" aria-label="End the guide" title="End the guide">&times;<\/button><\/div>';
   host.appendChild(bar);
-  bar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!S)return;
+  bar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!S)return;prime();
+    if(b.id==='gdVoice'){setVoice(!voice,stepText(),'bar');return;}if(b.id==='gdAgain'){say(stepText(),'bar');return;}
     if(b.id==='gdGo'){run(true);return;}if(b.id==='gdNext'){move(1,'d');return;}if(b.id==='gdSkip'){move(1,'s');return;}if(b.id==='gdBack'){move(-1);return;}
     if(b.id==='gdAll'){plan();return;}if(b.id==='gdEnd'){end();return;}
     if(b.id==='gdWhyBtn'){const on=!bar.classList.contains('gd-open');bar.classList.toggle('gd-open',on);b.setAttribute('aria-expanded',on?'true':'false');}});
   return bar;}
 const cur=()=>{if(!S||!S.run)return null;const L=stepsOf(S);return L[S.i]||null;};
 const goLabel=s=>s.form?'Open Form '+s.form:(s.btn||'Open');
+const stepText=()=>{const s=cur();if(!s)return '';const L=stepsOf(S);return 'Step '+(S.i+1)+' of '+L.length+'. '+s.t+(s.form?', Form '+s.form.split('').join(' ').replace(' - ',' ')+'':'')+'. '+s.why;};
+let barSaid=null;
 function paintBar(){const b=mkBar();if(!b)return;const s=cur();document.body.classList.toggle('gd-run',!!s);if(!s){b.hidden=true;return;}
   const L=stepsOf(S),t=task(S.task),last=S.i===L.length-1,went=!!S.went[s.k]||(s.form&&state.cur===s.form);
   $('#gdCount').innerHTML='<span class="gd-w">'+E(t.s)+': step '+(S.i+1)+' of '+L.length+'<\/span><span class="gd-s">Step '+(S.i+1)+' of '+L.length+'<\/span>';
@@ -268,7 +289,9 @@ function paintBar(){const b=mkBar();if(!b)return;const s=cur();document.body.cla
   const go=$('#gdGo'),nx=$('#gdNext');go.hidden=!(s.form||s.cmd);go.innerHTML='<span class="gd-w">'+E(goLabel(s))+'<\/span><span class="gd-s">'+E(s.form?'Open '+s.form:(s.btn||'Open'))+'<\/span>';
   go.classList.toggle('primary',!went&&!go.hidden);nx.classList.toggle('primary',went||go.hidden);
   nx.innerHTML=last?'Done: finish':'<span class="gd-w">Done: next step<\/span><span class="gd-s">Done: next<\/span>';$('#gdBack').disabled=S.i===0;$('#gdSkip').hidden=last;
-  b.hidden=false;}
+  b.hidden=false;
+  /* a new step is read once: not again when a form opens or the strip is drawn anew, and not on a page that has just loaded */
+  const sk=S.task+':'+S.i;if(barSaid===null)barSaid=sk;else if(sk!==barSaid){barSaid=sk;say(stepText(),'bar');}}
 function run(byHand){const s=cur();if(!s)return;S.went[s.k]=1;keep();
   try{if(s.form)openForm(s.form);else if(s.cmd&&CMD[s.cmd])CMD[s.cmd]();}catch(e){}
   paintBar();if(byHand){const nx=$('#gdNext');if(nx&&document.activeElement===$('#gdGo')&&!(s.cmd))try{nx.focus();}catch(e){}}}
@@ -277,15 +300,16 @@ function move(d,mark){const L=stepsOf(S),s=L[S.i];if(mark&&s)S.mark[s.k]=mark;
   S.i=Math.max(0,Math.min(L.length-1,S.i+d));keep();paintBar();
   const now=cur();if(mark==='d'&&now&&now.form){run(false);}   /* "Done: next step" opens the next form; Skip and Back wait for the button */
   const focus=$('#gdGo').hidden||(now&&S.went[now.k])?$('#gdNext'):$('#gdGo');try{focus.focus();}catch(e){}}
-function start(){const L=stepsOf(S);if(!L.length){shut();return;}const first=!S.run;S.run=true;keep();shut();paintBar();
+function start(){const L=stepsOf(S);if(!L.length){shut();return;}const first=!S.run;S.run=true;keep();shut();barSaid='';paintBar();
   const s=cur();if(first&&s&&s.form)run(false);const b=$('#gdGo').hidden||(s&&S.went[s.k])?$('#gdNext'):$('#gdGo');setTimeout(()=>{try{b.focus();}catch(e){}},60);}
-function end(){S=null;keep();paintBar();try{if(window.wsUI&&wsUI.toast)wsUI.toast('The guide is closed. “Guide me” on the start screen opens it again.',{ms:5000});}catch(e){}}
+function end(){S=null;barSaid='';hush();keep();paintBar();try{if(window.wsUI&&wsUI.toast)wsUI.toast('The guide is closed. “Guide me” on the start screen opens it again.',{ms:5000});}catch(e){}}
 /* the dialog's buttons */
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#dlgBody .gd [data-gd]');if(!b)return;const k=b.dataset.gd;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#dlgBody .gd [data-gd]');if(!b)return;const k=b.dataset.gd;prime();
+  if(k==='voice'){setVoice(!voice,undefined,'dlg');return;}if(k==='again'){say(lastSaid,'dlg');return;}
   if(k==='task'){begin(b.dataset.id);return;}if(k==='ans'){answer(b.dataset.k,b.dataset.v);return;}if(k==='back'){back();return;}if(k==='back0'){ask();return;}
   if(k==='anyway'){S.a[b.dataset.k]='anyway';delete S.au[b.dataset.k];ask();return;}
   if(k==='start'){start();return;}if(k==='resume'){shut();paintBar();return;}if(k==='plan'){plan();return;}
-  if(k==='jump'){const i=parseInt(b.dataset.i,10),L=stepsOf(S);if(!(i>=0&&i<L.length))return;S.i=i;S.run=true;keep();shut();paintBar();const s=cur();if(s&&s.form)run(false);return;}
+  if(k==='jump'){const i=parseInt(b.dataset.i,10),L=stepsOf(S);if(!(i>=0&&i<L.length))return;S.i=i;S.run=true;keep();shut();barSaid='';paintBar();const s=cur();if(s&&s.form)run(false);return;}
   if(k==='redo'){const id=S.task;begin(id);return;}if(k==='tasks'){openTasks();return;}if(k==='end'){shut();end();return;}if(k==='shut'){shut();return;}});
 /* an answer of "anyway" stands for the question's "no" when the steps are drawn */
 /* ---- the ways in ---- */
@@ -294,13 +318,15 @@ function mkStart(){const card=$('#blank .card');if(!card||$('#gdStart'))return;c
   x.innerHTML='<h2 id="gdStartH">What do you need to do today?<\/h2><p>Pick one. A question or two follows, then the workstation takes you through the steps one at a time.<\/p>'+
     '<div class="gd-pills" role="group" aria-labelledby="gdStartH"><button type="button" class="gd-on" data-gdopen="resume" hidden>Carry on with the guide<\/button><button type="button" class="gd-narrow" data-gdopen="list">Show the '+TASKS.length+' kinds of work<\/button>'+TASKS.map(t=>'<button type="button" data-gdopen="'+t.id+'">'+E(t.s)+'<\/button>').join('')+'<\/div>';
   const h=[...card.children].find(el=>el.tagName==='H2');card.insertBefore(x,h||null);card.classList.add('has-gd');
-  x.addEventListener('click',e=>{const b=e.target.closest('[data-gdopen]');if(!b)return;const id=b.dataset.gdopen;if(id==='list'){openTasks();return;}if(id==='resume'){paintBar();const g=$('#gdGo');try{(g.hidden?$('#gdNext'):g).focus();}catch(e2){}return;}
+  x.addEventListener('click',e=>{const b=e.target.closest('[data-gdopen]');if(!b)return;const id=b.dataset.gdopen;prime();if(id==='list'){openTasks();return;}if(id==='resume'){paintBar();const g=$('#gdGo');try{(g.hidden?$('#gdNext'):g).focus();}catch(e2){}return;}
     if(S&&S.run&&S.task!==id&&!confirm('A guide is in hand ('+task(S.task).t+'). Start this one instead?'))return;begin(id);});
   paintPills();}
 {const pb=document.createElement('button');pb.type='button';pb.id='wsGuideBtn';pb.style.display='none';pb.tabIndex=-1;pb.setAttribute('aria-hidden','true');pb.textContent='Guide me';pb.addEventListener('click',()=>openTasks());document.body.appendChild(pb);}
 try{const g=PH_MORE.find(x=>x[0]==='The workstation');if(g)g[1].unshift(['wsGuideBtn','Guide me: what do you need to do today?']);}catch(e){}
 try{CMDS.push({k:'guide me guided mode what do i need to do today walk through step by step wizard help me start where do i begin new student fba plan train data meeting incident',n:'Guide me: what do you need to do today?',s:'command',go:()=>openTasks()});}catch(e){}
 S=load();if(S&&!S.run)S=null;
+if(!S)barSaid='';   /* with no guide in hand at load, the first step shown is read */
+try{dlg().addEventListener('close',()=>{if(saidBy==='dlg')hush();});}catch(e){}   /* the dialog closed: what it was reading stops */
 mkStart();mkBar();paintBar();
 /* the form on screen changes: the strip's main button follows it */
 try{const of0=openForm;openForm=function(){const r=of0.apply(this,arguments);try{if(S&&S.run)paintBar();}catch(e){}return r;};}catch(e){}

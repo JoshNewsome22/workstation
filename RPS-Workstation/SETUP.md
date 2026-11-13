@@ -9905,6 +9905,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.14: Read aloud in the guide
+(asked for by the BCBA on 11/13: "Can it also be voiced so that there is an option that reads the question to you as you
+go".)
+- **What is new.** Every screen of Guide me has a button "Read aloud", and the strip at the foot of the work area has
+  the same as a link. Turned on, it reads what is on the guide's screen at once and then each thing as it comes: a
+  question with its help and its choices ("The choices are: ..."), the list of steps in short (how many, and the
+  first), each step with its number, its name, its form and its reason, and the end with what often comes next.
+  "Say it again" repeats the last one. A new reading stops the one before it; turning Read aloud off, closing the
+  dialog that was being read, or ending the guide stops it at once.
+- **Whose voice.** The device's own speech (the browser's speechSynthesis), in English; where the device has a voice
+  kept on the device itself, that one is chosen. No recording is in the workstation and no paid service is used. The
+  narrator's voice of the videos is not touched: this is a different thing.
+- **What is read.** Only the guide's own words. The student's name, the case and what is typed in a form are never
+  read. The choice (on or off) is kept on the device (nbh.guide.voice).
+- **What it does not do.** It does not listen: answers are still given by tapping. It does not read the forms. A step
+  is read once, not again when its form opens. A page that has just been opened reads nothing until a step changes or
+  "Say it again" is tapped (a browser lets a page speak only after a tap).
+- **Where there is no speech.** A browser without speech shows no Read aloud button, and the guide is as it was.
+- **Not heard on a real device.** The test watches what the page asks the device to say; no sound was made here. How
+  it sounds on the iPad, and whether the iPad's first reading after a reload needs a second tap, is for the BCBA's
+  iPad to show.
+- **Test.** `qa/v2614-guide-voice-test.js` (new, in the release list): off at first and silent; on, the exact words
+  of a question; the next question, with the earlier reading stopped; the steps; no second reading when a form
+  opens; Say it again; off; a reload; a device with no speech; a phone's width.
+- **The test run.** On the built folder: the new test and the guide's test in both editions, the start screen's and
+  the phone's tests, the size budgets and the build test.
 ### v26.13: Guide me, "What do you need to do today?" and the steps one at a time
 (asked for by the BCBA on 11/13: "an interactive mode that starts by asking you a question such as what do you need to do
 today? And then guide you through all the steps of doing it one at a time ... then a next set of questions conditionally
