@@ -75,7 +75,7 @@ const WANT={};Object.keys(EXP).forEach(k=>EXP[k].split(' ').forEach(id=>{WANT[id
    approval, attention, peers, self-monitoring: each read from its fields), FCT the first FCT video (a growing work
    requirement, or escape) */
 CARDS.forEach(p=>{if(p.id in WANT)return;WANT[p.id]=p.code==='DRO'?'dro_resetting':p.code==='NCE'?'ncr_work':p.code==='A_NCA'?'ncr_attention':p.code==='NCR'?'ncr_attention':p.code==='RIRD'?'rird_vocal':p.code==='DRA'?'dra_attention':p.code==='FCT'?'fct-practical-guide-thinning':'?';});
-const COUNTS={dro_resetting:46,dro_tokens:26,dro_class:14,dro_momentary:11,ncr_attention:37,ncr_items:28,ncr_work:33,ncr_between:5,rird_vocal:17,rird_motor:16,rird_pica:21,dra_attention:80,dra_escape:60,dra_tangible:11,dra_automatic:15,'fct-practical-guide-thinning':67,fct_attention:30,fct_tangible:47,fct_thinning_mult:20,'':7};
+const COUNTS={dro_resetting:47,dro_tokens:26,dro_class:14,dro_momentary:11,ncr_attention:37,ncr_items:28,ncr_work:33,ncr_between:5,rird_vocal:17,rird_motor:16,rird_pica:21,dra_attention:81,dra_escape:60,dra_tangible:11,dra_automatic:15,'fct-practical-guide-thinning':67,fct_attention:30,fct_tangible:47,fct_thinning_mult:20,'':7};
 /* the clause this test expects on named cards (every other card: none, or one of these forms) */
 const CLAUSE={'dro-sticker-chart-assault':'This card does not restart the interval after the behavior.','dro-hourly-token-rules':'This card does not restart the interval after the behavior.',
  'ncr-preferred-item-substitute':'This card is for behavior maintained by attention.','a_nca-praise-during-hard-work':'This card is for behavior maintained by escape from tasks.',
@@ -105,7 +105,7 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
   ok('A pwa-test lists each file to be kept offline; the release list runs this test',!miss.length&&/^v2568-td1-procvideos-test$/m.test(rl),miss);}
  {const ids=new Set(BANK.protocols.map(p=>p.id)),miss=[].concat(...Object.values(VID).map(v=>v.src)).concat(Object.keys(WANT)).filter(id=>!ids.has(id));
   const by={};CARDS.forEach(p=>{by[p.code]=(by[p.code]||0)+1;});
-  ok('A the cards: DRO 97, NCR 78, NCE 14, A_NCA 11, RIRD 61, DRA 166, FCT 164; every card a video was made from is in the bank',by.DRO===97&&by.NCR===78&&by.NCE===14&&by.A_NCA===11&&by.RIRD===61&&by.DRA===166&&by.FCT===164&&!miss.length,{by,miss});}
+  ok('A the cards: DRO 98, NCR 78, NCE 14, A_NCA 11, RIRD 61, DRA 167, FCT 164; every card a video was made from is in the bank',by.DRO===98&&by.NCR===78&&by.NCE===14&&by.A_NCA===11&&by.RIRD===61&&by.DRA===167&&by.FCT===164&&!miss.length,{by,miss});}
  const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});
  const errs=[];
  const ctxOf=(w,h)=>b.newContext({viewport:{width:w||1376,height:h||1032},hasTouch:true,isMobile:true,deviceScaleFactor:1,userAgent:IPAD});
@@ -117,8 +117,8 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
  /* ---------------- B. the mapping ---------------- */
  const R=await p.evaluate(C=>TD1_BANK.protocols.filter(x=>C.includes(x.code)).map(x=>({id:x.id,code:x.code,k:window.__tdVideo.key(x.id),has:window.__tdVideo.has(x.id),line:window.__tdVideo.line(x.id)})),CODES);
  {const wrong=R.filter(x=>x.k!==WANT[x.id]),cnt={};R.forEach(x=>{cnt[x.k]=(cnt[x.k]||0)+1;});
-  ok('B every card of the seven codes shows the video this test expects',R.length===CARDS.length&&R.length===591&&!wrong.length,wrong.slice(0,6));
-  ok('B the counts: DRO resetting 46, tokens 26, class 14, momentary 11; NCR, NCE and A_NCA attention 37, items 28, during work 33, before and between 5; RIRD vocal 17, motor 16, pica 21, none 7; DRA attention 80, escape 60, items 11, automatic 15; FCT the first video 67, attention 30, items 47, signaled thinning 20',Object.keys(COUNTS).every(k=>cnt[k]===COUNTS[k]),cnt);
+  ok('B every card of the seven codes shows the video this test expects',R.length===CARDS.length&&R.length===593&&!wrong.length,wrong.slice(0,6));
+  ok('B the counts: DRO resetting 47, tokens 26, class 14, momentary 11; NCR, NCE and A_NCA attention 37, items 28, during work 33, before and between 5; RIRD vocal 17, motor 16, pica 21, none 7; DRA attention 81, escape 60, items 11, automatic 15; FCT the first video 67, attention 30, items 47, signaled thinning 20',Object.keys(COUNTS).every(k=>cnt[k]===COUNTS[k]),cnt);
   const nv=R.filter(x=>!x.k);ok('B the 7 RIRD cards none fits (overcorrection, the awareness device, exposure and response prevention, the chin cue, touching private parts) have no video and no line',nv.length===7&&nv.every(x=>x.code==='RIRD'&&!x.has&&!x.line),nv);}
  /* ---------------- C. the lines ---------------- */
  {const VS=await p.evaluate(K=>{const o={};K.forEach(k=>{o[k]=window.__tdVideo.line(k);});return o;},Object.keys(VID));
@@ -138,7 +138,7 @@ const CLAUSES=[/^This card does not restart the interval after the behavior\.$/,
   const D=R.filter(x=>x.code==='DRA'&&!/^The video shows this card/.test(x.line)),kind=x=>/This card is for behavior maintained by/.test(x.line)?'fn':/This card (also uses|does not use) extinction/.test(x.line)?'ext':/This card names no function; its alternative: /.test(x.line)?'nofn':/This card’s alternative: /.test(x.line)?'alt':'none';
   const dk={};D.forEach(x=>{dk[kind(x)]=(dk[kind(x)]||0)+1;});const B=Object.fromEntries(BANK.protocols.map(p=>[p.id,p]));
   const dbad=D.filter(x=>{const p=B[x.id],k=kind(x);return k==='none'||(k==='nofn')!==!(p.fn||[]).length&&k!=='ext'&&k!=='fn';});
-  ok('C DRA: 161 cards beside the 5 sources each with one clause: its alternative (named with "names no function" when fn is empty), or extinction where the card withholds or still gives the reinforcer (1 card)',D.length===161&&!dbad.length&&dk.ext===1&&!dk.fn&&!dk.none&&dk.nofn+dk.alt===160,{dk,dbad:dbad.slice(0,4).map(x=>[x.id,x.line.slice(-120)])});
+  ok('C DRA: 162 cards beside the 5 sources each with one clause: its alternative (named with "names no function" when fn is empty), or extinction where the card withholds or still gives the reinforcer (1 card)',D.length===162&&!dbad.length&&dk.ext===1&&!dk.fn&&!dk.none&&dk.nofn+dk.alt===161,{dk,dbad:dbad.slice(0,4).map(x=>[x.id,x.line.slice(-120)])});
   /* v25.70 FCT: another function or no extinction only where the card's fields show it; every other FCT card names its own request */
   const F=R.filter(x=>x.code==='FCT'&&!/^The video shows this card/.test(x.line)),fk=x=>/This card is for behavior maintained by/.test(x.line)?'fn':/This card does not use extinction/.test(x.line)?'ext':/This card names no function; its request: /.test(x.line)?'nofn':/This card’s request: /.test(x.line)?'req':'none';
   const fc={};F.forEach(x=>{fc[fk(x)]=(fc[fk(x)]||0)+1;});

@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.05: Behavior Modification, fourth and last part: the 1977 volume read from scans; eight cards
+(the BCBA's folder of 11/13, finished; see v26.02 for the folder and the method.)
+- **How the scans were read.** The 41 files of volume 1 are pictures of pages with no text in them. Each page was
+  drawn at 200 dots per inch and read by the workstation's own text recognizer (`nbh-ocr/`, the one Read a document
+  uses), in a browser on the build computer: 584 pages in about 18 minutes, nothing sent anywhere. The text is good
+  enough to read methods and results; graphs are lost, so a result that an article gives only in a figure is
+  reported in words and the card's note says so.
+- **TD-1, 8 new cards** (3,290 in all; 50 from this journal):
+  - reminders that keep a behavior going: reward the wanted behavior on a varying schedule and stop saying "look at
+    me" at the moment the student is not doing it (Burleigh & Marholin; one EXTINCTION step);
+  - a family-style table at lunch, set by two students, with food passed in dishes and an invited adult guest, so that
+    students stay through the meal (Doke et al.);
+  - reversed and mirror-written letters: a token for each correct copy and a shown correction for each wrong one
+    (Lahey, Busemeyer, et al.);
+  - two conversation skills, encouragers and on-topic questions, taught by a parent in small steps (Arnold et al.);
+  - a daily "brag sheet" sent home for a whole kindergarten class, with one letter to parents and no training for
+    anyone (Lahey, Gendrich, et al.);
+  - sharing in preschool, praised only when the child's report of it is true (Rogers-Warren et al.);
+  - sentences taught in the speech room, used in class and at home only after five trials a day are run there (Garcia
+    et al.);
+  - self-injury during table work: 15 s of a back massager for each interval of working without it, from 15 s to 3
+    min (Nunes et al.; one RESTRICTIVE punishment step for the study's first stage, in which the massager was switched
+    off at each instance; the card works without it).
+- **Marks.** 37 EXTINCTION steps in the bank now. One new punishment step (Nunes et al.), marked and optional.
+- **GB-1, 3 source lines:** Share toys or materials with a peer (Rogers-Warren et al.); Describe a picture in a full
+  sentence (Garcia et al.); Copy letters and short passages neatly (Lahey, Busemeyer, et al.).
+- **Set aside and recorded** (`tools/banks/set-aside-procedures.md`): Doke et al. (the center's point penalties and
+  dismissal from the table, left out of the card); Rollings et al. (overcorrection for stereotypy, which also did
+  not last or carry over: not a card); Stimbert et al. (overcorrection and tray time-out in an intensive feeding
+  program: not a card); Goren et al. (a spoken punisher after echolalia, which suppressed speech in general: not a
+  card).
+- **Looked at and not banked** (from the abstract, or the part needed to decide): the two parent training studies of
+  Forehand and colleagues and Peed et al. (group outcomes of a parent program); Andrasik & McNamara (staff
+  performance); Parish (a group study of generosity); Matson & Stephens (overcorrection with an adult patient); Upper
+  et al. (contracts with adult foster home residents); the studies of adults in treatment (drinking, fears,
+  relaxation, weight, interview speech); the reviews and essays (Hersen & Bellack; Kanfer & Grimm; Cautela & Baron;
+  Bornstein et al.); six book reviews and an erratum. **Worth the BCBA's own reading:** Kazdin (1977), "Assessing the
+  clinical or applied importance of behavior change through social validation", the article behind the acceptability
+  ratings the forms ask for. It is not in the reading list, which holds 2022 to 2026 only.
+- **Tests.** The two bank tests and the versions test pass; the procedure-video test and the marks test pass with
+  their hand-kept counts raised (DRO 98, DRA 167; 3,290 cards, 37 EXTINCTION steps).
+- **The test run.** On the built folder: the bank tests and the Learning tests in both editions, and the versions,
+  procedure-video, marks and feeding tests, the size budgets and the build test in the workstation. Not seen on an iPad.
 ### v26.04: Behavior Modification, third part: 19 more cards in TD-1's bank; the 2020 to 2026 volumes are finished
 (the BCBA's folder of 11/13, continued; see v26.02 for the folder and the method.)
 - **TD-1, 19 new cards** (3,282 in all; 42 from this journal), each read from the article's method and results:

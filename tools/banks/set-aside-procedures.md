@@ -5,9 +5,9 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Tier A** procedures could be considered only in rare cases, after a functional assessment, after less restrictive procedures have been tried, and with the review and consent the district requires.
 - **Tier B** procedures are never used in schools. They are listed only so the form can show them as prohibited.
 
-## Tier A: may be considered with approval (260)
+## Tier A: may be considered with approval (264)
 
-### Response cost (67)
+### Response cost (68)
 
 - **Aragona et al. (1975)** [aragona1975]: Parents forfeited money they had deposited whenever weight goals were missed. *Main procedure.* Bank: study skipped.
 - **Bailey et al. (1970)** [bailey1970]: When the daily cards were faded to twice a week, a "no" cost all the points built up since the last card. *Part of a package.* Bank: kept out of the steps; note flags it.
@@ -20,6 +20,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Chadwick & Day (1971)** [chadwick1971]: The summer-class package for underachieving students used point fines. *Part of a package.* Bank: study skipped.
 - **Christophersen et al. (1972)** [christophersen1972]: Families fined 10 points for bickering, teasing and whining and 100 for not following directions, and undone chores lost their points. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Daou (2014)** [daou2014]: An earned token was taken away when a child resisted the graduated guidance through the photo schedule. *Part of a package.* Bank: kept out of the steps; note flags it.
+- **Doke et al., 1977** [doke1977]: At the family-style lunch table, as everywhere in the treatment center, rude or disruptive behavior brought a point penalty in the center's point system or dismissal from the table. *Part of a package.* Reported: Not reported apart from the dining arrangement. Bank: kept out of the steps; note flags it.
 - **Doty et al. (1974)** [doty1974]: A locked adult psychiatric unit ran on token fines, whose payment the study changed. *Main procedure.* Bank: study skipped.
 - **Fixsen et al. (1972)** [fixsen1972]: Boys lost points when their room self-reports did not match the adult's check, and a missing sheet cost 100 points. *Part of a package.* Bank: support kept for reinforcement part only.
 - **Fixsen et al. (1973)** [fixsen1973]: Group-home boys discussed and voted on point fines for peers' rule breaking. *Main procedure.* Bank: study skipped.
@@ -134,7 +135,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **paisey1991b** [paisey1991b]: After tantrums or aggression the 11-year-old was sent to her bedroom to lie quietly on her bed for 30 minutes alone (timer reset for more screaming); later this became 1 minute face down on a floor blanket and then 5 minutes alone on her bed. *Part of a package.* Reported: the first package with this procedure did not reduce problem behavior; the later package worked briefly but gains were lost at follow-up; not separated. Bank: study skipped.
 - **seekins1987** [seekins1987]: After each hit or thrown object, a 13-year-old boy with profound intellectual disability was sent to lie on his bed alone in his room until he had been quiet for 5 minutes in a row, with physical prompts back to the bed if he got up. *Main procedure.* Reported: Aggression fell from about 7.2 a day in baseline to 5 a day, rose when the seizure medication was doubled, and fell to about 1.7 a day once the original 50 mg dose was restored. Bank: study skipped.
 
-### Reprimand (31)
+### Reprimand (32)
 
 - **Azrin & Foxx (1971)** [azrin1971]: In the same toilet-training program, each accident brought a reprimand. *Part of a package.* Bank: study skipped.
 - **Azrin & Wesolowski (1974)** [azrin1974]: Each theft reversal came with a reprimand. *Part of a package.* Bank: study skipped.
@@ -145,6 +146,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **F. H. Jones & Eimers (1975)** [jones1975]: Teachers used brief limit-setting reprimands. *Part of a package.* Bank: kept out of the steps; note flags it.
 - **Foxx, McMorrow, Faw, et al., 1987** [foxx1987a]: During baseline and training the trainer said a firm 'No' after each echoed answer and 'no' or 'shh' when the student spoke during the quiet signal, restarting the trial. *Part of a package.* Reported: not separated from the package. Bank: kept out of the steps; note flags it; left out of the objective; its note flags it.
 - **Gardner & Heward, 1991** [gardner1991]: When he repeated the question about setting the table, staff said 'No, I just told you' or held up a palm as a stop signal, and other errors got a 'No, this is how you cue' correction with a demonstration. *Part of a package.* Reported: instructions with praise and correction alone produced only small, unstable gains; otherwise not separated. Bank: kept out of the steps; note flags it; left out of the objective; its note flags it.
+- **Goren et al., 1977** [goren1977]: In the second experiment the adult followed each echoed reply with a spoken punisher, alone and together with praise for appropriate replies, for two children with frequent echolalia. *Main procedure.* Reported: Punishing echolalia suppressed speech in general, appropriate replies included. Bank: study skipped.
 - **Jones et al. (1977)** [jones1977b]: Teachers were trained in limit setting: interrupting disruption quickly with brief, low-key disapproval (the student's name or a short phrase) delivered close to the student with an assertive gesture and tone. *Part of a package.* Reported: not separated from the package. Bank: study skipped.
 - **Koegel & Covert (1972)** [koegel1972]: A sharp spoken reprimand was given with the hand slaps for stereotypy. *Part of a package.* Bank: study skipped.
 - **Koegel & Rincover (1974)** [koegel1974a]: Disruption and self-stimulation in those sessions were also answered with a shouted "no". *Part of a package.* Bank: study skipped.
@@ -168,7 +170,7 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **paisey1991a** [paisey1991a]: In one assessment condition the therapist said things like 'No hitting!' or 'That hurts!' with brief eye contact after each aggressive act by three men during group-home meals. *Part of a package.* Reported: aggression in this condition suggested that reprimands added to aggression for 2 of the 3 men. Bank: study skipped.
 - **steuartwatson1994** [steuartwatson1994]: Each time the 52-year-old man began to ruminate during a meal, the trainer shouted "No!" and struck the table with both hands. *Part of a package.* Reported: not separated from the package. Bank: kept out of the steps; note flags it; study skipped.
 
-### Overcorrection (10)
+### Overcorrection (12)
 
 - **Azrin & Foxx (1971)** [azrin1971]: After an accident the person had to clean up and shower (forced cleanup). *Part of a package.* Bank: study skipped.
 - **Azrin & Wesolowski (1974)** [azrin1974]: Stealing was followed by returning the item plus giving the victim another one (theft reversal). *Main procedure.* Bank: study skipped.
@@ -178,7 +180,9 @@ These studies used a punishment or restrictive procedure. The banks left it out:
 - **Lomas Mevers et al., 2017** [lomasmevers2017]: Each time the other twin eloped, he was guided back and forth between the place he had run to and where he started, three times. *Part of a package.* Reported: The authors state their treatment analyses showed he needed it, but its effect is not separated in the data shown. Bank: kept out of the steps; note flags it; study skipped.
 - **Luiselli & Evans, 1987** [luiselli1987]: In Study I, each irrelevant vocalization by a 14-year-old girl led staff to guide her hands over her mouth for 10 s and back to the table, repeated for 1 minute and later shortened to 40 and then 30 s. *Main procedure.* Reported: Vocalizing fell from about 3 to 5.5 per minute to under 0.5 per minute with or without medication, and rose again when it was withdrawn. Bank: kept out of the steps; note flags it; study skipped.
 - **Migan-Gandonou & Leon, 2020** [migangandonou2020]: Each episode of rumination by a 9-year-old boy with autism was followed by brushing his teeth with toothpaste (contingent oral hygiene), chosen as the most avoided event in a stimulus avoidance assessment. *Main procedure.* Reported: Rumination fell by 97%. Bank: study skipped.
+- **Rollings et al., 1977** [rollings1977]: Overcorrection was applied after each stereotyped movement (body rocking, head weaving) of two people with severe intellectual disability. *Main procedure.* Reported: The movements were suppressed only while the trainer stood close; other stereotyped or emotional behaviors rose; little carried over to the living area and nothing lasted six months. Bank: study skipped.
 - **Rusch et al. (1976)** [rusch1976]: An adult's searching was also followed by hand-washing overcorrection. *Main procedure.* Bank: study skipped.
+- **Stimbert et al., 1977** [stimbert1977]: In an intensive feeding program (six meals a day, about 173 sessions a child) for six children with severe intellectual disability, incorrect eating was followed by restitutional and positive practice overcorrection, and disruptive behavior by removal of the tray and restitutional overcorrection; correct spoon use was taught with graduated guidance. *Main procedure.* Reported: Correct eating rose to near the best possible and disruptive behavior was nearly eliminated, with gains kept for up to a year. Bank: study skipped.
 - **calamari1990** [calamari1990]: The same program listed functional movement training, an overcorrection procedure, as a consequence for aggression. *Part of a package.* Reported: not separated from the package; the study evaluated the medicine. Bank: study skipped.
 
 ### Positive practice (5)
@@ -495,6 +499,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Danforth, J. S. (2016). A flow chart of behavior management strategies for families of children with co-occurring attention-deficit hyperactivity disorder and conduct problem behavior. Behavior Analysis in Practice, 9(1), 64–76.
 - Daou, N. (2014). Conducting behavioral research with children attending nonbehavioral intervention programs for autism: The case of Lebanon. Behavior Analysis in Practice, 7(2), 78–90.
 - Didden, R., Seys, D., & Schouwink, D. (1999). Treatment of chronic food refusal in a young developmentally disabled child. Behavioral Interventions, 14(4), 213–222.
+- Doke, L. A., Feaster, C. A., & Predmore, D. L. (1977). Managing the “eat-and-run” behavior of adolescents via family-style dining. Behavior Modification, 1(1), 73–92.
 - Drash, P. W., & Tudor, R. M. (1991). A standard methodology for the analysis, recording, and control of verbal behavior. The Analysis of Verbal Behavior, 9, 49–60.
 - Duker, P. C., Jol, K., & Palmen, A. (1991). The collateral decrease of self-injurious behavior with teaching communicative gestures to individuals who are mentally retarded. Behavioral Residential Treatment, 6(3), 183–196.
 - Ellison, D. M. (1997). Compliance training decreases maladaptive behaviors in two people with developmental disabilities: Report of five years' treatment. Behavioral Interventions, 12(4), 183–194.
@@ -505,6 +510,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Gardner, R., III, & Heward, W. L. (1991). Case study: Improving the social interactions of a group home resident with severe and multiple disabilities. Behavioral Residential Treatment, 6(1), 39–50.
 - Glass, M., Houlihan, D., Fatis, M., & Levine, H. (1993). Brief report: Compliance in the classroom: Using the “thumbs up” procedure to increase student compliance to teacher requests. Behavioral Residential Treatment, 8(4), 281–288.
 - Goetz, E. M., Holmberg, M. C., & LeBlanc, J. M. (1975). Differential reinforcement of other behavior and noncontingent reinforcement as control procedures during the modification of a preschooler's compliance. Journal of Applied Behavior Analysis, 8(1), 77–82.
+- Goren, E. R., Romanczyk, R. G., & Harris, S. L. (1977). A functional analysis of echolalic speech. Behavior Modification, 1(4), 481–498.
 - Guess, D. (1969). A functional analysis of receptive language and productive speech: Acquisition of the plural morpheme. Journal of Applied Behavior Analysis, 2(1), 55–64.
 - Hagopian, L. P., Boelter, E. W., & Jarmolowicz, D. P. (2011). Reinforcement schedule thinning following functional communication training: Review and recommendations. Behavior Analysis in Practice, 4(1), 4–16.
 - Hains, A. A. (1989). An anger-control intervention with aggressive delinquent youths. Behavioral Residential Treatment, 4(3), 213–230.
@@ -563,6 +569,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Plummer, S., Baer, D. M., & LeBlanc, J. M. (1977). Functional considerations in the use of procedural timeout and an effective alternative. Journal of Applied Behavior Analysis, 10(4), 689–705.
 - Repp, A. C., & Deitz, S. M. (1974). Reducing aggressive and self-injurious behavior of institutionalized retarded children through reinforcement of other behaviors. Journal of Applied Behavior Analysis, 7(2), 313–325.
 - Risley, T. R. (1968). The effects and side effects of punishing the autistic behaviors of a deviant child. Journal of Applied Behavior Analysis, 1(1), 21–34.
+- Rollings, J. P., Baumeister, A. A., & Baumeister, A. A. (1977). The use of overcorrection procedures to eliminate the stereotyped behaviors of retarded individuals: An analysis of collateral behaviors and generalization of suppressive effects. Behavior Modification, 1(1), 29–46.
 - Russo, D. C., & Koegel, R. L. (1977). A method for integrating an autistic child into a normal public-school classroom. Journal of Applied Behavior Analysis, 10(4), 579–590.
 - Sack, S. H., McLean, L. S., McLean, J. E., & Spradlin, J. E. (1992). Effects of increased opportunities within scripted activities on communication rates of individuals with severe retardation. Behavioral Residential Treatment, 7(3), 235–257.
 - Sailor, W., & Taman, T. (1972). Stimulus factors in the training of prepositional usage in three autistic children. Journal of Applied Behavior Analysis, 5(2), 183–190.
@@ -577,6 +584,7 @@ The studies a bank cites or drew on are listed in full. A study that was skipped
 - Semino, M., Riccio, E., Giannatiempo, S., Cavallini, F., & Vascelli, L. (2025). Evaluating a treatment package to reduce toe walking and improve ankle mobility in children with autism spectrum disorder: A multi-component intervention. Behavior Analysis in Practice, 18(1), 206–220.
 - Seymour, F. W., & Stokes, T. F. (1976). Self-recording in training girls to increase work and evoke staff praise in an institution for offenders. Journal of Applied Behavior Analysis, 9(1), 41–54.
 - Stevens-Long, J., & Rasmussen, M. (1974). The acquisition of simple and compound sentence structure in an autistic child. Journal of Applied Behavior Analysis, 7(3), 473–479.
+- Stimbert, V. E., Minor, J. W., & McCoy, J. F. (1977). Intensive feeding training with retarded children. Behavior Modification, 1(4), 517–530.
 - Stocks, J. T., Thyer, B. A., & Kearsley, M. (1987). Using a token economy in a community-based residential program for disabled adults: An empirical evaluation leads to program modification. Behavioral Residential Treatment, 2(3), 173–185.
 - Stolz, S. B., & Wolf, M. M. (1969). Visually discriminated behavior in a "blind" adolescent retardate. Journal of Applied Behavior Analysis, 2(1), 65–77.
 - Switzer, E. B., Deal, T. E., & Bailey, J. S. (1977). The reduction of stealing in second graders using a group contingency. Journal of Applied Behavior Analysis, 10(2), 267–272.
