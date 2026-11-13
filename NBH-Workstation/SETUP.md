@@ -9905,6 +9905,50 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.08: Check yourself on every procedure video, scored by the page
+(approved by the BCBA on 11/12 in the list of next steps: "Training that scores itself. Every video has a known
+timeline, so I can build a short quiz, a filled-in integrity checklist (TI-1) and a data-collection practice with an
+answer key from each one. Scores could go into the training and supervision forms (ST-1, RS-1).")
+This release is the first part: the quiz, and the way its score reaches the trainer. What is not built is listed
+below.
+- **Where.** On each video's page in the video library (videos.html), under "About this video": a panel "Check
+  yourself" with "Start the check". All 46 videos have it.
+- **What it asks.** Two parts, both made from the video's own step list and captions (`nbh-video-steps.js`, whose
+  words were checked against the picture in v25.72).
+  1. *Put the steps in the order the video shows them.* The numbered steps are dealt out of order; arrows move a
+     step up or down (the page says its new place, for a screen reader). One point for each step in its place.
+  2. *Which step is playing?* Up to four captions, one from each of four steps spread over the video; the choices are
+     the video's steps. One point each. A caption is not asked when it repeats its step's title (that would give the
+     answer away) or names another step (that would have two answers).
+- **The answer key is the video.** After "Check my answers" each row says "Right place" or "The video shows this as
+  step N"; each caption says "Right" or names its step, with "Play that moment", which plays the video from that
+  caption. "Check again" deals the steps anew and draws other captions where the video has more.
+- **The score.** Kept on the device with what was watched (the browser's `nbh.videos.v1`, one more value on the
+  video's entry: right, out of, the day, how many times). It is the last score, not the best. Watching the video
+  again does not erase it.
+- **In Learning.** A video's row in a unit shows "Checked N of M" (green when all were right). The record a learner
+  sends from My record carries the checks (`vc`), and the trainer's page for a trainee lists them under "Their
+  video checks": the video, the score, how many times, the last day. The trainer's reading of a record keeps only
+  checks of videos it knows, with a score no higher than its total.
+- **What it does not show.** A right order and matched captions show that a person knows the steps of the video. They
+  do not show that the person can carry the procedure out; that is the role-play with the trainer, which Learning
+  already records.
+- **Not built in this release, and why.**
+  - *A TI-1 checklist filled in from each video.* Form TI-1 takes its steps from a student's plan. A checklist of a
+    video's steps for scoring a staff member's role-play belongs with the role-plays in Learning or in Form ST-1; which
+    of the two is the BCBA's choice, and it was not guessed.
+  - *Data practice with an answer key from each video.* The step list says when each step starts; it does not say
+    when each behavior, prompt or reward happens. An answer key for counting needs those moments marked for each
+    video, by watching each one. Practice counting (practice.html) has such a key for its drawn scenes.
+  - *Scores in Forms ST-1 and RS-1.* The trainer's page in Learning receives them now. Those two forms are records
+    about a student's staff, kept with a case; whether a learner's scores are copied into them is not decided.
+- **Hosting.** HOSTING.md's row for the Learning record names the video checks.
+- **Test.** `qa/v2608-videocheck-test.js` (new, in the release list): the questions of all 46 videos, three draws
+  each, against the rules above; a whole check done right and one done wrong on one video; the unanswered case; a
+  phone's width; the row in Learning, the record sent, and the trainer's page with a well-formed, an over-large, a
+  malformed and an unknown check. `qa/v2600-learn-test.js`: the record's list of parts gains `vc`.
+- **The test run.** On the built folder: the new test and the two Learning tests in both editions, the video library's
+  tests, the size budgets and the build test. Not seen on an iPad or a phone.
 ### v26.07: an evidence line on every card of Form TD-1's bank, and an order by it
 (approved by the BCBA on 11/12 in the list of next steps: "grade the evidence on every bank card by one plain rubric
 (design, number of students, replication, closeness to a school setting) so TD-1 can rank options and say why".)

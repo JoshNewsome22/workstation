@@ -270,6 +270,23 @@ html.vl-mini,html.vl-mini body{overflow:hidden}html.vl-mini .vl-player{position:
 .vl-scap{margin:0;padding:0 12px 10px calc(3.1em + 50px);font-size:.875rem;line-height:1.45;color:var(--ink)}
 .vl-scap[hidden]{display:none}
 .vl-next .vl-steps{margin:0 0 22px}
+/* v26.08 Check yourself */
+.vl-chk h4{margin:16px 0 4px;font-size:1rem;color:var(--navy)}
+.vl-chk [hidden]{display:none!important}.vl-chkmv .vl-btn:disabled{opacity:.35}
+.vl-chklast{margin:6px 0 10px;font-weight:600;color:var(--navy)}
+.vl-chkord{list-style:none;margin:8px 0 0;padding:0}
+.vl-chkord li{display:grid;grid-template-columns:28px 1fr auto;gap:4px 10px;align-items:center;padding:6px 8px;border:1px solid var(--rule);border-radius:10px;margin:0 0 6px;background:#fff}
+.vl-chkp{font-weight:700;color:var(--muted);text-align:center}
+.vl-chkmv{display:flex;gap:6px}.vl-chkmv .vl-btn{min-width:44px;min-height:44px;padding:0;justify-content:center}
+.vl-chkord li.ok .vl-chkmv,.vl-chkord li.no .vl-chkmv{display:none}
+.vl-chkmk{grid-column:2 / -1;font-size:.875rem;font-weight:600}.vl-chkmk:empty{display:none}
+.vl-chkord li.ok,.vl-chkq.ok{border-color:#9fd0b5;background:#f1f9f4}.vl-chkord li.no,.vl-chkq.no{border-color:#e7c27a;background:#fff8ea}
+.vl-chkord li.ok .vl-chkmk{color:#17603a}.vl-chkord li.no .vl-chkmk{color:#7a3b00}
+.vl-chkq{margin:10px 0 0;padding:8px 12px 10px;border:1px solid var(--rule);border-radius:10px;min-width:0}
+.vl-chkq legend{float:left;width:100%;padding:0;margin:0 0 4px;font-weight:600;color:var(--navy)}.vl-chkq legend+*{clear:both}
+.vl-chkq label{display:flex;align-items:center;gap:10px;min-height:44px}.vl-chkq input{width:22px;height:22px;margin:0;flex:none}
+.vl-chkfb{margin:6px 0 0;font-weight:600;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.vl-chkfb[hidden]{display:none}
+.vl-chkend{margin:14px 0 0}.vl-chkres{margin:10px 0 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.vl-chkres:empty{display:none}
 /* v25.72 captions and transcript: the Steps and the Transcript as two tabs; every step listed, a step only on a card says so */
 .vl-tabs{padding:6px 8px 8px}
 .vl-next .vl-tabs{margin:0 0 22px}
@@ -423,7 +440,7 @@ var store=readStore();
 function writeStore(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
 function prog(k){var it=store.items[k];return it&&typeof it==='object'?it:null;}
 function setProg(k,t,d,ended){if(!BY[k]||!(d>0))return;var p=prog(k)||{},w=!!p.w||!!ended||t>=d*0.95;
-  store.items[k]={t:ended||t>=d-2?0:Math.max(0,Math.floor(t)),d:Math.round(d),w:w,at:Date.now()};writeStore();}
+  store.items[k]={t:ended||t>=d-2?0:Math.max(0,Math.floor(t)),d:Math.round(d),w:w,at:Date.now()};if(p.q)store.items[k].q=p.q;writeStore();}   /* v26.08 the Check yourself score stays */
 var inProgress=function(k){var p=prog(k);return !!p&&p.t>=5&&(!p.d||p.t<p.d-2);};
 var watched=function(k){var p=prog(k);return !!p&&!!p.w;};
 addEventListener('storage',function(e){if(e.key===KEY){store=readStore();if(view==='home')paintHome();}else if(e.key==='nbh.view')viewFromStore();});
@@ -636,6 +653,60 @@ function stepsHtml(S,hasT,full){var WH={open:full?'Said at the opening':'On the 
       return '<li data-i="'+i+'"'+(s.where?' data-where="'+s.where+'"':'')+'><button type="button" class="vl-sbtn" data-t="'+s.t+'"><span class="vl-stm">'+mmss(s.t)+'</span><span class="vl-sn'+(s.n?'':' vl-sn0')+'" aria-hidden="true">'+(s.n||'')+'</span><span>'+(s.n?'<span class="vl-sr">Step '+s.n+': </span>':'')+esc(s.title)+(note?'<span class="vl-snote">'+note+'</span>':'')+'</span></button><p class="vl-scap" hidden></p></li>';}).join('')+'</ol></div>'+
     (hasT?'<div class="vl-trans" id="vlTrans" role="tabpanel" aria-labelledby="vlTabT" hidden></div>':'')+'</section>';}
 var EXPLAIN={dro_resetting:['dro','DRO, resetting'],fct_thinning_mult:['fct','FCT: green and red'],ncr_attention:['ncr','NCR: attention on a timer']};   /* v25.78 video key -> [explain.html's address, its name]; v25.79 NCR */
+/* v26.08 Check yourself: two short parts made from the video's own step list and captions (nbh-video-steps.js), scored on
+   the page. 1 the numbered steps, to put in the order the video shows them; 2 up to four captions, each to match with the
+   step it is shown under. The answer key is the video itself: every answer can be played. The score is kept with what was
+   watched (nbh.videos.v1, items[key].q = {s, of, at, n}: right, out of, when, how many times); nothing typed, no student. */
+function chkData(S,tries){var seen={},st=S.steps.filter(function(s){if(!(s.n>=1)||seen[s.n])return false;seen[s.n]=1;return true;}).sort(function(a,b){return a.n-b.n;});
+  var by={},norm=function(x){return String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();};st.forEach(function(s){by[s.n]=s;});
+  var got={},one=[];(S.caps||[]).forEach(function(c){var s=by[c[2]];if(!s||got[c[2]]||!c[1]||c[1].length<12)return;var a=norm(c[1]),b=norm(s.title);
+    if(a===b||a.indexOf(b)>=0||b.indexOf(a)>=0)return;   /* a caption that repeats its step's title would give the answer away */
+    if(st.some(function(o){return o.n!==s.n&&(norm(o.title)===a||a.indexOf(norm(o.title))>=0);}))return;   /* one that names another step would have two answers */
+    got[c[2]]=1;one.push({t:c[0],cap:c[1],n:c[2]});});
+  var k=Math.min(4,one.length),qs=[];for(var i=0;i<k;i++)qs.push(one[(Math.floor(i*one.length/k)+tries)%one.length]);
+  qs.sort(function(a,b){return a.t-b.t;});return {steps:st,qs:qs};}
+function chkShuffle(a,seed){var r=a.slice(),x=((seed+1)*2654435761)>>>0||1;for(var i=r.length-1;i>0;i--){x=(Math.imul(x,1664525)+1013904223)>>>0;var j=x%(i+1),t=r[i];r[i]=r[j];r[j]=t;}
+  if(r.length>1&&r.every(function(s,i){return s===a[i];}))r.push(r.shift());return r;}
+function chkOpts(steps,q){if(steps.length<=6)return steps;var rest=chkShuffle(steps.filter(function(s){return s.n!==q.n;}),Math.round(q.t*10)).slice(0,4);
+  return rest.concat(steps.filter(function(s){return s.n===q.n;})).sort(function(a,b){return a.n-b.n;});}
+function checkSetup(v,S,playFrom){var host=$('vlChkHere');if(!host||!S||!S.steps||chkData(S,0).steps.length<3)return;
+  var qOf=function(){var p=prog(v.key);return p&&p.q&&p.q.of>0?p.q:null;};
+  var last=function(){var q=qOf();return q?'Last time: '+q.s+' of '+q.of+', on '+new Date(q.at).toLocaleDateString(undefined,{month:'long',day:'numeric'})+'.':'';};
+  host.innerHTML='<section class="vl-panel vl-chk" id="vlChk" aria-labelledby="vlChkH"><h3 id="vlChkH">Check yourself</h3>'+
+    '<p class="vl-note">Two short parts made from this video’s own steps and captions. The score stays on this device, with what you have watched.</p>'+
+    '<p class="vl-chklast" id="vlChkLast"'+(last()?'':' hidden')+'>'+esc(last())+'</p>'+
+    '<button type="button" class="vl-btn" id="vlChkGo">'+(last()?'Check again':'Start the check')+'</button><div id="vlChkBody" hidden></div></section>';
+  var body=$('vlChkBody'),go=$('vlChkGo'),D0=null,order=[],done=false;
+  var ordHtml=function(){return order.map(function(s,i){return '<li data-n="'+s.n+'"><span class="vl-chkp" aria-hidden="true">'+(i+1)+'</span><span class="vl-chkt">'+esc(s.title)+'</span>'+
+    '<span class="vl-chkmv"><button type="button" class="vl-btn vl-chkup" data-i="'+i+'" data-d="-1" aria-label="Move up: '+esc(s.title)+'"'+(i===0||done?' disabled':'')+'>▲</button>'+
+    '<button type="button" class="vl-btn vl-chkdn" data-i="'+i+'" data-d="1" aria-label="Move down: '+esc(s.title)+'"'+(i===order.length-1||done?' disabled':'')+'>▼</button></span><span class="vl-chkmk"></span></li>';}).join('');};
+  var start=function(){var q=qOf(),tries=q?q.n||1:0,h=0;for(var i=0;i<v.key.length;i++)h=(h*31+v.key.charCodeAt(i))>>>0;
+    D0=chkData(S,tries);order=chkShuffle(D0.steps,h%9973+tries);done=false;
+    body.innerHTML='<h4 id="vlChkOH">1. Put the steps in the order the video shows them</h4><p class="vl-note">Use the arrows to move a step up or down.</p><ol class="vl-chkord" id="vlChkOrd" aria-labelledby="vlChkOH">'+ordHtml()+'</ol>'+
+      (D0.qs.length?'<h4>2. Which step is playing?</h4>'+D0.qs.map(function(q,i){return '<fieldset class="vl-chkq" data-i="'+i+'"><legend>The video says: “'+esc(q.cap)+'”</legend>'+
+        chkOpts(D0.steps,q).map(function(s){return '<label><input type="radio" name="vlChkQ'+i+'" value="'+s.n+'"><span>Step '+s.n+': '+esc(s.title)+'</span></label>';}).join('')+'<p class="vl-chkfb" hidden></p></fieldset>';}).join(''):'')+
+      '<div class="vl-chkend"><button type="button" class="vl-btn vl-pri" id="vlChkDone">Check my answers</button><p class="vl-chkres" id="vlChkRes" role="status" aria-live="polite"></p></div>';
+    body.hidden=false;go.hidden=true;$('vlChkLast').hidden=true;};
+  go.addEventListener('click',start);
+  body.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+    if(b.dataset.d&&!done){var i=+b.dataset.i,j=i+(+b.dataset.d);if(j<0||j>=order.length)return;var t=order[i];order[i]=order[j];order[j]=t;var up=+b.dataset.d<0;$('vlChkOrd').innerHTML=ordHtml();
+      var nb=$('vlChkOrd').querySelector((up?'.vl-chkup':'.vl-chkdn')+'[data-i="'+j+'"]');if(nb&&nb.disabled)nb=$('vlChkOrd').querySelector((up?'.vl-chkdn':'.vl-chkup')+'[data-i="'+j+'"]');if(nb)nb.focus();
+      $('vlChkRes').textContent=t.title+': now in place '+(j+1)+' of '+order.length+'.';return;}
+    if(b.dataset.play){playFrom(+b.dataset.play);try{$('vlVideo').scrollIntoView({block:'center'});}catch(x){}return;}
+    if(b.id==='vlChkAgain'){start();try{$('vlChkOH').scrollIntoView({block:'start'});}catch(x){}return;}
+    if(b.id!=='vlChkDone'||done)return;
+    var open=D0.qs.filter(function(q,i){return !body.querySelector('input[name="vlChkQ'+i+'"]:checked');}).length;
+    if(open){$('vlChkRes').textContent='Answer every question first: '+open+' left.';return;}
+    done=true;var so=0,sq=0;$('vlChkOrd').innerHTML=ordHtml();
+    [].forEach.call($('vlChkOrd').children,function(li,i){var ok=order[i].n===D0.steps[i].n;if(ok)so++;li.className=ok?'ok':'no';li.querySelector('.vl-chkmk').textContent=ok?'Right place':'The video shows this as step '+order[i].n;});
+    D0.qs.forEach(function(q,i){var fs=body.querySelector('.vl-chkq[data-i="'+i+'"]'),pick=+fs.querySelector('input:checked').value,ok=pick===q.n,s=D0.steps.filter(function(x){return x.n===q.n;})[0],fb=fs.querySelector('.vl-chkfb');if(ok)sq++;
+      fs.className='vl-chkq '+(ok?'ok':'no');[].forEach.call(fs.querySelectorAll('input'),function(x){x.disabled=true;});
+      fb.innerHTML=(ok?'Right. ':'It is step '+q.n+': '+esc(s.title)+'. ')+'<button type="button" class="vl-btn" data-play="'+q.t+'">Play that moment</button>';fb.hidden=false;});
+    var tot=order.length+D0.qs.length,sc=so+sq,pq=qOf(),it=store.items[v.key];
+    if(!it||typeof it!=='object')it=store.items[v.key]={t:0,d:Math.round(v.dur||0),w:false,at:Date.now()};
+    it.q={s:sc,of:tot,at:Date.now(),n:((pq&&pq.n)||0)+1};writeStore();
+    $('vlChkDone').hidden=true;$('vlChkRes').innerHTML='<b>'+sc+' of '+tot+'.</b> The order: '+so+' of '+order.length+'.'+(D0.qs.length?' The captions: '+sq+' of '+D0.qs.length+'.':'')+(sc===tot?' Every answer is as the video shows it.':' The video is the answer key: play a moment, then check again.')+
+      ' <button type="button" class="vl-btn" id="vlChkAgain">Check again</button>';});}
 function stepAt(S,t){var c=null;for(var i=0;i<S.caps.length;i++){if(S.caps[i][0]<=t+0.05)c=S.caps[i];else break;}return c;}
 function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){return FN[x]||x;}),S=STEPS[v.key];
   var acts=v.cards.map(function(id,i){var c=D.cards[id]||{},c1=(c.cite||'').split('; ')[0];
@@ -671,6 +742,7 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
     '<div class="vl-panel">'+(sum?'<h3>What the video shows</h3><p>'+esc(cap(sum))+'.</p>':'')+
       (fnw.length?'<p class="vl-fns"><b>Function'+(fnw.length>1?'s':'')+' of the behavior in its card'+(v.cards.length>1?'s':'')+':</b> '+fnw.map(function(x){return '<span>'+esc(x)+'</span>';}).join('')+'</p>':'')+
       '<h3 style="margin-top:14px">About this video</h3><p class="vl-note">'+esc(v.note)+(v.frame==='full'?' The Steps beside the video show what happens in each step as it plays.':' Captions are part of the picture.')+' The Transcript beside the Steps has every word as text, and CC adds captions of what is said.</p></div>'+
+    '<div id="vlChkHere"></div>'+
     '</div><aside class="vl-next" aria-labelledby="vlNextH"><div id="vlStepsSide"></div><h2 id="vlNextH">Up next</h2>'+
       (N.fam.length?'<h3 class="vl-nh" id="vlNextF">More '+esc(f.short)+'</h3><ol class="vl-nl" aria-labelledby="vlNextF">'+N.fam.map(nextItem).join('')+'</ol>':'')+
       (N.fn.length?'<h3 class="vl-nh" id="vlNextN">Also for '+esc(fnw.join(', ').toLowerCase())+'</h3><ol class="vl-nl" aria-labelledby="vlNextN">'+N.fn.map(nextItem).join('')+'</ol>':'')+
@@ -695,6 +767,7 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
     if(vid.getAttribute('src'))vid.controls=!ph||isFull();bar.hidden=!ph;};
   /* the Steps and the Transcript, two tabs: beside the video (iPad sideways), right under the video and its bar (phone),
      under Open the TD-1 card (iPad upright). Every step is listed; a step with no moment of its own says where it is. */
+  checkSetup(v,S,playFrom);
   var sEl=null,mark=function(){};
   if(S&&S.steps&&S.steps.length){var sw=document.createElement('div');sw.innerHTML=stepsHtml(S,hasT,FULLF);sEl=sw.firstChild;
     var place=function(){var to=WIDE()?$('vlStepsSide'):PHONE()?$('vlStepsTop'):$('vlStepsHere');if(to&&sEl.parentNode!==to)to.appendChild(sEl);};

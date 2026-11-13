@@ -125,7 +125,8 @@ const NOW='2026-11-13T15:00:00Z';
   await p.reload();await p.waitForSelector('#lnName');f.kept=[await p.inputValue('#lnName'),await p.inputValue('#lnBacb')];
   ok('F My record: the unit’s page for the trainer shows the three role-plays and takes a word for the trainer; the name and the BACB ID are kept over a reload; section E shows the time counted, and a line gives it by kind (lesson 0:28); Send saves training-record-2026-11-13.json, which holds the name, the ID, the day’s seconds, the two quiz attempts and the word for the trainer, and nothing else of the device',
     roleN===3&&f.kept.join('|')==='Marisol Vance|RBT-26-0001'&&f.name==='training-record-2026-11-13.json'&&/Send that file to your trainer/.test(f.note)&&f.rows===2&&/^0:(2[89]|3\d)$/.test(f.E)&&/^On the page, by kind: lesson 0:28, videos 0:00, examples 0:0\d, practice 0:0\d, quiz 0:0\d\.$/.test(f.kinds||'')&&rec.kind==='nbh-learn-record'&&rec.v===1&&rec.who.name==='Marisol Vance'&&rec.who.bacb==='RBT-26-0001'&&
-    Object.keys(rec.days).join()==='2026-11-13'&&rec.u.e8.quiz.length===2&&rec.u.e8.fb.c==='More examples of DRL, please.'&&Object.keys(rec).sort().join()==='days,kind,made,tr,u,v,who',{f,keys:Object.keys(rec),days:rec.days});
+    Object.keys(rec.days).join()==='2026-11-13'&&rec.u.e8.quiz.length===2&&rec.u.e8.fb.c==='More examples of DRL, please.'&&Object.keys(rec).sort().join()==='days,kind,made,tr,u,v,vc,who'&&JSON.stringify(rec.vc)==='{}'   /* v26.08: vc, the Check yourself scores of the videos (none here) */
+    ,{f,keys:Object.keys(rec),days:rec.days});
   await A.ctx.close();
 
   /* ---------------- G the trainer ---------------- */

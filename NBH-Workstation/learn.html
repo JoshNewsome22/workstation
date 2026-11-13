@@ -353,6 +353,8 @@ function ledger(self,led,link){let tot=0;const segs=L.rbt.sections.map(s=>{const
 
 /* ---- a unit's parts and how far each is ---- */
 function watched(k){try{const v=JSON.parse(localStorage.getItem('nbh.videos.v1')||'null');return !!(v&&v.items&&v.items[k]&&v.items[k].w);}catch(e){return false;}}
+/* v26.08 the Check yourself score of a video (videos.html keeps it with what was watched), for the row here and for the record sent to a trainer */
+function vchecks(){const o={};try{const v=JSON.parse(localStorage.getItem('nbh.videos.v1')||'null'),it=(v&&v.items)||{};Object.keys(it).forEach(k=>{const q=it[k]&&it[k].q;if(VBY[k]&&q&&q.of>0)o[k]={s:+q.s||0,of:+q.of,at:dayOf(new Date(+q.at||Date.now())),n:+q.n||1};});}catch(e){}return o;}
 function partsOf(u){const c=U[u.id],us=S.u[u.id]||{les:[],t:{}},out=[];
   if(c){const n=c.lesson.length,d=c.lesson.filter((x,i)=>us.les&&us.les[i]).length;out.push({k:'lesson',n:'Lesson',sub:d+' of '+n+' parts',st:d>=n?2:d?1:0});}
   if((u.v&&u.v.length)||u.x||u.p){const core=c?(c.watch||[]).filter(w=>w.c).map(w=>w.k):(u.v||[]),d=core.filter(watched).length;
@@ -405,9 +407,9 @@ function matButtons(u){let h='';
   if(u.p)h+='<button type="button" class="ln-btn" data-open="practice.html" data-title="Practice counting">Practice counting</button>';
   (u.f||[]).forEach(f=>{h+=WS?'<button type="button" class="ln-btn" data-form="'+esc(f)+'">Form '+esc(f)+': '+esc(L.forms[f]||'')+'</button>':'<span class="ln-pill n" title="A form of the workstation, opened by your trainer">Form '+esc(f)+': '+esc(L.forms[f]||'')+'</span>';});
   return h?'<div class="ln-mat">'+h+'</div>':'';}
-function vidRow(k,look,core){const v=VBY[k];if(!v)return'';const w=watched(k),d=Math.round(v.dur||0);
+function vidRow(k,look,core){const v=VBY[k];if(!v)return'';const w=watched(k),d=Math.round(v.dur||0),vq=vchecks()[k];
   return '<li class="ln-vid"><img src="'+esc(v.poster)+'" alt="" loading="lazy" width="168" height="95"><div><div class="tt">'+esc(v.title)+'</div>'+(look?'<div class="lk"><strong>Look for:</strong> '+esc(look)+'</div>':'')+
-   '<div class="mt"><span>'+Math.floor(d/60)+':'+pad(d%60)+'</span>'+(core?'<span class="ln-pill n">Core</span>':'')+(w?'<span class="ln-pill g">Watched</span>':'')+'</div></div>'+
+   '<div class="mt"><span>'+Math.floor(d/60)+':'+pad(d%60)+'</span>'+(core?'<span class="ln-pill n">Core</span>':'')+(w?'<span class="ln-pill g">Watched</span>':'')+(vq?'<span class="ln-pill '+(vq.s===vq.of?'g':'w')+'">Checked '+vq.s+' of '+vq.of+'</span>':'')+'</div></div>'+
    '<div class="go"><button type="button" class="ln-btn'+(w?'':' ln-pri')+'" data-open="videos.html#video='+encodeURIComponent(k)+'" data-title="'+esc(v.title)+'" data-video="1">'+(w?'Watch again':'Watch')+'</button></div></li>';}
 
 let cur={};   /* the page's passing state: the lesson part shown, an activity under way */
@@ -547,7 +549,7 @@ function kindLine(days){const o={};Object.keys(days||{}).forEach(d=>{const x=day
 function quizRows(u){const out=[];Object.keys(u||{}).forEach(id=>{const un=UNIT[id];if(!un)return;const x=u[id]||{},q=x.quiz||[];if(!q.length&&!x.ex&&!x.pr)return;
   const best=q.reduce((m,a)=>Math.max(m,+a.pct||0),0);out.push('<tr><td>'+esc(un.t)+'</td><td class="n">'+(x.ex?(+x.ex.right||0)+' of '+(+x.ex.n||0):'')+'</td><td class="n">'+(x.pr?(+x.pr.right||0)+' of '+(+x.pr.n||0):'')+'</td><td class="n">'+q.length+'</td><td class="n">'+(q.length?best+'%':'')+'</td><td>'+(q.some(a=>a.pass)?'Passed':q.length?'Not yet':'')+'</td></tr>');});
   return out.length?'<div class="ln-tablewrap"><table class="ln-t"><thead><tr><th>Unit</th><th class="n">Examples</th><th class="n">Session</th><th class="n">Quiz attempts</th><th class="n">Best</th><th>Quiz</th></tr></thead><tbody>'+out.join('')+'</tbody></table></div>':'<p class="ln-note">No unit started yet.</p>';}
-function exportRec(){return {kind:'nbh-learn-record',v:1,made:new Date().toISOString(),who:{name:S.who.name||'',bacb:S.who.bacb||''},tr:S.tr||null,days:S.days,u:S.u};}
+function exportRec(){return {kind:'nbh-learn-record',v:1,made:new Date().toISOString(),who:{name:S.who.name||'',bacb:S.who.bacb||''},tr:S.tr||null,days:S.days,u:S.u,vc:vchecks()};}
 function vRecord(){setClock(null);const ds=Object.keys(S.days).sort();
   view.innerHTML='<h1>My record</h1><p class="ln-lead">What this device has counted for you, and how your quizzes went. Send it to your trainer, who adds the time you spent with them and keeps the training record.</p>'+
    '<div class="ln-form"><label class="ln-f">Your name<input id="lnName" autocomplete="name" maxlength="80"></label><label class="ln-f">Your BACB ID <small>From your BACB account. Leave empty if you have none yet.</small><input id="lnBacb" maxlength="20" autocomplete="off"></label></div>'+
@@ -640,7 +642,8 @@ function pickFile(done){const f=$('lnFile');f.value='';f.onchange=()=>{const x=f
 /* a record a trainee sent: only what the page knows is taken from it */
 const str=(s,n)=>typeof s==='string'?s.slice(0,n):'';
 const num=x=>{x=+x;return isFinite(x)&&x>=0?x:0;};
-function cleanRec(o){if(!o||o.kind!=='nbh-learn-record'||o.v!==1)return null;const r={who:{name:str(o.who&&o.who.name,80),bacb:str(o.who&&o.who.bacb,20)},made:str(o.made,30),days:{},u:{}};
+function cleanRec(o){if(!o||o.kind!=='nbh-learn-record'||o.v!==1)return null;const r={who:{name:str(o.who&&o.who.name,80),bacb:str(o.who&&o.who.bacb,20)},made:str(o.made,30),days:{},u:{},vc:{}};
+  Object.keys(o.vc||{}).slice(0,200).forEach(k=>{const q=o.vc[k]||{};if(!VBY[k]||!(num(q.of)>0))return;r.vc[k]={s:Math.min(num(q.s),num(q.of)),of:Math.min(60,num(q.of)),at:/^\d{4}-\d\d-\d\d$/.test(q.at||'')?q.at:'',n:Math.min(999,num(q.n)||1)};});
   Object.keys(o.days||{}).slice(0,400).forEach(d=>{if(!/^\d{4}-\d\d-\d\d$/.test(d))return;const x=o.days[d]||{};Object.keys(x).forEach(s=>{if(!SEC[s])return;Object.keys(x[s]||{}).forEach(k=>{if(!KINDS[k])return;const n=Math.min(86400,num(x[s][k]));if(n){(r.days[d]=r.days[d]||{});(r.days[d][s]=r.days[d][s]||{})[k]=n;}});});});
   Object.keys(o.u||{}).forEach(id=>{if(!UNIT[id])return;const x=o.u[id]||{},y={quiz:[]};
     (Array.isArray(x.quiz)?x.quiz:[]).slice(0,50).forEach(q=>{y.quiz.push({at:str(q.at,10),right:num(q.right),n:num(q.n),pct:Math.min(100,num(q.pct)),pass:q.pass?1:0});});
@@ -673,6 +676,7 @@ function vTrainee(id,sub){setClock(null);const t=trainee(id);if(!t){location.has
    '<h2 style="margin-top:26px">Sessions with a trainer</h2>'+((t.ses||[]).length?'<div class="ln-tablewrap"><table class="ln-t"><thead><tr><th>Date</th><th>What</th><th>Unit</th><th class="n">Minutes</th><th>Led by</th><th>Result</th><th></th></tr></thead><tbody id="rSes">'+
      t.ses.map((x,i)=>{const c=U[x.unit];return '<tr><td>'+esc(niceDay(x.d))+'</td><td>'+esc(LED[x.kind])+(x.kind==='roleplay'&&c&&c.role[x.role]?': '+esc(c.role[x.role].t):'')+'</td><td>'+esc(UNIT[x.unit].t)+'</td><td class="n">'+x.min+'</td><td>'+esc(x.by)+'</td><td>'+(x.kind==='roleplay'?(x.met?'Met':'Not yet')+(x.steps?' ('+x.steps.filter(Boolean).length+' of '+x.steps.length+')':''):'')+(x.note?'<br><span class="ln-note">'+esc(x.note)+'</span>':'')+'</td><td><button type="button" class="ln-btn" data-del="'+i+'" style="min-height:36px">Remove<span class="ln-sr"> the session of '+esc(niceDay(x.d))+'</span></button></td></tr>';}).join('')+'</tbody></table></div>':'<p class="ln-note">None logged yet.</p>')+
    '<h2 style="margin-top:26px">Their units, from the record they sent</h2>'+(t.rec?quizRows(rec.u):'<p class="ln-note">No record received yet. The trainee sends it from My record on their device.</p>')+
+   (t.rec&&Object.keys(rec.vc||{}).length?'<h2 style="margin-top:26px">Their video checks</h2><p class="ln-note">Check yourself, on a video\u2019s page: the steps put in order and captions matched to steps, scored by the page.</p><div class="ln-tablewrap"><table class="ln-t" id="rVc"><thead><tr><th>Video</th><th class="n">Right</th><th class="n">Times</th><th>Last</th></tr></thead><tbody>'+Object.keys(rec.vc).map(k=>'<tr><td>'+esc(VBY[k].title)+'</td><td class="n">'+rec.vc[k].s+' of '+rec.vc[k].of+'</td><td class="n">'+rec.vc[k].n+'</td><td>'+esc(niceDay(rec.vc[k].at))+'</td></tr>').join('')+'</tbody></table></div>':'')+
    (t.rec&&Object.keys(rec.u).some(k=>rec.u[k].fb&&(rec.u[k].fb.r||rec.u[k].fb.c))?'<h2 style="margin-top:26px">What they told you</h2><ul class="ln-list">'+Object.keys(rec.u).filter(k=>rec.u[k].fb&&(rec.u[k].fb.r||rec.u[k].fb.c)).map(k=>'<li><strong>'+esc(UNIT[k].t)+':</strong> '+esc(({3:'Clear',2:'Mostly clear',1:'Hard to follow'})[rec.u[k].fb.r]||'')+(rec.u[k].fb.c?' · '+esc(rec.u[k].fb.c):'')+'</li>').join('')+'</ul>':'')+
    '<div class="ln-row ln-noprint" style="margin-top:30px"><button type="button" class="ln-btn" id="rGone">Remove this trainee</button></div>'+
    '<p class="ln-foot">The time on the page is what the trainee’s device counted and they sent: the workstation cannot prove it. The sessions are what you logged. You review both before you sign.</p>';
