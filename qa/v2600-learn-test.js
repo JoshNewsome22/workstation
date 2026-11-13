@@ -1,11 +1,11 @@
 /* v26.00 (the BCBA, 11/13: "a place that goes over everything that a person who is studying to become a RBT can go and learn
    ... Also, a person studying to be a BCBA ... a full fledge curriculum space"; and "Yes, with me as the Responsible
-   Trainer.") the Learning page, learn.html, with its map (nbh-learn.js) and its first written unit (nbh-learn-units.js).
+   Trainer.") the Learning page, learn.html, with its map (nbh-learn.js) and its written units (nbh-learn-units*.js; v26.01: all 46).
    A  the map: the eight sections with the outline's minimum hours (38 in all); 46 units; every section's plan reaches its
       minimum and the whole plan 40 hours; each of the 43 tasks of the RBT outline is taught by a unit; every video of the
       library is in a unit; the BCBA map has 104 tasks in nine domains; every form the map names is a form of the workstation;
-   B  while the training is not whole, the home page, the track and the trainer's page say so, and none carries the BACB's
-      statement;
+   B  while the training is not released (v26.01: all 46 units are written and wait for the Responsible Trainer's review), the
+      home page, the track and the trainer's page say so, and none carries the BACB's statement;
    C  the lesson: a wrong answer leaves the part open; the right one marks it and frees Next; seven parts make the lesson
       done, and it is kept over a reload;
    D  the time: counted while the learner is active in a part; it stops after 90 seconds without a touch; nothing is counted
@@ -23,14 +23,17 @@
    J  in the workstation: the page opens in the Videos layer with Close, a form named by a unit opens that form, and the video
       library links to the page;
    K  a phone: none of the 13 views is wider than the screen; a tapped answer is taken; the choices are 44 px high;
-   L  a unit whose lesson is not written says so and still lists its videos;
+   L  with a file of units kept from the page: the page says it is being built, and such a unit says so and still lists its videos;
+   N  (v26.01) every one of the 46 units opens each of its parts; the answers are shown in an order drawn anew, and the right
+      one is taken by what it says;
    M  a record file with markup in the name and wild numbers: the name is shown as text and the time is capped;
    Z  no page error.
    Invented people only. usage: node qa/v2600-learn-test.js   (WS_URL and WS_ROOT as in qa/lib.js) */
 const L=require(__dirname+'/lib.js');const {sleep,fs,path}=L;
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1600):''));if(!c)fails++;};
 const DIR=path.join(L.ROOT,L.ED),PAGE=L.BASE+'/'+L.ED+'/learn.html';
-global.window={};require(path.join(DIR,'nbh-videos.js'));require(path.join(DIR,'nbh-learn.js'));require(path.join(DIR,'nbh-learn-units.js'));
+global.window={};require(path.join(DIR,'nbh-videos.js'));require(path.join(DIR,'nbh-learn.js'));
+const UNIT_FILES=fs.readdirSync(DIR).filter(f=>/^nbh-learn-units(-[a-z0-9]+)?\.js$/.test(f)).sort();UNIT_FILES.forEach(f=>require(path.join(DIR,f)));
 const M=global.window.NBH_LEARN,U=global.window.NBH_LEARN_UNITS,VID=global.window.NBH_VIDEOS;
 const STMT='This training program is designed to meet the 2026 training eligibility requirement for RBT certification. The training is offered independent of the BACB.';
 const NOW='2026-11-13T15:00:00Z';
@@ -51,9 +54,9 @@ const NOW='2026-11-13T15:00:00Z';
    const badForm=Object.keys(formsUsed).filter(f=>!M.forms[f]||idx.indexOf("['"+f+"','")<0);
    const badVid=units.reduce((a,u)=>a.concat((u.v||[]).filter(k=>vkeys.indexOf(k)<0)),[]),badFam=[];M.bcba.domains.forEach(d=>d.tasks.forEach(t=>((t[2]||{}).v||[]).forEach(f=>{if(fam.indexOf(f)<0)badFam.push(f);})));
    const ids=units.map(u=>u.id);
-   ok('A the map: eight sections with the minimums 2, 1, 3, 3, 20, 3, 5, 1 (38 hours); 46 units with ids of their own; every section’s plan reaches its minimum and the whole plan 40 hours; all 43 tasks of the RBT outline are taught; every video is in a unit and every key is a video; 104 BCBA tasks in nine domains (5, 24, 12, 9, 12, 8, 19, 8, 7); every form named is a form of the workstation; the training is not marked whole',
+   ok('A the map: eight sections with the minimums 2, 1, 3, 3, 20, 3, 5, 1 (38 hours); 46 units with ids of their own; every section’s plan reaches its minimum and the whole plan 40 hours; all 43 tasks of the RBT outline are taught; every video is in a unit and every key is a video; 104 BCBA tasks in nine domains (5, 24, 12, 9, 12, 8, 19, 8, 7); every form named is a form of the workstation; all 46 units are written, in 15 files that the page names; the training is not marked released',
      mins.join()==='2,1,3,3,20,3,5,1'&&units.length===46&&new Set(ids).size===46&&plan.every((m,i)=>m>=mins[i]*60)&&plan.reduce((a,b)=>a+b,0)>=2400&&tco.length===43&&tco.every(c=>codes[c])&&Object.keys(codes).every(c=>tco.indexOf(c)>=0)&&
-     vkeys.every(k=>used[k])&&!badVid.length&&!badFam.length&&M.bcba.domains.map(d=>d.tasks.length).join()==='5,24,12,9,12,8,19,8,7'&&!badForm.length&&M.rbt.ready===false&&M.rbt.statement===STMT&&!!U.e8,
+     vkeys.every(k=>used[k])&&!badVid.length&&!badFam.length&&M.bcba.domains.map(d=>d.tasks.length).join()==='5,24,12,9,12,8,19,8,7'&&!badForm.length&&M.rbt.ready===false&&M.rbt.statement===STMT&&units.every(u=>u.w===1&&!!U[u.id])&&Object.keys(U).length===46&&UNIT_FILES.length===15&&UNIT_FILES.every(f=>fs.readFileSync(path.join(DIR,'learn.html'),'utf8').indexOf('<script src="'+f+'"></script>')>0),
      {mins,plan,n:units.length,miss:tco.filter(c=>!codes[c]),free:vkeys.filter(k=>!used[k]),badVid,badFam,badForm});}
 
   /* ---------------- B, C, D: a learner on an iPad-size screen, the clock held ---------------- */
@@ -62,8 +65,8 @@ const NOW='2026-11-13T15:00:00Z';
   const b={home:await txt(p,'#lnBuilding'),homeAll:await txt(p,'body'),close:await p.isVisible('#lnClose'),lib:await p.isVisible('#lnToVideos')};
   await go(p,'#rbt');b.rbt=await txt(p,'#lnBuilding');b.rbtAll=await txt(p,'body');b.secs=await p.$$eval('.ln-sec',x=>x.length);b.units=await p.$$eval('.ln-unit',x=>x.length);b.tocome=await p.$$eval('.ln-pill.w',x=>x.length);
   await go(p,'#trainer');b.tr=await txt(p,'#lnBuilding');b.trAll=await txt(p,'body');
-  ok('B while the training is not whole: the home page, the track (8 sections, 46 units, 45 marked "Lesson to come") and the trainer’s page each say it is being built and cannot yet be used toward certification; none carries the BACB’s statement; on its own the page has no Close',
-    [b.home,b.rbt,b.tr].every(t=>/being built/.test(t||'')&&/1 of 46 units/.test(t)&&/cannot yet be used toward RBT certification/.test(t))&&[b.homeAll,b.rbtAll,b.trAll].every(t=>t.indexOf('designed to meet')<0)&&b.secs===8&&b.units===46&&b.tocome===45&&!b.close&&!b.lib,
+  ok('B while the training is not released: the home page, the track (8 sections, 46 units, none marked "Lesson to come") and the trainer’s page each say that all 46 units are written and wait for the Responsible Trainer’s review, and that it cannot be used toward certification; none carries the BACB’s statement; on its own the page has no Close',
+    [b.home,b.rbt,b.tr].every(t=>/All 46 units are written and are waiting for the Responsible Trainer’s review/.test(t||'')&&/cannot be used toward RBT certification/.test(t)&&/no certificate can be made/.test(t))&&[b.homeAll,b.rbtAll,b.trAll].every(t=>t.indexOf('designed to meet')<0)&&b.secs===8&&b.units===46&&b.tocome===0&&!b.close&&!b.lib,
     {home:b.home,secs:b.secs,units:b.units,tocome:b.tocome,close:b.close});
 
   await go(p,'#home');await p.clock.runFor(30000);const d0=(await store(p)).days;
@@ -147,11 +150,11 @@ const NOW='2026-11-13T15:00:00Z';
   g.rq=await t.$$eval('#rqList li',x=>x.map(l=>l.querySelector('.ln-pill').textContent));g.rq1=await txt(t,'#rqList li:nth-child(2)');g.fb=await txt(t,'#lnView');
   g.kinds=await txt(t,'#lnKinds');g.led=await t.$eval('#lnView table.ln-t tbody tr:nth-child(5)',r=>[r.cells[1].textContent,r.cells[2].textContent,r.cells[3].textContent]);
   await go(t,'#trainer/'+ids[0]+'/cert');g.no=await txt(t,'#certNo');g.sheet=await t.$$eval('#certSheet',x=>x.length);g.all=await txt(t,'body');
-  ok('G the trainer: no link until the name and number are typed; the self-check and the details are kept; an assistant is listed; a trainee needs a name; the record file is refused for the trainee with another BACB ID and taken for its owner; a role-play with all 8 steps ticked is "Met" and one with 1 of 5 "Not yet"; the trainee’s section E shows the page’s time, 0:40 with the trainer and the sum; hours, days and units read "Not yet"; the certificate is refused, says the training is not whole, and the page nowhere carries the statement',
+  ok('G the trainer: no link until the name and number are typed; the self-check and the details are kept; an assistant is listed; a trainee needs a name; the record file is refused for the trainee with another BACB ID and taken for its owner; a role-play with all 8 steps ticked is "Met" and one with 1 of 5 "Not yet"; the trainee’s section E shows the page’s time, 0:40 with the trainer and the sum; hours, days and units read "Not yet"; the certificate is refused, says the training is not released (all 46 units written, waiting for the review), and the page nowhere carries the statement',
     g.link0[0]===''&&g.link0[1]===true&&/learn\.html#t=[A-Za-z0-9_-]+$/.test(g.link)&&/Tobias Reyes, RBT-20-11111/.test(g.assist)&&/name/.test(g.miss)&&g.cards.join()==='Marisol Vance,Corwin Ashby'&&/Not added: the record’s BACB ID \(RBT-26-0001\) is not Corwin Ashby’s/.test(g.refused)&&
     g.taken==='Record added for Marisol Vance.'&&/started November 13, 2026 · record received November 13, 2026/.test(g.card)&&g.kept.join('|')==='Dr. Imogen Hartwell|BCBA-D|7'&&g.by.join()==='Dr. Imogen Hartwell,Tobias Reyes'&&g.steps===8&&g.ses.length===2&&/A resetting DRO.*\|25\|Met \(8 of 8\)/.test(g.ses[0])&&/DRA for attention\|15\|Not yet \(1 of 5/.test(g.ses[1])&&
     g.rq.join()==='Not yet,Not yet,Not yet,Not yet,Met,Not yet'&&/short in sections A, B, C, D, E, F, G, H/.test(g.rq1)&&/Mostly clear · More examples of DRL, please\./.test(g.fb)&&g.led[1]==='0:40'&&/by kind: lesson 0:28, videos 0:00/.test(g.kinds||'')&&/^1:(0[89]|1\d)$/.test(g.led[2])&&
-    /No certificate can be made for Marisol Vance yet/.test(g.no)&&/not whole yet: 1 of 46 units/.test(g.no)&&g.sheet===0&&g.all.indexOf('designed to meet')<0,g);
+    /No certificate can be made for Marisol Vance yet/.test(g.no)&&/not released yet: all 46 units are written and are waiting for the Responsible Trainer’s review/.test(g.no)&&g.sheet===0&&g.all.indexOf('designed to meet')<0,g);
   /* the link, on a trainee's own device */
   const N=await open({viewport:{width:390,height:800}},g.link);g.named=await txt(N.p,'.ln-you');g.hash=await N.p.evaluate(()=>location.hash);await N.ctx.close();
   ok('G the link, opened on another device, names the Responsible Trainer on the first screen (name, certification, number, organization) and leaves the address clean',
@@ -199,11 +202,39 @@ const NOW='2026-11-13T15:00:00Z';
   await go(q,'#home');i.home=await txt(q,'[aria-labelledby="hBcba"] .ln-facts');await go(q,'#bcba');i.row=await txt(q,'.ln-dom[href="#bcba/G"] .ln-note');i.clock=await q.evaluate(()=>window.NBHLearn.clock().kind);
   ok('I BCBA study: the nine domains A to I; domain G lists its 19 tasks; two ratings are kept over a reload and "1 you can explain" is counted on the home page and on the domain’s row; a task’s videos open in the player by procedure; on its own the page names a form without a button; no training time is counted here',
     i.doms==='ABCDEFGHI'&&i.tasks===19&&i.h==='Behavior-change procedures'&&i.kept==='G.2:Can explain it,G.3:Getting there'&&i.src==='videos.html#family=dra'&&i.form===0&&i.pill==='Form TD-1'&&/1 you can explain/.test(i.home)&&/19 tasks · 25 questions · 1 you can explain/.test(i.row)&&i.clock===null,i);
-  await go(q,'#rbt/e5');const l={state:await txt(q,'.ln-state'),vids:await q.$$eval('.ln-vid',x=>x.length),parts:await q.$$eval('.ln-parts',x=>x.length),pill:await txt(q,'.ln-uhead .ln-pill')};
-  await go(q,'#rbt/e3');l.none=await txt(q,'.ln-state');l.vids3=await q.$$eval('.ln-vid',x=>x.length);await go(q,'#rbt/nope');await sleep(150);l.back=await q.evaluate(()=>location.hash);
-  ok('L a unit whose lesson is not written says so ("still to be written"), carries "Lesson to come" and no parts, and lists its videos to watch now (chaining: 5); one with no video says the workstation has none yet; an unknown unit goes back to the track',
-    /still to be written/.test(l.state)&&/can be watched now/.test(l.state)&&l.vids===5&&l.parts===0&&l.pill==='Lesson to come'&&/has no video for it yet/.test(l.none)&&l.vids3===0&&l.back==='#rbt',l);
   await B.ctx.close();
+
+  /* ---------------- L a unit whose lesson is missing (the file of units e4 to e6 is kept from the page, here only) ---------------- */
+  const LL=await open({viewport:{width:1180,height:820}},null,async ctx=>{await ctx.route('**/nbh-learn-units-e2.js',r=>r.fulfill({status:200,contentType:'application/javascript',body:'window.NBH_LEARN_UNITS=window.NBH_LEARN_UNITS||{};'}));});
+  const lq=LL.p;await lq.goto(PAGE);await lq.waitForSelector('#lnView h1');const l={home:await txt(lq,'#lnBuilding')};
+  await go(lq,'#rbt');l.tocome=await lq.$$eval('.ln-pill.w',x=>x.length);
+  await go(lq,'#rbt/e5');l.state=await txt(lq,'.ln-state');l.vids=await lq.$$eval('.ln-vid',x=>x.length);l.parts=await lq.$$eval('.ln-parts',x=>x.length);l.pill=await txt(lq,'.ln-uhead .ln-pill');
+  await go(lq,'#rbt/e4');l.none=await txt(lq,'.ln-state');l.vids3=await lq.$$eval('.ln-vid',x=>x.length);await go(lq,'#rbt/nope');await sleep(150);l.back=await lq.evaluate(()=>location.hash);
+  ok('L with three units missing the page says the training is being built (43 of 46 units) and marks three "Lesson to come"; such a unit says so ("still to be written"), carries no parts, and lists its videos to watch now (chaining: 5); one with no video says the workstation has none yet; an unknown unit goes back to the track',
+    /being built/.test(l.home||'')&&/43 of 46 units/.test(l.home)&&/cannot yet be used toward RBT certification/.test(l.home)&&l.tocome===3&&/still to be written/.test(l.state)&&/can be watched now/.test(l.state)&&l.vids===5&&l.parts===0&&l.pill==='Lesson to come'&&/has no video for it yet/.test(l.none)&&l.vids3===0&&l.back==='#rbt',l);
+  await LL.ctx.close();
+
+  /* ---------------- N every unit opens; the order of the answers ---------------- */
+  const NN=await open({viewport:{width:1180,height:820}},PAGE);const np=NN.p,n={bad:[],parts:0,orders:{}};
+  for(const sec of M.rbt.sections)for(const u of sec.units){const c=U[u.id],parts=['lesson'].concat(c.watch&&c.watch.length?['watch']:[],['examples','practice','quiz','trainer']);
+    for(const part of parts){await np.evaluate(x=>{location.hash=x;},'#rbt/'+u.id+'/'+part);await sleep(45);n.parts++;
+      const got=await np.evaluate(()=>{const b=document.querySelector('#lnBody h2'),t=document.querySelector('#lnView h1');return [b?b.textContent:'',t?t.textContent:'',document.querySelectorAll('#lnBody .ln-opt').length];});
+      if(!got[0]||got[1].indexOf(u.t.slice(0,12))<0||(part!=='watch'&&part!=='trainer'&&got[2]<2))n.bad.push(u.id+'/'+part+':'+JSON.stringify(got));}}
+  const g1=U.g1.lesson[0].check;
+  for(let r=0;r<10;r++){await go(np,'#rbt');await go(np,'#rbt/g1/lesson');n.orders[await np.$$eval('#lnCheck .ln-opt',x=>x.map(b=>b.dataset.pick).join(''))]=1;}
+  n.perm=Object.keys(n.orders).every(o=>o.split('').sort().join('')===g1.opts.map((x,i2)=>i2).join(''));n.kinds=Object.keys(n.orders).length;
+  const wrongPick=g1.a===0?1:0;await np.click('#lnCheck .ln-opt[data-pick="'+wrongPick+'"]');n.wrong=await np.$$eval('#lnCheck .ln-opt.wrong',x=>x.map(b=>b.dataset.pick).join());
+  await np.click('#lnCheck .ln-opt[data-pick="'+g1.a+'"]');n.right=await np.$$eval('#lnCheck .ln-opt.right',x=>x.map(b=>b.dataset.pick+':'+b.textContent).join());n.why=await txt(np,'#lnWhy');
+  await go(np,'#rbt/g2/lesson');for(let k2=0;k2<4;k2++){await np.click('#lnCheck .ln-opt[data-pick="'+U.g2.lesson[k2].check.a+'"]');await np.click('#lnNext');}
+  n.num=await np.$$eval('#lnCheck .ln-opt',x=>x.map(b=>b.textContent).join('|'));n.numQ=await txt(np,'#lnCheck .q');
+  await go(np,'#rbt/g1/quiz');const qs=await np.$$eval('#lnQuiz fieldset',x=>x.map(f=>+f.dataset.q));
+  for(const qi of qs)await np.check('#lnQuiz fieldset[data-q="'+qi+'"] input[value="'+U.g1.quiz.items[qi].a+'"]');await np.click('#lnQuiz button[type=submit]');
+  n.quiz=await txt(np,'#lnScore');n.marks=await np.$$eval('#lnQuiz fieldset',x=>x.every(f=>{const r2=f.querySelectorAll('.ln-opt.right');return r2.length===1&&r2[0].querySelector('input').checked&&!f.querySelector('.ln-opt.wrong');}));
+  ok('N every one of the 46 units opens each of its parts under its own title, with answers to choose where there are questions ('+n.parts+' views); the answers of a lesson’s question come in more than one order over ten showings, each a full set; a wrong one is marked wrong and the right one right by what it says, not by where it stands; answers that are numbers keep their order (2, 5, 6, 12 hours); a quiz answered right throughout is 100% with the chosen answer marked right in each question',
+    !n.bad.length&&n.parts>=46*5&&n.kinds>=2&&n.perm&&n.wrong===String(wrongPick)&&n.right===g1.a+':'+g1.opts[g1.a]&&/^Right\./.test(n.why||'')&&/120 hours/.test(n.numQ||'')&&n.num==='2 hours|5 hours|6 hours|12 hours'&&n.quiz==='100%'&&n.marks,
+    {bad:n.bad.slice(0,6),parts:n.parts,kinds:n.kinds,perm:n.perm,wrong:n.wrong,right:n.right,num:n.num,quiz:n.quiz,marks:n.marks});
+  await NN.ctx.close();
+
 
   /* ---------------- J in the workstation ---------------- */
   const X=await br.newContext({serviceWorkers:'block',viewport:{width:1376,height:900}});const x=await X.newPage();x.on('pageerror',er=>errs.push(er.message));
@@ -226,7 +257,7 @@ const NOW='2026-11-13T15:00:00Z';
   await go(ph,'#rbt/e8/examples');await ph.tap('.ln-opt[data-pick="'+U.e8.examples.items[0].a+'"]');k.tap=await txt(ph,'#lnWhy');
   await go(ph,'#rbt/e8/lesson');k.opt=await ph.$$eval('.ln-opt,.ln-steps button,.ln-parts a,.ln-nav a,#lnNext',x=>Math.min.apply(null,x.map(b=>Math.round(b.getBoundingClientRect().height))));
   k.seg=await ph.evaluate(()=>{location.hash='#home';return new Promise(r=>setTimeout(()=>r(Math.min.apply(null,[...document.querySelectorAll('.ln-seg')].map(s=>Math.round(s.getBoundingClientRect().width)))),150));});
-  ok('K a phone (390 wide): none of the 13 views is wider than the screen (home, the track, every part of the unit, an unwritten unit, BCBA study and a domain, My record, the trainer’s page); a tapped answer is taken; every choice, step, part and link of the bar is at least 44 px high; the narrowest block of the ledger is still 26 px',
+  ok('K a phone (390 wide): none of the 13 views is wider than the screen (home, the track, every part of the unit, another unit, BCBA study and a domain, My record, the trainer’s page); a tapped answer is taken; every choice, step, part and link of the bar is at least 44 px high; the narrowest block of the ledger is still 26 px',
     Object.keys(k).filter(h=>h[0]==='#').length===13&&Object.keys(k).filter(h=>h[0]==='#').every(h=>k[h]<=0)&&/^Right\./.test(k.tap||'')&&k.opt>=44&&k.seg>=26,k);
   await P.ctx.close();
   ok('Z no page error',!errs.length,errs.slice(0,4));

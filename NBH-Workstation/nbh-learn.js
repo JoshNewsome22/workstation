@@ -10,7 +10,7 @@
          Each section holds units; a unit names the tasks of the RBT Test Content Outline (3rd ed.) it teaches (codes),
          the minutes it plans (self: on the page; led: with the trainer), and what the workstation already has for it:
          v videos (keys of nbh-videos.js), x explainers (explain.html#key), p the counting practice, f forms (ids).
-         w: 1 marks a unit whose lesson is written (nbh-learn-units.js holds it). ready says whether the WHOLE training
+         w: 1 marks a unit whose lesson is written (the files nbh-learn-units*.js hold them). ready says whether the WHOLE training
          is in place: until it is true the page makes no certificate and does not carry the BACB's statement.
    bcba  the BCBA track, by the nine domains and 104 tasks of the BCBA Test Content Outline (6th ed.).
 
@@ -33,74 +33,74 @@ window.NBH_LEARN = {
     ],
     sections: [
       { k: 'A', name: 'Introduction to applied behavior analysis', min: 2, units: [
-        { id: 'a1', t: 'What applied behavior analysis is, and what the service is for', codes: [], self: 15, led: 10 },
-        { id: 'a2', t: 'Behavior, what comes before it and what follows it', codes: ['A.5'], self: 20, led: 10, f: ['ABC-1'] },
-        { id: 'a3', t: 'Reinforcement: positive and negative, schedules and dimensions', codes: ['C.1'], self: 25, led: 10, f: ['SR-1'] },
-        { id: 'a4', t: 'Why behavior happens: the common functions', codes: ['D.1'], self: 20, led: 10, f: ['IA-1'] },
-        { id: 'a5', t: 'Asking, naming, repeating, answering: the verbal operants', codes: [], self: 15, led: 5 },
-        { id: 'a6', t: 'From baseline to maintenance: the phases of an intervention', codes: ['C.9'], self: 10, led: 5, f: ['DD-1'] }
+        { id: 'a1', t: 'What applied behavior analysis is, and what the service is for', codes: [], self: 15, led: 10, w: 1 },
+        { id: 'a2', t: 'Behavior, what comes before it and what follows it', codes: ['A.5'], self: 20, led: 10, f: ['ABC-1'], w: 1 },
+        { id: 'a3', t: 'Reinforcement: positive and negative, schedules and dimensions', codes: ['C.1'], self: 25, led: 10, f: ['SR-1'], w: 1 },
+        { id: 'a4', t: 'Why behavior happens: the common functions', codes: ['D.1'], self: 20, led: 10, f: ['IA-1'], w: 1 },
+        { id: 'a5', t: 'Asking, naming, repeating, answering: the verbal operants', codes: [], self: 15, led: 5, w: 1 },
+        { id: 'a6', t: 'From baseline to maintenance: the phases of an intervention', codes: ['C.9'], self: 10, led: 5, f: ['DD-1'], w: 1 }
       ] },
       { k: 'B', name: 'Preparing for service delivery', min: 1, units: [
-        { id: 'b1', t: 'Getting yourself ready: the plan, the last notes, the materials', codes: [], self: 20, led: 10, f: ['QS-1', 'EB-1'] },
-        { id: 'b2', t: 'Getting the student ready: rapport and assent', codes: [], self: 20, led: 15, f: ['SI-1'] }
+        { id: 'b1', t: 'Getting yourself ready: the plan, the last notes, the materials', codes: [], self: 20, led: 10, f: ['QS-1', 'EB-1'], w: 1 },
+        { id: 'b2', t: 'Getting the student ready: rapport and assent', codes: [], self: 20, led: 15, f: ['SI-1'], w: 1 }
       ] },
       { k: 'C', name: 'Data collection and graphing', min: 3, units: [
-        { id: 'c1', t: 'Describing behavior so two people would count the same thing', codes: ['A.5'], self: 20, led: 10, f: ['TB-1'] },
-        { id: 'c2', t: 'Why the data matter, and what unreliable data cost', codes: ['A.8'], self: 15, led: 5, p: 1 },
-        { id: 'c3', t: 'Continuous measurement: count, duration, latency, time between responses', codes: ['A.1'], self: 30, led: 15, p: 1, f: ['OB-1', 'DD-1'] },
-        { id: 'c4', t: 'Discontinuous measurement: partial interval, whole interval, momentary time sampling', codes: ['A.2'], self: 25, led: 10, f: ['MT-1'] },
-        { id: 'c5', t: 'Permanent products: measuring what the behavior leaves behind', codes: ['A.3'], self: 10, led: 5 },
-        { id: 'c6', t: 'Rate, mean duration, percentage: summarizing a session', codes: ['A.6'], self: 20, led: 5 },
-        { id: 'c7', t: 'Graphs: entering data, reading a trend, telling your supervisor', codes: ['A.4', 'A.7'], self: 20, led: 10, f: ['DD-1'] }
+        { id: 'c1', t: 'Describing behavior so two people would count the same thing', codes: ['A.5'], self: 20, led: 10, f: ['TB-1'], w: 1 },
+        { id: 'c2', t: 'Why the data matter, and what unreliable data cost', codes: ['A.8'], self: 15, led: 5, p: 1, w: 1 },
+        { id: 'c3', t: 'Continuous measurement: count, duration, latency, time between responses', codes: ['A.1'], self: 30, led: 15, p: 1, f: ['OB-1', 'DD-1'], w: 1 },
+        { id: 'c4', t: 'Discontinuous measurement: partial interval, whole interval, momentary time sampling', codes: ['A.2'], self: 25, led: 10, f: ['MT-1'], w: 1 },
+        { id: 'c5', t: 'Permanent products: measuring what the behavior leaves behind', codes: ['A.3'], self: 10, led: 5, w: 1 },
+        { id: 'c6', t: 'Rate, mean duration, percentage: summarizing a session', codes: ['A.6'], self: 20, led: 5, w: 1 },
+        { id: 'c7', t: 'Graphs: entering data, reading a trend, telling your supervisor', codes: ['A.4', 'A.7'], self: 20, led: 10, f: ['DD-1'], w: 1 }
       ] },
       { k: 'D', name: 'Assisting with behavior assessments', min: 3, units: [
-        { id: 'd1', t: 'What each kind of assessment is for', codes: ['B.1', 'B.2', 'B.3'], self: 20, led: 10 },
-        { id: 'd2', t: 'Preference assessments: single items, pairs, arrays, free play', codes: ['B.1'], self: 35, led: 30, f: ['PA-1', 'RA-1'] },
-        { id: 'd3', t: 'Helping with skill assessments', codes: ['B.2'], self: 20, led: 15, f: ['SA-1'] },
-        { id: 'd4', t: 'Helping with functional assessment: ABC records, scatter plots, the analysis', codes: ['B.3'], self: 35, led: 20, f: ['ABC-1', 'OB-1', 'SP-1', 'EA-1'] }
+        { id: 'd1', t: 'What each kind of assessment is for', codes: ['B.1', 'B.2', 'B.3'], self: 20, led: 10, w: 1 },
+        { id: 'd2', t: 'Preference assessments: single items, pairs, arrays, free play', codes: ['B.1'], self: 35, led: 30, f: ['PA-1', 'RA-1'], w: 1 },
+        { id: 'd3', t: 'Helping with skill assessments', codes: ['B.2'], self: 20, led: 15, f: ['SA-1'], w: 1 },
+        { id: 'd4', t: 'Helping with functional assessment: ABC records, scatter plots, the analysis', codes: ['B.3'], self: 35, led: 20, f: ['ABC-1', 'OB-1', 'SP-1', 'EA-1'], w: 1 }
       ] },
       { k: 'E', name: 'Behavior-change interventions', min: 20, units: [
-        { id: 'e1', t: 'Doing the plan as written: procedural integrity', codes: ['A.8'], self: 30, led: 20, f: ['TI-1'] },
+        { id: 'e1', t: 'Doing the plan as written: procedural integrity', codes: ['A.8'], self: 30, led: 20, f: ['TI-1'], w: 1 },
         { id: 'e2', t: 'Conditioned reinforcers, token economies and group rewards', codes: ['C.2', 'C.11'], self: 55, led: 35,
-          v: ['token_build', 'token_schedules', 'token_running', 'gbg'], f: ['TK-1', 'GC-1'] },
-        { id: 'e3', t: 'Discrete-trial teaching', codes: ['C.3'], self: 50, led: 45, f: ['SA-1'] },
-        { id: 'e4', t: 'Naturalistic teaching: incidental teaching and teaching in the natural setting', codes: ['C.4'], self: 45, led: 40 },
+          v: ['token_build', 'token_schedules', 'token_running', 'gbg'], f: ['TK-1', 'GC-1'], w: 1 },
+        { id: 'e3', t: 'Discrete-trial teaching', codes: ['C.3'], self: 50, led: 45, f: ['SA-1'], w: 1 },
+        { id: 'e4', t: 'Naturalistic teaching: incidental teaching and teaching in the natural setting', codes: ['C.4'], self: 45, led: 40, w: 1 },
         { id: 'e5', t: 'Task analysis and chaining: forward, backward, total task', codes: ['C.5'], self: 60, led: 40,
-          v: ['chain_forward', 'chain_backward', 'chain_hw_forward', 'chain_hw_backward', 'chain_hw_total'] },
-        { id: 'e6', t: 'Prompts and how to fade them', codes: ['C.7'], self: 55, led: 40, v: ['prompt_ltm', 'prompt_mtl', 'prompt_delay'], f: ['VS-1'] },
-        { id: 'e7', t: 'Discrimination training', codes: ['C.6'], self: 45, led: 35 },
+          v: ['chain_forward', 'chain_backward', 'chain_hw_forward', 'chain_hw_backward', 'chain_hw_total'], w: 1 },
+        { id: 'e6', t: 'Prompts and how to fade them', codes: ['C.7'], self: 55, led: 40, v: ['prompt_ltm', 'prompt_mtl', 'prompt_delay'], f: ['VS-1'], w: 1 },
+        { id: 'e7', t: 'Discrimination training', codes: ['C.6'], self: 45, led: 35, w: 1 },
         { id: 'e8', t: 'Differential reinforcement: DRA, DRI, DRO, DRL and functional communication training', codes: ['D.3'], self: 80, led: 45, w: 1,
           v: ['dra_attention', 'dra_escape', 'dra_tangible', 'dra_automatic', 'dro_resetting', 'dro_class', 'dro_momentary', 'dro_tokens',
               'fct-practical-guide-thinning', 'fct_attention', 'fct_tangible', 'fct_thinning_mult'], x: ['dro', 'fct'], f: ['SR-1'] },
-        { id: 'e9', t: 'Extinction and its side effects', codes: ['D.4', 'D.6'], self: 50, led: 35, v: ['ext_wait', 'ext_ignore', 'ext_kind'] },
+        { id: 'e9', t: 'Extinction and its side effects', codes: ['D.4', 'D.6'], self: 50, led: 35, v: ['ext_wait', 'ext_ignore', 'ext_kind'], w: 1 },
         { id: 'e10', t: 'Punishment and its side effects; interrupting and redirecting', codes: ['D.5', 'D.6'], self: 45, led: 30,
-          v: ['rird_vocal', 'rird_motor', 'rird_pica'] },
-        { id: 'e11', t: 'Shaping', codes: ['C.10'], self: 40, led: 30 },
+          v: ['rird_vocal', 'rird_motor', 'rird_pica'], w: 1 },
+        { id: 'e11', t: 'Shaping', codes: ['C.10'], self: 40, led: 30, w: 1 },
         { id: 'e12', t: 'Antecedent interventions: reinforcement on a timer, easy requests first, choice, changes to the task', codes: ['D.2'], self: 85, led: 40,
           v: ['ncr_attention', 'ncr_items', 'ncr_work', 'ncr_between', 'a_highp', 'a_highp_praise', 'a_highp_class', 'a_highp_seatwork', 'a_highp_peer',
-              'choice-academic-task-escape', 'ante_fade', 'ante_task', 'ante_mix'], x: ['ncr'], p: 1 },
-        { id: 'e13', t: 'Generalization and maintenance', codes: ['C.8', 'C.9'], self: 40, led: 30 },
-        { id: 'e14', t: 'Self-monitoring', codes: [], self: 35, led: 25, f: ['SM-1'] },
+              'choice-academic-task-escape', 'ante_fade', 'ante_task', 'ante_mix'], x: ['ncr'], p: 1, w: 1 },
+        { id: 'e13', t: 'Generalization and maintenance', codes: ['C.8', 'C.9'], self: 40, led: 30, w: 1 },
+        { id: 'e14', t: 'Self-monitoring', codes: [], self: 35, led: 25, f: ['SM-1'], w: 1 },
         { id: 'e15', t: 'Crisis and emergency procedures, and calming routines', codes: ['D.7'], self: 55, led: 45,
-          v: ['calm_breath', 'calm_muscle', 'calm_plan'], f: ['CR-1'] }
+          v: ['calm_breath', 'calm_muscle', 'calm_plan'], f: ['CR-1'], w: 1 }
       ] },
       { k: 'F', name: 'Service delivery documentation and reporting', min: 3, units: [
-        { id: 'f1', t: 'Confidentiality and the record: what the law and the workplace require', codes: ['E.4', 'F.5'], self: 30, led: 15 },
-        { id: 'f2', t: 'The session note: objective, accurate, on time', codes: ['E.4'], self: 35, led: 20, f: ['CN-1'] },
-        { id: 'f3', t: 'Reporting what could affect progress: illness, medication, schedule changes', codes: ['E.3'], self: 20, led: 10 },
-        { id: 'f4', t: 'Asking your supervisor, and passing on what the team tells you', codes: ['E.1', 'E.2'], self: 30, led: 20 }
+        { id: 'f1', t: 'Confidentiality and the record: what the law and the workplace require', codes: ['E.4', 'F.5'], self: 30, led: 15, w: 1 },
+        { id: 'f2', t: 'The session note: objective, accurate, on time', codes: ['E.4'], self: 35, led: 20, f: ['CN-1'], w: 1 },
+        { id: 'f3', t: 'Reporting what could affect progress: illness, medication, schedule changes', codes: ['E.3'], self: 20, led: 10, w: 1 },
+        { id: 'f4', t: 'Asking your supervisor, and passing on what the team tells you', codes: ['E.1', 'E.2'], self: 30, led: 20, w: 1 }
       ] },
       { k: 'G', name: 'Ethics and professionalism', min: 5, units: [
-        { id: 'g1', t: 'The core principles and the RBT Ethics Code', codes: ['F.1'], self: 45, led: 25 },
-        { id: 'g2', t: 'Your role, your competence and your supervision', codes: ['F.2', 'F.3', 'F.4'], self: 40, led: 20, f: ['RS-1', 'ST-1'] },
-        { id: 'g3', t: 'Multiple relationships and gifts', codes: ['F.7', 'F.8'], self: 35, led: 20 },
-        { id: 'g4', t: 'Confidential information and public statements', codes: ['F.5', 'F.6'], self: 30, led: 15 },
-        { id: 'g5', t: 'Cultural humility and responsiveness', codes: ['F.10'], self: 30, led: 20 },
-        { id: 'g6', t: 'Professional conduct, feedback, and reporting misconduct', codes: ['F.9'], self: 30, led: 20 }
+        { id: 'g1', t: 'The core principles and the RBT Ethics Code', codes: ['F.1'], self: 45, led: 25, w: 1 },
+        { id: 'g2', t: 'Your role, your competence and your supervision', codes: ['F.2', 'F.3', 'F.4'], self: 40, led: 20, f: ['RS-1', 'ST-1'], w: 1 },
+        { id: 'g3', t: 'Multiple relationships and gifts', codes: ['F.7', 'F.8'], self: 35, led: 20, w: 1 },
+        { id: 'g4', t: 'Confidential information and public statements', codes: ['F.5', 'F.6'], self: 30, led: 15, w: 1 },
+        { id: 'g5', t: 'Cultural humility and responsiveness', codes: ['F.10'], self: 30, led: 20, w: 1 },
+        { id: 'g6', t: 'Professional conduct, feedback, and reporting misconduct', codes: ['F.9'], self: 30, led: 20, w: 1 }
       ] },
       { k: 'H', name: 'Next steps in the certification process', min: 1, units: [
-        { id: 'h1', t: 'From this training to the examination', codes: [], self: 25, led: 10 },
-        { id: 'h2', t: 'Keeping the certification: supervision, statuses, self-reporting, renewal', codes: ['F.3'], self: 25, led: 10, f: ['RS-1'] }
+        { id: 'h1', t: 'From this training to the examination', codes: [], self: 25, led: 10, w: 1 },
+        { id: 'h2', t: 'Keeping the certification: supervision, statuses, self-reporting, renewal', codes: ['F.3'], self: 25, led: 10, f: ['RS-1'], w: 1 }
       ] }
     ],
     /* the RBT Test Content Outline (3rd ed.): domain, questions on the examination, and each task's code with a short title */

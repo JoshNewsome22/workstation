@@ -12,7 +12,9 @@
      report    what to tell the supervisor
      read      further reading (reading does not count toward training time)
    The people in every example are invented. Nothing here is about a student or a learner. */
-window.NBH_LEARN_UNITS = {
+window.NBH_LEARN_UNITS = window.NBH_LEARN_UNITS || {};
+/* the first unit written (v26.00); the others are in nbh-learn-units-*.js, a few to a file, each adding to this list */
+Object.assign(window.NBH_LEARN_UNITS, {
   e8: {
     aim: [
       'Say what differential reinforcement is, and tell DRA, DRI, DRO, DRL and functional communication training apart.',
@@ -91,6 +93,7 @@ window.NBH_LEARN_UNITS = {
       { k: 'fct_tangible', look: 'The three steps: ask, then wait, then accept “no”.' }
     ],
     examples: {
+      ask: 'Which procedure is this?',
       intro: 'Ten short scenes. For each, choose the procedure it shows. Four of them are not differential reinforcement at all: seeing why is half the skill.',
       opts: ['DRA', 'DRI', 'DRO', 'DRL', 'FCT', 'Not differential reinforcement'],
       items: [
@@ -107,6 +110,7 @@ window.NBH_LEARN_UNITS = {
       ]
     },
     practice: {
+      nav: 'Run a session', good: 'You ran the plan as written. The quiz is next.', again: 'Run it again. The plan answers every one of these decisions: read it before each choice.',
       title: 'Run a DRO session',
       intro: 'You are the technician. Jonah is a simulated student. Read his plan, then make each decision as the session goes on.',
       plan: ['Behavior: tearing paper (any tear in a worksheet or book).', 'DRO, 2 minutes, resetting. The timer is where Jonah can see it.',
@@ -178,4 +182,4 @@ window.NBH_LEARN_UNITS = {
       'Jessel, J., & Ingvarsson, E. T. (2016). Recent advances in applied research on DRO procedures. Journal of Applied Behavior Analysis, 49(4), 991–995.'
     ]
   }
-};
+});

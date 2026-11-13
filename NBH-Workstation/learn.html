@@ -262,6 +262,20 @@ dialog.ln-dlg iframe{display:block;width:100%;height:calc(100% - 58px);border:0}
 <script src="nbh-videos.js"></script>
 <script src="nbh-learn.js"></script>
 <script src="nbh-learn-units.js"></script>
+<script src="nbh-learn-units-a.js"></script>
+<script src="nbh-learn-units-a2.js"></script>
+<script src="nbh-learn-units-c.js"></script>
+<script src="nbh-learn-units-c2.js"></script>
+<script src="nbh-learn-units-d.js"></script>
+<script src="nbh-learn-units-e1.js"></script>
+<script src="nbh-learn-units-e2.js"></script>
+<script src="nbh-learn-units-e3.js"></script>
+<script src="nbh-learn-units-e4.js"></script>
+<script src="nbh-learn-units-e5.js"></script>
+<script src="nbh-learn-units-f.js"></script>
+<script src="nbh-learn-units-g.js"></script>
+<script src="nbh-learn-units-g2.js"></script>
+<script src="nbh-learn-units-h.js"></script>
 <script>
 (function(){'use strict';
 const L=window.NBH_LEARN,U=window.NBH_LEARN_UNITS||{},VD=window.NBH_VIDEOS||{list:[],families:[]};
@@ -300,7 +314,7 @@ const clock={sec:null,unit:null,kind:null,playing:false,last:Date.now(),prev:Dat
 function capOf(u,kind){const c=U[u.id];
   if(kind==='video'){let d=0;(u.v||[]).forEach(k=>{d+=(VBY[k]&&VBY[k].dur)||0;});return Math.round(d*1.5)+(u.x?u.x.length*600:0)+(u.p?900:0);}
   if(!c)return 0;
-  if(kind==='lesson')return c.lesson.length*240;
+  if(kind==='lesson')return (c.lesson||[]).length*240;
   if(kind==='examples')return c.examples.items.length*90;
   if(kind==='practice')return c.practice.steps.length*120;
   if(kind==='quiz')return c.quiz.draw*90*3;
@@ -334,10 +348,10 @@ function ledger(self,led,link){let tot=0;const segs=L.rbt.sections.map(s=>{const
 function watched(k){try{const v=JSON.parse(localStorage.getItem('nbh.videos.v1')||'null');return !!(v&&v.items&&v.items[k]&&v.items[k].w);}catch(e){return false;}}
 function partsOf(u){const c=U[u.id],us=S.u[u.id]||{les:[],t:{}},out=[];
   if(c){const n=c.lesson.length,d=c.lesson.filter((x,i)=>us.les&&us.les[i]).length;out.push({k:'lesson',n:'Lesson',sub:d+' of '+n+' parts',st:d>=n?2:d?1:0});}
-  if((u.v&&u.v.length)||u.x||u.p){const core=c?c.watch.filter(w=>w.c).map(w=>w.k):(u.v||[]),d=core.filter(watched).length;
+  if((u.v&&u.v.length)||u.x||u.p){const core=c?(c.watch||[]).filter(w=>w.c).map(w=>w.k):(u.v||[]),d=core.filter(watched).length;
     out.push({k:'watch',n:c?'Watch':'Watch now',sub:core.length?d+' of '+core.length+(c?' core videos':' videos'):'Explainers and practice',st:core.length&&d>=core.length?2:d?1:0});}
   if(c){const ex=us.ex;out.push({k:'examples',n:'Sort the examples',sub:ex?ex.right+' of '+ex.n+' right':c.examples.items.length+' scenes',st:ex?2:0});
-    const pr=us.pr;out.push({k:'practice',n:'Run a session',sub:pr?pr.right+' of '+pr.n+' right':c.practice.steps.length+' decisions',st:pr?(pr.right/pr.n>=.8?2:1):0});
+    const pr=us.pr;out.push({k:'practice',n:c.practice.nav||'Practice',sub:pr?pr.right+' of '+pr.n+' right':c.practice.steps.length+' '+(c.practice.word||'decision').toLowerCase()+'s',st:pr?(pr.right/pr.n>=.8?2:1):0});
     const best=(us.quiz||[]).reduce((m,q)=>Math.max(m,q.pct),-1);out.push({k:'quiz',n:'Quiz',sub:best<0?'Pass at '+c.quiz.pass+'%':'Best: '+best+'%',st:best>=c.quiz.pass?2:best>=0?1:0});
     out.push({k:'trainer',n:'With your trainer',sub:'Role-play and discussion',st:0});}
   return out;}
@@ -348,6 +362,7 @@ function unitPill(u){if(!U[u.id])return '<span class="ln-pill w">Lesson to come<
 function written(){let n=0,all=0;L.rbt.sections.forEach(s=>s.units.forEach(u=>{all++;if(U[u.id])n++;}));return [n,all];}
 function stateBox(){const w=written();
   if(L.rbt.ready)return '<div class="ln-state ok"><p>'+esc(L.rbt.statementPages)+'</p></div>';
+  if(w[0]>=w[1])return '<div class="ln-state" id="lnBuilding"><p><strong>All '+w[1]+' units are written and are waiting for the Responsible Trainer’s review.</strong> Until that review is done and the training is released, it cannot be used toward RBT certification, and no certificate can be made.</p></div>';
   return '<div class="ln-state" id="lnBuilding"><p><strong>This training is being built.</strong> '+w[0]+' of '+w[1]+' units are written. It is not yet a complete 40-hour training, and it cannot yet be used toward RBT certification. No certificate can be made until every unit is in place.</p></div>';}
 function docs(list){return '<ul class="ln-list">'+list.map(d=>'<li><a href="'+esc(d[1])+'" target="_blank" rel="noopener">'+esc(d[0])+'</a> (bacb.com)</li>').join('')+'</ul>';}
 
@@ -402,30 +417,33 @@ function vUnit(id,part){const u=UNIT[id];if(!u){location.hash='#rbt';return;}
   const body=$('lnBody');if(part==='trainer')setClock(null);else setClock(id,part==='watch'?'video':part);
   ({lesson:pLesson,watch:pWatch,examples:pExamples,practice:pPractice,quiz:pQuiz,trainer:pTrainer})[part](u,c,body);}
 
-function optBtns(opts,name){return '<div class="ln-opts">'+opts.map((o,i)=>'<button type="button" class="ln-opt" data-pick="'+i+'">'+esc(o)+'</button>').join('')+'</div>';}
+/* the order of the answers is drawn anew each time they are shown, so that no place on the screen is the right one more often;
+   answers that are numbers, or that speak of "above", keep the order they were written in. data-pick is the answer's own index. */
+function mixIdx(opts){const ix=opts.map((x,i)=>i);return (opts.every(o=>/^[\d$]/.test(o))||opts.some(o=>/\b(above|below)\b/i.test(o)))?ix:shuffle(ix,Math.random);}
+function optBtns(opts,mix){const ix=mix?mixIdx(opts):opts.map((x,i)=>i);return '<div class="ln-opts">'+ix.map(i=>'<button type="button" class="ln-opt" data-pick="'+i+'">'+esc(opts[i])+'</button>').join('')+'</div>';}
 function pLesson(u,c,body){const us=uState(u.id);let i=cur.seg;if(cur.unit!==u.id||i==null||i>=c.lesson.length){i=c.lesson.findIndex((x,k)=>!us.les[k]);if(i<0)i=0;}cur={unit:u.id,seg:i};
-  const g=c.lesson[i],done=!!us.les[i];
+  const g=c.lesson[i],done=!!us.les[i],hasWatch=partsOf(u).some(x=>x.k==='watch');
   body.innerHTML='<h2>Lesson</h2>'+(i===0?'<p class="ln-note" style="margin-bottom:4px">After this unit you can:</p><ul class="ln-list">'+c.aim.map(a=>'<li>'+esc(a)+'</li>').join('')+'</ul>':'')+
    '<ol class="ln-steps" aria-label="Parts of the lesson">'+c.lesson.map((x,k)=>'<li><button type="button" data-seg="'+k+'" class="'+(us.les[k]?'done':'')+'"'+(k===i?' aria-current="true"':'')+' aria-label="Part '+(k+1)+': '+esc(x.h)+(us.les[k]?', done':'')+'">'+(k+1)+'</button></li>').join('')+'</ol>'+
    '<article class="ln-prose"><h3 style="font-size:1.375rem;margin-bottom:10px">'+esc(g.h)+'</h3>'+g.p.map(p=>'<p>'+esc(p)+'</p>').join('')+'</article>'+(g.key?'<ul class="ln-key">'+g.key.map(k=>'<li>'+esc(k)+'</li>').join('')+'</ul>':'')+
-   '<div class="ln-q" id="lnCheck"><p class="q">Check: '+esc(g.check.q)+'</p>'+optBtns(g.check.opts)+'<div id="lnWhy" aria-live="polite"></div></div>'+
-   '<div class="ln-row"><button type="button" class="ln-btn" data-seg="'+(i-1)+'"'+(i?'':' disabled')+'>Back</button><button type="button" class="ln-btn ln-pri" id="lnNext" '+(done?'':'disabled')+'>'+(i<c.lesson.length-1?'Next part':'On to the videos')+'</button></div>';
+   '<div class="ln-q" id="lnCheck"><p class="q">Check: '+esc(g.check.q)+'</p>'+optBtns(g.check.opts,true)+'<div id="lnWhy" aria-live="polite"></div></div>'+
+   '<div class="ln-row"><button type="button" class="ln-btn" data-seg="'+(i-1)+'"'+(i?'':' disabled')+'>Back</button><button type="button" class="ln-btn ln-pri" id="lnNext" '+(done?'':'disabled')+'>'+(i<c.lesson.length-1?'Next part':hasWatch?'On to the videos':'On to the examples')+'</button></div>';
   if(done)showCheck(g.check,g.check.a,true);
   body.onclick=e=>{const b=e.target.closest('button');if(!b)return;
     if(b.dataset.seg!=null&&!b.disabled){cur.seg=+b.dataset.seg;pLesson(u,c,body);focusBody();return;}
     if(b.dataset.pick!=null&&!b.disabled){const k=+b.dataset.pick,ok=k===g.check.a;showCheck(g.check,k,ok);
       if(ok&&!us.les[i]){us.les[i]=1;save();$('lnNext').disabled=false;paintParts(u);const sb=body.querySelector('.ln-steps [data-seg="'+i+'"]');if(sb){sb.classList.add('done');sb.setAttribute('aria-label',sb.getAttribute('aria-label')+', done');}}return;}
-    if(b.id==='lnNext'){if(i<c.lesson.length-1){cur.seg=i+1;pLesson(u,c,body);focusBody();}else location.hash='#rbt/'+u.id+'/watch';}};}
-function showCheck(ch,k,ok){const box=$('lnCheck');box.querySelectorAll('.ln-opt').forEach((b,j)=>{b.classList.remove('right','wrong');if(j===k)b.classList.add(ok?'right':'wrong');if(ok)b.disabled=true;});
+    if(b.id==='lnNext'){if(i<c.lesson.length-1){cur.seg=i+1;pLesson(u,c,body);focusBody();}else location.hash='#rbt/'+u.id+(hasWatch?'/watch':'/examples');}};}
+function showCheck(ch,k,ok){const box=$('lnCheck');box.querySelectorAll('.ln-opt').forEach(b=>{const j=+b.dataset.pick;b.classList.remove('right','wrong');if(j===k)b.classList.add(ok?'right':'wrong');if(ok)b.disabled=true;});
   $('lnWhy').innerHTML='<p class="ln-why '+(ok?'right':'wrong')+'"><strong>'+(ok?'Right. ':'Not that one. ')+'</strong>'+(ok?esc(ch.why):'Read the part again and choose another answer.')+'</p>';}
 function focusBody(){const b=$('lnBody');if(b){const h=b.querySelector('h2');if(h){h.tabIndex=-1;h.focus({preventScroll:true});}window.scrollTo(0,Math.max(0,b.getBoundingClientRect().top+window.scrollY-90));}}
 function paintParts(u){const ol=view.querySelector('.ln-parts');if(!ol)return;
   partsOf(u).forEach((p,i)=>{const a=ol.children[i]&&ol.children[i].firstChild;if(!a)return;const d=a.querySelector('.d');d.className='d'+(p.st===2?' done':p.st===1?' part':'');d.textContent=p.st===2?'✓':'';a.querySelector('small').textContent=p.sub;});
   const pill=view.querySelector('.ln-uhead .ln-pill');if(pill)pill.outerHTML=unitPill(u);}
 
-function pWatch(u,c,body){const core=c.watch.filter(w=>w.c),more=c.watch.filter(w=>!w.c);
-  body.innerHTML='<h2>Watch</h2><p class="ln-note">Each video shows the procedure with simulated people. Watch the core ones; the rest show the same procedure in other situations. Time is counted while a video plays.</p>'+
-   '<h3 style="margin:16px 0 10px">Core videos</h3><ul class="ln-vids">'+core.map(w=>vidRow(w.k,w.look,true)).join('')+'</ul>'+
+function pWatch(u,c,body){const W=c.watch||[],core=W.filter(w=>w.c),more=W.filter(w=>!w.c);
+  body.innerHTML='<h2>Watch</h2><p class="ln-note">'+(W.length?'Each video shows the procedure with simulated people. Watch the core ones; the rest show the same procedure in other situations. Time is counted while a video plays.':'The workstation has no video for this unit yet. What it has is below.')+'</p>'+
+   (core.length?'<h3 style="margin:16px 0 10px">Core videos</h3><ul class="ln-vids">'+core.map(w=>vidRow(w.k,w.look,true)).join('')+'</ul>':'')+
    (more.length?'<h3 style="margin:22px 0 10px">More to watch</h3><ul class="ln-vids">'+more.map(w=>vidRow(w.k,w.look,false)).join('')+'</ul>':'')+
    ((u.x||u.p||u.f)?'<h3 style="margin:22px 0 4px">Also in the workstation</h3>'+matButtons(u):'')+
    '<div class="ln-row"><a class="ln-btn ln-pri" href="#rbt/'+u.id+'/examples">On to the examples</a></div>';body.onclick=null;}
@@ -434,36 +452,36 @@ function pWatch(u,c,body){const core=c.watch.filter(w=>w.c),more=c.watch.filter(
 function runSet(u,body,o){let i=0,right=0;const n=o.items.length;
   const draw=()=>{const it=o.items[i];
     body.innerHTML='<h2>'+esc(o.title)+'</h2>'+(o.top||'')+'<p class="ln-note" aria-live="polite">'+esc(o.word)+' '+(i+1)+' of '+n+'</p>'+
-     '<div class="ln-q" id="lnCheck">'+(it.t?'<p class="ln-when">'+esc(it.t)+'</p>':'')+'<p class="ln-scene">'+esc(it.s)+'</p>'+(o.ask?'<p class="q">'+esc(o.ask)+'</p>':'')+optBtns(it.opts||o.opts)+'<div id="lnWhy" aria-live="polite"></div></div>'+
+     '<div class="ln-q" id="lnCheck">'+(it.t?'<p class="ln-when">'+esc(it.t)+'</p>':'')+'<p class="ln-scene">'+esc(it.s)+'</p>'+((it.ask||o.ask)?'<p class="q">'+esc(it.ask||o.ask)+'</p>':'')+optBtns(it.opts||o.opts,!!it.opts)+'<div id="lnWhy" aria-live="polite"></div></div>'+
      '<div class="ln-row"><button type="button" class="ln-btn ln-pri" id="lnNext" disabled>'+(i<n-1?'Next':'See the result')+'</button></div>';};
   const end=()=>{const pct=Math.round(right/n*100);o.done(right,n);save();paintParts(u);
     body.innerHTML='<h2>'+esc(o.title)+'</h2><p class="ln-score" id="lnScore">'+right+' of '+n+'</p><p class="ln-prose">'+esc(o.verdict(pct))+'</p>'+
      '<div class="ln-row"><button type="button" class="ln-btn" id="lnAgain">Do it again</button><a class="ln-btn ln-pri" href="#rbt/'+u.id+'/'+o.next[0]+'">'+esc(o.next[1])+'</a></div>';say(right+' of '+n+' right');};
   body.onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
     if(b.dataset.pick!=null){const it=o.items[i],k=+b.dataset.pick,ok=k===it.a;if(ok)right++;
-      body.querySelectorAll('.ln-opt').forEach((x,j)=>{x.disabled=true;if(j===it.a)x.classList.add('right');else if(j===k)x.classList.add('wrong');});
+      body.querySelectorAll('.ln-opt').forEach(x=>{const j=+x.dataset.pick;x.disabled=true;if(j===it.a)x.classList.add('right');else if(j===k)x.classList.add('wrong');});
       $('lnWhy').innerHTML='<p class="ln-why '+(ok?'right':'wrong')+'"><strong>'+(ok?'Right. ':'Not quite. ')+'</strong>'+esc(it.why)+'</p>';$('lnNext').disabled=false;$('lnNext').focus();return;}
     if(b.id==='lnNext'){i++;if(i<n){draw();focusBody();}else end();return;}
     if(b.id==='lnAgain'){i=0;right=0;draw();focusBody();}};
   draw();}
 function pExamples(u,c,body){const us=uState(u.id);
-  runSet(u,body,{title:'Sort the examples',top:'<p class="ln-prose">'+esc(c.examples.intro)+'</p>',word:'Scene',ask:'Which procedure is this?',opts:c.examples.opts,
-    items:c.examples.items,done:(r,n)=>{us.ex={right:r,n:n,at:today()};},verdict:p=>p>=80?'You can tell the procedures apart. Go on to run a session.':'Read the reasons again, then try once more: the non-examples are the ones that catch people.',next:['practice','Run a session']});}
+  runSet(u,body,{title:'Sort the examples',top:'<p class="ln-prose">'+esc(c.examples.intro)+'</p>',word:'Scene',ask:c.examples.ask||'Which is it?',opts:c.examples.opts,
+    items:c.examples.items,done:(r,n)=>{us.ex={right:r,n:n,at:today()};},verdict:p=>p>=80?'You can tell them apart. The practice is next.':'Read the reasons again, then try once more: the ones that are not examples are the ones that catch people.',next:['practice','On to the practice']});}
 function pPractice(u,c,body){const us=uState(u.id),P=c.practice;
-  runSet(u,body,{title:P.title,top:'<p class="ln-prose">'+esc(P.intro)+'</p><div class="ln-plan"><strong>The plan</strong><ul>'+P.plan.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>',word:'Decision',ask:'What do you do?',
-    items:P.steps.map(s=>({t:s.t,s:s.see,opts:s.opts,a:s.a,why:s.why})),done:(r,n)=>{if(!us.pr||r>=us.pr.right)us.pr={right:r,n:n,at:today()};},
-    verdict:p=>p>=80?'You ran the plan as written. The quiz is next.':'Run it again. The plan answers every one of these decisions: read it before each choice.',next:['quiz','Take the quiz']});}
+  runSet(u,body,{title:P.title,top:'<p class="ln-prose">'+esc(P.intro)+'</p>'+(P.plan&&P.plan.length?'<div class="ln-plan"><strong>'+esc(P.planT||'The plan')+'</strong><ul>'+P.plan.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>':''),word:P.word||'Decision',ask:P.ask||'What do you do?',
+    items:P.steps.map(s=>({t:s.t,s:s.see,ask:s.ask,opts:s.opts,a:s.a,why:s.why})),done:(r,n)=>{if(!us.pr||r>=us.pr.right)us.pr={right:r,n:n,at:today()};},
+    verdict:p=>p>=80?(P.good||'You chose as the plan and your role call for. The quiz is next.'):(P.again||'Go through it again, and read the reason under each choice.'),next:['quiz','Take the quiz']});}
 
 function shuffle(a,rnd){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
 function pQuiz(u,c,body){const us=uState(u.id),Q=c.quiz,past=us.quiz||[];
   const start=()=>{const set=shuffle(Q.items.map((x,i)=>i),Math.random).slice(0,Q.draw);
     body.innerHTML='<h2>Quiz</h2><form id="lnQuiz" novalidate>'+set.map((qi,n)=>{const q=Q.items[qi];
-      return '<fieldset class="ln-q" data-q="'+qi+'"><legend>'+(n+1)+'. '+esc(q.q)+'</legend><div class="ln-opts">'+q.opts.map((o,i)=>'<label class="ln-opt"><input type="radio" name="q'+qi+'" value="'+i+'"><span>'+esc(o)+'</span></label>').join('')+'</div><div class="w"></div></fieldset>';}).join('')+
+      return '<fieldset class="ln-q" data-q="'+qi+'"><legend>'+(n+1)+'. '+esc(q.q)+'</legend><div class="ln-opts">'+mixIdx(q.opts).map(i=>'<label class="ln-opt"><input type="radio" name="q'+qi+'" value="'+i+'"><span>'+esc(q.opts[i])+'</span></label>').join('')+'</div><div class="w"></div></fieldset>';}).join('')+
      '<p class="ln-why wrong" id="lnQMiss" hidden></p><div class="ln-row"><button type="submit" class="ln-btn ln-pri">Hand in the quiz</button></div></form>';
     $('lnQuiz').onsubmit=e=>{e.preventDefault();const f=e.target,sets=[...f.querySelectorAll('fieldset')],blank=sets.filter(s=>!s.querySelector('input:checked'));
       if(blank.length){const m=$('lnQMiss');m.hidden=false;m.textContent=blank.length+(blank.length===1?' question has':' questions have')+' no answer yet.';blank[0].querySelector('input').focus();return;}
       let right=0;sets.forEach(s=>{const q=Q.items[+s.dataset.q],k=+s.querySelector('input:checked').value,ok=k===q.a;if(ok)right++;
-        s.querySelectorAll('.ln-opt').forEach((l,j)=>{l.querySelector('input').disabled=true;if(j===q.a)l.classList.add('right');else if(j===k)l.classList.add('wrong');});
+        s.querySelectorAll('.ln-opt').forEach(l=>{const j=+l.querySelector('input').value;l.querySelector('input').disabled=true;if(j===q.a)l.classList.add('right');else if(j===k)l.classList.add('wrong');});
         s.querySelector('.w').innerHTML='<p class="ln-why '+(ok?'right':'wrong')+'"><strong>'+(ok?'Right. ':'Not quite. ')+'</strong>'+esc(q.why)+'</p>';});
       const pct=Math.round(right/sets.length*100),pass=pct>=Q.pass;(us.quiz=us.quiz||[]).push({at:today(),right:right,n:sets.length,pct:pct,pass:pass?1:0});save();paintParts(u);
       $('lnQMiss').hidden=true;const row=f.querySelector('.ln-row');
@@ -636,7 +654,7 @@ function vTrainee(id,sub){setClock(null);const t=trainee(id);if(!t){location.has
   view.innerHTML='<p class="ln-crumb"><a href="#trainer">For the trainer</a> › Trainee</p><h1>'+esc(t.name)+'</h1><p class="ln-lead">BACB ID '+esc(t.bacb||'not given')+(r.start?' · started '+esc(niceDay(r.start)):'')+(r.end?' · last activity '+esc(niceDay(r.end)):'')+'</p>'+
    '<div class="ln-card" style="margin-top:16px">'+ledger(r.self,r.led,false)+'</div>'+
    '<h2 style="margin-top:26px">Against the requirements</h2><ul class="ln-list" style="list-style:none;padding:0" id="rqList">'+
-    yes(!!L.rbt.ready,'The training is whole: every unit written and reviewed by the Responsible Trainer.')+
+    yes(!!L.rbt.ready,'The training is whole and released: every unit written, and reviewed by the Responsible Trainer.')+
     yes(r.okHours,'At least 40 hours, and each section’s minimum. Now '+hm(r.tot)+(r.short.length?'; short in section'+(r.short.length>1?'s ':' ')+r.short.join(', '):'')+'.')+
     yes(r.okDays,'Completed in no fewer than 5 and no more than 180 days. Now '+(r.span||0)+(r.span===1?' day':' days')+' from the first day to the last, with activity on '+r.days+'.')+
     yes(r.okUnits,'Every unit: the quiz passed, each role-play met, the discussion held. Now '+r.done+' of '+r.units+'.')+
@@ -679,7 +697,7 @@ function vLog(t){const first=L.rbt.sections[0].units[0].id;
 
 function vCert(t){const r=req(t),me=T.me;
   const head='<p class="ln-crumb ln-noprint"><a href="#trainer">For the trainer</a> › <a href="#trainer/'+t.id+'">'+esc(t.name)+'</a> › Certificate</p>';
-  if(!r.ok){const why=[];if(!L.rbt.ready)why.push('The training is not whole yet: '+written()[0]+' of '+written()[1]+' units are written. Until every unit is in place this page makes no certificate for anyone.');
+  if(!r.ok){const why=[];if(!L.rbt.ready)why.push(written()[0]>=written()[1]?'The training is not released yet: all '+written()[1]+' units are written and are waiting for the Responsible Trainer’s review. Until it is released this page makes no certificate for anyone.':'The training is not whole yet: '+written()[0]+' of '+written()[1]+' units are written. Until every unit is in place this page makes no certificate for anyone.');
     if(!r.okHours)why.push('The hours: '+hm(r.tot)+' of 40:00'+(r.short.length?', and short in section'+(r.short.length>1?'s ':' ')+r.short.join(', '):'')+'.');
     if(!r.okDays)why.push('The days: '+(r.span||0)+' from the first day to the last; the training takes no fewer than 5 and no more than 180.');
     if(!r.okUnits)why.push('The units: '+r.done+' of '+r.units+' have the quiz passed, every role-play met and the discussion held.');

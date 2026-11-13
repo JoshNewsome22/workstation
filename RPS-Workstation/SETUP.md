@@ -9905,6 +9905,66 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.01: Learning, all 46 units of the RBT training written (not released: they wait for the Responsible Trainer's review)
+(the BCBA, 11/13: "Write the other 45 units"; and, asked whether the time in lessons should count toward the 40 hours:
+"Count it".)
+- **What was written.** The other 45 units, so that every unit of the map (`nbh-learn.js`) now has its content. They are
+  in 15 files beside the page: `nbh-learn-units.js` (the first unit, differential reinforcement) and
+  `nbh-learn-units-a.js`, `-a2`, `-c`, `-c2`, `-d`, `-e1` to `-e5`, `-f`, `-g`, `-g2`, `-h`. Together about 660 KB of text
+  and 1,518 questions.
+- **The shape of every unit** is that of the first one:
+  - *Lesson*: 3 to 8 short parts, each closed by one question. A wrong answer does not give the reason away.
+  - *Watch* (the 8 units that have videos): the unit's videos, the core ones marked, each with what to look for.
+  - *Sort the examples*: 5 to 10 scenes to put in their class, with the reason for each.
+  - *Practice*: 4 to 8 decisions in a simulated situation, each answered by the plan or the role.
+  - *Quiz*: 6 to 10 questions drawn anew each time from a pool at least 2 larger; pass at 80%.
+  - *With your trainer*: 1 to 3 role-plays with their steps, questions to talk through, further reading.
+- **By section.** A, behavior analysis: what it is, the three-term contingency, reinforcement, functions, verbal
+  operants, the phases of a program. B, getting ready: yourself, and rapport and assent. C, measurement: definitions,
+  why data matter, continuous and discontinuous measurement, permanent products, calculating, graphs. D, assessment:
+  what assessments are for, preference assessments, skill assessments, functional assessment. E, the procedures:
+  integrity, tokens and group rewards, discrete-trial and naturalistic teaching, chaining, prompts, discrimination,
+  differential reinforcement, extinction, punishment and RIRD, shaping, antecedent interventions, generalization,
+  self-monitoring, crisis and calming. F, documentation: confidentiality and the record, the session note, reporting
+  what could affect progress, asking the supervisor. G, ethics: the core principles and the code, role and
+  competence and supervision, multiple relationships and gifts, confidential information and public statements,
+  cultural humility, professional conduct and feedback and reporting misconduct. H: from the training to the
+  examination, and keeping the certification.
+- **Where the content comes from.** The procedures are taught as the workstation's own forms, videos and bank teach
+  them. Sections F, G and H follow the BACB's *RBT Ethics Code (2.0)* (updated 08/2024) and *RBT Handbook* (updated
+  10/2026), read in full for this, described in the workstation's own words and cited by standard number, never
+  copied; each of those units names the BACB's document to read in full. Fees are left out on purpose. Laws are named
+  only as examples from the United States, and the units send the learner to the workplace's policy and the
+  supervisor. Journal articles are named under Further reading only where the reference is certain. Every person in an
+  example is invented.
+- **Not released.** `NBH_LEARN.rbt.ready` stays false. The home page, the track and the trainer's page now say: *All
+  46 units are written and are waiting for the Responsible Trainer's review. Until that review is done and the
+  training is released, it cannot be used toward RBT certification, and no certificate can be made.* The certificate
+  is refused for every trainee with that reason, and the BACB's statement is shown nowhere. **To release it,** the
+  Responsible Trainer reviews the units and says so; the change is one word in `nbh-learn.js`.
+- **What the review is for.** The units were written by the assistant from the sources above and have not been read
+  by a behavior analyst. They are to be checked for accuracy, for fit with the BACB's curriculum outline, and for the
+  plan's minutes; the supervision, self-reporting and renewal rules in G2, H1 and H2 are the handbook's as of 10/2026
+  and change from year to year.
+- **The order of the answers** is drawn anew each time a question is shown (lesson questions, practice decisions and
+  the quiz), so the right answer cannot be learned by its place. Answers that are numbers keep their order, and the
+  fixed classes of Sort the examples keep theirs.
+- **The lesson's time counts** (decided 11/13). A unit counts no more than 4 minutes for a part of its lesson. My
+  record and each trainee's record show, under the hours, the time on the page by kind: lesson, videos, examples,
+  practice, quiz (this line was added after v26.00 and is in this release).
+- **A unit can now be without videos, without a written plan above its practice, and can word its own questions**
+  (the 38 units with no video go from the lesson straight to the examples).
+- **Tests.** `v2601-learn-units-test` (new) reads every unit as data: all 46 written, the shape, every question's
+  choices, answer and reason, the videos against the map, the time a unit can count against its plan, the spread of
+  the right answers, the words. `v2600-learn-test` now also opens every part of every unit (238 views), checks the
+  drawn order of the answers, and proves the "being built" wording by keeping one file of units from the page.
+- **Still to do.** The Responsible Trainer's review; a look on an iPad and a phone; study notes and questions for the
+  BCBA track; a slot for the BCBA's own trainings in a unit.
+- **The test run.** On the built folder, in the workstation and the school edition: `v2600-learn-test` (17 checks) and
+  `v2601-learn-units-test` (8 checks) pass in both. Also passing: the video library (`v2572-videos`, 54 of 54;
+  `v2569-video-library`, 82 of 82), the player (`v2598`, `v2591-mini-player`), the calendar (`v2599`), the start screen
+  (`v2572-start-screen`), the size budgets (`budget-test`) and the build (`v2212-build-test`). The whole run of about 530
+  tests was not repeated for this release; nothing outside the Learning page changed. Not seen on an iPad or a phone.
 ### v26.00: Learning, a place to study for the RBT and BCBA examinations (first part: the map and one whole unit)
 (the BCBA, 11/13: "a place that goes over everything that a person who is studying to become a RBT can go and learn all the
 materials they need to know based on the BACB ... content and course sequence topics. Also, a person studying to be a BCBA
@@ -9938,8 +9998,8 @@ track should count as the 40-hour training: "Yes, with me as the Responsible Tra
 - **The time.** Counted only while a part of a unit is open, the page is in view and the learner did something in the
   last 90 seconds, or a video is playing. Each part of a unit counts up to a limit (the lesson: 4 minutes a part), so a
   page left open adds nothing. Reading is not counted. A chip in the bar says Counting or Paused and the day's time.
-  **A decision for the Responsible Trainer:** the lesson's time is counted because it is taught on the page with a
-  question in each part, not assigned as reading; if lesson time should not count, say so and it is one line.
+  **Decided by the Responsible Trainer (11/13: "Count it"):** the lesson's time is counted, because it is taught on
+  the page with a question in each part, not assigned as reading.
 - **My record** (the learner): name and BACB ID if typed, time by section, each unit's scores; **Send my record to my
   trainer** makes a file to send.
 - **For the trainer.** The Responsible Trainer's name, certification and number, and assistant trainers; a self-check in
