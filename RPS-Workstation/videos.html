@@ -371,6 +371,7 @@ html.vl-mini,html.vl-mini body{overflow:hidden}html.vl-mini .vl-player{position:
 <script src="nbh-videos.js"></script>
 <script src="nbh-video-steps.js"></script>
 <script src="nbh-video-transcripts.js"></script>
+<script src="nbh-video-transcripts-es.js"></script>
 <script src="nbh-transcript.js"></script>
 <script src="nbh-pod-transcripts.js"></script>
 <script src="nbh-pod-player.js"></script>
@@ -729,6 +730,7 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
       '<button type="button" class="vl-bb vl-bcc" id="vlBCC" aria-pressed="false" aria-label="Captions">'+CC_ICO+'</button><button type="button" class="vl-bb" id="vlBPip" aria-label="Picture in Picture: a small window that stays on top" hidden>'+PIP_ICO+'</button><button type="button" class="vl-bb" id="vlBFull" aria-label="Full screen">'+FULL_ICO+'</button></div>'+
     '<div class="vl-strip" id="vlStrip" hidden aria-hidden="true"></div>'+
     '<div class="vl-opts" id="vlOpts"><label class="vl-osel"><span>Speed</span><select id="vlSpeed">'+[0.5,0.75,1,1.25,1.5,2].map(function(r){return '<option value="'+r+'"'+(r===1?' selected':'')+'>'+(r===1?'Normal':r+'\u00d7')+'</option>';}).join('')+'</select></label>'+
+      '<label class="vl-osel" id="vlCcLangL" hidden><span>Captions in</span><select id="vlCcLang"><option value="en">English</option><option value="es" lang="es">Espa\u00f1ol</option></select></label>'+
       '<button type="button" class="vl-ob" id="vlRepeat" aria-pressed="false" hidden>'+REPEAT_ICO+'<span id="vlRepeatT">Repeat this step</span></button>'+
       '<button type="button" class="vl-ob" id="vlAuto" aria-pressed="true" hidden>Play the next one</button>'+
       '<details class="vl-keys"><summary>Shortcuts</summary><p><b>On the picture:</b> double-tap the left or the right half to go back or forward 10 seconds; press and hold to play at 2\u00d7 for as long as you hold.</p>'+
@@ -795,11 +797,18 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
   /* captions of what is said (the narration and the people's lines), a real text track: off unless CC was turned on here */
   if(hasT){var cues=vttOf(tw,v.dur||0);track=document.createElement('track');track.kind='captions';track.label='English';track.srclang='en';
     track.src=URL.createObjectURL(new Blob([cues],{type:'text/vtt'}));vid.appendChild(track);
-    var ccOn=function(on){if(track.track)track.track.mode=on?'showing':'hidden';[$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.setAttribute('aria-pressed',String(!!on));});};
+    /* v26.09 the same captions in Spanish (nbh-video-transcripts-es.js: one line for each spoken line, timed as the English line is):
+       a second track, and "Captions in" to choose which one CC shows; the choice is kept on this device (nbh.videos.pref, ccl) */
+    var esL=(window.NBH_VIDEO_TRANSCRIPTS_ES||{})[v.key],spk=tw.filter(function(l){return l[1]!=='O';}),trackEs=null,ROLE_ES={Teacher:'Docente',Instructor:'Docente',Student:'Estudiante',Aide:'Asistente',Peer:'Compa\u00f1ero',Classmate:'Compa\u00f1ero'};
+    if(esL&&esL.length===spk.length){trackEs=document.createElement('track');trackEs.kind='captions';trackEs.label='Espa\u00f1ol';trackEs.srclang='es';
+      trackEs.src=URL.createObjectURL(new Blob([vttOf(spk.map(function(l,i){return [l[0],l[1]==='N'?'N':(ROLE_ES[l[1]]||l[1]),esL[i]];}),v.dur||0)],{type:'text/vtt'}));vid.appendChild(trackEs);}
+    var ccLang=function(){return trackEs&&pref().ccl==='es'?'es':'en';},ccSel=$('vlCcLang');
+    if(trackEs&&ccSel){$('vlCcLangL').hidden=false;ccSel.value=ccLang();ccSel.addEventListener('change',function(){setPref('ccl',ccSel.value==='es'?'es':'en');ccOn(true);setPref('cc',true);});}
+    var ccOn=function(on){var es=ccLang()==='es';if(track.track)track.track.mode=on&&!es?'showing':'hidden';if(trackEs&&trackEs.track)trackEs.track.mode=on&&es?'showing':'hidden';[$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.setAttribute('aria-pressed',String(!!on));});};
     ccOn(!!pref().cc);
     [$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.addEventListener('click',function(){var on=b.getAttribute('aria-pressed')!=='true';ccOn(on);setPref('cc',on);});});
     /* the browser's own captions menu changes it too */
-    vid.textTracks.addEventListener('change',function(){var on=!!track.track&&track.track.mode==='showing';[$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.setAttribute('aria-pressed',String(on));});});}
+    vid.textTracks.addEventListener('change',function(){var en=!!track.track&&track.track.mode==='showing',es=!!trackEs&&!!trackEs.track&&trackEs.track.mode==='showing',on=en||es;if(on&&ccSel&&trackEs){var l=es?'es':'en';if(ccSel.value!==l){ccSel.value=l;setPref('ccl',l);}}[$('vlCC'),$('vlBCC')].forEach(function(b){if(b)b.setAttribute('aria-pressed',String(on));});});}
   else{var bc=$('vlBCC');if(bc)bc.hidden=true;}
   /* the phone's bar: play and pause, the time, the position, captions, full screen (the browser's own player there) */
   var BP=$('vlBPlay'),BT=$('vlBTime'),BS=$('vlBSeek');

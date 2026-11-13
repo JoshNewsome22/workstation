@@ -9905,6 +9905,34 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.09: Spanish captions for every procedure video
+(approved by the BCBA on 11/12 in the list of next steps: "Families. Spanish captions for every video are free. Spanish
+narration would be paid." Only the captions are done; no narration was made and nothing was spent.)
+- **What.** `nbh-video-transcripts-es.js`: for each of the 46 videos, one line of Spanish for each spoken line of the
+  English transcript (the narrator's and the people's: 653 lines, about 12,300 English words). The on-screen lines (the
+  cards and the step captions, which are part of the picture) are not translated.
+- **In the video library.** On a video's page, beside Speed: "Captions in", with English and Español. Choosing Español
+  turns CC on in Spanish; choosing English goes back. Each Spanish line is shown for the time of the English line it
+  stands for, so it stays with the voice. A person's line is marked with the role in Spanish ([Docente],
+  [Estudiante], [Asistente], [Compañero]). The device's own captions menu, where a browser has one, lists both. The
+  choice is kept on the device (the browser's `nbh.videos.pref`, with the CC choice).
+- **The wording.** Plain Latin American Spanish, addressed to staff as usted; what a teacher says to a student is in
+  tú. Terms: conducta problemática, refuerzo, reforzador, elogio, ayuda (a prompt), línea de base, descanso, ficha
+  and tablero (tokens), pedido (a request), extinción del escape, costo de respuesta, encadenamiento hacia adelante
+  and hacia atrás. The forms' own names stay as they are (TD-1, DRO, DRA, FCT), and so do the names of the simulated
+  people.
+- **Not reviewed.** The translation was written for this workstation and has not been read by a Spanish-speaking
+  behavior analyst or by a family. Terms differ between countries (ayuda or instigación; berrinche or rabieta). It
+  should be read by someone who works with these families before it is relied on; a correction is a change to one
+  line of the file.
+- **Where it is not yet.** Form TD-1's own player and the Transcript tab stay English. Learning and the forms are
+  English.
+- **The build.** The offline copy saves the new file (85 KB).
+- **Test.** `qa/v2609-captions-es-test.js` (new, in the release list): every video has its Spanish, line for line,
+  with the digits and the forms' names of the English; the choice on a video's page; the Spanish track shown and the
+  English hidden, timed as the English is; the role marks; the choice kept across pages; a phone's width.
+- **The test run.** On the built folder: the new test in both editions, the video library's tests, the Check
+  yourself test, the size budgets and the build test. Not seen on an iPad or a phone.
 ### v26.08: Check yourself on every procedure video, scored by the page
 (approved by the BCBA on 11/12 in the list of next steps: "Training that scores itself. Every video has a known
 timeline, so I can build a short quiz, a filled-in integrity checklist (TI-1) and a data-collection practice with an
