@@ -1927,7 +1927,7 @@ body:not(.has-form) #focusBtn{display:none}
 
 <div class="pal-back" id="palBack"></div>
 <div class="pal" id="pal" role="dialog" aria-modal="true" aria-label="Go to">
-  <input id="palIn" role="combobox" aria-expanded="true" aria-controls="palRes" aria-autocomplete="list" placeholder="Go to a form, or type a command&hellip;" autocomplete="off" spellcheck="false">
+  <input id="palIn" role="combobox" aria-expanded="true" aria-controls="palRes" aria-autocomplete="list" placeholder="Find a form, a student, a video, a lesson&hellip;" autocomplete="off" spellcheck="false">
   <div class="res" id="palRes" role="listbox" aria-label="Results"></div>
   <div class="foot"><kbd>&uarr;</kbd><kbd>&darr;</kbd> move <kbd>&crarr;</kbd> open <kbd>esc</kbd> close
     &nbsp;&middot;&nbsp; <kbd>&#8984;K</kbd> opens this from anywhere</div>
@@ -3081,7 +3081,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v26.09';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v26.10';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -7970,6 +7970,29 @@ setInterval(()=>{try{paintBadge();}catch(e){}},15000);
   const st=(CL5.list||[]).filter(x=>(String(x.client||'')+' '+String(x.sid||'')).toLowerCase().includes(s)).slice(0,6).map(x=>({id:'',n:'Open '+clName(x)+'’s case',s:'student on this '+HERE+'',go:()=>caseloadGo(x.key,''),hay:''}));
   return st.concat(r).slice(0,40);};}
 {const po5=palOpen;palOpen=function(){const r=po5.apply(this,arguments);clList().then(L=>{CL5.list=L||[];if($('#pal').classList.contains('on'))palDraw();}).catch(()=>{});return r;};}
+/* v26.10 one search box (the BCBA's list of 11/12, idea 8): the videos, the units of the Learning page and its reading list answer
+   in the same box as the forms, the commands and the students. Their three small lists (nbh-videos.js, nbh-learn.js,
+   nbh-learn-readings.js: no student in any of them) are loaded the first time the box opens. A result opens in the viewer the
+   videos use. The forms, commands and students keep their places at the top; these come after them. */
+(function(){let asked=false;
+  const LISTS=[['NBH_VIDEOS','nbh-videos.js'],['NBH_LEARN','nbh-learn.js'],['NBH_LEARN_READINGS','nbh-learn-readings.js']];
+  const load=()=>{if(asked)return;asked=true;LISTS.forEach(([g,src])=>{if(window[g])return;const el=document.createElement('script');el.src=src;el.onload=()=>{made=null;try{if($('#pal').classList.contains('on'))palDraw();}catch(e){}};document.head.appendChild(el);});};
+  const mmss=d=>{d=Math.round(d||0);return Math.floor(d/60)+':'+(d%60<10?'0':'')+d%60;};
+  const show=k=>{window.__wsVideos.open(k);};
+  let made=null;
+  const rows=()=>{if(made)return made;const out=[],V=window.NBH_VIDEOS,L=window.NBH_LEARN,R=window.NBH_LEARN_READINGS;
+    if(V&&V.list){const F={};(V.families||[]).forEach(f=>{F[f[0]]=(f[1]||'')+' '+(f[2]||'');});
+      V.list.forEach(v=>out.push({id:'',n:'Video: '+v.title,s:'video'+(v.dur?' · '+mmss(v.dur):''),go:()=>show(v.key),hay:'',fields:[[palWords(v.title),110,70],[palWords((F[v.family]||'')+' '+(v.after||'')+' video'),60,40]]}));}
+    if(L&&L.rbt)L.rbt.sections.forEach(sc=>sc.units.forEach(u=>out.push({id:'',n:'Lesson: '+u.t,s:'Learning · RBT unit '+String(u.id).toUpperCase(),go:()=>show('page:learn#rbt/'+u.id),hay:'',fields:[[palWords(u.t),105,65],[palWords(sc.name+' lesson unit learning '+(u.codes||[]).join(' ')),40,25]]})));
+    if(R&&R.list)R.list.forEach(x=>{const m=/^(.*?)\s\((\d{4})[a-z]?\)\.\s+(.+?)\.\s+Behavior Modification/.exec(x.apa||''),title=m?m[3]:String(x.apa||'').slice(0,110),who=m?m[1].split(',')[0]+(/,.*,|&/.test(m[1])?' et al.':'')+' ('+m[2]+')':'',dom=((x.t||[])[0]||'').split('.')[0];
+      out.push({id:'',n:'Reading: '+title,s:'reading list'+(who?' · '+who:''),go:()=>show('page:learn#bcba'+(/^[A-I]$/.test(dom)?'/'+dom:'')),hay:'',fields:[[palWords(title),100,60],[palWords((m?m[1]:'')+' '+(x.note||'')+' reading article'),30,20]]});});
+    if(V&&L&&R)made=out;return out;};
+  const po=palOpen;palOpen=function(){const r=po.apply(this,arguments);try{load();}catch(e){}return r;};
+  const pl=palList;palList=function(q){const r=pl.apply(this,arguments),toks=palWords(String(q||'').trim());if(!toks.length)return r;
+    const add=[];rows().forEach((x,i)=>{const sc=palScore(toks,x);if(sc){add.push(Object.assign({},x,{score:sc.score,kw:[],toks,i}));}});
+    if(!add.length)return r;add.sort((a,b)=>b.score-a.score||a.i-b.i);
+    const base=r.filter(x=>!x.near);return base.slice(0,26).concat(add.slice(0,40-Math.min(26,base.length)));};
+})();
 setTimeout(()=>{CMDS.push({k:'iep meeting packet present levels plaafp goals copy print',n:'IEP meeting packet: present levels, goals, the plan, progress',s:'command',go:()=>iepOpen()},
   {k:'what changed since last save compare differences',n:'What changed since the last save',s:'command',go:()=>changesOpen()},
   {k:'calendar ics deadlines caseload reviews iep reevaluation',n:'Caseload deadlines to the Calendar (.ics)',s:'command',go:()=>clCalendar()},
@@ -8327,7 +8350,7 @@ function palDraw(){
     `<div class="r" role="option" data-i="${i}" aria-selected="${i===palAt}">
        <span class="rid">${esc(r.id)}</span><span class="rnm">${palMark(r.n,r.toks)}${r.kw&&r.kw.length?' <span class="rkw">· '+r.kw.map(k=>'<b>'+esc(k)+'</b>').join(', ')+'</span>':''}</span>
        <span class="rsub">${esc(r.s)}</span></div>`).join('')
-    :'<div class="none">No form or command found for “'+esc(q.trim())+'”. Try a word from its name, such as graph, consent or crisis.</div>');
+    :'<div class="none">Nothing found for “'+esc(q.trim())+'”. Try a word from a form’s name, such as graph, consent or crisis, or from a video or a lesson.</div>');
   const sel=$('#palRes').querySelector('[aria-selected=true]');
   if(sel)sel.scrollIntoView({block:'nearest'});
 }
@@ -12930,7 +12953,7 @@ function open(key,from){if(typeof EMBED!=='undefined'&&EMBED){try{wsUI.toast('Th
   /* v25.78 the same frame shows the explainers and the counting practice (explain.html, practice.html: drawn pages, linked
      from the library); 'page:explain' and 'page:practice' open them, and a video asked for while one of them is showing
      brings the library back */
-  const pg=/^page:(explain|practice|learn|check)(#[a-z0-9\/=_-]{1,40})?$/.exec(key||''),url=pg?pg[1]+'.html'+(pg[2]||''):'videos.html'+hash;   /* v26.00 and the Learning page (learn.html); v26.06 and the Device check (check.html) */
+  const pg=/^page:(explain|practice|learn|check)(#[A-Za-z0-9\/=_-]{1,40})?$/.exec(key||''),url=pg?pg[1]+'.html'+(pg[2]||''):'videos.html'+hash;   /* v26.00 and the Learning page (learn.html); v26.06 and the Device check (check.html) */
   if(!fr){fr=document.createElement('iframe');fr.title='Video library';fr.src=url;layer.appendChild(fr);
     fr.addEventListener('load',()=>{if(isOpen())tell({nbh:'videos-focus'});},{once:true});}
   else if(key!==undefined){try{const w=fr.contentWindow,here=String(w.location.pathname||'').split('/').pop();
@@ -13066,13 +13089,13 @@ window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr,is
 })();
 </script>
 <script type="application/json" id="ws-whatsnew">
-{"v": "v26.09",
+{"v": "v26.10",
 "title": "What's new in this version",
 "notes": "SETUP.md",
 "items":[
-"Videos: captions in Spanish for all 46 procedure videos. On a video's page, set \"Captions in\" to Espa\u00f1ol; CC then shows what is said in Spanish. The sound stays English.",
-"The choice is remembered on the device, so a family's iPad can stay on Spanish.",
-"The Spanish is a translation written for the workstation and has not yet been reviewed by a Spanish-speaking behavior analyst. Read it, or have it read, before it is relied on with families."]}
+"The search box on the start screen now also finds the 46 videos, the 46 lessons of Learning and the 53 articles of its reading list. Type a word such as token, chaining or single-case.",
+"Forms, commands and students still come first. A video opens on its own page, a lesson on its unit, an article on its part of the BCBA study track.",
+"The cards of Form TD-1's protocol bank are still searched in Form TD-1, not here."]}
 </script>
 <script id="ws-v2570">
 /* v25.70 (the BCBA, 11/9; S/research/NEXT.md and NEXT2.md #2). The release step edits the list above (ws-whatsnew): its v is

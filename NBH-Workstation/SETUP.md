@@ -9905,6 +9905,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.10: the start screen's search also finds videos, lessons and readings
+(approved by the BCBA on 11/12 with the list of ten ideas: "One search box across students, forms, bank cards, videos
+and readings." What existed was checked first, as promised.)
+- **What existed.** The start screen's box ("Go to a form, or type a command") already found the 49 forms, the
+  commands and the students kept on the device. The caseload has its own box for every student's records, and Form
+  TD-1 has its own for the bank.
+- **What is new.** The same box now also answers with the 46 videos ("Video: ...", with the length), the 46 units of
+  the Learning page ("Lesson: ...", with the unit) and the 53 articles of its reading list ("Reading: ...", with the
+  authors and year). A video opens on its page in the video library, a lesson on its unit, an article on its domain
+  of the BCBA study track, each in the viewer the videos use. The box's hint reads "Find a form, a student, a video,
+  a lesson".
+- **The order.** Students, forms and commands keep their places at the top (up to 26 rows); the new kinds follow, the
+  best match first. An empty box lists forms, as before. A misspelt word still gets "Did you mean".
+- **How.** The three small lists (`nbh-videos.js`, `nbh-learn.js`, `nbh-learn-readings.js`; none holds anything about
+  a student) are loaded the first time the box is opened, not with the start screen. The viewer's address rule now
+  takes a capital letter, for the BCBA domains (A to I).
+- **Not in this box: the 3,290 cards of the protocol bank.** The bank is a 12.8 MB file; loading it into the start
+  screen for every search would slow the screen every person opens first. Form TD-1's own search covers the cards.
+  A row that hands the typed words to Form TD-1 would need a small change in that form; it was not made here.
+- **The other nine ideas, checked so far.**
+  - *iPad shortcuts on the app icon (idea 7):* not possible. An iPad does not show a web app's shortcuts when its
+    icon is pressed and held; only apps from the App Store get them. The same list would appear on an Android
+    tablet or a Windows computer, which the district does not use for this.
+  - *Prompts from the data (the earlier list's item 4):* already there. The caseload's "Decision" items come from
+    Form PR-1's own rules (ten school days, 20% counted as progress, unless the form sets others) and Form TI-1's
+    criterion, and each names the rule.
+  - The rest (meeting prep, deadlines written to the calendar, service time from events, a screen-share view,
+    paper in and data out, a code on printed plans, a follow-ups list, questionnaire reminders) are not started.
+- **Test.** `qa/v2610-search-test.js` (new, in the release list): the lists are loaded only when the box opens; a
+  word finds each kind, named for what it is, after the forms; every video, lesson and article is found by the
+  first words of its title; each kind opens in its place; the old answers are unchanged.
+- **The test run.** On the built folder: the new test in both editions, the start screen's tests that use the box,
+  the size budgets and the build test. Not seen on an iPad.
 ### v26.09: Spanish captions for every procedure video
 (approved by the BCBA on 11/12 in the list of next steps: "Families. Spanish captions for every video are free. Spanish
 narration would be paid." Only the captions are done; no narration was made and nothing was spent.)
