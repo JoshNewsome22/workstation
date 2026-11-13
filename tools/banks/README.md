@@ -7,3 +7,9 @@
   a functional assessment and less restrictive procedures, with the review and consent the district requires; Tier B is
   never used in schools and is listed so a form can show it as prohibited. Kept for the planned punishment and
   punishment-assessment form. Nothing here is shipped to a school; it is the BCBA's record.
+- `mark-proposals.md` and `.json` (after v26.06): a proposal, not a record of anything done. 254 steps of Form TD-1's
+  bank that describe extinction, escape extinction, guidance through a demand, or blocking or a hold without carrying
+  the "EXTINCTION:" or "RESTRICTIVE:" mark the reader rules ask for (rules 3, 3a and 4), each with its card, its
+  source and the proposed mark, and 26 of them as questions. It waits for the BCBA's approval; the bank is unchanged
+  until then. When the approved marks are applied, this entry and the page are updated to say which and in what
+  version.
