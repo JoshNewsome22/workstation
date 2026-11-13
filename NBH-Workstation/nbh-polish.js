@@ -522,7 +522,18 @@
       '.sheet table.rank tr,.sheet table.grid tr{break-inside:avoid;page-break-inside:avoid}' +
       '.sheet table.rank thead,.sheet table.grid thead{display:table-header-group}' +
       'p,li,.method,.cite{orphans:3;widows:3}' +
-      '.sig,.sigcite,.signatures,.sigrow,.sign{break-inside:avoid;page-break-inside:avoid}}';
+      '.sig,.sigcite,.signatures,.sigrow,.sign{break-inside:avoid;page-break-inside:avoid}' +
+      /* v26.15 (the print review of 11/13) what a screen draws and paper should not carry: the corner grip of a text box;
+         a box's grey example words; the browser's own "mm/dd/yyyy" in a date left empty (marked when printing starts) */
+      'textarea{resize:none!important}' +
+      'input.nbh-pr-nodate{color:transparent!important}' +
+      /* a heading keeps the sentence under it */
+      ':is(h2,h3,h4,.nbh-band,.bar,.sumhead)+:is(p,.method,.hint,.note,.sub,small){break-after:avoid;page-break-after:avoid}' +
+      '[data-nbh-split]{break-inside:auto!important;page-break-inside:auto!important}' +
+      /* left off the paper whatever the form's own rules say (the two :not()s outweigh a rule written for an id) */
+      '[data-nbh-bare]:not(#nbh-a):not(#nbh-b){display:none!important}}' +
+      '@media print{::placeholder{color:transparent!important;opacity:0!important}}' +
+      '@media print{input.nbh-pr-nodate::-webkit-datetime-edit{color:transparent!important}}';
     document.head.appendChild(st);
   }
   /* the two choices are made once, in the workstation's Packet options (a form's own toolbar stays as it is, so no toolbar
@@ -553,6 +564,21 @@
   /* the last blocks of a sheet stay together, up to about a third of a page, measured on a paper-wide layout; a long block
      above them stays breakable, and when it is a table its last rows join the chain */
   var PR_NEED = 340, PR_LONG = 560, PR_MAX = 560;   /* px on paper (a Letter page holds about 980): enough; too long to add whole; the most a chain may hold, so the page it leaves is never emptier than it fills */
+  /* a sign-off: a short block that names a signature, or that is little more than names and dates to be filled in */
+  function prSign(el) { var h = el.getBoundingClientRect().height; if (!(h > 2 && h <= 210)) return false;
+    if (/\b(sig|sign|signature|signatures|sigrow|sigblock|signoff)\b/i.test(el.className || '')) return true;
+    var t = (el.textContent || '').replace(/\s+/g, ' ').trim(); if (t.length > 260) return false;
+    return /signature|sign-?off\b|\bsigned\b/i.test(t) || (t.match(/date\b/gi) || []).length >= 2; }   /* a table's cells run together in its text ("BCBADate") */
+  /* v26.15 the sign-off goes into one block with its own heading and the short blocks just above it (about 3.5 inches in all
+     at the most: a block a page cannot cut, in any browser); a long table above it is tied on by its last three rows. */
+  function prTie(el) { if (el.hasAttribute('data-nbh-keep')) return; el.setAttribute('data-nbh-keep', '2'); prUndo.push(function () { el.removeAttribute('data-nbh-keep'); }); }
+  function prSignKeep(real, wraps) { var chain = [real[0]], i = 1, tot = real[0].getBoundingClientRect().height, acc = 0;
+    while (i < real.length && chain.length < 3 && (/^(H2|H3|H4|H5|LEGEND)$/.test(real[i].tagName) || /\b(bar|nbh-band|sumhead)\b/.test(real[i].className || '') || (real[i].tagName === 'P' && real[i].getBoundingClientRect().height <= 44))) { tot += real[i].getBoundingClientRect().height; chain.push(real[i]); i++; }
+    for (; i < real.length && acc < 120; i++) { var el = real[i], h = el.getBoundingClientRect().height, t = el.tagName === 'TABLE' ? el : (el.children.length === 1 && el.firstElementChild.tagName === 'TABLE' ? el.firstElementChild : null);
+      if (h <= 260 && tot + h <= 340) { chain.push(el); tot += h; acc += h; continue; }   /* a short block joins the sign-off's own block */
+      if (t) { var rows = t.rows; for (var r = Math.max(1, rows.length - 3); r < rows.length; r++) prTie(rows[r]); }   /* a long table: its last rows */
+      break; }
+    chain.reverse(); wraps.push(chain); }
   function prTails() {
     var TAIL = /\b(cite|method|foot|note|hint|sig|sigcite|src|cap)\b/, HIDE = /\bnoprint\b|\bnbh-pr-blank\b/;
     var sheets = document.querySelectorAll('.sheet,section[class*="only-"]'), html = document.documentElement, wraps = [];
@@ -564,12 +590,21 @@
         if (sh.classList.contains('nbh-pr-blank') || sh.closest('.nbh-pr-blank')) continue;
         if ((sh.id === 'guide' || sh.id === 'refs' || sh.classList.contains('only-guide')) && !prGuideOn()) continue;
         var kids = []; for (var c = sh.lastElementChild; c; c = c.previousElementSibling) { if (c.hidden || HIDE.test(c.className || '') || getComputedStyle(c).display === 'none') continue; kids.push(c); }
-        if (!kids.length) continue; var last = kids[0];
-        if (!(TAIL.test(last.className || '') || last.tagName === 'P' || last.tagName === 'SMALL')) continue;
+        if (!kids.length) continue; var last = kids[0], need = PR_NEED, most = PR_MAX;
+        /* v26.15 (the print review of 11/13) a sign-off that closes a sheet (a row of signature lines, a short table of names
+           and dates) is not left to start a page alone: it takes its heading and the rows or lines above it along (prSignKeep).
+           It is looked for past empty boxes at the end, and inside a sheet whose content sits in one tall wrapper. */
+        var rk = kids, sign = null;
+        for (var deep = 0; deep < 4; deep++) { var real = rk.filter(function (e) { return e.getBoundingClientRect().height > 2; });
+          if (deep < 3 && real.length === 1 && real[0].children.length > 1 && !/^(TABLE|UL|OL|DL|SVG|FIELDSET|SELECT|P)$/i.test(real[0].tagName) && real[0].getBoundingClientRect().height > PR_MAX && /^(block|flow-root)$/.test(getComputedStyle(real[0]).display)) {
+            rk = []; for (var c2 = real[0].lastElementChild; c2; c2 = c2.previousElementSibling) { if (c2.hidden || HIDE.test(c2.className || '') || getComputedStyle(c2).display === 'none') continue; rk.push(c2); } }
+          else { if (real.length && prSign(real[0])) sign = real; break; } }
+        if (sign) { prSignKeep(sign, wraps); continue; }
+        else if (!(TAIL.test(last.className || '') || last.tagName === 'P' || last.tagName === 'SMALL')) continue;
         var acc = 0, chain = [];
         for (var k = 0; k < kids.length; k++) { var el = kids[k], h = el.getBoundingClientRect().height;
-          if (chain.length && (h > PR_LONG || acc + h > PR_MAX)) break;   /* a long block above the tail stays breakable */
-          chain.push(el); acc += h; if (acc >= PR_NEED) break; }
+          if (chain.length && (h > PR_LONG || acc + h > most)) break;   /* a long block above the tail stays breakable */
+          chain.push(el); acc += h; if (acc >= need) break; }
         if (!chain.length) continue;
         chain.reverse(); wraps.push(chain); }
     } finally { html.classList.remove('nbh-pr-measure'); }
@@ -580,6 +615,116 @@
       for (var i = 0; i < list.length; i++) box.appendChild(list[i]);
       prUndo.push(function () { if (!box.parentNode) return; while (box.firstChild) box.parentNode.insertBefore(box.firstChild, box); box.remove(); });
     })(wraps[w]);
+  }
+  /* v26.15 (the print review of 11/13) read with the paper's own rules on (every @media print rule made to hold for a moment,
+     every screen-only rule set aside, as the packet's window does): a sheet that would print nothing but its heading or the
+     Simulated tag is left off; a block marked not to break that is taller than most of a page may break, since held whole it
+     leaves the page before it empty under a lone heading; a date left empty prints empty. All of it is undone after printing. */
+  function prRules(pg) {
+    var held = [], PAGEW = pg.w;
+    function onPaper(t) { t = (t || '').trim().toLowerCase(); if (!t || t === 'all') return true;
+      return t.split(',').some(function (q) { q = q.trim(); var neg = /^not\s/.test(q); q = q.replace(/^(not|only)\s+/, '');
+        var ok = q.split(/\s+and\s+/).every(function (part) { part = part.trim();
+          if (!part || part === 'print' || part === 'all') return true;
+          if (/^(screen|speech|tv|projection|handheld)$/.test(part)) return false;
+          var m = /^\(\s*(min|max)-width\s*:\s*([\d.]+)\s*([a-z]*)\s*\)$/.exec(part);
+          if (m) { var u = { px: 1, 'in': 96, cm: 96 / 2.54, mm: 96 / 25.4, pt: 96 / 72, em: 16, rem: 16 }[m[3] || 'px'] || 1; var v = parseFloat(m[2]) * u; return m[1] === 'max' ? PAGEW <= v : PAGEW >= v; }
+          try { return window.matchMedia(part).matches; } catch (e) { return true; } });
+        return neg ? !ok : ok; }); }
+    (function walk(list) { for (var i = 0; i < list.length; i++) { var r = list[i]; if (r.type === 4 && r.media) held.push(r); if (r.cssRules && r.type !== 6) { try { walk(r.cssRules); } catch (e) {} } } })(
+      [].concat.apply([], Array.prototype.map.call(document.styleSheets, function (sh) { try { return Array.prototype.slice.call(sh.cssRules); } catch (e) { return []; } })));
+    var texts = held.map(function (r) { return r.media.mediaText; });
+    held.forEach(function (r, i) { try { r.media.mediaText = onPaper(texts[i]) ? 'all' : 'not all'; } catch (e) {} });
+    var de = document.documentElement, b = document.body, keep = [de.style.cssText, b.style.cssText];
+    de.style.setProperty('width', PAGEW + 'px', 'important'); de.style.setProperty('min-width', '0', 'important'); de.style.setProperty('max-width', PAGEW + 'px', 'important');
+    b.style.setProperty('width', PAGEW + 'px', 'important'); b.style.setProperty('min-width', '0', 'important'); b.style.setProperty('max-width', PAGEW + 'px', 'important'); b.style.setProperty('margin', '0', 'important');
+    return function () { de.style.cssText = keep[0]; b.style.cssText = keep[1]; held.forEach(function (r, i) { try { r.media.mediaText = texts[i]; } catch (e) {} }); };
+  }
+  var PR_HEAD = 'h1,h2,h3,h4,h5,h6,.nbh-band,.bar,.sumhead,.nbh-print-head,.nbh-sim-tag,.noprint,.no-print,.nbh-pr-blank,[data-nbh-bare]';
+  function prShows(el) { return el.getClientRects().length > 0; }
+  function prBare(sh) {   /* nothing but headings and the tag would print */
+    if (!prShows(sh)) return false;
+    var f = sh.querySelectorAll('input,select,textarea,img,svg,canvas,table,video,object,iframe');
+    for (var i = 0; i < f.length; i++) { if (f[i].closest(PR_HEAD)) continue; if (prShows(f[i])) return false; }
+    var tw = document.createTreeWalker(sh, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = tw.nextNode())) { if (!/\S/.test(n.nodeValue)) continue; var p = n.parentElement; if (!p || p.closest(PR_HEAD) || /^(SCRIPT|STYLE|TEMPLATE|OPTION)$/.test(p.tagName)) continue; if (prShows(p)) return false; }
+    return true;
+  }
+  /* the height a page gives the form: Letter, less the margins of the form's own @page rule (landscape when it says so) */
+  function prPage() { var top = 0.45, bot = 0.5, lef = 0.45, rig = 0.45, land = false, IN = { 'in': 1, mm: 1 / 25.4, cm: 1 / 2.54, pt: 1 / 72, px: 1 / 96 };
+    function len(v) { var m = /^([\d.]+)(in|mm|cm|pt|px)$/.exec(String(v || '').trim()); return m ? parseFloat(m[1]) * IN[m[2]] : null; }
+    (function walk(list) { for (var i = 0; i < list.length; i++) { var r = list[i];
+      if (r.type === 6 && !r.selectorText) { var st = r.style, mt = len(st.marginTop), mb = len(st.marginBottom), ml = len(st.marginLeft), mr = len(st.marginRight); if (mt !== null) top = mt; if (mb !== null) bot = mb; if (ml !== null) lef = ml; if (mr !== null) rig = mr; if (/landscape/.test(st.size || st.getPropertyValue('size') || '')) land = true; else if (/portrait/.test(st.size || st.getPropertyValue('size') || '')) land = false; }
+      else if (r.type === 4 && r.cssRules) { var t = r.media.mediaText.toLowerCase(); if (t === 'all' || /\bprint\b/.test(t)) { try { walk(r.cssRules); } catch (e) {} } } } })(
+      [].concat.apply([], Array.prototype.map.call(document.styleSheets, function (sh) { try { return Array.prototype.slice.call(sh.cssRules); } catch (e) { return []; } })));
+    return { h: ((land ? 8.5 : 11) - top - bot) * 96, w: ((land ? 11 : 8.5) - lef - rig) * 96, land: land }; }
+  /* how many pages a run takes, and how much its last page holds: the run's blocks that cannot split, in order, each pushed
+     to the next page when it does not fit what is left of this one */
+  function prSim(atoms, y0, y1, PAGE, z) { var start = 0, pages = 1; atoms = atoms.slice().sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; });
+    for (var i = 0; i < atoms.length; i++) { var t = (atoms[i][0] - y0) * z, b = (atoms[i][1] - y0) * z;
+      while (t - start >= PAGE) { start += PAGE; pages++; }
+      if (b - start > PAGE) { if (t - start > 0.5 && b - t <= PAGE) { start = t; pages++; } else while (b - start > PAGE) { start += PAGE; pages++; } } }
+    var end = (y1 - y0) * z; while (end - start > PAGE) { start += PAGE; pages++; }
+    return { pages: pages, tail: end - start }; }
+  function prPaper() {
+    var d = document.querySelectorAll('input[type="date"],input[type="time"],input[type="month"],input[type="week"],input[type="datetime-local"]');
+    for (var i = 0; i < d.length; i++) if (!d[i].value && !d[i].classList.contains('nbh-pr-nodate')) (function (e) { e.classList.add('nbh-pr-nodate'); prUndo.push(function () { e.classList.remove('nbh-pr-nodate'); }); })(d[i]);
+    /* a form's own print modes (one sheet, a packet of its own, a paper data sheet) arrange their own paper */
+    if (/\bprint-|-only\b|-printing\b|\bsp-printall\b|\bprint\b/.test(document.body.className + ' ' + document.documentElement.className)) return;
+    var pg = prPage(), back = prRules(pg);
+    try {
+      var sheets = document.querySelectorAll('.sheet,section[class*="only-"]'), bare = [], tall = [], fit = [], PAGE = pg.h;
+      for (var s = 0; s < sheets.length; s++) { if (sheets[s].querySelector('.sheet')) continue; if (prBare(sheets[s])) bare.push(sheets[s]); }
+      var panes = document.querySelectorAll('.sheet .pane,.sheet>section');
+      for (var pn = 0; pn < panes.length; pn++) { if (bare.some(function (b) { return b.contains(panes[pn]); })) continue; if (prBare(panes[pn])) bare.push(panes[pn]); }
+      /* a part inside a sheet with nothing but its heading (its body is a screen tool, or is empty and left off) */
+      var hs = document.querySelectorAll('.sheet h2,.sheet h3,.sheet .nbh-band,.sheet .bar'), seen = [];
+      for (var q = 0; q < hs.length; q++) { var par = hs[q].parentElement; if (!par || seen.indexOf(par) >= 0 || !prShows(hs[q])) continue; seen.push(par);
+        if (par.classList.contains('sheet') || /^(BODY|MAIN|FORM)$/.test(par.tagName) || par.closest('.nbh-pr-blank,.noprint,[data-nbh-bare]')) continue;
+        if (bare.some(function (b) { return b.contains(par); })) continue; if (prBare(par)) bare.push(par); }
+      /* v26.15 a run of the form between two forced page starts that fills one page and a few lines of a second is
+         brought back onto the one (to 92% at the least). The page starts are read from
+         the rules (a sheet, a pane, a block a form starts on a page of its own); the run is scaled block by block. */
+      var els = document.body.getElementsByTagName('*'), cuts = [], top0 = null, bot0 = null;
+      var atoms = [];   /* what cannot split across pages: a table row, a block marked to stay whole, a picture, a box to write in */
+      for (var f = 0; f < els.length; f++) { var u = els[f]; if (u.ownerSVGElement || !u.offsetHeight || /^(TD|TH|TBODY|THEAD|OPTION|BR)$/.test(u.tagName)) continue;
+        var cb = getComputedStyle(u), r0 = null;
+        if (/^(TR|IMG|svg|CANVAS|TEXTAREA|INPUT|SELECT)$/.test(u.tagName) || cb.breakInside === 'avoid' || cb.pageBreakInside === 'avoid' || (/^inline-(block|flex|grid)$/.test(cb.display) && u.offsetHeight > 30)) { r0 = u.getBoundingClientRect(); if (r0.height <= PAGE) atoms.push([r0.top, r0.bottom]); }
+        if (u.tagName === 'TR') continue;
+        if (cb.breakBefore === 'page' || cb.pageBreakBefore === 'always') { r0 = u.getBoundingClientRect(); cuts.push(r0.top); }
+        if (cb.breakAfter === 'page' || cb.pageBreakAfter === 'always') { r0 = r0 || u.getBoundingClientRect(); cuts.push(r0.bottom); } }
+      for (var g = 0; g < sheets.length; g++) { if (!prShows(sheets[g]) || bare.indexOf(sheets[g]) >= 0) continue; var rs = sheets[g].getBoundingClientRect(); if (top0 === null || rs.top < top0) top0 = rs.top; if (bot0 === null || rs.bottom > bot0) bot0 = rs.bottom; }
+      if (top0 !== null && bot0 - top0 > 40) {
+        var ph = document.querySelector('.nbh-print-head'); if (ph && prShows(ph)) top0 = Math.min(top0, ph.getBoundingClientRect().top);
+        cuts = cuts.filter(function (y) { return y > top0 + 4 && y < bot0 - 4; }).sort(function (a, b) { return a - b; });
+        var bounds = [top0].concat(cuts, [bot0]);
+        for (var k2 = 0; k2 + 1 < bounds.length; k2++) { var y0 = bounds[k2], y1 = bounds[k2 + 1], H = y1 - y0; if (H < 4) continue;
+          var mine = atoms.filter(function (a) { return a[0] >= y0 - 1 && a[1] <= y1 + 1; }), now = prSim(mine, y0, y1, PAGE, 1), z = 0;
+          /* only a run of one page and a little: over more pages the estimate drifts from what the browser does (Form VI-1, 11/13) */
+          if (!(now.pages === 2 && now.tail <= PAGE * 0.085)) continue;
+          for (var zz = 0.985; zz >= 0.92; zz -= 0.013) { if (prSim(mine, y0, y1, PAGE - 6, zz).pages < now.pages) { z = zz - 0.006; break; } }
+          if (!z) continue;
+          /* the blocks that lie wholly in the run: the largest ones, found from the top down */
+          var take = [], okRun = true;
+          (function dig(el) { var kids = el.children; for (var i = 0; i < kids.length && okRun; i++) { var c = kids[i]; if (c.ownerSVGElement || !c.offsetHeight) continue; var rr = c.getBoundingClientRect();
+              if (rr.bottom <= y0 + 1 || rr.top >= y1 - 1) continue;
+              if (rr.top >= y0 - 1 && rr.bottom <= y1 + 1) { if (/^(TR|TD|TH|TBODY|THEAD|LI|SPAN|LABEL)$/.test(c.tagName) || c.style.zoom) okRun = false; else take.push(c); }
+              else if (/^(TABLE|UL|OL|svg|SVG)$/.test(c.tagName)) okRun = false; else dig(c); } })(document.body);
+          if (okRun && take.length && take.length <= 400) take.forEach(function (c) { fit.push([c, z]); }); } }
+      /* a block marked to stay whole that is taller than most of a page, with only a short lead above it on its page (its
+         heading, a sentence: up to a fifth of a page from where a page starts), may break: held whole it goes to the next
+         page, leaves the lead alone and is cut there anyway. Deeper in a run, where its place on the page is not known, it
+         is left as it was. */
+      var starts = [top0 === null ? 0 : top0].concat(cuts || []);
+      var all = document.querySelectorAll('.sheet *');
+      for (var k = 0; k < all.length; k++) { var el = all[k]; if (el.ownerSVGElement || el.tagName === 'TR' || el.tagName === 'svg') continue; var h = el.offsetHeight; if (!(h > PAGE * 0.8) || h > PAGE * 3) continue;
+        var cs = getComputedStyle(el); if (!((cs.breakInside === 'avoid' || cs.pageBreakInside === 'avoid') && !/inline/.test(cs.display))) continue;
+        var et = el.getBoundingClientRect().top, st = null; for (var q3 = 0; q3 < starts.length; q3++) if (starts[q3] <= et + 1 && (st === null || starts[q3] > st)) st = starts[q3];
+        if (st !== null && et - st <= PAGE * 0.2 && et - st + h > PAGE) tall.push(el); }
+    } finally { back(); }
+    bare.forEach(function (e) { e.setAttribute('data-nbh-bare', ''); prUndo.push(function () { e.removeAttribute('data-nbh-bare'); }); });
+    fit.forEach(function (x) { x[0].style.zoom = x[1].toFixed(3); x[0].setAttribute('data-nbh-fit', ''); prUndo.push(function () { x[0].style.zoom = ''; x[0].removeAttribute('data-nbh-fit'); }); });
+    tall.forEach(function (e) { e.setAttribute('data-nbh-split', ''); prUndo.push(function () { e.removeAttribute('data-nbh-split'); }); });
   }
   function prBefore() {
     try {
@@ -595,6 +740,7 @@
         for (var i = 0; i < els.length; i++) { var k = els[i].getAttribute('data-nbh-blank'); (groups[k] = groups[k] || []).push(els[i]); }
         for (var key in groups) if (!prHasData(groups[key])) (function (list) { list.forEach(function (e) { e.classList.add('nbh-pr-blank'); }); prUndo.push(function () { list.forEach(function (e) { e.classList.remove('nbh-pr-blank'); }); }); })(groups[key]);
       }
+      prPaper();
       prTails();
     } catch (e) {}
   }
@@ -602,7 +748,7 @@
   /* registered once the form's own scripts have run, so the policy sees what they render for paper */
   function prArm() { window.addEventListener('beforeprint', prBefore); window.addEventListener('afterprint', prAfter); }
   if (document.readyState === 'complete') prArm(); else window.addEventListener('load', prArm);
-  window.nbhPrint = { before: prBefore, after: prAfter, guideOn: prGuideOn, blankOn: prBlankOn, inject: prInject, set: prSetChoice };
+  window.nbhPrint = { before: prBefore, after: prAfter, paper: prPaper, guideOn: prGuideOn, blankOn: prBlankOn, inject: prInject, set: prSetChoice };
 
   /* v24.39 (review R-121, R-122, E-02) the simulation, seeded and marked. nbhSim.rnd() is a seeded random source (mulberry32):
      seed 1 unless "New example" asked for another, so a form's worked example is the same at every load and a test can read

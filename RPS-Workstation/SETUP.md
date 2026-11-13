@@ -9905,6 +9905,82 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.15: the print review, part one: no stray pages, and what paper should not carry
+(asked for by the BCBA on 11/13: "do a in-depth research of how the pdf printing packet of the entire workstation should
+look in comparison to the top pdf form design print for clinical printing ... look at the entire printing and make
+enhancements/changes to make it the best quality printing pdf on the market." The scatter plot sheet, the ABC data
+sheet and Form IC-1's print, worked on earlier, are the standard here and are not changed.)
+- **The standard the prints were read against.** Drawn from published rules for paper clinical records and paper
+  forms (the Western Australia Country Health Service's Health Record Form Design Guideline, which follows AS 2828.1;
+  CoxHealth's and UTMB's medical-record layout rules; Queen Mary University of London's case-report-form guide; the
+  Australian Bureau of Statistics' Forms Design Standards Manual; the New Zealand government's guidance on documents
+  for print; 42 CFR 482.24 on record entries). Their pages could not be opened from here (the session's network does
+  not reach those sites); what follows is from the search results' summaries of them, and no figure is taken from AS
+  2828.1 itself, which is sold, not published.
+  1. Who and what on every page: the student, the form's name and number, "Page n of N", so a loose page can be put
+     back (WACHS, CoxHealth, UTMB, QMUL).
+  2. Entries dated and signed, with room to do it (42 CFR 482.24: "legible, complete, dated, timed, and
+     authenticated").
+  3. Type a person can read after a photocopy: 10 point for instructions, 14 for headings, lines no longer than about
+     115 mm (ABS); 12 point for a general reader (NZ). Sans serif, no light weights.
+  4. Places to write that are white, ruled by a solid half-point line; 8 mm for a line of handwriting; tick boxes 4 mm
+     square and all one size (ABS).
+  5. A page is never left with a line or two on it, a heading is never parted from what it heads, and a signature is
+     never parted from what is signed (the plain rules of page make-up; no source above states them as a number).
+  6. Nothing of the screen on the paper: no buttons, no grey example text, no browser furniture.
+- **Where the workstation already stood (read on 479 printed pages: every form with its simulation, and the 749-page
+  packet of 47 forms).** Point 1: every form already prints the school, the student and ID, the form number, the
+  revision and print dates, a confidentiality line and "Page n of N" on every page; the packet prints a cover, a
+  contents list and a running head and foot. Point 2: sign-off blocks are there. These were not changed.
+- **What was wrong, and is changed here.**
+  - *A sign-off alone on a page* (Forms RM-1 and AD-1 on their own; Forms IC-1 and TB-1 in the packet). A sign-off that
+    closes a sheet now goes to paper with what is above it: its heading and the short blocks above it, up to about
+    3.5 inches in all, are one block a page break cannot cut; where a long table stands above it, the table's last
+    three rows come along instead. The rule that did this for closing notes (v24.31) now also knows a sign-off by its
+    words (signature, sign-off, or little more than names and dates), looks past empty boxes at a sheet's end and
+    inside a sheet built as one wrapper. A first version that took a fixed quarter page along left Forms AD-1 and RA-1
+    with half-empty pages and was dropped.
+  - *A part with nothing but its heading* (Form GB-1's "Goal Sheet" with no objectives, a page of its own). Read with
+    the paper's own rules on, a sheet or part that would print only its heading or the Simulated tag is left off.
+  - *One page and a line or two* (Form SM-1's setup, 2 pages for 1; Form EB-1's one-page brief, 2 lines on a second
+    page; Form RS-1's record, one caption line on a third). The form is laid out at the paper's width with the print
+    rules on; a run between two page starts that fills one page and up to 8.5% of a second is scaled back onto the one,
+    never below 92%.
+  - *A block marked to stay whole that is taller than a page* may break when it stands under a short lead (up to a
+    fifth of a page) at the start of a page: held whole, it was pushed to the next page, leaving its heading behind,
+    and cut there anyway. Anywhere else it is left as it was: allowed to break everywhere, it left Form TB-1 a page
+    with almost nothing on it (`qa/pp131-test.js` caught that).
+  - *The screen on the paper.* Text boxes printed their corner grip (30 on Form FS-1 alone); an empty date printed
+    "mm/dd/yyyy" on 52 pages of 19 forms; a box's grey example could print. None prints now.
+  - *The packet.* The same three rules in the packet's window, and one more: a heading whose next block starts a page
+    of its own is left off. Form IA-1's scoring worksheets were each preceded by a page holding only "Simulated" and a
+    page holding only the heading: their two-column block was marked to stay whole at three pages tall.
+- **The numbers.** The 49 forms on their own: 479 pages before, 475 after; Forms DM-1, EA-1, EB-1, GB-1, RS-1 and SM-1
+  each a page fewer; Forms AD-1 and RA-1 each a page more (a sign-off now brings what it signs with it). Pages holding
+  almost nothing (not counting the token boards and visual supports, which are sheets to cut out): 20 before, 15
+  after. A packet of Forms IA-1, SM-1 and VI-1: 91 pages before, 84 after; nearly empty pages 7 before, 2 after. The
+  whole packet of 47 forms: 749 pages before, 742 after; nearly empty pages 29 before, 24 after, the cut-out sheets
+  counted in both.
+- **Not solved, and said so.**
+  - A long run (three pages or more) that ends a line or two into a new page is not brought back: an estimate of
+    where the browser breaks drifts over many pages, and a first attempt made Form VI-1 worse, so the rule stops at
+    one page and a little. Still so: Form SR-1's last page (one line), Form PD-1's (a note box), Form IM-1's page 5
+    (two lines of a legend), Form ABC-1's record, last page (one "Other" line; that form arranges its own paper).
+  - In the packet, Form VI-1's signature row still starts a page: the box above it cannot be cut.
+  - Type size was measured and not changed: most forms print their body at 9 to 10 point, labels at 7 to 8; Forms
+    IA-1, PA-1, RA-1 and TD-1 print their body at 7.5 point and Forms DM-1, TB-1 and RS-1 at 8, under the 10 point of
+    the standard above. Raising it adds pages and moves every layout: it is the BCBA's choice, form by form.
+  - On a form printed alone each sheet starts a new page, so Form DM-1's ten sheets leave pages about two-thirds full;
+    in the packet the same sheets run on. Left as it is: a sheet filed alone is the reason.
+  - The packet's contents list carries no page numbers until "Finish PDF" adds them, as before.
+- **How it was checked.** Each form printed to PDF by the browser's own print path (its beforeprint handlers
+  running), before and after, and the pages counted and looked at; the packet built from a saved simulated case.
+  Chromium only: Safari on the iPad breaks pages by its own rules, takes the scaling and the inline blocks the same
+  way, and does not print the running head (Finish PDF adds it, as before). Not printed on paper.
+- **Test.** `qa/v2615-print-test.js` (new, in the release list): no grip, no example text, empty dates empty and the
+  mark taken off after; Form RM-1's sign-off in one block with what is above it; Form GB-1 three pages without the
+  lone heading; Forms SM-1, EB-1 and RS-1 a page fewer and nothing under 92%; the screen as it was after printing;
+  Form SP-1's scatter plot sheet and Form IC-1 untouched.
 ### v26.14: Read aloud in the guide
 (asked for by the BCBA on 11/13: "Can it also be voiced so that there is an option that reads the question to you as you
 go".)

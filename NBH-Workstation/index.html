@@ -3081,7 +3081,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v26.14';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v26.15';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -4573,6 +4573,10 @@ async function masterRun(chosen,opt){opt=opt||{};
     /* a form built as a run of pages keeps those page breaks inside the packet */
     .mp-sec .nbh-page+.nbh-page{page-break-before:always;break-before:page}
     @media print{.mp-sec [data-mp-empty]{display:none!important}}
+    /* v26.15 left off whatever a form's own print rules say (the two :not()s outweigh a rule written for an id); a sign-off with what is above it */
+    @media print{.mp-sec [data-mp-empty]:not(#mp-a):not(#mp-b){display:none!important}}
+    .mp-sec .mp-keep{display:inline-block;width:100%;vertical-align:top;box-sizing:border-box;break-before:avoid;page-break-before:avoid}
+    .mp-sec [data-mp-kb]{break-before:avoid!important;page-break-before:avoid!important}
     /* The packet decides pagination, through the section break above and the one
        between pages. A form that also breaks before its own sheet fires on top of
        that and leaves an empty sheet of paper between two forms. */
@@ -4854,6 +4858,85 @@ async function masterRun(chosen,opt){opt=opt||{};
      });
      window.__nbhFitBy = fitBy; window.__nbhPages = est;
      Object.keys(tall).forEach(function(t){ scaled.push(t + ': ' + tall[t] + ' page' + (tall[t] === 1 ? '' : 's') + ' scaled to the packet’s page'); });
+     /* v26.15 (the print review of 11/13) no stray pages. Read here, while the print rules hold:
+        1. a page or part of a form that would print nothing but its heading or the Simulated tag is left off the paper
+           (Form IA-1's instrument pages with only the tag; a sheet whose body is a screen tool);
+        2. a sign-off that closes a sheet (a row of signature lines, a short table of names and dates) takes its heading and
+           the last rows or lines above it along, so it never starts a page alone. */
+     (function(){
+       var HEADS = 'h1,h2,h3,h4,h5,h6,.nbh-band,.bar,.sumhead,.nbh-sim-tag,.noprint,.no-print,.mp-band,.nbh-print-head,[data-mp-empty]';
+       function shows(el){ return el.getClientRects().length > 0; }
+       function bare(el){
+         if (!shows(el)) return false;
+         var f = el.querySelectorAll('input,select,textarea,img,svg,canvas,table,video,object,iframe');
+         for (var i = 0; i < f.length; i++) { if (f[i].closest(HEADS)) continue; if (shows(f[i])) return false; }
+         var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n;
+         while ((n = tw.nextNode())) { if (!/\\S/.test(n.nodeValue)) continue; var pe = n.parentElement; if (!pe || pe.closest(HEADS) || /^(SCRIPT|STYLE|TEMPLATE|OPTION)$/.test(pe.tagName)) continue; if (shows(pe)) return false; }
+         return true;
+       }
+       function sign(el){ var h = el.getBoundingClientRect().height; if (!(h > 2 && h <= 210)) return false;
+         if (/\\b(sig|sign|signature|signatures|sigrow|sigblock|signoff)\\b/i.test(el.className || '')) return true;
+         var t = (el.textContent || '').replace(/\\s+/g, ' ').trim(); if (t.length > 260) return false;
+         return /signature|sign-?off\\b|\\bsigned\\b/i.test(t) || (t.match(/date\\b/gi) || []).length >= 2; }
+       function kidsOf(el){ var out = []; for (var c = el.lastElementChild; c; c = c.previousElementSibling) { if (c.hidden || !shows(c)) continue; out.push(c); } return out; }
+       var left = 0, kept = 0;
+       document.querySelectorAll('.mp-sec').forEach(function(sec){
+         var parts = sec.querySelectorAll('.sheet,.nbh-page,.pane,section[class*="only-"]');
+         for (var i = 0; i < parts.length; i++) { var pt = parts[i]; if (pt.hasAttribute('data-mp-empty') || pt.closest('[data-mp-empty]') || !shows(pt)) continue; if (bare(pt)) { pt.setAttribute('data-mp-empty', ''); left++; } }
+         var hs = sec.querySelectorAll('h2,h3,.nbh-band,.bar'), seen = [];
+         for (var q = 0; q < hs.length; q++) { var par = hs[q].parentElement; if (!par || par === sec || seen.indexOf(par) >= 0 || !shows(hs[q])) continue; seen.push(par);
+           if (par.classList.contains('sheet') || par.classList.contains('nbh-page') || par.closest('[data-mp-empty]')) continue; if (bare(par)) { par.setAttribute('data-mp-empty', ''); left++; } }
+         /* a heading whose next block starts a page of its own (a sheet made to be handed out, with its own title) would
+            stand alone at the foot of a page or on one: it is left off */
+         for (var q2 = 0; q2 < hs.length; q2++) { var hd = hs[q2]; if (!shows(hd) || hd.closest('[data-mp-empty]')) continue; var nx = hd.nextElementSibling; while (nx && !shows(nx)) nx = nx.nextElementSibling; if (!nx) continue;
+           for (var d2 = 0, e2 = nx; d2 < 4 && e2; d2++) { var c2 = getComputedStyle(e2); if (c2.breakBefore === 'page' || c2.pageBreakBefore === 'always') { hd.setAttribute('data-mp-empty', ''); left++; break; }
+             var fc = e2.firstElementChild; while (fc && !shows(fc)) fc = fc.nextElementSibling; e2 = fc; } }
+         var sheets = sec.querySelectorAll('.sheet,.nbh-page,section[class*="only-"]');
+         for (var k = 0; k < sheets.length; k++) { var sh = sheets[k]; if (!shows(sh) || sh.closest('[data-mp-empty]') || sh.querySelector('.sheet,.nbh-page')) continue;
+           var rk = kidsOf(sh), tail = null;
+           for (var deep = 0; deep < 4; deep++) { var real = rk.filter(function(e){ return e.getBoundingClientRect().height > 2 && !e.hasAttribute('data-mp-empty'); });
+             if (deep < 3 && real.length === 1 && real[0].children.length > 1 && !/^(TABLE|UL|OL|DL|SVG|FIELDSET|SELECT|P)$/i.test(real[0].tagName) && real[0].getBoundingClientRect().height > 560 && /^(block|flow-root)$/.test(getComputedStyle(real[0]).display)) rk = kidsOf(real[0]);
+             else { if (real.length && sign(real[0])) tail = real; break; } }
+           if (!tail || tail[0].closest('.mp-keep,.nbh-keep')) continue;
+           /* the sign-off, its own heading and the short blocks just above it in one block (about 3.5 inches in all at the
+              most); a long table above it is tied on by its last three rows */
+           var chain = [tail[0]], c = 1, tot = tail[0].getBoundingClientRect().height, acc = 0;
+           while (c < tail.length && chain.length < 3 && (/^(H2|H3|H4|H5|LEGEND)$/.test(tail[c].tagName) || /\\b(bar|nbh-band|sumhead)\\b/.test(tail[c].className || '') || (tail[c].tagName === 'P' && tail[c].getBoundingClientRect().height <= 44))) { tot += tail[c].getBoundingClientRect().height; chain.push(tail[c]); c++; }
+           for (; c < tail.length && acc < 120; c++) { var el = tail[c], h = el.getBoundingClientRect().height, tb = el.tagName === 'TABLE' ? el : (el.children.length === 1 && el.firstElementChild.tagName === 'TABLE' ? el.firstElementChild : null);
+             if (h <= 260 && tot + h <= 340) { chain.push(el); tot += h; acc += h; continue; }
+             if (tb) { for (var rr = Math.max(1, tb.rows.length - 3); rr < tb.rows.length; rr++) tb.rows[rr].setAttribute('data-mp-kb', ''); }
+             break; }
+           chain.reverse(); var box = document.createElement('div'); box.className = 'mp-keep'; chain[0].parentNode.insertBefore(box, chain[0]);
+           for (var m = 0; m < chain.length; m++) box.appendChild(chain[m]); kept++; }
+       });
+       /* 3. a sheet that starts a page with a short lead (its heading, a sentence) over a block that cannot split and is
+          about a page tall: the block is scaled (to 80% at the least) so that it shares the lead's page. Held whole at its
+          size, it went to the next page and left the heading alone on one, and before that a page with only the tag. */
+       var joined = 0, split = 0;
+       document.querySelectorAll('.mp-sec').forEach(function(sec){
+         /* a block marked to stay whole that is taller than a page, under a short lead at the top of a sheet's page: held
+            whole it is pushed to a new page (leaving its heading behind) and cut there anyway. It may break. */
+         var every = sec.getElementsByTagName('*');
+         for (var t = 0; t < every.length; t++) { var big = every[t]; if (big.ownerSVGElement || big.offsetHeight <= PAGEH) continue; var bs = getComputedStyle(big);
+           if (!((bs.breakInside === 'avoid' || bs.pageBreakInside === 'avoid') && !/^inline/.test(bs.display))) continue;
+           /* only under a short lead from a page start (up to a fifth of a page): deeper in a run its place on the page is not known */
+           var un = big.closest('.nbh-page,.sheet'); if (!un || un.hasAttribute('data-mp-flow') || (un.classList.contains('sheet') && un.parentElement && un.parentElement.classList.contains('nbh-page') && un.previousElementSibling)) continue;
+           var ld = big.getBoundingClientRect().top - un.getBoundingClientRect().top; if (ld > PAGEH * 0.2) continue;
+           big.style.setProperty('break-inside', 'auto', 'important'); big.style.setProperty('page-break-inside', 'auto', 'important'); split++; }
+         var sheets = sec.querySelectorAll('.nbh-page,.sheet,section[class*="only-"],.pane');
+         for (var k = 0; k < sheets.length; k++) { var sh = sheets[k]; if (!shows(sh) || sh.closest('[data-mp-empty]') || sh.querySelector('.nbh-page,.sheet,section[class*="only-"],.pane') || sh.hasAttribute('data-mp-flow') || (sh.parentElement && sh.parentElement.hasAttribute('data-mp-flow'))) continue;
+           var sb = getComputedStyle(sh); if (!(sh.classList.contains('nbh-page') || sb.breakBefore === 'page' || sb.pageBreakBefore === 'always' || (sh.classList.contains('sheet') && sh.parentElement && sh.parentElement.classList.contains('nbh-page') && !sh.previousElementSibling))) continue;
+           var top = sh.getBoundingClientRect().top, list = sh.getElementsByTagName('*');
+           for (var i = 0; i < list.length; i++) { var el = list[i]; if (el.ownerSVGElement || /^(TR|TD|TH|TBODY|THEAD)$/.test(el.tagName)) continue;
+             var r = el.getBoundingClientRect(); if (r.height < PAGEH * 0.7 || r.height > PAGEH + 2) continue;
+             var cs = getComputedStyle(el); if (!(cs.breakInside === 'avoid' || cs.pageBreakInside === 'avoid' || el.hasAttribute('data-mp-fit') || /^inline-(block|flex|grid)$/.test(cs.display) || /^(IMG|svg|CANVAS)$/.test(el.tagName))) continue;
+             var lead = r.top - top; if (lead > 4 && lead <= PAGEH * 0.3 && lead + r.height > PAGEH - 4) { var z = (PAGEH - 10 - lead) / r.height;
+               if (z >= 0.8) { var cur = parseFloat(el.style.zoom) || 1; el.style.zoom = (cur * z).toFixed(3); el.setAttribute('data-mp-fit', ''); el.style.setProperty('break-before', 'avoid', 'important'); el.style.setProperty('page-break-before', 'avoid', 'important'); joined++; } }
+             break; } }
+       });
+       window.__nbhStray = { left: left, kept: kept, joined: joined, split: split };
+       if ((left || kept || joined) && window.console) console.log('NBH packet: ' + left + ' part(s) with nothing to print left off; ' + kept + ' sign-off(s) kept with what is above them; ' + joined + ' tall block(s) brought onto the page of their heading');
+     })();
      rules.forEach(function(r, i){ if (texts[i] !== undefined) try { r.media.mediaText = texts[i]; } catch (e) {} });
      if (scaled.length && window.console) console.log('NBH packet: fitted ' + scaled.join('; '));
      window.__nbhFitted = scaled;
@@ -13177,14 +13260,15 @@ window.__wsVideos={open:k=>open(k,null),close:()=>close(),isOpen,frame:()=>fr,is
 })();
 </script>
 <script type="application/json" id="ws-whatsnew">
-{"v": "v26.14",
+{"v": "v26.15",
 "title": "What's new in this version",
 "notes": "SETUP.md",
 "items":[
-"Guide me can read to you. \"Read aloud\" on the guide's screens, and in the strip at the foot of the screen, reads each question with its choices and each step with its reason as you go.",
-"\"Say it again\" repeats it. Turning Read aloud off stops the reading at once. The choice is remembered on this device.",
-"It uses the device's own voice and reads only the guide's own words: nothing about a student is read or sent.",
-"Guide me (v26.13): the start screen asks \"What do you need to do today?\", asks a question or two, and takes you through the steps one at a time."]}
+"Printing, every form: a sign-off (signature lines, names and dates) no longer prints alone at the top of a page. It takes part of what is above it along.",
+"A part with nothing but its heading is left off the paper, and a page that ran a line or two onto a second sheet is brought back onto one (Forms SM-1, EB-1, RS-1, GB-1, DM-1 and EA-1 each print a page fewer).",
+"Text boxes print without the corner grip, and an empty date prints empty, not as mm/dd/yyyy.",
+"The packet: the same rules, and a tall block is no longer pushed off the page of its heading. The whole packet of 47 forms went from 749 pages to 742; a test packet of three forms from 91 to 84, its nearly empty pages from 7 to 2.",
+"Guide me can read to you (v26.14): Read aloud on the guide's screens."]}
 </script>
 <script id="ws-v2570">
 /* v25.70 (the BCBA, 11/9; S/research/NEXT.md and NEXT2.md #2). The release step edits the list above (ws-whatsnew): its v is
