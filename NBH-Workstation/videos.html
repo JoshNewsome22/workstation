@@ -132,7 +132,7 @@ body.vl-watching #vlClose{margin-left:auto}
 .vl-seen svg{width:13px;height:13px}
 .vl-info{display:flex;gap:12px;padding:10px 2px 0;align-items:flex-start}
 .vl-av{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 .6875rem/1 var(--sans);letter-spacing:.02em;background:var(--navy)}
-.vl-f-dro{background:#1D3A52}.vl-f-dra{background:#7a3b52}.vl-f-ncr{background:#2f6b37}.vl-f-rird{background:#6b4a7a}.vl-f-highp{background:#9b4e15}.vl-f-fct{background:#22657a}.vl-f-choice{background:#5a5a1e}.vl-f-group{background:#3d4f8a}.vl-f-chain{background:#6a4a2a}.vl-f-prompt{background:#3d4f8a}.vl-f-token{background:#7a5a16}.vl-f-ext{background:#4a4a55}
+.vl-f-dro{background:#1D3A52}.vl-f-dra{background:#7a3b52}.vl-f-ncr{background:#2f6b37}.vl-f-rird{background:#6b4a7a}.vl-f-highp{background:#9b4e15}.vl-f-fct{background:#22657a}.vl-f-choice{background:#5a5a1e}.vl-f-group{background:#3d4f8a}.vl-f-chain{background:#6a4a2a}.vl-f-prompt{background:#3d4f8a}.vl-f-token{background:#7a5a16}.vl-f-ext{background:#4a4a55}.vl-f-ante{background:#1f6f5c}
 .vl-txt{position:relative;min-width:0;display:flex;flex-direction:column;gap:3px}
 /* a title wraps and is never cut */
 .vl-t{font-weight:600;font-size:1rem;line-height:1.3;color:var(--ink);overflow-wrap:break-word}
@@ -698,6 +698,7 @@ function paintWatch(v){var f=fam(v),N=nextOf(v),fnw=(v.fn||[]).map(function(x){r
   BP.addEventListener('click',function(){if(vid.paused){var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});$('vlPlay').hidden=true;}else vid.pause();});
   BS.addEventListener('input',function(){BS.dragging=true;try{vid.currentTime=+BS.value;}catch(e){}});BS.addEventListener('change',function(){BS.dragging=false;});
   vid.addEventListener('click',function(){if(!vid.controls&&vid.getAttribute('src')){if(vid.paused){var pr=vid.play();if(pr&&pr.catch)pr.catch(function(){});}else vid.pause();}});
+  nbhSkipTap(vid,vid.parentNode);   /* v25.97 a double tap on the left or the right half of the picture: back or forward 10 s */
   $('vlBFull').addEventListener('click',function(){try{if(vid.requestFullscreen)vid.requestFullscreen().catch(function(){if(vid.webkitEnterFullscreen)vid.webkitEnterFullscreen();});else if(vid.webkitEnterFullscreen)vid.webkitEnterFullscreen();}catch(e){}});
   fullFns=[layout];
   layout();
@@ -772,6 +773,44 @@ if(POD)POD.on(function(type){if(type==='time')return;epPaint();if(view==='home'&
 function openCard(id){pauseNow();
   if(WS){tell({nbh:'videos-card',card:id});return;}
   location.href=(D.form||'TD-1_Function-Based-Treatment-Developer_v2026-09.html')+'#card='+encodeURIComponent(id);}
+/* v25.97 (the BCBA, 11/13: "double click the screen on the left side to rewind 10 or 15 seconds and on the right side to fast
+   forward") a double tap on the picture skips: the left half goes back 10 s, the right half forward 10 s, and each further
+   tap within a moment adds 10 s more. A round mark on the picture says what was done ("-10 s", "+20 s") and is spoken to a
+   screen reader. For a finger or a pen only: a mouse keeps the browser's own double click (full screen), as on YouTube, and a
+   keyboard has the arrow keys. Taps on the strip of the player's own controls at the foot are left alone. Some browsers skip
+   on a double tap by themselves: the place is set from where the video was at the first tap and held there for a moment, so
+   the skip is 10 s whether or not the browser also moved it. The mark is placed over the picture wherever it is on the
+   screen, so the player's own layout is not touched. */
+function nbhSkipTap(vid,host){
+  var STEP=10,GAP=350,last=null,sum=0,mark=null,hideT=0,want=null,wantAt=0,token=0;
+  function foot(r,y){return vid.controls&&r.bottom-y<Math.max(56,r.height*.16);}
+  function clamp(t){return Math.max(0,Math.min(vid.duration,t));}
+  function hold(){var k=++token;[60,160,300,460].forEach(function(ms){setTimeout(function(){if(k!==token||want==null)return;
+    var exp=clamp(want+(vid.paused?0:(Date.now()-wantAt)/1000));if(Math.abs(vid.currentTime-exp)>1.5){try{vid.currentTime=exp;}catch(err){}}},ms);});}
+  function show(side,total,r){
+    if(!mark){mark=document.createElement('div');mark.className='nbh-skip';mark.setAttribute('role','status');mark.setAttribute('aria-live','polite');
+      mark.style.cssText='position:fixed;z-index:2147483000;pointer-events:none;display:grid;place-items:center;width:112px;height:112px;margin:-56px 0 0 -56px;border-radius:50%;background:rgba(15,26,34,.74);color:#fff;font:700 20px/1 -apple-system,Helvetica,Arial,sans-serif;opacity:0;transition:opacity .15s';
+      host.appendChild(mark);}
+    mark.textContent=(side<0?'−':'+')+total+' s';mark.setAttribute('aria-label',(side<0?'Back ':'Forward ')+total+' seconds');
+    mark.style.left=(r.left+r.width*(side<0?.22:.78))+'px';mark.style.top=(r.top+r.height*.5)+'px';mark.style.opacity='1';
+    clearTimeout(hideT);hideT=setTimeout(function(){mark.style.opacity='0';},700);
+  }
+  function tap(e){
+    if(e.pointerType==='mouse')return;
+    if(!(vid.duration>0)||!vid.getAttribute('src'))return;
+    var p=e.changedTouches&&e.changedTouches[0]||e,r=vid.getBoundingClientRect();if(!r.width||!r.height)return;
+    var x=(p.clientX-r.left)/r.width,y=(p.clientY-r.top)/r.height;
+    if(!(x>=0&&x<=1&&y>=0&&y<=1)||foot(r,p.clientY)){last=null;return;}
+    var side=x<.5?-1:1,now=Date.now();
+    if(last&&last.side===side&&now-last.t<(last.run?800:GAP)){
+      want=clamp((last.run&&want!=null?want:last.at)+side*STEP);wantAt=now;
+      try{vid.currentTime=want;}catch(err){}
+      hold();sum=(last.run?sum:0)+STEP;show(side,sum,r);last={side:side,t:now,run:true,at:want};
+      try{vid.dispatchEvent(new CustomEvent('nbh-skip',{detail:{by:side*STEP,total:side*sum}}));}catch(err){}
+    }else{last={side:side,t:now,run:false,at:vid.currentTime};sum=0;}
+  }
+  if(window.PointerEvent)vid.addEventListener('pointerup',tap);else if('ontouchend' in window)vid.addEventListener('touchend',tap);
+}
 function tellPlaying(on){try{if(window.parent!==window)window.parent.postMessage({nbh:'videos-playing',on:!!on},'*');}catch(e){}}
 function pauseNow(){tellPlaying(false);var vid=$('vlVideo');if(vid&&cur){try{if(vid.duration>0)setProg(cur,vid.currentTime,vid.duration,false);vid.pause();}catch(e){}}}
 

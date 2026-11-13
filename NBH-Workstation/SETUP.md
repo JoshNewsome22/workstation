@@ -9905,6 +9905,46 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v25.97: double-tap to skip in the video players, and three videos on escape antecedents
+(the BCBA, 11/13: "is there a quick rewind and fast forward feature like YouTube has where you can double click the screen
+on the left side to rewind 10 or 15 seconds and on the right side to fast forward" ... "Yes"; and "Yes" to the next
+set of procedure videos, escape antecedents, with a new pair of simulated people)
+- **Double-tap to skip.** In the video library's player and in Watch how on Form TD-1: a double tap on the left half of
+  the picture goes back 10 seconds, on the right half forward 10 seconds, and each further tap within a moment adds 10
+  more. A round mark on the picture says what was done ("−10 s", "+20 s") and is spoken to a screen reader. The skip
+  stops at the start and the end of the video.
+  - For a finger or a pen. A mouse keeps the browser's own double click (full screen), and a keyboard has the arrow
+    keys (5 seconds), as before.
+  - Taps on the strip of the player's own controls at the foot of the picture are left alone.
+  - Some browsers skip on a double tap by themselves; the place is set from where the video was at the first tap, so
+    the skip is 10 seconds either way.
+  - Not in the device's own full-screen player, which the page cannot reach. **Not seen on an iPad.**
+- **Three procedure videos**, each after one card of TD-1's protocol bank, with a new pair of simulated people:
+  - **Demand fading: instructions added back slowly** (2:53), card df-instructions-with-breaks, after Ringdahl et al.
+    (2002). Sessions with leisure items and no instructions; then one instruction every 15 minutes; a 1-minute break
+    for an instruction done alone; the next instruction after problem behavior; one more instruction per 15 minutes
+    after each session without problem behavior, up to the classroom rate.
+  - **Changing the task: an aid for hard work** (3:06), card curr-escape-task-features, after McComas et al. (2000).
+    The task feature that sets off the behavior is found and tested; counters go on the table with "Do your work.";
+    if he does not start, the problem is read aloud and pointed to, then the aid; repeated work is replaced by a new
+    worksheet; praise on about every fifth response.
+  - **Interspersal: easy items before each hard one** (2:42), card a_intersperse-easy-math-facts, after Lee et al.
+    (2012). Rows of three easy facts and then one hard problem; a packet with more than can be finished; a 10-minute
+    timer, the adult moved back, no comments on the work; stop, collect, thank.
+- **Where they are.** The video library, under a new procedure, **Antecedents** (a filter chip and a shelf), and Watch
+  how on each of the three cards. 43 videos in all (40 until now).
+- **Left out of the pictures, and said in each closing card:** in the demand-fading study the break was ended when
+  problem behavior occurred in it (a punishment step, restrictive), and giving the next instruction after problem
+  behavior is escape extinction (the consent block on TD-1 first); in the task study the student was physically helped
+  to work the problem when he had not started (physical guidance through a demand, restrictive).
+- **The teacher's lips are drawn to his words** in the seven shots in which he speaks: a lip-sync step redraws the
+  mouth to the recorded line, so the line plays at its natural pace. The narrator's voice is the recording as made.
+  The room sound on his lines is lighter than in the earlier sets (the BCBA, 11/13: "too much like he is in a
+  bathroom").
+- **The step panel is at the upper left** in these three (at the right it covered the student's head).
+- **The size.** The three add about 48 MB to the folder; the limit the release check allows for the videos was raised
+  from 560 MB to 600 MB.
+- **The test run.** Targeted tests only, all passing: the double-tap skip in both players (v2597-skip, new), the video library's list and filters (v2569), the library page's layout (v2572-videos), captions and transcripts (v2572-transcript), TD-1's Watch how (v2568-td1-versions, v2568-td1-procvideos), the mini player (v2591), the size budget and the build check. The whole run was not repeated (the last whole run was at v25.91).
 ### v25.96: three procedure videos on extinction
 (the BCBA, 11/12: "Yes" to the three extinction videos, and after seeing them: "Raise it. Also, the lip syncing is the
 only thing that's kind of off but the rest of the stuff from the videos is good.")
