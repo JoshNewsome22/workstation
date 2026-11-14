@@ -9939,7 +9939,36 @@ device-only product as it is, with a way to issue and end licences, no hosting, 
   honest customers that makes the terms visible, and the contract is what binds. Staff are not counted (no server sees the
   devices); the count is shown as a term. A form opened by itself, outside the start page, is not checked.
 - **Still to do before a sale.** The BCBA makes the signing key and gives the public key (it is not a secret); it goes
-  into the block above. A tool that builds a customer's copy (name, logo, `required` true). The contact line.
+  into each customer's file (below). The contact line. Permission for the two forms named under the tool, below.
+- **A customer's copy (a tool added on 11/14 after the release; neither edition's files change, so the version stays).**
+  (the BCBA, 11/14: "I want to start building all the pieces that I will need for ABA companies and districts")
+  `python3 tools/build-customer.py CUSTOMER.json OUT_FOLDER` builds the workstation for one customer from a small file:
+  the name, an edition tag, optionally a logo and an icon, and the licence block (required, the public key, the contact).
+  It is the school edition's build with the customer's values: `tools/build-rps.py` now reads the edition from the
+  `WS_EDITION` environment variable and, with none, builds the school edition byte for byte as before.
+  - The copy: the customer's name on every letterhead and title; a plain logo drawn from the name when none is sent
+    (the initials in a dark square); the installed app named by the initials; its own autosave, settings and Drive folder
+    under its tag; Rewrite with Claude off (it uses the practice's relay); the licence required; `SETUP.md` (these notes)
+    left out; the procedure videos the same files as every edition's (linked while building, so a copy takes about
+    130 MB of disk on the build machine, and a customer gets the same video zips).
+  - Examples that named the practice's website (the placeholders of four address boxes, one line of Help, two sections of
+    HOSTING.md) name a neutral one or are left out, and the calendar files' product name is the customer's app.
+  - **Nothing in a copy sends anything to the publisher.** Questionnaire links, the reply box and the staff phone page use
+    the website the copy is opened from. So a customer hosts its own copy; a copy hosted on the practice's website would
+    put the customer's locked questionnaire answers there.
+  - The forms' examples that named Royal Palm School (placeholders, one default, the simulated students' school, one line
+    of guidance in Form IC-1) name the customer. **Five mentions stay, because they are sources:** Form ABC-1's coded
+    sheet ("the Royal Palm ABC coded sheet", "The starting point was the Royal Palm form") and Form SM-1's
+    interlocking-schedule session sheet (the school's unpublished manual, cited in SM-1 and named once in SR-1). Before a
+    copy is sold, the school's permission to distribute those two is needed, or the two are rewritten from the
+    published sources alone. This is a question for the BCBA and the school, not settled here.
+  - The build stops if anything in the copy's pages, scripts or guides still names the practice's website, the school
+    edition or its app, or if one of the five source mentions is not found exactly once.
+  - Test: `qa/v2628-customer-test.js` (20 checks, in the release list): the refusals (no name, another edition's tag, a
+    private key in the file, markup in the name); a copy built for an invented district whose name has an apostrophe; its
+    files; the start page, a licence for another edition refused and one for this edition accepted; each of the 49 forms
+    opened by itself with no page error and the customer's name on it. Not tested: a customer's own logo file, the
+    one-file edition of a copy, a copy on an iPad.
 - **Test:** `qa/v2627-licence-test.js` (62 checks, in the release list): the files; the browser's signature check and the
   written-out one agree on 30 licences, on each with a character changed, and on 30 signed with another key; the copy as
   shipped; a copy with a key; a customer's copy with no licence; every date from 31 days before to 31 days after, with a

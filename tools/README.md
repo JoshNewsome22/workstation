@@ -291,3 +291,8 @@ opened over https or localhost). `tools/build-release.sh` copies it to `deliver/
 folder and no customer gets it. The signing key it makes is saved by the publisher, locked with a passphrase; it is never
 put in this repository. The workstation's side is `NBH-Workstation/nbh-shell-licence.js` and the block
 `<script type="application/json" id="ws-licence">` in `index.html`; SETUP.md, v26.27, says how they work.
+
+`tools/build-customer.py CUSTOMER.json OUT_FOLDER` builds a customer's copy (name, logo, edition tag, licence required);
+its header says what goes in the file. It runs `tools/build-rps.py` with the customer's values in the `WS_EDITION`
+environment variable; with none set, `build-rps.py` builds the school edition as before. Only the public key goes into a
+copy. Checked by `qa/v2628-customer-test.js`.
