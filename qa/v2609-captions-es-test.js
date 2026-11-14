@@ -2,11 +2,13 @@
    A  the file: every video of the English transcripts has its Spanish, one line for each spoken line (the narrator's and
       the people's, not the on-screen ones), none empty; each line carries the digits its English line carries; no dash
       used as punctuation; the names the forms use (TD-1, DRO, DRA, FCT) are kept where the English line has them;
-   B  on a video's page: "Captions in" offers English and Español; nothing shows until CC is on; English is the first choice;
+   B  on a video's page: "Captions" offers Off, English and Español (v26.20: one control, with Off in it); it reads Off and
+      nothing shows until a language is chosen or CC is turned on;
    C  choosing Español turns the captions on in Spanish: the Spanish track shows and the English one does not; its lines
       start when the English lines start; the first line is the file's first line; a person's line is marked with the
       role in Spanish; the choice is kept on the device and holds after the page is opened again and on another video;
-   D  choosing English shows the English track again; CC off hides both;
+   D  choosing English shows the English track again; CC off hides both and the choice reads Off; CC on again shows the
+      language chosen; choosing Off hides both, turns CC off, is kept on the device and holds when the page is opened again;
    E  at a phone's width the choice is 44 px tall and nothing is wider than the screen; the offline list holds the file;
       no page error.
    usage: node qa/v2609-captions-es-test.js   (WS_URL, WS_ROOT and WS_EDITION as in qa/lib.js) */
@@ -35,7 +37,8 @@ const KEY = 'dro_resetting';
   await p.goto(B + 'videos.html#video=' + KEY); await p.waitForSelector('#vlCcLang', { state: 'attached', timeout: 30000 }); await sleep(500);
   const tracks = () => p.evaluate(() => { const v = document.getElementById('vlVideo'); return [...v.textTracks].map(t => ({ lang: t.language, label: t.label, mode: t.mode, cues: t.cues ? t.cues.length : -1, first: t.cues && t.cues[0] ? t.cues[0].text : '', starts: t.cues ? [...t.cues].map(c => Math.round(c.startTime * 10) / 10) : [], texts: t.cues ? [...t.cues].map(c => c.text) : [] })); });
   const b = { vis: await p.evaluate(() => !document.getElementById('vlCcLangL').hidden && getComputedStyle(document.getElementById('vlCcLangL')).display !== 'none'), opts: await p.$$eval('#vlCcLang option', o => o.map(x => x.value + ':' + x.textContent)), val: await p.inputValue('#vlCcLang'), cc: await p.getAttribute('#vlCC', 'aria-pressed'), t: (await tracks()).map(t => t.lang + ':' + t.mode) };
-  ok('B on a video\'s page "Captions in" offers English and Español, English first; with CC off neither track shows', b.vis && b.opts.join() === 'en:English,es:Español' && b.val === 'en' && b.cc === 'false' && b.t.join() === 'en:hidden,es:hidden', b);
+  b.label = await p.evaluate(() => document.querySelector('#vlCcLangL span').textContent);
+  ok('B on a video\'s page "Captions" offers Off, English and Español; it reads Off, CC is off and neither track shows', b.vis && b.label === 'Captions' && b.opts.join() === 'off:Off,en:English,es:Español' && b.val === 'off' && b.cc === 'false' && b.t.join() === 'en:hidden,es:hidden', b);
   /* C */
   await p.selectOption('#vlCcLang', 'es'); await p.waitForFunction(() => { const t = [...document.getElementById('vlVideo').textTracks].find(x => x.language === 'es'); return t && t.cues && t.cues.length > 0; }, null, { timeout: 15000 });
   /* the English track's cues, to compare the times: shown for a moment, then back */
@@ -50,8 +53,12 @@ const KEY = 'dro_resetting';
     pref1.cc === true && pref1.ccl === 'es' && again.val === 'es' && again.cc === 'true' && again.t.join() === 'en:hidden,es:showing' && other.val === 'es' && other.t.join() === 'en:hidden,es:showing', { es: { mode: es.mode, cues: es.cues, first: es.first }, en: en0.mode, roleCue, pref1, again, other, missing: lineStarts.filter(x => !es.starts.includes(x)).slice(0, 5) });
   /* D */
   await p.selectOption('#vlCcLang', 'en'); await sleep(300); const d1 = (await tracks()).map(t => t.lang + ':' + t.mode); await p.click('#vlCC'); await sleep(200); const d2 = (await tracks()).map(t => t.lang + ':' + t.mode), cc2 = await p.getAttribute('#vlCC', 'aria-pressed');
-  await p.click('#vlCC'); await sleep(200); const d3 = (await tracks()).map(t => t.lang + ':' + t.mode);
-  ok('D English shows the English track again; CC off hides both; CC on again shows the language chosen', d1.join() === 'en:showing,es:hidden' && d2.join() === 'en:hidden,es:hidden' && cc2 === 'false' && d3.join() === 'en:showing,es:hidden', { d1, d2, cc2, d3 });
+  const v2 = await p.inputValue('#vlCcLang'); await p.click('#vlCC'); await sleep(200); const d3 = (await tracks()).map(t => t.lang + ':' + t.mode), v3 = await p.inputValue('#vlCcLang');
+  await p.selectOption('#vlCcLang', 'off'); await sleep(300); const d4 = (await tracks()).map(t => t.lang + ':' + t.mode), cc4 = await p.getAttribute('#vlCC', 'aria-pressed'), pref4 = await p.evaluate(() => JSON.parse(localStorage.getItem('nbh.videos.pref') || '{}'));
+  await p.reload(); await p.waitForSelector('#vlCcLang', { state: 'attached' }); await sleep(600); const d5 = { val: await p.inputValue('#vlCcLang'), t: (await tracks()).map(t => t.lang + ':' + t.mode).join() };
+  ok('D English shows the English track again; CC off hides both and the choice reads Off; CC on again shows the language chosen; Off hides both, turns CC off, is kept and holds when the page is opened again',
+    d1.join() === 'en:showing,es:hidden' && d2.join() === 'en:hidden,es:hidden' && cc2 === 'false' && v2 === 'off' && d3.join() === 'en:showing,es:hidden' && v3 === 'en' &&
+    d4.join() === 'en:hidden,es:hidden' && cc4 === 'false' && pref4.cc === false && d5.val === 'off' && d5.t === 'en:hidden,es:hidden', { d1, d2, cc2, v2, d3, v3, d4, cc4, pref4, d5 });
   /* E */
   const ph = await br.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const q = await ph.newPage(); q.on('pageerror', e => errs.push('phone: ' + e)); await q.goto(B + 'videos.html#video=' + KEY); await q.waitForSelector('#vlCcLang', { state: 'attached' }); await sleep(500);

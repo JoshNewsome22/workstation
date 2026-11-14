@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.20: captions off, in one place
+(the BCBA, 11/14: "When I say captions I am talking about the closed captions for the spoken words being narrated. ... I
+didn't see a way to turn the closed captions off in the video player, just a way to change from English to Spanish.")
+- **What was wrong.** On a video's page the choice *Captions in* (English, Español) turned the captions on when a
+  language was chosen, and kept them on for every video on that device. The only way to turn them off was the CC button
+  beside the Steps, away from the choice, or the browser's own captions menu in full screen.
+- **Now.** One control under the video, beside Speed: **Captions: Off, English, Español** (Off and English where a
+  video has no Spanish). It reads Off until a language is chosen; Off hides the captions and is kept on the device
+  (`nbh.videos.pref`, `cc` and `ccl`), as a language is. The CC button and the browser's own captions menu still work,
+  and the control follows them.
+- **Not changed.** The step's name, the step list and the notes in the picture are part of the video and stay. The
+  captions themselves, their timing and the Spanish lines are as in v26.09.
+- **Known, not solved.** In full screen on an iPad the captions are drawn by the iPad over the bottom of the picture,
+  where the step's name is. With the captions off there is nothing over it.
+- **Not seen on an iPad.** Checked in the test browser at an iPad's and a phone's size.
+- **Test.** `qa/v2609-captions-es-test.js`: the control offers Off, English and Español and reads Off; Off hides both
+  tracks, turns CC off, is kept, and holds when the page is opened again.
+
 ### v26.19: 10 point on paper
 (the BCBA, 11/13: "Let's try to get 10 point", after the measured comparison of v26.17: the Pearson and PAR sample
 reports print their body at 10 to 11 point, these forms printed at 9)
