@@ -9905,6 +9905,41 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.22: three videos on low rates (DRL)
+(the BCBA, 11/14, of the three videos sent for review: "They will do for now. Let's keep them")
+- **Three procedure videos**, each after one card of TD-1's protocol bank, with a teacher and a boy of about ten as the
+  simulated people:
+  - **A check-box card for requests** (2:53), card s_drl-help-request-card, after Austin & Bevan (2011). The baseline
+    count of requests for help; a limit set with the teacher; the card explained to him alone; a card with one more box
+    than the limit; each request up to the limit answered and a box initialled; no answers once the last box is used
+    (bathroom, health and safety always answered); a team point when a box is still blank. Three typically developing
+    girls in the study, no follow-up.
+  - **A green and a red signal** (2:35), card s_drl-signaled-spaced-full-session, after Becraft et al. (2018). The
+    baseline time between responses; an interval of twice that time; the two signals explained each day; the first
+    response on green honored, then red and the timer; a response on red restarts the timer; green again when it ends.
+    Translational evidence only (preschoolers, a computer game), and the video says so.
+  - **A limit for the whole period** (2:47), card s_drl-talkout-limit, after Dietz & Repp (1973). Ten periods of
+    baseline; a limit below the average and a reward he wants; the count kept quietly; the result told at the end;
+    free time when the limit was met, a calm "tomorrow" when it was not; the limit lowered in small steps. One boy in
+    one classroom; not for aggression or self-injury.
+- **Where they are.** The video library, under a new procedure, **Low rates** (a filter chip and a shelf), and Watch
+  how on each of the three cards. 49 videos in all (46 until now). The Learning page lists them in the unit on
+  differential reinforcement (e8) as videos to watch, not as required ones, so the unit's planned time is unchanged.
+- **Like the others:** steps, captions, a transcript, Check yourself (made from the steps and captions) and Spanish
+  captions (44 lines; written for this workstation and not yet reviewed by a Spanish-speaking behavior analyst).
+- **How they were made, and what is known to be imperfect.** Each shot was drawn from its own still (no shot continues
+  another) at the faster, cheaper setting, 1344 by 768, and enlarged; the BCBA found them less good than the stills
+  and accepted them as they are. Known small faults, left in: a slow move toward the people in some shots; in the
+  tally shot the pen is yellow and the boy has no worksheet; the green card is not the same shade in every shot; the
+  step panel touches the boy's hair in a few frames. The narrator's voice is the recording as made; the teacher's lips
+  are drawn to her eight lines.
+- **What it cost** (inside the limits agreed for the set): the shots and the lip-drawing about $17 of $25, 38 of 40
+  picture credits, 5,731 of 8,000 characters of speech. Nothing was spent to put them into the app.
+- **The size.** The three add about 43 MB to the folder (683 MB of videos in all); the limit the release check allows
+  for the videos was raised from 650 MB to 700 MB with this release, as the consequence of keeping the three.
+- **The test run.** On the built folder: the tests of the video list, the library, the players, the transcripts, the
+  Spanish captions, Check yourself, the Learning map and units, the size budget, the version and the build. The whole
+  test run was not repeated.
 ### v26.21: Form SP-1 printed from the iPad app
 (the BCBA, 11/14, with their own printout: "This is how the scatterplot document prints for me on the iPad")
 - **What the printout showed.** The data sheet made by the workstation installed on an iPad (the PDF the page draws

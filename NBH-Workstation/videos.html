@@ -462,17 +462,20 @@ var SPELL={behaviour:'behavior',behaviours:'behaviors',behavioural:'behavioral',
 var words=function(s){return norm(s).split(/[^a-z0-9]+/).filter(Boolean);};
 function hay(v){var f=fam(v);return [v.title,f.short,f.name,citeOf(v),v.note,(v.shows||{}).summary,(v.fn||[]).join(' '),
   v.cards.map(function(id){var c=D.cards[id]||{};return (c.lab||'')+' '+(c.cite||'')+' '+(c.code||'');}).join(' ')].join(' ');}
-LIST.forEach(function(v){var w=words(hay(v));v._cmp=w.join('');var u={};w.forEach(function(x){if(x.length>=4)u[x]=1;});v._tok=Object.keys(u);});
+/* v26.22 _st: where each word begins in _cmp (the search finds a word only there: "pica" is not found inside "typically") */
+function starts(w){var o=0,st={};w.forEach(function(x){st[o]=1;o+=x.length;});return st;}
+LIST.forEach(function(v){var w=words(hay(v));v._cmp=w.join('');v._st=starts(w);var u={};w.forEach(function(x){if(x.length>=4)u[x]=1;});v._tok=Object.keys(u);});
 /* v25.73 an episode is found by its title, its series, its study, its card, About this episode and every word of its transcript */
 function podHay(p){return [p.title,p.series,p.after,'podcast listen episode audio',(p.about||[]).join(' '),(p.fn||[]).join(' '),(FAM[p.family]||{}).name||'',
   p.cards.map(function(id){var c=D.cards[id]||{};return (c.lab||'')+' '+(c.cite||'')+' '+(c.code||'');}).join(' '),(PT[p.key]||[]).map(function(l){return l[2];}).join(' ')].join(' ');}
-PODS.forEach(function(p){var w=words(podHay(p));p._cmp=w.join('');var u={};w.forEach(function(x){if(x.length>=4)u[x]=1;});p._tok=Object.keys(u);});
+PODS.forEach(function(p){var w=words(podHay(p));p._cmp=w.join('');p._st=starts(w);var u={};w.forEach(function(x){if(x.length>=4)u[x]=1;});p._tok=Object.keys(u);});
 /* one letter wrong, missing or extra */
 function near(a,b){var la=a.length,lb=b.length;if(Math.abs(la-lb)>1)return false;var i=0,j=0,e=0;
   while(i<la&&j<lb){if(a.charAt(i)===b.charAt(j)){i++;j++;continue;}if(++e>1)return false;if(la>lb)i++;else if(lb>la)j++;else{i++;j++;}}
   return e+(la-i)+(lb-j)<=1;}
-function wordIn(v,w){if(v._cmp.indexOf(w)>=0)return true;
-  if(w.length>=4&&/s$/.test(w)&&v._cmp.indexOf(w.slice(0,-1))>=0)return true;
+function at(v,w){var c=v._cmp,i=c.indexOf(w);while(i>=0){if(v._st[i])return true;i=c.indexOf(w,i+1);}return false;}
+function wordIn(v,w){if(at(v,w))return true;
+  if(w.length>=4&&/s$/.test(w)&&at(v,w.slice(0,-1)))return true;
   if(w.length<5)return false;
   return v._tok.some(function(t){return near(w,t)||(t.length>w.length&&(near(w,t.slice(0,w.length))||near(w,t.slice(0,w.length+1))||near(w,t.slice(0,w.length-1))));});}
 /* the keys the search finds (all when it is empty) */
