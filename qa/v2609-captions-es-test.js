@@ -29,7 +29,7 @@ const KEY = 'dro_resetting';
       ['TD-1', 'DRO', 'DRA', 'FCT'].forEach(w => { if (new RegExp('\\b' + w + '\\b').test(sp[i][2]) && !t.includes(w)) faults.push(k + ' ' + i + ' ' + w); }); } }); });
   const extra = Object.keys(ES).filter(k => !EN[k]);
   ok('A the Spanish file: all ' + Object.keys(EN).length + ' videos, ' + lines + ' lines, one for each spoken English line, none empty, the same digits, no dash as punctuation, the forms\' own names kept; no video the English does not have',
-    Object.keys(EN).length >= 49 && lines >= 690 && !faults.length && !extra.length, { faults: faults.slice(0, 8), extra });
+    Object.keys(EN).length >= 52 && lines >= 735 && !faults.length && !extra.length, { faults: faults.slice(0, 8), extra });
   /* B */
   const br = await chromium.launch(), errs = [];
   const ctx = await br.newContext({ viewport: { width: 1180, height: 820 }, deviceScaleFactor: 1, hasTouch: true });

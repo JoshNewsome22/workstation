@@ -9905,6 +9905,50 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.24: three videos on shaping
+(the BCBA, 11/14, of the three videos sent for review: "Yes. Keep them")
+- **Three procedure videos**, each after one card of TD-1's protocol bank, with a teacher and a girl of about nine as
+  the simulated people:
+  - **Closer, one line at a time** (2:51), card shape-approach-feared-items, after Ricciardi et al. (2006). A plan made
+    with the family and the school psychologist; tape lines from the door to one meter in front of the feared item;
+    her liked items at the door for two sessions, then at the current line; leaving always ends the session, with no
+    blocking; a request to walk to the near line at the start and the end; the line one meter closer after two
+    sessions at 90 percent. One boy on an inpatient unit in the study; fear responses not recorded.
+  - **Longer stretches of work** (2:57), card shape-percentile-task-engagement, after Athens et al. (2007). Each stretch
+    of independent work timed; the 20 most recent stretches ranked; a token for a stretch longer than the 10th; "Time
+    to work" after 15 seconds with no work; tokens traded at the end. Four students, one to one in a separate room,
+    with no test back in the classroom; the video says the method is complicated and that a simpler one may do.
+  - **Faster answers** (2:55), card shape-faster-answer-latency, after Tiger et al. (2007). Ten answers timed in
+    baseline; the time limit told before each session; a token for an answer under it and brief feedback for a slow
+    one; the next limit 10 percent below the last average; a rule and tokens for correct answers on work that needs
+    working out. One adult in a clinic; the video warns that a speed-only rule can teach fast guessing.
+- **Where they are.** The video library, under a new procedure, **Shaping** (a filter chip and a shelf), and Watch how
+  on each of the three cards. 52 videos in all (49 until now).
+- **The Function filter.** Closer, one line at a time is filed under Escape, as its card is. The other two cards name
+  no function; the library files such a video under the function most cards of its procedure name, which for Shaping
+  is also Escape. That is the library's standing rule, not a statement of the two studies.
+- **The Learning page.** The Shaping unit (e11) had no video; it now lists the three, with Longer stretches of work as
+  its core video (a unit that lists videos must have one). That adds a video of about three minutes to what a learner
+  watches to finish the unit; the unit's planned minutes are unchanged. The BCBA study map points task G.11 (Shaping)
+  at the new shelf.
+- **Like the others:** steps, captions, a transcript, Check yourself (made from the steps and captions) and Spanish
+  captions (45 lines; written for this workstation and not yet reviewed by a Spanish-speaking behavior analyst).
+- **How they were made, and what is known to be imperfect.** Each shot was drawn from its own still at the faster,
+  cheaper setting, 1344 by 768, and enlarged. The stills were made by the picture editor used until now, which gives
+  faces a harder, less photo-like look than the first picture of a pair; a test on 11/14 found a different editor
+  that keeps the softer look, and the next set uses it. These three were kept as they are. Known small faults, left
+  in: the room reads smaller than the six meters spoken of; the token bowl is not the same in every shot; a slow move
+  toward the people in some shots; in the wide shots the teacher's lips are not drawn to his words; one walking shot
+  is cut short. The narrator's voice is the recording as made.
+- **What it cost.** At the prices on the billing page (11/14): the moving shots about $2.70 and the lip-drawing about
+  $2, so about $5 (reported as about $15.66 while it was being made, because each shot was reserved at a higher
+  price than it was charged); 32 of 40 picture credits; 6,135 of 8,000 characters of speech. Nothing was spent to
+  put them into the app.
+- **The size.** The three add about 48 MB to the folder (731 MB of videos in all); the limit the release check allows
+  for the videos was raised from 700 MB to 750 MB with this release, as the consequence of keeping the three.
+- **The test run.** On the built folder: the tests of the video list, the library, the players, the transcripts, the
+  Spanish captions, Check yourself, the Learning map and units, the size budget, the version and the build. The whole
+  test run was not repeated.
 ### v26.23: a form no longer jumps to its top when the bars fold (iPad)
 (the BCBA, 11/14, with a screen recording of 11/13: "Why is the movement glitchy")
 - **What the recording showed.** Form EA-1, in Step by step, in the workstation installed on the iPad. At a scroll down

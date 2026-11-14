@@ -50,6 +50,11 @@ Object.assign(window.NBH_LEARN_UNITS, {
           opts: ['He is growing.', 'The quieter forms stopped working and the louder ones were reinforced.', 'He has forgotten how to raise his hand.', 'It is a coincidence.'],
           a: 1, why: 'Reinforcement moved, step by step, to louder behavior. That is shaping, unplanned.' } }
     ],
+    watch: [
+      { k: 'shape_work', c: 1, look: 'What makes a stretch of work earn a token, and how that mark moves as she improves.' },
+      { k: 'shape_dist', look: 'The one thing that changes from session to session, and what the adult does when she steps away.' },
+      { k: 'shape_fast', look: 'How the time limit is set for the next session, and why correct answers earn tokens too.' }
+    ],
     examples: {
       ask: 'Which procedure is this?',
       intro: 'Ten descriptions. Decide whether each is shaping, chaining or prompt fading.',
