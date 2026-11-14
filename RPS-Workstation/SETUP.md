@@ -9905,6 +9905,25 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.23: a form no longer jumps to its top when the bars fold (iPad)
+(the BCBA, 11/14, with a screen recording of 11/13: "Why is the movement glitchy")
+- **What the recording showed.** Form EA-1, in Step by step, in the workstation installed on the iPad. At a scroll down
+  the workstation's bars folded away, the page jumped, and the bars came straight back; again at the next scroll.
+- **The cause.** Folding the bars makes the form's frame taller: for the form, a resize of height alone. Each form's Fit
+  code (`nbh-fit-screen`) ran 150 ms after ANY resize, and it begins by setting the sheets back to actual size before it
+  fits them again. For that instant the page was shorter than the frame, so the browser dropped the scroll position to
+  the top; and with a form at its top the workstation brings its bars back. On a long page the jump was smaller and easy
+  to miss; on a short page (a single step-by-step sheet) it was the whole page, at every scroll down.
+- **The change.** Fit depends on the width only, so it now runs only when the page's width changed (the iPad turned, a
+  window made narrower, the sheets rail opened). A change of height alone (the bars folding or returning, the on-screen
+  keyboard) no longer runs it. The same line was changed in all 49 forms by `tools/history/v2623-fit-resize.py`.
+- **The test.** `qa/v2623-bars-short-page-test.js` (9 checks, an empty form): on an iPad in landscape the second
+  step-by-step sheet of Form EA-1 is scrolled down by a finger twice; the bars fold once and stay folded, the form's
+  scroll never returns to the top, the sheets' zoom is not touched by the fold or by a shorter window, and a change of
+  width still re-fits. It fails on v26.22 (4 checks) and passes here, on both editions. With it: the bars' own test
+  (hdr147), the iPad layout test, the version and build tests. The whole test run was not repeated.
+- **Not seen on an iPad.** The recording was reproduced in this session's browser with an iPad's size and touch; the fix
+  has not been tried on the device.
 ### v26.22: three videos on low rates (DRL)
 (the BCBA, 11/14, of the three videos sent for review: "They will do for now. Let's keep them")
 - **Three procedure videos**, each after one card of TD-1's protocol bank, with a teacher and a boy of about ten as the

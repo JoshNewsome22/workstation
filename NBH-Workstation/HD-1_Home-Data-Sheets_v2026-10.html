@@ -3467,8 +3467,11 @@ html{touch-action:manipulation}
   function start() { build(); label(); fit(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
-  var t = null;
-  window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(fit, 150); });
+  /* v26.23 only a change of WIDTH re-fits the sheets. A change of height alone (the workstation's bars folding above
+     the form on an iPad, the on-screen keyboard) used to run fit() too: it sets the sheets to actual size for an
+     instant, the shorter page lost its scroll position, and the form jumped to its top as it was scrolled. */
+  var t = null, fitW = root.clientWidth;
+  window.addEventListener('resize', function () { if (root.clientWidth === fitW) return; clearTimeout(t); t = setTimeout(function () { fit(); fitW = root.clientWidth; }, 150); });
   /* A sheet built after this ran would otherwise sit at actual size while the
      sheets above it stayed scaled, so the page changed zoom as you scrolled. */
   try {
