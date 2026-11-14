@@ -719,6 +719,12 @@ html.sp-one .lg-slash{display:none}
   html.sp-printall table.scatter tfoot tr.sp-foot td{height:24px;box-sizing:border-box}
   html.sp-printall .sp-fid{display:block;position:absolute;width:11px;height:11px;background:#000}
   html.sp-printall .sp-fid.sp-tl{top:1px;left:1px}html.sp-printall .sp-fid.sp-tr{top:1px;right:1px}html.sp-printall .sp-fid.sp-bl{bottom:1px;left:1px}html.sp-printall .sp-fid.sp-br{bottom:1px;right:1px}
+  /* v26.21 (the BCBA's printout, 11/14) the scan's corner squares sat on "Total" and on "Intervals marked", and the times
+     touched the line beside them (the grid's own rule for every cell took their padding): the words keep clear of both */
+  html.sp-printall table.scatter td.time{padding:0 4px 0 2px;letter-spacing:var(--timels,0)}
+  html.sp-printall table.scatter tfoot tr.sp-foot td.time{letter-spacing:0}
+  html.sp-printall table.scatter thead th.tot{text-align:left;padding-left:5px}
+  html.sp-printall table.scatter tfoot tr.sp-foot td.time{padding-left:15px;font-size:9.5px;line-height:1.05;white-space:normal}
   html.sp-printall table.scatter{table-layout:fixed}
   html.sp-printall table.scatter th.timecol{width:104px}html.sp-printall table.scatter th.actcol{width:86px}html.sp-printall table.scatter th.tot{width:52px}
   html.sp-printall table.scatter thead tr.sp-days th{height:28px;box-sizing:border-box;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -5546,6 +5552,14 @@ function staticClone(node){
     const val = document.documentElement.style.getPropertyValue(v);
     if(val) clone.style.setProperty(v, val);
   });
+  /* v26.21 the times keep 4 px from the line beside them on paper: the longest one (11:30 AM – 12:00 PM) is measured in
+     this device's font at its printed size, and where it is wider than its 104 px column allows the letters close up by
+     as much as it needs (at most half a px a letter; Inter is wider than Helvetica) */
+  try{ const lab = rowLabels(), n = lab.reduce((m, t) => Math.max(m, String(t).length), 1);
+    const box = spBox(10, 10); box.whiteSpace = "nowrap"; box.width = "auto"; box.fontVariantNumeric = "tabular-nums";   /* as the times are set: figures of one width */
+    const wide = lab.reduce((m, t) => { spMeasureBox.textContent = String(t); return Math.max(m, spMeasureBox.getBoundingClientRect().width); }, 0);
+    box.fontVariantNumeric = "";
+    if(wide > 97) clone.style.setProperty("--timels", "-" + Math.min(0.5, (wide - 97) / n).toFixed(2) + "px"); }catch(e){}
   return clone;
 }
 function buildPrintSet(mode){
@@ -5605,6 +5619,32 @@ function spScanTag(clone, bi, p, flag){
   }catch(e){}
   return clone;
 }
+/* v26.21 (the BCBA's own printout from the workstation installed on an iPad, 11/14: grid rows 4 mm high above an empty
+   foot of the page). The rows' height is an estimate of what the page has left (spFixed), kept on the safe side, and on an
+   iPad it leaves room for the line Safari prints at the foot of a page. The PDF the installed app makes itself has no such
+   line and can be measured: nbh-pdf-make shows this form its print copy as it lies on paper, once, and each data sheet's
+   rows take what its own page really has left (up to SP_ROWMAX, down to 12 px when the estimate was short). The row height
+   is written into the sheet's scan code again, since the scan reads the grid by it. The copy and the page are changed
+   alike, so every page drawn afterwards is the same. The browser's own Print keeps the estimate. */
+function spScanRow(sheet, rh){
+  const box = sheet.querySelector(".sp-scan"), code = box && box.dataset.spCode; if(!code) return;
+  const parts = code.split(";"); parts[9] = String(rh); const payload = parts.join(";"), sv = box.querySelector("svg");
+  if(sv){ const t = document.createElement("div"); t.innerHTML = spQR(payload, 50); const n = t.querySelector("svg"); if(n) sv.innerHTML = n.innerHTML; }   /* the picture's own parts: the picture itself stays, with what the PDF maker noted on it */
+  box.dataset.spCode = payload;
+}
+window.nbhPdfFit = function(copy, paper){
+  const live = $$("#spPrint > .sheet"), there = Array.from(copy.querySelectorAll("#spPrint > .sheet"));
+  if(!paper || !(paper.ch > 0) || live.length !== there.length) return;
+  there.forEach((s, i) => {
+    const t = s.querySelector("table.scatter"), nR = t && t.tBodies[0] ? t.tBodies[0].rows.length : 0;
+    const rh0 = parseFloat(s.style.getPropertyValue("--rowh"));
+    if(!nR || !(rh0 > 0) || s.classList.contains("sp-split")) return;   /* a grid that runs over two pages keeps its rows */
+    const free = paper.ch - s.getBoundingClientRect().height - 6;   /* 6: room to spare */
+    const rh = Math.max(12, Math.min(SP_ROWMAX, rh0 + Math.floor(free / nR)));
+    if(rh === rh0) return;
+    [s, live[i]].forEach(x => { x.style.setProperty("--rowh", rh + "px"); spScanRow(x, rh); });
+  });
+};
 /* v23.05 (review I50) a marking guide for the back of the first sheet: each behavior's definition, example and non-example
    and how to mark it with its own cutoff, what to do when the student is not observed (an X, kept out of every count; a
    blank means watched, none), and a line a day of the first sheet to initial. Printed when "marking guide" is ticked; not in

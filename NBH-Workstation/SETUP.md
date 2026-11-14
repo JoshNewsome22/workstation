@@ -9905,6 +9905,38 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.21: Form SP-1 printed from the iPad app
+(the BCBA, 11/14, with their own printout: "This is how the scatterplot document prints for me on the iPad")
+- **What the printout showed.** The data sheet made by the workstation installed on an iPad (the PDF the page draws
+  itself, v25.89) had grid rows about 4 mm high, with about a fifth of the page empty under the sheet; the scan's black
+  corner squares sat on "Total" and on "Intervals marked"; the times touched the line beside them.
+- **Rows.** A row's height was an estimate of what the page has left (`spFixed`), kept on the safe side, less the room
+  Safari's own foot line takes on an iPad. The app's PDF has no such line and can be measured: `nbh-pdf-make.js` now shows
+  a form its print copy as it lies on paper, once, before the pages are cut (`window.nbhPdfFit(copy, paper)`), and Form
+  SP-1 gives each data sheet's rows what its own page really has left (up to 44 px, down to 12). The row height in the
+  sheet's scan code is written again to match. A grid that runs over two pages keeps its rows. The browser's own Print
+  (Safari, a computer) keeps the estimate.
+- **Words clear of the squares and the line.** On paper "Total" sits at the left of its cell, "Intervals marked" starts
+  right of its square, and a time keeps 4 px from the line beside it; where the longest time is wider than its 104 px
+  column in the device's font, its letters close up by at most half a px.
+- **Scan a paper sheet could not read a sheet printed from the app.** Found by the new test, and true of every version
+  since the scan came (v24.32) together with the app's PDF (v25.89). The page drawer copies onto every SVG picture the
+  styles it has on the screen, the box included; the square code under the grid (50 px by its print rule) was drawn
+  33 px wide beside its line of words, the scan took the sheet's scale from it and looked for the grid's far corners in
+  the wrong place ("Only 2 of the grid's four corner squares could be found"). `nbh-pdf-make.js` now takes the copied box
+  off the outermost SVG of each picture, so the form's print rules size it. This is in the shared PDF maker, so it holds
+  for every form's pictures; Form SP-1's charts were compared before and after and are the same. **A sheet printed from
+  the app with an earlier version still cannot be scanned: print it again.** ABC-1's and DD-1's sheets printed from the
+  app were not tried.
+- **The iPad on its side.** There the screen shows a sheet enlarged (the Fit button), and Form SP-1's print copy, made
+  while the PDF is drawn, was enlarged with it: the pages came out about a third too large and were cut off. The PDF
+  maker now leaves the screen's enlargement off the copy.
+- **Test.** `qa/v2621-sp1-ipad-pdf-test.js`: the app's PDF upright and on its side (the sheet fills its page, the code and
+  the grid agree, the words are clear), the made page read back by the form's own scan (65 cells, every shaded one
+  found), and the browser's own Print as it was. Simulated data. The printout itself was only looked at; nothing from it
+  is kept.
+- **Not seen on an iPad.** Chromium plays the iPad here. Safari's own Print from a browser tab is not changed by this.
+
 ### v26.20: captions off, in one place
 (the BCBA, 11/14: "When I say captions I am talking about the closed captions for the spoken words being narrated. ... I
 didn't see a way to turn the closed captions off in the video player, just a way to change from English to Spanish.")

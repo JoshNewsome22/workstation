@@ -1,4 +1,4 @@
-/* nbh-pdf-make (v25.89): a form's printed pages made into a PDF by the page itself, for the workstation installed on an
+/* nbh-pdf-make (v25.89, v26.21): a form's printed pages made into a PDF by the page itself, for the workstation installed on an
    iPad or iPhone, where the device offers no print options to an installed app.
    How: the page is drawn as it would print (its own print rules switched on in a copy, at the paper's width), cut into
    pages where a cut harms nothing (never through a line of words, a table row, a picture, or a block the form keeps
@@ -47,7 +47,33 @@
       return t;
     }).join(', ');
   }
-  function asPrinted(doc, P) {
+  /* v26.21 the drawing copies onto every SVG picture the styles it has on the screen (it must: a picture is drawn on its
+     own, away from the page's style sheets), and with them the box the screen gave it: its width, its height, whether it may
+     shrink beside its neighbours. On paper that box is the form's print rules' to give. Form SP-1's square code under the grid
+     (50 px by its print rule) was drawn 33 px wide beside its line of words, and the scan, which takes the sheet's scale from
+     the code, could not find the grid's corner squares. The outermost SVG of each picture gets its box back: the copied
+     box is taken off, and what the form itself wrote on the picture is put back. */
+  var BOX = ['width', 'height', 'min-width', 'min-height', 'max-width', 'max-height', 'inline-size', 'block-size', 'min-inline-size', 'min-block-size',
+    'max-inline-size', 'max-block-size', 'flex', 'flex-grow', 'flex-shrink', 'flex-basis', 'align-self', 'justify-self', 'place-self', 'order',
+    'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'margin-inline', 'margin-inline-start', 'margin-inline-end',
+    'margin-block', 'margin-block-start', 'margin-block-end', 'display', 'visibility', 'position', 'top', 'right', 'bottom', 'left', 'inset',
+    'inset-block', 'inset-inline', 'inset-block-start', 'inset-block-end', 'inset-inline-start', 'inset-inline-end', 'float', 'aspect-ratio'];
+  function stampPictures(doc) {
+    var all = doc.querySelectorAll('svg'), done = [];
+    for (var i = 0; i < all.length; i++) { var p = all[i].parentNode; if (p && p.namespaceURI === 'http://www.w3.org/2000/svg') continue; all[i].setAttribute('data-nbh-svg', String(done.length)); done.push(all[i]); }
+    return { list: done, off: function () { for (var k = 0; k < done.length; k++) done[k].removeAttribute('data-nbh-svg'); } };
+  }
+  function paperBoxes(doc, live) {
+    var all = doc.querySelectorAll('svg[data-nbh-svg]');
+    for (var i = 0; i < all.length; i++) {
+      var c = all[i], l = live && live[+c.getAttribute('data-nbh-svg')], k;
+      if (!c.style) continue;
+      for (k = 0; k < BOX.length; k++) c.style.removeProperty(BOX[k]);
+      if (l && l.style) for (k = 0; k < BOX.length; k++) { var v = l.style.getPropertyValue(BOX[k]); if (v) c.style.setProperty(BOX[k], v, l.style.getPropertyPriority(BOX[k])); }
+    }
+  }
+  function asPrinted(doc, P, live) {
+    try { paperBoxes(doc, live); } catch (e) {}
     eachRule(doc, function (r) { if (r.media && r.type === 4) { var t = r.media.mediaText, n = flip(t); if (n !== t) { try { r.media.mediaText = n; } catch (e) {} } } });
     var els = doc.querySelectorAll('style[media],link[media]');
     for (var i = 0; i < els.length; i++) { var m = els[i].getAttribute('media'); els[i].setAttribute('media', flip(m)); }
@@ -64,6 +90,10 @@
     for (i = 0; i < zs.length; i++) {
       var el = zs[i], z = parseFloat(el.style.zoom);
       if (!z || Math.abs(z - 1) < 0.004 || z > 4) continue;
+      /* v26.21 the screen's own enlargement of a sheet (the Fit button: an inline zoom above 1 on the sheet) is not part
+         of the paper. A form that adds sheets while the PDF is made (Form SP-1's print copy) had it put back on them by
+         the page, on an iPad held on its side: those pages were drawn a third larger and cut off. */
+      if (z > 1 && el.matches && el.matches('main, .sheet')) { el.style.zoom = ''; continue; }
       el.style.zoom = '1';
       var w0 = el.offsetWidth, h0 = el.offsetHeight, cs = win.getComputedStyle(el);
       if (cs.transform && cs.transform !== 'none') continue;
@@ -224,14 +254,18 @@
     var base = { backgroundColor: '#ffffff', scale: scale, useCORS: false, allowTaint: false, logging: false, scrollX: 0, scrollY: 0, windowWidth: P.cw, windowHeight: P.ch, imageTimeout: 8000,
       ignoreElements: function (el) { return el.tagName === 'SCRIPT' || el.tagName === 'NOSCRIPT' || el.tagName === 'IFRAME' || (el.hasAttribute && el.hasAttribute('data-nbh-nopdf')); } };
     var with_ = function (o) { var r = {}, k; for (k in base) r[k] = base[k]; for (k in o) r[k] = o[k]; return r; };
-    var pages = null, imgs = [], unmark = function () {}, MW = null;
+    var pages = null, imgs = [], unmark = function () {}, MW = null, pics = { list: [], off: function () {} };
     fire(win, 'beforeprint');
     var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
     return wait(60).then(function () {
       try { unmark = markUnprinted(doc); } catch (e) {}
+      try { pics = stampPictures(doc); } catch (e) {}
       try { MW = marginWords(doc); } catch (e) { MW = null; }
       /* a first pass finds where the pages end */
-      return h2c(root, with_({ x: 0, y: 0, width: 2, height: 2, scale: 1, onclone: function (d) { asPrinted(d, P); pages = paginate(d, P); } }));
+      /* v26.21 a form that sizes its sheet to the page (Form SP-1's grid rows) is shown the copy as it lies on paper, once,
+         before the pages are cut: window.nbhPdfFit(copy, paper) changes the copy and the page alike, so the pages drawn
+         afterwards are the same */
+      return h2c(root, with_({ x: 0, y: 0, width: 2, height: 2, scale: 1, onclone: function (d) { asPrinted(d, P, pics.list); if (typeof win.nbhPdfFit === 'function') { try { win.nbhPdfFit(d, P); } catch (e) {} } pages = paginate(d, P); } }));
     }).then(function () {
       if (!pages || !pages.length) throw new Error('nothing to print');
       if (!opt.scale && pages.length > 60) { scale = 1.5; base.scale = 1.5; }
@@ -240,7 +274,7 @@
         if (i >= pages.length) return null;
         var pg = pages[i], hh = Math.max(1, pg[1] - pg[0]);
         if (opt.progress) { try { opt.progress(i + 1, pages.length); } catch (e) {} }
-        return h2c(root, with_({ x: 0, y: pg[0], width: P.cw, height: hh, onclone: function (d) { asPrinted(d, P); } })).then(function (cv) {
+        return h2c(root, with_({ x: 0, y: pg[0], width: P.cw, height: hh, onclone: function (d) { asPrinted(d, P, pics.list); } })).then(function (cv) {
           var pc = doc.createElement('canvas'); pc.width = Math.round(P.w * scale); pc.height = Math.round(P.h * scale);
           var g = pc.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, pc.width, pc.height);
           g.drawImage(cv, Math.round(P.m[3] * scale), Math.round(P.m[0] * scale));
@@ -255,10 +289,10 @@
       };
       return next();
     }).then(function () {
-      unmark(); fire(win, 'afterprint');
+      unmark(); pics.off(); fire(win, 'afterprint');
       var title = (doc.title || 'Form').trim(), name = title.replace(/[^\w .()\-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'Form';
       return { blob: pdfOf(imgs, P, title), pages: imgs.length, name: name + '.pdf', paper: P, cuts: pages };
-    }, function (e) { unmark(); fire(win, 'afterprint'); throw e; });
+    }, function (e) { unmark(); pics.off(); fire(win, 'afterprint'); throw e; });
   };
   window.nbhPdfMake.paper = paper; window.nbhPdfMake.flip = flip; window.nbhPdfMake.marginWords = marginWords; window.nbhPdfMake.asPrinted = asPrinted; window.nbhPdfMake.paginate = paginate;
 })();
