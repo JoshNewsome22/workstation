@@ -9905,6 +9905,55 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.26: three videos on competing items
+(the BCBA, 11/14, of the three videos sent for review, after the corrections below: "yes we can put the videos in")
+- **Three procedure videos**, each after one card of TD-1's protocol bank, with a teacher and a boy of about nine as
+  the simulated people:
+  - **Items that match the sensation** (2:52), card ee-matched-stimulation-check, after Rapp (2006). What the behavior
+    produces is named; about ten like items are tried in free access and the top four kept; the match is checked in
+    three parts of 15 minutes (an empty table, the four items, an empty table again); the items are then given at the
+    times the behavior usually happens. One student in a residential program in the study, no functional analysis.
+  - **Items offered in turn** (2:39), card ee-competing-items-rotated-or-with-prompted-play, after Rosenzweig et al.
+    (2024). The order is drawn before the session; one item is offered; the next comes after ten seconds without
+    touching it; a dropped item is put back once; the stereotypy itself gets no response. The closing cards say that
+    two of the four students needed prompted play, that it is restrictive and needs district review and consent.
+  - **Something for busy hands** (2:52), card ee-textured-hand-objects, after Lane et al. (2006). The lesson in which
+    the hands are idle; the object and its three rules explained in private; one object chosen before the lesson and
+    held with no comments; one calm reminder for misuse; back in the box; a 10-minute probe each day. One student.
+- **The teacher's mouth.** The first version used a lip-sync tool on the seven shots in which she speaks; the BCBA
+  found that the repainted mouth looked drawn and that it changed from shot to shot. Three ways were shown side by
+  side (the tool; the video model's own mouth with her line laid over; her recorded line given to the video model),
+  and the BCBA chose the third. The seven shots were remade that way: the model takes the still as a reference
+  picture and the recorded line as a reference sound, and speaks exactly her words. Only the picture of those shots
+  is used; the model's own sound, which had background noise, is left out, and her clean recording is laid where the
+  model spoke (its timing follows the recording closely). A shot made this way is re-made from the still, not pinned
+  to it, so each was checked for the people, the room, the hands and the framing.
+- **"Stereotypy."** The BCBA: it is said "stair-ee-ought-ah-pee". The narrator said it two ways. Six of the seven
+  narration lines of Items offered in turn were recorded again with the same voice and settings, with the spelling
+  "stereotopy" sent to the voice, which gives that pronunciation; each take was checked by measuring the vowel before
+  the "t". Captions and on-screen text keep "stereotypy". The earlier videos that say the word (DRA for automatic
+  reinforcement, RIRD vocal, RIRD motor) are not corrected yet.
+- **Known faults.** In Items offered in turn, the item the teacher should take away stays on the table while she
+  offers the next one (the shot was retaken once and did the same). In Something for busy hands, he picks an orange
+  ball in one shot and holds a green one in the next. In Items that match the sensation, the timer in her hand looks
+  like a phone.
+- **Where they are.** The video library has a sixteenth shelf, Competing items (55 videos in all), and the three cards
+  show Watch how in TD-1. The Learning page lists the three in unit e12 (antecedent interventions; none is a core
+  video of that unit) and under task G.5 of the BCBA outline. Steps, captions, the transcript, Spanish captions
+  (43 lines, not yet reviewed by a Spanish-speaking behavior analyst) and Check yourself as for the other videos.
+- **Cost of the set.** Replicate about $6.50 at the prices on the billing page ($10.59 reserved of an $11 limit, which
+  includes the lip-sync pass that is no longer used), Kling 18 credits, ElevenLabs 6,869 characters.
+- **A fault of v26.25, corrected.** The library files a video whose own cards name no function under each function that
+  at least half of the bank's cards of the same procedure name. One of v26.25's new DRO cards brought the DRO cards to an
+  exact tie (30 of 60 name automatic), which moved the video DRO in class under the Automatic filter. It is back under
+  Any only, by a named exception in the tool that writes the list; no other video moved. The test that checks this was
+  not among the tests run for v26.25, which is why it was missed.
+- **Size.** The three files add 43,479 KB; the videos now take 774,988 KB. The size budget for the videos was raised
+  from 750 MB to 800 MB with this release, with the BCBA's yes.
+- **The test run.** On the built folder: the tests of the video list, the library, the players, the transcripts, the
+  Spanish captions, Check yourself, the procedure-video picker, the search, the Learning map and units, the size
+  budget, the version and the build; the library, the players' page, the captions, the Learning map and the versions
+  also in the school edition. All pass. The whole test run was not repeated. Not seen on an iPad.
 ### v26.25: Behavior Modification 2015 to 2019: 40 more cards in TD-1's bank
 (the BCBA, 11/14, sent the Drive folder again with five more volumes in it; asked whether to read them into the banks as
 the 2020 to 2026 volumes were: "Yes". See v26.02 for the folder and the method.)

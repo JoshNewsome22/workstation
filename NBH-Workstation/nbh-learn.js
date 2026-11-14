@@ -79,7 +79,7 @@ window.NBH_LEARN = {
         { id: 'e11', t: 'Shaping', codes: ['C.10'], self: 40, led: 30, v: ['shape_work', 'shape_dist', 'shape_fast'], w: 1 },
         { id: 'e12', t: 'Antecedent interventions: reinforcement on a timer, easy requests first, choice, changes to the task', codes: ['D.2'], self: 85, led: 40,
           v: ['ncr_attention', 'ncr_items', 'ncr_work', 'ncr_between', 'a_highp', 'a_highp_praise', 'a_highp_class', 'a_highp_seatwork', 'a_highp_peer',
-              'choice-academic-task-escape', 'ante_fade', 'ante_task', 'ante_mix'], x: ['ncr'], p: 1, w: 1 },
+              'choice-academic-task-escape', 'ante_fade', 'ante_task', 'ante_mix', 'ee_match', 'ee_turn', 'ee_hands'], x: ['ncr'], p: 1, w: 1 },
         { id: 'e13', t: 'Generalization and maintenance', codes: ['C.8', 'C.9'], self: 40, led: 30, w: 1 },
         { id: 'e14', t: 'Self-monitoring', codes: [], self: 35, led: 25, f: ['SM-1'], w: 1 },
         { id: 'e15', t: 'Crisis and emergency procedures, and calming routines', codes: ['D.7'], self: 55, led: 45,
@@ -167,7 +167,7 @@ window.NBH_LEARN = {
       { k: 'G', name: 'Behavior-change procedures', q: 25, tasks: [
         ['G.1', 'Positive and negative reinforcement procedures', { f: ['SR-1', 'TD-1'] }], ['G.2', 'Differential reinforcement, with and without extinction', { v: ['dra', 'dro', 'fct'], x: ['dro', 'fct'], f: ['TD-1'] }],
         ['G.3', 'Time-based schedules', { v: ['ncr'], x: ['ncr'], p: 1 }], ['G.4', 'Conditioned reinforcers and token economies', { v: ['token'], f: ['TK-1'] }],
-        ['G.5', 'Motivating operations and discriminative stimuli in a procedure', { v: ['ncr', 'fct', 'ante'] }], ['G.6', 'Simple and conditional discriminations'],
+        ['G.5', 'Motivating operations and discriminative stimuli in a procedure', { v: ['ncr', 'fct', 'ante', 'ee'] }], ['G.6', 'Simple and conditional discriminations'],
         ['G.7', 'Choosing prompting procedures', { v: ['prompt'] }], ['G.8', 'Fading prompts', { v: ['prompt'] }], ['G.9', 'Modeling', { f: ['ST-1'] }], ['G.10', 'Instructions and rules', { v: ['highp'] }],
         ['G.11', 'Shaping', { v: ['shape'] }], ['G.12', 'Chaining', { v: ['chain'] }], ['G.13', 'Trial-based and free-operant procedures', { f: ['SA-1'] }], ['G.14', 'Group contingencies', { v: ['group'], f: ['GC-1'] }],
         ['G.15', 'Promoting generalization'], ['G.16', 'Maintaining the change: thinning and natural reinforcers', { v: ['fct', 'token'], f: ['SR-1', 'RM-1'] }],

@@ -130,6 +130,9 @@ def gen(folder, src):
             code = by[ids[0]]['code']
             same = [p for p in bank['protocols'] if p['code'] == code and p.get('fn')]
             f = {x for x in FNS if same and sum(1 for p in same if x in p['fn']) * 2 >= len(same)}
+            # v26.26: DRO in class stays under Any only. Its cards name no function, and at v26.25 one more DRO card brought the
+            # bank to an exact tie (30 of 60 DRO cards name automatic), which would file a classroom video under Automatic.
+            if key == 'dro_class': f = set()
         fn[key] = [x for x in FNS if x in f]
         path = os.path.join(folder, file)
         if not os.path.isfile(path):

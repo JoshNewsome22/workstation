@@ -81,7 +81,7 @@ let AXE=null;try{AXE=fs.readFileSync(require.resolve('axe-core/axe.min.js',{path
 /* v26.00: the row under the shelves gains a third button (Learning: RBT training and BCBA study), which wraps to a row of its own on an iPad upright and on a phone: 4.47 and 7.12 screens (at most 4.5 and 7.15) */
 /* v25.99: 46 videos, a thirteenth shelf (Calming, three videos): 6.72, 4.42 and 7.05 screens (at most 6.75, 4.5 and 7.15) */
 /* v26.22: 49 videos, a fourteenth shelf (Low rates, three videos): 7.06, 4.68 and 7.51 screens (at most 7.1, 4.7 and 7.55) */
-const WANT={ipadL:{cols:4,cards:4,screens:7.45,lines:3},ipadP:{cols:4,cards:8,screens:4.95,lines:4},phone:{cols:1,cards:2,screens:7.95,lines:3}};   /* v26.24: 52 videos, a fifteenth shelf (Shaping, three videos): 7.41, 4.89 and 7.90 screens */
+const WANT={ipadL:{cols:4,cards:4,screens:7.85,lines:3},ipadP:{cols:4,cards:8,screens:5.15,lines:4},phone:{cols:1,cards:2,screens:8.35,lines:3}};   /* v26.26: 55 videos, a sixteenth shelf (Competing items, three videos): 7.81, 5.11 and 8.30 screens; v26.24: 52 videos, 7.41, 4.89 and 7.90 */
  for(const size of Object.keys(SZ)){const {ctx,p}=await mk(size);await home(p);
   await p.waitForFunction(()=>[...document.querySelectorAll('#vlList .vl-card img')].every(i=>i.complete),null,{timeout:20000}).catch(()=>{});
   const r=await p.evaluate(()=>{const g=document.querySelector('#vlList .vl-fam .vl-grid'),cards=[...document.querySelectorAll('#vlList .vl-card')];
@@ -104,11 +104,11 @@ const WANT={ipadL:{cols:4,cards:4,screens:7.45,lines:3},ipadP:{cols:4,cards:8,sc
    const cnt=document.getElementById('vlCount').getBoundingClientRect(),row=document.querySelector('.vl-frow[data-row=fam] .vl-chips').getBoundingClientRect(),seen=document.querySelector('.vl-sel-seen');
    return {fam:lab('vlChips'),fn:lab('vlFns'),r1:g('vlChips').map(b=>b.textContent.replace(/[\d,].*$/,'')),r2:g('vlFns').map(b=>b.textContent.replace(/[\d,].*$/,'')),role:document.getElementById('vlChips').getAttribute('role'),
     countRight:cnt.left>=row.right&&cnt.right>innerWidth-80,seenVis:!!seen.offsetParent&&seen.querySelector('select').options.length===3,seenRight:seen.getBoundingClientRect().right>innerWidth-80};});
-  ok('C iPad: two labelled rows, Procedure (Any, DRO, DRA, NCR, RIRD, High-p, FCT, Choice, Group, Chain, Prompting, Tokens, Extinction, Antecedents, Calming, Low rates, Shaping) and Function (Any, Attention, Escape, Tangible, Automatic), Watched a menu, the count at the right',
-   f.fam==='Procedure'&&f.fn==='Function'&&f.r1.join()==='Any,DRO,DRA,NCR,RIRD,High-p,FCT,Choice,Group,Chain,Prompting,Tokens,Extinction,Antecedents,Calming,Low rates,Shaping'&&f.r2.join()==='Any,Attention,Escape,Tangible,Automatic'&&f.role==='radiogroup'&&f.countRight&&f.seenVis&&f.seenRight,f);
+  ok('C iPad: two labelled rows, Procedure (Any, DRO, DRA, NCR, RIRD, High-p, FCT, Choice, Group, Chain, Prompting, Tokens, Extinction, Antecedents, Calming, Low rates, Shaping, Competing items) and Function (Any, Attention, Escape, Tangible, Automatic), Watched a menu, the count at the right',
+   f.fam==='Procedure'&&f.fn==='Function'&&f.r1.join()==='Any,DRO,DRA,NCR,RIRD,High-p,FCT,Choice,Group,Chain,Prompting,Tokens,Extinction,Antecedents,Calming,Low rates,Shaping,Competing items'&&f.r2.join()==='Any,Attention,Escape,Tangible,Automatic'&&f.role==='radiogroup'&&f.countRight&&f.seenVis&&f.seenRight,f);
   await p.locator('#vlChips [data-chip="fam:dro"]').tap();await sleep(150);await p.locator('#vlFns [data-chip="fn:escape"]').tap();await sleep(150);
   const c1=await shown(p),t1=await p.textContent('#vlCount'),pr=await p.evaluate(()=>[...document.querySelectorAll('#vlFilt [aria-checked=true]')].map(b=>b.dataset.chip).join());
-  ok('C iPad: DRO and Escape combine (one choice in each row): '+c1,c1===exp(v=>v.family==='dro'&&v.fn.includes('escape'))&&c1.length>0&&/^\d+ of 52 videos · DRO · Escape$/.test(t1)&&pr==='fam:dro,fn:escape',{c1,t1,pr});
+  ok('C iPad: DRO and Escape combine (one choice in each row): '+c1,c1===exp(v=>v.family==='dro'&&v.fn.includes('escape'))&&c1.length>0&&/^\d+ of 55 videos · DRO · Escape$/.test(t1)&&pr==='fam:dro,fn:escape',{c1,t1,pr});
   await p.locator('#vlChips [data-chip="fam:any"]').tap();await p.locator('#vlFns [data-chip="fn:any"]').tap();await sleep(150);
   /* the counts follow the search */
   await p.fill('#vlQ','token');await sleep(350);

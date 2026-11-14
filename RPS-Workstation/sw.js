@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = 'ce0ead65112c';
+const VERSION = 'b510e843f6bc';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -203,6 +203,9 @@ const FILES = [
   'nbh-td1-video-shape-closer-one-line.js',
   'nbh-td1-video-shape-longer-stretches.js',
   'nbh-td1-video-shape-faster-answers.js',
+  'nbh-td1-video-ee-items-that-match.js',
+  'nbh-td1-video-ee-items-offered-in-turn.js',
+  'nbh-td1-video-ee-something-for-busy-hands.js',
   'nbh-td1-poster-fct.jpg',
   'nbh-td1-poster-highp.jpg',
   'nbh-td1-poster-highp-praise.jpg',
@@ -255,6 +258,9 @@ const FILES = [
   'nbh-td1-poster-shape-closer-one-line.jpg',
   'nbh-td1-poster-shape-longer-stretches.jpg',
   'nbh-td1-poster-shape-faster-answers.jpg',
+  'nbh-td1-poster-ee-items-that-match.jpg',
+  'nbh-td1-poster-ee-items-offered-in-turn.jpg',
+  'nbh-td1-poster-ee-something-for-busy-hands.jpg',
   'nbh-pod-romaniuk-2002.js',
   'nbh-gb1-bank.js',
   'nbh-sm1-narration.js',

@@ -202,7 +202,10 @@ Object.assign(window.NBH_LEARN_UNITS, {
       { k: 'a_highp_class', look: 'The sequence given to a whole class before a transition.' },
       { k: 'a_highp_seatwork', look: 'The sequence used just before independent work.' },
       { k: 'a_highp_peer', look: 'A classmate giving the easy requests.' },
-      { k: 'ante_task', look: 'The aid that is added to the hard work, and what stays the same.' }
+      { k: 'ante_task', look: 'The aid that is added to the hard work, and what stays the same.' },
+      { k: 'ee_match', look: 'How the adult finds out whether the items really match: the three parts of the check.' },
+      { k: 'ee_turn', look: 'When the item is changed, and what the adult does about the stereotypy itself.' },
+      { k: 'ee_hands', look: 'The three rules for the object, and what the adult says about it during the lesson.' }
     ],
     examples: {
       ask: 'Which antecedent intervention is this?',
