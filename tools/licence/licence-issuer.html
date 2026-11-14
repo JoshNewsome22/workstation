@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Licence issuer · the workstation</title>
+<!-- v26.27 The publisher's page for making licences (the BCBA, 11/13 and 11/14). It is not part of the workstation's folder
+     and no customer gets it: it is kept in tools/licence/ and copied to deliver/ by tools/build-release.sh. It needs a
+     page opened over https (or localhost). Everything happens on this device: the signing key is made
+     here, saved to a file locked with a passphrase, and never sent anywhere. The workstation carries only the public key.
+     A licence: WSL1.<payload>.<signature>; see nbh-shell-licence.js. -->
+<style>
+:root{--ink:#16242e;--teal:#254657;--line:#b9c7cd;--soft:#f3f7f8;--ok:#17603a;--no:#8a1c10}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:26px;line-height:1.2;margin:0 0 6px;color:var(--teal)}
+h2{font-size:19px;margin:0 0 8px;color:var(--teal)}
+p{margin:8px 0}
+.lead{color:#3c505a}
+section{border:1px solid var(--line);border-radius:12px;padding:16px;margin:18px 0;background:#fff}
+label{display:block;font-weight:600;margin:12px 0 4px}
+label small{font-weight:400;color:#4a5d66}
+input,select,textarea{width:100%;font-family:inherit;font-size:16px;line-height:1.35;padding:10px;border:1px solid #8ea3ab;border-radius:8px;background:#fff;color:var(--ink)}
+textarea{min-height:92px;font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media(max-width:560px){.two{grid-template-columns:1fr}}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+button{min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--teal);background:#fff;color:var(--teal);font-family:inherit;font-size:15px;font-weight:600;line-height:1;cursor:pointer}
+button.main{background:var(--teal);color:#fff}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #6fb3d6;outline-offset:2px}
+.state{padding:10px 12px;border-radius:8px;background:var(--soft);margin:8px 0}
+.state.yes{background:#e6f4ec;color:var(--ok)}.state.no{background:#fde8e4;color:var(--no)}
+.msg{font-weight:600;min-height:1.5em;margin:8px 0}.msg.yes{color:var(--ok)}.msg.no{color:var(--no)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #dde5e8;vertical-align:top}
+.hint{color:#4a5d66;font-size:14px}
+#list{overflow-x:auto}#list table{min-width:560px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Licence issuer</h1>
+<p class="lead">This page makes the licence keys that the workstation checks. It works on this device only: the signing key is made here and nothing is sent anywhere. A customer never gets this page.</p>
+
+<section aria-labelledby="h-key">
+<h2 id="h-key">1. Your signing key</h2>
+<p id="keyState" class="state" role="status">No signing key is open.</p>
+<p class="hint">The signing key is one file, locked with a passphrase you choose. Whoever has the file and the passphrase can make licences, so keep the file in two safe places and tell no one the passphrase. If both copies are lost, licences already made keep working, but new ones need a new key and a new version of the workstation.</p>
+<label for="pass1">Passphrase <small>(at least 12 characters)</small></label>
+<input id="pass1" type="password" autocomplete="off">
+<div id="newOnly" hidden>
+<label for="pass2">The passphrase again</label>
+<input id="pass2" type="password" autocomplete="off">
+</div>
+<div class="row">
+<button type="button" id="keyOpen" class="main">Open my signing key file</button>
+<button type="button" id="keyNew">Make a new signing key</button>
+<button type="button" id="keyClose" hidden>Close the key</button>
+</div>
+<input type="file" id="keyIn" accept=".json,application/json" hidden>
+<p id="keyMsg" class="msg" role="status"></p>
+<div id="pubBox" hidden>
+<label for="pub">The public key <small>(not a secret: it goes into the workstation, so the workstation can check your licences)</small></label>
+<textarea id="pub" readonly rows="3"></textarea>
+<div class="row"><button type="button" id="pubCopy">Copy the public key</button></div>
+</div>
+</section>
+
+<section aria-labelledby="h-lic">
+<h2 id="h-lic">2. A licence</h2>
+<label for="to">Licensed to <small>(the name the customer will see)</small></label>
+<input id="to" type="text" maxlength="120" autocomplete="off">
+<div class="two">
+<div><label for="kind">Kind</label>
+<select id="kind"><option value="district">District</option><option value="practice">Practice (an ABA company)</option><option value="individual">One person</option><option value="trial">Trial</option></select></div>
+<div><label for="seats">Staff <small>(0 means everyone: a site licence)</small></label>
+<input id="seats" type="number" min="0" max="100000" step="1" value="0" inputmode="numeric"></div>
+<div><label for="from">First day</label><input id="from" type="date"></div>
+<div><label for="until">Last day</label><input id="until" type="date"></div>
+<div><label for="lid">Number</label><input id="lid" type="text" maxlength="24" autocomplete="off"></div>
+<div><label for="note">Note <small>(optional, inside the licence)</small></label><input id="note" type="text" maxlength="120" autocomplete="off"></div>
+</div>
+<div class="row"><button type="button" id="make" class="main" disabled>Make the licence</button></div>
+<p id="makeMsg" class="msg" role="status"></p>
+<div id="outBox" hidden>
+<label for="out">The licence key</label>
+<textarea id="out" readonly rows="5"></textarea>
+<div class="row"><button type="button" id="outCopy">Copy the licence key</button><button type="button" id="outSave">Save it as the file licence.key</button></div>
+<p class="hint">Send the customer the key or the file. One person pastes the key in the workstation (Help, Licence). For every device at once, the person who looks after their website puts the file <i>licence.key</i> in the workstation's folder, beside index.html.</p>
+</div>
+</section>
+
+<section aria-labelledby="h-chk">
+<h2 id="h-chk">3. Check a licence</h2>
+<label for="chk">A licence key</label>
+<textarea id="chk" rows="4" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+<div class="row"><button type="button" id="chkGo">Read it</button></div>
+<div id="chkOut" role="status"></div>
+</section>
+
+<section aria-labelledby="h-list">
+<h2 id="h-list">4. Licences made on this device</h2>
+<p class="hint">This list is kept in this browser on this device only, so it is not your record: save it after each licence and keep it with your customer papers.</p>
+<div id="list"></div>
+<div class="row"><button type="button" id="listSave">Save the list as a file</button><button type="button" id="listClear">Empty the list</button></div>
+</section>
+</main>
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const enc=new TextEncoder(),dec=new TextDecoder();
+const toB64u=u=>{let s='';u=new Uint8Array(u);for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');};
+const fromB64u=s=>{s=String(s).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;};
+const msg=(id,t,yes)=>{const m=$(id);m.textContent=t;m.className='msg '+(yes?'yes':'no');};
+const pad=n=>(n<10?'0':'')+n,day=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const save=(name,text,type)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);};
+const copy=async(el,btn)=>{try{await navigator.clipboard.writeText(el.value);}catch(e){el.focus();el.select();try{document.execCommand('copy');}catch(x){}}const t=btn.textContent;btn.textContent='Copied';setTimeout(()=>{btn.textContent=t;},1500);};
+const ALG={name:'ECDSA',namedCurve:'P-256'},ITER=600000;
+const K={priv:null,pub:null};   /* the open key: in this page's memory only, gone when the page closes */
+if(!(window.crypto&&crypto.subtle)){$('#keyState').className='state no';$('#keyState').textContent='This page cannot work here: the browser offers its signing tools only on a page opened from a website with https. Put this file on your website and open it from its web address.';['#keyOpen','#keyNew','#chkGo'].forEach(s=>{$(s).disabled=true;});return;}
+
+/* ---- the signing key ---- */
+const lockKey=async(pass,salt)=>crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt,iterations:ITER},await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveKey']),{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+function shown(){
+  const open=!!K.priv;
+  $('#keyState').className='state'+(open?' yes':'');$('#keyState').textContent=open?'A signing key is open. It stays in this page until you close the key or the page.':'No signing key is open.';
+  $('#keyClose').hidden=!open;$('#make').disabled=!open;$('#pubBox').hidden=!K.pub;
+  if(K.pub)$('#pub').value=JSON.stringify({x:K.pub.x,y:K.pub.y});}
+$('#keyNew').addEventListener('click',async()=>{
+  if($('#newOnly').hidden){$('#newOnly').hidden=false;msg('#keyMsg','Type the passphrase twice, then press Make a new signing key again.',true);$('#pass1').focus();return;}
+  const p=$('#pass1').value;
+  if(p.length<12){msg('#keyMsg','The passphrase needs at least 12 characters.',false);return;}
+  if(p!==$('#pass2').value){msg('#keyMsg','The two passphrases are not the same.',false);return;}
+  try{
+    const kp=await crypto.subtle.generateKey(ALG,true,['sign','verify']);
+    const pub=await crypto.subtle.exportKey('jwk',kp.publicKey),pk8=await crypto.subtle.exportKey('pkcs8',kp.privateKey);
+    const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+    const box=await crypto.subtle.encrypt({name:'AES-GCM',iv},await lockKey(p,salt),pk8);
+    const file={what:'The signing key of the workstation’s licences. Keep it safe; it is locked with your passphrase.',v:1,made:day(new Date()),kdf:'PBKDF2-SHA256',iter:ITER,salt:toB64u(salt),iv:toB64u(iv),key:toB64u(box),pub:{x:pub.x,y:pub.y}};
+    K.priv=await crypto.subtle.importKey('pkcs8',pk8,ALG,false,['sign']);K.pub={x:pub.x,y:pub.y};
+    save('workstation-signing-key.json',JSON.stringify(file,null,1),'application/json');
+    $('#pass1').value='';$('#pass2').value='';$('#newOnly').hidden=true;shown();
+    msg('#keyMsg','The key is made and its file is saved (workstation-signing-key.json). Put the file in two safe places now. Then copy the public key below for the workstation.',true);
+  }catch(e){msg('#keyMsg','The key could not be made: '+(e&&e.message||e),false);}});
+$('#keyOpen').addEventListener('click',()=>{if(!$('#pass1').value){msg('#keyMsg','Type the passphrase first, then open the file.',false);$('#pass1').focus();return;}$('#keyIn').click();});
+$('#keyIn').addEventListener('change',async()=>{
+  const f=$('#keyIn').files[0];$('#keyIn').value='';if(!f)return;
+  let file;try{file=JSON.parse(await f.text());}catch(e){msg('#keyMsg','That file is not a signing key file.',false);return;}
+  if(!file||file.v!==1||!file.key||!file.salt||!file.iv||!file.pub){msg('#keyMsg','That file is not a signing key file.',false);return;}
+  try{
+    const k=await crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:fromB64u(file.salt),iterations:+file.iter||ITER},await crypto.subtle.importKey('raw',enc.encode($('#pass1').value),'PBKDF2',false,['deriveKey']),{name:'AES-GCM',length:256},false,['decrypt']);
+    const pk8=await crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64u(file.iv)},k,fromB64u(file.key));
+    K.priv=await crypto.subtle.importKey('pkcs8',pk8,ALG,false,['sign']);K.pub={x:file.pub.x,y:file.pub.y};
+    $('#pass1').value='';shown();msg('#keyMsg','The key is open.',true);
+  }catch(e){msg('#keyMsg','The file did not open. The passphrase is not the one this file was locked with.',false);}});
+$('#keyClose').addEventListener('click',()=>{K.priv=null;K.pub=null;shown();msg('#keyMsg','The key is closed.',true);});
+$('#pubCopy').addEventListener('click',e=>copy($('#pub'),e.currentTarget));
+
+/* ---- a licence ---- */
+const LIST='nbh.licence.issued';
+const issued=()=>{try{return JSON.parse(localStorage.getItem(LIST)||'[]');}catch(e){return [];}};
+const nextId=()=>{const y=new Date().getFullYear(),n=issued().filter(r=>String(r.id).indexOf(y+'-')===0).length+1;return y+'-'+String(n).padStart(4,'0');};
+{const d=new Date();$('#from').value=day(d);const u=new Date(d.getFullYear()+1,d.getMonth(),d.getDate()-1);$('#until').value=day(u);$('#lid').value=nextId();}
+$('#kind').addEventListener('change',()=>{if($('#kind').value==='trial'){const p=$('#from').value.split('-').map(Number);if(p.length===3)$('#until').value=day(new Date(p[0],p[1]-1,p[2]+29));}
+  if($('#kind').value==='individual')$('#seats').value='1';});
+function paintList(){
+  const L=issued();
+  $('#list').innerHTML=L.length?'<table><tr><th>Number</th><th>Licensed to</th><th>Kind</th><th>Staff</th><th>First day</th><th>Last day</th><th>Made</th></tr>'+
+    L.slice().reverse().map(r=>'<tr><td>'+esc(r.id)+'</td><td>'+esc(r.to)+'</td><td>'+esc(r.kind)+'</td><td>'+(r.seats?esc(r.seats):'site')+'</td><td>'+esc(r.from)+'</td><td>'+esc(r.until)+'</td><td>'+esc(r.made)+'</td></tr>').join('')+'</table>':'<p class="hint">None yet.</p>';}
+$('#make').addEventListener('click',async()=>{
+  $('#outBox').hidden=true;
+  const to=$('#to').value.trim().replace(/\s+/g,' '),from=$('#from').value,until=$('#until').value,id=$('#lid').value.trim(),seats=Math.max(0,Math.floor(+$('#seats').value||0)),note=$('#note').value.trim();
+  if(!K.priv){msg('#makeMsg','Open your signing key first.',false);return;}
+  if(!to){msg('#makeMsg','Write who the licence is for.',false);$('#to').focus();return;}
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(until)){msg('#makeMsg','Give the first and the last day.',false);return;}
+  if(until<from){msg('#makeMsg','The last day is before the first day.',false);return;}
+  if(!id){msg('#makeMsg','Give the licence a number.',false);return;}
+  if(issued().some(r=>r.id===id)&&!confirm('A licence with the number '+id+' was already made on this device. Make another with the same number?'))return;
+  const lic={v:1,id,to,kind:$('#kind').value,seats,from,until};if(note)lic.note=note;
+  try{
+    const head='WSL1.'+toB64u(enc.encode(JSON.stringify(lic)));
+    const sig=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},K.priv,enc.encode(head));
+    const token=head+'.'+toB64u(sig);
+    $('#out').value=token;$('#outBox').hidden=false;
+    const L=issued();L.push({id,to,kind:lic.kind,seats,from,until,made:day(new Date())});try{localStorage.setItem(LIST,JSON.stringify(L));}catch(e){}
+    paintList();$('#lid').value=nextId();
+    msg('#makeMsg','The licence for '+to+' is made: number '+id+', '+from+' to '+until+'.',true);
+  }catch(e){msg('#makeMsg','The licence could not be made: '+(e&&e.message||e),false);}});
+$('#outCopy').addEventListener('click',e=>copy($('#out'),e.currentTarget));
+$('#outSave').addEventListener('click',()=>save('licence.key',$('#out').value+'\n'));
+
+/* ---- check one ---- */
+$('#chkGo').addEventListener('click',async()=>{
+  const o=$('#chkOut'),t=$('#chk').value.replace(/\s+/g,''),m=/^WSL1\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(t);
+  if(!m){o.innerHTML='<p class="state no">This is not a licence key.</p>';return;}
+  let lic;try{lic=JSON.parse(dec.decode(fromB64u(m[1])));}catch(e){o.innerHTML='<p class="state no">The licence key is damaged.</p>';return;}
+  let signed='Open your signing key to see whether it was signed with it.';let cls='state';
+  if(K.pub){try{const pk=await crypto.subtle.importKey('jwk',{kty:'EC',crv:'P-256',x:K.pub.x,y:K.pub.y,ext:true},ALG,false,['verify']);
+    const ok=await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},pk,fromB64u(m[2]),enc.encode('WSL1.'+m[1]));
+    signed=ok?'Signed with the key that is open.':'NOT signed with the key that is open, or changed after signing.';cls='state '+(ok?'yes':'no');}catch(e){signed='The signature could not be checked.';cls='state no';}}
+  o.innerHTML='<p class="'+cls+'">'+esc(signed)+'</p><table><tr><th>Number</th><td>'+esc(lic.id)+'</td></tr><tr><th>Licensed to</th><td>'+esc(lic.to)+'</td></tr><tr><th>Kind</th><td>'+esc(lic.kind)+'</td></tr><tr><th>Staff</th><td>'+(lic.seats?esc(lic.seats):'everyone (a site licence)')+'</td></tr><tr><th>First day</th><td>'+esc(lic.from)+'</td></tr><tr><th>Last day</th><td>'+esc(lic.until)+'</td></tr>'+(lic.note?'<tr><th>Note</th><td>'+esc(lic.note)+'</td></tr>':'')+'</table>';});
+
+/* ---- the list ---- */
+$('#listSave').addEventListener('click',()=>{const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  save('licences-made-'+day(new Date())+'.csv','Number,Licensed to,Kind,Staff,First day,Last day,Made\r\n'+issued().map(r=>[r.id,r.to,r.kind,r.seats||'site',r.from,r.until,r.made].map(q).join(',')).join('\r\n')+'\r\n','text/csv');});
+$('#listClear').addEventListener('click',()=>{if(!issued().length||!confirm('Empty the list on this device? Save it as a file first if you have not.'))return;try{localStorage.removeItem(LIST);}catch(e){}paintList();$('#lid').value=nextId();});
+paintList();shown();
+})();
+</script>
+</body>
+</html>

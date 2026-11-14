@@ -9905,6 +9905,49 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.27: licence keys
+(the BCBA, 11/13: "Add that [a licence-key system] to the list of things we need to do"; 11/14, asked whether to start on
+it: "Yes". It is the first step of the order agreed for offering the workstation to districts and ABA practices: the
+device-only product as it is, with a way to issue and end licences, no hosting, and no customer data held by the publisher.)
+- **What a licence is.** A short text the publisher signs: `WSL1.<payload>.<signature>`. The payload names who it is
+  for, the kind (district, practice, one person, trial), the staff count (0 is a site licence), the first and the last day
+  and a number. The signature is ECDSA P-256 with SHA-256. The workstation carries only the publisher's public key and
+  checks the signature on the device. Nothing is sent anywhere.
+- **The script** is `nbh-shell-licence.js`, beside the start page (the page's size budget had about 7 KB left), loaded by
+  one tag; the one-file editions carry it inline (`tools/build-single.py`). Its settings are one block in the start
+  page, `<script type="application/json" id="ws-licence">`: `required` (false in both editions as shipped), `keys` (the
+  publisher's public key or keys: empty until the BCBA makes the signing key) and `contact` (who to write to).
+- **As shipped, nothing changes.** With `required` false and no key, the script shows nothing and stops nothing. With a
+  key and `required` false (the practice's own copy, later), Help has a section, Licence, where a key can be tried.
+- **In a copy built for a customer** (`required` true; the tool that makes such a copy, with the customer's name and
+  logo, is the next step and is not written yet):
+  - 30 days before the last day a strip under the top bar names the day; it can be put away for the day.
+  - For 30 days after the last day the strip says the licence ended and until when the workstation works as before.
+  - After that, or with no licence, or before its first day: the students kept on the device open, print and save as
+    before, and so does a case file. A new student asks for a licence: New student, the student's boxes while no case is
+    open, and a form opened with no case each open the Licence dialog. No record is ever locked.
+- **Where a licence comes from.** Entered on the device (Help, Licence, or the strip's button: pasted, or opened from a
+  file), or read from the file `licence.key` beside the start page, which the district's IT places once for every device.
+  The one that lasts longest is used. The folder's licence is also kept on the device, for when it is offline.
+- **The issuer** is one page for the publisher only, `tools/licence/licence-issuer.html` (the build copies it to
+  `deliver/`; it is in neither edition's folder). It makes the signing key on the device, saves it as a file locked with a
+  passphrase (PBKDF2-SHA256, 600,000 rounds, AES-GCM), shows the public key, makes licences, reads one back, and keeps a
+  list of the ones made on that device. It needs a page opened over https, so it goes on the publisher's own website.
+  The private key never leaves the device it was made on, and is not in this repository.
+- **What it is and is not.** The signature cannot be forged, so a licence cannot be made up or have its date changed. But
+  the page runs on the customer's device, where it can be edited, and the date is the device's own clock: this is a lock for
+  honest customers that makes the terms visible, and the contract is what binds. Staff are not counted (no server sees the
+  devices); the count is shown as a term. A form opened by itself, outside the start page, is not checked.
+- **Still to do before a sale.** The BCBA makes the signing key and gives the public key (it is not a secret); it goes
+  into the block above. A tool that builds a customer's copy (name, logo, `required` true). The contact line.
+- **Test:** `qa/v2627-licence-test.js` (62 checks, in the release list): the files; the browser's signature check and the
+  written-out one agree on 30 licences, on each with a character changed, and on 30 signed with another key; the copy as
+  shipped; a copy with a key; a customer's copy with no licence; every date from 31 days before to 31 days after, with a
+  kept student still opening; `licence.key` in the folder; the issuer from making a key to a licence that a workstation
+  with that public key accepts and one with another key refuses; sizes on a phone. The signing key of the test is made for
+  each run; the test page's licence block is rewritten in the test browser, so the script has no hook for tests.
+  Also run on the built folders: the version, budget, Guide me, case home, search and start-screen tests in the
+  workstation and the version and Guide me tests in the school edition. The whole run was not repeated; not seen on an iPad.
 ### v26.26: three videos on competing items
 (the BCBA, 11/14, of the three videos sent for review, after the corrections below: "yes we can put the videos in")
 - **Three procedure videos**, each after one card of TD-1's protocol bank, with a teacher and a boy of about nine as

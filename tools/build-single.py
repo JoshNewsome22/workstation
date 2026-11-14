@@ -47,6 +47,12 @@ if idx.count(GUIDE_TAG) != 1:
     sys.exit('index.html does not load nbh-shell-guide.js once')
 _gd = open(os.path.join(SRC, 'nbh-shell-guide.js'), encoding='utf-8').read()
 idx = idx.replace(GUIDE_TAG, '<script id="nbh-guide">\n' + _gd.replace('</script', '<\\/script') + '</script>', 1)
+# v26.27 the licence, the same way: nbh-shell-licence.js beside the page; a one-file edition carries it inline
+LIC_TAG = '<script id="nbh-licence" src="nbh-shell-licence.js"></script>'
+if idx.count(LIC_TAG) != 1:
+    sys.exit('index.html does not load nbh-shell-licence.js once')
+_lc = open(os.path.join(SRC, 'nbh-shell-licence.js'), encoding='utf-8').read()
+idx = idx.replace(LIC_TAG, '<script id="nbh-licence">\n' + _lc.replace('</script', '<\\/script') + '</script>', 1)
 if re.search(r'<link rel="(manifest|apple-touch-icon)"', idx):
     sys.exit('index.html links the manifest or the touch icon outside its nbh-pwa-head block')
 logo = re.search(r'<img id="logo" alt="[^"]*" src="(data:image/[a-z]+;base64,[A-Za-z0-9+/=]+)"', idx).group(1)

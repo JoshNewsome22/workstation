@@ -330,6 +330,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     'nbh-td1-video-chain-hw-forward.js', 'nbh-td1-video-chain-hw-backward.js', 'nbh-td1-video-chain-hw-total.js' /* v25.82 (the BCBA, 11/11) the three handwashing chaining videos, loaded when asked */,
     'nbh-shell-docread.js' /* v25.68 the workstation's Read a document, loaded by the shell (its page's size budget) */,
     'nbh-shell-guide.js' /* v26.13 Guide me, loaded by the shell the same way */,
+    'nbh-shell-licence.js' /* v26.27 the licence, loaded by the shell the same way */,
     'videos.html','nbh-videos.js','nbh-video-steps.js','nbh-video-transcripts.js','nbh-transcript.js' /* v25.69 the video library and the videos' one list; v25.72 each video's Steps, its transcript and the transcript's drawing */,
     'nbh-pod-player.js','nbh-pod-transcripts.js','nbh-pod-romaniuk-2002.js' /* v25.73 the study podcast: its player, its episodes' turns, the pilot episode's audio */,
     'explain.html','practice.html','nbh-scene.js','nbh-scene3d.js' /* v25.78 the drawn pages (the explainers, the counting practice) and the scenes they draw with (flat, and lit 3D) */,

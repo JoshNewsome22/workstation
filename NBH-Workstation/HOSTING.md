@@ -146,6 +146,17 @@ offline copy finishes sooner. It changes nothing in the forms or in what they sa
   Save to Files) and run Finish PDF: since v21.90 it adds the page header and
   footer, the bookmarks and the contents page numbers, on the iPad.
 
+## A licence for every device (`licence.key`, v26.27)
+
+This applies only to a copy of the workstation that was supplied under a licence; a copy that needs none ignores it.
+
+The licence is a short text file named `licence.key`. Put it in the workstation's folder, beside `index.html`. Every
+device that opens the workstation from the website then reads it, and keeps it for when the device is offline. A renewal
+is the same step with the new file. The file holds the name of the licence holder and its dates, and no student
+information. Nothing is sent from the device to check it.
+
+One person can also enter a licence on one device: Help, Licence.
+
 ## Google sign-in (once, for Sheets, Gmail, Drive and Calendar)
 
 Five features use Google with your school account: Form DD-1 reading the team's Google Sheet, sending questionnaires

@@ -21,6 +21,7 @@ step python3 tools/pwa-sw.py NBH-Workstation
 step python3 tools/build-rps.py NBH-Workstation RPS-Workstation tools/rps-assets/rps-lockup.webp tools/rps-assets/rps-favicon.png
 step python3 tools/build-single.py NBH-Workstation deliver/NBH-Workstation.html
 step python3 tools/build-single.py RPS-Workstation deliver/RPS-Workstation.html
+step cp tools/licence/licence-issuer.html deliver/licence-issuer.html   # v26.27 the publisher's page for making licences: one file, for the publisher only
 step python3 tools/pwa-sw.py --check NBH-Workstation
 step python3 tools/check-build.py
 echo "build-release: done ($(grep -o "WS_REL='[^']*'" NBH-Workstation/index.html | head -1))"

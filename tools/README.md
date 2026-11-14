@@ -283,3 +283,11 @@ The writing help: `wording-rollout-test` (every form against the commit before t
 `wording-client-test`, `wording-rules-test` and the relay's `tools/relay/tests/run.sh`.
 `cn1-test`, `sr1-test`, `vs1-test`), `pwa-test` (the offline copy and the installed app) and
 `a11y.js` (needs `axe-core` in `qa/node_modules`).
+
+## Licences (v26.27)
+
+`tools/licence/licence-issuer.html` is the publisher's page for making licence keys (one file, no network; it needs a page
+opened over https or localhost). `tools/build-release.sh` copies it to `deliver/`. It is not part of the workstation's
+folder and no customer gets it. The signing key it makes is saved by the publisher, locked with a passphrase; it is never
+put in this repository. The workstation's side is `NBH-Workstation/nbh-shell-licence.js` and the block
+`<script type="application/json" id="ws-licence">` in `index.html`; SETUP.md, v26.27, says how they work.
