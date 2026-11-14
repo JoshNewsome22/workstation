@@ -9905,6 +9905,96 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v26.25: Behavior Modification 2015 to 2019: 40 more cards in TD-1's bank
+(the BCBA, 11/14, sent the Drive folder again with five more volumes in it; asked whether to read them into the banks as
+the 2020 to 2026 volumes were: "Yes". See v26.02 for the folder and the method.)
+- **What was in the folder:** volumes 39 to 43 (2015 to 2019), 204 articles. They were handled as untrusted files:
+  the text was taken out in isolated mode and nothing in them was run. About 55 are studies of a procedure a school
+  team could run or adapt; each of those was read from its method and results. The others are reviews, measurement
+  and statistics papers, psychotherapy and health studies, and staff training (reader rule 14) and were not read.
+  The first two issues of 2016 are one special issue on health behavior with nothing for the bank.
+- **TD-1, 40 new cards** (3,330 in all; 90 from this journal):
+  - 2019 (8): running off treated without blocking, with the rule "Stay by me and then you can run" and the wait
+    lengthened step by step (Boyle et al.); pretending that an everyday object is something else, with a question,
+    then pictures, then a model (Lee et al.); nine stages from play led by the student to teaching at the table
+    (Shillingsburg et al.); high school phones in a clear box with team points and a mystery reward (Hernan et
+    al.); a polite refusal taught with liked and unliked foods mixed (Chezan et al.); staff check-ins on a timer
+    during a free period, and line walking with "do better than last time" (both McDougale et al.); a printed
+    sentence that turns one-word requests into full sentences, then the print made lighter (Roche et al.).
+  - 2018 (10): toy play taught by backward chaining and checked in free play (Edwards et al.); a recess activity
+    built on the student's special interest, placed in a kind of activity the student already likes (Koegel et
+    al.); skin picking and the one best competing item (Clay et al.); FCT in which a request is honored only when it
+    differs from the last few (Falcomata et al.); letting the student's choices decide the form of the request
+    (Kunnavatana et al.); a two-sided green and red board for aggression with several functions (Randall et al.);
+    brief attention on a timer for vocal scripting (Rispoli et al.); two requests thinned two ways, with the
+    student's choice between them checked (Briggs et al.); interval DRL for severe behavior kept by attention
+    (Bonner & Borrero); a first aid routine from a picture storybook read by a peer (Kearney et al.).
+  - 2017 (9): five stars for extra recess, gained or kept (Lee et al.); a social skills group with three examples
+    of each skill and then credit only for varied answers (Radley et al.); responding to one's name with praise
+    first and stronger steps only as needed (Cook et al.); DRO for stereotypy with a matched item and a timer in
+    view (Rapp et al.); green and red signals for break requests with a reward for working on red (Campos et al.);
+    a rules game for a group session with a target that tightens (Brogan, Falligant, & Rapp); a picture activity
+    schedule in a binder or on a tablet, and the student's choice between them (Giles & Markham); class-wide
+    teams run in the language being learned (Hansen et al.); following directions without arguing, with the
+    student's own graph, a target and a reward menu (Brogan, Rapp, et al.).
+  - 2016 (5): check-in/check-out run by a well-liked classmate (Collins et al.); breaks on a timer chosen from a
+    menu, with a picture reminder (Moore et al.); the Caught Being Good Game beside the Good Behavior Game (Wahl et
+    al.); the Color Wheel in kindergarten (Watson et al.); a short social skills group for adolescents with
+    intellectual disability (O'Handley et al.).
+  - 2015 (8): a slower pace of answer-together questions, and multiplication built from known facts, each found by
+    trial lessons that change one feature of the task (both Hagan-Burke et al.); exercise before a lesson until the
+    student shows they are done (Neely et al.); Tootling (Lambert et al.); self-model videos made by a parent for
+    shop and counter routines (Allen et al.); a break request on a one-button device for vocal stereotypy that
+    occurs in every condition (Scalzo et al.); saying the deal and showing a model earning it for new foods (Fu et
+    al.); a Social Story written to the behavior's function, with the request it describes (Pane et al.).
+- **Marks.** Three new punishment steps, each "needs approval before use" and each on a card that works without
+  it: the team's bonus points lost for phone use (Hernan et al.), the red side of the board after aggression
+  (Randall et al.), and stars erased (Lee et al., 2017; the card's default is the version in which stars are
+  gained). Seven new RESTRICTIVE steps: blocking stereotypy during teaching (Edwards et al.), a spoken interruption
+  of stereotypy (Rapp et al.), escape extinction (Kunnavatana et al.; Briggs et al.; Campos et al.), guidance back
+  to the task (Moore et al.), and the bite kept at the lips (Fu et al.). Two new EXTINCTION steps (Falcomata et
+  al.; Briggs et al.). No new OPTION step. The bank now holds 322 punishment steps, 706 other RESTRICTIVE steps,
+  191 EXTINCTION steps and 13 OPTION steps.
+- **Where the card departs from the study, and says so.** Cook et al. taught and scored eye contact after a name
+  call; the card asks only for turning toward the speaker unless the team and family agree otherwise (reader rule
+  10), and names the 2019 replication by Rapp and colleagues in its note. Allen et al.'s step lists included eye
+  contact with the clerk; the card leaves it out or optional. Shillingsburg et al. guided a student gently to the
+  seat in one stage; that is left off. Campos et al. blocked one participant's card requests while red showed;
+  that is left off. Clay et al.'s student wore arm sleeves at other times; the note treats that as protective
+  equipment. Fu et al. prompted eye contact with the model; the card invites looking and does not require it.
+- **References.** Built from the details Crossref holds for each DOI (only the DOI is sent), with the subtitle
+  added where the article has one. Five keys carry a letter because the bank already held another paper by the
+  same first author and year from another journal: Boyle et al., 2019b; Shillingsburg et al., 2019b; Kunnavatana
+  et al., 2018b; Lee et al., 2017b; Cook et al., 2017b. The two Brogan papers of 2017 are cited 2017a and 2017b.
+- **GB-1, 12 source lines** (no new objective): Answer when their name is called (Cook et al.); Pretend an
+  everyday object is something else and act it out (Lee et al., 2019); Treat a small cut or burn with a first-aid
+  kit (Kearney et al.); Follow a picture activity schedule on their own (Giles & Markham); Play appropriately
+  without an adult (Edwards et al.); Keep their phone put away for the whole class period (Hernan et al.); Ask for
+  a break from work (Pane et al.; Scalzo et al.); Accept and swallow bites of new foods (Fu et al.); Buy an item
+  in a store (Allen et al.); Stay within reach of the adult on a store trip (Boyle et al.); Use leisure items that
+  give similar sensation (Clay et al.).
+- **Reading list** (Learning page): 14 review and method papers from these volumes added, 67 in all. As before,
+  each note is taken from the article's abstract; the articles were not read in full for the list.
+- **Read and not banked:** 2019: Ertel et al. (high-p sequences at ratios of 1:1, 3:1 and 5:1; 5:1 was a little
+  better; a high-p card needs the compare rows, so it is a candidate for that table, not a card yet), Ferguson et
+  al. (a larger reinforcer gave more varied requests under a lag schedule), Préfontaine et al. (a phone app that
+  chooses a treatment for stereotypy), Rapp et al. (the replication named above), and a study in which the high-p
+  sequence did not help feeding. 2018: Iadarola et al. (a transition program tested across districts, with no
+  effect on its main measures) and Haq et al. (a fixed lean signaled schedule at home; its values could not be
+  taken from the text, and the bank holds that procedure). 2016: two translational studies and a second study of
+  several refusal requests close to the 2019 card. 2015: Kocher et al. (work first or work in small pieces; the
+  amounts could not be taken from the text).
+- **Limits.** Each card was written from the article's text as taken out of the PDF. Figures were not read, so
+  results are given as the text states them, and a few cards give no numbers where the text gave none. The
+  evidence letters on the 40 cards come from the grading tool and were not checked by hand.
+- **Tests.** The two bank tests, the marks test, the evidence test, the versions test and the Learning units test
+  pass in both editions; the procedure-video test, the Learning test, the search test, the size budgets and the
+  build test pass in the workstation. Hand-kept counts raised: 3,330 cards and 191 EXTINCTION steps; DRO 99, NCR 79,
+  NCE 15, A_NCA 12, DRA 169 and FCT 168 cards that show a video. One rule added to TD-1's video picker: the card on
+  timed attention for vocal scripting shows the attention-on-a-timer video (by its function alone it would have shown
+  the video on items). Two tests fail exactly as before this version: the option-step test (3 checks) and the bank
+  test that counts OPTION cards (13 against the 12 approved); both wait for the BCBA's answer on one card. The
+  whole run was not repeated. Not seen on an iPad.
 ### v26.24: three videos on shaping
 (the BCBA, 11/14, of the three videos sent for review: "Yes. Keep them")
 - **Three procedure videos**, each after one card of TD-1's protocol bank, with a teacher and a girl of about nine as

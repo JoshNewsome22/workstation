@@ -1,9 +1,9 @@
-/* nbh-learn-readings.js (v26.02): a reading list for the Learning page, from the method and review papers of the journal
-   Behavior Modification, volumes 46 to 50 (2022 to 2026), which the BCBA sent on 11/13. Each note is one or two sentences taken
+/* nbh-learn-readings.js (v26.02, extended in v26.25): a reading list for the Learning page, from the method and review papers of the journal
+   Behavior Modification, volumes 46 to 50 (2022 to 2026) and 39 to 43 (2015 to 2019), which the BCBA sent on 11/13 and 11/14. Each note is one or two sentences taken
    from the article's ABSTRACT, in the workstation's words; the article itself was not read in full for this list.
    k: volume year and place in the batch; t: tasks of the BCBA Test Content Outline (6th ed.); u: units of the RBT training;
    f: forms of the workstation. Made by a tool from the looked-up reference details; do not edit by hand. */
-window.NBH_LEARN_READINGS = { from: 'Behavior Modification, 2022 to 2026', list: [
+window.NBH_LEARN_READINGS = { from: 'Behavior Modification, 2015 to 2019 and 2022 to 2026', list: [
  {
   "k": "23.610",
   "apa": "Ninci, J. (2023). Single-case data analysis: A practitioner guide for accurate and reliable decisions. Behavior Modification, 47(6), 1455–1481.",
@@ -740,5 +740,190 @@ window.NBH_LEARN_READINGS = { from: 'Behavior Modification, 2022 to 2026', list:
   ],
   "u": [],
   "f": []
+ },
+ {
+  "k": "19.306",
+  "apa": "Wolfe, K., Dickenson, T. S., Miller, B., & McGrath, K. V. (2019). Comparing visual and statistical analysis of multiple baseline design graphs. Behavior Modification, 43(3), 361–388.",
+  "doi": "10.1177/0145445518768723",
+  "note": "Compared visual analysis of multiple baseline graphs with four statistics: improvement rate difference and the between-case standardized mean difference agreed best with visual analysis; Tau-U agreed on raw values but less well once the values were cut into effect or no effect.",
+  "t": [
+   "C.11",
+   "D.6"
+  ],
+  "u": [
+   "c7"
+  ],
+  "f": [
+   "DD-1"
+  ]
+ },
+ {
+  "k": "15.405",
+  "apa": "Ninci, J., Vannest, K. J., Willson, V., & Zhang, N. (2015). Interrater agreement between visual analysts of single-case data. Behavior Modification, 39(4), 510–541.",
+  "doi": "10.1177/0145445515581327",
+  "note": "A meta-analysis of 19 articles on how well visual analysts agree with each other, looking at what changes agreement: the design, the raters' expertise, context given with the graph, visual aids and an operational definition of what is being judged.",
+  "t": [
+   "C.11",
+   "D.6"
+  ],
+  "u": [
+   "c7"
+  ],
+  "f": [
+   "DD-1"
+  ]
+ },
+ {
+  "k": "18.304",
+  "apa": "Gerow, S., Hagan-Burke, S., Rispoli, M., Gregori, E., Mason, R., & Ninci, J. (2018). A systematic review of parent-implemented functional communication training for children with ASD. Behavior Modification, 42(3), 335–363.",
+  "doi": "10.1177/0145445517740872",
+  "note": "A review of 26 studies of FCT run by parents: it reduced the children's challenging behavior, and in some cases the results lasted and carried over to new settings.",
+  "t": [
+   "H.2",
+   "G.2"
+  ],
+  "u": [
+   "e8"
+  ],
+  "f": [
+   "TD-1"
+  ]
+ },
+ {
+  "k": "18.306",
+  "apa": "MacNaul, H. L., & Neely, L. C. (2018). Systematic review of differential reinforcement of alternative behavior without extinction for individuals with autism. Behavior Modification, 42(3), 398–421.",
+  "doi": "10.1177/0145445517740321",
+  "note": "A review of 10 studies of DRA without extinction for individuals with autism: nine showed positive effects; five did so by changing the size, speed or quality of reinforcement and four by changing its schedule.",
+  "t": [
+   "H.2",
+   "G.2"
+  ],
+  "u": [],
+  "f": [
+   "TD-1"
+  ]
+ },
+ {
+  "k": "18.407",
+  "apa": "Weston, R., Hodges, A., & Davis, T. N. (2018). Differential reinforcement of other behaviors to treat challenging behaviors among children with autism: A systematic and quality review. Behavior Modification, 42(4), 584–609.",
+  "doi": "10.1177/0145445517743487",
+  "note": "A systematic review of 45 studies of DRO for challenging behavior in children with autism, each rated on the eight quality indicators of the Council for Exceptional Children (2014).",
+  "t": [
+   "H.2",
+   "G.2"
+  ],
+  "u": [],
+  "f": [
+   "TD-1"
+  ]
+ },
+ {
+  "k": "18.405",
+  "apa": "Erturk, B., Machalicek, W., & Drew, C. (2018). Self-injurious behavior in children with developmental disabilities: A systematic review of behavioral intervention literature. Behavior Modification, 42(4), 498–542.",
+  "doi": "10.1177/0145445517741474",
+  "note": "A review of 46 single-case studies (66 children under 12) of behavioral treatment for self-injury: positive outcomes were reported for 78% of the participants.",
+  "t": [
+   "H.2",
+   "G.2"
+  ],
+  "u": [],
+  "f": []
+ },
+ {
+  "k": "19.607",
+  "apa": "Wolfe, K., Pound, S., McCammon, M. N., Chezan, L. C., & Drasgow, E. (2019). A systematic review of interventions to promote varied social-communication behavior in individuals with autism spectrum disorder. Behavior Modification, 43(6), 790–818.",
+  "doi": "10.1177/0145445519859803",
+  "note": "A systematic review of interventions to increase varied social-communication behavior in individuals with autism: of 32 studies, 18 (55 cases) met What Works Clearinghouse design standards.",
+  "t": [
+   "H.2",
+   "G.2"
+  ],
+  "u": [],
+  "f": []
+ },
+ {
+  "k": "16.504",
+  "apa": "McKenna, J. W., Flower, A., & Adamson, R. (2016). A systematic review of function-based replacement behavior interventions for students with and at risk for emotional and behavioral disorders. Behavior Modification, 40(5), 678–712.",
+  "doi": "10.1177/0145445515621489",
+  "note": "A systematic review of function-based replacement behavior interventions (social skills teaching tailored with functional assessment data) for students with or at risk for emotional and behavioral disorders, rated against What Works Clearinghouse standards.",
+  "t": [
+   "H.2",
+   "G.2"
+  ],
+  "u": [],
+  "f": []
+ },
+ {
+  "k": "16.605",
+  "apa": "Tincani, M., & De Mers, M. (2016). Meta-analysis of single-case research design studies on instructional pacing. Behavior Modification, 40(6), 799–824.",
+  "doi": "10.1177/0145445516643488",
+  "note": "A meta-analysis of 13 high-quality single-case studies of instructional pacing in schools: 11 found small to large effects when two or more paces were compared.",
+  "t": [
+   "H.2"
+  ],
+  "u": [],
+  "f": []
+ },
+ {
+  "k": "15.202",
+  "apa": "Bowman-Perrott, L., Burke, M. D., de Marin, S., Zhang, N., & Davis, H. (2015). A meta-analysis of single-case research on behavior contracts. Behavior Modification, 39(2), 247–269.",
+  "doi": "10.1177/0145445514551383",
+  "note": "A meta-analysis of 18 single-case studies of behavior contracts with 58 children and youth aged 5 to 21: a moderate overall effect (0.57), with benefit regardless of grade, gender or disability status.",
+  "t": [
+   "H.2"
+  ],
+  "u": [],
+  "f": []
+ },
+ {
+  "k": "15.205",
+  "apa": "Little, S. G., Akin-Little, A., & O’Neill, K. (2015). Group contingency interventions with children—1980-2010. Behavior Modification, 39(2), 322–341.",
+  "doi": "10.1177/0145445514554393",
+  "note": "A meta-analysis of 50 single-case studies of group contingencies with school-aged children: a large overall effect, with dependent, independent and interdependent arrangements all effective.",
+  "t": [
+   "H.2"
+  ],
+  "u": [],
+  "f": []
+ },
+ {
+  "k": "17.304",
+  "apa": "Mitchell, B. S., Adamson, R., & McKenna, J. W. (2017). Curbing our enthusiasm: An analysis of the check-in/Check-out literature using the council for exceptional children’s evidence-based practice standards. Behavior Modification, 41(3), 343–367.",
+  "doi": "10.1177/0145445516675273",
+  "note": "Reviews the research on Check-In/Check-Out against the Council for Exceptional Children's 2014 quality indicators and standards for evidence-based practice.",
+  "t": [
+   "H.2"
+  ],
+  "u": [],
+  "f": []
+ },
+ {
+  "k": "17.505",
+  "apa": "Ivy, J. W., Meindl, J. N., Overley, E., & Robson, K. M. (2017). Token economy: A systematic review of procedural descriptions. Behavior Modification, 41(5), 708–737.",
+  "doi": "10.1177/0145445517699559",
+  "note": "A review of how completely token economies in applied settings were described in articles published from 2000 to 2015, across the six parts of a token economy.",
+  "t": [
+   "G.4"
+  ],
+  "u": [
+   "e2"
+  ],
+  "f": [
+   "TK-1"
+  ]
+ },
+ {
+  "k": "17.401",
+  "apa": "Andzik, N., & Cannella-Malone, H. I. (2017). A review of the pyramidal training approach for practitioners working with individuals with disabilities. Behavior Modification, 41(4), 558–580.",
+  "doi": "10.1177/0145445517692952",
+  "note": "A review of 14 articles on pyramidal training: every first-tier trainee improved, as did 83% of second-tier trainees and 43% of the individuals with disabilities they served.",
+  "t": [
+   "I.5",
+   "I.7"
+  ],
+  "u": [],
+  "f": [
+   "ST-1"
+  ]
  }
 ] };
